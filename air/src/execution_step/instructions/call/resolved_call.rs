@@ -27,7 +27,7 @@ use crate::trace_to_exec_err;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use air_interpreter_cid::json_data_cid;
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
@@ -49,6 +49,13 @@ pub(super) struct ResolvedCall<'i> {
 struct ResolvedArguments {
     call_arguments: String,
     tetraplets: Vec<RcSecurityTetraplets>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum CheckArgsResult<T, E = ExecutionError> {
+    Ok(T),
+    Joinable(E),
+    Err(E),
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -81,9 +88,20 @@ impl<'i> ResolvedCall<'i> {
         // https://github.com/fluencelabs/aquavm/issues/214
         // also note that if there is a non-join error then the corresponding state
         // won't be saved to data
-        self.check_args(exec_ctx)?;
+        let checked_args = match self.check_args(exec_ctx) {
+            CheckArgsResult::Ok(args) => Some(args),
+            CheckArgsResult::Joinable(_) => None,
+            CheckArgsResult::Err(err) => return Err(err),
+        };
+        let argument_hash: Option<Rc<str>> = checked_args.map(|(args, _)| {
+            value_to_json_cid(&args)
+                .expect("JSON serializer shouldn't fail")
+                .into_inner()
+                .into()
+        });
 
-        let state = self.prepare_current_executed_state(raw_call, exec_ctx, trace_ctx)?;
+        let state = self.prepare_current_executed_state(raw_call, argument_hash.as_ref(), exec_ctx, trace_ctx)?;
+
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
             return Ok(());
@@ -109,7 +127,6 @@ impl<'i> ResolvedCall<'i> {
         };
 
         let call_id = exec_ctx.next_call_request_id();
-        let arugment_hash = json_data_cid::<JValue>(request_params.arguments.as_bytes()).into_inner();
 
         exec_ctx.call_requests.insert(call_id, request_params);
 
@@ -117,7 +134,6 @@ impl<'i> ResolvedCall<'i> {
         trace_ctx.meet_call_end(CallResult::sent_peer_id_with_call_id(
             exec_ctx.run_parameters.current_peer_id.clone(),
             call_id,
-            arugment_hash.into(),
         ));
 
         Ok(())
@@ -158,13 +174,14 @@ impl<'i> ResolvedCall<'i> {
     fn prepare_current_executed_state(
         &self,
         raw_call: &Call<'i>,
+        args: Option<&Rc<str>>,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
         let prev_result = trace_ctx.meet_call_start();
         match trace_to_exec_err!(prev_result, raw_call)? {
             MergerCallResult::Met(call_result) => {
-                handle_prev_state(call_result, &self.tetraplet, &self.output, exec_ctx, trace_ctx)
+                handle_prev_state(call_result, &self.tetraplet, args, &self.output, exec_ctx, trace_ctx)
             }
             MergerCallResult::NotMet => Ok(StateDescriptor::no_previous_state()),
         }
@@ -172,16 +189,7 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
-        use crate::execution_step::resolver::resolve_to_args;
-
-        let function_args = self.function_arg_paths.iter();
-        let mut call_arguments = Vec::with_capacity(function_args.len());
-        let mut tetraplets = Vec::with_capacity(function_args.len());
-        for instruction_value in function_args {
-            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
-            call_arguments.push(arg);
-            tetraplets.push(tetraplet);
-        }
+        let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
         let call_arguments = JValue::Array(call_arguments);
         let call_arguments = call_arguments.to_string();
@@ -196,17 +204,35 @@ impl<'i> ResolvedCall<'i> {
 
     /// Lightweight version of resolve_args function that intended to check arguments of
     /// a call instruction. It suppresses joinable errors.
-    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<()> {
-        // TODO: make this function more lightweight
+    fn check_args(
+        &self,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> CheckArgsResult<(Vec<serde_json::Value>, Vec<RcSecurityTetraplets>)> {
+        let fun_result = self.collect_args(exec_ctx);
+
+        match fun_result {
+            Ok(values) => CheckArgsResult::Ok(values),
+            Err(err) if err.is_joinable() => CheckArgsResult::Joinable(err),
+            Err(err) => CheckArgsResult::Err(err),
+        }
+    }
+
+    fn collect_args(
+        &self,
+        exec_ctx: &ExecutionCtx<'i>,
+    ) -> ExecutionResult<(Vec<serde_json::Value>, Vec<RcSecurityTetraplets>)> {
         use crate::execution_step::resolver::resolve_to_args;
 
-        self.function_arg_paths
-            .iter()
-            .try_for_each(|arg_path| match resolve_to_args(arg_path, exec_ctx) {
-                Ok(_) => Ok(()),
-                Err(e) if e.is_joinable() => Ok(()),
-                Err(e) => Err(e),
-            })
+        let function_args = self.function_arg_paths.iter();
+        let mut call_arguments = Vec::with_capacity(function_args.len());
+        let mut tetraplets = Vec::with_capacity(function_args.len());
+
+        for instruction_value in function_args {
+            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
+            call_arguments.push(arg);
+            tetraplets.push(tetraplet);
+        }
+        Ok((call_arguments, tetraplets))
     }
 }
 

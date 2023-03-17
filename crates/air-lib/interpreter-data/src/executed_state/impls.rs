@@ -37,16 +37,8 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerId(peer_id))
     }
 
-    pub fn sent_peer_id_with_call_id(
-        peer_id: Rc<String>,
-        call_id: u32,
-        argument_hash: Rc<str>,
-    ) -> CallResult {
-        CallResult::RequestSentBy(Sender::PeerIdWithCallId {
-            peer_id,
-            call_id,
-            argument_hash,
-        })
+    pub fn sent_peer_id_with_call_id(peer_id: Rc<String>, call_id: u32) -> CallResult {
+        CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
     pub fn executed_service_result(value_ref: ValueRef) -> Self {
@@ -171,12 +163,8 @@ impl std::fmt::Display for Sender {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Sender::PeerId(peer_id) => write!(f, "request_sent_by({peer_id})"),
-            Sender::PeerIdWithCallId {
-                peer_id,
-                call_id,
-                argument_hash,
-            } => {
-                write!(f, "request_sent_by({peer_id}: {call_id}; {argument_hash})")
+            Sender::PeerIdWithCallId { peer_id, call_id } => {
+                write!(f, "request_sent_by({peer_id}: {call_id})")
             }
         }
     }

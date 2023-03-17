@@ -42,6 +42,7 @@ pub(crate) struct StateDescriptor {
 pub(super) fn handle_prev_state<'i>(
     met_result: MetCallResult,
     tetraplet: &RcSecurityTetraplet,
+    argument_hash: Option<&Rc<str>>,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
@@ -68,17 +69,15 @@ pub(super) fn handle_prev_state<'i>(
             let err_msg = call_service_failed.message;
             Err(CatchableError::LocalServiceError(call_service_failed.ret_code, err_msg).into())
         }
-        RequestSentBy(Sender::PeerIdWithCallId {
-            ref peer_id,
-            call_id,
-            ref argument_hash,
-        }) if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() => {
+        RequestSentBy(Sender::PeerIdWithCallId { ref peer_id, call_id })
+            if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
+        {
             // call results are identified by call_id that is saved in data
             match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(
                         tetraplet.clone(),
-                        argument_hash.clone(),
+                        argument_hash.expect("Result for joinable error").clone(),
                         output,
                         call_result,
                         exec_ctx,

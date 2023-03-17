@@ -38,11 +38,7 @@ pub struct ParResult {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Sender {
     PeerId(Rc<String>),
-    PeerIdWithCallId {
-        peer_id: Rc<String>,
-        call_id: u32,
-        argument_hash: Rc<str>,
-    },
+    PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
