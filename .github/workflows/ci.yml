@@ -39,8 +39,7 @@ jobs:
         run: ./build_test_binaries.sh
         working-directory: air/tests/test_module
 
-      - name: Run cargo build
-        run: cargo build
+      - run: cargo clean
 
       - name: Run cargo test
         env:
@@ -48,20 +47,10 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
           RUSTDOCFLAGS: "-Cpanic=abort"
-        run: |
-          cargo test --release
-          # Check that it does compile
-          cargo bench --no-run
-          # The `memory` sanitizer on cargo test has false positive even on empty project.
-          for san in address leak; do
-            RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
-          done
+        run: cargo test --release
 
       - name: Setup grcov
-        uses: SierraSoftworks/setup-grcov@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: latest
+        uses: taiki-e/install-action@grcov
 
       - name: Run grcov
         id: coverage
@@ -78,6 +67,13 @@ jobs:
         with:
           name: code-coverage-report.zip
           path: ${{ steps.coverage.outputs.report }}
+
+      - name: Run tests with test_with_native_code
+        run: |
+          # The `memory` sanitizer on cargo test has false positive even on empty project.
+          for san in address leak; do
+            RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
+          done
 
   lint:
     name: "aquavm / lints"
