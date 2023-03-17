@@ -1,12 +1,12 @@
 [package]
 name = "air-testing-framework"
-version = "0.1.4"
+version = "0.1.7"
 description = "AquaVM testing framework"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/test-framework"
-publish = false
+documentation = "https://docs.rs/air-testing-framework"
 keywords = ["fluence", "air", "test"]
 
 [lib]
@@ -14,8 +14,8 @@ name = "air_test_framework"
 path = "src/lib.rs"
 
 [dependencies]
-air-test-utils = { version = "0.4.4", path = "../air-lib/test-utils" }
-air-parser = { version = "0.7.3", path = "../air-lib/air-parser" }
+air-test-utils = { version = "0.4.7", path = "../air-lib/test-utils" }
+aquavm-air-parser = { version = "0.7.4", path = "../air-lib/air-parser" }
 
 itertools = "0.10.5"
 strum = { version="0.24.1", features=["derive"] }
@@ -28,4 +28,4 @@ maplit = "1.0.2"
 pretty_assertions = "1.3.0"
 
 # We do not want to depend on wasm binary path
-air-test-utils = { version = "0.4.4", path = "../air-lib/test-utils", features = ["test_with_native_code"] }
+air-test-utils = { version = "0.4.7", path = "../air-lib/test-utils", features = ["test_with_native_code"] }

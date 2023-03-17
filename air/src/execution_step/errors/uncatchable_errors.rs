@@ -16,13 +16,10 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
-use crate::JValue;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
-use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
-use air_trace_handler::merger::MergerApResult;
 use air_trace_handler::GenerationCompatificationError;
 use air_trace_handler::TraceHandlerError;
 
@@ -62,11 +59,6 @@ pub enum UncatchableError {
     #[error("multiple iterable values found for iterable name '{0}'")]
     MultipleIterableValues(String),
 
-    /// Errors occurred when result from data doesn't match to an ap instruction, f.e. an ap
-    /// could be applied to a stream, but result doesn't contain generation in a source position.
-    #[error("ap result {0:?} doesn't match with corresponding instruction")]
-    ApResultNotCorrespondToInstr(MergerApResult),
-
     /// Errors occurred when result from data doesn't match to a call instruction, f.e. a call
     /// could be applied to a stream, but result doesn't contain generation in a source position.
     #[error("call result value {0:?} doesn't match with corresponding instruction")]
@@ -82,18 +74,6 @@ pub enum UncatchableError {
     /// be caught by a xor instruction.
     #[error("new end block tries to pop up a variable '{scalar_name}' that wasn't defined at depth {depth}")]
     ScalarsStateCorrupted { scalar_name: String, depth: usize },
-
-    /// Variable with such a position wasn't defined during AIR script execution.
-    /// Canon instruction requires this value to be present in data, otherwise it's considered
-    /// as a hard error.
-    #[error("variable with position '{0}' wasn't defined during script execution")]
-    VariableNotFoundByPos(TracePos),
-
-    #[error("can't deserialize stream {canonicalized_stream:?} with error: {de_error}")]
-    InvalidCanonStreamInData {
-        canonicalized_stream: JValue,
-        de_error: serde_json::Error,
-    },
 
     #[error("failed to calculate value's CID")]
     CidError(#[from] CidCalculationError),

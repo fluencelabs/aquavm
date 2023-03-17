@@ -15,6 +15,7 @@
  */
 
 use air::ExecutionCidState;
+use air::UncatchableError::ValueForCidNotFound;
 use air_interpreter_cid::CID;
 use air_interpreter_data::{CidStore, CidTracker};
 use air_test_framework::AirScriptExecutor;
@@ -201,12 +202,8 @@ fn test_canon_value_not_found() {
     cid_state.value_tracker = CidTracker::<_>::new();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        format!("value for CID \"{missing_cid}\" not found")
-    );
+    let expected_error = ValueForCidNotFound("value", String::from(missing_cid));
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -256,11 +253,8 @@ fn test_canon_root_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        format!("tetraplet for CID \"{missing_cid}\" not found")
-    );
+    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -315,11 +309,8 @@ fn test_canon_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        format!("tetraplet for CID \"{missing_cid}\" not found"),
-    );
+    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
+    assert!(check_error(&result, expected_error));
 }
 
 #[test]
@@ -363,9 +354,6 @@ fn test_canon_agg_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    assert_eq!(result.ret_code, 20012);
-    assert_eq!(
-        result.error_message,
-        format!("canon aggregate for CID \"{missing_cid}\" not found")
-    );
+    let expected_error = ValueForCidNotFound("canon aggregate", String::from(missing_cid));
+    assert!(check_error(&result, expected_error));
 }

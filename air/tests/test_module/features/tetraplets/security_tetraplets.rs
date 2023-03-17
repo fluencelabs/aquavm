@@ -223,6 +223,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
     let service_base_dir = std::env::temp_dir();
 
     AppServiceConfig {
+        service_working_dir: service_base_dir.clone(),
         service_base_dir,
         marine_config,
     }
@@ -260,7 +261,7 @@ fn tetraplet_with_wasm_modules() {
         call_parameters.tetraplets = tetraplets;
 
         let mut service = services_inner.borrow_mut();
-        let service: &mut AppService = service.get_mut(params.service_id.as_str()).unwrap();
+        let service = service.get_mut(params.service_id.as_str()).unwrap();
 
         let result = service
             .call(params.function_name, JValue::Array(params.arguments), call_parameters)

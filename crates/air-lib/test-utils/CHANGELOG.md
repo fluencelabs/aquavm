@@ -10,6 +10,32 @@
   * dependencies
     * avm-server bumped from 0.29.0 to 0.30.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-server bumped from 0.30.0 to 0.30.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.37.1 to 0.38.0
+    * air-interpreter-data bumped from 0.6.3 to 0.6.4
+    * air-interpreter-interface bumped from 0.12.1 to 0.13.0
+    * avm-interface bumped from 0.28.2 to 0.28.3
+    * avm-server bumped from 0.30.1 to 0.31.0
+
+## [0.4.6](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.4.5...air-test-utils-v0.4.6) (2023-03-15)
+
+
+### Features
+
+* **tools:** merge some tools into the `air` CLI tool ([#509](https://github.com/fluencelabs/aquavm/issues/509)) ([79ac153](https://github.com/fluencelabs/aquavm/commit/79ac153f1dcfc0a77ec511c6e25285728312ad4c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.37.0 to 0.37.1
+
 ## [0.4.2](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.4.1...air-test-utils-v0.4.2) (2023-02-08)
 
 

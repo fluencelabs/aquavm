@@ -17,6 +17,7 @@
 mod canon;
 
 use air::ExecutionCidState;
+use air::UncatchableError::ValueForCidNotFound;
 use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -41,11 +42,9 @@ fn test_missing_cid() {
 
     let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    assert_eq!(result.ret_code, 20012, "{:?}", result);
-    assert_eq!(
-        result.error_message,
-        "service result aggregate for CID \"bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq\" not found",
-    );
+    let missing_cid = String::from("bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq");
+    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
+    assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
 #[test]

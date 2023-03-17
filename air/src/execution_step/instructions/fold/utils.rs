@@ -126,12 +126,7 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
             array.len()
         }
         v => {
-            return Err(CatchableError::IncompatibleJValueType {
-                variable_name: variable_name.to_string(),
-                actual_value: (*v).clone(),
-                expected_value_type: "array",
-            }
-            .into());
+            return Err(CatchableError::FoldIteratesOverNonArray((*v).clone(), variable_name.to_string()).into());
         }
     };
 

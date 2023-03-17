@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-use super::log_data::{LogKey, LogRecord, Message};
-use crate::utils::parse_tracing_duration;
+use super::super::utils::parse_tracing_duration;
+use super::log_data::LogKey;
+use super::log_data::LogRecord;
+use super::log_data::Message;
 
 use std::{collections::HashMap, time::Duration};
 

@@ -55,7 +55,7 @@ pub enum CatchableError {
     },
 
     /// A fold instruction must iterate over array value.
-    #[error("lambda '{1}' returned non-array value '{0}' for fold instruction")]
+    #[error("expression '{1}' returned non-array value '{0}' for fold iterable")]
     FoldIteratesOverNonArray(JValue, String),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
@@ -125,7 +125,7 @@ impl LastErrorAffectable for CatchableError {
 
 macro_rules! log_join {
     ($($args:tt)*) => {
-        log::info!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
+        log::trace!(target: air_log_targets::JOIN_BEHAVIOUR, $($args)*)
     }
 }
 
@@ -141,15 +141,6 @@ impl Joinable for CatchableError {
                 log_join!("  waiting for an argument with name '{}'", var_name);
                 true
             }
-            LambdaApplierError(LambdaError::StreamNotHaveEnoughValues { stream_size, idx }) => {
-                log_join!("  waiting for an argument with idx '{}' on stream with size '{}'", idx, stream_size);
-                true
-            }
-            LambdaApplierError(LambdaError::EmptyStream) => {
-                log_join!("  waiting on empty stream for path ");
-                true
-            }
-
             _ => false,
         }
     }

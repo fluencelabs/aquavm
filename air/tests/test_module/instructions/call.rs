@@ -215,7 +215,7 @@ fn test_invalid_call_service_failed() {
     let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
     let res = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
 
-    assert_eq!(res.ret_code, 20014);
+    assert_eq!(res.ret_code, 20011);
     assert_eq!(
         res.error_message,
         "failed to deserialize invalid type: string \"error\", expected struct CallServiceFailed",

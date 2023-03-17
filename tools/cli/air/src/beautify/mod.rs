@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-#![forbid(unsafe_code)]
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-
 use air_beautifier::Beautifier;
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -33,7 +21,8 @@ use clap::Parser;
 use std::{io, path::PathBuf};
 
 #[derive(Parser)]
-struct Args {
+#[clap(about = "Pretty-print an AIR script to Python-like representation")]
+pub(crate) struct Args {
     #[clap(short, long, default_value_t = air_beautifier::DEFAULT_INDENT_STEP)]
     indent_step: usize,
     #[clap(short, long)]
@@ -72,8 +61,7 @@ fn build_output(args: &Args) -> Result<Box<dyn io::Write>> {
     Ok(output)
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
+pub(crate) fn beautify(args: Args) -> Result<()> {
     let air_script = read_script(&args).context("failed to read the input")?;
     let output = build_output(&args).context("failed to open the output")?;
 

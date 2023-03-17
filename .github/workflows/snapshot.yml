@@ -40,10 +40,8 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install marine
-        uses: baptiste0928/cargo-install@v1.3.1
-        with:
-          crate: marine
+      - name: Setup marine
+        uses: fluencelabs/setup-marine@v1
 
       - name: Build air-interpreter-wasm binary
         run: marine build --release --features marine
