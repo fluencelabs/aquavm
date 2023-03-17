@@ -320,10 +320,8 @@ impl ExecutedCallBuilder {
     }
 
     pub fn unused(self) -> ExecutedState {
-        let mut cid_state = ExecutionCidState::new();
-        let service_result_agg_cid =
-            value_aggregate_cid(self.result, self.tetraplet, self.args, &mut cid_state);
-        let value = ValueRef::Unused(service_result_agg_cid);
+        let value_cid = value_to_json_cid(&self.result).unwrap();
+        let value = ValueRef::Unused(value_cid.into());
         ExecutedState::Call(CallResult::Executed(value))
     }
 

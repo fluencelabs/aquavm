@@ -20,6 +20,7 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 use crate::UncatchableError;
 
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_data::CallResult;
 use air_interpreter_data::TracePos;
 use air_interpreter_data::ValueRef;
@@ -61,13 +62,11 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             Ok(CallResult::executed_stream(service_result_agg_cid, generation))
         }
         CallOutputValue::None => {
-            let mut dummy_cid_state = ExecutionCidState::new();
-            let service_result_agg_cid = dummy_cid_state
-                .insert_value(executed_result.result, tetraplet, argument_hash)
-                .map_err(UncatchableError::from)?;
+            let value_cid = value_to_json_cid(&*executed_result.result)
+                .map_err(UncatchableError::from)?
+                .into();
 
-            // TODO: Might we add only value's CID for the `Unused`?
-            Ok(CallResult::executed_unused(service_result_agg_cid))
+            Ok(CallResult::executed_unused(value_cid))
         }
     }
 }

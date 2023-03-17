@@ -328,9 +328,13 @@ fn fold_merge() {
                 let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
                     let cid = match value {
-                        ValueRef::Scalar(cid) => cid,
-                        ValueRef::Stream { cid, .. } => cid,
-                        ValueRef::Unused(cid) => cid,
+                        ValueRef::Scalar(service_result_cid) => service_result_cid,
+                        ValueRef::Stream {
+                            cid: service_result_cid,
+                            ..
+                        } => service_result_cid,
+                        // Cannot resolve
+                        ValueRef::Unused(_value_cid) => continue,
                     };
 
                     let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap();
@@ -475,8 +479,8 @@ fn test_merge_unused_mismatch() {
         concat!(
             r#"on instruction 'call "peer" ("" "") [] ' trace handler encountered an error:"#,
             r#" values in call results are not equal:"#,
-            r#" Unused(CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"))"#,
-            r#" != Unused(CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"))"#
+            r#" Unused(CID("bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq"))"#,
+            r#" != Unused(CID("bagaaieraitfxgdccasakar33kbnoncxvbd5zb6lm6dwfjrvnc2kj3vbh6e5a"))"#
         )
     );
 }

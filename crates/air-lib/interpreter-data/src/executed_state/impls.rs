@@ -59,8 +59,8 @@ impl CallResult {
         })
     }
 
-    pub fn executed_unused(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
-        Self::executed_service_result(ValueRef::Unused(service_result_agg_cid))
+    pub fn executed_unused(value_cid: Rc<CID<JValue>>) -> CallResult {
+        Self::executed_service_result(ValueRef::Unused(value_cid))
     }
 
     pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {

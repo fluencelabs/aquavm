@@ -82,7 +82,7 @@ pub enum ValueRef {
         generation: u32,
     },
     /// The call value is not stored.
-    Unused(Rc<CID<ServiceResultAggregate>>),
+    Unused(Rc<CID<JValue>>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
