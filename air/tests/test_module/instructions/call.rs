@@ -218,6 +218,6 @@ fn test_invalid_call_service_failed() {
     assert_eq!(res.ret_code, 20011);
     assert_eq!(
         res.error_message,
-        "failed to deserialize invalid type: string \"error\", expected struct CallServiceFailed",
+        "failed to deserialize to CallServiceFailed: invalid type: string \"error\", expected struct CallServiceFailed",
     );
 }

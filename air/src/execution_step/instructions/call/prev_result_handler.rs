@@ -54,7 +54,7 @@ pub(super) fn handle_prev_state<'i>(
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
             fn deserialize_from_value<T: serde::de::DeserializeOwned>(value: JValue) -> ExecutionResult<T> {
-                Ok(serde_json::from_value(value).map_err(UncatchableError::MalformedValue)?)
+                Ok(serde_json::from_value(value).map_err(UncatchableError::MalformedCallServiceFailed)?)
             }
 
             let err_value = exec_ctx
