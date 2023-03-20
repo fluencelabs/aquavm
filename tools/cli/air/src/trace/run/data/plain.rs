@@ -46,8 +46,8 @@ pub(crate) struct PlainDataArgs {
 pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
     use super::super::load_data;
 
-    let air_script =
-        read_air_script(args.air_script_path.as_deref()).context("failed to read AIR script")?;
+    let air_script = read_air_with_prompt(args.air_script_path.as_deref())
+        .context("failed to read AIR script")?;
     let prev_data = match &args.prev_data_path {
         None => DEFAULT_DATA.to_owned(),
         Some(prev_data_path) => load_data(prev_data_path).context("failed to read prev_data")?,
@@ -75,7 +75,7 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
     })
 }
 
-fn read_air_script(air_input: Option<&Path>) -> anyhow::Result<String> {
+fn read_air_with_prompt(air_input: Option<&Path>) -> anyhow::Result<String> {
     use std::io::Read;
 
     let air_script = match air_input {
@@ -84,10 +84,27 @@ fn read_air_script(air_input: Option<&Path>) -> anyhow::Result<String> {
             let mut buffer = String::new();
             let mut stdin = std::io::stdin().lock();
 
+            // unfortunately, it seems to always return false in WASM mode
+            if atty::is(atty::Stream::Stdin) {
+                print_air_prompt();
+            }
+
             stdin.read_to_string(&mut buffer)?;
             buffer
         }
     };
 
     Ok(air_script)
+}
+
+fn print_air_prompt() {
+    use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor as _};
+
+    let mut stderr = StandardStream::stderr(ColorChoice::Auto);
+    let mut bold = ColorSpec::new();
+    bold.set_bold(true);
+
+    let _ = stderr.set_color(&bold);
+    eprintln!("Reading AIR script from stdin...");
+    let _ = stderr.set_color(&ColorSpec::new());
 }
