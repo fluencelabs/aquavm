@@ -163,7 +163,10 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
     }
 }
 
-fn load_data_or_default(data_path: Option<impl AsRef<Path>>, default: &str) -> anyhow::Result<String> {
+fn load_data_or_default(
+    data_path: Option<impl AsRef<Path>>,
+    default: &str,
+) -> anyhow::Result<String> {
     match data_path {
         None => Ok(default.to_owned()),
         Some(data_path) => load_data(data_path.as_ref()),
