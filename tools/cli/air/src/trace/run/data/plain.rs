@@ -40,19 +40,18 @@ pub(crate) struct PlainDataArgs {
     #[clap(long = "prev-data")]
     prev_data_path: Option<PathBuf>,
     #[clap(long = "data")]
-    data_path: PathBuf,
+    data_path: Option<PathBuf>,
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
-    use super::super::load_data;
+    use super::super::load_data_or_default;
 
     let air_script = read_air_with_prompt(args.air_script_path.as_deref())
         .context("failed to read AIR script")?;
-    let prev_data = match &args.prev_data_path {
-        None => DEFAULT_DATA.to_owned(),
-        Some(prev_data_path) => load_data(prev_data_path).context("failed to read prev_data")?,
-    };
-    let current_data = load_data(&args.data_path).context("failed to read data")?;
+    let prev_data = load_data_or_default(args.prev_data_path.as_ref(), DEFAULT_DATA)
+        .context("failed to read prev_data")?;
+    let current_data = load_data_or_default(args.data_path.as_ref(), DEFAULT_DATA)
+        .context("failed to read data")?;
 
     let timestamp = args.timestamp.unwrap_or_else(unix_timestamp_now);
     let ttl = args.ttl.unwrap_or(u32::MAX);
