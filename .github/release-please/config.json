@@ -50,7 +50,9 @@
     },
     "crates/data-store": {},
     "crates/testing-framework": {},
-    "tools/cli/aquavm-air-cli": {},
+    "tools/cli/air": {
+      "component": "aquavm-air-cli"
+    },
     "tools/wasm/air-beautify-wasm": {
       "component": "air-beautify-wasm"
     }
