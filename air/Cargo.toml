@@ -45,8 +45,8 @@ strum_macros = "0.24"
 tracing = "0.1.37"
 
 [dev_dependencies]
-air-test-utils = { version = "0.4.6", path = "../crates/air-lib/test-utils" }
-air-testing-framework = { version = "0.1.1", path = "../crates/testing-framework" }
+air-test-utils = { path = "../crates/air-lib/test-utils" }
+air-testing-framework = { path = "../crates/testing-framework" }
 fluence-app-service = "0.25.0"
 marine-rs-sdk = { version = "0.7.0", features = ["logger"] }
 
