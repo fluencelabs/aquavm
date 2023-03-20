@@ -50,7 +50,7 @@ impl DataKeeper {
     }
 
     pub(crate) fn result_trace_next_pos(&self) -> TracePos {
-        self.result_trace.len().into()
+        (self.result_trace.len() as air_interpreter_data::PosType).into()
     }
 
     pub(crate) fn prev_slider(&self) -> &TraceSlider {

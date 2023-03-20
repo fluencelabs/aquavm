@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use num_traits::CheckedAdd;
+
 use super::*;
 use crate::data_keeper::TraceSlider;
 
@@ -38,7 +40,7 @@ fn compute_new_state(par_result: ParResult, subgraph_type: SubgraphType, slider:
 
     let new_position = slider
         .position()
-        .checked_add(par_subgraph_len)
+        .checked_add(&air_interpreter_data::TracePos::from(par_subgraph_len))
         .ok_or_else(|| StateFSMError::ParPosOverflow(par_result, slider.position(), MergeCtxType::Previous))?;
 
     let new_subtrace_len = match subgraph_type {

@@ -26,6 +26,9 @@
     unreachable_patterns
 )]
 
+#[macro_use]
+extern crate newtype_derive;
+
 mod cid_store;
 mod executed_state;
 mod interpreter_data;

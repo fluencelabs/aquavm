@@ -15,72 +15,48 @@
  */
 
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Display},
-    ops::{Add, AddAssign, Sub},
-};
+
+pub type PosType = u32;
+
+macro_rules! auto_checked_add {
+    [$type:ty] => {
+        impl ::num_traits::CheckedAdd for $type {
+            fn checked_add(&self, other: &Self) -> Option<Self> {
+                self.0.checked_add(other.0).map(Self)
+            }
+        }
+    };
+}
+
+macro_rules! auto_wrapper_types_from {
+    [$dst_type:ident, $wrapped_type:ty, $src_type:ty ] => {
+        impl ::std::convert::From<$src_type> for $dst_type {
+            fn from(value: $src_type) -> Self {
+                $dst_type(value as $wrapped_type) // ? saturation semantics ?
+            }
+        }
+    };
+}
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 #[repr(transparent)]
-pub struct TracePos(usize);
+pub struct TracePos(PosType);
 
-impl TracePos {
-    pub fn checked_add(self, other: usize) -> Option<Self> {
-        self.0.checked_add(other).map(Self)
-    }
-}
-
-impl Debug for TracePos {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
-}
-
-impl Display for TracePos {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl From<usize> for TracePos {
-    fn from(pos: usize) -> Self {
-        TracePos(pos)
-    }
-}
+NewtypeFrom! { () pub struct TracePos(PosType); }
+NewtypeAdd! { (PosType) pub struct TracePos(PosType); }
+NewtypeAdd! { () pub struct TracePos(PosType); }
+NewtypeAddAssign! { () pub struct TracePos(PosType); }
+NewtypeAddAssign! { (PosType) pub struct TracePos(PosType); }
+NewtypeSub! { () pub struct TracePos(PosType); }
+NewtypeSub! { (PosType) pub struct TracePos(PosType); }
+NewtypeDebug! { () pub struct TracePos(PosType); }
+NewtypeDisplay! { () pub struct TracePos(PosType); }
+auto_checked_add![TracePos];
+auto_wrapper_types_from![TracePos, PosType, usize];
 
 impl From<TracePos> for usize {
-    fn from(pos: TracePos) -> Self {
-        pos.0
-    }
-}
-
-impl AddAssign<usize> for TracePos {
-    fn add_assign(&mut self, rhs: usize) {
-        self.0 += rhs;
-    }
-}
-
-impl Add<usize> for TracePos {
-    type Output = Self;
-
-    fn add(self, rhs: usize) -> Self::Output {
-        TracePos(self.0 + rhs)
-    }
-}
-
-impl Sub<usize> for TracePos {
-    type Output = Self;
-
-    fn sub(self, rhs: usize) -> Self::Output {
-        TracePos(self.0 - rhs)
-    }
-}
-
-impl Sub<TracePos> for TracePos {
-    type Output = usize;
-
-    fn sub(self, rhs: TracePos) -> Self::Output {
-        self.0 - rhs.0
+    fn from(value: TracePos) -> Self {
+        value.0 as Self // ? saturation semantics ?
     }
 }

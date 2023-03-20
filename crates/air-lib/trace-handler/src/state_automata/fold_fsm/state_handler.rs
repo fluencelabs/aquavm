@@ -17,6 +17,7 @@
 use super::*;
 use crate::merger::MergeCtxType;
 use crate::ResolvedFold;
+use num_traits::ops::checked::CheckedAdd;
 
 /// This state updater manage to do the same thing as CtxStateHandler in ParFSM,
 /// for details please see its detailed comment.
@@ -52,7 +53,7 @@ fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: Me
 
     let current_position = ctx.slider.position();
     let pos = current_position
-        .checked_add(fold.fold_states_count)
+        .checked_add(&TracePos::from(fold.fold_states_count))
         .ok_or_else(|| StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
 
     let current_len = ctx.slider.subtrace_len();
