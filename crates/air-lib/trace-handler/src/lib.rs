@@ -32,9 +32,13 @@ mod handler;
 pub mod merger;
 mod state_automata;
 
+pub use data_keeper::KeeperError;
 pub use errors::GenerationCompatificationError;
 pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;
+pub use merger::DataType;
+pub use merger::MergeError;
+pub use state_automata::StateFSMError;
 pub use state_automata::SubgraphType;
 
 pub type TraceHandlerResult<T> = std::result::Result<T, TraceHandlerError>;
