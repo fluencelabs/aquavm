@@ -40,7 +40,20 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Download marine artifact
+        id: marine
+        uses: actions/download-artifact@v3
+        continue-on-error: true
+        with:
+          name: marine
+          path: ~/.local/bin
+
+      - name: Make marine executable
+        if: steps.marine.outcome == 'success'
+        run: chmod +x ~/.local/bin/marine
+
       - name: Setup marine
+        if: steps.marine.outcome == 'failure'
         uses: fluencelabs/setup-marine@v1
 
       - name: Build air-interpreter-wasm binary
