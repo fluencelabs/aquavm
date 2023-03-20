@@ -39,8 +39,8 @@ pub(crate) struct PlainDataArgs {
     air_script_path: Option<PathBuf>,
     #[clap(long = "prev-data")]
     prev_data_path: Option<PathBuf>,
-    #[clap(long = "data")]
-    data_path: Option<PathBuf>,
+    #[clap(long = "current-data")]
+    current_data_path: Option<PathBuf>,
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
@@ -50,7 +50,7 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
         .context("failed to read AIR script")?;
     let prev_data = load_data_or_default(args.prev_data_path.as_ref(), DEFAULT_DATA)
         .context("failed to read prev_data")?;
-    let current_data = load_data_or_default(args.data_path.as_ref(), DEFAULT_DATA)
+    let current_data = load_data_or_default(args.current_data_path.as_ref(), DEFAULT_DATA)
         .context("failed to read data")?;
 
     let timestamp = args.timestamp.unwrap_or_else(unix_timestamp_now);
