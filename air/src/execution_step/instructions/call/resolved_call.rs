@@ -51,11 +51,20 @@ struct ResolvedArguments {
     tetraplets: Vec<RcSecurityTetraplets>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-enum CheckArgsResult<T, E = ExecutionError> {
+#[derive(Debug)]
+enum CheckArgsResult<T> {
     Ok(T),
-    Joinable(E),
-    Err(E),
+    Joinable(ExecutionError),
+}
+
+impl<T> CheckArgsResult<T> {
+    fn new(result: ExecutionResult<T>) -> ExecutionResult<Self> {
+        match result {
+            Ok(nested) => Ok(CheckArgsResult::Ok(nested)),
+            Err(err) if err.is_joinable() => Ok(CheckArgsResult::Joinable(err)),
+            Err(err) => Err(err),
+        }
+    }
 }
 
 impl<'i> ResolvedCall<'i> {
@@ -88,12 +97,11 @@ impl<'i> ResolvedCall<'i> {
         // https://github.com/fluencelabs/aquavm/issues/214
         // also note that if there is a non-join error then the corresponding state
         // won't be saved to data
-        let checked_args = match self.check_args(exec_ctx) {
+        let checked_args = match self.check_args(exec_ctx)? {
             CheckArgsResult::Ok(args) => Some(args),
             CheckArgsResult::Joinable(_) => None,
-            CheckArgsResult::Err(err) => return Err(err),
         };
-        let argument_hash: Option<Rc<str>> = checked_args.map(|(args, _)| {
+        let argument_hash: Option<Rc<str>> = checked_args.map(|args| {
             value_to_json_cid(&args)
                 .expect("JSON serializer shouldn't fail")
                 .into_inner()
@@ -114,6 +122,8 @@ impl<'i> ResolvedCall<'i> {
             return Ok(());
         }
 
+        // TODO we are recalculating params here for the second time.
+        // we might extend the `checked_args`, but we have to proove that the value is same.
         let request_params = match self.prepare_request_params(exec_ctx, tetraplet) {
             Ok(params) => params,
             Err(e) if e.is_joinable() => {
@@ -202,19 +212,11 @@ impl<'i> ResolvedCall<'i> {
         Ok(resolved_arguments)
     }
 
-    /// Lightweight version of resolve_args function that intended to check arguments of
-    /// a call instruction. It suppresses joinable errors.
-    fn check_args(
-        &self,
-        exec_ctx: &ExecutionCtx<'i>,
-    ) -> CheckArgsResult<(Vec<serde_json::Value>, Vec<RcSecurityTetraplets>)> {
+    /// A version of `resolve_args` that supresses joinable errors.
+    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<CheckArgsResult<Vec<serde_json::Value>>> {
         let fun_result = self.collect_args(exec_ctx);
 
-        match fun_result {
-            Ok(values) => CheckArgsResult::Ok(values),
-            Err(err) if err.is_joinable() => CheckArgsResult::Joinable(err),
-            Err(err) => CheckArgsResult::Err(err),
-        }
+        CheckArgsResult::new(fun_result.map(|values| values.0))
     }
 
     fn collect_args(
