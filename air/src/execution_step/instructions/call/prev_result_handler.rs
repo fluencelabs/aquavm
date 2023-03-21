@@ -57,8 +57,8 @@ pub(super) fn handle_prev_state<'i>(
                 .cid_state
                 .resolve_service_value(failed_cid)
                 .map_err(UncatchableError::from)?;
-            let call_service_failed: CallServiceFailed = serde_json::from_value((*err_value).clone())
-                .map_err(UncatchableError::MalformedCallServiceFailed)?;
+            let call_service_failed: CallServiceFailed =
+                serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
             trace_ctx.meet_call_end(met_result.result);
