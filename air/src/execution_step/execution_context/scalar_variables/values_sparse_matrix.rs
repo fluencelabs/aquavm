@@ -297,7 +297,8 @@ mod test {
         let rc_tetraplet = Rc::new(tetraplet);
         let value = json!(1u64);
         let rc_value = Rc::new(value);
-        let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1.into());
+        let pos_one: air_interpreter_data::PosType = 1;
+        let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, pos_one.into());
         let value_1_name = "name_1";
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 

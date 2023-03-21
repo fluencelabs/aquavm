@@ -295,24 +295,24 @@ fn fold_par_early_exit() {
         executed_state::stream_string("d2", 1),
         executed_state::par(69, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(4, subtrace_desc(14, 34), subtrace_desc(48, 0)),
-            executed_state::subtrace_lore(5, subtrace_desc(48, 34), subtrace_desc(82, 0)),
+            executed_state::subtrace_lore(4, subtrace_desc(14 as PosType, 34), subtrace_desc(48 as PosType, 0)),
+            executed_state::subtrace_lore(5, subtrace_desc(48 as PosType, 34), subtrace_desc(82 as PosType, 0)),
         ]),
         executed_state::par(33, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(6, subtrace_desc(16, 16), subtrace_desc(32, 0)),
-            executed_state::subtrace_lore(7, subtrace_desc(32, 16), subtrace_desc(48, 0)),
+            executed_state::subtrace_lore(6, subtrace_desc(16 as PosType, 16), subtrace_desc(32 as PosType, 0)),
+            executed_state::subtrace_lore(7, subtrace_desc(32 as PosType, 16), subtrace_desc(48 as PosType, 0)),
         ]),
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, subtrace_desc(19, 6), subtrace_desc(25, 0)),
-            executed_state::subtrace_lore(9, subtrace_desc(25, 6), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(19 as PosType, 6), subtrace_desc(25 as PosType, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(25 as PosType, 6), subtrace_desc(31 as PosType, 0)),
         ]),
         executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(21, 2), subtrace_desc(23, 0)),
-            executed_state::subtrace_lore(11, subtrace_desc(23, 2), subtrace_desc(25, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(21 as PosType, 2), subtrace_desc(23 as PosType, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(23 as PosType, 2), subtrace_desc(25 as PosType, 0)),
         ]),
         executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
@@ -320,8 +320,8 @@ fn fold_par_early_exit() {
         executed_state::scalar_string(unit_call_service_result),
         executed_state::par(5, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(10, subtrace_desc(27, 2), subtrace_desc(29, 0)),
-            executed_state::subtrace_lore(11, subtrace_desc(29, 2), subtrace_desc(31, 0)),
+            executed_state::subtrace_lore(10, subtrace_desc(27 as PosType, 2), subtrace_desc(29 as PosType, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(29 as PosType, 2), subtrace_desc(31 as PosType, 0)),
         ]),
         executed_state::par(1, 0),
         executed_state::scalar_string(unit_call_service_result),
@@ -331,8 +331,8 @@ fn fold_par_early_exit() {
         executed_state::par(15, 0),
         executed_state::par(13, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(8, subtrace_desc(35, 6), subtrace_desc(41, 0)),
-            executed_state::subtrace_lore(9, subtrace_desc(41, 6), subtrace_desc(47, 0)),
+            executed_state::subtrace_lore(8, subtrace_desc(35 as PosType, 6), subtrace_desc(41 as PosType, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(41 as PosType, 6), subtrace_desc(47 as PosType, 0)),
         ]),
     ];
     let trace_len = expected_trace.len();

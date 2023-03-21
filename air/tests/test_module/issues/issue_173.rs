@@ -77,8 +77,16 @@ fn issue_173() {
         executed_state::stream_number(1, 0),
         executed_state::stream_number(2, 0),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(9.into(), 2)),
-            executed_state::subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 2)),
+            executed_state::subtrace_lore(
+                0,
+                SubTraceDesc::new((3 as PosType).into(), 2),
+                SubTraceDesc::new((9 as PosType).into(), 2),
+            ),
+            executed_state::subtrace_lore(
+                1,
+                SubTraceDesc::new((5 as PosType).into(), 2),
+                SubTraceDesc::new((7 as PosType).into(), 2),
+            ),
         ]),
         executed_state::par(6, 1),
         executed_state::stream_number(1, 0),

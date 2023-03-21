@@ -201,8 +201,9 @@ fn variable_names_shown_in_error() {
     let result = checked_call_vm!(echo_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
+    let pos_one = TracePos::from(1 as PosType);
     assert_eq!(
-        trace[1.into()],
+        trace[pos_one],
         executed_state::scalar(json!(
             "call cannot resolve non-String triplet variable part `-relay-` with value '1'"
         ))

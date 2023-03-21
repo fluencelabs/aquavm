@@ -97,7 +97,7 @@ fn remote_peer_id_call() {
     let expected_state = executed_state::request_sent_by(some_local_peer_id);
 
     assert_eq!(actual_trace.len(), 1);
-    assert_eq!(actual_trace[0.into()], expected_state);
+    assert_eq!(actual_trace[(0 as PosType).into()], expected_state);
     assert_eq!(result.next_peer_pks, vec![remote_peer_id]);
 }
 
@@ -169,5 +169,5 @@ fn string_parameters() {
     let expected_state = executed_state::scalar_string("arg1");
 
     assert_eq!(actual_trace.len(), 2);
-    assert_eq!(actual_trace[1.into()], expected_state);
+    assert_eq!(actual_trace[(1 as PosType).into()], expected_state);
 }

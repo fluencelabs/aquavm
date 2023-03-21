@@ -42,9 +42,10 @@ pub enum CtorState {
 
 impl SubTraceLoreCtor {
     pub(super) fn from_before_start(value_pos: TracePos, data_keeper: &DataKeeper) -> Self {
+        let init_value: air_interpreter_data::PosType = 0;
         let before_tracker = PositionsTracker {
             start_pos: data_keeper.result_trace_next_pos(),
-            end_pos: 0.into(),
+            end_pos: init_value.into(),
         };
 
         Self {

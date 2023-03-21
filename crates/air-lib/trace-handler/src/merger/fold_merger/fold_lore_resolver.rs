@@ -223,18 +223,19 @@ mod tests {
     fn convolution_test_1() {
         // [1, 1] [2, 2] [3, 3] => [12, 1] [11, 3] [9, 6]
         //   g0     g0     g0
+        let init_pos: u32 = 0;
         let lore = vec![
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 1), subtrace_desc(init_pos, 1)],
             },
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 2), subtrace_desc(0, 2)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 2), subtrace_desc(init_pos, 2)],
             },
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 3), subtrace_desc(0, 3)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 3), subtrace_desc(init_pos, 3)],
             },
         ];
 
@@ -255,30 +256,31 @@ mod tests {
     fn convolution_test_2() {
         // [1, 1] [2, 2] [3, 3] [4, 4] [5, 5] [1, 1] => [12, 1] [11, 3] [9, 6] [18, 4] [14, 9] [2, 1]
         //   g0     g0     g0     g1     g1     g2
+        let init_pos: air_interpreter_data::PosType = 0;
         let lore = vec![
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 1), subtrace_desc(init_pos, 1)],
             },
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 2), subtrace_desc(0, 2)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 2), subtrace_desc(init_pos, 2)],
             },
             FoldSubTraceLore {
-                value_pos: 0.into(),
-                subtraces_desc: vec![subtrace_desc(0, 3), subtrace_desc(0, 3)],
+                value_pos: init_pos.into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 3), subtrace_desc(init_pos, 3)],
             },
             FoldSubTraceLore {
-                value_pos: 1.into(),
-                subtraces_desc: vec![subtrace_desc(0, 4), subtrace_desc(0, 4)],
+                value_pos: (1 as u32).into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 4), subtrace_desc(init_pos, 4)],
             },
             FoldSubTraceLore {
-                value_pos: 1.into(),
-                subtraces_desc: vec![subtrace_desc(0, 5), subtrace_desc(0, 5)],
+                value_pos: (1 as u32).into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 5), subtrace_desc(init_pos, 5)],
             },
             FoldSubTraceLore {
-                value_pos: 2.into(),
-                subtraces_desc: vec![subtrace_desc(0, 1), subtrace_desc(0, 1)],
+                value_pos: (2 as u32).into(),
+                subtraces_desc: vec![subtrace_desc(init_pos, 1), subtrace_desc(init_pos, 1)],
             },
         ];
 

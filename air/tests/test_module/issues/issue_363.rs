@@ -79,7 +79,7 @@ fn issue_363() {
     let p2_result_1 = checked_call_vm!(p2_vm, <_>::default(), script, "", p1_result_1.data.clone());
 
     let p2_trace_1 = trace_from_result(&p2_result_1);
-    let fold_position = TracePos::from(9);
+    let fold_position = TracePos::from(9 as PosType);
     let fold_p2 = p2_trace_1.get(fold_position).unwrap();
     if let ExecutedState::Fold(fold) = fold_p2 {
         assert_eq!(fold.lore.len(), 4);

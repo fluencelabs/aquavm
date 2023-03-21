@@ -59,7 +59,7 @@ fn basic_canon() {
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
-    let actual_state = &trace_from_result(&result)[6.into()];
+    let actual_state = &trace_from_result(&result)[(6 as PosType).into()];
 
     let expected_state = executed_state::canon(
         json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
@@ -219,7 +219,7 @@ fn canon_gates() {
     let vm_3_result = checked_call_vm!(vm_3, <_>::default(), &script, "", vm_2_result.data);
 
     let actual_trace = trace_from_result(&vm_3_result);
-    let fold = match &actual_trace[11.into()] {
+    let fold = match &actual_trace[(11 as PosType).into()] {
         ExecutedState::Fold(fold_result) => fold_result,
         _ => unreachable!(),
     };

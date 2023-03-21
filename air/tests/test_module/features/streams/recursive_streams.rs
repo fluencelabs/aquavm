@@ -58,8 +58,8 @@ fn recursive_stream_with_early_exit() {
         executed_state::stream_number(1, 0),
         executed_state::stream_number(1, 1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(0, subtrace_desc(3, 1), subtrace_desc(4, 0)),
-            executed_state::subtrace_lore(1, subtrace_desc(4, 1), subtrace_desc(5, 0)),
+            executed_state::subtrace_lore(0, subtrace_desc(3 as PosType, 1), subtrace_desc(4 as PosType, 0)),
+            executed_state::subtrace_lore(1, subtrace_desc(4 as PosType, 1), subtrace_desc(5 as PosType, 0)),
         ]),
         executed_state::scalar_string("stop"),
         executed_state::scalar_string("stop"),
@@ -120,30 +120,31 @@ fn recursive_stream_many_iterations() {
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
-    let actual_fold = &actual_trace[2.into()];
+    let pos = TracePos::from(2 as PosType);
+    let actual_fold = &actual_trace[pos];
     let expected_fold_v1 = executed_state::fold(vec![
-        executed_state::subtrace_lore(0, subtrace_desc(3, 2), subtrace_desc(5, 0)),
-        executed_state::subtrace_lore(1, subtrace_desc(5, 2), subtrace_desc(7, 0)),
-        executed_state::subtrace_lore(4, subtrace_desc(7, 2), subtrace_desc(11, 0)),
-        executed_state::subtrace_lore(6, subtrace_desc(9, 2), subtrace_desc(11, 0)),
-        executed_state::subtrace_lore(8, subtrace_desc(11, 2), subtrace_desc(15, 0)),
-        executed_state::subtrace_lore(10, subtrace_desc(13, 2), subtrace_desc(15, 0)),
-        executed_state::subtrace_lore(12, subtrace_desc(15, 2), subtrace_desc(19, 0)),
-        executed_state::subtrace_lore(14, subtrace_desc(17, 2), subtrace_desc(19, 0)),
-        executed_state::subtrace_lore(16, subtrace_desc(19, 1), subtrace_desc(20, 0)),
+        executed_state::subtrace_lore(0, subtrace_desc(3 as PosType, 2), subtrace_desc(5 as PosType, 0)),
+        executed_state::subtrace_lore(1, subtrace_desc(5 as PosType, 2), subtrace_desc(7 as PosType, 0)),
+        executed_state::subtrace_lore(4, subtrace_desc(7 as PosType, 2), subtrace_desc(11 as PosType, 0)),
+        executed_state::subtrace_lore(6, subtrace_desc(9 as PosType, 2), subtrace_desc(11 as PosType, 0)),
+        executed_state::subtrace_lore(8, subtrace_desc(11 as PosType, 2), subtrace_desc(15 as PosType, 0)),
+        executed_state::subtrace_lore(10, subtrace_desc(13 as PosType, 2), subtrace_desc(15 as PosType, 0)),
+        executed_state::subtrace_lore(12, subtrace_desc(15 as PosType, 2), subtrace_desc(19 as PosType, 0)),
+        executed_state::subtrace_lore(14, subtrace_desc(17 as PosType, 2), subtrace_desc(19 as PosType, 0)),
+        executed_state::subtrace_lore(16, subtrace_desc(19 as PosType, 1), subtrace_desc(20 as PosType, 0)),
     ]);
 
     let expected_fold_v2 = executed_state::fold(vec![
-        executed_state::subtrace_lore(0, subtrace_desc(3, 2), subtrace_desc(5, 0)),
-        executed_state::subtrace_lore(1, subtrace_desc(5, 2), subtrace_desc(7, 0)),
-        executed_state::subtrace_lore(4, subtrace_desc(7, 2), subtrace_desc(11, 0)),
-        executed_state::subtrace_lore(6, subtrace_desc(9, 2), subtrace_desc(11, 0)),
-        executed_state::subtrace_lore(8, subtrace_desc(11, 2), subtrace_desc(15, 0)),
-        executed_state::subtrace_lore(10, subtrace_desc(13, 2), subtrace_desc(15, 0)),
-        executed_state::subtrace_lore(12, subtrace_desc(15, 2), subtrace_desc(18, 0)),
-        executed_state::subtrace_lore(14, subtrace_desc(17, 1), subtrace_desc(18, 0)),
-        executed_state::subtrace_lore(16, subtrace_desc(18, 2), subtrace_desc(20, 0)),
-        executed_state::subtrace_lore(19, subtrace_desc(20, 1), subtrace_desc(21, 0)),
+        executed_state::subtrace_lore(0, subtrace_desc(3 as PosType, 2), subtrace_desc(5 as PosType, 0)),
+        executed_state::subtrace_lore(1, subtrace_desc(5 as PosType, 2), subtrace_desc(7 as PosType, 0)),
+        executed_state::subtrace_lore(4, subtrace_desc(7 as PosType, 2), subtrace_desc(11 as PosType, 0)),
+        executed_state::subtrace_lore(6, subtrace_desc(9 as PosType, 2), subtrace_desc(11 as PosType, 0)),
+        executed_state::subtrace_lore(8, subtrace_desc(11 as PosType, 2), subtrace_desc(15 as PosType, 0)),
+        executed_state::subtrace_lore(10, subtrace_desc(13 as PosType, 2), subtrace_desc(15 as PosType, 0)),
+        executed_state::subtrace_lore(12, subtrace_desc(15 as PosType, 2), subtrace_desc(18 as PosType, 0)),
+        executed_state::subtrace_lore(14, subtrace_desc(17 as PosType, 1), subtrace_desc(18 as PosType, 0)),
+        executed_state::subtrace_lore(16, subtrace_desc(18 as PosType, 2), subtrace_desc(20 as PosType, 0)),
+        executed_state::subtrace_lore(19, subtrace_desc(20 as PosType, 1), subtrace_desc(21 as PosType, 0)),
     ]);
 
     let test_passed = (actual_fold == &expected_fold_v1) || (actual_fold == &expected_fold_v2);
@@ -221,11 +222,11 @@ fn recursive_stream_join() {
         executed_state::stream_string("non_join", 0),
         executed_state::scalar_string(""),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(1, subtrace_desc(4, 2), subtrace_desc(6, 0)),
-            executed_state::subtrace_lore(5, subtrace_desc(6, 2), subtrace_desc(8, 0)),
-            executed_state::subtrace_lore(7, subtrace_desc(8, 2), subtrace_desc(10, 0)),
-            executed_state::subtrace_lore(9, subtrace_desc(10, 2), subtrace_desc(12, 0)),
-            executed_state::subtrace_lore(11, subtrace_desc(12, 2), subtrace_desc(14, 0)),
+            executed_state::subtrace_lore(1, subtrace_desc(4 as PosType, 2), subtrace_desc(6 as PosType, 0)),
+            executed_state::subtrace_lore(5, subtrace_desc(6 as PosType, 2), subtrace_desc(8 as PosType, 0)),
+            executed_state::subtrace_lore(7, subtrace_desc(8 as PosType, 2), subtrace_desc(10 as PosType, 0)),
+            executed_state::subtrace_lore(9, subtrace_desc(10 as PosType, 2), subtrace_desc(12 as PosType, 0)),
+            executed_state::subtrace_lore(11, subtrace_desc(12 as PosType, 2), subtrace_desc(14 as PosType, 0)),
         ]),
         executed_state::scalar_string("non_join"),
         executed_state::ap(1),
@@ -294,11 +295,31 @@ fn recursive_stream_error_handling() {
         executed_state::stream_string("non_stop", 0),
         executed_state::stream_string("non_stop", 1),
         executed_state::fold(vec![
-            subtrace_lore(0, SubTraceDesc::new(3.into(), 2), SubTraceDesc::new(5.into(), 0)),
-            subtrace_lore(1, SubTraceDesc::new(5.into(), 2), SubTraceDesc::new(7.into(), 0)),
-            subtrace_lore(4, SubTraceDesc::new(7.into(), 2), SubTraceDesc::new(10.into(), 0)),
-            subtrace_lore(6, SubTraceDesc::new(9.into(), 1), SubTraceDesc::new(10.into(), 0)),
-            subtrace_lore(8, SubTraceDesc::new(10.into(), 1), SubTraceDesc::new(11.into(), 0)),
+            subtrace_lore(
+                0,
+                SubTraceDesc::new((3 as PosType).into(), 2),
+                SubTraceDesc::new((5 as PosType).into(), 0),
+            ),
+            subtrace_lore(
+                1,
+                SubTraceDesc::new((5 as PosType).into(), 2),
+                SubTraceDesc::new((7 as PosType).into(), 0),
+            ),
+            subtrace_lore(
+                4,
+                SubTraceDesc::new((7 as PosType).into(), 2),
+                SubTraceDesc::new((10 as PosType).into(), 0),
+            ),
+            subtrace_lore(
+                6,
+                SubTraceDesc::new((9 as PosType).into(), 1),
+                SubTraceDesc::new((10 as PosType).into(), 0),
+            ),
+            subtrace_lore(
+                8,
+                SubTraceDesc::new((10 as PosType).into(), 1),
+                SubTraceDesc::new((11 as PosType).into(), 0),
+            ),
         ]),
         executed_state::scalar_string("non_stop"),
         executed_state::ap(2),
@@ -444,7 +465,7 @@ fn recursive_stream_fold_with_n_service_call() {
     let test_params = TestRunParameters::from_init_peer_id(vm_peer_id);
     let result = checked_call_vm!(vm, test_params, &script, "", "");
     let actual_trace = trace_from_result(&result);
-    let actual_fold_state = match &actual_trace[2.into()] {
+    let actual_fold_state = match &actual_trace[(2 as PosType).into()] {
         ExecutedState::Fold(fold_result) => fold_result,
         _ => panic!("2nd state should be fold"),
     };

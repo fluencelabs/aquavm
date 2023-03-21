@@ -71,7 +71,7 @@ fn lambda_with_string_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
+    assert_eq!(&trace[(2 as PosType).into()], &executed_state::scalar_number(1u32));
 }
 
 #[test]
@@ -102,8 +102,8 @@ fn lambda_with_number_scalar() {
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
-
-    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
+    let pos = TracePos::from(2 as PosType);
+    assert_eq!(&trace[pos], &executed_state::scalar_number(1u32));
 }
 
 #[test]
@@ -146,7 +146,8 @@ fn lambda_with_number_stream() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[6.into()], &executed_state::scalar_number(2));
+    let pos = TracePos::from(6 as PosType);
+    assert_eq!(&actual_trace[pos], &executed_state::scalar_number(2));
 }
 
 #[test]
@@ -194,7 +195,8 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[7.into()], &executed_state::scalar_number(checkable_value));
+    let pos = TracePos::from(7 as PosType);
+    assert_eq!(&actual_trace[pos], &executed_state::scalar_number(checkable_value));
 }
 
 #[test]
@@ -226,7 +228,8 @@ fn lambda_with_scalar_join() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[3.into()], &executed_state::request_sent_by("set_variable"));
+    let pos = TracePos::from(3 as PosType);
+    assert_eq!(&trace[pos], &executed_state::request_sent_by("set_variable"));
 }
 
 #[ignore]
@@ -272,8 +275,6 @@ fn lambda_with_canon_stream_join() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(
-        &actual_trace[7.into()],
-        &executed_state::request_sent_by("set_variable"),
-    );
+    let pos = TracePos::from(7 as PosType);
+    assert_eq!(&actual_trace[pos], &executed_state::request_sent_by("set_variable"),);
 }

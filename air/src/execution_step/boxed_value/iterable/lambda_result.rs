@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::PosType;
+
 use super::Iterable;
 use super::IterableItem;
 use crate::execution_step::RcSecurityTetraplet;
@@ -57,7 +59,8 @@ impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0.into()));
+        let init_pos = air_interpreter_data::TracePos::from(0 as PosType);
+        let result = IterableItem::RefRef((jvalue, &self.tetraplet, init_pos));
 
         Some(result)
     }

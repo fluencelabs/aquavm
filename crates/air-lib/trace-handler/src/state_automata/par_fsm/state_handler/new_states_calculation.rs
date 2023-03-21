@@ -34,7 +34,7 @@ pub(super) fn compute_new_states(
 
 fn compute_new_state(par_result: ParResult, subgraph_type: SubgraphType, slider: &TraceSlider) -> FSMResult<CtxState> {
     let par_subgraph_len = match subgraph_type {
-        SubgraphType::Left => par_result.left_size as usize,
+        SubgraphType::Left => par_result.left_size,
         SubgraphType::Right => par_result.size().ok_or(StateFSMError::ParLenOverflow(par_result))?,
     };
 
@@ -44,10 +44,10 @@ fn compute_new_state(par_result: ParResult, subgraph_type: SubgraphType, slider:
         .ok_or_else(|| StateFSMError::ParPosOverflow(par_result, slider.position(), MergeCtxType::Previous))?;
 
     let new_subtrace_len = match subgraph_type {
-        SubgraphType::Left => par_subgraph_len,
+        SubgraphType::Left => par_subgraph_len as usize,
         SubgraphType::Right => slider
             .subtrace_len()
-            .checked_sub(par_subgraph_len)
+            .checked_sub(par_subgraph_len as usize)
             .ok_or_else(|| StateFSMError::ParLenUnderflow(par_result, slider.subtrace_len(), MergeCtxType::Current))?,
     };
 

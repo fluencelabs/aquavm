@@ -304,6 +304,7 @@ mod test {
     use super::Stream;
     use super::ValueAggregate;
 
+    use air_interpreter_data::PosType;
     use serde_json::json;
 
     use air_trace_handler::merger::ValueSource;
@@ -311,8 +312,9 @@ mod test {
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
+        let pos_one: PosType = 1;
+        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), pos_one.into());
+        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), pos_one.into());
         let mut stream = Stream::from_generations_count(2, 0);
 
         stream
@@ -354,8 +356,10 @@ mod test {
 
     #[test]
     fn generation_from_current_data() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
+        let pos_one: PosType = 1;
+        let pos_two: PosType = 2;
+        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), pos_one.into());
+        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), pos_two.into());
         let mut stream = Stream::from_generations_count(5, 5);
 
         stream

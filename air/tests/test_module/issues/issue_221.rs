@@ -90,8 +90,8 @@ fn issue_221() {
         executed_state::scalar_string(peer_2_value),
         executed_state::ap(1),
         executed_state::fold(vec![
-            executed_state::subtrace_lore(3, SubTraceDesc::new(8.into(), 4), SubTraceDesc::new(12.into(), 0)),
-            executed_state::subtrace_lore(6, SubTraceDesc::new(12.into(), 4), SubTraceDesc::new(16.into(), 0)),
+            executed_state::subtrace_lore(3, SubTraceDesc::new((8 as PosType).into(), 4), SubTraceDesc::new((12 as PosType).into(), 0)),
+            executed_state::subtrace_lore(6, SubTraceDesc::new((12 as PosType).into(), 4), SubTraceDesc::new((16 as PosType).into(), 0)),
         ]),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
