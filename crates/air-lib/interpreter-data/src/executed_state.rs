@@ -63,12 +63,19 @@ pub enum CallResult {
  * ```
  * Scalar(CID<ServiceResultAggregate>) ---+
  *                                        |
- *             +--------------------------+
- *             |
- *             +---<CID>----> ServiceResultAggregate:
- *                                value_cid -------------<CID>----> JValue
- *                                tetraplet_cid ---------<CID>----> SecurityTetraplet
- *                                argument_hash
+ *   +----<service_result_store>------+
+ *   |
+ *   +-------> ServiceResultAggregate:
+ *                value_cid ------------<value_store>----> JValue
+ *                tetraplet_cid --------<tetraplet_store>----> SecurityTetraplet
+ *                argument_hash: String
+ * ```
+ *
+ * `Stream` variant is similar, however, `Unused` is different: it has value CID only, but the value
+ * is not stored into the `value_store`:
+ *
+ * ```
+ * Unused(Rc<CID<JValue>>) ---> X
  * ```
  */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
