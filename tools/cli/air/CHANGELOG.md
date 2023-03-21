@@ -21,6 +21,11 @@
     * air-interpreter-interface bumped from 0.12.1 to 0.13.0
     * air-test-utils bumped from 0.4.6 to 0.4.7
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.38.0 to 0.39.0
+    * air-test-utils bumped from 0.4.7 to 0.5.0
+
 ## [0.2.6](https://github.com/fluencelabs/aquavm/compare/air-trace-v0.2.5...air-trace-v0.2.6) (2023-03-13)
 
 

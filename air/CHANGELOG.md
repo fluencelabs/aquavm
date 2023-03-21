@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.39.0](https://github.com/fluencelabs/aquavm/compare/air-v0.38.0...air-v0.39.0) (2023-03-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-data:** 
+
+### Features
+
+* **interpreter-data:** New data format for calls ([#501](https://github.com/fluencelabs/aquavm/issues/501)) ([d502894](https://github.com/fluencelabs/aquavm/commit/d5028942e41e1ac47ce31e20b57c17895f543ac8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.6.4 to 0.7.0
+    * air-trace-handler bumped from 0.1.3 to 0.2.0
+
 ## [0.38.0](https://github.com/fluencelabs/aquavm/compare/air-v0.37.1...air-v0.38.0) (2023-03-15)
 
 
