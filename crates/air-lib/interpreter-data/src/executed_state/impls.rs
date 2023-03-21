@@ -15,7 +15,6 @@
  */
 
 use super::*;
-use crate::JValue;
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -42,20 +41,30 @@ impl CallResult {
         CallResult::RequestSentBy(Sender::PeerIdWithCallId { peer_id, call_id })
     }
 
-    pub fn executed_scalar(cid: Rc<CID<JValue>>) -> CallResult {
-        let value = ValueRef::Scalar(cid);
-
-        CallResult::Executed(value)
+    pub fn executed_service_result(value_ref: ValueRef) -> Self {
+        Self::Executed(value_ref)
     }
 
-    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: u32) -> CallResult {
-        let value = ValueRef::Stream { cid, generation };
-
-        CallResult::Executed(value)
+    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> Self {
+        Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
-    pub fn failed(ret_code: i32, error_msg: impl Into<String>) -> CallResult {
-        CallResult::CallServiceFailed(ret_code, Rc::new(error_msg.into()))
+    pub fn executed_stream(
+        service_result_agg_cid: Rc<CID<ServiceResultAggregate>>,
+        generation: u32,
+    ) -> CallResult {
+        Self::executed_service_result(ValueRef::Stream {
+            cid: service_result_agg_cid,
+            generation,
+        })
+    }
+
+    pub fn executed_unused(value_cid: Rc<CID<JValue>>) -> CallResult {
+        Self::executed_service_result(ValueRef::Unused(value_cid))
+    }
+
+    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
+        CallResult::Failed(service_result_agg_cid)
     }
 }
 
@@ -107,11 +116,11 @@ impl std::fmt::Display for ExecutedState {
                 right_size: right_subgraph_size,
             }) => write!(f, "par({left_subgraph_size}, {right_subgraph_size})"),
             Call(RequestSentBy(sender)) => write!(f, r"{sender}"),
-            Call(Executed(value)) => {
-                write!(f, "executed({value})")
+            Call(Executed(value_ref)) => {
+                write!(f, "executed({value_ref:?})")
             }
-            Call(CallServiceFailed(ret_code, err_msg)) => {
-                write!(f, r#"call_service_failed({ret_code}, "{err_msg}")"#)
+            Call(Failed(failed_cid)) => {
+                write!(f, "failed({failed_cid:?})")
             }
             Fold(FoldResult { lore }) => {
                 writeln!(f, "fold(",)?;
@@ -145,6 +154,7 @@ impl std::fmt::Display for ValueRef {
             ValueRef::Stream { cid, generation } => {
                 write!(f, "stream: {cid:?} generation: {generation}")
             }
+            ValueRef::Unused(cid) => write!(f, "unused: {cid:?}"),
         }
     }
 }

@@ -20,6 +20,7 @@ use crate::cid_store::CidStore;
 use crate::CanonCidAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
+use crate::ServiceResultAggregate;
 
 use air_utils::measure;
 use polyplets::SecurityTetraplet;
@@ -130,16 +131,19 @@ impl Versions {
     }
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CidInfo {
-    /// Map CID to value
+    /// Map CID to value.
     pub value_store: CidStore<JValue>,
 
-    /// Map CID to a tetraplet
+    /// Map CID to a tetraplet.
     pub tetraplet_store: CidStore<SecurityTetraplet>,
 
-    /// Map CID to a canon value
+    /// Map CID to a canon value.
     pub canon_store: CidStore<CanonCidAggregate>,
+
+    /// Map CID to a service result aggregate.
+    pub service_result_store: CidStore<ServiceResultAggregate>,
 }
 
 #[cfg(test)]

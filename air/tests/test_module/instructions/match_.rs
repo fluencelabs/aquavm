@@ -43,7 +43,13 @@ fn match_equal() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("result_1");
+    let expected_state = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 3);
     assert_eq!(actual_trace[2.into()], expected_state);
@@ -75,7 +81,13 @@ fn match_not_equal() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("result_2");
+    let expected_state = scalar!(
+        "result_2",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_2"]
+    );
 
     assert_eq!(actual_trace.len(), 3);
     assert_eq!(actual_trace[2.into()], expected_state);
@@ -104,7 +116,13 @@ fn match_with_string() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("result_1");
+    let expected_state = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
@@ -134,7 +152,13 @@ fn match_with_init_peer_id() {
     let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_executed_call_result = executed_state::scalar_string("result_1");
+    let expected_executed_call_result = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
@@ -165,7 +189,13 @@ fn match_with_timestamp() {
     let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_executed_call_result = executed_state::scalar_string("result_1");
+    let expected_executed_call_result = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
@@ -196,7 +226,13 @@ fn match_with_ttl() {
     let result = checked_call_vm!(vm, test_params, script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_executed_call_result = executed_state::scalar_string("result_1");
+    let expected_executed_call_result = scalar!(
+        "result_1",
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = ["result_1"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
@@ -318,5 +354,14 @@ fn issue_165() {
     let echo_result = checked_call_vm!(echo_peer, <_>::default(), &script, "", setter_result.data);
 
     let trace = trace_from_result(&echo_result);
-    assert_eq!(trace.last().unwrap(), &executed_state::scalar(json!(1)));
+    assert_eq!(
+        trace.last().unwrap(),
+        &unused!(
+            1,
+            peer = echo_peer_id,
+            service = "callbackSrv",
+            function = "response",
+            args = [1]
+        )
+    );
 }

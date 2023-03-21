@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/214
@@ -44,7 +47,7 @@ fn issue_214() {
            )
            (xor
             (call -relay- ("op" "identity") [s.$.field!] res) ;; (1) should not produce data after calling on relay
-            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1]) ;; (2) should be called
+            (call %init_peer_id% ("errorHandlingSrv" "error") ["%last_error%" 1]) ;; (2) should be called
            )
           )
           (xor
@@ -58,11 +61,17 @@ fn issue_214() {
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
     let result = checked_call_vm!(client, test_params, &script, "", "");
-    let expected_trace = vec![
-        executed_state::scalar_string(relay_id),
-        executed_state::scalar(scalar),
-        executed_state::scalar_string(error_handler),
-    ];
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(relay_id, peer = client_id, service = "getDataSrv", function = "-relay-"),
+        scalar!(scalar, peer = client_id, service = "getDataSrv", function = "s"),
+        unused!(
+            error_handler,
+            peer = client_id,
+            service = "errorHandlingSrv",
+            function = "error",
+            args = vec![json!("%last_error%"), json!(1)]
+        ),
+    ]);
     let actual_trace = trace_from_result(&result);
 
     assert_eq!(actual_trace, expected_trace);

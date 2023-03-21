@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
+use air_interpreter_data::{ExecutionTrace, InterpreterData};
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -82,37 +84,45 @@ fn merge_streams_in_two_fold() {
 
     let actual_trace_1 = trace_from_result(&result_1);
 
-    let expected_trace_1 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+    let expected_trace_1 = ExecutionTrace::from(vec![
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
         request_sent_by(set_variable_peer_id),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
         request_sent_by(vm_1_peer_id),
-        stream_string(vm_1_peer_id, 1),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
         request_sent_by(vm_1_peer_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace_1, expected_trace_1);
     assert_eq!(result_1.next_peer_pks, vec![vm_2_peer_id.to_string()]);
 
     let actual_trace_2 = trace_from_result(&result_2);
 
-    let expected_trace_2 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+    let expected_trace_2 = ExecutionTrace::from(vec![
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
         request_sent_by(set_variable_peer_id),
         par(1, 0),
-        stream_string(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
         request_sent_by(vm_2_peer_id),
         par(1, 0),
-        stream_string(vm_2_peer_id, 0),
+        stream!(vm_2_peer_id, 0, peer = vm_2_peer_id, service = "get_providers"),
         request_sent_by(vm_2_peer_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace_2, expected_trace_2);
     assert_eq!(result_2.next_peer_pks, vec![vm_1_peer_id.to_string()]);
@@ -120,16 +130,20 @@ fn merge_streams_in_two_fold() {
     let actual_trace_3 = trace_from_result(&result_3);
 
     let expected_trace_3 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
-        stream_string(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
-        stream_string(vm_2_peer_id, 1),
-        stream_string(vm_1_peer_id, 1),
+        stream!(vm_2_peer_id, 1, peer = vm_2_peer_id, service = "get_providers"),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
         request_sent_by(vm_1_peer_id),
     ];
 
@@ -138,19 +152,23 @@ fn merge_streams_in_two_fold() {
 
     let actual_trace_4 = trace_from_result(&result_4);
 
-    let expected_trace_4 = vec![
-        scalar_string_array(vec![vm_1_peer_id, vm_2_peer_id]),
+    let expected_trace_4 = ExecutionTrace::from(vec![
+        scalar!(
+            json!([vm_1_peer_id, vm_2_peer_id]),
+            peer = set_variable_peer_id,
+            service = "neighborhood"
+        ),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "add_provider"),
         par(1, 0),
-        stream_string(vm_2_peer_id, 2),
+        stream!(vm_2_peer_id, 2, peer = vm_2_peer_id, service = "add_provider"),
         par(1, 2),
-        stream_string(vm_1_peer_id, 0),
+        stream!(vm_1_peer_id, 0, peer = vm_1_peer_id, service = "get_providers"),
         par(1, 0),
-        stream_string(vm_2_peer_id, 1),
-        stream_string(vm_1_peer_id, 1),
-        scalar_string(vm_2_peer_id),
-    ];
+        stream!(vm_2_peer_id, 1, peer = vm_2_peer_id, service = "get_providers"),
+        stream!(vm_1_peer_id, 1, peer = vm_1_peer_id, service = "identity"),
+        scalar!(vm_2_peer_id, peer = vm_2_peer_id),
+    ]);
 
     assert_eq!(actual_trace_4, expected_trace_4);
     assert!(result_4.next_peer_pks.is_empty());
@@ -310,11 +328,18 @@ fn fold_merge() {
                 let value_pos = subtrace_lore.value_pos;
                 if let ExecutedState::Call(CallResult::Executed(value)) = &data.trace[value_pos] {
                     let cid = match value {
-                        ValueRef::Scalar(cid) => cid,
-                        ValueRef::Stream { cid, .. } => cid,
+                        ValueRef::Scalar(service_result_cid) => service_result_cid,
+                        ValueRef::Stream {
+                            cid: service_result_cid,
+                            ..
+                        } => service_result_cid,
+                        // Cannot resolve
+                        ValueRef::Unused(_value_cid) => continue,
                     };
 
-                    let value = data.cid_info.value_store.get(cid).unwrap().clone();
+                    let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap();
+                    let value = data.cid_info.value_store.get(&service_result_agg.value_cid).unwrap();
+
                     if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
                         calls_count.insert(var_name.to_owned(), current_count + 1);
@@ -335,4 +360,127 @@ fn fold_merge() {
             assert_eq!(call_count, 16);
         }
     }
+}
+
+#[test]
+fn test_merge_scalar_match() {
+    let air = r#"(call "peer" ("" "") [] var)"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut cid_store = ExecutionCidState::new();
+
+    let trace = ExecutionTrace::from(vec![scalar_tracked!(42, cid_store, peer = "peer")]);
+    let data = raw_data_from_trace(trace, cid_store);
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_scalar_mismatch() {
+    let air = r#"(call "peer" ("" "") [] var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![scalar_tracked!(42, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![scalar_tracked!(43, cid_state2, peer = "peer")]);
+    let data1 = raw_data_from_trace(trace1, cid_state1);
+    let data2 = raw_data_from_trace(trace2, cid_state2);
+
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] var' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Scalar(CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"))"#,
+            r#" != Scalar(CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"))"#
+        )
+    );
+}
+
+#[test]
+fn test_merge_stream_match() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut cid_store = ExecutionCidState::new();
+
+    let trace = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_store, peer = "peer")]);
+    let data = raw_data_from_trace(trace, cid_store);
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_stream_match_gen() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![stream_tracked!(42, 1, cid_state2, peer = "peer")]);
+    let data1 = raw_data_from_trace(trace1, cid_state1);
+    let data2 = raw_data_from_trace(trace2, cid_state2);
+    checked_call_vm!(avm, <_>::default(), air, data1, data2);
+}
+
+#[test]
+fn test_merge_stream_mismatch() {
+    let air = r#"(call "peer" ("" "") [] $var)"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let mut cid_state1 = ExecutionCidState::default();
+    let mut cid_state2 = ExecutionCidState::default();
+    let trace1 = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_state1, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![stream_tracked!(43, 0, cid_state2, peer = "peer")]);
+    let data1 = raw_data_from_trace(trace1, cid_state1);
+    let data2 = raw_data_from_trace(trace2, cid_state2);
+
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] $var' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Stream { cid: CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"), generation: 0 }"#,
+            r#" != Stream { cid: CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"), generation: 0 }"#
+        )
+    );
+}
+
+#[test]
+fn test_merge_unused_match() {
+    let air = r#"(call "peer" ("" "") [])"#;
+
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let trace = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
+    let data = raw_data_from_trace(trace, <_>::default());
+
+    checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
+}
+
+#[test]
+fn test_merge_unused_mismatch() {
+    let air = r#"(call "peer" ("" "") [])"#;
+    let mut avm = create_avm(echo_call_service(), "peer");
+
+    let trace1 = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
+    let trace2 = ExecutionTrace::from(vec![unused!(43, peer = "peer")]);
+    let data1 = raw_data_from_trace(trace1, <_>::default());
+    let data2 = raw_data_from_trace(trace2, <_>::default());
+
+    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    assert_eq!(result.ret_code, 20000);
+    assert_eq!(
+        result.error_message,
+        concat!(
+            r#"on instruction 'call "peer" ("" "") [] ' trace handler encountered an error:"#,
+            r#" values in call results are not equal:"#,
+            r#" Unused(CID("bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq"))"#,
+            r#" != Unused(CID("bagaaieraitfxgdccasakar33kbnoncxvbd5zb6lm6dwfjrvnc2kj3vbh6e5a"))"#
+        )
+    );
 }

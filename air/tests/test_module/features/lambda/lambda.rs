@@ -71,7 +71,7 @@ fn lambda_with_string_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
+    assert_eq!(&trace[2.into()], &unused!(1u32, peer = local_peer_id, args = vec![1]));
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn lambda_with_number_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(&trace[2.into()], &executed_state::scalar_number(1u32));
+    assert_eq!(&trace[2.into()], &unused!(1u32, peer = local_peer_id, args = vec![1]));
 }
 
 #[test]
@@ -146,7 +146,10 @@ fn lambda_with_number_stream() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[6.into()], &executed_state::scalar_number(2));
+    assert_eq!(
+        &actual_trace[6.into()],
+        &unused!(2, peer = local_peer_id, args = vec![2])
+    );
 }
 
 #[test]
@@ -194,7 +197,10 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
     let actual_trace = trace_from_result(&result);
 
-    assert_eq!(&actual_trace[7.into()], &executed_state::scalar_number(checkable_value));
+    assert_eq!(
+        &actual_trace[7.into()],
+        &unused!(checkable_value, peer = local_peer_id, args = vec![checkable_value])
+    );
 }
 
 #[test]

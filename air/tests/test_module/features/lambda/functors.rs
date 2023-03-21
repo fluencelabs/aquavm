@@ -18,6 +18,8 @@ use air::CatchableError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
+use pretty_assertions::assert_eq;
+
 use std::cell::RefCell;
 
 #[test]
@@ -37,8 +39,8 @@ fn length_functor_for_array_scalar() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(json!([1, 1, 1])),
-        executed_state::scalar_number(3),
+        scalar!(json!([1, 1, 1]), peer = init_peer_id, service = "..0"),
+        unused!(3, peer = init_peer_id, args = vec![3], service = "..1"),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -103,7 +105,7 @@ fn length_functor_for_stream() {
                 },
             ]
         })),
-        executed_state::scalar_number(2),
+        unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -131,7 +133,7 @@ fn length_functor_for_empty_stream() {
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
                 "values": []} ),
         ),
-        executed_state::scalar_number(0),
+        unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -166,7 +168,7 @@ fn length_functor_for_canon_stream() {
                            {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
                 ]} ),
         ),
-        executed_state::scalar_number(2),
+        unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -193,7 +195,7 @@ fn length_functor_for_empty_canon_stream() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
         ),
-        executed_state::scalar_number(0),
+        unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -232,8 +234,8 @@ fn functor_dont_influence_tetraplet() {
     assert_eq!(actual_tetraplet.as_ref(), &expected_tetraplet);
 
     let expected_trace = vec![
-        executed_state::scalar(set_variable_peer_result),
-        executed_state::scalar_number(3),
+        scalar!(set_variable_peer_result, peer = set_variable_peer_id),
+        unused!(3, peer = tetraplet_catcher_peer_id, args = vec![3]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

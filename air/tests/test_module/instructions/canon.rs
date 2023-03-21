@@ -109,16 +109,16 @@ fn canon_fixes_stream_correct() {
         executed_state::par(1, 3),
         executed_state::request_sent_by(peer_id_2),
         executed_state::par(1, 1),
-        executed_state::stream_number(2, 0),
-        executed_state::stream_number(3, 1),
-        executed_state::scalar_number(4),
+        stream!(2, 0, peer = peer_id_2, args = [2]),
+        stream!(3, 1, peer = peer_id_3, args = [3]),
+        unused!(4, peer = peer_id_4, args = [4]),
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
             "values": [{"result": 2, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""}, "trace_pos": 3},
                 {"result": 3, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""}, "trace_pos": 4}]}),
         ),
         executed_state::par(1, 1),
-        executed_state::scalar(json!([2, 3])),
+        unused!(json!([2, 3]), peer = peer_id_3, args = [json!([2, 3])]),
         executed_state::request_sent_by(peer_id_3),
     ];
     assert_eq!(actual_vm_3_result_2_trace, expected_vm_3_result_2_trace);
@@ -127,19 +127,19 @@ fn canon_fixes_stream_correct() {
     let vm_1_result_2_trace = trace_from_result(&vm_1_result_2);
     let expected_vm_1_result_2_trace = vec![
         executed_state::par(1, 3),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0, peer = peer_id_1, args = [1]),
         executed_state::par(1, 1),
-        executed_state::stream_number(2, 1),
-        executed_state::stream_number(3, 2),
-        executed_state::scalar_number(4),
+        stream!(2, 1, peer = peer_id_2, args = [2]),
+        stream!(3, 2, peer = peer_id_3, args = [3]),
+        unused!(4, peer = peer_id_4, args = [4]),
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
             "values": [{"result": 2, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""}, "trace_pos": 3},
                 {"result": 3, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""}, "trace_pos": 4}]}),
         ),
         executed_state::par(1, 1),
-        executed_state::scalar(json!([2, 3])),
-        executed_state::scalar(json!([2, 3])),
+        unused!(json!([2, 3]), peer = peer_id_3, args = [json!([2, 3])]),
+        unused!(json!([2, 3]), peer = peer_id_1, args = [json!([2, 3])]),
     ];
     assert_eq!(vm_1_result_2_trace.deref(), expected_vm_1_result_2_trace);
 }
@@ -248,7 +248,7 @@ fn canon_empty_stream() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []}),
         ),
-        executed_state::scalar(json!([])),
+        unused!(json!([]), peer = peer_id_1, args = [json!([])]),
     ];
     assert_eq!(actual_trace, expected_trace);
 
@@ -258,7 +258,7 @@ fn canon_empty_stream() {
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []} ),
         ),
-        executed_state::scalar(json!([])),
+        unused!(json!([]), peer = peer_id_1, args = [json!([])]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -315,11 +315,11 @@ fn canon_over_later_defined_stream() {
 
     let expected_trace = vec![
         executed_state::par(1, 2),
-        executed_state::stream_number(1, 0),
+        stream!(1, 0, peer = vm_peer_id_2, args = [1]),
         executed_state::canon(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},"values": []}),
         ),
-        executed_state::scalar(json!([])),
+        unused!(json!([]), peer = vm_peer_id_3, args = [json!([])]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

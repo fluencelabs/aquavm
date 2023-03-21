@@ -67,12 +67,12 @@ fn merge_call_results(prev_call: CallResult, current_call: CallResult) -> MergeR
     use PreparationScheme::*;
 
     let (merged_state, scheme) = match (prev_call, current_call) {
-        (prev @ CallServiceFailed(..), current @ CallServiceFailed(..)) => {
+        (prev @ Failed(..), current @ Failed(..)) => {
             check_equal(&prev, &current)?;
             (prev, Previous)
         }
-        (RequestSentBy(_), current @ CallServiceFailed(..)) => (current, Current),
-        (prev @ CallServiceFailed(..), RequestSentBy(_)) => (prev, Previous),
+        (RequestSentBy(_), current @ Failed(..)) => (current, Current),
+        (prev @ Failed(..), RequestSentBy(_)) => (prev, Previous),
         // senders shouldn't be checked for equality, for more info please look at
         // github.com/fluencelabs/aquavm/issues/137
         (previous @ RequestSentBy(_), RequestSentBy(_)) => (previous, Previous),

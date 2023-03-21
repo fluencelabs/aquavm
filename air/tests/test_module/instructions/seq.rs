@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-use air_interpreter_data::CidTracker;
+use air::ExecutionCidState;
 use air_test_utils::prelude::*;
-
-use std::rc::Rc;
 
 #[test]
 fn seq_remote_remote() {
     let mut vm = create_avm(unit_call_service(), "");
-    let mut cid_tracker = CidTracker::new();
-    cid_tracker.record_value(Rc::new("".into())).unwrap();
+    let mut cid_state = ExecutionCidState::new();
 
     let script = r#"
             (seq
@@ -34,8 +31,14 @@ fn seq_remote_remote() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_1")]);
 
-    let initial_trace = vec![executed_state::scalar_string("")];
-    let initial_data = raw_data_from_trace(initial_trace, cid_tracker.into());
+    let initial_trace = vec![scalar_tracked!(
+        "",
+        cid_state,
+        peer = "remote_peer_id_1",
+        service = "local_service_id",
+        function = "local_fn_name"
+    )];
+    let initial_data = raw_data_from_trace(initial_trace, cid_state.into());
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", initial_data);
 

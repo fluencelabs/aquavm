@@ -89,6 +89,9 @@ pub enum UncatchableError {
              stream is {stream:?}"
     )]
     StreamDontHaveSuchGeneration { stream: Stream, generation: Generation },
+
+    #[error("failed to deserialize to CallServiceFailed: {0}")]
+    MalformedCallServiceFailed(serde_json::Error),
 }
 
 impl ToErrorCode for UncatchableError {

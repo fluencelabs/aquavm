@@ -23,7 +23,6 @@ use crate::TracePos;
 use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
 use se_de::par_serializer;
-use se_de::sender_serializer;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -36,7 +35,7 @@ pub struct ParResult {
     pub right_size: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Sender {
     PeerId(Rc<String>),
     PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
@@ -46,26 +45,79 @@ pub enum Sender {
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
-    #[serde(with = "sender_serializer")]
     #[serde(rename = "sent_by")]
     RequestSentBy(Sender),
 
     /// A corresponding call's been already executed with such value as a result.
     Executed(ValueRef),
 
-    /// call_service ended with a service error.
-    #[serde(rename = "failed")]
-    CallServiceFailed(i32, Rc<String>),
+    /// The call returned a service error.
+    ///
+    /// The `JValue` has to be a two element array `[i32, String]`.
+    Failed(Rc<CID<ServiceResultAggregate>>),
+}
+
+/*
+ * The current value structure is:
+ *
+ * ```
+ * Scalar(CID<ServiceResultAggregate>) ---+
+ *                                        |
+ *   +----<service_result_store>------+
+ *   |
+ *   +-------> ServiceResultAggregate:
+ *                value_cid ------------<value_store>----> JValue
+ *                tetraplet_cid --------<tetraplet_store>----> SecurityTetraplet
+ *                argument_hash: String
+ * ```
+ *
+ * `Stream` variant is similar, however, `Unused` is different: it has value CID only, but the value
+ * is not stored into the `value_store`:
+ *
+ * ```
+ * Unused(Rc<CID<JValue>>) ---> X
+ * ```
+ */
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ValueRef {
+    /// The call value is stored to a scalar variable.
+    Scalar(Rc<CID<ServiceResultAggregate>>),
+    /// The call value is stored to a stream variable.
+    Stream {
+        cid: Rc<CID<ServiceResultAggregate>>,
+        generation: u32,
+    },
+    /// The call value is not stored.
+    Unused(Rc<CID<JValue>>),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CallServiceFailed {
+    pub ret_code: i32,
+    /// This field contains a JSON-serialized value, not a plain error message.
+    pub message: Rc<String>,
+}
+
+impl CallServiceFailed {
+    pub fn new(ret_code: i32, message: Rc<String>) -> Self {
+        Self { ret_code, message }
+    }
+
+    pub fn to_value(&self) -> JValue {
+        serde_json::to_value(self).expect("default serializer shouldn't fail")
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum ValueRef {
-    Scalar(Rc<CID<JValue>>),
-    Stream {
-        cid: Rc<CID<JValue>>,
-        generation: u32,
-    },
+/// A proof of service result execution result.
+pub struct ServiceResultAggregate {
+    pub value_cid: Rc<CID<JValue>>,
+    /// Hash of the call arguments.
+    pub argument_hash: Rc<str>,
+    /// The tetraplet of the call result.
+    pub tetraplet_cid: Rc<CID<SecurityTetraplet>>,
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:

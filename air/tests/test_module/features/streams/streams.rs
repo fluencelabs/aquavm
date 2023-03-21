@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -80,33 +81,33 @@ fn stream_merging_v0() {
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
-    let expected_trace_1 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_1 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(21, 0)),
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(21, 0)),
             executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 0)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+    ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
     let executor_result_2 = checked_call_vm!(
@@ -119,20 +120,20 @@ fn stream_merging_v0() {
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
     let expected_trace_2 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(21, 0)),
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(21, 0)),
@@ -140,16 +141,16 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(8, subtrace_desc(21, 2), subtrace_desc(25, 0)),
             executed_state::subtrace_lore(13, subtrace_desc(23, 2), subtrace_desc(25, 0)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
     ];
     assert_eq!(actual_trace_2.deref(), expected_trace_2);
 
@@ -162,21 +163,21 @@ fn stream_merging_v0() {
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
-    let expected_trace_3 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_3 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(21, 0)),
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(21, 0)),
@@ -186,21 +187,21 @@ fn stream_merging_v0() {
             executed_state::subtrace_lore(10, subtrace_desc(25, 2), subtrace_desc(29, 0)),
             executed_state::subtrace_lore(11, subtrace_desc(27, 2), subtrace_desc(29, 0)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+    ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
@@ -232,20 +233,20 @@ fn stream_merging_v1() {
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
-    let expected_trace_1 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_1 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
@@ -253,15 +254,15 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(12, subtrace_desc(19, 2), subtrace_desc(21, 1)),
         ]),
         executed_state::par(7, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+    ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
     let executor_result_2 = checked_call_vm!(
@@ -273,21 +274,21 @@ fn stream_merging_v1() {
     );
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
-    let expected_trace_2 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_2 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(22, 1)),
@@ -296,21 +297,21 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(13, subtrace_desc(26, 2), subtrace_desc(28, 1)),
         ]),
         executed_state::par(7, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+    ]);
     assert_eq!(actual_trace_2, expected_trace_2);
 
     let executor_result_3 = checked_call_vm!(
@@ -322,21 +323,21 @@ fn stream_merging_v1() {
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
-    let expected_trace_3 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_3 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 2), subtrace_desc(23, 1)),
             executed_state::subtrace_lore(9, subtrace_desc(17, 2), subtrace_desc(22, 1)),
@@ -347,27 +348,27 @@ fn stream_merging_v1() {
             executed_state::subtrace_lore(11, subtrace_desc(32, 2), subtrace_desc(34, 1)),
         ]),
         executed_state::par(7, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
         executed_state::par(4, 1),
-        executed_state::scalar_string(unit_call_service_result),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
         executed_state::par(1, 1),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+    ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
@@ -400,33 +401,33 @@ fn stream_merging_v2() {
     let actual_trace_1 = trace_from_result(&executor_result_1);
 
     let unit_call_service_result = "result from unit_call_service";
-    let expected_trace_1 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_1 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 1), subtrace_desc(21, 2)),
             executed_state::subtrace_lore(9, subtrace_desc(16, 1), subtrace_desc(19, 2)),
             executed_state::subtrace_lore(12, subtrace_desc(17, 1), subtrace_desc(18, 2)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+    ]);
     assert_eq!(actual_trace_1, expected_trace_1);
 
     let executor_result_2 = checked_call_vm!(
@@ -438,21 +439,21 @@ fn stream_merging_v2() {
     );
     let actual_trace_2 = trace_from_result(&executor_result_2);
 
-    let expected_trace_2 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_2 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
         executed_state::request_sent_by(initiator_id),
         executed_state::request_sent_by(initiator_id),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 0), subtrace_desc(19, 2)),
             executed_state::subtrace_lore(9, subtrace_desc(15, 0), subtrace_desc(17, 2)),
@@ -460,17 +461,17 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(8, subtrace_desc(21, 0), subtrace_desc(23, 2)),
             executed_state::subtrace_lore(13, subtrace_desc(21, 0), subtrace_desc(21, 2)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+    ]);
     assert_eq!(actual_trace_2, expected_trace_2);
 
     let executor_result_3 = checked_call_vm!(
@@ -482,21 +483,21 @@ fn stream_merging_v2() {
     );
     let actual_trace_3 = trace_from_result(&executor_result_3);
 
-    let expected_trace_3 = vec![
-        executed_state::scalar_string(unit_call_service_result),
+    let expected_trace_3 = ExecutionTrace::from(vec![
+        unused!(unit_call_service_result, peer = initiator_id),
         executed_state::par(11, 1),
         executed_state::par(9, 1),
         executed_state::par(7, 1),
         executed_state::par(5, 1),
         executed_state::par(3, 1),
         executed_state::par(1, 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("3", 2),
-        executed_state::stream_string("1", 0),
-        executed_state::stream_string("2", 1),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("3", 2, peer = setter_3_id),
+        stream!("1", 0, peer = setter_1_id),
+        stream!("2", 1, peer = setter_2_id),
         executed_state::fold(vec![
             executed_state::subtrace_lore(7, subtrace_desc(15, 0), subtrace_desc(19, 2)),
             executed_state::subtrace_lore(9, subtrace_desc(15, 0), subtrace_desc(17, 2)),
@@ -506,20 +507,20 @@ fn stream_merging_v2() {
             executed_state::subtrace_lore(10, subtrace_desc(25, 0), subtrace_desc(27, 2)),
             executed_state::subtrace_lore(11, subtrace_desc(25, 0), subtrace_desc(25, 2)),
         ]),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-        executed_state::scalar_string(unit_call_service_result),
-    ];
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["1"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["2"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+        unused!(unit_call_service_result, peer = executor_id, args = ["3"]),
+    ]);
     assert_eq!(actual_trace_3, expected_trace_3);
 }

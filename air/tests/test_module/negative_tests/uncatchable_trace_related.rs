@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air::UncatchableError;
-use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
 use air_interpreter_data::FoldSubTraceLore;
 use air_interpreter_data::ParResult;
@@ -38,12 +38,14 @@ fn par_len_underflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (ap 42 some)
             (call "other" ("" "") [some] other)
         )
-    "#);
+    "#
+    );
 
     let trace = vec![
         executed_state::par(42, 1),
@@ -63,7 +65,8 @@ fn set_subtrace_len_and_pos_failed() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "vm_peer_id_1" ("" "") [] $s)
             (fold $s i
@@ -71,11 +74,12 @@ fn set_subtrace_len_and_pos_failed() {
                 (next i)
             )
         )
-    "#);
-    let mut tracker = CidTracker::<JValue>::new();
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, cid_state),
         executed_state::fold(vec![executed_state::subtrace_lore(
             1,
             subtrace_desc(5, 1),
@@ -83,7 +87,7 @@ fn set_subtrace_len_and_pos_failed() {
         )]),
         request_sent_by("vm_peer_id_1"),
     ];
-    let wrong_data = raw_data_from_trace(trace, tracker);
+    let wrong_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(peer_vm_1, <_>::default(), script, wrong_data, "");
     let expected_error = UncatchableError::TraceError {
         trace_error: KeeperError(SetSubtraceLenAndPosFailed {
@@ -100,7 +104,8 @@ fn set_subtrace_len_and_pos_failed() {
 fn no_element_at_position() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "vm_peer_id_1" ("" "") [] $s)
             (fold $s i
@@ -108,11 +113,12 @@ fn no_element_at_position() {
                 (next i)
             )
         )
-    "#);
-    let mut tracker = CidTracker::<JValue>::new();
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, cid_state),
         executed_state::fold(vec![executed_state::subtrace_lore(
             42,
             subtrace_desc(3, 1),
@@ -120,7 +126,7 @@ fn no_element_at_position() {
         )]),
         request_sent_by("vm_peer_id_1"),
     ];
-    let wrong_data = raw_data_from_trace(trace, tracker);
+    let wrong_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(peer_vm_1, <_>::default(), script, wrong_data, "");
     let expected_error = UncatchableError::TraceError {
         trace_error: air_trace_handler::TraceHandlerError::KeeperError(NoElementAtPosition {
@@ -137,7 +143,8 @@ fn no_stream_state() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "vm_peer_id_1" ("" "") [] $s)
             (fold $s i
@@ -145,12 +152,13 @@ fn no_stream_state() {
                 (next i)
             )
         )
-    "#);
-    let mut tracker = CidTracker::<JValue>::new();
+    "#
+    );
+    let mut tracker = ExecutionCidState::new();
     let wrong_state = request_sent_by("vm_peer_id_1");
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, &mut tracker),
         executed_state::fold(vec![executed_state::subtrace_lore(
             3,
             subtrace_desc(3, 1), // try to change the number of elems to 3
@@ -171,26 +179,28 @@ fn no_stream_state() {
 fn incompatible_executed_states() {
     let vm_peer_id = "vm_peer_id";
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [] scalar)
             (ap scalar $stream)
         )
-    "#);
-    let mut cid_tracker = CidTracker::new();
+    "#
+    );
+    let mut cid_tracker = ExecutionCidState::new();
     let prev_trace = vec![
-        executed_state::scalar_tracked("", &mut cid_tracker),
+        scalar_tracked!("", cid_tracker, peer = vm_peer_id),
         executed_state::ap(1),
     ];
-    let current_trace = vec![executed_state::scalar_string(""), executed_state::scalar_string("")];
+    let current_trace = vec![scalar!("", peer = vm_peer_id), scalar!("", peer = vm_peer_id)];
     let prev_data = raw_data_from_trace(prev_trace, cid_tracker.clone().into());
     let current_data = raw_data_from_trace(current_trace, cid_tracker.into());
     let result = call_vm!(peer_vm_1, <_>::default(), &script, prev_data, current_data);
-    let cid = value_to_json_cid(&json!("")).unwrap().into();
+
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::IncompatibleExecutedStates(
             ExecutedState::Ap(ApResult::new(1)),
-            ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))),
+            scalar!("", peer = vm_peer_id),
         )),
         instruction: "ap scalar $stream".to_string(),
     };
@@ -202,12 +212,14 @@ fn different_executed_state_expected() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap 42 some)
             (call "vm_peer_id_2" ("" "") [] $s)
         )
-    "#);
+    "#
+    );
     let wrong_state = executed_state::ap(42);
     let prev_trace = vec![wrong_state.clone()];
     let prev_data = raw_data_from_trace(prev_trace, <_>::default());
@@ -227,9 +239,11 @@ fn different_executed_state_expected() {
 fn invalid_dst_generations() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (ap "a" $s)
-    "#);
+    "#
+    );
     let data = json!(
     {
         "version": "0.6.3",
@@ -245,7 +259,8 @@ fn invalid_dst_generations() {
         "cid_info": {
             "value_store": {},
             "tetraplet_store": {},
-            "canon_store": {}
+            "canon_store": {},
+            "service_result_store": {}
         }
     });
     let data: Vec<u8> = serde_json::to_vec(&data).unwrap();
@@ -266,21 +281,35 @@ fn invalid_dst_generations() {
 fn incorrect_call_result() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (call "vm_peer_id_1" ("" "") [] v)
-    "#);
-    let prev_call_result = service_failed(42, "some");
+    "#
+    );
+    let prev_call_result = failed!(42, "some", peer = vm_peer_id_1);
     let prev_trace = vec![prev_call_result.clone()];
     let prev_data = raw_data_from_trace(prev_trace, <_>::default());
-    let curr_call_result = scalar_string("some");
+    let curr_call_result = scalar!("some", peer = vm_peer_id_1);
     let curr_trace = vec![curr_call_result.clone()];
     let curr_data = raw_data_from_trace(curr_trace, <_>::default());
     let result = call_vm!(peer_vm_1, <_>::default(), &script, prev_data, curr_data);
-    let curr_call_value_ref = ValueRef::Scalar(value_to_json_cid(&json!("some")).unwrap().into());
+
+    let mut cid_store = ExecutionCidState::new();
+    let curr_call_value_ref = ValueRef::Scalar(value_aggregate_cid(
+        json!("some"),
+        SecurityTetraplet::literal_tetraplet(vm_peer_id_1),
+        vec![],
+        &mut cid_store,
+    ));
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectCallResult(
             CallResultError::IncompatibleCallResults {
-                prev_call: air_interpreter_data::CallResult::CallServiceFailed(42, String::from(r#""some""#).into()),
+                prev_call: air_interpreter_data::CallResult::Failed(value_aggregate_cid(
+                    serde_json::to_value(CallServiceFailed::new(42, r#""some""#.to_owned().into())).unwrap(),
+                    SecurityTetraplet::literal_tetraplet(vm_peer_id_1),
+                    vec![],
+                    &mut cid_store,
+                )),
                 current_call: air_interpreter_data::CallResult::Executed(curr_call_value_ref),
             },
         )),
@@ -294,9 +323,11 @@ fn canon_result_error() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (canon "vm_peer_id_1" $stream #canon)
-    "#);
+    "#
+    );
     let prev_tetraplet = json!({
         "tetraplet": {"function_name": "s", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
         "values": [
@@ -344,7 +375,8 @@ fn canon_result_error() {
 fn several_records_with_same_pos() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "vm_peer_id_1" ("" "") [] $s)
             (fold $s i
@@ -352,19 +384,20 @@ fn several_records_with_same_pos() {
                 (next i)
             )
         )
-    "#);
-    let mut tracker = CidTracker::<JValue>::new();
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
     let value_pos = 1;
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, cid_state),
         fold(vec![
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
         ]),
         request_sent_by("vm_peer_id_1"),
     ];
-    let wrong_data = raw_data_from_trace(trace, tracker);
+    let wrong_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(peer_vm_1, <_>::default(), &script, wrong_data, "");
     // let result = peer_vm_1.call(script, wrong_data, "", <_>::default()).unwrap();
     let fold_lore = FoldSubTraceLore {
@@ -397,18 +430,32 @@ fn values_not_equal() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (call "vm_peer_id_1" ("" "") [] $s)
-    "#);
+    "#
+    );
     let prev_value = json!(42);
-    let prev_trace = vec![scalar(prev_value.clone())];
+    let prev_trace = vec![scalar!(prev_value.clone(), peer = vm_peer_id_1)];
     let prev_data = raw_data_from_trace(prev_trace, <_>::default());
     let curr_value = json!(43);
-    let curr_trace = vec![scalar(curr_value.clone())];
+    let curr_trace = vec![scalar!(curr_value.clone(), peer = vm_peer_id_1)];
     let curr_data = raw_data_from_trace(curr_trace, <_>::default());
     let result = call_vm!(peer_vm_1, <_>::default(), &script, prev_data, curr_data);
-    let prev_value = ValueRef::Scalar(value_to_json_cid(&prev_value).unwrap().into());
-    let current_value = ValueRef::Scalar(value_to_json_cid(&curr_value).unwrap().into());
+
+    let mut cid_state = ExecutionCidState::new();
+    let prev_value = ValueRef::Scalar(value_aggregate_cid(
+        prev_value,
+        SecurityTetraplet::literal_tetraplet(vm_peer_id_1),
+        vec![],
+        &mut cid_state,
+    ));
+    let current_value = ValueRef::Scalar(value_aggregate_cid(
+        curr_value,
+        SecurityTetraplet::literal_tetraplet(vm_peer_id_1),
+        vec![],
+        &mut cid_state,
+    ));
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::IncorrectCallResult(
             CallResultError::ValuesNotEqual {
@@ -416,7 +463,7 @@ fn values_not_equal() {
                 current_value,
             },
         )),
-        instruction: String::from(f!(r#"call "{vm_peer_id_1}" ("" "") [] $s"#)),
+        instruction: String::from(format!(r#"call "{vm_peer_id_1}" ("" "") [] $s"#)),
     };
     assert!(check_error(&result, expected_error));
 }

@@ -75,12 +75,42 @@ fn create_service() {
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
-        executed_state::scalar(module_bytes),
-        executed_state::scalar(module_config),
-        executed_state::scalar(blueprint),
-        executed_state::scalar_string(add_module_response),
-        executed_state::scalar_string(add_blueprint_response),
-        executed_state::scalar_string(create_response),
+        scalar!(
+            module_bytes.clone(),
+            peer = "set_variables",
+            service = "add_module",
+            args = ["module_bytes"]
+        ),
+        scalar!(
+            module_config.clone(),
+            peer = "set_variables",
+            service = "add_module",
+            args = ["module_config"]
+        ),
+        scalar!(
+            blueprint.clone(),
+            peer = "set_variables",
+            service = "add_module",
+            args = ["blueprint"]
+        ),
+        scalar!(
+            add_module_response,
+            peer = "A",
+            service = "add_module",
+            args = [module_bytes, module_config]
+        ),
+        scalar!(
+            add_blueprint_response,
+            peer = "A",
+            service = "add_blueprint",
+            args = [blueprint]
+        ),
+        scalar!(
+            create_response,
+            peer = "A",
+            service = "create",
+            args = [add_blueprint_response]
+        ),
         executed_state::request_sent_by("A"),
     ];
 
