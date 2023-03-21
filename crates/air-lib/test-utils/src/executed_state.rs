@@ -249,7 +249,7 @@ macro_rules! stream {
 #[macro_export]
 macro_rules! stream_tracked {
     ($value:expr, $generation:expr, $state:expr) => {
-        _trace_value_body!($value).stream_tracked(&mut $state)
+        _trace_value_body!($value).stream_tracked($generation, &mut $state)
     };
 
     ($value:expr, $generation:expr, $state:expr, $func1:ident = $v1:expr $(, $func:ident = $v:expr)*) => {
