@@ -184,15 +184,20 @@ impl<'i> ResolvedCall<'i> {
     fn prepare_current_executed_state(
         &self,
         raw_call: &Call<'i>,
-        args: Option<&Rc<str>>,
+        argument_hash: Option<&Rc<str>>,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {
         let prev_result = trace_ctx.meet_call_start();
         match trace_to_exec_err!(prev_result, raw_call)? {
-            MergerCallResult::Met(call_result) => {
-                handle_prev_state(call_result, &self.tetraplet, args, &self.output, exec_ctx, trace_ctx)
-            }
+            MergerCallResult::Met(call_result) => handle_prev_state(
+                call_result,
+                &self.tetraplet,
+                argument_hash,
+                &self.output,
+                exec_ctx,
+                trace_ctx,
+            ),
             MergerCallResult::NotMet => Ok(StateDescriptor::no_previous_state()),
         }
     }

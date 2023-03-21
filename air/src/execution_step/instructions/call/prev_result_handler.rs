@@ -53,15 +53,12 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
-            fn deserialize_from_value<T: serde::de::DeserializeOwned>(value: JValue) -> ExecutionResult<T> {
-                Ok(serde_json::from_value(value).map_err(UncatchableError::MalformedCallServiceFailed)?)
-            }
-
             let err_value = exec_ctx
                 .cid_state
                 .resolve_service_value(failed_cid)
                 .map_err(UncatchableError::from)?;
-            let call_service_failed: CallServiceFailed = deserialize_from_value((*err_value).clone())?;
+            let call_service_failed: CallServiceFailed = serde_json::from_value((*err_value).clone())
+                .map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
             trace_ctx.meet_call_end(met_result.result);
