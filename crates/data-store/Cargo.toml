@@ -16,7 +16,7 @@ path = "src/lib.rs"
 
 [dependencies]
 avm-interface = { version = "0.28.3", path = "../../avm/interface"}
-serde = { version = "1.0.155", features = ["derive"] }
+serde = { version = "1.0.158", features = ["derive"] }
 serde_bytes = "0.11.9"
 
 [dev-dependencies]
