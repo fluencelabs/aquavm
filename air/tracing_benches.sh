@@ -115,7 +115,7 @@ function main {
             eval "${script_cmd}" | \
                 air run "$@" --repeat 1 --plain \
                     --prev-data "$prev_data_path" \
-                    --data "$current_data_path"
+                    --current-data "$current_data_path"
         done
     done
 }
