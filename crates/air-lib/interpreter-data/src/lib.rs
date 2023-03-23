@@ -32,6 +32,7 @@ mod interpreter_data;
 mod stream_generations;
 mod trace;
 mod trace_pos;
+mod generation_idx;
 
 pub use cid_store::*;
 pub use executed_state::*;
@@ -39,6 +40,7 @@ pub use interpreter_data::*;
 pub use stream_generations::*;
 pub use trace::*;
 pub use trace_pos::*;
+pub use generation_idx::*;
 
 use once_cell::sync::Lazy;
 use serde_json::Value as JValue;

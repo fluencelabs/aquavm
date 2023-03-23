@@ -138,7 +138,7 @@ impl InstructionTracker {
 }
 
 impl NewTracker {
-    pub fn get_iteration(&self, position: AirPos) -> u32 {
+    pub fn get_iteration(&self, position: AirPos) -> u32{
         self.executed_count
             .get(&position)
             .copied()

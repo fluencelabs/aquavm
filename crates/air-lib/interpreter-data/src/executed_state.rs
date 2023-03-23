@@ -19,6 +19,7 @@ mod se_de;
 
 use crate::JValue;
 use crate::TracePos;
+use crate::GenerationIdx;
 
 use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
@@ -60,9 +61,6 @@ pub enum CallResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-
-pub type GenerationIdx = u32;
-
 pub enum ValueRef {
     Scalar(Rc<CID<JValue>>),
     Stream {
@@ -79,7 +77,7 @@ pub enum ValueRef {
 ///     (call 3)
 ///     (call 4)
 /// )
-///
+///x
 /// Having started with stream with two elements {v1, v2} the resulted trace would looks like
 /// [(1) (2)] [(1) (2)] [(3) (4)] [(3) (4)]  <---  the sequence of call states
 ///    v1        v2        v2        v1      <---- corresponding values from $stream that
@@ -130,7 +128,7 @@ pub struct FoldResult {
 #[serde(rename_all = "snake_case")]
 pub struct ApResult {
     #[serde(rename = "gens")]
-    pub res_generations: Vec<u32>,
+    pub res_generations: Vec<GenerationIdx>,
 }
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.

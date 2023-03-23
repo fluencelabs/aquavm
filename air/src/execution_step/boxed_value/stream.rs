@@ -26,6 +26,7 @@ use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use std::collections::HashMap;
+use std::convert::TryInto;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -38,7 +39,7 @@ pub struct Stream {
     values: Vec<Vec<ValueAggregate>>,
 
     /// Count of values from previous data.
-    previous_gens_count: usize,
+    previous_gens_count: GenerationIdx,
 
     /// This map is intended to support canonicalized stream creation, such streams has
     /// corresponding value positions in a data and this field are used to create such streams.
@@ -46,16 +47,15 @@ pub struct Stream {
 }
 
 impl Stream {
-    pub(crate) fn from_generations_count(previous_count: usize, current_count: usize) -> Self {
-        let last_generation_count = 1;
+    pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
+        let last_generation_count: GenerationIdx = 1.into();
         // TODO: bubble up an overflow error instead of expect
         let overall_count = previous_count
             .checked_add(current_count)
             .and_then(|value| value.checked_add(last_generation_count))
             .expect("it shouldn't overflow");
-
         Self {
-            values: vec![vec![]; overall_count],
+            values: vec![vec![]; overall_count.try_into().unwrap()],
             previous_gens_count: previous_count,
             values_by_pos: HashMap::new(),
         }
@@ -65,7 +65,7 @@ impl Stream {
     // for streams that have values in
     pub(crate) fn from_value(value: ValueAggregate) -> Self {
         let values_by_pos = maplit::hashmap! {
-            value.trace_pos => StreamValueLocation::new(0, 0),
+            value.trace_pos => StreamValueLocation::new(0.into(), 0),
         };
         Self {
             values: vec![vec![value]],
@@ -81,11 +81,11 @@ impl Stream {
         value: ValueAggregate,
         generation: Generation,
         source: ValueSource,
-    ) -> ExecutionResult<u32> {
+    ) -> ExecutionResult<GenerationIdx> {
         let generation_number = match (generation, source) {
-            (Generation::Last, _) => self.values.len() - 1,
-            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
-            (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen as usize,
+            (Generation::Last, _) => self.values.len().into() - 1,
+            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen,
+            (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen,
         };
 
         if generation_number >= self.values.len() {
@@ -102,19 +102,19 @@ impl Stream {
             StreamValueLocation::new(generation_number, values.len()),
         );
         values.push(value);
-        Ok(generation_number as u32)
+        Ok(generation_number)
     }
 
-    pub(crate) fn generations_count(&self) -> usize {
+    pub(crate) fn generations_count(&self) -> GenerationIdx {
         // the last generation could be empty due to the logic of from_generations_count ctor
         if self.values.last().unwrap().is_empty() {
-            self.values.len() - 1
+            self.values.len().try_into().unwrap() - 1
         } else {
-            self.values.len()
+            self.values.len().try_into().unwrap()
         }
     }
 
-    pub(crate) fn last_non_empty_generation(&self) -> usize {
+    pub(crate) fn last_non_empty_generation(&self) -> GenerationIdx {
         self.values
             .iter()
             .rposition(|generation| !generation.is_empty())
@@ -151,10 +151,10 @@ impl Stream {
         should_remove_generation
     }
 
-    pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
+    pub(crate) fn elements_count(&self, generation: Generation) -> Option<GenerationIdx> {
         match generation {
-            Generation::Nth(generation) if generation as usize > self.generations_count() => None,
-            Generation::Nth(generation) => Some(self.values.iter().take(generation as usize).map(|v| v.len()).sum()),
+            Generation::Nth(generation) if generation.into() > self.generations_count() => None,
+            Generation::Nth(generation) => Some(self.values.iter().take(generation.into()).map(|v| v.len()).sum()),
             Generation::Last => Some(self.values.iter().map(|v| v.len()).sum()),
         }
     }
@@ -188,7 +188,7 @@ impl Stream {
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
         let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
-            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) if generation >= self.generations_count() => return None,
             Generation::Nth(generation) => {
                 Box::new(self.values.iter().take(generation as usize + 1).flat_map(|v| v.iter()))
             }
@@ -207,7 +207,7 @@ impl Stream {
             return None;
         }
 
-        let generations_count = self.generations_count() as u32 - 1;
+        let generations_count = self.generations_count().into() - 1;
         let (start, end) = match (start, end) {
             (Generation::Nth(start), Generation::Nth(end)) => (start, end),
             (Generation::Nth(start), Generation::Last) => (start, generations_count),
@@ -228,13 +228,13 @@ impl Stream {
     }
 
     /// Removes empty generations updating data and returns final generation count.
-    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<usize> {
+    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<GenerationIdx> {
         self.remove_empty_generations();
 
         for (generation, values) in self.values.iter().enumerate() {
             for value in values.iter() {
                 trace_ctx
-                    .update_generation(value.trace_pos, generation as u32)
+                    .update_generation(value.trace_pos, generation)
                     .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
             }
         }
@@ -298,12 +298,12 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
 
 #[derive(Clone, Copy, Debug, Default)]
 struct StreamValueLocation {
-    pub generation: usize,
+    pub generation: GenerationIdx,
     pub position_in_generation: usize,
 }
 
 impl StreamValueLocation {
-    pub(super) fn new(generation: usize, position_in_generation: usize) -> Self {
+    pub(super) fn new(generation: GenerationIdx, position_in_generation: usize) -> Self {
         Self {
             generation,
             position_in_generation,

@@ -84,7 +84,7 @@ impl Streams {
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
 
-    pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<u32> {
+    pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<GenerationIdx> {
         let StreamValueDescriptor {
             value,
             name,
@@ -107,17 +107,17 @@ impl Streams {
                 let descriptor = StreamDescriptor::global(stream);
                 self.streams.insert(name.to_string(), vec![descriptor]);
                 let generation = 0;
-                Ok(generation)
+                Ok(generation.into())
             }
         }
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: u32) {
+    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: GenerationIdx) {
         let name = name.into();
         let (prev_gens_count, current_gens_count) =
-            self.stream_generation_from_data(&name, span.left, iteration as usize);
+            self.stream_generation_from_data(&name, span.left, iteration);
 
-        let new_stream = Stream::from_generations_count(prev_gens_count as usize, current_gens_count as usize);
+        let new_stream = Stream::from_generations_count(prev_gens_count.into(), current_gens_count.into());
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
         match self.streams.entry(name) {
             Occupied(mut entry) => {
@@ -145,7 +145,7 @@ impl Streams {
         }
         let gens_count = last_descriptor.stream.compactify(trace_ctx)?;
 
-        self.collect_stream_generation(name, position, gens_count as u32);
+        self.collect_stream_generation(name, position, gens_count /*as u32*/);
         Ok(())
     }
 
@@ -166,14 +166,14 @@ impl Streams {
                 // of the execution
                 let stream = descriptors.pop().unwrap().stream;
                 let gens_count = stream.compactify(trace_ctx)?;
-                Ok((name, gens_count as u32))
+                Ok((name, gens_count.into()))
             })
             .collect::<Result<GlobalStreamGens, _>>()?;
 
         Ok((global_streams, self.new_restricted_stream_gens))
     }
 
-    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: usize) -> (u32, u32) {
+    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: GenerationIdx) -> (GenerationIdx, GenerationIdx) {
         let previous_generation =
             Self::restricted_stream_generation(&self.previous_restricted_stream_gens, name, position, iteration)
                 .unwrap_or_default();
@@ -188,8 +188,8 @@ impl Streams {
         restricted_stream_gens: &RestrictedStreamGens,
         name: &str,
         position: AirPos,
-        iteration: usize,
-    ) -> Option<u32> {
+        iteration: GenerationIdx,
+    ) -> Option<GenerationIdx> {
         restricted_stream_gens
             .get(name)
             .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
@@ -199,14 +199,14 @@ impl Streams {
     fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: GenerationIdx) {
         match self.new_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
-                Occupied(mut iterations) => iterations.get_mut().push(generation),
+                Occupied(mut iterations) => iterations.get_mut().push(generation.into()),
                 Vacant(entry) => {
-                    entry.insert(vec![generation]);
+                    entry.insert(vec![generation.into()]);
                 }
             },
             Vacant(entry) => {
                 let iterations = maplit::hashmap! {
-                    position => vec![generation],
+                    position => vec![generation.into()],
                 };
                 entry.insert(iterations);
             }

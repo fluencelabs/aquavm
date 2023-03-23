@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::GenerationIdx;
+
 use super::construct_stream_iterable_values;
 use crate::execution_step::boxed_value::Generation;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::instructions::fold::IterableValue;
 
 pub(super) struct StreamCursor {
-    last_seen_generation: u32,
+    last_seen_generation: GenerationIdx,
 }
 
 impl StreamCursor {
     pub(super) fn new() -> Self {
         Self {
-            last_seen_generation: 0,
+            last_seen_generation: 0.into(),
         }
     }
 
     pub(super) fn construct_iterables(&mut self, stream: &Stream) -> Vec<IterableValue> {
         let iterables =
             construct_stream_iterable_values(stream, Generation::Nth(self.last_seen_generation), Generation::Last);
-        self.last_seen_generation = stream.last_non_empty_generation() as u32;
+        self.last_seen_generation = stream.last_non_empty_generation() /*as u32*/;
 
         iterables
     }

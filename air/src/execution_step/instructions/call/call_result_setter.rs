@@ -51,7 +51,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 Generation::Last,
                 stream.position,
             );
-            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
+            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?.into();
             Ok(CallResult::executed_stream(cid, generation))
         }
         // by the internal conventions if call has no output value,
@@ -89,7 +89,7 @@ pub(crate) fn populate_context_from_data<'i>(
 
             let result = ValueRef::Stream {
                 cid,
-                generation: resulted_generation,
+                generation: resulted_generation.into(),
             };
             Ok(result)
         }

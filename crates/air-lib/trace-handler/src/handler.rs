@@ -57,7 +57,7 @@ impl TraceHandler {
     pub fn update_generation(
         &mut self,
         trace_pos: TracePos,
-        generation: u32,
+        generation: GenerationIdx,
     ) -> Result<(), GenerationCompatificationError> {
         let state = self
             .data_keeper
