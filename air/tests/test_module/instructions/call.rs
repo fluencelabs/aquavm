@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use air::UncatchableError;
+use air::{ExecutionCidState, UncatchableError};
+use air_interpreter_data::{ExecutionTrace, ServiceResultAggregate};
 use air_test_utils::prelude::*;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
@@ -34,7 +35,12 @@ fn current_peer_id_call() {
     let result = checked_call_vm!(vm, test_params, script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar_string("result from unit_call_service")];
+    let expected_trace = vec![scalar!(
+        "result from unit_call_service",
+        peer = vm_peer_id,
+        service = service_id,
+        function = function_name
+    )];
 
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
@@ -61,7 +67,11 @@ fn call_with_timestamp() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar_number(test_params.timestamp)];
+    let expected_trace = vec![scalar!(
+        test_params.timestamp,
+        peer = vm_peer_id,
+        args = [test_params.timestamp]
+    )];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -77,7 +87,7 @@ fn call_with_ttl() {
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);
-    let expected_trace = vec![executed_state::scalar_number(test_params.ttl)];
+    let expected_trace = vec![scalar!(test_params.ttl, peer = vm_peer_id, args = [test_params.ttl])];
 
     assert_eq!(actual_trace, expected_trace);
 }
@@ -166,8 +176,48 @@ fn string_parameters() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
 
     let actual_trace = trace_from_result(&result);
-    let expected_state = executed_state::scalar_string("arg1");
+    let expected_state = scalar!(
+        "arg1",
+        peer = vm_peer_id,
+        service = service_id,
+        function = function_name,
+        args = ["arg1", "arg2", "arg3_value"]
+    );
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
+}
+
+#[test]
+fn test_invalid_call_service_failed() {
+    let peer_id = "init_peer_id";
+    let mut cid_state = ExecutionCidState::new();
+
+    // Craft an artificial incorrect error result
+    let value = json!("error");
+    let value_cid = cid_state.value_tracker.record_value(value).unwrap();
+    let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
+    let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash: "0000000000000".into(),
+        tetraplet_cid,
+    };
+    let service_result_agg_cid = cid_state
+        .service_result_agg_tracker
+        .record_value(service_result_agg)
+        .unwrap();
+
+    let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);
+    let data = raw_data_from_trace(trace, cid_state);
+
+    let mut vm = create_avm(unit_call_service(), peer_id);
+    let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
+    let res = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
+
+    assert_eq!(res.ret_code, 20011);
+    assert_eq!(
+        res.error_message,
+        "failed to deserialize to CallServiceFailed: invalid type: string \"error\", expected struct CallServiceFailed",
+    );
 }

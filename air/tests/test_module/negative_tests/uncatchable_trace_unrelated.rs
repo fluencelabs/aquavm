@@ -15,7 +15,7 @@
  */
 
 use air::UncatchableError::*;
-use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::CID;
 use air_interpreter_data::ValueRef;
 use air_test_utils::prelude::*;
 
@@ -26,16 +26,16 @@ fn fold_state_not_found() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
 
     let script = f!(r#"
-        (seq
-            (seq
-                (call "vm_peer_id_1" ("" "") [] some)
-                (fold some i
-                    (next i)
-                )
-            )
-            (next i)
-        )
-    "#);
+         (seq
+             (seq
+                 (call "vm_peer_id_1" ("" "") [] some)
+                 (fold some i
+                     (next i)
+                 )
+             )
+             (next i)
+         )
+     "#);
 
     let result = peer_vm_1.call(script, "", "", <_>::default()).unwrap();
     let expected_error = FoldStateNotFound(String::from("i"));
@@ -49,13 +49,13 @@ fn iterable_shadowing() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
 
     let script = f!(r#"
-        (seq
-            (call "vm_peer_id_1" ("" "") [] some)
-            (fold some i
-                (call "vm_peer_id_1" ("" "") [] i)
-            )
-        )
-    "#);
+         (seq
+             (call "vm_peer_id_1" ("" "") [] some)
+             (fold some i
+                 (call "vm_peer_id_1" ("" "") [] i)
+             )
+         )
+     "#);
 
     let result = peer_vm_1.call(script, "", "", <_>::default()).unwrap();
     let expected_error = IterableShadowing(String::from("i"));
@@ -69,17 +69,17 @@ fn call_result_not_correspond_to_instr() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
 
     let script = f!(r#"
-        (call "vm_peer_id_1" ("" "") [] $some)
-        "#);
+         (call "vm_peer_id_1" ("" "") [] $some)
+         "#);
 
     let scalar_value = 42;
-    let wrong_trace = vec![scalar_number(scalar_value)];
+    let wrong_trace = vec![scalar!(scalar_value)];
     let data = raw_data_from_trace(wrong_trace, <_>::default());
 
     let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
-    let value_ref = ValueRef::Scalar(value_to_json_cid(&json!(scalar_value)).unwrap().into());
+    let value_ref = ValueRef::Scalar(CID::new("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq").into());
     let expected_error = CallResultNotCorrespondToInstr(value_ref);
-    assert!(check_error(&result, expected_error));
+    assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
 #[test]
@@ -88,11 +88,11 @@ fn shadowing_is_not_allowed() {
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
     let var_name = String::from("some");
     let script = f!(r#"
-    (seq
-        (ap 42 {var_name})
-        (ap 42 {var_name})
-    )
-    "#);
+     (seq
+         (ap 42 {var_name})
+         (ap 42 {var_name})
+     )
+     "#);
 
     let result = peer_vm_1.call(script, "", "", <_>::default()).unwrap();
     let expected_error = ShadowingIsNotAllowed(var_name);
@@ -106,14 +106,14 @@ fn value_for_cid_not_found() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
 
     let script = f!(r#"
-        (call "vm_peer_id_1" ("" "") [] some)
-    "#);
+         (call "vm_peer_id_1" ("" "") [] some)
+     "#);
 
-    let wrong_trace = vec![scalar_number(42)];
+    let wrong_trace = vec![scalar!(42)];
     let data = raw_data_from_trace(wrong_trace, <_>::default());
     let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
-    println!("{:?}", result);
-    let missing_cid = String::from("bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq");
-    let expected_error = ValueForCidNotFound("value", missing_cid);
+
+    let missing_cid = String::from("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq");
+    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
     assert!(check_error(&result, expected_error));
 }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
+
+use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/211
@@ -70,9 +73,14 @@ fn issue_211() {
 
     let result = engine.execute_one(peer_1_id).unwrap();
 
-    let expected_trace = vec![
-        executed_state::scalar_number(2),
-        executed_state::scalar(json!([1, 2, 3])),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(2, peer = peer_1_id, service = "getdatasrv..0", function = "idx"),
+        scalar!(
+            json!([1, 2, 3]),
+            peer = peer_1_id,
+            service = "getdatasrv..1",
+            function = "nodes"
+        ),
         executed_state::par(6, 0),
         executed_state::par(1, 4),
         executed_state::ap(0),
@@ -88,19 +96,25 @@ fn issue_211() {
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 4
                 },
-               {
+                {
                     "result": 2,
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 6
                 },
-            {
+                {
                     "result": 3,
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 8
                 },
             ]
         })),
-        executed_state::scalar_string("expected result"),
+        unused!(
+            "expected result",
+            peer = peer_1_id,
+            service = "op..2",
+            function = "noop",
+            args = vec![json!(3), json!([1, 2, 3])]
+        ),
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
             "values": [
@@ -109,20 +123,26 @@ fn issue_211() {
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 4
                 },
-               {
+                {
                     "result": 2,
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 6
                 },
-            {
+                {
                     "result": 3,
                     "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 8
                 },
             ]
         })),
-        executed_state::scalar_string("expected result"),
-    ];
+        scalar!(
+            "expected result",
+            peer = peer_1_id,
+            service = "op..3",
+            function = "identity",
+            args = vec![json!([1, 2, 3])]
+        ),
+    ]);
 
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace, expected_trace);

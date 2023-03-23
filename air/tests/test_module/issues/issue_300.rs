@@ -39,8 +39,8 @@ fn issue_300() {
 
     let expected_trace = vec![
         executed_state::par(1, 1),
-        executed_state::stream_number(2, 1),
-        executed_state::stream_number(1, 0),
+        stream!(2, 1, peer = peer_id_1, args = vec![2]),
+        stream!(1, 0, peer = peer_id_2, args = vec![1]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }

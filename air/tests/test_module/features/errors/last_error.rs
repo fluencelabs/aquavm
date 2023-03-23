@@ -201,12 +201,8 @@ fn variable_names_shown_in_error() {
     let result = checked_call_vm!(echo_vm, <_>::default(), script, "", result.data);
     let trace = trace_from_result(&result);
 
-    assert_eq!(
-        trace[1.into()],
-        executed_state::scalar(json!(
-            "call cannot resolve non-String triplet variable part `-relay-` with value '1'"
-        ))
-    );
+    let msg = "call cannot resolve non-String triplet variable part `-relay-` with value '1'";
+    assert_eq!(trace[1.into()], unused!(msg, peer = echo_vm_peer_id, args = vec![msg]));
 }
 
 #[test]

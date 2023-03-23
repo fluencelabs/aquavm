@@ -33,6 +33,8 @@ pub use position_mapping::PreparationScheme;
 
 pub use errors::ApResultError;
 pub use errors::CallResultError;
+pub use errors::CanonResultError;
+pub use errors::DataType;
 pub use errors::FoldResultError;
 pub use errors::MergeError;
 

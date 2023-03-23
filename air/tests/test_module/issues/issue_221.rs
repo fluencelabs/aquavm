@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
+use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/221
@@ -81,13 +83,13 @@ fn issue_221() {
     let _join_1_result = executor.execute_one(join_1_id).unwrap();
     let join_1_result = executor.execute_one(join_1_id).unwrap(); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
-    let expected_trace = vec![
-        executed_state::scalar(json!([peer_1_id, peer_2_id])),
+    let expected_trace = ExecutionTrace::from(vec![
+        scalar!(json!([peer_1_id, peer_2_id]), peer = set_variable_id, service = "..0"),
         executed_state::par(2, 3),
-        executed_state::scalar_string(peer_1_value),
+        scalar!(peer_1_value, peer = peer_1_id, service = "..1", args = vec![peer_1_id]),
         executed_state::ap(0),
         executed_state::par(2, 0),
-        executed_state::scalar_string(peer_2_value),
+        scalar!(peer_2_value, peer = peer_2_id, service = "..1", args = vec![peer_2_id]),
         executed_state::ap(1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(3, SubTraceDesc::new(8.into(), 4), SubTraceDesc::new(12.into(), 0)),
@@ -95,14 +97,24 @@ fn issue_221() {
         ]),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        executed_state::scalar_string(peer_1_value),
+        unused!(
+            peer_1_value,
+            peer = join_1_id,
+            service = "..2",
+            args = vec![peer_1_value]
+        ),
         executed_state::request_sent_by(peer_1_id),
         executed_state::par(3, 0),
         executed_state::par(1, 1),
-        executed_state::scalar_string(peer_2_value),
+        unused!(
+            peer_2_value,
+            peer = join_1_id,
+            service = "..2",
+            args = vec![peer_2_value]
+        ),
         executed_state::request_sent_by(peer_2_id),
         executed_state::request_sent_by(join_1_id),
-    ];
+    ]);
 
     assert_eq!(actual_trace, expected_trace);
 }

@@ -17,7 +17,6 @@
 use super::*;
 
 use air_interpreter_cid::CID;
-use serde_json::Value as JValue;
 
 pub(super) fn merge_executed(prev_value: ValueRef, current_value: ValueRef) -> MergeResult<CallResult> {
     match (&prev_value, &current_value) {
@@ -27,6 +26,10 @@ pub(super) fn merge_executed(prev_value: ValueRef, current_value: ValueRef) -> M
         }
         (ValueRef::Stream { cid: pr, .. }, ValueRef::Stream { cid: cr, .. }) => {
             are_streams_equal(pr, cr, &prev_value, &current_value)?;
+            Ok(CallResult::Executed(prev_value))
+        }
+        (ValueRef::Unused(_), ValueRef::Unused(_)) => {
+            are_scalars_equal(&prev_value, &current_value)?;
             Ok(CallResult::Executed(prev_value))
         }
         _ => Err(CallResultError::not_equal_values(prev_value, current_value)),
@@ -45,8 +48,8 @@ fn are_scalars_equal(prev_value: &ValueRef, current_value: &ValueRef) -> MergeRe
 }
 
 fn are_streams_equal(
-    prev_result_value: &CID<JValue>,
-    current_result_value: &CID<JValue>,
+    prev_result_value: &CID<ServiceResultAggregate>,
+    current_result_value: &CID<ServiceResultAggregate>,
     prev_value: &ValueRef,
     current_value: &ValueRef,
 ) -> MergeResult<()> {

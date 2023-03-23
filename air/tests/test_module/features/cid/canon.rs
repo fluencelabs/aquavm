@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air::UncatchableError::ValueForCidNotFound;
 use air_interpreter_cid::CID;
 use air_interpreter_data::{CidStore, CidTracker};
@@ -38,13 +39,18 @@ fn test_canon_ok() {
     let result = executor.execute_one(init_peer_id).unwrap();
     let data = data_from_result(&result);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let expected_trace = vec![
         ap(0),
-        stream_tracked("to canon", 1, &mut value_tracker),
+        stream_tracked!(
+            "to canon",
+            1,
+            cid_state,
+            peer = init_peer_id,
+            service = "serv..0",
+            function = "func"
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -66,16 +72,18 @@ fn test_canon_ok() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     assert_eq!(&*data.trace, expected_trace);
-    assert_eq!(data.cid_info.value_store, value_tracker.into());
-    assert_eq!(data.cid_info.tetraplet_store, tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, canon_tracker.into());
+    assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
+    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.service_result_store,
+        cid_state.service_result_agg_tracker.into()
+    );
 }
 
 #[test]
@@ -99,13 +107,25 @@ fn test_canon_ok_multi() {
     let result3 = executor.execute_one(init_peer_id).unwrap();
     let data = data_from_result(&result3);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let expected_trace = vec![
-        stream_tracked("to canon", 0, &mut value_tracker),
-        stream_tracked("other", 1, &mut value_tracker),
+        stream_tracked!(
+            "to canon",
+            0,
+            cid_state,
+            peer = init_peer_id,
+            service = "serv..0",
+            function = "func"
+        ),
+        stream_tracked!(
+            "other",
+            1,
+            cid_state,
+            peer = other_peer_id,
+            service = "other_serv..1",
+            function = "other_func"
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -127,17 +147,19 @@ fn test_canon_ok_multi() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     assert_eq!(&*data.trace, expected_trace);
     assert_eq!(data.cid_info.value_store.len(), 2);
-    assert_eq!(data.cid_info.value_store, value_tracker.into());
-    assert_eq!(data.cid_info.tetraplet_store, tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, canon_tracker.into());
+    assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
+    assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
+    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.service_result_store,
+        cid_state.service_result_agg_tracker.into()
+    );
 }
 
 #[test]
@@ -145,9 +167,7 @@ fn test_canon_value_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let air_script = format!(
         r#"
@@ -170,17 +190,17 @@ fn test_canon_value_not_found() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     let missing_cid = "bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq";
-    let value_store: CidStore<_> = value_tracker.into();
+    let value_store: CidStore<_> = cid_state.value_tracker.into();
     assert!(value_store.get(&CID::<_>::new(missing_cid)).is_some());
 
-    let cur_data = raw_data_from_trace_with_canon(trace, CidTracker::<_>::new(), tetraplet_tracker, canon_tracker);
+    // Override with fake data.
+    cid_state.value_tracker = CidTracker::<_>::new();
+    let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
     let expected_error = ValueForCidNotFound("value", String::from(missing_cid));
     assert!(check_error(&result, expected_error));
@@ -192,9 +212,7 @@ fn test_canon_root_tetraplet_not_found() {
     let other_peer_id = "other_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let air_script = format!(
         r#"
@@ -217,14 +235,12 @@ fn test_canon_root_tetraplet_not_found() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     let missing_cid = "bagaaiera2bwoxisr5k7qlbzhxi2jmdqlgqybqgxcfwt3v652nqdo5fyc665q";
-    let tetraplet_store: CidStore<_> = tetraplet_tracker.into();
+    let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
@@ -232,7 +248,9 @@ fn test_canon_root_tetraplet_not_found() {
         .record_value(SecurityTetraplet::literal_tetraplet(other_peer_id))
         .unwrap();
 
-    let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, fake_tetraplet_tracker, canon_tracker);
+    cid_state.tetraplet_tracker = fake_tetraplet_tracker;
+
+    let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
@@ -244,9 +262,7 @@ fn test_canon_tetraplet_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let air_script = format!(
         r#"
@@ -255,7 +271,14 @@ fn test_canon_tetraplet_not_found() {
           (canon "{init_peer_id}" $stream #canon))"#
     );
     let trace = vec![
-        stream_tracked(42, 0, &mut value_tracker),
+        stream_tracked!(
+            42,
+            0,
+            cid_state,
+            peer = "peer_1",
+            service = "serv..0",
+            function = "func"
+        ),
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -269,14 +292,12 @@ fn test_canon_tetraplet_not_found() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     let missing_cid = "bagaaieracu6twiik6az3cosyzlplrscon3ek6rnu3lkjnflibphqkw6kcdiq";
-    let tetraplet_store: CidStore<_> = tetraplet_tracker.into();
+    let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
@@ -284,7 +305,8 @@ fn test_canon_tetraplet_not_found() {
         .record_value(SecurityTetraplet::literal_tetraplet(init_peer_id))
         .unwrap();
 
-    let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, fake_tetraplet_tracker, canon_tracker);
+    cid_state.tetraplet_tracker = fake_tetraplet_tracker;
+    let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
@@ -296,9 +318,7 @@ fn test_canon_agg_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
 
-    let mut value_tracker = CidTracker::<JValue>::new();
-    let mut tetraplet_tracker = CidTracker::<SecurityTetraplet>::new();
-    let mut canon_tracker = CidTracker::<CanonCidAggregate>::new();
+    let mut cid_state = ExecutionCidState::new();
 
     let air_script = format!(
         r#"
@@ -321,17 +341,17 @@ fn test_canon_agg_not_found() {
                     },
                 }]
             }),
-            &mut value_tracker,
-            &mut tetraplet_tracker,
-            &mut canon_tracker,
+            &mut cid_state,
         ),
     ];
 
     let missing_cid = "bagaaierapp2oi35ib4iveexfswax6jcf2zhj3e2ergzjyavm6m7stlzh23ta";
-    let canon_store: CidStore<_> = canon_tracker.into();
+    let canon_store: CidStore<_> = cid_state.canon_tracker.into();
     assert!(canon_store.get(&CID::<_>::new(missing_cid)).is_some());
 
-    let cur_data = raw_data_from_trace_with_canon(trace, value_tracker, tetraplet_tracker, <_>::default());
+    // Fake data
+    cid_state.canon_tracker = <_>::default();
+    let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("canon aggregate", String::from(missing_cid));

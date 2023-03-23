@@ -49,8 +49,8 @@ fn issue_216() {
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        executed_state::scalar(json!([])),
-        executed_state::scalar_string(error_message),
+        scalar!(json!([]), peer = some_peer_id, function = "value"),
+        unused!(error_message, peer = client_id, args = vec![error_message]),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
