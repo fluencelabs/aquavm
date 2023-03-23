@@ -269,7 +269,7 @@ fn invalid_dst_generations() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectApResult(
             ApResultError::InvalidDstGenerations(ApResult {
-                res_generations: vec![42, 42],
+                res_generations: vec![42.into(), 42.into()],
             }),
         )),
         instruction: String::from(r#"ap "a" $s"#),

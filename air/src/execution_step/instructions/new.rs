@@ -51,7 +51,9 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     match &new.argument {
         NewArgument::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
-            exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
+            exec_ctx
+                .streams
+                .meet_scope_start(stream.name, new.span, iteration as usize);
         }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start_scalar(scalar.name.to_string()),
         NewArgument::CanonStream(canon_stream) => exec_ctx

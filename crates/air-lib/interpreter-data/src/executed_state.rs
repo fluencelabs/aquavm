@@ -17,9 +17,9 @@
 mod impls;
 mod se_de;
 
+use crate::GenerationIdx;
 use crate::JValue;
 use crate::TracePos;
-use crate::GenerationIdx;
 
 use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
@@ -86,7 +86,7 @@ pub enum ValueRef {
     Scalar(Rc<CID<ServiceResultAggregate>>),
     /// The call value is stored to a stream variable.
     Stream {
-        cid: Rc<CID<JValue>>,
+        cid: Rc<CID<ServiceResultAggregate>>,
         generation: GenerationIdx,
     },
     /// The call value is not stored.

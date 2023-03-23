@@ -28,7 +28,7 @@ pub(super) struct StreamCursor {
 impl StreamCursor {
     pub(super) fn new() -> Self {
         Self {
-            last_seen_generation: 0.into(),
+            last_seen_generation: GenerationIdx::from(0),
         }
     }
 

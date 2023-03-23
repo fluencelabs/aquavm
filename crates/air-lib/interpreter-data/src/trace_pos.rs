@@ -26,7 +26,7 @@ use std::{
 pub struct TracePos(usize);
 
 impl TracePos {
-   pub fn checked_add(self, other: usize) -> Option<Self> {
+    pub fn checked_add(self, other: usize) -> Option<Self> {
         self.0.checked_add(other).map(Self)
     }
 }
@@ -84,4 +84,3 @@ impl Sub<TracePos> for TracePos {
         self.0 - rhs.0
     }
 }
-

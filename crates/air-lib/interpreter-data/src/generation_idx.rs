@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,80 @@
  * limitations under the License.
  */
 
- use serde::{Deserialize, Serialize};
- use std::convert::TryFrom;
- use std::{
-     fmt::{Debug, Display},
-     ops::{Add, AddAssign, Sub},
- };
- 
- #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
- #[serde(transparent)]
- #[repr(transparent)]
-pub struct GenerationIdx(u32);
+use serde::Deserialize;
+use serde::Serialize;
+use std::cmp::Ordering;
+
+use std::fmt::Debug;
+use std::fmt::Display;
+
+type GenerationIdxType = u32;
+
+#[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+#[repr(transparent)]
+pub struct GenerationIdx(GenerationIdxType);
 
 impl GenerationIdx {
-   pub fn checked_add(self, other: Self) -> Option<Self> {
+    pub fn checked_add(self, other: Self) -> Option<Self> {
         self.0.checked_add(other.0).map(Self)
-    } 
+    }
+
+    pub fn checked_sub(self, other: Self) -> Option<Self> {
+        self.0.checked_sub(other.0).map(Self)
+    }
+
+    pub fn next(self) -> Self {
+        // TODO: check for overflow
+        Self::from(self.0 as usize + 1)
+    }
+
+    pub fn prev(self) -> Self {
+        // TODO: check for overflow
+        Self::from(self.0 as usize - 1)
+    }
+}
+
+impl PartialOrd<usize> for GenerationIdx {
+    fn partial_cmp(&self, other: &usize) -> Option<Ordering> {
+        let self_as_usize: usize = (*self).into();
+        self_as_usize.partial_cmp(other)
+    }
+}
+
+impl PartialEq<usize> for GenerationIdx {
+    fn eq(&self, other: &usize) -> bool {
+        let self_as_usize: usize = (*self).into();
+        self_as_usize == *other
+    }
+}
+
+/*
+impl From<u32> for GenerationIdx {
+    fn from(generation: u32) -> Self {
+        GenerationIdx(generation)
+    }
+}
+
+impl From<GenerationIdx> for u32 {
+    fn from(generation: GenerationIdx) -> Self {
+        generation.0
+    }
+}
+
+ */
+
+//TODO: replace these two traits with try-* versions
+impl From<usize> for GenerationIdx {
+    fn from(value: usize) -> Self {
+        GenerationIdx(value as u32)
+    }
+}
+
+impl From<GenerationIdx> for usize {
+    fn from(value: GenerationIdx) -> Self {
+        value.0 as usize
+    }
 }
 
 impl Debug for GenerationIdx {
@@ -41,49 +99,5 @@ impl Debug for GenerationIdx {
 impl Display for GenerationIdx {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self.0, f)
-    }
-}
-
-impl From<u32> for GenerationIdx {
-    fn from(pos: u32) -> Self {
-        GenerationIdx(pos)
-    }
-}
-
-impl TryFrom<usize> for GenerationIdx {
-    type Error = <u32 as TryFrom<usize>>::Error;
-
-    fn try_from(value: usize) -> Result<Self, Self::Error> {
-        u32::try_from(value).map(GenerationIdx)
-    }
-}
-
-impl AddAssign<u32> for GenerationIdx {
-    fn add_assign(&mut self, rhs: u32) {
-        self.0 += rhs;
-    }
-}
-
-impl Add<u32> for GenerationIdx {
-    type Output = Self;
-
-    fn add(self, rhs: u32) -> Self::Output {
-        GenerationIdx(self.0 + rhs)
-    }
-}
-
-impl Sub<u32> for GenerationIdx {
-    type Output = Self;
-
-    fn sub(self, rhs: u32) -> Self::Output {
-        GenerationIdx(self.0 - rhs)
-    }
-}
-
-impl Sub<GenerationIdx> for GenerationIdx {
-    type Output = u32;
-
-    fn sub(self, rhs: GenerationIdx) -> Self::Output {
-        self.0 - rhs.0
     }
 }

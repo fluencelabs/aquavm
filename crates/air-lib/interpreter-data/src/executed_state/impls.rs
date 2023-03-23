@@ -49,7 +49,10 @@ impl CallResult {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
-    pub fn executed_stream(cid: Rc<CID<JValue>>, generation: GenerationIdx) -> CallResult {
+    pub fn executed_stream(
+        cid: Rc<CID<ServiceResultAggregate>>,
+        generation: GenerationIdx,
+    ) -> CallResult {
         let value = ValueRef::Stream { cid, generation };
         CallResult::Executed(value)
     }
@@ -84,9 +87,9 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_generation: GenerationIdx) -> Self {
+    pub fn new(res_generation: impl Into<GenerationIdx>) -> Self {
         Self {
-            res_generations: vec![res_generation],
+            res_generations: vec![res_generation.into()],
         }
     }
 }

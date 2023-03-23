@@ -30,10 +30,10 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
+use air_interpreter_data::GenerationIdx;
 use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;
-use air_interpreter_data::GenerationIdx;
 
 use std::rc::Rc;
 

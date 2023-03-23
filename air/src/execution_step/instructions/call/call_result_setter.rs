@@ -58,13 +58,16 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 Generation::Last,
                 stream.position,
             );
+            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
+            Ok(CallResult::executed_stream(service_result_agg_cid, generation))
+        }
+        CallOutputValue::None => {
+            let value_cid = value_to_json_cid(&*executed_result.result)
+                .map_err(UncatchableError::from)?
+                .into();
 
-            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?.into();
-            Ok(CallResult::executed_stream(cid, generation))
-      }
-        // by the internal conventions if call has no output value,
-        // corresponding data should have scalar type
-        CallOutputValue::None => Ok(CallResult::executed_scalar(cid)),
+            Ok(CallResult::executed_unused(value_cid))
+        }
     }
 }
 
@@ -97,7 +100,7 @@ pub(crate) fn populate_context_from_data<'i>(
 
             let result = ValueRef::Stream {
                 cid,
-                generation: resulted_generation.into(),
+                generation: resulted_generation,
             };
             Ok(result)
         }

@@ -29,7 +29,7 @@ pub(super) fn merge_global_streams(
         .iter()
         .map(|(stream_name, &prev_gens_count)| {
             let current_gens_count = current_global_streams.get(stream_name).cloned().unwrap_or_default();
-            let global_stream = Stream::from_generations_count(prev_gens_count.into(), current_gens_count.into());
+            let global_stream = Stream::from_generations_count(prev_gens_count, current_gens_count);
             let descriptor = StreamDescriptor::global(global_stream);
             (stream_name.to_string(), vec![descriptor])
         })
@@ -40,7 +40,7 @@ pub(super) fn merge_global_streams(
             continue;
         }
 
-        let global_stream = Stream::from_generations_count(0, current_gens_count.into());
+        let global_stream = Stream::from_generations_count(0, current_gens_count);
         let descriptor = StreamDescriptor::global(global_stream);
         global_streams.insert(stream_name, vec![descriptor]);
     }

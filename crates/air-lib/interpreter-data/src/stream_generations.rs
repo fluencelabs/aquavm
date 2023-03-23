@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+use crate::GenerationIdx;
 use air_parser::AirPos;
 
 use std::collections::HashMap;
 
 /// Mapping from a stream name to it's generation count.
 /// Similar to pi-calculus non-restricted names/channels.
-pub type GlobalStreamGens = HashMap<String, u32>;
+pub type GlobalStreamGens = HashMap<String, GenerationIdx>;
 
 /// Mapping from a stream name to
 ///    position of a new instruction in a script that creates a scope for a stream
@@ -30,4 +31,4 @@ pub type GlobalStreamGens = HashMap<String, u32>;
 /// so it could be met several times during script execution. This field anchors iteration
 /// where it was met.
 /// Similar to pi-calculus restricted names/channels.
-pub type RestrictedStreamGens = HashMap<String, HashMap<AirPos, Vec<u32>>>;
+pub type RestrictedStreamGens = HashMap<String, HashMap<AirPos, Vec<GenerationIdx>>>;

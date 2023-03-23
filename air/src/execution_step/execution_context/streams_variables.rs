@@ -25,9 +25,9 @@ use crate::ExecutionError;
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
 
+use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
-use air_interpreter_data::GenerationIdx;
 use air_parser::ast::Span;
 use air_parser::AirPos;
 use air_trace_handler::TraceHandler;
@@ -84,7 +84,10 @@ impl Streams {
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
 
-    pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<GenerationIdx> {
+    pub(crate) fn add_stream_value(
+        &mut self,
+        value_descriptor: StreamValueDescriptor<'_>,
+    ) -> ExecutionResult<GenerationIdx> {
         let StreamValueDescriptor {
             value,
             name,
@@ -112,12 +115,11 @@ impl Streams {
         }
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: GenerationIdx) {
+    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: usize) {
         let name = name.into();
-        let (prev_gens_count, current_gens_count) =
-            self.stream_generation_from_data(&name, span.left, iteration);
+        let (prev_gens_count, current_gens_count) = self.stream_generation_from_data(&name, span.left, iteration);
 
-        let new_stream = Stream::from_generations_count(prev_gens_count.into(), current_gens_count.into());
+        let new_stream = Stream::from_generations_count(prev_gens_count, current_gens_count);
         let new_descriptor = StreamDescriptor::restricted(new_stream, span);
         match self.streams.entry(name) {
             Occupied(mut entry) => {
@@ -173,7 +175,12 @@ impl Streams {
         Ok((global_streams, self.new_restricted_stream_gens))
     }
 
-    fn stream_generation_from_data(&self, name: &str, position: AirPos, iteration: GenerationIdx) -> (GenerationIdx, GenerationIdx) {
+    fn stream_generation_from_data(
+        &self,
+        name: &str,
+        position: AirPos,
+        iteration: usize,
+    ) -> (GenerationIdx, GenerationIdx) {
         let previous_generation =
             Self::restricted_stream_generation(&self.previous_restricted_stream_gens, name, position, iteration)
                 .unwrap_or_default();
@@ -188,7 +195,7 @@ impl Streams {
         restricted_stream_gens: &RestrictedStreamGens,
         name: &str,
         position: AirPos,
-        iteration: GenerationIdx,
+        iteration: usize,
     ) -> Option<GenerationIdx> {
         restricted_stream_gens
             .get(name)

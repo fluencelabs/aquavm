@@ -221,7 +221,7 @@ fn par_early_exit() {
             vec![],
             &mut cid_state,
         ),
-        generation: 1,
+        generation: 1.into(),
     };
     let current_value = ValueRef::Stream {
         cid: value_aggregate_cid(
@@ -230,7 +230,7 @@ fn par_early_exit() {
             vec![],
             &mut cid_state,
         ),
-        generation: 0,
+        generation: 0.into(),
     };
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncorrectCallResult(CallResultError::ValuesNotEqual {

@@ -31,15 +31,61 @@ use crate::SubTraceDesc;
 use air::ExecutionCidState;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CidTracker;
-use air_interpreter_data::GenerationIdx;
-
+use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_data::{CanonCidAggregate, GenerationIdx};
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
 use std::rc::Rc;
+
+pub fn simple_value_aggregate_cid(
+    result: impl Into<serde_json::Value>,
+    cid_state: &mut ExecutionCidState,
+) -> Rc<CID<ServiceResultAggregate>> {
+    let value_cid = cid_state
+        .value_tracker
+        .record_value(Rc::new(result.into()))
+        .unwrap();
+    let tetraplet = SecurityTetraplet::default();
+    let tetraplet_cid = cid_state
+        .tetraplet_tracker
+        .record_value(Rc::new(tetraplet))
+        .unwrap();
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash: "".into(),
+        tetraplet_cid,
+    };
+    cid_state
+        .service_result_agg_tracker
+        .record_value(Rc::new(service_result_agg))
+        .unwrap()
+}
+
+pub fn value_aggregate_cid(
+    result: impl Into<serde_json::Value>,
+    tetraplet: SecurityTetraplet,
+    args: Vec<serde_json::Value>,
+    cid_state: &mut ExecutionCidState,
+) -> Rc<CID<ServiceResultAggregate>> {
+    let value_cid = cid_state
+        .value_tracker
+        .record_value(Rc::new(result.into()))
+        .unwrap();
+    let tetraplet_cid = cid_state
+        .tetraplet_tracker
+        .record_value(Rc::new(tetraplet))
+        .unwrap();
+
+    let arguments = serde_json::Value::Array(args);
+    let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
+
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash,
+        tetraplet_cid,
+    };
 
     cid_state
         .service_result_agg_tracker
@@ -85,8 +131,8 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
     }
 }
 
-pub fn ap(generation: GenerationIdx) -> ExecutedState {
-    let ap_result = ApResult::new(generation);
+pub fn ap(generation: impl Into<GenerationIdx>) -> ExecutedState {
+    let ap_result = ApResult::new(generation.into());
     ExecutedState::Ap(ap_result)
 }
 
@@ -311,7 +357,8 @@ impl ExecutedCallBuilder {
             value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Stream {
             cid: service_result_agg_cid,
-            generation,
+            // TODO: refactor it
+            generation: (generation as usize).into(),
         };
         ExecutedState::Call(CallResult::Executed(value))
     }
