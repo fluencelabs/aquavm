@@ -91,7 +91,7 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
         check_subtrace_lore(subtrace_lore)?;
 
         let current_generation = merge_ctx.try_get_generation(subtrace_lore.value_pos)?;
-        // TODO: check sequence for monotone]
+        // TODO: check sequence for monotone
         if last_seen_generation != current_generation {
             if subtrace_id > 0 {
                 // do a back traversal for before lens

@@ -62,21 +62,6 @@ impl PartialEq<usize> for GenerationIdx {
     }
 }
 
-/*
-impl From<u32> for GenerationIdx {
-    fn from(generation: u32) -> Self {
-        GenerationIdx(generation)
-    }
-}
-
-impl From<GenerationIdx> for u32 {
-    fn from(generation: GenerationIdx) -> Self {
-        generation.0
-    }
-}
-
- */
-
 //TODO: replace these two traits with try-* versions
 impl From<usize> for GenerationIdx {
     fn from(value: usize) -> Self {
