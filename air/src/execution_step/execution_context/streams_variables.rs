@@ -168,7 +168,7 @@ impl Streams {
                 // of the execution
                 let stream = descriptors.pop().unwrap().stream;
                 let gens_count = stream.compactify(trace_ctx)?;
-                Ok((name, gens_count.into()))
+                Ok((name, gens_count))
             })
             .collect::<Result<GlobalStreamGens, _>>()?;
 
@@ -206,14 +206,14 @@ impl Streams {
     fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: GenerationIdx) {
         match self.new_restricted_stream_gens.entry(name) {
             Occupied(mut streams) => match streams.get_mut().entry(position) {
-                Occupied(mut iterations) => iterations.get_mut().push(generation.into()),
+                Occupied(mut iterations) => iterations.get_mut().push(generation),
                 Vacant(entry) => {
-                    entry.insert(vec![generation.into()]);
+                    entry.insert(vec![generation]);
                 }
             },
             Vacant(entry) => {
                 let iterations = maplit::hashmap! {
-                    position => vec![generation.into()],
+                    position => vec![generation],
                 };
                 entry.insert(iterations);
             }
