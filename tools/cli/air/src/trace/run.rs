@@ -53,6 +53,9 @@ pub(crate) struct Args {
     #[clap(long, help = "Output JSON tracing info")]
     json: bool,
 
+    #[clap(long = "no-fail", help = "Do not fail if AquaVM returns error")]
+    no_fail: bool,
+
     #[clap(subcommand)]
     source: Source,
 }
@@ -107,6 +110,9 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {
             println!("{result:?}");
+        }
+        if !args.no_fail && (result.ret_code != 0) {
+            std::process::exit(2);
         }
     }
 
