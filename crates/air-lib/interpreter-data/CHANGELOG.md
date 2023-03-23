@@ -4,6 +4,17 @@
   * dependencies
     * air-parser bumped from 0.7.2 to 0.7.3
 
+## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.4...air-interpreter-data-v0.7.0) (2023-03-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-data:** 
+
+### Features
+
+* **interpreter-data:** New data format for calls ([#501](https://github.com/fluencelabs/aquavm/issues/501)) ([d502894](https://github.com/fluencelabs/aquavm/commit/d5028942e41e1ac47ce31e20b57c17895f543ac8))
+
 ## [0.6.4](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.3...air-interpreter-data-v0.6.4) (2023-03-15)
 
 

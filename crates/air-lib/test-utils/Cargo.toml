@@ -1,6 +1,6 @@
 [package]
 name = "air-test-utils"
-version = "0.4.7"
+version = "0.5.0"
 description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -15,9 +15,9 @@ name = "air_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
-aquavm-air = { version = "0.38.0", path = "../../../air" }
+aquavm-air = { version = "0.39.0", path = "../../../air" }
 air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
-air-interpreter-data = { version = "0.6.4", path = "../interpreter-data" }
+air-interpreter-data = { version = "0.7.0", path = "../interpreter-data" }
 air-interpreter-interface = { version = "0.13.0", path = "../interpreter-interface" }
 avm-interface = { version = "0.28.3", path = "../../../avm/interface" }
 avm-server = { version = "0.31.0", path = "../../../avm/server" }
