@@ -16,8 +16,8 @@
 
 use serde::Deserialize;
 use serde::Serialize;
-use std::cmp::Ordering;
 
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Display;
 
