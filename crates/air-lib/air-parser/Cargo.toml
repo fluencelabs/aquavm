@@ -22,7 +22,7 @@ air-lambda-ast = { version = "0.1.0", path = "../lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../lambda/parser" }
 
 lalrpop-util = "0.19.8"
-regex = "1.7.1"
+regex = "1.7.3"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
 multimap = "0.8.3"
