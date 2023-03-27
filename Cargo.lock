@@ -278,12 +278,14 @@ dependencies = [
  "air-test-utils",
  "anyhow",
  "aquavm-air",
+ "atty",
  "avm-data-store",
  "avm-interface",
  "clap 4.1.11",
  "itertools",
  "serde",
  "serde_json",
+ "termcolor",
  "tracing-subscriber",
 ]
 
