@@ -1,4 +1,4 @@
-name: "ci"
+name: "tests"
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  aquavm:
     uses: ./.github/workflows/tests.yml
     with:
       ref: ${{ github.ref }}
