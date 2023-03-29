@@ -2037,9 +2037,9 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a8aeb3e06867363bd177dba64dee12b2166343bcf917a4d1b322e577d4f65a5"
+checksum = "a46d7fc11c8e16f6a2a1c4f88f1389ad2eb2e0379a8bc536ba3264f3dbaf6fe1"
 dependencies = [
  "anyhow",
  "it-memory-traits",
