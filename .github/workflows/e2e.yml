@@ -21,7 +21,9 @@ concurrency:
 
 jobs:
   aquavm:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.fork == false
+    if: |
+      github.event.pull_request.head.repo.fork == false # trigger when PRs is not from fork
+      || github.event_name == 'workflow_dispatch'       # or when workflow triggered manually
     uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
