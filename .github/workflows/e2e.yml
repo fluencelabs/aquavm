@@ -3,10 +3,16 @@ name: "e2e"
 on:
   pull_request:
     paths-ignore:
-      - "!**.md"
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
   push:
     branches:
       - "master"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -14,11 +20,13 @@ concurrency:
 
 jobs:
   aquavm:
+    environment: e2e
     uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
 
   rust-peer:
+    environment: e2e
     needs:
       - aquavm
 
@@ -40,6 +48,7 @@ jobs:
         ]
 
   rust-peer-tests:
+    environment: e2e
     name: "rust-peer"
     needs:
       - aquavm
@@ -61,6 +70,7 @@ jobs:
         ]
 
   js-client-tests:
+    environment: e2e
     name: "js-client"
     needs:
       - aquavm
@@ -72,6 +82,7 @@ jobs:
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   js-client:
+    environment: e2e
     needs:
       - aquavm
 
@@ -80,6 +91,7 @@ jobs:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
 
   aqua-playground:
+    environment: e2e
     needs:
       - js-client
       - rust-peer
@@ -90,6 +102,7 @@ jobs:
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   status:
+    environment: e2e
     runs-on: ubuntu-latest
     if: always()
     needs:
