@@ -1,12 +1,19 @@
 name: "e2e"
 
 on:
+  workflow_dispatch:
   pull_request:
     paths-ignore:
-      - "!**.md"
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
   push:
     branches:
       - "master"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -14,6 +21,8 @@ concurrency:
 
 jobs:
   aquavm:
+    # trigger when PRs is not from fork or when workflow triggered manually
+    if: github.event.pull_request.head.repo.fork == false || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
