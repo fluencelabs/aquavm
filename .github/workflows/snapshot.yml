@@ -29,7 +29,6 @@ jobs:
     name: "Build air-interpreter-wasm"
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: e2e
 
     steps:
       - name: Checkout AquaVM
@@ -71,12 +70,15 @@ jobs:
     name: "Publish cargo snapshots"
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: e2e
 
     needs: wasm
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout AquaVM
@@ -89,8 +91,11 @@ jobs:
         uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
-          method: github
-          githubToken: ${{ secrets.FLUENCEBOT_VAULT_LOGIN }}
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
           exportToken: false
           secrets: |
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
@@ -130,12 +135,15 @@ jobs:
     name: "Publish @fluencelabs/avm snapshot"
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: e2e
 
     needs: wasm
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout AquaVM
@@ -157,8 +165,11 @@ jobs:
         uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
-          method: github
-          githubToken: ${{ secrets.FLUENCEBOT_VAULT_LOGIN }}
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
           exportToken: false
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
@@ -192,10 +203,13 @@ jobs:
     name: "Publish air-beautify-wasm snapshot"
     runs-on: builder
     timeout-minutes: 60
-    environment: e2e
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout aquavm
@@ -208,8 +222,11 @@ jobs:
         uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
-          method: github
-          githubToken: ${{ secrets.FLUENCEBOT_VAULT_LOGIN }}
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
           exportToken: false
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
