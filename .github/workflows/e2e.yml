@@ -20,21 +20,21 @@ concurrency:
 jobs:
   air-interpreter-wasm:
     name: "aquavm"
-    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
+    if: github.event.pull_request.head.repo.fork != true && contains(github.event.pull_request.labels.*.name, 'e2e')
     uses: ./.github/workflows/snapshot-air-interpreter-wasm.yml
     with:
       ref: ${{ github.ref }}
 
   air-beautify-wasm:
     name: "aquavm"
-    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
+    if: github.event.pull_request.head.repo.fork != true && contains(github.event.pull_request.labels.*.name, 'e2e')
     uses: ./.github/workflows/snapshot-air-beautify-wasm.yml
     with:
       ref: ${{ github.ref }}
 
   avm:
     name: "aquavm"
-    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
+    if: github.event.pull_request.head.repo.fork != true && contains(github.event.pull_request.labels.*.name, 'e2e')
     needs: air-interpreter-wasm
     uses: ./.github/workflows/snapshot-avm.yml
     with:
@@ -42,7 +42,7 @@ jobs:
 
   cargo:
     name: "aquavm"
-    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
+    if: github.event.pull_request.head.repo.fork != true && contains(github.event.pull_request.labels.*.name, 'e2e')
     needs: air-interpreter-wasm
     uses: ./.github/workflows/snapshot-cargo.yml
     with:
