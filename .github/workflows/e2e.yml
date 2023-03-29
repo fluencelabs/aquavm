@@ -19,16 +19,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  aquavm:
-    # trigger when PRs is not from fork
-    if: github.event.pull_request.head.repo.fork == false
-    uses: ./.github/workflows/snapshot.yml
+  air-interpreter-wasm:
+    name: "aquavm"
+    # do not trigger E2E when PR is from fork
+    if: github.event.pull_request.head.repo.fork != true
+    uses: ./.github/workflows/snapshot-air-interperet-wasm.yml
+    with:
+      ref: ${{ github.ref }}
+
+  air-beautify-wasm:
+    name: "aquavm"
+    # do not trigger E2E when PR is from fork
+    if: github.event.pull_request.head.repo.fork != true
+    uses: ./.github/workflows/snapshot-air-beautify-wasm.yml
+    with:
+      ref: ${{ github.ref }}
+
+  avm:
+    name: "aquavm"
+    # do not trigger E2E when PR is from fork
+    if: github.event.pull_request.head.repo.fork != true
+    needs: air-interpreter-wasm
+    uses: ./.github/workflows/snapshot-avm.yml
+    with:
+      ref: ${{ github.ref }}
+
+  cargo:
+    name: "aquavm"
+    # do not trigger E2E when PR is from fork
+    if: github.event.pull_request.head.repo.fork != true
+    needs: air-interpreter-wasm
+    uses: ./.github/workflows/snapshot-cargo.yml
     with:
       ref: ${{ github.ref }}
 
   rust-peer:
     needs:
-      - aquavm
+      - cargo
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
@@ -37,12 +64,12 @@ jobs:
         [
           {
             "package": "avm-server",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.cargo.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "air-interpreter-wasm",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.cargo.outputs.version }}",
             "registry": "fluence"
           }
         ]
@@ -50,7 +77,7 @@ jobs:
   rust-peer-tests:
     name: "rust-peer"
     needs:
-      - aquavm
+      - cargo
 
     uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
     with:
@@ -58,12 +85,12 @@ jobs:
         [
           {
             "package": "avm-server",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.cargo.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "air-interpreter-wasm",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.cargo.outputs.version }}",
             "registry": "fluence"
           }
         ]
@@ -71,21 +98,21 @@ jobs:
   js-client-tests:
     name: "js-client"
     needs:
-      - aquavm
+      - avm
       - rust-peer
 
     uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
-      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
+      avm-version: "${{ needs.avm.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   js-client:
     needs:
-      - aquavm
+      - avm
 
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
-      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
+      avm-version: "${{ needs.avm.outputs.version }}"
 
   aqua-playground:
     needs:
