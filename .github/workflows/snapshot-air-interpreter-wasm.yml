@@ -10,9 +10,7 @@ on:
       cargo-dependencies:
         description: "Cargo dependencies map"
         type: string
-
-env:
-  FORCE_COLOR: true
+        default: "null"
 
 jobs:
   wasm:
@@ -47,7 +45,7 @@ jobs:
         uses: fluencelabs/setup-marine@v1
 
       - name: Set dependencies
-        if: inputs.cargo-dependencies != ''
+        if: inputs.cargo-dependencies != 'null'
         uses: fluencelabs/github-actions/cargo-set-dependency@main
         with:
           dependencies: ${{ inputs.cargo-dependencies }}
