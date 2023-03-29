@@ -7,12 +7,8 @@ on:
       - ".github/**"
       - "!.github/workflows/e2e.yml"
       - "!.github/workflows/snapshot.yml"
-  push:
-    branches:
-      - "master"
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
+    types:
+      - "labeled"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -21,24 +17,21 @@ concurrency:
 jobs:
   air-interpreter-wasm:
     name: "aquavm"
-    # do not trigger E2E when PR is from fork
-    if: github.event.pull_request.head.repo.fork != true
+    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
     uses: ./.github/workflows/snapshot-air-interpreter-wasm.yml
     with:
       ref: ${{ github.ref }}
 
   air-beautify-wasm:
     name: "aquavm"
-    # do not trigger E2E when PR is from fork
-    if: github.event.pull_request.head.repo.fork != true
+    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
     uses: ./.github/workflows/snapshot-air-beautify-wasm.yml
     with:
       ref: ${{ github.ref }}
 
   avm:
     name: "aquavm"
-    # do not trigger E2E when PR is from fork
-    if: github.event.pull_request.head.repo.fork != true
+    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
     needs: air-interpreter-wasm
     uses: ./.github/workflows/snapshot-avm.yml
     with:
@@ -46,8 +39,7 @@ jobs:
 
   cargo:
     name: "aquavm"
-    # do not trigger E2E when PR is from fork
-    if: github.event.pull_request.head.repo.fork != true
+    if: github.event.pull_request.head.repo.fork != true && github.event.label.name == 'e2e'
     needs: air-interpreter-wasm
     uses: ./.github/workflows/snapshot-cargo.yml
     with:
