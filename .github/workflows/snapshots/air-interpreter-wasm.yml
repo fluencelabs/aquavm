@@ -1,0 +1,63 @@
+name: Publish air-interpreter-wasm snapshot
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "git ref to checkout to"
+        type: string
+        default: "master"
+      cargo-dependencies:
+        description: "Cargo dependencies map"
+        type: string
+
+env:
+  FORCE_COLOR: true
+
+jobs:
+  wasm:
+    name: "Build air-interpreter-wasm"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout AquaVM
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Download marine artifact
+        id: marine
+        uses: actions/download-artifact@v3
+        continue-on-error: true
+        with:
+          name: marine
+          path: ~/.local/bin
+
+      - name: Make marine executable
+        if: steps.marine.outcome == 'success'
+        run: chmod +x ~/.local/bin/marine
+
+      - name: Setup marine
+        if: steps.marine.outcome == 'failure'
+        uses: fluencelabs/setup-marine@v1
+
+      - name: Set dependencies
+        if: inputs.cargo-dependencies != ''
+        uses: fluencelabs/github-actions/cargo-set-dependency@main
+        with:
+          dependencies: ${{ inputs.cargo-dependencies }}
+
+      - name: Build air-interpreter-wasm binary
+        run: marine build --release --features marine
+        working-directory: air-interpreter
+
+      - name: Upload air-interpreter-wasm binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: air-interpreter-wasm
+          path: target/wasm32-wasi/release/air_interpreter_server.wasm

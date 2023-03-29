@@ -1,7 +1,6 @@
 name: "e2e"
 
 on:
-  workflow_dispatch:
   pull_request:
     paths-ignore:
       - "**.md"
@@ -21,8 +20,8 @@ concurrency:
 
 jobs:
   aquavm:
-    # trigger when PRs is not from fork or when workflow triggered manually
-    if: github.event.pull_request.head.repo.fork == false || github.event_name == 'workflow_dispatch'
+    # trigger when PRs is not from fork
+    if: github.event.pull_request.head.repo.fork == false
     uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
@@ -99,6 +98,7 @@ jobs:
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   status:
+    name: "e2e status"
     runs-on: ubuntu-latest
     if: always()
     needs:
@@ -109,7 +109,7 @@ jobs:
       - uses: lwhiteley/dependent-jobs-result-check@v1
         id: status
         with:
-          statuses: failure,cancelled,skipped
+          statuses: failure
           dependencies: ${{ toJSON(needs) }}
 
       - name: Log output
