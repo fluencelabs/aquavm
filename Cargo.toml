@@ -1,5 +1,6 @@
 [workspace]
 members = [
+
     "air",
     "air-interpreter",
     "avm/interface",
