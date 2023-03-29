@@ -59,8 +59,6 @@ jobs:
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
-          cache: "npm"
-          cache-dependency-path: "tools/wasm/air-beautify-wasm/package-lock.json"
 
       - name: Build air-beautify-wasm
         run: |
