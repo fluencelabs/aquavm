@@ -24,8 +24,6 @@ jobs:
     runs-on: builder
     timeout-minutes: 60
 
-    needs: wasm
-
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
 
