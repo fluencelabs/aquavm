@@ -23,7 +23,7 @@ jobs:
     name: "aquavm"
     # do not trigger E2E when PR is from fork
     if: github.event.pull_request.head.repo.fork != true
-    uses: ./.github/workflows/snapshot-air-interperet-wasm.yml
+    uses: ./.github/workflows/snapshot-air-interpreter-wasm.yml
     with:
       ref: ${{ github.ref }}
 
