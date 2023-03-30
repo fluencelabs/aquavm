@@ -69,6 +69,7 @@ jobs:
         ]
 
   rust-peer-snapshot:
+    name: "rust-peer"
     needs:
       - rust-peer
 
