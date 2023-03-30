@@ -71,7 +71,7 @@ jobs:
 
   rust-peer-snapshot:
     needs:
-      - cargo
+      - rust-peer
 
     uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
     with:
