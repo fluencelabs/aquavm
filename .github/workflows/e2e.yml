@@ -54,7 +54,6 @@ jobs:
 
     uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
     with:
-      image-name: "docker.fluence.dev/aquavm"
       cargo-dependencies: |
         [
           {
