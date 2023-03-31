@@ -1,11 +1,12 @@
-name: "tests"
+name: "test"
 
 on:
   pull_request:
     paths-ignore:
       - "**.md"
       - ".github/**"
-      - "!.github/workflows/ci.yml"
+      - "!.github/workflows/run-tests.yml"
+      - "!.github/workflows/tests.yml"
   push:
     branches:
       - "master"
