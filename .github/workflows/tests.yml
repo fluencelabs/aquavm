@@ -7,6 +7,10 @@ on:
         description: "git ref to checkout to"
         type: string
         default: "master"
+      cargo-dependencies:
+        description: "Cargo dependencies map"
+        type: string
+        default: "null"
 
 jobs:
   tests:
@@ -18,13 +22,36 @@ jobs:
       checks: write # for coverall to create checks
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout AquaVM
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Download marine artifact
+        id: marine
+        uses: actions/download-artifact@v3
+        continue-on-error: true
+        with:
+          name: marine
+          path: ~/.local/bin
+
+      - name: Make marine executable
+        if: steps.marine.outcome == 'success'
+        run: chmod +x ~/.local/bin/marine
+
       - name: Setup marine
+        if: steps.marine.outcome == 'failure'
         uses: fluencelabs/setup-marine@v1
+
+      - name: Set dependencies
+        if: inputs.cargo-dependencies != 'null'
+        uses: fluencelabs/github-actions/cargo-set-dependency@main
+        with:
+          dependencies: ${{ inputs.cargo-dependencies }}
 
       - name: Build Wasm binary for tests
         run: ./build_test_binaries.sh
@@ -40,12 +67,14 @@ jobs:
         run: cargo llvm-cov nextest --release --all-features --profile ci --lcov --output-path lcov.info
 
       - name: Coveralls upload
+        if: inputs.cargo-dependencies == 'null'
         uses: coverallsapp/github-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: lcov.info
 
       - name: Archive code coverage results
+        if: inputs.cargo-dependencies == 'null'
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
