@@ -67,12 +67,14 @@ jobs:
         run: cargo llvm-cov nextest --release --all-features --profile ci --lcov --output-path lcov.info
 
       - name: Coveralls upload
+        if: inputs.cargo-dependencies == 'null'
         uses: coverallsapp/github-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: lcov.info
 
       - name: Archive code coverage results
+        if: inputs.cargo-dependencies == 'null'
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
