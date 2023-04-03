@@ -129,6 +129,22 @@ jobs:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
+  registry:
+    needs:
+      - rust-peer-snapshot
+
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+
+  fluence-cli:
+    needs:
+      - rust-peer-snapshot
+
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+
   status:
     name: "e2e status"
     runs-on: ubuntu-latest
