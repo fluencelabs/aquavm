@@ -28,7 +28,7 @@ air-trace-handler = { version = "0.2.0", path = "../crates/air-lib/trace-handler
 air-utils = { version = "0.1.0", path = "../crates/air-lib/utils" }
 polyplets = { version = "0.3.2", path = "../crates/air-lib/polyplets" }
 
-serde = { version = "1.0.158", features = [ "derive", "rc" ] }
+serde = { version = "1.0.159", features = [ "derive", "rc" ] }
 serde_json = "1.0.94"
 
 boolinator = "2.4.0"
