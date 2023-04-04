@@ -4,6 +4,7 @@
     "config:base",
     ":semanticCommitTypeAll(chore)"
   ],
+  "excludeCommitPaths": ["junk/**"],
   "enabledManagers": ["cargo", "npm", "github-actions"],
   "schedule": "every weekend",
   "packageRules": [
