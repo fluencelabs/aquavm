@@ -1,28 +1,20 @@
-name: "Run tests"
+name: Run tests with workflow_call
 
 on:
-  pull_request:
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
-      - "!.github/workflows/ci.yml"
-  push:
-    branches:
-      - "master"
-    paths-ignore:
-      - "**.md"
-      - ".github/**"
-
-concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
-  cancel-in-progress: true
-
-env:
-  RUST_TEST_THREADS: 1
+  workflow_call:
+    inputs:
+      ref:
+        description: "git ref to checkout to"
+        type: string
+        default: "master"
+      cargo-dependencies:
+        description: "Cargo dependencies map"
+        type: string
+        default: "null"
 
 jobs:
   tests:
-    name: "aquavm / cargo test"
+    name: "cargo nextest"
     timeout-minutes: 60
     runs-on: builder
 
@@ -30,13 +22,36 @@ jobs:
       checks: write # for coverall to create checks
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout AquaVM
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Download marine artifact
+        id: marine
+        uses: actions/download-artifact@v3
+        continue-on-error: true
+        with:
+          name: marine
+          path: ~/.local/bin
+
+      - name: Make marine executable
+        if: steps.marine.outcome == 'success'
+        run: chmod +x ~/.local/bin/marine
+
       - name: Setup marine
+        if: steps.marine.outcome == 'failure'
         uses: fluencelabs/setup-marine@v1
+
+      - name: Set dependencies
+        if: inputs.cargo-dependencies != 'null'
+        uses: fluencelabs/github-actions/cargo-set-dependency@main
+        with:
+          dependencies: ${{ inputs.cargo-dependencies }}
 
       - name: Build Wasm binary for tests
         run: ./build_test_binaries.sh
@@ -48,45 +63,39 @@ jobs:
       - run: cargo clean
       - run: cargo build
 
-      - name: Run cargo test
-        run: cargo llvm-cov nextest --release --all-features --lcov --output-path lcov.info
+      - name: Run cargo nextest
+        run: cargo llvm-cov nextest --release --all-features --profile ci --lcov --output-path lcov.info
 
       - name: Coveralls upload
+        if: inputs.cargo-dependencies == 'null'
         uses: coverallsapp/github-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: lcov.info
 
       - name: Archive code coverage results
+        if: inputs.cargo-dependencies == 'null'
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
           path: lcov.info
 
+      - name: Upload test report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: aquavm report
+          path: target/nextest/ci/junit.xml
+          reporter: java-junit
+
       - name: Run tests with test_with_native_code
+        env:
+          RUST_TEST_THREADS: 1
         run: |
           # The `memory` sanitizer on cargo test has false positive even on empty project.
           for san in address leak; do
             RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
-
-  lint:
-    name: "aquavm / lints"
-    timeout-minutes: 60
-    runs-on: builder
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Setup marine
-        uses: fluencelabs/setup-marine@v1
-
-      - name: Build Wasm binary for tests
-        run: ./build_test_binaries.sh
-        working-directory: air/tests/test_module
 
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
