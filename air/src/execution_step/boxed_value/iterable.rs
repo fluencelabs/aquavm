@@ -24,7 +24,9 @@ pub(crate) use lambda_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
+use super::Provenance;
 use super::ValueAggregate;
+use super::ValueAggregateWithProvenance;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
@@ -58,9 +60,9 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, TracePos)),
-    RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos)),
-    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos)),
+    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, TracePos, Provenance)),
+    RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos, Provenance)),
+    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos, Provenance)),
 }
 
 impl IterableItem<'_> {
@@ -68,24 +70,38 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         let pos = match self {
-            RefRef((.., pos)) => pos,
-            RefValue((.., pos)) => pos,
-            RcValue((.., pos)) => pos,
+            RefRef((.., pos, _)) => pos,
+            RefValue((.., pos, _)) => pos,
+            RcValue((.., pos, _)) => pos,
         };
 
         *pos
     }
 
-    pub(crate) fn into_resolved_result(self) -> ValueAggregate {
+    pub(crate) fn provenance(&self) -> Provenance {
         use IterableItem::*;
 
-        let (value, tetraplet, pos) = match self {
-            RefRef((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet.clone(), pos),
-            RefValue((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet, pos),
+        match self {
+            RefRef((.., ref prov)) => prov,
+            RefValue((.., ref prov)) => prov,
+            RcValue((.., ref prov)) => prov,
+        }
+        .clone()
+    }
+
+    pub(crate) fn into_resolved_result(self) -> ValueAggregateWithProvenance {
+        use IterableItem::*;
+
+        let (value, tetraplet, pos, provenance) = match self {
+            RefRef((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet.clone(), pos, prov),
+            RefValue((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet, pos, prov),
             RcValue(ingredients) => ingredients,
         };
 
-        ValueAggregate::new(value, tetraplet, pos)
+        ValueAggregateWithProvenance {
+            value_aggregate: ValueAggregate::new(value, tetraplet, pos),
+            provenance: provenance.clone(),
+        }
     }
 }
 

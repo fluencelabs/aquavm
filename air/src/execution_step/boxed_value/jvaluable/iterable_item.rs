@@ -50,9 +50,9 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet) = match self {
-            RefRef((jvalue, tetraplet, _)) => (*jvalue, *tetraplet),
-            RefValue((jvalue, tetraplet, _)) => (*jvalue, tetraplet),
-            RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
+            RefRef((jvalue, tetraplet, _, _)) => (*jvalue, *tetraplet),
+            RefValue((jvalue, tetraplet, _, _)) => (*jvalue, tetraplet),
+            RcValue((jvalue, tetraplet, _, _)) => (jvalue.deref(), tetraplet),
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
@@ -86,12 +86,12 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
 
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
-            RefRef((_, tetraplet, _)) => {
+            RefRef((_, tetraplet, _, _)) => {
                 let tetraplet = tetraplet.deref().clone();
                 vec![tetraplet]
             }
-            RefValue((_, tetraplet, _)) => vec![tetraplet.clone()],
-            RcValue((_, tetraplet, _)) => vec![tetraplet.clone()],
+            RefValue((_, tetraplet, _, _)) => vec![tetraplet.clone()],
+            RcValue((_, tetraplet, _, _)) => vec![tetraplet.clone()],
         }
     }
 }

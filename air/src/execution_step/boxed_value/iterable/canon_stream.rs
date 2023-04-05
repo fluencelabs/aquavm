@@ -52,8 +52,14 @@ impl<'ctx> Iterable<'ctx> for CanonStreamIterableIngredients {
             return None;
         }
 
-        let value = self.canon_stream.nth(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
-        let result = IterableItem::RefRef((&value.result, &value.tetraplet, value.trace_pos));
+        let value_w_prov = self.canon_stream.nth(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
+        let value = &value_w_prov.value_aggregate;
+        let result = IterableItem::RefRef((
+            &value.result,
+            &value.tetraplet,
+            value.trace_pos,
+            value_w_prov.provenance.clone(),
+        ));
         Some(result)
     }
 

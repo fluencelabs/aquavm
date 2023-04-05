@@ -15,27 +15,30 @@
  */
 
 use super::Stream;
-use super::ValueAggregate;
+use super::ValueAggregateWithProvenance;
 use crate::execution_step::Generation;
 use crate::JValue;
 
+use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResultAggregate;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::ops::Deref;
 use std::rc::Rc;
 
 /// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
 /// scalars, and represent a stream fixed at some execution point.
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStream {
-    values: Vec<ValueAggregate>,
+    values: Vec<ValueAggregateWithProvenance>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
     tetraplet: Rc<SecurityTetraplet>,
 }
 
 impl CanonStream {
-    pub(crate) fn new(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+    pub(crate) fn new(values: Vec<ValueAggregateWithProvenance>, tetraplet: Rc<SecurityTetraplet>) -> Self {
         Self { values, tetraplet }
     }
 
@@ -65,11 +68,11 @@ impl CanonStream {
         JValue::Array(jvalue_array)
     }
 
-    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
+    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregateWithProvenance> {
         self.values.iter()
     }
 
-    pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
+    pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregateWithProvenance> {
         self.values.get(idx)
     }
 
@@ -84,8 +87,29 @@ impl fmt::Display for CanonStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for value in self.values.iter() {
-            write!(f, "{value}, ")?;
+            // TODO debug? only aggregate? should we drop Display entirely?
+            write!(f, "{value:?}, ")?;
         }
         write!(f, "]")
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CanonStreamWithProvenance {
+    pub(crate) canon_stream: CanonStream,
+    pub(crate) cid: Rc<CID<CanonResultAggregate>>,
+}
+
+impl CanonStreamWithProvenance {
+    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultAggregate>>) -> Self {
+        Self { canon_stream, cid }
+    }
+}
+
+impl Deref for CanonStreamWithProvenance {
+    type Target = CanonStream;
+
+    fn deref(&self) -> &Self::Target {
+        &self.canon_stream
     }
 }

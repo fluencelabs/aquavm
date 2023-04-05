@@ -17,6 +17,7 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::boxed_value::Provenance;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver;
@@ -52,7 +53,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
 }
 
 fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet) = resolver::resolve_ast_scalar(scalar, exec_ctx)?;
+    let (value, mut tetraplet, _prov) = resolver::resolve_ast_scalar(scalar, exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
@@ -61,7 +62,7 @@ fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i
 }
 
 fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet) = resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?;
+    let (value, mut tetraplet, _prov) = resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
@@ -94,7 +95,7 @@ fn fail_with_canon_stream(
 ) -> ExecutionResult<()> {
     let variable = Variable::CanonStream { name: ast_canon.name };
 
-    let (value, tetraplet) = resolver::apply_lambda(variable, &ast_canon.lambda, exec_ctx)?;
+    let (value, tetraplet, _prov) = resolver::apply_lambda(variable, &ast_canon.lambda, exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
@@ -115,6 +116,7 @@ fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
     tetraplet: Option<RcSecurityTetraplet>,
+    provenance: Provenance,
 ) -> ExecutionResult<()> {
     exec_ctx
         .last_error_descriptor

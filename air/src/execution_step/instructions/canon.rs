@@ -18,6 +18,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::boxed_value::CanonStreamWithProvenance;
 use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
@@ -108,7 +109,12 @@ fn epilog(
         canon_result_cid,
     } = stream_with_positions;
 
-    exec_ctx.scalars.set_canon_value(canon_stream_name, canon_stream)?;
+    exec_ctx
+        .scalars
+        .set_canon_value(
+            canon_stream_name,
+            CanonStreamWithProvenance::new(canon_stream, canon_result_cid.clone()),
+        )?;
 
     trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
     Ok(())
@@ -126,7 +132,7 @@ fn create_canon_stream_from_name(
 ) -> ExecutionResult<StreamWithSerializedView> {
     let stream = get_stream_or_default(ast_canon, exec_ctx);
 
-    let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
+    let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id, exec_ctx);
 
     let value_cids = canon_stream
         .iter()

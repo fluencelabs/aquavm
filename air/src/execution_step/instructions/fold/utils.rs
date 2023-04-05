@@ -88,7 +88,7 @@ pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     }
 
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
-    let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
+    let iterable_ingredients = CanonStreamIterableIngredients::init((**canon_stream).clone());
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))
 }
@@ -116,7 +116,7 @@ pub(crate) fn construct_stream_iterable_values(
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
+fn from_value(call_result: ValueAggregateWithProvenance, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {
@@ -167,9 +167,9 @@ fn to_tetraplet(iterable: &IterableItem<'_>) -> SecurityTetraplet {
     use IterableItem::*;
 
     let tetraplet = match iterable {
-        RefRef((_, tetraplet, _)) => tetraplet,
-        RefValue((_, tetraplet, _)) => tetraplet,
-        RcValue((_, tetraplet, _)) => tetraplet,
+        RefRef((_, tetraplet, _, _)) => tetraplet,
+        RefValue((_, tetraplet, _, _)) => tetraplet,
+        RcValue((_, tetraplet, _, _)) => tetraplet,
     };
 
     (*tetraplet).deref().clone()

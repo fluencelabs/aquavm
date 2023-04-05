@@ -22,6 +22,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::instructions::ValueAggregate;
+use crate::execution_step::instructions::ValueSource;
 use crate::execution_step::resolver::apply_lambda;
 use crate::log_instruction;
 use crate::trace_to_exec_err;

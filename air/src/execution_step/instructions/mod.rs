@@ -37,6 +37,7 @@ pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
 use super::boxed_value::ValueAggregate;
+use super::boxed_value::ValueSource;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;

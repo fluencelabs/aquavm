@@ -21,6 +21,7 @@ mod iterable_item;
 mod resolved_call_result;
 mod stream;
 
+use super::ValueSource;
 use super::iterable::IterableItem;
 use super::ExecutionResult;
 use super::ValueAggregate;

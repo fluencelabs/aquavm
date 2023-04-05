@@ -16,6 +16,7 @@
 
 use super::RcSecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::boxed_value::Provenance;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
@@ -33,7 +34,7 @@ use std::rc::Rc;
 pub(crate) fn resolve_to_args<'i>(
     value: &ast::ImmutableValue<'i>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     use ast::ImmutableValue::*;
 
     match value {
@@ -54,19 +55,19 @@ pub(crate) fn resolve_to_args<'i>(
 pub(crate) fn prepare_const(
     arg: impl Into<JValue>,
     ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
 
-    Ok((jvalue, vec![tetraplet]))
+    Ok((jvalue, vec![tetraplet], Provenance::literal(None)))
 }
 
 #[allow(clippy::unnecessary_wraps)]
 pub(crate) fn prepare_last_error<'i>(
     error_accessor: &Option<LambdaAST<'i>>,
     ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     use crate::LastError;
 
     let LastError { error, tetraplet } = ctx.last_error();
@@ -85,18 +86,21 @@ pub(crate) fn prepare_last_error<'i>(
         }
     };
 
-    Ok((jvalue, tetraplets))
+    Ok((jvalue, tetraplets, Provenance::literal(None)))
 }
 
 #[tracing::instrument(level = "trace", skip(ctx))]
 pub(crate) fn resolve_variable<'ctx, 'i>(
     variable: Variable<'_>,
     ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<Box<dyn JValuable + 'ctx>> {
+) -> ExecutionResult<(Box<dyn JValuable + 'ctx>, Provenance)> {
     use crate::execution_step::boxed_value::StreamJvaluableIngredients;
 
     match variable {
-        Variable::Scalar { name, .. } => Ok(ctx.scalars.get_value(name)?.into_jvaluable()),
+        Variable::Scalar { name, .. } => {
+            let get_value = ctx.scalars.get_value(name)?;
+            Ok(get_value.into_jvaluable())
+        }
         Variable::Stream {
             name,
             generation,
@@ -105,16 +109,19 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
             match ctx.streams.get(name, position) {
                 Some(stream) => {
                     let ingredients = StreamJvaluableIngredients::new(stream, generation);
-                    Ok(Box::new(ingredients))
+                    Ok((Box::new(ingredients), Provenance::todo()))
                 }
                 // return an empty stream for not found stream
                 // here it ignores the join behaviour
-                None => Ok(Box::new(())),
+                None => Ok((Box::new(()), Provenance::todo())),
             }
         }
         Variable::CanonStream { name, .. } => {
-            let canon_stream = ctx.scalars.get_canon_stream(name)?;
-            Ok(Box::new(canon_stream))
+            let canon_stream_with_prov = ctx.scalars.get_canon_stream(name)?;
+            Ok((
+                Box::new(&canon_stream_with_prov.canon_stream),
+                Provenance::canon(canon_stream_with_prov.cid, None),
+            ))
         }
     }
 }
@@ -123,23 +130,23 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
 pub(crate) fn resolve_ast_variable<'ctx, 'i>(
     ast_variable: &ast::ImmutableVariable<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     let variable: Variable<'_> = ast_variable.into();
-    let value = resolve_variable(variable, exec_ctx)?;
+    let (value, prov) = resolve_variable(variable, exec_ctx)?;
     let tetraplets = value.as_tetraplets();
-    Ok((value.into_jvalue(), tetraplets))
+    Ok((value.into_jvalue(), tetraplets, prov))
 }
 
 #[tracing::instrument(level = "trace", skip(exec_ctx))]
 pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
     ast_variable: &ast::ImmutableVariableWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     let variable: Variable<'_> = ast_variable.into();
 
-    apply_lambda(variable, ast_variable.lambda(), exec_ctx).map(|(value, tetraplet)| {
+    apply_lambda(variable, ast_variable.lambda(), exec_ctx).map(|(value, tetraplet, prov)| {
         let tetraplet = Rc::new(tetraplet);
-        (value, vec![tetraplet])
+        (value, vec![tetraplet], prov)
     })
 }
 
@@ -147,7 +154,7 @@ pub(crate) fn resolve_ast_variable_wl<'ctx, 'i>(
 pub(crate) fn resolve_ast_scalar<'ctx, 'i>(
     ast_scalar: &ast::Scalar<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::ImmutableVariable::Scalar(ast_scalar.clone());
     resolve_ast_variable(&variable, exec_ctx)
@@ -157,7 +164,7 @@ pub(crate) fn resolve_ast_scalar<'ctx, 'i>(
 pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::ImmutableVariableWithLambda::Scalar(ast_scalar.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
@@ -167,7 +174,7 @@ pub(crate) fn resolve_ast_scalar_wl<'ctx, 'i>(
 pub(crate) fn resolve_ast_canon_wl<'ctx, 'i>(
     ast_canon: &ast::CanonStreamWithLambda<'_>,
     exec_ctx: &'ctx ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     // TODO: wrap lambda path with Rc to make this clone cheaper
     let variable = ast::ImmutableVariableWithLambda::CanonStream(ast_canon.clone());
     resolve_ast_variable_wl(&variable, exec_ctx)
@@ -178,10 +185,11 @@ pub(crate) fn apply_lambda<'i>(
     variable: Variable<'_>,
     lambda: &LambdaAST<'i>,
     exec_ctx: &ExecutionCtx<'i>,
-) -> ExecutionResult<(JValue, SecurityTetraplet)> {
-    let resolved = resolve_variable(variable, exec_ctx)?;
+) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)> {
+    let (resolved, provenance) = resolve_variable(variable, exec_ctx)?;
     let (jvalue, tetraplet) = resolved.apply_lambda_with_tetraplets(lambda, exec_ctx)?;
+    let provenance = provenance.apply_lambda(&tetraplet);
 
     // it's known that apply_lambda_with_tetraplets returns vec of one value
-    Ok((jvalue.into_owned(), tetraplet))
+    Ok((jvalue.into_owned(), tetraplet, provenance))
 }

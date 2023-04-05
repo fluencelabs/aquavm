@@ -17,7 +17,9 @@
 mod values_sparse_matrix;
 
 use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::boxed_value::CanonStreamWithProvenance;
 use crate::execution_step::boxed_value::ScalarRef;
+use crate::execution_step::boxed_value::ValueAggregateWithProvenance;
 use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
@@ -84,9 +86,9 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: ValuesSparseMatrix<ValueAggregate>,
+    pub(crate) non_iterable_variables: ValuesSparseMatrix<ValueAggregateWithProvenance>,
 
-    pub(crate) canon_streams: ValuesSparseMatrix<CanonStream>,
+    pub(crate) canon_streams: ValuesSparseMatrix<CanonStreamWithProvenance>,
 
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 }
@@ -102,13 +104,13 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
+    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregateWithProvenance) -> ExecutionResult<bool> {
         self.non_iterable_variables.set_value(name, value)
     }
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_canon_value(&mut self, name: impl Into<String>, value: CanonStream) -> ExecutionResult<bool> {
+    pub(crate) fn set_canon_value(&mut self, name: impl Into<String>, value: CanonStreamWithProvenance) -> ExecutionResult<bool> {
         self.canon_streams.set_value(name, value)
     }
 
@@ -132,7 +134,7 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
+    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregateWithProvenance>> {
         self.non_iterable_variables.get_value(name)
     }
 
@@ -148,17 +150,17 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| UncatchableError::FoldStateNotFound(name.to_string()).into())
     }
 
-    pub(crate) fn get_canon_stream(&'i self, name: &str) -> ExecutionResult<&'i CanonStream> {
+    pub(crate) fn get_canon_stream(&'i self, name: &str) -> ExecutionResult<&'i CanonStreamWithProvenance> {
         self.canon_streams
             .get_value(name)?
             .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
     }
 
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
-        let value = self.get_non_iterable_scalar(name);
-        let iterable_value = self.iterable_variables.get(name);
+        let value_with_prov = self.get_non_iterable_scalar(name);
+        let iterable_value_with_prov = self.iterable_variables.get(name);
 
-        match (value, iterable_value) {
+        match (value_with_prov, iterable_value_with_prov) {
             (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
             (Ok(None), _) => Err(CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into()),
             (Ok(Some(value)), None) => Ok(ScalarRef::Value(value)),
@@ -221,8 +223,8 @@ use std::fmt;
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "scalars:\n{}", self.non_iterable_variables)?;
-        writeln!(f, "canon_streams:\n{}", self.canon_streams)?;
+        writeln!(f, "scalars:\n{:?}", self.non_iterable_variables)?;
+        writeln!(f, "canon_streams:\n{:?}", self.canon_streams)?;
 
         for (name, _) in self.iterable_variables.iter() {
             // it's impossible to print an iterable value for now

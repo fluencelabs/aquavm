@@ -101,7 +101,7 @@ fn apply_scalar_wl(
     let variable = Variable::scalar(ast_scalar.name);
     let (jvalue, tetraplet) = apply_lambda(variable, &ast_scalar.lambda, exec_ctx)?;
     let tetraplet = Rc::new(tetraplet);
-    let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos());
+    let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, trace_ctx.trace_pos(), todo!());
 
     Ok(result)
 }
@@ -118,7 +118,7 @@ fn apply_canon_stream(
     let value = JValuable::as_jvalue(&canon_stream).into_owned();
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos();
-    let value = ValueAggregate::new(Rc::new(value), tetraplet, position);
+    let value = ValueAggregate::new(Rc::new(value), tetraplet, position, todo!());
     Ok(value)
 }
 

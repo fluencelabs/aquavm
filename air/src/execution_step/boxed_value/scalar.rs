@@ -20,10 +20,17 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
+use air_interpreter_cid::CID;
+use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::CanonResultAggregate;
+use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_data::TracePos;
+use fluence_app_service::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::ops::Deref;
+use std::ops::DerefMut;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -33,15 +40,97 @@ pub struct ValueAggregate {
     pub trace_pos: TracePos,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum Provenance {
+    Literal {
+        // TODO does it differ from SecurityTetraplet.lambda_path?
+        // OK, let's remove it if not needed.
+        lambda_path: Option<Rc<str>>,
+    },
+    ServiceResult {
+        // the original call result CID; not changed on lambda application
+        cid: Rc<CID<ServiceResultAggregate>>,
+        // TODO does it differ from SecurityTetraplet.lambda_path?
+        lambda_path: Option<Rc<str>>,
+    },
+    Canon {
+        cid: Rc<CID<CanonResultAggregate>>,
+        // TODO ditto
+        lambda_path: Option<Rc<str>>,
+    },
+}
+
+impl Provenance {
+    pub(crate) fn literal(lambda_path: Option<Rc<str>>) -> Self {
+        Self::Literal { lambda_path }
+    }
+
+    pub(crate) fn service_result(cid: Rc<CID<ServiceResultAggregate>>, lambda_path: Option<Rc<str>>) -> Self {
+        Self::ServiceResult { cid, lambda_path }
+    }
+
+    pub(crate) fn canon(cid: Rc<CID<CanonResultAggregate>>, lambda_path: Option<Rc<str>>) -> Self {
+        Self::Canon { cid, lambda_path }
+    }
+
+    pub(crate) fn todo() -> Self {
+        Self::Literal { lambda_path: None }
+    }
+
+    pub(crate) fn apply_lambda(&self, tetraplet: &SecurityTetraplet) -> Self {
+        let lambda_path = Some(tetraplet.json_path.into());
+        match self {
+            Provenance::Literal { .. } => Self::Literal { lambda_path },
+            Provenance::ServiceResult { cid, .. } => Self::ServiceResult {
+                cid: cid.clone(),
+                lambda_path,
+            },
+            Provenance::Canon { cid, .. } => Self::Canon {
+                cid: cid.clone(),
+                lambda_path,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ValueAggregateWithProvenance {
+    pub value_aggregate: ValueAggregate,
+    pub provenance: Provenance,
+}
+
+impl DerefMut for ValueAggregateWithProvenance {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value_aggregate
+    }
+}
+
+impl Deref for ValueAggregateWithProvenance {
+    type Target = ValueAggregate;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value_aggregate
+    }
+}
+
+impl ValueAggregateWithProvenance {
+    pub fn new(value_aggregate: ValueAggregate, provenance: Provenance) -> Self {
+        Self {
+            value_aggregate,
+            provenance,
+        }
+    }
+}
+
 pub(crate) enum ScalarRef<'i> {
-    Value(&'i ValueAggregate),
+    Value(&'i ValueAggregateWithProvenance),
     IterableValue(&'i FoldState<'i>),
 }
 
 impl<'i> ScalarRef<'i> {
-    pub(crate) fn into_jvaluable(self) -> Box<dyn JValuable + 'i> {
+    pub(crate) fn into_jvaluable(self) -> (Box<dyn JValuable + 'i>, Provenance) {
         match self {
-            ScalarRef::Value(value) => Box::new(value.clone()),
+            ScalarRef::Value(value) => (Box::new(value.value_aggregate.clone()), value.provenance.clone()),
             ScalarRef::IterableValue(fold_state) => {
                 let peeked_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
                 Box::new(peeked_value)

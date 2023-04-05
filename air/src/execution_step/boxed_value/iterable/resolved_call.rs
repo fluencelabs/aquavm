@@ -17,6 +17,7 @@
 use super::Iterable;
 use super::IterableItem;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::ValueAggregateWithProvenance;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -26,13 +27,13 @@ use std::ops::Deref;
 /// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableResolvedCall {
-    pub(crate) call_result: ValueAggregate,
+    pub(crate) call_result: ValueAggregateWithProvenance,
     pub(crate) cursor: usize,
     pub(crate) len: usize,
 }
 
 impl IterableResolvedCall {
-    pub(crate) fn init(call_result: ValueAggregate, len: usize) -> Self {
+    pub(crate) fn init(call_result: ValueAggregateWithProvenance, len: usize) -> Self {
         Self {
             call_result,
             cursor: 0,
@@ -57,10 +58,14 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             return None;
         }
 
-        let ValueAggregate {
-            result,
-            tetraplet,
-            trace_pos,
+        let ValueAggregateWithProvenance {
+            value_aggregate:
+                ValueAggregate {
+                    result,
+                    tetraplet,
+                    trace_pos,
+                },
+            provenance,
         } = &self.call_result;
 
         let jvalue = match &result.deref() {
@@ -68,7 +73,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
-        let result = IterableItem::RefValue((jvalue, tetraplet.clone(), *trace_pos));
+        let result = IterableItem::RefValue((jvalue, tetraplet.clone(), *trace_pos, provenance.clone()));
         Some(result)
     }
 

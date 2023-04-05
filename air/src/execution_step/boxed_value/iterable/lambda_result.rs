@@ -17,6 +17,7 @@
 use super::Iterable;
 use super::IterableItem;
 use crate::execution_step::RcSecurityTetraplet;
+use crate::execution_step::boxed_value::Provenance;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -57,7 +58,7 @@ impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0.into()));
+        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0.into(), Provenance::literal(None)));
 
         Some(result)
     }

@@ -16,6 +16,7 @@
 
 use super::ExecutionResult;
 use super::ValueAggregate;
+use super::ValueAggregateWithProvenance;
 use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
@@ -31,7 +32,7 @@ pub struct Stream {
     /// of values that interpreter obtained from one particle. It means that number of generation on
     /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
     /// obtained values from a current_data that were not present in prev_data becomes a new generation.
-    values: Vec<Vec<ValueAggregate>>,
+    values: Vec<Vec<ValueAggregateWithProvenance>>,
 
     /// Count of values from previous data.
     previous_gens_count: usize,
@@ -54,7 +55,7 @@ impl Stream {
 
     // streams created with this ctor assumed to have only one generation,
     // for streams that have values in
-    pub(crate) fn from_value(value: ValueAggregate) -> Self {
+    pub(crate) fn from_value(value: ValueAggregateWithProvenance) -> Self {
         Self {
             values: vec![vec![value]],
             previous_gens_count: 0,
@@ -65,7 +66,7 @@ impl Stream {
     // be added to given generation
     pub(crate) fn add_value(
         &mut self,
-        value: ValueAggregate,
+        value: ValueAggregateWithProvenance,
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<u32> {
@@ -159,7 +160,7 @@ impl Stream {
     }
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
-        let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
+        let iter: Box<dyn Iterator<Item = &ValueAggregateWithProvenance>> = match generation {
             Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
             Generation::Nth(generation) => {
                 Box::new(self.values.iter().take(generation as usize + 1).flat_map(|v| v.iter()))
@@ -227,12 +228,12 @@ pub enum Generation {
 }
 
 pub(crate) struct StreamIter<'result> {
-    iter: Box<dyn Iterator<Item = &'result ValueAggregate> + 'result>,
+    iter: Box<dyn Iterator<Item = &'result ValueAggregateWithProvenance> + 'result>,
     len: usize,
 }
 
 impl<'result> Iterator for StreamIter<'result> {
-    type Item = &'result ValueAggregate;
+    type Item = &'result ValueAggregateWithProvenance;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -249,12 +250,12 @@ impl<'result> Iterator for StreamIter<'result> {
 impl<'result> ExactSizeIterator for StreamIter<'result> {}
 
 pub(crate) struct StreamSliceIter<'slice> {
-    iter: Box<dyn Iterator<Item = &'slice [ValueAggregate]> + 'slice>,
+    iter: Box<dyn Iterator<Item = &'slice [ValueAggregateWithProvenance]> + 'slice>,
     pub len: usize,
 }
 
 impl<'slice> Iterator for StreamSliceIter<'slice> {
-    type Item = &'slice [ValueAggregate];
+    type Item = &'slice [ValueAggregateWithProvenance];
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -303,6 +304,7 @@ mod test {
     use super::Generation;
     use super::Stream;
     use super::ValueAggregate;
+    use super::ValueSource;
 
     use serde_json::json;
 
@@ -311,8 +313,16 @@ mod test {
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
+        let value_1 = ValueAggregate::new(
+            Rc::new(json!("value")),
+            <_>::default(),
+            1.into(),
+        );
+        let value_2 = ValueAggregate::new(
+            Rc::new(json!("value")),
+            <_>::default(),
+            1.into(),
+        );
         let mut stream = Stream::from_generations_count(2, 0);
 
         stream
@@ -354,8 +364,16 @@ mod test {
 
     #[test]
     fn generation_from_current_data() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
+        let value_1 = ValueAggregate::new(
+            Rc::new(json!("value_1")),
+            <_>::default(),
+            1.into(),
+        );
+        let value_2 = ValueAggregate::new(
+            Rc::new(json!("value_2")),
+            <_>::default(),
+            2.into(),
+        );
         let mut stream = Stream::from_generations_count(5, 5);
 
         stream
