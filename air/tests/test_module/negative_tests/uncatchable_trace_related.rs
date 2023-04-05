@@ -259,7 +259,7 @@ fn invalid_dst_generations() {
         "cid_info": {
             "value_store": {},
             "tetraplet_store": {},
-            "canon_store": {},
+            "canon_element_store": {},
             "service_result_store": {}
         }
     });

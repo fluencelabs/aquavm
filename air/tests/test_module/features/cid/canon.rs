@@ -79,7 +79,10 @@ fn test_canon_ok() {
     assert_eq!(&*data.trace, expected_trace);
     assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
     assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.canon_element_store,
+        cid_state.canon_element_tracker.into()
+    );
     assert_eq!(
         data.cid_info.service_result_store,
         cid_state.service_result_agg_tracker.into()
@@ -155,7 +158,10 @@ fn test_canon_ok_multi() {
     assert_eq!(data.cid_info.value_store.len(), 2);
     assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
     assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.canon_element_store,
+        cid_state.canon_element_tracker.into()
+    );
     assert_eq!(
         data.cid_info.service_result_store,
         cid_state.service_result_agg_tracker.into()
@@ -346,11 +352,11 @@ fn test_canon_agg_not_found() {
     ];
 
     let missing_cid = "bagaaierapp2oi35ib4iveexfswax6jcf2zhj3e2ergzjyavm6m7stlzh23ta";
-    let canon_store: CidStore<_> = cid_state.canon_tracker.into();
-    assert!(canon_store.get(&CID::<_>::new(missing_cid)).is_some());
+    let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
+    assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
 
     // Fake data
-    cid_state.canon_tracker = <_>::default();
+    cid_state.canon_element_tracker = <_>::default();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 

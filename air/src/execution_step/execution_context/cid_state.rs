@@ -34,7 +34,7 @@ use std::rc::Rc;
 pub struct ExecutionCidState {
     pub value_tracker: CidTracker<JValue>,
     pub tetraplet_tracker: CidTracker<SecurityTetraplet>,
-    pub canon_tracker: CidTracker<CanonCidAggregate>,
+    pub canon_element_tracker: CidTracker<CanonCidAggregate>,
     pub service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
 }
 
@@ -65,7 +65,8 @@ impl ExecutionCidState {
         let value_tracker = CidTracker::from_cid_stores(prev_cid_info.value_store, current_cid_info.value_store);
         let tetraplet_tracker =
             CidTracker::from_cid_stores(prev_cid_info.tetraplet_store, current_cid_info.tetraplet_store);
-        let canon_tracker = CidTracker::from_cid_stores(prev_cid_info.canon_store, current_cid_info.canon_store);
+        let canon_element_tracker =
+            CidTracker::from_cid_stores(prev_cid_info.canon_element_store, current_cid_info.canon_element_store);
         let service_result_agg_tracker = CidTracker::from_cid_stores(
             prev_cid_info.service_result_store,
             current_cid_info.service_result_store,
@@ -74,7 +75,7 @@ impl ExecutionCidState {
         Self {
             value_tracker,
             tetraplet_tracker,
-            canon_tracker,
+            canon_element_tracker,
             service_result_agg_tracker,
         }
     }
@@ -99,7 +100,7 @@ impl ExecutionCidState {
         cid: &CID<CanonCidAggregate>,
     ) -> Result<ValueAggregate, UncatchableError> {
         let canon_aggregate = self
-            .canon_tracker
+            .canon_element_tracker
             .get(cid)
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.clone().into()))?;
         let result = self.get_value_by_cid(&canon_aggregate.value)?;
@@ -136,7 +137,7 @@ impl From<ExecutionCidState> for CidInfo {
         Self {
             value_store: value.value_tracker.into(),
             tetraplet_store: value.tetraplet_tracker.into(),
-            canon_store: value.canon_tracker.into(),
+            canon_element_store: value.canon_element_tracker.into(),
             service_result_store: value.service_result_agg_tracker.into(),
         }
     }

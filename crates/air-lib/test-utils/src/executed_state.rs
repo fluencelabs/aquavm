@@ -179,10 +179,12 @@ pub fn canon_tracked(
             let tetraplet_cid = cid_state
                 .tetraplet_tracker
                 .record_value(value.tetraplet.clone())?;
-            cid_state.canon_tracker.record_value(CanonCidAggregate {
-                value: value_cid,
-                tetraplet: tetraplet_cid,
-            })
+            cid_state
+                .canon_element_tracker
+                .record_value(CanonCidAggregate {
+                    value: value_cid,
+                    tetraplet: tetraplet_cid,
+                })
         })
         .collect::<Result<Vec<_>, _>>()
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));

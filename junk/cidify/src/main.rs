@@ -30,7 +30,7 @@ fn main() {
         json!({
             "value_store": Into::<air_interpreter_data::CidStore<_>>::into(values),
             "tetraplet_store": {},
-            "canon_store": {},
+            "canon_element_store": {},
         }),
     );
     data.other_fields

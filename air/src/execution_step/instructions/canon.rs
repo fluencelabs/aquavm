@@ -140,7 +140,10 @@ fn create_canon_stream_from_name(
                     .tetraplet_tracker
                     .record_value(val.tetraplet.clone())?,
             };
-            Ok(exec_ctx.cid_state.canon_tracker.record_value(canon_value_aggregate)?)
+            Ok(exec_ctx
+                .cid_state
+                .canon_element_tracker
+                .record_value(canon_value_aggregate)?)
         })
         .collect::<Result<_, _>>()?;
     let tetraplet_cid = exec_ctx
