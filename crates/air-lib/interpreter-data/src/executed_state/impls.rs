@@ -26,9 +26,7 @@ impl ParResult {
 
     /// Returns a size of subtrace that this par describes in execution_step trace.
     pub fn size(&self) -> Option<u32> {
-        self.left_size
-            .checked_add(self.right_size)
-            .map(|v| v)
+        self.left_size.checked_add(self.right_size)
     }
 }
 

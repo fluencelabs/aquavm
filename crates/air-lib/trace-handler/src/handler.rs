@@ -17,8 +17,6 @@
 use super::*;
 use merger::*;
 
-use IntConversionError;
-
 use std::convert::TryInto;
 
 #[derive(Debug, Default)]
@@ -44,7 +42,7 @@ impl TraceHandler {
             .result_trace
             .len()
             .try_into()
-            .map_err(|e| IntConversionError::TryIntoTracePosError(e))
+            .map_err(IntConversionError::TryIntoTracePosError)
     }
 
     pub fn into_result_trace(self) -> ExecutionTrace {
