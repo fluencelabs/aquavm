@@ -244,6 +244,7 @@ fn invalid_dst_generations() {
         (ap "a" $s)
     "#
     );
+    // TODO generate data instead, as the code will be apdated on each data change
     let data = json!(
     {
         "version": "0.6.3",
@@ -260,6 +261,7 @@ fn invalid_dst_generations() {
             "value_store": {},
             "tetraplet_store": {},
             "canon_element_store": {},
+            "canon_result_store": {},
             "service_result_store": {}
         }
     });

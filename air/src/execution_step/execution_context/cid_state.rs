@@ -22,6 +22,7 @@ use crate::UncatchableError;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::CanonResult;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::ServiceResultAggregate;
@@ -35,6 +36,7 @@ pub struct ExecutionCidState {
     pub value_tracker: CidTracker<JValue>,
     pub tetraplet_tracker: CidTracker<SecurityTetraplet>,
     pub canon_element_tracker: CidTracker<CanonCidAggregate>,
+    pub canon_result_tracker: CidTracker<CanonResult>,
     pub service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
 }
 
@@ -67,6 +69,8 @@ impl ExecutionCidState {
             CidTracker::from_cid_stores(prev_cid_info.tetraplet_store, current_cid_info.tetraplet_store);
         let canon_element_tracker =
             CidTracker::from_cid_stores(prev_cid_info.canon_element_store, current_cid_info.canon_element_store);
+        let canon_result_tracker =
+            CidTracker::from_cid_stores(prev_cid_info.canon_result_store, current_cid_info.canon_result_store);
         let service_result_agg_tracker = CidTracker::from_cid_stores(
             prev_cid_info.service_result_store,
             current_cid_info.service_result_store,
@@ -76,6 +80,7 @@ impl ExecutionCidState {
             value_tracker,
             tetraplet_tracker,
             canon_element_tracker,
+            canon_result_tracker,
             service_result_agg_tracker,
         }
     }
@@ -138,6 +143,7 @@ impl From<ExecutionCidState> for CidInfo {
             value_store: value.value_tracker.into(),
             tetraplet_store: value.tetraplet_tracker.into(),
             canon_element_store: value.canon_element_tracker.into(),
+            canon_result_store: value.canon_result_tracker.into(),
             service_result_store: value.service_result_agg_tracker.into(),
         }
     }
