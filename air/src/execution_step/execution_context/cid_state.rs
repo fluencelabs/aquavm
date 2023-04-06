@@ -22,7 +22,7 @@ use crate::UncatchableError;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CanonResult;
+use air_interpreter_data::CanonResultAggregate;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::CidTracker;
 use air_interpreter_data::ServiceResultAggregate;
@@ -36,7 +36,7 @@ pub struct ExecutionCidState {
     pub value_tracker: CidTracker<JValue>,
     pub tetraplet_tracker: CidTracker<SecurityTetraplet>,
     pub canon_element_tracker: CidTracker<CanonCidAggregate>,
-    pub canon_result_tracker: CidTracker<CanonResult>,
+    pub canon_result_tracker: CidTracker<CanonResultAggregate>,
     pub service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
 }
 
@@ -117,6 +117,15 @@ impl ExecutionCidState {
             tetraplet,
             trace_pos: fake_trace_pos,
         })
+    }
+
+    pub(crate) fn get_canon_result_by_cid(
+        &self,
+        cid: &CID<CanonResultAggregate>,
+    ) -> Result<Rc<CanonResultAggregate>, UncatchableError> {
+        self.canon_result_tracker
+            .get(cid)
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon result aggregate", cid.clone().into()))
     }
 
     pub(crate) fn get_service_result_agg_by_cid(

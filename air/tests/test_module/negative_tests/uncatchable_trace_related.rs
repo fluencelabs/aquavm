@@ -358,14 +358,12 @@ fn canon_result_error() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectCanonResult(
             CanonResultError::IncompatibleState {
-                prev_canon_result: air_interpreter_data::CanonResult {
-                    tetraplet: CID::new("bagaaierasjgckcjojtq3m3aylofqmzqitnostogfwnj2fzyaqsmxnlquf2la").into(),
-                    values: vec![CID::new("bagaaieraxlk56ks2zevx5umgur2xxhf2cuopflnpopps3m6sgldmzquxumvq").into()],
-                },
-                current_canon_result: air_interpreter_data::CanonResult {
-                    tetraplet: CID::new("bagaaierasjgckcjojtq3m3aylofqmzqitnostogfwnj2fzyaqsmxnlquf2la").into(),
-                    values: vec![CID::new("bagaaierawwlvodborlxavs7j42eea23dmitophllfxg4kvozwe5ru4ywitea").into()],
-                },
+                prev_canon_result: air_interpreter_data::CanonResult::new(
+                    CID::new("bagaaieraabjypch3htxkmdw64wrx62z5tm57fk3rl7dn7agsc7agcxa7om6q").into(),
+                ),
+                current_canon_result: air_interpreter_data::CanonResult::new(
+                    CID::new("bagaaierakocnb4ajzbw2jxxlrjmpq5jzmwzdhjhqwmftp3qgj3b6va6bnweq").into(),
+                ),
             },
         )),
         instruction: String::from(r#"canon "vm_peer_id_1" $stream #canon"#),

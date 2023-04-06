@@ -17,6 +17,7 @@
 use super::ApResult;
 use super::CallResult;
 use super::CanonResult;
+use super::CanonResultAggregate;
 use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
@@ -188,8 +189,13 @@ pub fn canon_tracked(
         })
         .collect::<Result<Vec<_>, _>>()
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));
-    let canon_result = CanonResult::new(tetraplet_cid, value_cids);
-    ExecutedState::Canon(canon_result)
+
+    let canon_result = CanonResultAggregate::new(tetraplet_cid, value_cids);
+    let canon_result_cid = cid_state
+        .canon_result_tracker
+        .record_value(canon_result.clone())
+        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_result));
+    ExecutedState::Canon(CanonResult::new(canon_result_cid))
 }
 
 #[macro_export]

@@ -184,8 +184,12 @@ pub struct ApResult {
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct CanonResult(pub Rc<CID<CanonResultAggregate>>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct CanonResult {
+pub struct CanonResultAggregate {
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
     pub values: Vec<Rc<CID<CanonCidAggregate>>>,
 }

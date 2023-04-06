@@ -18,7 +18,7 @@ use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::cid_store::CidStore;
 use crate::CanonCidAggregate;
-use crate::CanonResult;
+use crate::CanonResultAggregate;
 use crate::ExecutionTrace;
 use crate::JValue;
 use crate::ServiceResultAggregate;
@@ -144,7 +144,7 @@ pub struct CidInfo {
     pub canon_element_store: CidStore<CanonCidAggregate>,
 
     /// Map CID to a canon result.
-    pub canon_result_store: CidStore<CanonResult>,
+    pub canon_result_store: CidStore<CanonResultAggregate>,
 
     /// Map CID to a service result aggregate.
     pub service_result_store: CidStore<ServiceResultAggregate>,
