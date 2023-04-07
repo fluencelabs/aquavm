@@ -20,8 +20,6 @@ use crate::ResolvedFold;
 
 use num_traits::ops::checked::CheckedAdd;
 
-use std::convert::TryFrom;
-
 /// This state updater manage to do the same thing as CtxStateHandler in ParFSM,
 /// for details please see its detailed comment.
 #[derive(Debug, Default, Clone)]
@@ -55,10 +53,8 @@ fn compute_new_state(fold: &ResolvedFold, data_keeper: &DataKeeper, ctx_type: Me
     };
 
     let current_position = ctx.slider.position();
-    let fold_states_count = TracePos::try_from(fold.fold_states_count)
-        .map_err(|e| StateFSMError::FoldStatesCountOverflow(e, fold.clone(), ctx_type))?;
     let pos = current_position
-        .checked_add(&fold_states_count)
+        .checked_add(&fold.fold_states_count.into())
         .ok_or_else(|| StateFSMError::FoldPosOverflow(fold.clone(), current_position, ctx_type))?;
 
     let current_len = ctx.slider.subtrace_len();

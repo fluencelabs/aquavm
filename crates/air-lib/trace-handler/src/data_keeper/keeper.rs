@@ -21,8 +21,6 @@ use crate::TracePos;
 
 use bimap::BiHashMap;
 
-use std::convert::TryInto;
-
 /// Keeps all necessary data for merging.
 #[derive(Debug, Default, PartialEq)]
 pub(crate) struct DataKeeper {
@@ -52,7 +50,7 @@ impl DataKeeper {
     }
 
     pub(crate) fn result_trace_next_pos(&self) -> TracePos {
-        self.result_trace.len().try_into().expect("try_into() TracePos failed.")
+        self.result_trace.trace_states_count().into()
     }
 
     pub(crate) fn prev_slider(&self) -> &TraceSlider {
