@@ -1,0 +1,25 @@
+name: "test"
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/run-tests.yml"
+      - "!.github/workflows/tests.yml"
+  push:
+    branches:
+      - "master"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  aquavm:
+    uses: ./.github/workflows/tests.yml
+    with:
+      ref: ${{ github.ref }}

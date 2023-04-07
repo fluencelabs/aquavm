@@ -155,7 +155,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
 }
 
 impl ResolvedFold {
-    pub(crate) fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
+    pub fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {
             lore,
             fold_states_count,
@@ -164,7 +164,7 @@ impl ResolvedFold {
 }
 
 impl ResolvedSubTraceDescs {
-    pub(self) fn new(before_subtrace: SubTraceDesc, after_subtrace: SubTraceDesc) -> Self {
+    pub fn new(before_subtrace: SubTraceDesc, after_subtrace: SubTraceDesc) -> Self {
         Self {
             before_subtrace,
             after_subtrace,

@@ -17,7 +17,7 @@ Alias: `air r`.
 Executes an AIR script with data in WASM AquaVM.  It has two modes of parameter input: plain and anomaly.
 
 ### Common parameters
-All common parameters are optional.  Their position is before the mode selector (`--plain` or `--anomaly`).
+All common parameters are optional.  Their position is always before the mode selector (`--plain` or `--anomaly`).
 
 + `--call-results PATH` parameter allows you to provide call results for current execution.
 + `--max-heap-size N` defines maximum heap size for WASM runtime.
@@ -31,7 +31,7 @@ The important option is `--native`.  It runs the AquaVM as the native code that 
 Run `air run --help` to see all common parameters.
 
 ### Plain mode
-In the `--plain` mode, the parameters like AIR script path, data path, previous data path and other particle fields can be provided in separate arguments, of which only `--data` is the required one (and AIR script is read from stdin by default).
+In the `--plain` mode, the parameters like AIR script path, data path, previous data path and other particle fields can be provided in separate arguments (all of them are optional, and AIR script is read from stdin by default).
 
 Run `air run --plain --help` to see all plain mode options.
 
@@ -63,17 +63,23 @@ Please, note that currently tracing outputs to stdout, and execution result is a
 
 ### AIR interpreter
 
-You need the `marine` tool installed.  Run following command in the repo's root directory:
+Unless you intend to run AIR in native mode, you will need a AIR interpreter build in WASM.  You can build it with the `marine` tool.  Run following command in the repo's root directory:
 
 ``` sh
 marine build --features marine --package air-interpreter --release
 ```
 
-It will output the binary to default `--interpreter` path at `target/wasm32-wasi/release/air_interpreter_server.wasm`; if you wish to run the `air` from arbitrary place, store the `air_interpreter_server.wasm` binary in a cool dry place and set `AIR_INTERPRETER_WASM_PATH` variable.
+It will output the binary to default `--interpreter` path at `target/wasm32-wasi/release/air_interpreter_server.wasm`; if you wish to run the `air` from arbitrary place, store the `air_interpreter_server.wasm` binary in a cool dry place and either set `AIR_INTERPRETER_WASM_PATH` variable or use the `--interpreter` common option of `air run`.
 
 ## `air` binary
 
-You need to have Rust toolchain and its `cargo` utility installed.  Run this command from the repo's root directory:
+You need to have Rust toolchain and its `cargo` utility installed.  Run this command to install latest released version from `crates.io`:
+
+``` sh
+cargo install aquavm-air-cli
+```
+
+You may install developer version from the repo's root:
 
 ``` sh
 cargo install --path tools/cli/air
@@ -81,7 +87,7 @@ cargo install --path tools/cli/air
 
 ## `air` CLI native build
 
-You can have fully native or pure WASM `air` CLI build with the following commands:
+You can build fully native or pure WASM `air` CLI build with the following commands:
 
 ``` sh
 cargo build --no-default-features --release -p aquavm-air-cli

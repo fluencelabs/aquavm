@@ -86,7 +86,7 @@ class Bench:
                 ) + [
                     "--tracing-params", tracing_params,
                     "--plain",
-                    "--data", self.cur_data_path,
+                    "--current-data", self.cur_data_path,
                     "--prev-data", self.prev_data_path,
                     "--script", self.air_script_path,
                 ] + [

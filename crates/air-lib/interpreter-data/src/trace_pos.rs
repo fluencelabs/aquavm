@@ -14,73 +14,43 @@
  * limitations under the License.
  */
 
-use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Display},
-    ops::{Add, AddAssign, Sub},
-};
+use air_utils::auto_checked_add;
+
+use newtype_derive::*;
+
+use serde::Deserialize;
+use serde::Serialize;
+
+use std::convert::TryFrom;
+
+pub type PosType = u32;
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 #[repr(transparent)]
-pub struct TracePos(usize);
+pub struct TracePos(PosType);
 
-impl TracePos {
-    pub fn checked_add(self, other: usize) -> Option<Self> {
-        self.0.checked_add(other).map(Self)
-    }
-}
-
-impl Debug for TracePos {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
-}
-
-impl Display for TracePos {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
-impl From<usize> for TracePos {
-    fn from(pos: usize) -> Self {
-        TracePos(pos)
-    }
-}
+NewtypeFrom! { () pub struct TracePos(PosType); }
+NewtypeAdd! { (PosType) pub struct TracePos(PosType); }
+NewtypeAdd! { () pub struct TracePos(PosType); }
+NewtypeAddAssign! { () pub struct TracePos(PosType); }
+NewtypeAddAssign! { (PosType) pub struct TracePos(PosType); }
+NewtypeSub! { () pub struct TracePos(PosType); }
+NewtypeSub! { (PosType) pub struct TracePos(PosType); }
+NewtypeDebug! { () pub struct TracePos(PosType); }
+NewtypeDisplay! { () pub struct TracePos(PosType); }
+auto_checked_add![TracePos];
 
 impl From<TracePos> for usize {
-    fn from(pos: TracePos) -> Self {
-        pos.0
+    fn from(value: TracePos) -> Self {
+        value.0 as Self
     }
 }
 
-impl AddAssign<usize> for TracePos {
-    fn add_assign(&mut self, rhs: usize) {
-        self.0 += rhs;
-    }
-}
+impl TryFrom<usize> for TracePos {
+    type Error = <PosType as TryFrom<usize>>::Error;
 
-impl Add<usize> for TracePos {
-    type Output = Self;
-
-    fn add(self, rhs: usize) -> Self::Output {
-        TracePos(self.0 + rhs)
-    }
-}
-
-impl Sub<usize> for TracePos {
-    type Output = Self;
-
-    fn sub(self, rhs: usize) -> Self::Output {
-        TracePos(self.0 - rhs)
-    }
-}
-
-impl Sub<TracePos> for TracePos {
-    type Output = usize;
-
-    fn sub(self, rhs: TracePos) -> Self::Output {
-        self.0 - rhs.0
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        PosType::try_from(value).map(TracePos)
     }
 }

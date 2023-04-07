@@ -34,6 +34,7 @@ mod state_automata;
 
 pub use data_keeper::KeeperError;
 pub use errors::GenerationCompatificationError;
+pub use errors::IntConversionError;
 pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;
 pub use merger::DataType;

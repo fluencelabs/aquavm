@@ -22,6 +22,8 @@ use air_interpreter_data::ExecutedState;
 use air_interpreter_data::TracePos;
 use thiserror::Error as ThisError;
 
+use std::num::TryFromIntError;
+
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
 #[allow(clippy::enum_variant_names)]
@@ -56,4 +58,11 @@ impl GenerationCompatificationError {
     pub fn points_to_invalid_state(position: TracePos, state: ExecutedState) -> Self {
         GenerationCompatificationError::TracePosPointsToInvalidState { position, state }
     }
+}
+
+#[derive(ThisError, Debug)]
+#[allow(clippy::enum_variant_names)]
+pub enum IntConversionError {
+    #[error("trying to cast integer types, there is an error {0:?}")]
+    TryIntoTracePosError(TryFromIntError),
 }
