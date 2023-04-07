@@ -19,10 +19,12 @@ use super::FSMResult;
 use super::MergeCtx;
 use crate::TracePos;
 
+pub type TraceLen = u32;
+
 #[derive(Debug, Default, Clone, Copy)]
 pub(super) struct CtxState {
     pub(super) pos: TracePos,
-    pub(super) subtrace_len: usize,
+    pub(super) subtrace_len: TraceLen,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -32,7 +34,7 @@ pub(super) struct CtxStatesPair {
 }
 
 impl CtxState {
-    pub(super) fn new(pos: TracePos, subtrace_len: usize) -> Self {
+    pub(super) fn new(pos: TracePos, subtrace_len: TraceLen) -> Self {
         Self { pos, subtrace_len }
     }
 

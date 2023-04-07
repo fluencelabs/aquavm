@@ -15,9 +15,12 @@
  */
 
 use super::ExecutedState;
+// use ::TraceLen;
 use crate::TracePos;
+
 use serde::Deserialize;
 use serde::Serialize;
+use std::convert::TryInto;
 use std::ops::Deref;
 use std::ops::Index;
 use std::ops::IndexMut;
@@ -41,6 +44,10 @@ impl ExecutionTrace {
 
     pub fn push(&mut self, value: ExecutedState) {
         self.0.push(value);
+    }
+
+    pub fn trace_states_count(&self) -> TraceLen {
+        self.0.len().try_into().expect("try_into() TraceLen failed.")
     }
 }
 

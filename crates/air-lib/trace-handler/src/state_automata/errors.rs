@@ -16,6 +16,7 @@
 
 use super::KeeperError;
 use super::ParResult;
+use super::TraceLen;
 use crate::merger::MergeCtxType;
 use crate::ResolvedFold;
 use crate::TracePos;
@@ -46,7 +47,7 @@ pub enum StateFSMError {
 
     /// Errors occurred when ParResult.0 + ParResult.1 value is bigger than current subgraph size.
     #[error("underflow is occurred while calculating the new position of a {2} slider for resolved par {0:?} and current subtrace len {1}'")]
-    ParLenUnderflow(ParResult, usize, MergeCtxType),
+    ParLenUnderflow(ParResult, TraceLen, MergeCtxType),
 
     /// Errors occurred when {0}.fold_states_count + {1} overflows.
     #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current position {1}'")]

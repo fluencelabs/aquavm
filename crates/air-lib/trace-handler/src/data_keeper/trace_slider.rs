@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
+use std::convert::TryInto;
+
 use super::ExecutedState;
 use super::ExecutionTrace;
 use super::KeeperError::*;
 use super::KeeperResult;
+use crate::state_automata::TraceLen;
 use crate::TracePos;
+
+type SeenElements = u32;
 
 /// This slider is intended to slide on a subtrace inside provided trace. This subtrace
 /// is identified by position and len.
@@ -32,16 +37,16 @@ pub struct TraceSlider {
     position: TracePos,
 
     /// Length of a current subtrace.
-    subtrace_len: usize,
+    subtrace_len: TraceLen,
 
     /// Count of seen elements since the last position update.
-    seen_elements: usize,
+    seen_elements: SeenElements,
 }
 
 impl TraceSlider {
     pub(crate) fn new(trace: impl Into<ExecutionTrace>) -> Self {
         let trace = trace.into();
-        let subtrace_len = trace.len();
+        let subtrace_len = trace.len().try_into().unwrap();
 
         Self {
             trace,
@@ -54,7 +59,7 @@ impl TraceSlider {
     /// and None otherwise.
     #[allow(clippy::suspicious_operation_groupings)]
     pub(crate) fn next_state(&mut self) -> Option<ExecutedState> {
-        if self.seen_elements >= self.subtrace_len || usize::from(self.position) >= self.trace.len() {
+        if self.seen_elements >= self.subtrace_len.into() || usize::from(self.position) >= self.trace.len() {
             return None;
         }
 
@@ -64,10 +69,9 @@ impl TraceSlider {
         Some(result)
     }
 
-    pub(crate) fn set_position_and_len(&mut self, position: TracePos, subtrace_len: usize) -> KeeperResult<()> {
-        let pos: usize = position.into();
+    pub(crate) fn set_position_and_len(&mut self, position: TracePos, subtrace_len: TraceLen) -> KeeperResult<()> {
         // it's possible to set empty subtrace_len and inconsistent position
-        if subtrace_len != 0 && pos + subtrace_len > self.trace.len() {
+        if subtrace_len != 0 && position + subtrace_len > self.trace.len().try_into().unwrap() {
             return Err(SetSubtraceLenAndPosFailed {
                 requested_pos: position,
                 requested_subtrace_len: subtrace_len,
@@ -82,8 +86,8 @@ impl TraceSlider {
         Ok(())
     }
 
-    pub(crate) fn set_subtrace_len(&mut self, subtrace_len: usize) -> KeeperResult<()> {
-        let trace_remainder = self.trace.len() - usize::from(self.position);
+    pub(crate) fn set_subtrace_len(&mut self, subtrace_len: TraceLen) -> KeeperResult<()> {
+        let trace_remainder: TraceLen = (TracePos::from(self.trace_len()) - self.position).into();
         if trace_remainder < subtrace_len {
             return Err(SetSubtraceLenFailed {
                 requested_subtrace_len: subtrace_len,
@@ -102,7 +106,7 @@ impl TraceSlider {
         self.position
     }
 
-    pub(crate) fn subtrace_len(&self) -> usize {
+    pub(crate) fn subtrace_len(&self) -> TraceLen {
         self.subtrace_len - self.seen_elements
     }
 
@@ -111,7 +115,7 @@ impl TraceSlider {
         self.trace.get(position)
     }
 
-    pub(super) fn trace_len(&self) -> usize {
-        self.trace.len()
+    pub(super) fn trace_len(&self) -> TraceLen {
+        self.trace.len().try_into().unwrap()
     }
 }

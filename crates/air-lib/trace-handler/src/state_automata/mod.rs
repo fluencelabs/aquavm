@@ -23,6 +23,7 @@ mod utils;
 
 pub use errors::StateFSMError;
 pub use par_fsm::SubgraphType;
+pub use utils::TraceLen;
 
 pub(crate) type FSMResult<T> = std::result::Result<T, StateFSMError>;
 

@@ -23,10 +23,12 @@ use air_interpreter_data::TracePos;
 
 use std::collections::HashMap;
 
+pub type FoldStatesCount = u32;
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct ResolvedFold {
     pub lore: HashMap<TracePos, ResolvedSubTraceDescs>,
-    pub fold_states_count: usize,
+    pub fold_states_count: FoldStatesCount,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -78,10 +80,10 @@ pub(super) fn resolve_fold_lore(fold: &FoldResult, merge_ctx: &MergeCtx) -> Merg
 
 // TODO: in future it's possible to change a format of a Fold state to one behaves like Par,
 // because this function adds some overhead
-fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(usize, Vec<LoresLen>)> {
+fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeResult<(FoldStatesCount, Vec<LoresLen>)> {
     let subtraces_count = fold.lore.len();
     let mut lens = Vec::with_capacity(subtraces_count);
-    let mut fold_states_count: usize = 0;
+    let mut fold_states_count: FoldStatesCount = 0;
     let mut last_seen_generation = 0;
     let mut last_seen_generation_pos = 0;
     let mut cum_after_len = 0;
@@ -106,8 +108,8 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
         let after_len = subtrace_lore.subtraces_desc[1].subtrace_len;
         // this checks for overflow both cum_before_len and cum_after_len
         fold_states_count = fold_states_count
-            .checked_add(before_len as usize)
-            .and_then(|v| v.checked_add(after_len as usize))
+            .checked_add(before_len)
+            .and_then(|v| v.checked_add(after_len))
             .ok_or_else(|| FoldResultError::SubtraceLenOverflow {
                 fold_result: fold.clone(),
                 count: subtrace_id,
@@ -155,7 +157,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
 }
 
 impl ResolvedFold {
-    pub fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
+    pub fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: FoldStatesCount) -> Self {
         Self {
             lore,
             fold_states_count,

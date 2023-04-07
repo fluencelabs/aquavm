@@ -578,7 +578,7 @@ fn fold_pos_overflow() {
     );
     let resolved_fold = ResolvedFold::new(
         hashmap![value_pos.into() => fold_lore],
-        (wrong_after_subtrace_len + 1) as usize,
+        wrong_after_subtrace_len + 1,
     );
     let expected_error = UncatchableError::TraceError {
         trace_error: StateFSMError(FoldPosOverflow(resolved_fold, before_subtrace_pos.into(), Previous)),

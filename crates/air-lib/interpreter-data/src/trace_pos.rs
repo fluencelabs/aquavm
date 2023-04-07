@@ -54,3 +54,11 @@ impl TryFrom<usize> for TracePos {
         PosType::try_from(value).map(TracePos)
     }
 }
+
+impl std::ops::Sub<TracePos> for u32 {
+    type Output = u32;
+
+    fn sub(self, rhs: TracePos) -> Self::Output {
+        self.sub(rhs.0)
+    }
+}

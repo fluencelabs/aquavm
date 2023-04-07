@@ -45,10 +45,10 @@ fn compute_new_state(par_result: ParResult, subgraph_type: SubgraphType, slider:
 
     assert!(std::mem::size_of_val(&par_subgraph_len) <= std::mem::size_of::<usize>());
     let new_subtrace_len = match subgraph_type {
-        SubgraphType::Left => par_subgraph_len as usize,
+        SubgraphType::Left => par_subgraph_len,
         SubgraphType::Right => slider
             .subtrace_len()
-            .checked_sub(par_subgraph_len as usize)
+            .checked_sub(par_subgraph_len)
             .ok_or_else(|| StateFSMError::ParLenUnderflow(par_result, slider.subtrace_len(), MergeCtxType::Current))?,
     };
 

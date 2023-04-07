@@ -39,6 +39,7 @@ pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;
 pub use merger::DataType;
 pub use merger::MergeError;
+pub use state_automata::utils::TraceLen;
 pub use state_automata::StateFSMError;
 pub use state_automata::SubgraphType;
 
