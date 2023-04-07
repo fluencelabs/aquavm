@@ -40,7 +40,7 @@ pub(super) fn merge_global_streams(
             continue;
         }
 
-        let global_stream = Stream::from_generations_count(0, current_gens_count);
+        let global_stream = Stream::from_generations_count(0.into(), current_gens_count);
         let descriptor = StreamDescriptor::global(global_stream);
         global_streams.insert(stream_name, vec![descriptor]);
     }

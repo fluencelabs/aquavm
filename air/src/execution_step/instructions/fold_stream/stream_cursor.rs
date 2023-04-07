@@ -35,7 +35,7 @@ impl StreamCursor {
     pub(super) fn construct_iterables(&mut self, stream: &Stream) -> Vec<IterableValue> {
         let iterables =
             construct_stream_iterable_values(stream, Generation::Nth(self.last_seen_generation), Generation::Last);
-        self.last_seen_generation = stream.last_non_empty_generation() /*as u32*/;
+        self.last_seen_generation = stream.last_non_empty_generation();
 
         iterables
     }

@@ -87,9 +87,9 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_generation: impl Into<GenerationIdx>) -> Self {
+    pub fn new(res_generation: GenerationIdx) -> Self {
         Self {
-            res_generations: vec![res_generation.into()],
+            res_generations: vec![res_generation],
         }
     }
 }

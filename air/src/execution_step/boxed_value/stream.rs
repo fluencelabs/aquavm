@@ -24,6 +24,8 @@ use air_interpreter_data::GenerationIdx;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
+use std::convert::TryFrom;
+
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
 #[derive(Debug, Default, Clone)]
@@ -39,15 +41,11 @@ pub struct Stream {
 }
 
 impl Stream {
-    pub(crate) fn from_generations_count(
-        previous_count: impl Into<GenerationIdx>,
-        current_count: impl Into<GenerationIdx>,
-    ) -> Self {
-        let previous_count = previous_count.into();
+    pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
         let last_generation_count = GenerationIdx::from(1);
         // TODO: bubble up an overflow error instead of expect
         let overall_count = previous_count
-            .checked_add(current_count.into())
+            .checked_add(current_count)
             .and_then(|value| value.checked_add(last_generation_count))
             .expect("it shouldn't overflow");
         Self {
@@ -243,7 +241,9 @@ impl Generation {
     }
 
     pub fn nth(generation_id: u32) -> Self {
-        Self::Nth((generation_id as usize).into())
+        let generation_id = usize::try_from(generation_id).unwrap();
+        let generation_idx = GenerationIdx::from(generation_id);
+        Self::Nth(generation_idx)
     }
 }
 
@@ -334,7 +334,7 @@ mod test {
     fn test_slice_iter() {
         let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
         let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let mut stream = Stream::from_generations_count(2, 0);
+        let mut stream = Stream::from_generations_count(2.into(), 0.into());
 
         stream
             .add_value(value_1, Generation::nth(0), ValueSource::PreviousData)
@@ -358,7 +358,7 @@ mod test {
 
     #[test]
     fn test_slice_on_empty_stream() {
-        let stream = Stream::from_generations_count(2, 0);
+        let stream = Stream::from_generations_count(2.into(), 0.into());
 
         let slice = stream.slice_iter(Generation::nth(0), Generation::nth(1));
         assert!(slice.is_none());
@@ -377,7 +377,7 @@ mod test {
     fn generation_from_current_data() {
         let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
         let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
-        let mut stream = Stream::from_generations_count(5, 5);
+        let mut stream = Stream::from_generations_count(5.into(), 5.into());
 
         stream
             .add_value(value_1.clone(), Generation::nth(2), ValueSource::CurrentData)

@@ -199,7 +199,7 @@ fn incompatible_executed_states() {
 
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::IncompatibleExecutedStates(
-            ExecutedState::Ap(ApResult::new(1)),
+            ExecutedState::Ap(ApResult::new(1.into())),
             scalar!("", peer = vm_peer_id),
         )),
         instruction: "ap scalar $stream".to_string(),

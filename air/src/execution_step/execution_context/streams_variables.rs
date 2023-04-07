@@ -147,7 +147,7 @@ impl Streams {
         }
         let gens_count = last_descriptor.stream.compactify(trace_ctx)?;
 
-        self.collect_stream_generation(name, position, gens_count /*as u32*/);
+        self.collect_stream_generation(name, position, gens_count);
         Ok(())
     }
 
