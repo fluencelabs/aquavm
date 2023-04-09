@@ -22,6 +22,8 @@ use crate::log_instruction;
 use air_parser::ast::New;
 use air_parser::ast::NewArgument;
 
+use std::convert::TryFrom;
+
 impl<'i> super::ExecutableInstruction<'i> for New<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(new, exec_ctx, trace_ctx);
@@ -51,9 +53,8 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
     match &new.argument {
         NewArgument::Stream(stream) => {
             let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
-            exec_ctx
-                .streams
-                .meet_scope_start(stream.name, new.span, iteration as usize);
+            let iteration = usize::try_from(iteration).unwrap();
+            exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start_scalar(scalar.name.to_string()),
         NewArgument::CanonStream(canon_stream) => exec_ctx
