@@ -24,8 +24,6 @@ use air_interpreter_data::GenerationIdx;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
-use std::convert::TryFrom;
-
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
 #[derive(Debug, Default, Clone)]
@@ -240,7 +238,10 @@ impl Generation {
         Self::Last
     }
 
+    #[cfg(test)]
     pub fn nth(generation_id: u32) -> Self {
+        use std::convert::TryFrom;
+
         let generation_id = usize::try_from(generation_id).unwrap();
         let generation_idx = GenerationIdx::from(generation_id);
         Self::Nth(generation_idx)
