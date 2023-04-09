@@ -99,7 +99,7 @@ pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
     ))))
 }
 
-pub fn par(left: usize, right: usize) -> ExecutedState {
+pub fn par(left: u32, right: u32) -> ExecutedState {
     let par_result = ParResult {
         left_size: left as _,
         right_size: right as _,
@@ -114,7 +114,7 @@ pub fn fold(lore: FoldLore) -> ExecutedState {
 }
 
 pub fn subtrace_lore(
-    value_pos: usize,
+    value_pos: impl Into<TracePos>,
     before: SubTraceDesc,
     after: SubTraceDesc,
 ) -> FoldSubTraceLore {

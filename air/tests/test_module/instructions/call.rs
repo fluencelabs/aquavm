@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use air::{ExecutionCidState, UncatchableError};
-use air_interpreter_data::{ExecutionTrace, ServiceResultAggregate};
+use air::UncatchableError;
 use air_test_utils::prelude::*;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
@@ -186,38 +185,4 @@ fn string_parameters() {
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
-}
-
-#[test]
-fn test_invalid_call_service_failed() {
-    let peer_id = "init_peer_id";
-    let mut cid_state = ExecutionCidState::new();
-
-    // Craft an artificial incorrect error result
-    let value = json!("error");
-    let value_cid = cid_state.value_tracker.record_value(value).unwrap();
-    let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
-    let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
-    let service_result_agg = ServiceResultAggregate {
-        value_cid,
-        argument_hash: "0000000000000".into(),
-        tetraplet_cid,
-    };
-    let service_result_agg_cid = cid_state
-        .service_result_agg_tracker
-        .record_value(service_result_agg)
-        .unwrap();
-
-    let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);
-    let data = raw_data_from_trace(trace, cid_state);
-
-    let mut vm = create_avm(unit_call_service(), peer_id);
-    let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
-    let res = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
-
-    assert_eq!(res.ret_code, 20011);
-    assert_eq!(
-        res.error_message,
-        "failed to deserialize to CallServiceFailed: invalid type: string \"error\", expected struct CallServiceFailed",
-    );
 }

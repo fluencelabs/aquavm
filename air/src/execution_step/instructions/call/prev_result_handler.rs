@@ -141,7 +141,7 @@ fn update_state_with_service_result<'i>(
     // try to get service result from call service result
     let result = try_to_service_result(service_result, &argument_hash, &tetraplet, exec_ctx, trace_ctx)?;
 
-    let trace_pos = trace_ctx.trace_pos();
+    let trace_pos = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
     let new_call_result =

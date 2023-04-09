@@ -25,6 +25,8 @@ use air_trace_handler::TraceHandlerError;
 
 use pretty_assertions::assert_eq;
 
+use std::convert::TryInto;
+
 #[test]
 fn par_early_exit() {
     let init_peer_id = "init_peer_id";
@@ -287,10 +289,16 @@ fn fold_early_exit() {
     let expected_state = unused!(error_value.clone(), peer = last_peer_checker_id, args = [error_value]);
 
     let bubbled_error_from_stream_1 = actual_trace.len() - 3;
-    assert_eq!(&actual_trace[bubbled_error_from_stream_1.into()], &expected_state);
+    assert_eq!(
+        &actual_trace[bubbled_error_from_stream_1.try_into().unwrap()],
+        &expected_state
+    );
 
     let bubbled_error_from_stream_2 = actual_trace.len() - 2;
-    assert_eq!(&actual_trace[bubbled_error_from_stream_2.into()], &expected_state);
+    assert_eq!(
+        &actual_trace[bubbled_error_from_stream_2.try_into().unwrap()],
+        &expected_state
+    );
 }
 
 #[test]
