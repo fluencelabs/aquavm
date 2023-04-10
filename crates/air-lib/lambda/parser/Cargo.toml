@@ -20,7 +20,7 @@ lalrpop = "0.19.9"
 [dependencies]
 air-lambda-ast = { version = "0.1.0", path = "../ast" }
 
-lalrpop-util = "0.19.8"
+lalrpop-util = "0.19.9"
 regex = "1.7.3"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
