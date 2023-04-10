@@ -21,7 +21,7 @@ lalrpop = "0.19.9"
 air-lambda-ast = { version = "0.1.0", path = "../lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../lambda/parser" }
 
-lalrpop-util = "0.19.8"
+lalrpop-util = "0.19.9"
 regex = "1.7.3"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
