@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::GenerationIdx;
+
 use super::ExecutionTrace;
 use super::KeeperError;
 use super::KeeperResult;
@@ -33,7 +35,7 @@ impl MergeCtx {
         Self { slider }
     }
 
-    pub(crate) fn try_get_generation(&self, position: TracePos) -> KeeperResult<u32> {
+    pub(crate) fn try_get_generation(&self, position: TracePos) -> KeeperResult<GenerationIdx> {
         use air_interpreter_data::*;
 
         let state = self
@@ -46,7 +48,7 @@ impl MergeCtx {
 
         match state {
             ExecutedState::Call(CallResult::Executed(ValueRef::Stream { generation, .. })) => Ok(*generation),
-            // such Aps are always preceded by Fold where corresponding stream could be used,
+            // such Aps are always preceded by Fold where corresponding stream could be used
             // so it's been already checked that res_generation is well-formed
             // and accessing 0th element is safe here
             ExecutedState::Ap(ap_result) => Ok(ap_result.res_generations[0]),

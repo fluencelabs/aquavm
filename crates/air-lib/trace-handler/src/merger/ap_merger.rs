@@ -30,7 +30,7 @@ pub enum MergerApResult {
 
 #[derive(Debug, Clone)]
 pub struct MetApResult {
-    pub generation: u32,
+    pub generation: GenerationIdx,
     pub value_source: ValueSource,
 }
 
@@ -83,7 +83,7 @@ fn prepare_merge_result(
 }
 
 impl MetApResult {
-    pub(crate) fn new(generation: u32, value_source: ValueSource) -> Self {
+    pub(crate) fn new(generation: GenerationIdx, value_source: ValueSource) -> Self {
         Self {
             generation,
             value_source,

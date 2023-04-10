@@ -95,7 +95,7 @@ fn issue_173() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$stream".to_string() => maplit::hashmap! {
-            AirPos::from(282) => vec![1,1]
+            AirPos::from(282) => vec![1.into(), 1.into()]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);

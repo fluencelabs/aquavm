@@ -266,7 +266,7 @@ fn incompatible_executed_states() {
 
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::IncompatibleExecutedStates(
-            ExecutedState::Ap(ApResult::new(1)),
+            ExecutedState::Ap(ApResult::new(1.into())),
             scalar!("", peer = vm_peer_id),
         )),
         instruction: "ap scalar $stream".to_string(),
@@ -336,7 +336,7 @@ fn invalid_dst_generations() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectApResult(
             ApResultError::InvalidDstGenerations(ApResult {
-                res_generations: vec![42, 42],
+                res_generations: vec![42.into(), 42.into()],
             }),
         )),
         instruction: String::from(r#"ap "a" $s"#),
