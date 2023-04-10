@@ -43,7 +43,7 @@ pub(crate) fn are_matchable_eq<'ctx>(
         ),
 
         (LastError(error_accessor), matchable) | (matchable, LastError(error_accessor)) => {
-            let (value, _) = prepare_last_error(error_accessor, exec_ctx)?;
+            let (value, _, _) = prepare_last_error(error_accessor, exec_ctx)?;
             compare_matchable(matchable, exec_ctx, make_object_comparator(value))
         }
 
@@ -82,29 +82,29 @@ pub(crate) fn are_matchable_eq<'ctx>(
         }
 
         (Variable(left_variable), Variable(right_variable)) => {
-            let (left_value, _) = resolve_ast_variable(left_variable, exec_ctx)?;
-            let (right_value, _) = resolve_ast_variable(right_variable, exec_ctx)?;
+            let (left_value, _, _) = resolve_ast_variable(left_variable, exec_ctx)?;
+            let (right_value, _, _) = resolve_ast_variable(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)
         }
 
         (Variable(left_variable), VariableWithLambda(right_variable)) => {
-            let (left_value, _) = resolve_ast_variable(left_variable, exec_ctx)?;
-            let (right_value, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
+            let (left_value, _, _) = resolve_ast_variable(left_variable, exec_ctx)?;
+            let (right_value, _, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)
         }
 
         (VariableWithLambda(left_variable), Variable(right_variable)) => {
-            let (left_value, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
-            let (right_value, _) = resolve_ast_variable(right_variable, exec_ctx)?;
+            let (left_value, _, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
+            let (right_value, _, _) = resolve_ast_variable(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)
         }
 
         (VariableWithLambda(left_variable), VariableWithLambda(right_variable)) => {
-            let (left_value, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
-            let (right_value, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
+            let (left_value, _, _) = resolve_ast_variable_wl(left_variable, exec_ctx)?;
+            let (right_value, _, _) = resolve_ast_variable_wl(right_variable, exec_ctx)?;
 
             Ok(left_value == right_value)
         }
@@ -127,7 +127,7 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         LastError(error_accessor) => {
-            let (jvalue, _) = prepare_last_error(error_accessor, exec_ctx)?;
+            let (jvalue, _, _) = prepare_last_error(error_accessor, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Literal(str) => {
@@ -155,11 +155,11 @@ fn compare_matchable<'ctx>(
             Ok(comparator(Cow::Owned(jvalue)))
         }
         Variable(variable) => {
-            let (jvalue, _) = resolve_ast_variable(variable, exec_ctx)?;
+            let (jvalue, _, _) = resolve_ast_variable(variable, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
         VariableWithLambda(variable) => {
-            let (jvalue, _) = resolve_ast_variable_wl(variable, exec_ctx)?;
+            let (jvalue, _, _) = resolve_ast_variable_wl(variable, exec_ctx)?;
             Ok(comparator(Cow::Owned(jvalue)))
         }
     }

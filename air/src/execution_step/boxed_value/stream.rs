@@ -15,7 +15,6 @@
  */
 
 use super::ExecutionResult;
-use super::ValueAggregate;
 use super::ValueAggregateWithProvenance;
 use crate::ExecutionError;
 use crate::JValue;
@@ -193,7 +192,7 @@ impl Stream {
         }
 
         let len = (end - start) as usize + 1;
-        let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> =
+        let iter: Box<dyn Iterator<Item = &[ValueAggregateWithProvenance]>> =
             Box::new(self.values.iter().skip(start as usize).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
 
@@ -303,25 +302,25 @@ impl fmt::Display for Generation {
 mod test {
     use super::Generation;
     use super::Stream;
-    use super::ValueAggregate;
+    use super::ValueAggregateWithProvenance;
     use super::ValueSource;
+    use crate::execution_step::Provenance;
+    use crate::execution_step::ValueAggregate;
 
+    use air_interpreter_cid::CID;
     use serde_json::json;
 
-    use air_trace_handler::merger::ValueSource;
     use std::rc::Rc;
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = ValueAggregate::new(
-            Rc::new(json!("value")),
-            <_>::default(),
-            1.into(),
+        let value_1 = ValueAggregateWithProvenance::new(
+            ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            Provenance::service_result(CID::new("some fake cid").into(), None),
         );
-        let value_2 = ValueAggregate::new(
-            Rc::new(json!("value")),
-            <_>::default(),
-            1.into(),
+        let value_2 = ValueAggregateWithProvenance::new(
+            ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            Provenance::service_result(CID::new("some fake cid").into(), None),
         );
         let mut stream = Stream::from_generations_count(2, 0);
 
@@ -364,15 +363,13 @@ mod test {
 
     #[test]
     fn generation_from_current_data() {
-        let value_1 = ValueAggregate::new(
-            Rc::new(json!("value_1")),
-            <_>::default(),
-            1.into(),
+        let value_1 = ValueAggregateWithProvenance::new(
+            ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
+            Provenance::service_result(CID::new("some fake cid").into(), None),
         );
-        let value_2 = ValueAggregate::new(
-            Rc::new(json!("value_2")),
-            <_>::default(),
-            2.into(),
+        let value_2 = ValueAggregateWithProvenance::new(
+            ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
+            Provenance::service_result(CID::new("some fake cid").into(), None),
         );
         let mut stream = Stream::from_generations_count(5, 5);
 

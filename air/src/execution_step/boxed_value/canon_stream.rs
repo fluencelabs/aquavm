@@ -61,8 +61,6 @@ impl CanonStream {
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
-        use std::ops::Deref;
-
         // TODO: this clone will be removed after boxed values
         let jvalue_array = self.values.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
         JValue::Array(jvalue_array)

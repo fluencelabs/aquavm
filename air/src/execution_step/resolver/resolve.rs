@@ -109,18 +109,18 @@ pub(crate) fn resolve_variable<'ctx, 'i>(
             match ctx.streams.get(name, position) {
                 Some(stream) => {
                     let ingredients = StreamJvaluableIngredients::new(stream, generation);
-                    Ok((Box::new(ingredients), Provenance::todo()))
+                    Ok((Box::new(ingredients), unreachable!("stream cannot be used as a value")))
                 }
                 // return an empty stream for not found stream
                 // here it ignores the join behaviour
-                None => Ok((Box::new(()), Provenance::todo())),
+                None => Ok((Box::new(()), unreachable!("stream cannot be used as a value"))),
             }
         }
         Variable::CanonStream { name, .. } => {
             let canon_stream_with_prov = ctx.scalars.get_canon_stream(name)?;
             Ok((
                 Box::new(&canon_stream_with_prov.canon_stream),
-                Provenance::canon(canon_stream_with_prov.cid, None),
+                Provenance::canon(canon_stream_with_prov.cid.clone(), None),
             ))
         }
     }

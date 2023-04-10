@@ -17,7 +17,6 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Provenance;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver;
@@ -116,7 +115,7 @@ fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
     tetraplet: Option<RcSecurityTetraplet>,
-    provenance: Provenance,
+    // TODO: should the last error preserve provenance?  Most likely, yes
 ) -> ExecutionResult<()> {
     exec_ctx
         .last_error_descriptor

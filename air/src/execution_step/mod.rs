@@ -41,9 +41,11 @@ pub mod errors_prelude {
 pub(super) use self::instructions::ExecutableInstruction;
 pub(super) use self::instructions::FoldState;
 pub(super) use boxed_value::Generation;
+pub(super) use boxed_value::Provenance;
 pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
+pub(super) use boxed_value::ValueAggregateWithProvenance;
 pub(crate) use errors::Joinable;
 pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;

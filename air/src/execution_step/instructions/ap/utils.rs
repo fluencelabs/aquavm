@@ -16,13 +16,13 @@
 
 use crate::execution_step::execution_context::StreamValueDescriptor;
 use crate::execution_step::Generation;
-use crate::execution_step::ValueAggregate;
+use crate::execution_step::ValueAggregateWithProvenance;
 
 use air_parser::ast;
 use air_trace_handler::merger::MergerApResult;
 
 pub(super) fn generate_value_descriptor<'stream>(
-    value: ValueAggregate,
+    value: ValueAggregateWithProvenance,
     stream: &'stream ast::Stream<'_>,
     ap_result: &MergerApResult,
 ) -> StreamValueDescriptor<'stream> {

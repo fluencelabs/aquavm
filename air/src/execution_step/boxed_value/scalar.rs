@@ -21,11 +21,10 @@ use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CanonResultAggregate;
 use air_interpreter_data::ServiceResultAggregate;
 use air_interpreter_data::TracePos;
-use fluence_app_service::SecurityTetraplet;
+use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -73,12 +72,13 @@ impl Provenance {
         Self::Canon { cid, lambda_path }
     }
 
+    // TODO remove me and refactor all the usages
     pub(crate) fn todo() -> Self {
         Self::Literal { lambda_path: None }
     }
 
     pub(crate) fn apply_lambda(&self, tetraplet: &SecurityTetraplet) -> Self {
-        let lambda_path = Some(tetraplet.json_path.into());
+        let lambda_path = Some(tetraplet.json_path.as_str().into());
         match self {
             Provenance::Literal { .. } => Self::Literal { lambda_path },
             Provenance::ServiceResult { cid, .. } => Self::ServiceResult {
@@ -133,7 +133,8 @@ impl<'i> ScalarRef<'i> {
             ScalarRef::Value(value) => (Box::new(value.value_aggregate.clone()), value.provenance.clone()),
             ScalarRef::IterableValue(fold_state) => {
                 let peeked_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
-                Box::new(peeked_value)
+                let provenance = peeked_value.provenance();
+                (Box::new(peeked_value), provenance)
             }
         }
     }

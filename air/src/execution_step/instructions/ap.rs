@@ -21,9 +21,9 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::Variable;
-use crate::execution_step::instructions::ValueAggregate;
-use crate::execution_step::instructions::ValueSource;
-use crate::execution_step::resolver::apply_lambda;
+use crate::execution_step::Provenance;
+use crate::execution_step::ValueAggregate;
+use crate::execution_step::ValueAggregateWithProvenance;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -74,7 +74,7 @@ fn to_merger_ap_result(instr: &Ap<'_>, trace_ctx: &mut TraceHandler) -> Executio
 fn populate_context<'ctx>(
     ap_result: &ast::ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
-    result: ValueAggregate,
+    result: ValueAggregateWithProvenance,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<u32>> {
     match ap_result {

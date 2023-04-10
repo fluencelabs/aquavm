@@ -100,7 +100,7 @@ impl IterableItem<'_> {
 
         ValueAggregateWithProvenance {
             value_aggregate: ValueAggregate::new(value, tetraplet, pos),
-            provenance: provenance.clone(),
+            provenance,
         }
     }
 }

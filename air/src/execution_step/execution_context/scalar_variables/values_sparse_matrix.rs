@@ -260,7 +260,7 @@ where
 
 impl<T> fmt::Display for ValuesSparseMatrix<T>
 where
-    T: fmt::Display,
+    T: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "current_depth: {}", self.current_depth)?;
@@ -269,7 +269,7 @@ where
             write!(f, "{name}: ")?;
 
             for value in values.iter() {
-                write!(f, "{value} ")?;
+                write!(f, "{value:?} ")?;
             }
             writeln!(f)?;
         }

@@ -51,7 +51,7 @@ pub(crate) fn resolve_peer_id_to_string<'i>(
     use crate::execution_step::resolver;
     use ast::ResolvableToPeerIdVariable::*;
 
-    let ((jvalue, _), name) = match value {
+    let ((jvalue, _, _), name) = match value {
         InitPeerId => return Ok(exec_ctx.run_parameters.init_peer_id.to_string()),
         Literal(value) => return Ok(value.to_string()),
         Scalar(scalar) => (resolver::resolve_ast_scalar(scalar, exec_ctx)?, scalar.name),
@@ -75,7 +75,7 @@ pub(crate) fn resolve_to_string<'i>(
     use crate::execution_step::resolver;
     use ast::ResolvableToStringVariable::*;
 
-    let ((jvalue, _), name) = match value {
+    let ((jvalue, _, _), name) = match value {
         Literal(value) => return Ok(value.to_string()),
         Scalar(scalar) => (resolver::resolve_ast_scalar(scalar, exec_ctx)?, scalar.name),
         ScalarWithLambda(scalar) => (resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?, scalar.name),

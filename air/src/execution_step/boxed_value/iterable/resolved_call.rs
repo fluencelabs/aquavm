@@ -17,7 +17,7 @@
 use super::Iterable;
 use super::IterableItem;
 use super::ValueAggregate;
-use crate::execution_step::boxed_value::ValueAggregateWithProvenance;
+use crate::execution_step::ValueAggregateWithProvenance;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;

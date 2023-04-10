@@ -235,7 +235,7 @@ impl<'i> ResolvedCall<'i> {
         let mut tetraplets = Vec::with_capacity(function_args.len());
 
         for instruction_value in function_args {
-            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
+            let (arg, tetraplet, _) = resolve_to_args(instruction_value, exec_ctx)?;
             call_arguments.push(arg);
             tetraplets.push(tetraplet);
         }

@@ -16,14 +16,12 @@
 
 mod values_sparse_matrix;
 
-use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::CanonStreamWithProvenance;
 use crate::execution_step::boxed_value::ScalarRef;
-use crate::execution_step::boxed_value::ValueAggregateWithProvenance;
 use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
-use crate::execution_step::ValueAggregate;
+use crate::execution_step::ValueAggregateWithProvenance;
 use values_sparse_matrix::ValuesSparseMatrix;
 
 use std::collections::HashMap;
@@ -104,13 +102,21 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregateWithProvenance) -> ExecutionResult<bool> {
+    pub(crate) fn set_scalar_value(
+        &mut self,
+        name: impl Into<String>,
+        value: ValueAggregateWithProvenance,
+    ) -> ExecutionResult<bool> {
         self.non_iterable_variables.set_value(name, value)
     }
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_canon_value(&mut self, name: impl Into<String>, value: CanonStreamWithProvenance) -> ExecutionResult<bool> {
+    pub(crate) fn set_canon_value(
+        &mut self,
+        name: impl Into<String>,
+        value: CanonStreamWithProvenance,
+    ) -> ExecutionResult<bool> {
         self.canon_streams.set_value(name, value)
     }
 
@@ -134,7 +140,10 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregateWithProvenance>> {
+    pub(crate) fn get_non_iterable_scalar(
+        &'i self,
+        name: &str,
+    ) -> ExecutionResult<Option<&'i ValueAggregateWithProvenance>> {
         self.non_iterable_variables.get_value(name)
     }
 
@@ -223,8 +232,8 @@ use std::fmt;
 
 impl<'i> fmt::Display for Scalars<'i> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "scalars:\n{:?}", self.non_iterable_variables)?;
-        writeln!(f, "canon_streams:\n{:?}", self.canon_streams)?;
+        writeln!(f, "scalars:\n{}", self.non_iterable_variables)?;
+        writeln!(f, "canon_streams:\n{}", self.canon_streams)?;
 
         for (name, _) in self.iterable_variables.iter() {
             // it's impossible to print an iterable value for now
