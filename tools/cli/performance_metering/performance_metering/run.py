@@ -16,6 +16,7 @@
 """Running benches."""
 
 import logging
+import operator
 import os
 import subprocess
 import typing
@@ -50,10 +51,14 @@ def discover_tests(bench_dir: typing.Optional[str]) -> list[Bench]:
     """Discover bench suite elements."""
     if bench_dir is None:
         bench_dir = DEFAULT_TEST_DIR
-    return list(map(
-        lambda filename: Bench(os.path.join(bench_dir, filename)),
-        sorted(os.listdir(bench_dir))
-    ))
+    return [
+        Bench(ent.path)
+        for ent in sorted(
+                os.scandir(bench_dir),
+                key=operator.attrgetter('name'),
+        )
+        if ent.is_dir(follow_symlinks=True)
+    ]
 
 
 def run(args):
