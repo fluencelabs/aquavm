@@ -31,8 +31,8 @@ use crate::SubTraceDesc;
 use air::ExecutionCidState;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_data::{CanonCidAggregate, GenerationIdx};
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -131,8 +131,8 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
     }
 }
 
-pub fn ap(generation: u32) -> ExecutedState {
-    let ap_result = ApResult::new(generation);
+pub fn ap(generation: impl Into<GenerationIdx>) -> ExecutedState {
+    let ap_result = ApResult::new(generation.into());
     ExecutedState::Ap(ap_result)
 }
 
@@ -357,7 +357,8 @@ impl ExecutedCallBuilder {
             value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Stream {
             cid: service_result_agg_cid,
-            generation,
+            // TODO: refactor it
+            generation: (generation as usize).into(),
         };
         ExecutedState::Call(CallResult::Executed(value))
     }
