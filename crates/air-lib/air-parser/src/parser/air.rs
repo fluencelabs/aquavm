@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.8"
+// auto-generated: "lalrpop 0.19.9"
 // sha3: 3ad9b22b9e4c2674604f2810bb1b7b297eecd7ba9091a4c8694fb34d4c670b6e
 use crate::ast::*;
 use crate::parser::ParserError;

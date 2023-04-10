@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air::interpreter_data::ExecutedState;
+use air::ExecutionCidState;
 use air::UncatchableError::*;
 use air_interpreter_cid::CID;
 use air_interpreter_data::ValueRef;
@@ -115,5 +117,36 @@ fn value_for_cid_not_found() {
 
     let missing_cid = String::from("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq");
     let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn malformed_call_service_failed() {
+    let peer_id = "init_peer_id";
+    let mut cid_state = ExecutionCidState::new();
+
+    // Craft an artificial incorrect error result
+    let value = json!("error");
+    let value_cid = cid_state.value_tracker.record_value(value.clone()).unwrap();
+    let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
+    let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
+    let service_result_agg = ServiceResultAggregate {
+        value_cid,
+        argument_hash: "0000000000000".into(),
+        tetraplet_cid,
+    };
+    let service_result_agg_cid = cid_state
+        .service_result_agg_tracker
+        .record_value(service_result_agg)
+        .unwrap();
+
+    let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);
+    let data = raw_data_from_trace(trace, cid_state);
+
+    let mut vm = create_avm(unit_call_service(), peer_id);
+    let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
+    let result = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
+    let expected_serde_error = serde_json::from_value::<CallServiceFailed>(value).unwrap_err();
+    let expected_error = MalformedCallServiceFailed(expected_serde_error);
     assert!(check_error(&result, expected_error));
 }
