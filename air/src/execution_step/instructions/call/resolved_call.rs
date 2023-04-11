@@ -20,6 +20,7 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
@@ -35,7 +36,6 @@ use air_trace_handler::merger::MergerCallResult;
 use air_trace_handler::TraceHandler;
 use air_utils::measure;
 
-use crate::execution_step::resolver::Resolvable;
 use std::rc::Rc;
 
 /// Represents Call instruction with resolved internal parts.
