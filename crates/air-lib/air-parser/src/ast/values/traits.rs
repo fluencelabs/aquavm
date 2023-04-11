@@ -68,3 +68,9 @@ impl fmt::Display for ImmutableVariableWithLambda<'_> {
         }
     }
 }
+
+impl fmt::Display for StreamMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}

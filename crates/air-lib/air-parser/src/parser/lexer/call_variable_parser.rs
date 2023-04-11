@@ -34,6 +34,7 @@ pub(super) fn try_parse_call_variable(
 enum MetTag {
     None,
     Stream,
+    StreamMap,
     CanonStream,
 }
 
@@ -291,6 +292,10 @@ impl<'input> CallVariableParser<'input> {
                 name,
                 position: self.start_pos,
             },
+            MetTag::StreamMap => Token::StreamMap {
+                name,
+                position: self.start_pos,
+            },
         }
     }
 
@@ -307,6 +312,11 @@ impl<'input> CallVariableParser<'input> {
                 position: self.start_pos,
             },
             MetTag::CanonStream => Token::CanonStreamWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            },
+            MetTag::StreamMap => Token::StreamMapWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
@@ -378,6 +388,7 @@ impl MetTag {
         match tag {
             '$' => Self::Stream,
             '#' => Self::CanonStream,
+            '%' => Self::StreamMap,
             _ => Self::None,
         }
     }

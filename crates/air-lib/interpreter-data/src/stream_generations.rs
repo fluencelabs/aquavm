@@ -22,6 +22,7 @@ use std::collections::HashMap;
 /// Mapping from a stream name to it's generation count.
 /// Similar to pi-calculus non-restricted names/channels.
 pub type GlobalStreamGens = HashMap<String, GenerationIdx>;
+pub type GlobalStreamMapGens = GlobalStreamGens;
 
 /// Mapping from a stream name to
 ///    position of a new instruction in a script that creates a scope for a stream
@@ -32,3 +33,4 @@ pub type GlobalStreamGens = HashMap<String, GenerationIdx>;
 /// where it was met.
 /// Similar to pi-calculus restricted names/channels.
 pub type RestrictedStreamGens = HashMap<String, HashMap<AirPos, Vec<GenerationIdx>>>;
+pub type RestrictedStreamMapGens = RestrictedStreamGens;
