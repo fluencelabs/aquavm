@@ -35,6 +35,7 @@ mod utils;
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::RunParameters;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
+pub use execution_step::execution_context::errors::StreamMapError;
 pub use execution_step::execution_context::ExecutionCidState;
 pub use execution_step::execution_context::LastError;
 pub use execution_step::CatchableError;

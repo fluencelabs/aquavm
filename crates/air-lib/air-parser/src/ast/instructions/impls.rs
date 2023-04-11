@@ -22,6 +22,20 @@ impl<'i> Ap<'i> {
     }
 }
 
+impl<'i> ApMap<'i> {
+    pub fn new(
+        key_argument: ApArgument<'i>,
+        argument: ApArgument<'i>,
+        result: ApResult<'i>,
+    ) -> Self {
+        Self {
+            key_argument,
+            argument,
+            result,
+        }
+    }
+}
+
 impl<'i> Call<'i> {
     pub fn new(
         triplet: Triplet<'i>,
@@ -126,6 +140,24 @@ impl<'i> FoldScalar<'i> {
 impl<'i> FoldStream<'i> {
     pub fn new(
         iterable: Stream<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        last_instruction: Option<Instruction<'i>>,
+        span: Span,
+    ) -> Self {
+        Self {
+            iterable,
+            iterator,
+            instruction: Rc::new(instruction),
+            last_instruction: last_instruction.map(Rc::new),
+            span,
+        }
+    }
+}
+
+impl<'i> FoldStreamMap<'i> {
+    pub fn new(
+        iterable: StreamMap<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
         last_instruction: Option<Instruction<'i>>,

@@ -44,6 +44,15 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Ap(apply))
     },
 
+    <left: @L> "(" ap <key:ApArgument> <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
+        let apply = ApMap::new(key, arg, result);
+
+        let span = Span::new(left, right);
+        validator.met_ap_map(&apply, span);
+
+        Box::new(Instruction::ApMap(apply))
+    },
+
     "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq::new(l, r))),
     "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par::new(l, r))),
     "(" never ")" => Box::new(Instruction::Never(Never)),
@@ -81,6 +90,17 @@ Instr: Box<Instruction<'input>> = {
         validator.meet_fold_stream(&fold, span);
 
         Box::new(Instruction::FoldStream(fold))
+    },
+
+    <left: @L> "(" fold <stream_map:StreamMap> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
+        let iterable = StreamMap::new(stream_map.0, stream_map.1);
+        let iterator = Scalar::new(iterator.0, iterator.1);
+        let span = Span::new(left, right);
+        let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+
+        validator.meet_fold_stream_map(&fold, span);
+
+        Box::new(Instruction::FoldStreamMap(fold))
     },
 
     <left: @L> "(" next <iterator:Scalar> ")" <right: @R> => {
@@ -128,6 +148,7 @@ Triplet: Triplet<'input> = {
 ApResult: ApResult<'input> = {
     <scalar:Scalar> => ApResult::scalar(scalar.0, scalar.1),
     <stream:Stream> => ApResult::stream(stream.0, stream.1),
+    <stream_map:StreamMap> => ApResult::stream_map(stream_map.0, stream_map.1),
 };
 
 CallOutput: CallOutputValue<'input> = {
@@ -177,6 +198,7 @@ ResolvableToStringVariable: ResolvableToStringVariable<'input> = {
 NewArgument: NewArgument<'input> = {
     <scalar:Scalar> => NewArgument::Scalar(Scalar::new(scalar.0, scalar.1)),
     <stream:Stream> => NewArgument::Stream(Stream::new(stream.0, stream.1)),
+    <stream:StreamMap> => NewArgument::StreamMap(StreamMap::new(stream.0, stream.1)),
     <canon_stream:CanonStream> => NewArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
 }
 
@@ -240,6 +262,7 @@ extern {
         Scalar => Token::Scalar { name:<&'input str>, position: <AirPos> },
         ScalarWithLambda => Token::ScalarWithLambda { name: <&'input str>, lambda: <LambdaAST<'input>>, position: <AirPos> },
         Stream => Token::Stream { name: <&'input str>, position: <AirPos> },
+        StreamMap => Token::StreamMap { name: <&'input str>, position: <AirPos> },
         CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
         CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 

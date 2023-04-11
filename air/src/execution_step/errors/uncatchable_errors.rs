@@ -15,6 +15,7 @@
  */
 
 use super::Stream;
+use crate::execution_step::boxed_value::StreamMap;
 use crate::execution_step::Generation;
 use crate::ToErrorCode;
 
@@ -94,6 +95,16 @@ pub enum UncatchableError {
              stream is {stream:?}"
     )]
     StreamDontHaveSuchGeneration { stream: Stream, generation: Generation },
+
+    /// Errors occurred while insertion of a value inside stream map that doesn't have corresponding generation.
+    #[error(
+        "stream map doesn't have generation with number {generation}, supplied to the interpreter data is corrupted,\n\
+            stream map is {stream_map:?}"
+    )]
+    StreamMapDontHaveSuchGeneration {
+        stream_map: StreamMap,
+        generation: Generation,
+    },
 
     #[error("failed to deserialize to CallServiceFailed: {0}")]
     MalformedCallServiceFailed(serde_json::Error),

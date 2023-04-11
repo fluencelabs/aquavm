@@ -24,6 +24,7 @@ use super::ImmutableVariableWithLambda;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
+use super::StreamMap;
 
 use air_lambda_ast::LambdaAST;
 
@@ -109,6 +110,8 @@ pub enum ApResult<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
+    #[serde(borrow)]
+    StreamMap(StreamMap<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -135,6 +138,8 @@ pub enum NewArgument<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
+    #[serde(borrow)]
+    StreamMap(StreamMap<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
 }

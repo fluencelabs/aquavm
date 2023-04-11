@@ -199,6 +199,18 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
     Instruction::Ap(Ap { argument, result })
 }
 
+pub(super) fn ap_with_map<'i>(
+    key: ApArgument<'i>,
+    argument: ApArgument<'i>,
+    result: ApResult<'i>,
+) -> Instruction<'i> {
+    Instruction::ApMap(ApMap {
+        key_argument: key,
+        argument,
+        result,
+    })
+}
+
 pub(super) fn canon<'i>(
     peer_pk: ResolvableToPeerIdVariable<'i>,
     stream: Stream<'i>,

@@ -22,7 +22,7 @@ use crate::UncatchableError;
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
-pub(super) fn apply_to_arg(
+pub(crate) fn apply_to_arg(
     argument: &ast::ApArgument<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,

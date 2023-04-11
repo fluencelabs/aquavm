@@ -21,7 +21,7 @@ use air_interpreter_data::GlobalStreamGens;
 
 use std::collections::HashMap;
 
-pub(super) fn merge_global_streams(
+pub(crate) fn merge_global_streams(
     previous_global_streams: GlobalStreamGens,
     current_global_streams: GlobalStreamGens,
 ) -> HashMap<String, Vec<StreamDescriptor>> {

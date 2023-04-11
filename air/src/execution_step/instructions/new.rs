@@ -56,6 +56,13 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
             let iteration = usize::try_from(iteration).unwrap();
             exec_ctx.streams.meet_scope_start(stream.name, new.span, iteration);
         }
+        NewArgument::StreamMap(stream_map) => {
+            let iteration = exec_ctx.tracker.new_tracker.get_iteration(position);
+            let iteration = usize::try_from(iteration).unwrap();
+            exec_ctx
+                .stream_maps
+                .meet_scope_start(stream_map.name, new.span, iteration);
+        }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_start_scalar(scalar.name.to_string()),
         NewArgument::CanonStream(canon_stream) => exec_ctx
             .scalars
@@ -72,6 +79,12 @@ fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut Tr
             exec_ctx
                 .streams
                 .meet_scope_end(stream.name.to_string(), position, trace_ctx)?;
+            Ok(())
+        }
+        NewArgument::StreamMap(stream_map) => {
+            exec_ctx
+                .stream_maps
+                .meet_scope_end(stream_map.name.to_string(), position, trace_ctx)?;
             Ok(())
         }
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_end_scalar(scalar.name),

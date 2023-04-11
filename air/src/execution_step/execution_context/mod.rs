@@ -18,6 +18,7 @@ mod cid_state;
 mod context;
 mod last_error;
 mod scalar_variables;
+mod stream_maps_variables;
 mod streams_variables;
 
 pub use last_error::*;
@@ -25,4 +26,5 @@ pub use last_error::*;
 pub use cid_state::ExecutionCidState;
 pub(crate) use context::*;
 pub(crate) use scalar_variables::*;
+pub(crate) use stream_maps_variables::*;
 pub(crate) use streams_variables::*;

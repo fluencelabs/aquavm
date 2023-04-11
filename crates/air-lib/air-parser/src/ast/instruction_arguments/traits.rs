@@ -25,6 +25,7 @@ impl fmt::Display for ApResult<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             Stream(stream) => write!(f, "{stream}"),
+            StreamMap(stream_map) => write!(f, "{stream_map}"),
         }
     }
 }
@@ -124,6 +125,7 @@ impl fmt::Display for NewArgument<'_> {
             Self::Scalar(scalar) => write!(f, "{scalar}"),
             Self::Stream(stream) => write!(f, "{stream}"),
             Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            Self::StreamMap(stream_map) => write!(f, "{stream_map}"),
         }
     }
 }

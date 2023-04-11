@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,59 +14,59 @@
  * limitations under the License.
  */
 
-use crate::execution_step::Stream;
+use crate::execution_step::StreamMap;
 
 use air_parser::ast::Span;
 use air_parser::AirPos;
 
 use std::fmt;
 
-pub(crate) struct StreamDescriptor {
-    pub(crate) span: Span,
-    pub(crate) stream: Stream,
+pub(super) struct StreamMapDescriptor {
+    pub(super) span: Span,
+    pub(super) stream_map: StreamMap,
 }
 
-impl StreamDescriptor {
-    pub(crate) fn global(stream: Stream) -> Self {
+impl StreamMapDescriptor {
+    pub(super) fn global(stream_map: StreamMap) -> Self {
         Self {
             span: Span::new(0.into(), usize::MAX.into()),
-            stream,
+            stream_map,
         }
     }
 
-    pub(crate) fn restricted(stream: Stream, span: Span) -> Self {
-        Self { span, stream }
+    pub(super) fn restricted(stream_map: StreamMap, span: Span) -> Self {
+        Self { span, stream_map }
     }
 }
 
-impl fmt::Display for StreamDescriptor {
+impl fmt::Display for StreamMapDescriptor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, " <{}> - <{}>: {}", self.span.left, self.span.right, self.stream)
+        write!(f, " <{}> - <{}>: {}", self.span.left, self.span.right, self.stream_map)
     }
 }
 
-pub(crate) fn find_closest<'d>(
-    descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
+pub(super) fn find_closest<'d>(
+    descriptors: impl DoubleEndedIterator<Item = &'d StreamMapDescriptor>,
     position: AirPos,
-) -> Option<&'d Stream> {
+) -> Option<&'d StreamMap> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
         if descriptor.span.contains_position(position) {
-            return Some(&descriptor.stream);
+            return Some(&descriptor.stream_map);
         }
     }
 
     None
 }
 
-pub(crate) fn find_closest_mut<'d>(
-    descriptors: impl DoubleEndedIterator<Item = &'d mut StreamDescriptor>,
+pub(super) fn find_closest_mut<'d>(
+    descriptors: impl DoubleEndedIterator<Item = &'d mut StreamMapDescriptor>,
     position: AirPos,
-) -> Option<&'d mut Stream> {
+) -> Option<&'d mut StreamMap> {
     // descriptors are placed in a order of decreasing scopes, so it's enough to get the latest suitable
     for descriptor in descriptors.rev() {
         if descriptor.span.contains_position(position) {
-            return Some(&mut descriptor.stream);
+            return Some(&mut descriptor.stream_map);
         }
     }
 
