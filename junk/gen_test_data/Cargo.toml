@@ -1,0 +1,11 @@
+[package]
+name = "gen_test_data_dashboard"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+air-test-utils = { path = "../../crates/air-lib/test-utils" , features = ["test_with_native_code"] }
+maplit = "1.0.2"
+serde_json = "1.0.91"
