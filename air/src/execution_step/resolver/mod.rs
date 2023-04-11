@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-mod resolve;
+mod immutable_value;
+mod resolvable;
 
-pub(crate) use resolve::*;
+pub(crate) use resolvable::Resolvable;
 
 use super::RcSecurityTetraplets;

@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use crate::execution_step::CatchableError;
 use crate::JValue;
 
+use crate::execution_step::resolver::Resolvable;
 use air_parser::ast;
 use polyplets::ResolvedTriplet;
 
@@ -48,18 +49,14 @@ pub(crate) fn resolve_peer_id_to_string<'i>(
     value: &ast::ResolvableToPeerIdVariable<'i>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<String> {
-    use crate::execution_step::resolver;
     use ast::ResolvableToPeerIdVariable::*;
 
     let ((jvalue, _), name) = match value {
         InitPeerId => return Ok(exec_ctx.run_parameters.init_peer_id.to_string()),
         Literal(value) => return Ok(value.to_string()),
-        Scalar(scalar) => (resolver::resolve_ast_scalar(scalar, exec_ctx)?, scalar.name),
-        ScalarWithLambda(scalar) => (resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?, scalar.name),
-        CanonStreamWithLambda(canon_stream) => (
-            resolver::resolve_ast_canon_wl(canon_stream, exec_ctx)?,
-            canon_stream.name,
-        ),
+        Scalar(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
+        ScalarWithLambda(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
+        CanonStreamWithLambda(canon_stream) => (canon_stream.resolve(exec_ctx)?, canon_stream.name),
     };
 
     try_jvalue_to_string(jvalue, name)
@@ -72,17 +69,13 @@ pub(crate) fn resolve_to_string<'i>(
     value: &ast::ResolvableToStringVariable<'i>,
     exec_ctx: &ExecutionCtx<'i>,
 ) -> ExecutionResult<String> {
-    use crate::execution_step::resolver;
     use ast::ResolvableToStringVariable::*;
 
     let ((jvalue, _), name) = match value {
         Literal(value) => return Ok(value.to_string()),
-        Scalar(scalar) => (resolver::resolve_ast_scalar(scalar, exec_ctx)?, scalar.name),
-        ScalarWithLambda(scalar) => (resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?, scalar.name),
-        CanonStreamWithLambda(canon_stream) => (
-            resolver::resolve_ast_canon_wl(canon_stream, exec_ctx)?,
-            canon_stream.name,
-        ),
+        Scalar(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
+        ScalarWithLambda(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
+        CanonStreamWithLambda(canon_stream) => (canon_stream.resolve(exec_ctx)?, canon_stream.name),
     };
 
     try_jvalue_to_string(jvalue, name)

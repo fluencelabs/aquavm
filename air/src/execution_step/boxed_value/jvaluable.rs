@@ -19,7 +19,7 @@ mod cell_vec_resolved_call_result;
 mod empty_stream;
 mod iterable_item;
 mod resolved_call_result;
-mod stream;
+//mod stream;
 
 use super::iterable::IterableItem;
 use super::ExecutionResult;
@@ -31,7 +31,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
-pub(crate) use stream::StreamJvaluableIngredients;
+//pub(crate) use stream::StreamJvaluableIngredients;
 
 use std::borrow::Cow;
 

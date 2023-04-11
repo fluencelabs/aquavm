@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-mod canon_stream;
-mod iterable;
-mod jvaluable;
-mod scalar;
-mod stream;
-mod utils;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::ExecutionResult;
+use crate::execution_step::RcSecurityTetraplets;
+use crate::JValue;
 
-pub(crate) use canon_stream::*;
-pub(crate) use iterable::*;
-pub(crate) use jvaluable::*;
-pub(crate) use scalar::ScalarRef;
-pub(crate) use scalar::ValueAggregate;
-pub(crate) use stream::Generation;
-pub(crate) use stream::Stream;
-pub(crate) use utils::populate_tetraplet_with_lambda;
-
-use super::ExecutionResult;
+pub(crate) trait Resolvable {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)>;
+}
