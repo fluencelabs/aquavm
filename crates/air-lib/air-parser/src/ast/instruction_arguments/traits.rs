@@ -25,6 +25,7 @@ impl fmt::Display for ApResult<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             Stream(stream) => write!(f, "{stream}"),
+            StreamMap(stream_map) => write!(f, "{stream_map}"),
         }
     }
 }

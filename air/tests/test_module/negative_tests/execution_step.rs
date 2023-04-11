@@ -16,6 +16,9 @@
 
 use air::CatchableError;
 use air::LambdaError;
+use air::StreamMapError::FloatMapKeyIsUnsupported;
+use air::StreamMapError::UnsupportedMapKeyType;
+
 use air_test_utils::prelude::*;
 
 #[test]
@@ -540,5 +543,40 @@ fn canon_stream_not_have_enough_values_call_arg() {
     assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
     let expected_error =
         CatchableError::LambdaApplierError(LambdaError::CanonStreamNotHaveEnoughValues { stream_size: 0, idx: 0 });
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn float_map_key_is_unsupported() {
+    let mut local_vm = create_avm(echo_call_service(), "local_peer_id");
+
+    let map_name = "%map";
+    let join_stream_script = f!(r#"
+        (ap 0.5 "serv1" %map)
+     "#);
+
+    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let expected_error = CatchableError::StreamMapError(FloatMapKeyIsUnsupported {
+        variable_name: String::from(map_name),
+    });
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn unsupported_map_key_type() {
+    let mut local_vm = create_avm(echo_call_service(), "local_peer_id");
+
+    let map_name = "%map";
+    let join_stream_script = f!(r#"
+    (seq
+        (ap "a" some)
+        (ap some "serv1" %map)
+    )
+     "#);
+
+    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let expected_error = CatchableError::StreamMapError(UnsupportedMapKeyType {
+        variable_name: String::from(map_name),
+    });
     assert!(check_error(&result, expected_error));
 }

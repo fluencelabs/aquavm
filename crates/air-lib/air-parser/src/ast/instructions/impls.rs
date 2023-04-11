@@ -17,8 +17,23 @@
 use super::*;
 
 impl<'i> Ap<'i> {
-    pub fn new(argument: ApArgument<'i>, result: ApResult<'i>) -> Self {
-        Self { argument, result }
+    pub fn new(
+        key_option: Option<ApArgument<'i>>,
+        argument: ApArgument<'i>,
+        result: ApResult<'i>,
+    ) -> Self {
+        match key_option {
+            Some(key) => Self {
+                key_argument: Some(key),
+                argument,
+                result,
+            },
+            None => Self {
+                key_argument: None,
+                argument,
+                result,
+            },
+        }
     }
 }
 
@@ -126,6 +141,24 @@ impl<'i> FoldScalar<'i> {
 impl<'i> FoldStream<'i> {
     pub fn new(
         iterable: Stream<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        last_instruction: Option<Instruction<'i>>,
+        span: Span,
+    ) -> Self {
+        Self {
+            iterable,
+            iterator,
+            instruction: Rc::new(instruction),
+            last_instruction: last_instruction.map(Rc::new),
+            span,
+        }
+    }
+}
+
+impl<'i> FoldStreamMap<'i> {
+    pub fn new(
+        iterable: StreamMap<'i>,
         iterator: Scalar<'i>,
         instruction: Instruction<'i>,
         last_instruction: Option<Instruction<'i>>,

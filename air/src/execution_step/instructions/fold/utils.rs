@@ -115,6 +115,28 @@ pub(crate) fn construct_stream_iterable_values(
         .collect::<Vec<_>>()
 }
 
+/// Constructs iterable value for given stream iterable.
+pub(crate) fn construct_stream_map_iterable_values(
+    stream_map: &StreamMap,
+    start: Generation,
+    end: Generation,
+) -> Vec<IterableValue> {
+    let stream_map_iter = match stream_map.slice_iter(start, end) {
+        Some(stream_map_iter) => stream_map_iter,
+        None => return vec![],
+    };
+
+    stream_map_iter
+        .filter(|iterable| !iterable.is_empty())
+        .map(|iterable| {
+            let call_results = iterable.to_vec();
+            let foldable = IterableVecResolvedCall::init(call_results);
+            let foldable: IterableValue = Box::new(foldable);
+            foldable
+        })
+        .collect::<Vec<_>>()
+}
+
 /// Constructs iterable value from resolved call result.
 fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {

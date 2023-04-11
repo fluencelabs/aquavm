@@ -34,6 +34,7 @@ impl fmt::Display for Instruction<'_> {
             Fail(fail) => write!(f, "{fail}"),
             FoldScalar(fold) => write!(f, "{fold}"),
             FoldStream(fold) => write!(f, "{fold}"),
+            FoldStreamMap(fold) => write!(f, "{fold}"),
             Never(never) => write!(f, "{never}"),
             Next(next) => write!(f, "{next}"),
             New(new) => write!(f, "{new}"),
@@ -92,6 +93,12 @@ impl fmt::Display for FoldScalar<'_> {
 }
 
 impl fmt::Display for FoldStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for FoldStreamMap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "fold {} {}", self.iterable, self.iterator)
     }

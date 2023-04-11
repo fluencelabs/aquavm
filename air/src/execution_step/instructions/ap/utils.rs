@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::execution_step::execution_context::StreamMapValueDescriptor;
 use crate::execution_step::execution_context::StreamValueDescriptor;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
@@ -37,6 +38,31 @@ pub(super) fn generate_value_descriptor<'stream>(
             stream.position,
         ),
         MergerApResult::Met(met_result) => StreamValueDescriptor::new(
+            value,
+            stream.name,
+            met_result.value_source,
+            Generation::Nth(met_result.generation),
+            stream.position,
+        ),
+    }
+}
+
+pub(super) fn generate_map_value_descriptor<'stream>(
+    value: ValueAggregate,
+    stream: &'stream ast::StreamMap<'_>,
+    ap_result: &MergerApResult,
+) -> StreamMapValueDescriptor<'stream> {
+    use air_trace_handler::merger::ValueSource;
+
+    match ap_result {
+        MergerApResult::NotMet => StreamMapValueDescriptor::new(
+            value,
+            stream.name,
+            ValueSource::PreviousData,
+            Generation::Last,
+            stream.position,
+        ),
+        MergerApResult::Met(met_result) => StreamMapValueDescriptor::new(
             value,
             stream.name,
             met_result.value_source,

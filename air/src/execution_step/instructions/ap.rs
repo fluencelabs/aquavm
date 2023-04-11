@@ -20,11 +20,17 @@ mod utils;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::execution_context::errors::StreamMapError::FloatMapKeyIsUnsupported;
+use crate::execution_step::execution_context::errors::StreamMapError::MapKeyIsAbsent;
+use crate::execution_step::execution_context::errors::StreamMapError::UnsupportedMapKeyType;
 use crate::execution_step::instructions::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use crate::CatchableError;
 use crate::JValue;
 use crate::SecurityTetraplet;
+use air_parser::ast::ApArgument;
+use air_parser::ast::Number;
 use apply_to_arguments::*;
 use utils::*;
 
@@ -46,7 +52,13 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
 
         let merger_ap_result = to_merger_ap_result(self, trace_ctx)?;
-        let maybe_generation = populate_context(&self.result, &merger_ap_result, result, exec_ctx)?;
+        let maybe_generation = populate_context(
+            &self.result,
+            &merger_ap_result,
+            self.key_argument.as_ref(),
+            result,
+            exec_ctx,
+        )?;
         maybe_update_trace(maybe_generation, trace_ctx);
 
         Ok(())
@@ -56,13 +68,13 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
 /// This function is intended to check whether a Ap instruction should produce
 /// a new state in data.
 fn should_touch_trace(ap: &Ap<'_>) -> bool {
-    matches!(ap.result, ast::ApResult::Stream(_))
+    matches!(ap.result, ast::ApResult::Stream(_) | ast::ApResult::StreamMap(_))
 }
 
 fn to_merger_ap_result(instr: &Ap<'_>, trace_ctx: &mut TraceHandler) -> ExecutionResult<MergerApResult> {
     match instr.result {
         ast::ApResult::Scalar(_) => Ok(MergerApResult::NotMet),
-        ast::ApResult::Stream(_) => {
+        ast::ApResult::Stream(_) | ast::ApResult::StreamMap(_) => {
             let merger_ap_result = trace_to_exec_err!(trace_ctx.meet_ap_start(), instr)?;
             Ok(merger_ap_result)
         }
@@ -72,6 +84,7 @@ fn to_merger_ap_result(instr: &Ap<'_>, trace_ctx: &mut TraceHandler) -> Executio
 fn populate_context<'ctx>(
     ap_result: &ast::ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
+    key_argument: Option<&ApArgument<'ctx>>,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<GenerationIdx>> {
@@ -80,6 +93,32 @@ fn populate_context<'ctx>(
         ast::ApResult::Stream(stream) => {
             let value_descriptor = generate_value_descriptor(result, stream, merger_ap_result);
             exec_ctx.streams.add_stream_value(value_descriptor).map(Some)
+        }
+        ast::ApResult::StreamMap(stream_map) => {
+            let value_descriptor = generate_map_value_descriptor(result, stream_map, merger_ap_result);
+            match key_argument {
+                Some(key) => match key {
+                    ApArgument::Literal(s) => exec_ctx.stream_maps.add_stream_map_value(s, value_descriptor).map(Some),
+                    ApArgument::Number(n) => match n {
+                        Number::Int(int) => exec_ctx
+                            .stream_maps
+                            .add_stream_map_value(int, value_descriptor)
+                            .map(Some),
+                        Number::Float(_) => Err(CatchableError::StreamMapError(FloatMapKeyIsUnsupported {
+                            variable_name: String::from(stream_map.name),
+                        })
+                        .into()),
+                    },
+                    _ => Err(CatchableError::StreamMapError(UnsupportedMapKeyType {
+                        variable_name: String::from(stream_map.name),
+                    })
+                    .into()),
+                },
+                None => Err(CatchableError::StreamMapError(MapKeyIsAbsent {
+                    variable_name: String::from(stream_map.name),
+                })
+                .into()),
+            }
         }
     }
 }

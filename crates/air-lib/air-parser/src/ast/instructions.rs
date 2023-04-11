@@ -38,6 +38,7 @@ pub enum Instruction<'i> {
     Fail(Fail<'i>),
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
+    FoldStreamMap(FoldStreamMap<'i>),
     Never(Never),
     New(New<'i>),
     Next(Next<'i>),
@@ -56,6 +57,7 @@ pub struct Call<'i> {
 /// (ap argument result)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Ap<'i> {
+    pub key_argument: Option<ApArgument<'i>>,
     pub argument: ApArgument<'i>,
     pub result: ApResult<'i>,
 }
@@ -128,6 +130,18 @@ pub struct FoldScalar<'i> {
 #[derive(Serialize, Debug, PartialEq)]
 pub struct FoldStream<'i> {
     pub iterable: Stream<'i>,
+    #[serde(borrow)]
+    pub iterator: Scalar<'i>,
+    pub instruction: Rc<Instruction<'i>>,
+    // option is needed to provide a graceful period of adoption
+    pub last_instruction: Option<Rc<Instruction<'i>>>,
+    pub span: Span,
+}
+
+/// (fold stream_iterable iterator instruction)
+#[derive(Serialize, Debug, PartialEq)]
+pub struct FoldStreamMap<'i> {
+    pub iterable: StreamMap<'i>,
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
     pub instruction: Rc<Instruction<'i>>,

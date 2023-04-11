@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-use super::ExecutionCtx;
+use thiserror::Error as ThisError;
 
-pub(crate) struct FoldGenerationObserver {
-    subgraph_complete: bool,
-}
+/// Describes errors related to applying lambdas to values.
+#[derive(Debug, Clone, ThisError)]
+pub enum StreamMapError {
+    #[error("map {variable_name} key can not be float")]
+    FloatMapKeyIsUnsupported { variable_name: String },
 
-impl FoldGenerationObserver {
-    pub(crate) fn new() -> Self {
-        Self {
-            subgraph_complete: false,
-        }
-    }
+    #[error("unsupported type for {variable_name} map's key")]
+    UnsupportedMapKeyType { variable_name: String },
 
-    pub(crate) fn observe_completeness(&mut self, completeness: bool) {
-        self.subgraph_complete |= completeness;
-    }
-
-    pub(crate) fn update_completeness(self, exec_ctx: &mut ExecutionCtx<'_>) {
-        exec_ctx.set_subgraph_completeness(self.subgraph_complete);
-    }
+    #[error("there must be a key to add a value into {variable_name} map")]
+    MapKeyIsAbsent { variable_name: String },
 }

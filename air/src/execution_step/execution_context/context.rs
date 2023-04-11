@@ -18,6 +18,7 @@ use super::ExecutionCidState;
 use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
+use super::StreamMaps;
 use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
@@ -36,6 +37,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Contains all streams.
     pub(crate) streams: Streams,
+
+    /// Contains all streams.
+    pub(crate) stream_maps: StreamMaps,
 
     /// Set of peer public keys that should receive resulted data.
     pub(crate) next_peer_pks: Vec<String>,

@@ -79,3 +79,10 @@ pub enum ImmutableVariableWithLambda<'i> {
     #[serde(borrow)]
     CanonStream(CanonStreamWithLambda<'i>),
 }
+
+/// A map based on top of a stream.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct StreamMap<'i> {
+    pub name: &'i str,
+    pub position: AirPos,
+}

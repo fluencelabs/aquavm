@@ -196,7 +196,23 @@ pub(super) fn mismatch<'i>(
 }
 
 pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruction<'i> {
-    Instruction::Ap(Ap { argument, result })
+    Instruction::Ap(Ap {
+        key_argument: None,
+        argument,
+        result,
+    })
+}
+
+pub(super) fn ap_with_map<'i>(
+    key: ApArgument<'i>,
+    argument: ApArgument<'i>,
+    result: ApResult<'i>,
+) -> Instruction<'i> {
+    Instruction::Ap(Ap {
+        key_argument: Some(key),
+        argument,
+        result,
+    })
 }
 
 pub(super) fn canon<'i>(

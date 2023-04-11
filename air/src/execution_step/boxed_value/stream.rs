@@ -23,6 +23,8 @@ use air_interpreter_data::GenerationIdx;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
+use std::slice::Iter;
+
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
 #[derive(Debug, Default, Clone)]
@@ -208,8 +210,12 @@ impl Stream {
     }
 
     /// Removes empty generations from current values.
-    fn remove_empty_generations(&mut self) {
+    pub(crate) fn remove_empty_generations(&mut self) {
         self.values.retain(|values| !values.is_empty());
+    }
+
+    pub(crate) fn get_values_iter(&self) -> Iter<'_, Vec<ValueAggregate>> {
+        self.values.iter()
     }
 }
 

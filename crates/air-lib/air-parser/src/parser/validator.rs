@@ -58,6 +58,10 @@ pub struct VariableValidator<'i> {
 
     /// Contains all names that should be checked that they are not iterators.
     not_iterators_candidates: Vec<(&'i str, Span)>,
+
+    // This contains info about unssuported map key arguments used with ap instruction,
+    // namely (key map ApArgument)
+    unsupported_map_keys: Vec<(String, &'i str, Span)>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -112,6 +116,11 @@ impl<'i> VariableValidator<'i> {
         self.met_iterator_definition(&fold.iterator, span);
     }
 
+    pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
+        self.met_variable_name(fold.iterable.name, span);
+        self.met_iterator_definition(&fold.iterator, span);
+    }
+
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
         self.not_iterators_candidates
             .push((new.argument.name(), span));
@@ -129,6 +138,21 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
+        match &ap.key_argument {
+            Some(key) => match key {
+                ApArgument::Literal(_) | ApArgument::Number(_) => {}
+                ApArgument::Scalar(scalar) => self.met_scalar(scalar, span),
+                ApArgument::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+                ApArgument::CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+                _ => {
+                    let key_type = key.to_string();
+                    self.unsupported_map_keys
+                        .push((key_type, ap.result.name(), span));
+                }
+            },
+            None => (),
+        }
+
         match &ap.argument {
             ApArgument::Number(_)
             | ApArgument::Timestamp
@@ -155,6 +179,7 @@ impl<'i> VariableValidator<'i> {
             .check_multiple_next_in_fold()
             .check_new_on_iterators()
             .check_iterator_for_multiple_definitions()
+            .check_for_unsupported_map_keys()
             .build()
     }
 
@@ -414,6 +439,19 @@ impl<'i> ValidatorErrorBuilder<'i> {
             }
         }
 
+        self
+    }
+
+    // Unsupported StreamMap keys check, e.g. Stream can not be a map key (ap $stream "value" %map)
+    fn check_for_unsupported_map_keys(mut self) -> Self {
+        for (arg_key_type, ap_result_name, span) in self.validator.unsupported_map_keys.iter_mut() {
+            let error = ParserError::unsupported_map_key_type(
+                *span,
+                arg_key_type.to_string(),
+                *ap_result_name,
+            );
+            add_to_errors(&mut self.errors, *span, Token::New, error);
+        }
         self
     }
 

@@ -138,6 +138,9 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::FoldStream(fold_stream) => {
                 self.beautify_fold_stream(fold_stream, indent)
             }
+            ast::Instruction::FoldStreamMap(fold_stream_map) => {
+                self.beautify_fold_stream_map(fold_stream_map, indent)
+            }
             ast::Instruction::Never(never) => self.beautify_simple(never, indent),
             ast::Instruction::New(new) => self.beautify_new(new, indent),
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
@@ -210,6 +213,14 @@ impl<W: io::Write> Beautifier<W> {
     fn beautify_fold_stream(
         &mut self,
         fold: &ast::FoldStream<'_>,
+        indent: usize,
+    ) -> io::Result<()> {
+        compound!(self, indent, fold)
+    }
+
+    fn beautify_fold_stream_map(
+        &mut self,
+        fold: &ast::FoldStreamMap<'_>,
         indent: usize,
     ) -> io::Result<()> {
         compound!(self, indent, fold)
