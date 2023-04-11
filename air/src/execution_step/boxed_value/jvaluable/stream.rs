@@ -86,8 +86,9 @@ impl JValuable for StreamJvaluableIngredients<'_> {
     }
 }
 
-use crate::execution_step::boxed_value::StreamIter;
+use crate::execution_step::boxed_value::stream::StreamIter;
 
+#[allow(dead_code)]
 impl<'stream> StreamJvaluableIngredients<'stream> {
     pub(crate) fn new(stream: &'stream Stream, generation: Generation) -> Self {
         Self { stream, generation }
