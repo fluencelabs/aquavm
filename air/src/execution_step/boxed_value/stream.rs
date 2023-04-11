@@ -148,10 +148,6 @@ impl Stream {
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        if self.values.is_empty() {
-            return false;
-        }
-
         self.values.iter().all(|v| v.is_empty())
     }
 
