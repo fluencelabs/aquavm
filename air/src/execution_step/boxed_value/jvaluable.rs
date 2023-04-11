@@ -16,7 +16,6 @@
 
 mod canon_stream;
 mod cell_vec_resolved_call_result;
-mod empty_stream;
 mod iterable_item;
 mod resolved_call_result;
 
