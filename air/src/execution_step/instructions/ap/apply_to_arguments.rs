@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
@@ -65,7 +66,7 @@ fn apply_last_error<'i>(
     exec_ctx: &ExecutionCtx<'i>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let (value, mut tetraplets) = crate::execution_step::resolver::prepare_last_error(error_accessor, exec_ctx)?;
+    let (value, mut tetraplets) = error_accessor.resolve(exec_ctx)?;
     let value = Rc::new(value);
     // removing is safe because prepare_last_error always returns a vec with one element.
     let tetraplet = tetraplets.remove(0);
@@ -105,11 +106,9 @@ fn apply_scalar_wl(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let variable = Variable::scalar(ast_scalar.name);
-    let (jvalue, tetraplet) = apply_lambda(variable, &ast_scalar.lambda, exec_ctx)?;
-    let tetraplet = Rc::new(tetraplet);
+    let (value, mut tetraplets) = ast_scalar.resolve(exec_ctx)?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let result = ValueAggregate::new(Rc::new(jvalue), tetraplet, position);
+    let result = ValueAggregate::new(Rc::new(value), tetraplets.remove(0), position);
 
     Ok(result)
 }
