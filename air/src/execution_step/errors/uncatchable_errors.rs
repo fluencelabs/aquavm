@@ -21,6 +21,7 @@ use crate::ToErrorCode;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_data::ValueRef;
 use air_trace_handler::GenerationCompatificationError;
+use air_trace_handler::IntConversionError;
 use air_trace_handler::TraceHandlerError;
 
 use strum::IntoEnumIterator;
@@ -46,6 +47,10 @@ pub enum UncatchableError {
     /// These errors are related to internal bug in the interpreter when result trace is corrupted.
     #[error(transparent)]
     GenerationCompatificationError(#[from] GenerationCompatificationError),
+
+    /// Integer casts, e.g. usize(=u64) to u32, might trigger such errors.
+    #[error(transparent)]
+    IntConversionError(#[from] IntConversionError),
 
     /// Fold state wasn't found for such iterator name.
     #[error("fold state not found for this iterable '{0}'")]

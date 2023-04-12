@@ -33,6 +33,7 @@ use air::ExecutionCidState;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::Provenance;
 use air_interpreter_data::ServiceResultAggregate;
 use avm_server::SecurityTetraplet;
@@ -101,7 +102,7 @@ pub fn request_sent_by(sender: impl Into<String>) -> ExecutedState {
     ))))
 }
 
-pub fn par(left: usize, right: usize) -> ExecutedState {
+pub fn par(left: u32, right: u32) -> ExecutedState {
     let par_result = ParResult {
         left_size: left as _,
         right_size: right as _,
@@ -116,7 +117,7 @@ pub fn fold(lore: FoldLore) -> ExecutedState {
 }
 
 pub fn subtrace_lore(
-    value_pos: usize,
+    value_pos: impl Into<TracePos>,
     before: SubTraceDesc,
     after: SubTraceDesc,
 ) -> FoldSubTraceLore {
@@ -133,8 +134,8 @@ pub fn subtrace_desc(begin_pos: impl Into<TracePos>, subtrace_len: u32) -> SubTr
     }
 }
 
-pub fn ap(generation: u32) -> ExecutedState {
-    let ap_result = ApResult::new(generation);
+pub fn ap(generation: impl Into<GenerationIdx>) -> ExecutedState {
+    let ap_result = ApResult::new(generation.into());
     ExecutedState::Ap(ap_result)
 }
 
@@ -372,7 +373,8 @@ impl ExecutedCallBuilder {
             value_aggregate_cid(self.result, self.tetraplet, self.args, cid_state);
         let value = ValueRef::Stream {
             cid: service_result_agg_cid,
-            generation,
+            // TODO: refactor it
+            generation: (generation as usize).into(),
         };
         ExecutedState::Call(CallResult::Executed(value))
     }

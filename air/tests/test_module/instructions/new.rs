@@ -95,7 +95,7 @@ fn new_with_global_streams_seq() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$stream".to_string() => maplit::hashmap! {
-            AirPos::from(282) => vec![1,1]
+            AirPos::from(282) => vec![1.into(), 1.into()]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -365,7 +365,7 @@ fn new_in_fold_with_ap() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$s1".to_string() => maplit::hashmap! {
-            AirPos::from(146) => vec![1,1,1,1,1]
+            AirPos::from(146) => vec![1.into(), 1.into(), 1.into(), 1.into(), 1.into()]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
@@ -417,17 +417,17 @@ fn new_with_streams_with_errors() {
     let actual_restricted_streams = data.restricted_streams;
     let expected_restricted_streams = maplit::hashmap! {
         "$restricted_stream_2".to_string() => maplit::hashmap! {
-            AirPos::from(216) => vec![1]
+            AirPos::from(216) => vec![1.into()]
         },
         "$restricted_stream_1".to_string() => maplit::hashmap! {
-            AirPos::from(141) => vec![0]
+            AirPos::from(141) => vec![0.into()]
         }
     };
     assert_eq!(actual_restricted_streams, expected_restricted_streams);
 
     let actual_global_streams = data.global_streams;
     let expected_global_streams = maplit::hashmap! {
-        "$global_stream".to_string() => 1,
+        "$global_stream".to_string() => 1.into(),
     };
     assert_eq!(actual_global_streams, expected_global_streams);
 }

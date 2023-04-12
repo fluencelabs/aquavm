@@ -30,6 +30,7 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
+use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::Provenance;
 use air_parser::ast;
 use air_parser::ast::Ap;
@@ -76,7 +77,7 @@ fn populate_context<'ctx>(
     merger_ap_result: &MergerApResult,
     result: ValueAggregateWithProvenance,
     exec_ctx: &mut ExecutionCtx<'ctx>,
-) -> ExecutionResult<Option<u32>> {
+) -> ExecutionResult<Option<GenerationIdx>> {
     match ap_result {
         ast::ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
         ast::ApResult::Stream(stream) => {
@@ -86,7 +87,7 @@ fn populate_context<'ctx>(
     }
 }
 
-fn maybe_update_trace(maybe_generation: Option<u32>, trace_ctx: &mut TraceHandler) {
+fn maybe_update_trace(maybe_generation: Option<GenerationIdx>, trace_ctx: &mut TraceHandler) {
     use air_interpreter_data::ApResult;
 
     if let Some(generation) = maybe_generation {

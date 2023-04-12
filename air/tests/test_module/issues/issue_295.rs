@@ -49,7 +49,7 @@ fn issue_295() {
     );
     let expected_error = UncatchableError::TraceError {
         trace_error: TraceHandlerError::MergeError(MergeError::IncompatibleExecutedStates(
-            ExecutedState::Ap(ApResult::new(1)),
+            ExecutedState::Ap(ApResult::new(1.into())),
             ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))),
         )),
         instruction: "ap scalar $stream".to_string(),

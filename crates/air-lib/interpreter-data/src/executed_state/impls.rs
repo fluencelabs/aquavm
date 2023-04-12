@@ -25,10 +25,8 @@ impl ParResult {
     }
 
     /// Returns a size of subtrace that this par describes in execution_step trace.
-    pub fn size(&self) -> Option<usize> {
-        self.left_size
-            .checked_add(self.right_size)
-            .map(|v| v as usize)
+    pub fn size(&self) -> Option<u32> {
+        self.left_size.checked_add(self.right_size)
     }
 }
 
@@ -50,13 +48,11 @@ impl CallResult {
     }
 
     pub fn executed_stream(
-        service_result_agg_cid: Rc<CID<ServiceResultAggregate>>,
-        generation: u32,
+        cid: Rc<CID<ServiceResultAggregate>>,
+        generation: GenerationIdx,
     ) -> CallResult {
-        Self::executed_service_result(ValueRef::Stream {
-            cid: service_result_agg_cid,
-            generation,
-        })
+        let value = ValueRef::Stream { cid, generation };
+        CallResult::Executed(value)
     }
 
     pub fn executed_unused(value_cid: Rc<CID<JValue>>) -> CallResult {
@@ -89,7 +85,7 @@ impl ExecutedState {
 }
 
 impl ApResult {
-    pub fn new(res_generation: u32) -> Self {
+    pub fn new(res_generation: GenerationIdx) -> Self {
         Self {
             res_generations: vec![res_generation],
         }

@@ -1,0 +1,6 @@
+{
+    "cycle": true,
+    "call_info": [{
+        "peer": "init_peer_id"
+    }]
+}

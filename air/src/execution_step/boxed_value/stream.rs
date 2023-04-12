@@ -20,6 +20,7 @@ use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
 
+use air_interpreter_data::GenerationIdx;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
@@ -38,17 +39,16 @@ pub struct Stream {
 }
 
 impl Stream {
-    pub(crate) fn from_generations_count(previous_count: usize, current_count: usize) -> Self {
-        let last_generation_count = 1;
+    pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
+        let last_generation_count = GenerationIdx::from(1);
         // TODO: bubble up an overflow error instead of expect
         let overall_count = previous_count
             .checked_add(current_count)
             .and_then(|value| value.checked_add(last_generation_count))
             .expect("it shouldn't overflow");
-
         Self {
-            values: vec![vec![]; overall_count],
-            previous_gens_count: previous_count,
+            values: vec![vec![]; overall_count.into()],
+            previous_gens_count: previous_count.into(),
         }
     }
 
@@ -68,11 +68,13 @@ impl Stream {
         value: ValueAggregateWithProvenance,
         generation: Generation,
         source: ValueSource,
-    ) -> ExecutionResult<u32> {
+    ) -> ExecutionResult<GenerationIdx> {
         let generation_number = match (generation, source) {
             (Generation::Last, _) => self.values.len() - 1,
-            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen as usize,
-            (Generation::Nth(current_gen), ValueSource::CurrentData) => self.previous_gens_count + current_gen as usize,
+            (Generation::Nth(previous_gen), ValueSource::PreviousData) => previous_gen.into(),
+            (Generation::Nth(current_gen), ValueSource::CurrentData) => {
+                self.previous_gens_count + usize::from(current_gen)
+            }
         };
 
         if generation_number >= self.values.len() {
@@ -84,9 +86,10 @@ impl Stream {
         }
 
         self.values[generation_number].push(value);
-        Ok(generation_number as u32)
+        Ok(generation_number.into())
     }
 
+    // TODO: remove this function
     pub(crate) fn generations_count(&self) -> usize {
         // the last generation could be empty due to the logic of from_generations_count ctor
         if self.values.last().unwrap().is_empty() {
@@ -96,7 +99,7 @@ impl Stream {
         }
     }
 
-    pub(crate) fn last_non_empty_generation(&self) -> usize {
+    pub(crate) fn last_non_empty_generation(&self) -> GenerationIdx {
         self.values
             .iter()
             .rposition(|generation| !generation.is_empty())
@@ -104,6 +107,7 @@ impl Stream {
             // there is a new state was added with add_new_generation_if_non_empty
             .map(|non_empty_gens| non_empty_gens + 1)
             .unwrap_or_else(|| self.generations_count())
+            .into()
     }
 
     /// Add a new empty generation if the latest isn't empty.
@@ -133,10 +137,13 @@ impl Stream {
         should_remove_generation
     }
 
-    pub(crate) fn elements_count(&self, generation: Generation) -> Option<usize> {
+    pub(crate) fn generation_elements_count(&self, generation: Generation) -> Option<usize> {
         match generation {
-            Generation::Nth(generation) if generation as usize > self.generations_count() => None,
-            Generation::Nth(generation) => Some(self.values.iter().take(generation as usize).map(|v| v.len()).sum()),
+            Generation::Nth(generation) if generation > self.generations_count() => None,
+            Generation::Nth(generation) => {
+                let elements_count = generation.into();
+                Some(self.values.iter().take(elements_count).map(|v| v.len()).sum())
+            }
             Generation::Last => Some(self.values.iter().map(|v| v.len()).sum()),
         }
     }
@@ -160,14 +167,14 @@ impl Stream {
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
         let iter: Box<dyn Iterator<Item = &ValueAggregateWithProvenance>> = match generation {
-            Generation::Nth(generation) if generation as usize >= self.generations_count() => return None,
+            Generation::Nth(generation) if generation >= self.generations_count() => return None,
             Generation::Nth(generation) => {
-                Box::new(self.values.iter().take(generation as usize + 1).flat_map(|v| v.iter()))
+                Box::new(self.values.iter().take(generation.next().into()).flat_map(|v| v.iter()))
             }
             Generation::Last => Box::new(self.values.iter().flat_map(|v| v.iter())),
         };
         // unwrap is safe here, because generation's been already checked
-        let len = self.elements_count(generation).unwrap();
+        let len = self.generation_elements_count(generation).unwrap();
 
         let iter = StreamIter { iter, len };
 
@@ -179,11 +186,11 @@ impl Stream {
             return None;
         }
 
-        let generations_count = self.generations_count() as u32 - 1;
+        let generations_count = self.generations_count() - 1;
         let (start, end) = match (start, end) {
-            (Generation::Nth(start), Generation::Nth(end)) => (start, end),
-            (Generation::Nth(start), Generation::Last) => (start, generations_count),
-            (Generation::Last, Generation::Nth(end)) => (generations_count, end),
+            (Generation::Nth(start), Generation::Nth(end)) => (usize::from(start), usize::from(end)),
+            (Generation::Nth(start), Generation::Last) => (start.into(), generations_count),
+            (Generation::Last, Generation::Nth(end)) => (generations_count, end.into()),
             (Generation::Last, Generation::Last) => (generations_count, generations_count),
         };
 
@@ -191,27 +198,27 @@ impl Stream {
             return None;
         }
 
-        let len = (end - start) as usize + 1;
+        let len = (end - start) + 1;
         let iter: Box<dyn Iterator<Item = &[ValueAggregateWithProvenance]>> =
-            Box::new(self.values.iter().skip(start as usize).take(len).map(|v| v.as_slice()));
+            Box::new(self.values.iter().skip(start).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
 
         Some(iter)
     }
 
     /// Removes empty generations updating data and returns final generation count.
-    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<usize> {
+    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<GenerationIdx> {
         self.remove_empty_generations();
 
         for (generation, values) in self.values.iter().enumerate() {
             for value in values.iter() {
                 trace_ctx
-                    .update_generation(value.trace_pos, generation as u32)
+                    .update_generation(value.trace_pos, generation.into())
                     .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
             }
         }
-
-        Ok(self.values.len())
+        let last_generation_idx = self.values.len();
+        Ok(last_generation_idx.into())
     }
 
     /// Removes empty generations from current values.
@@ -223,7 +230,22 @@ impl Stream {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Generation {
     Last,
-    Nth(u32),
+    Nth(GenerationIdx),
+}
+
+impl Generation {
+    pub fn last() -> Self {
+        Self::Last
+    }
+
+    #[cfg(test)]
+    pub fn nth(generation_id: u32) -> Self {
+        use std::convert::TryFrom;
+
+        let generation_id = usize::try_from(generation_id).unwrap();
+        let generation_idx = GenerationIdx::from(generation_id);
+        Self::Nth(generation_idx)
+    }
 }
 
 pub(crate) struct StreamIter<'result> {
@@ -322,22 +344,22 @@ mod test {
             ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
             Provenance::service_result(CID::new("some fake cid").into(), None),
         );
-        let mut stream = Stream::from_generations_count(2, 0);
+        let mut stream = Stream::from_generations_count(2.into(), 0.into());
 
         stream
-            .add_value(value_1, Generation::Nth(0), ValueSource::PreviousData)
+            .add_value(value_1, Generation::nth(0), ValueSource::PreviousData)
             .unwrap();
         stream
-            .add_value(value_2, Generation::Nth(1), ValueSource::PreviousData)
+            .add_value(value_2, Generation::nth(1), ValueSource::PreviousData)
             .unwrap();
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1)).unwrap();
+        let slice = stream.slice_iter(Generation::nth(0), Generation::nth(1)).unwrap();
         assert_eq!(slice.len, 2);
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Last).unwrap();
+        let slice = stream.slice_iter(Generation::nth(0), Generation::Last).unwrap();
         assert_eq!(slice.len, 2);
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(0)).unwrap();
+        let slice = stream.slice_iter(Generation::nth(0), Generation::nth(0)).unwrap();
         assert_eq!(slice.len, 1);
 
         let slice = stream.slice_iter(Generation::Last, Generation::Last).unwrap();
@@ -346,15 +368,15 @@ mod test {
 
     #[test]
     fn test_slice_on_empty_stream() {
-        let stream = Stream::from_generations_count(2, 0);
+        let stream = Stream::from_generations_count(2.into(), 0.into());
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(1));
+        let slice = stream.slice_iter(Generation::nth(0), Generation::nth(1));
         assert!(slice.is_none());
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Last);
+        let slice = stream.slice_iter(Generation::nth(0), Generation::Last);
         assert!(slice.is_none());
 
-        let slice = stream.slice_iter(Generation::Nth(0), Generation::Nth(0));
+        let slice = stream.slice_iter(Generation::nth(0), Generation::nth(0));
         assert!(slice.is_none());
 
         let slice = stream.slice_iter(Generation::Last, Generation::Last);
@@ -371,13 +393,13 @@ mod test {
             ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
             Provenance::service_result(CID::new("some fake cid").into(), None),
         );
-        let mut stream = Stream::from_generations_count(5, 5);
+        let mut stream = Stream::from_generations_count(5.into(), 5.into());
 
         stream
-            .add_value(value_1.clone(), Generation::Nth(2), ValueSource::CurrentData)
+            .add_value(value_1.clone(), Generation::nth(2), ValueSource::CurrentData)
             .unwrap();
         stream
-            .add_value(value_2.clone(), Generation::Nth(4), ValueSource::PreviousData)
+            .add_value(value_2.clone(), Generation::nth(4), ValueSource::PreviousData)
             .unwrap();
 
         let generations_count = stream.generations_count();

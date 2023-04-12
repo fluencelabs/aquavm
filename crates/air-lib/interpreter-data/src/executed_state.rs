@@ -17,6 +17,7 @@
 mod impls;
 mod se_de;
 
+use crate::GenerationIdx;
 use crate::JValue;
 use crate::TracePos;
 
@@ -86,7 +87,7 @@ pub enum ValueRef {
     /// The call value is stored to a stream variable.
     Stream {
         cid: Rc<CID<ServiceResultAggregate>>,
-        generation: u32,
+        generation: GenerationIdx,
     },
     /// The call value is not stored.
     Unused(Rc<CID<JValue>>),
@@ -128,7 +129,7 @@ pub struct ServiceResultAggregate {
 ///     (call 3)
 ///     (call 4)
 /// )
-///
+///x
 /// Having started with stream with two elements {v1, v2} the resulted trace would looks like
 /// [(1) (2)] [(1) (2)] [(3) (4)] [(3) (4)]  <---  the sequence of call states
 ///    v1        v2        v2        v1      <---- corresponding values from $stream that
@@ -179,7 +180,7 @@ pub struct FoldResult {
 #[serde(rename_all = "snake_case")]
 pub struct ApResult {
     #[serde(rename = "gens")]
-    pub res_generations: Vec<u32>,
+    pub res_generations: Vec<GenerationIdx>,
 }
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.

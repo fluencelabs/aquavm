@@ -25,12 +25,79 @@ use air_trace_handler::merger::CallResultError;
 use air_trace_handler::merger::CanonResultError;
 use air_trace_handler::merger::FoldResultError;
 use air_trace_handler::merger::MergeCtxType::Current;
-use air_trace_handler::DataType::Previous;
+use air_trace_handler::merger::MergeCtxType::Previous;
+use air_trace_handler::merger::ResolvedFold;
+use air_trace_handler::merger::ResolvedSubTraceDescs;
 use air_trace_handler::KeeperError::*;
 use air_trace_handler::StateFSMError::*;
 use air_trace_handler::TraceHandlerError::KeeperError;
 use air_trace_handler::TraceHandlerError::MergeError;
 use air_trace_handler::TraceHandlerError::StateFSMError;
+use maplit::hashmap;
+
+#[test]
+fn par_len_overflow() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+
+    let script = format!(
+        r#"
+        (par
+            (ap 42 some)
+            (call "other" ("" "") [some] other)
+        )
+    "#
+    );
+
+    let error_left_pos_value = 1;
+    let error_right_pos_value = u32::MAX;
+    let trace = vec![
+        executed_state::par(error_left_pos_value, error_right_pos_value),
+        executed_state::request_sent_by(vm_peer_id_1),
+    ];
+    let data = raw_data_from_trace(trace, <_>::default());
+    let result = call_vm!(peer_vm_1, <_>::default(), script, "", data);
+    let expected_error = UncatchableError::TraceError {
+        trace_error: StateFSMError(ParLenOverflow(ParResult::new(
+            error_left_pos_value,
+            error_right_pos_value,
+        ))),
+        instruction: "par".to_string(),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn par_pos_overflow() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+
+    let script = format!(
+        r#"
+        (par
+            (ap 42 some)
+            (call "other" ("" "") [some] other)
+        )
+    "#
+    );
+
+    let error_pos_value = u32::MAX;
+    let trace = vec![
+        executed_state::par(error_pos_value, error_pos_value),
+        executed_state::request_sent_by(vm_peer_id_1),
+    ];
+    let data = raw_data_from_trace(trace, <_>::default());
+    let result = call_vm!(peer_vm_1, <_>::default(), script, "", data);
+    let expected_error = UncatchableError::TraceError {
+        trace_error: StateFSMError(ParPosOverflow(
+            ParResult::new(error_pos_value, error_pos_value),
+            1.into(),
+            Previous,
+        )),
+        instruction: "par".to_string(),
+    };
+    assert!(check_error(&result, expected_error));
+}
 
 #[test]
 fn par_len_underflow() {
@@ -198,7 +265,7 @@ fn incompatible_executed_states() {
 
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::IncompatibleExecutedStates(
-            ExecutedState::Ap(ApResult::new(1)),
+            ExecutedState::Ap(ApResult::new(1.into())),
             scalar!("", peer = vm_peer_id),
         )),
         instruction: "ap scalar $stream".to_string(),
@@ -226,7 +293,7 @@ fn different_executed_state_expected() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::merger::MergeError::DifferentExecutedStateExpected(
             wrong_state,
-            Previous,
+            air_trace_handler::DataType::Previous,
             "call",
         )),
         instruction: String::from(r#"call "vm_peer_id_2" ("" "") [] $s"#),
@@ -270,7 +337,7 @@ fn invalid_dst_generations() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectApResult(
             ApResultError::InvalidDstGenerations(ApResult {
-                res_generations: vec![42, 42],
+                res_generations: vec![42.into(), 42.into()],
             }),
         )),
         instruction: String::from(r#"ap "a" $s"#),
@@ -396,7 +463,6 @@ fn several_records_with_same_pos() {
     ];
     let wrong_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(peer_vm_1, <_>::default(), &script, wrong_data, "");
-    // let result = peer_vm_1.call(script, wrong_data, "", <_>::default()).unwrap();
     let fold_lore = FoldSubTraceLore {
         value_pos: value_pos.into(),
         subtraces_desc: vec![
@@ -461,6 +527,59 @@ fn values_not_equal() {
             },
         )),
         instruction: String::from(format!(r#"call "{vm_peer_id_1}" ("" "") [] $s"#)),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fold_pos_overflow() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let script = format!(
+        r#"
+        (par
+            (call "vm_peer_id_1" ("" "") [] $s)
+            (fold $s i
+                (call "vm_peer_id_2" ("" "") [] a)
+                (next i)
+            )
+        )
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
+    let value_pos = 1;
+    let before_subtrace_pos = 3;
+    let after_subtrace_pos = 4;
+    let wrong_after_subtrace_len = u32::MAX - 1;
+    let trace = vec![
+        executed_state::par(1, 2),
+        stream_tracked!(json!([42, 43]), 0, cid_state),
+        fold(vec![subtrace_lore(
+            value_pos,
+            subtrace_desc(before_subtrace_pos, 1),
+            subtrace_desc(after_subtrace_pos, wrong_after_subtrace_len),
+        )]),
+        request_sent_by("vm_peer_id_1"),
+    ];
+    let wrong_data = raw_data_from_trace(trace, cid_state);
+    let result = call_vm!(peer_vm_1, <_>::default(), &script, wrong_data, "");
+    let fold_lore = ResolvedSubTraceDescs::new(
+        SubTraceDesc {
+            begin_pos: before_subtrace_pos.into(),
+            subtrace_len: wrong_after_subtrace_len + 1,
+        },
+        SubTraceDesc {
+            begin_pos: after_subtrace_pos.into(),
+            subtrace_len: wrong_after_subtrace_len,
+        },
+    );
+    let resolved_fold = ResolvedFold::new(
+        hashmap![value_pos.into() => fold_lore],
+        (wrong_after_subtrace_len + 1) as usize,
+    );
+    let expected_error = UncatchableError::TraceError {
+        trace_error: StateFSMError(FoldPosOverflow(resolved_fold, before_subtrace_pos.into(), Previous)),
+        instruction: String::from(String::from("fold $s i")),
     };
     assert!(check_error(&result, expected_error));
 }
