@@ -15,10 +15,10 @@
  */
 
 use super::*;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
-use crate::execution_step::resolver::Resolvable;
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 

@@ -16,10 +16,10 @@
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
 use crate::JValue;
 
-use crate::execution_step::resolver::Resolvable;
 use air_parser::ast;
 use polyplets::ResolvedTriplet;
 
