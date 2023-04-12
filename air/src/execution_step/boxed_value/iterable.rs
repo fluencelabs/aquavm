@@ -24,12 +24,12 @@ pub(crate) use lambda_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
-use super::Provenance;
 use super::ValueAggregate;
 use super::ValueAggregateWithProvenance;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
+use air_interpreter_data::Provenance;
 use air_interpreter_data::TracePos;
 use std::rc::Rc;
 

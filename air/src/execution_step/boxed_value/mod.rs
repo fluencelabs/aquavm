@@ -25,7 +25,6 @@ mod variable;
 pub(crate) use canon_stream::*;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
-pub(crate) use scalar::Provenance;
 pub(crate) use scalar::ScalarRef;
 pub(crate) use scalar::ValueAggregate;
 pub(crate) use scalar::ValueAggregateWithProvenance;

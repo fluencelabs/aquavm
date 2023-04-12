@@ -33,6 +33,7 @@ use air::ExecutionCidState;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::Provenance;
 use air_interpreter_data::ServiceResultAggregate;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
@@ -141,6 +142,8 @@ pub fn ap(generation: u32) -> ExecutedState {
 pub struct ValueAggregateAlike {
     pub result: Rc<JValue>,
     pub tetraplet: Rc<SecurityTetraplet>,
+    // TODO convert data and remove Provenance
+    pub provenance: Option<Provenance>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -185,6 +188,10 @@ pub fn canon_tracked(
                 .record_value(CanonCidAggregate {
                     value: value_cid,
                     tetraplet: tetraplet_cid,
+                    provenance: value
+                        .provenance
+                        .clone()
+                        .unwrap_or_else(|| Provenance::literal(None)),
                 })
         })
         .collect::<Result<Vec<_>, _>>()
@@ -368,6 +375,23 @@ impl ExecutedCallBuilder {
             generation,
         };
         ExecutedState::Call(CallResult::Executed(value))
+    }
+}
+
+pub fn extract_service_result_cid(
+    stream_exec_state: &ExecutedState,
+) -> Rc<CID<ServiceResultAggregate>> {
+    match stream_exec_state {
+        ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid, .. })) => cid.clone(),
+        ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))) => cid.clone(),
+        _ => panic!("the function is intended for call results values only"),
+    }
+}
+
+pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> Rc<CID<CanonResultAggregate>> {
+    match canon_state {
+        ExecutedState::Canon(CanonResult(cid)) => cid.clone(),
+        _ => panic!("the function is intended for canon only"),
     }
 }
 

@@ -16,7 +16,6 @@
 
 use super::RcSecurityTetraplets;
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::boxed_value::Provenance;
 use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
@@ -25,6 +24,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use serde_json::json;

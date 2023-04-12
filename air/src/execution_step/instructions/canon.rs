@@ -141,6 +141,7 @@ fn create_canon_stream_from_name(
                     .cid_state
                     .tetraplet_tracker
                     .record_value(val.tetraplet.clone())?,
+                provenance: val.provenance.clone(),
             };
             Ok(exec_ctx
                 .cid_state

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use crate::execution_step::Provenance;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::ValueAggregate;
 use crate::execution_step::ValueAggregateWithProvenance;
@@ -120,7 +119,7 @@ impl ExecutionCidState {
                 tetraplet,
                 trace_pos: fake_trace_pos,
             },
-            Provenance::todo(),
+            canon_aggregate.provenance.clone(),
         ))
     }
 

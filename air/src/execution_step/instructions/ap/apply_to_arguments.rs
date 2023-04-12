@@ -15,8 +15,8 @@
  */
 
 use super::*;
-use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::execution_step::resolver::apply_lambda;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;

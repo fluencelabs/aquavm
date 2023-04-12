@@ -199,6 +199,28 @@ pub struct CanonResultAggregate {
 pub struct CanonCidAggregate {
     pub value: Rc<CID<serde_json::Value>>,
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
+    pub provenance: Provenance,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum Provenance {
+    Literal {
+        // TODO does it differ from SecurityTetraplet.lambda_path?
+        // OK, let's remove it if not needed.
+        lambda_path: Option<Rc<str>>,
+    },
+    ServiceResult {
+        // the original call result CID; not changed on lambda application
+        cid: Rc<CID<ServiceResultAggregate>>,
+        // TODO does it differ from SecurityTetraplet.lambda_path?
+        lambda_path: Option<Rc<str>>,
+    },
+    Canon {
+        cid: Rc<CID<CanonResultAggregate>>,
+        // TODO ditto
+        lambda_path: Option<Rc<str>>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

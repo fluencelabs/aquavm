@@ -21,7 +21,6 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::Variable;
-use crate::execution_step::Provenance;
 use crate::execution_step::ValueAggregate;
 use crate::execution_step::ValueAggregateWithProvenance;
 use crate::log_instruction;
@@ -31,6 +30,7 @@ use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;

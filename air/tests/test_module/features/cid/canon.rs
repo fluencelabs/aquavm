@@ -41,16 +41,20 @@ fn test_canon_ok() {
 
     let mut cid_state = ExecutionCidState::new();
 
+    let stream_exec_state = stream_tracked!(
+        "to canon",
+        1,
+        cid_state,
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+
+    let service_result_cid = extract_service_result_cid(&stream_exec_state);
+
     let expected_trace = vec![
         ap(0),
-        stream_tracked!(
-            "to canon",
-            1,
-            cid_state,
-            peer = init_peer_id,
-            service = "serv..0",
-            function = "func"
-        ),
+        stream_exec_state,
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -62,6 +66,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
+                    "provenance": Provenance::literal(None),
                 }, {
                     "result": "to canon",
                     "tetraplet": {
@@ -70,6 +75,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
+                    "provenance": Provenance::service_result(service_result_cid, None),
                 }]
             }),
             &mut cid_state,
@@ -112,23 +118,29 @@ fn test_canon_ok_multi() {
 
     let mut cid_state = ExecutionCidState::new();
 
+    let stream_state_1 = stream_tracked!(
+        "to canon",
+        0,
+        cid_state,
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+    let service_result_cid_1 = extract_service_result_cid(&stream_state_1);
+
+    let stream_state_2 = stream_tracked!(
+        "other",
+        1,
+        cid_state,
+        peer = other_peer_id,
+        service = "other_serv..1",
+        function = "other_func"
+    );
+    let service_result_cid_2 = extract_service_result_cid(&stream_state_2);
+
     let expected_trace = vec![
-        stream_tracked!(
-            "to canon",
-            0,
-            cid_state,
-            peer = init_peer_id,
-            service = "serv..0",
-            function = "func"
-        ),
-        stream_tracked!(
-            "other",
-            1,
-            cid_state,
-            peer = other_peer_id,
-            service = "other_serv..1",
-            function = "other_func"
-        ),
+        stream_state_1,
+        stream_state_2,
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -140,6 +152,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
+                    "provenance": Provenance::service_result(service_result_cid_1, None),
                 }, {
                     "result": "other",
                     "tetraplet": {
@@ -148,6 +161,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": other_peer_id,
                         "service_id": "other_serv..1",
                     },
+                    "provenance": Provenance::service_result(service_result_cid_2, None),
                 }]
             }),
             &mut cid_state,
@@ -345,13 +359,14 @@ fn test_canon_agg_not_found() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
+                    "provenance": Provenance::literal(None),
                 }]
             }),
             &mut cid_state,
         ),
     ];
 
-    let missing_cid = "bagaaierapp2oi35ib4iveexfswax6jcf2zhj3e2ergzjyavm6m7stlzh23ta";
+    let missing_cid = "bagaaieraai4q4w3hovs6mbyow6ycut76izwhkas7tm6a6ira4dd3ao3vq4vq";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
     assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
 

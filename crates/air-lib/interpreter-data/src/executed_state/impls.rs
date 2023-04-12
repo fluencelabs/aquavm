@@ -111,6 +111,41 @@ impl CanonResultAggregate {
     }
 }
 
+impl Provenance {
+    #[inline]
+    pub fn literal(lambda_path: Option<Rc<str>>) -> Self {
+        Self::Literal { lambda_path }
+    }
+
+    #[inline]
+    pub fn service_result(
+        cid: Rc<CID<ServiceResultAggregate>>,
+        lambda_path: Option<Rc<str>>,
+    ) -> Self {
+        Self::ServiceResult { cid, lambda_path }
+    }
+
+    #[inline]
+    pub fn canon(cid: Rc<CID<CanonResultAggregate>>, lambda_path: Option<Rc<str>>) -> Self {
+        Self::Canon { cid, lambda_path }
+    }
+
+    pub fn apply_lambda(&self, tetraplet: &SecurityTetraplet) -> Self {
+        let lambda_path = Some(tetraplet.json_path.as_str().into());
+        match self {
+            Provenance::Literal { .. } => Self::Literal { lambda_path },
+            Provenance::ServiceResult { cid, .. } => Self::ServiceResult {
+                cid: cid.clone(),
+                lambda_path,
+            },
+            Provenance::Canon { cid, .. } => Self::Canon {
+                cid: cid.clone(),
+                lambda_path,
+            },
+        }
+    }
+}
+
 impl std::fmt::Display for ExecutedState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CallResult::*;

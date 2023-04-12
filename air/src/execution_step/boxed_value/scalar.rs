@@ -20,11 +20,8 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
-use air_interpreter_cid::CID;
-use air_interpreter_data::CanonResultAggregate;
-use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_data::Provenance;
 use air_interpreter_data::TracePos;
-use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -37,60 +34,6 @@ pub struct ValueAggregate {
     pub result: Rc<JValue>,
     pub tetraplet: RcSecurityTetraplet,
     pub trace_pos: TracePos,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum Provenance {
-    Literal {
-        // TODO does it differ from SecurityTetraplet.lambda_path?
-        // OK, let's remove it if not needed.
-        lambda_path: Option<Rc<str>>,
-    },
-    ServiceResult {
-        // the original call result CID; not changed on lambda application
-        cid: Rc<CID<ServiceResultAggregate>>,
-        // TODO does it differ from SecurityTetraplet.lambda_path?
-        lambda_path: Option<Rc<str>>,
-    },
-    Canon {
-        cid: Rc<CID<CanonResultAggregate>>,
-        // TODO ditto
-        lambda_path: Option<Rc<str>>,
-    },
-}
-
-impl Provenance {
-    pub(crate) fn literal(lambda_path: Option<Rc<str>>) -> Self {
-        Self::Literal { lambda_path }
-    }
-
-    pub(crate) fn service_result(cid: Rc<CID<ServiceResultAggregate>>, lambda_path: Option<Rc<str>>) -> Self {
-        Self::ServiceResult { cid, lambda_path }
-    }
-
-    pub(crate) fn canon(cid: Rc<CID<CanonResultAggregate>>, lambda_path: Option<Rc<str>>) -> Self {
-        Self::Canon { cid, lambda_path }
-    }
-
-    // TODO remove me and refactor all the usages
-    pub(crate) fn todo() -> Self {
-        Self::Literal { lambda_path: None }
-    }
-
-    pub(crate) fn apply_lambda(&self, tetraplet: &SecurityTetraplet) -> Self {
-        let lambda_path = Some(tetraplet.json_path.as_str().into());
-        match self {
-            Provenance::Literal { .. } => Self::Literal { lambda_path },
-            Provenance::ServiceResult { cid, .. } => Self::ServiceResult {
-                cid: cid.clone(),
-                lambda_path,
-            },
-            Provenance::Canon { cid, .. } => Self::Canon {
-                cid: cid.clone(),
-                lambda_path,
-            },
-        }
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]

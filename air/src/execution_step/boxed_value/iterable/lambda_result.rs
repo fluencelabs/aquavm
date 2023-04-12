@@ -16,11 +16,12 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::boxed_value::Provenance;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
+
+use air_interpreter_data::Provenance;
 
 /// Used for iterating over a result of applied to a JValue lambda.
 #[derive(Clone, Debug, Eq, PartialEq)]

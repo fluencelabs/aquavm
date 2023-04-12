@@ -304,10 +304,10 @@ mod test {
     use super::Stream;
     use super::ValueAggregateWithProvenance;
     use super::ValueSource;
-    use crate::execution_step::Provenance;
     use crate::execution_step::ValueAggregate;
 
     use air_interpreter_cid::CID;
+    use air_interpreter_data::Provenance;
     use serde_json::json;
 
     use std::rc::Rc;
