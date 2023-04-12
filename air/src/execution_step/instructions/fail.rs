@@ -17,9 +17,8 @@
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::execution_context::check_error_object;
-use crate::execution_step::resolver;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
@@ -52,7 +51,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
 }
 
 fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet, _prov) = resolver::resolve_ast_scalar(scalar, exec_ctx)?;
+    let (value, mut tetraplet, _prov) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
@@ -61,7 +60,7 @@ fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i
 }
 
 fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet, _prov) = resolver::resolve_ast_scalar_wl(scalar, exec_ctx)?;
+    let (value, mut tetraplet, _prov) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
@@ -92,13 +91,12 @@ fn fail_with_canon_stream(
     ast_canon: &ast::CanonStreamWithLambda<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
-    let variable = Variable::CanonStream { name: ast_canon.name };
+    let (value, mut tetraplets, _prov) = ast_canon.resolve(exec_ctx)?;
 
-    let (value, tetraplet, _prov) = resolver::apply_lambda(variable, &ast_canon.lambda, exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(Rc::new(tetraplet)))
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)))
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {

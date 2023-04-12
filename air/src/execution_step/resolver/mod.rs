@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-mod resolve;
+mod resolvable_impl;
 
-pub(crate) use resolve::*;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::ExecutionResult;
+use crate::execution_step::RcSecurityTetraplets;
+use crate::JValue;
 
-use super::RcSecurityTetraplets;
+use air_interpreter_data::Provenance;
+
+pub(crate) trait Resolvable {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)>;
+}

@@ -31,8 +31,6 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
-pub(crate) use stream::StreamJvaluableIngredients;
-
 use std::borrow::Cow;
 
 /// Represent a value that could be transform to a JValue with or without tetraplets.

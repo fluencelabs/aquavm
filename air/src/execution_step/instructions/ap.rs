@@ -20,7 +20,6 @@ mod utils;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Variable;
 use crate::execution_step::ValueAggregate;
 use crate::execution_step::ValueAggregateWithProvenance;
 use crate::log_instruction;

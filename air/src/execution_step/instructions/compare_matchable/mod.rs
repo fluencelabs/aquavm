@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-mod comparator;
+use crate::execution_step::resolver::Resolvable;
+use crate::execution_step::ExecutionCtx;
+use crate::execution_step::ExecutionResult;
 
-pub(super) use comparator::are_matchable_eq;
+use air_parser::ast;
+
+#[tracing::instrument(skip_all)]
+pub(crate) fn are_matchable_eq<'ctx>(
+    left: &ast::ImmutableValue<'_>,
+    right: &ast::ImmutableValue<'_>,
+    exec_ctx: &'ctx ExecutionCtx<'_>,
+) -> ExecutionResult<bool> {
+    let (left_value, _, _) = left.resolve(exec_ctx)?;
+    let (right_value, _, _) = right.resolve(exec_ctx)?;
+
+    Ok(left_value == right_value)
+}
