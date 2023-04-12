@@ -18,6 +18,7 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::execution_context::check_error_object;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
 use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
@@ -29,7 +30,6 @@ use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
 
-use crate::execution_step::resolver::Resolvable;
 use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
