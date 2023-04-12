@@ -60,15 +60,6 @@ pub(crate) fn resolve_const(
     Ok((jvalue, vec![tetraplet]))
 }
 
-impl Resolvable for JValue {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-        let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
-        let tetraplet = Rc::new(tetraplet);
-
-        Ok((self.clone(), vec![tetraplet]))
-    }
-}
-
 impl Resolvable for Option<LambdaAST<'_>> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
         use crate::LastError;
