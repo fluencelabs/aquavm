@@ -66,7 +66,11 @@ impl Resolvable for Option<LambdaAST<'_>> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         use crate::LastError;
 
-        let LastError { error, tetraplet } = ctx.last_error();
+        let LastError {
+            error,
+            tetraplet,
+            provenance,
+        } = ctx.last_error();
 
         let jvalue = match self {
             Some(error_accessor) => select_by_lambda_from_scalar(error.as_ref(), error_accessor, ctx)?.into_owned(),
@@ -82,7 +86,7 @@ impl Resolvable for Option<LambdaAST<'_>> {
             }
         };
 
-        Ok((jvalue, tetraplets, Provenance::literal(None)))
+        Ok((jvalue, tetraplets, provenance.clone()))
     }
 }
 

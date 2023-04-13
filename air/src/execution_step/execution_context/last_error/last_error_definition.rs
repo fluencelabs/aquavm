@@ -18,6 +18,7 @@ use super::LastErrorObjectError;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
+use air_interpreter_data::Provenance;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -41,6 +42,9 @@ pub struct LastError {
 
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
+
+    /// Value provenance
+    pub provenance: Provenance,
 }
 
 pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str, peer_id: &str) -> JValue {
