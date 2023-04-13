@@ -15,7 +15,6 @@
  */
 
 use super::*;
-// TODO use crate::execution_step::resolver::apply_lambda;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
