@@ -151,11 +151,11 @@ fn update_state_with_service_result<'i>(
     Ok(())
 }
 
-fn handle_service_error<'i>(
+fn handle_service_error(
     service_result: CallServiceResult,
     argument_hash: Rc<str>,
     tetraplet: RcSecurityTetraplet,
-    exec_ctx: &mut ExecutionCtx<'i>,
+    exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use air_interpreter_interface::CALL_SERVICE_SUCCESS;
