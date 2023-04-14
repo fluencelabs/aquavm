@@ -21,7 +21,8 @@ use crate::execution_step::boxed_value::ScalarRef;
 use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
-use crate::execution_step::ValueAggregateWithProvenance;
+use crate::execution_step::ValueAggregate;
+use crate::execution_step::WithProvenance;
 use values_sparse_matrix::ValuesSparseMatrix;
 
 use std::collections::HashMap;
@@ -84,7 +85,7 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: ValuesSparseMatrix<ValueAggregateWithProvenance>,
+    pub(crate) non_iterable_variables: ValuesSparseMatrix<WithProvenance<ValueAggregate>>,
 
     pub(crate) canon_streams: ValuesSparseMatrix<CanonStreamWithProvenance>,
 
@@ -105,7 +106,7 @@ impl<'i> Scalars<'i> {
     pub(crate) fn set_scalar_value(
         &mut self,
         name: impl Into<String>,
-        value: ValueAggregateWithProvenance,
+        value: WithProvenance<ValueAggregate>,
     ) -> ExecutionResult<bool> {
         self.non_iterable_variables.set_value(name, value)
     }
@@ -143,7 +144,7 @@ impl<'i> Scalars<'i> {
     pub(crate) fn get_non_iterable_scalar(
         &'i self,
         name: &str,
-    ) -> ExecutionResult<Option<&'i ValueAggregateWithProvenance>> {
+    ) -> ExecutionResult<Option<&'i WithProvenance<ValueAggregate>>> {
         self.non_iterable_variables.get_value(name)
     }
 

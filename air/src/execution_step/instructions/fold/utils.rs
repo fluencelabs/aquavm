@@ -116,7 +116,7 @@ pub(crate) fn construct_stream_iterable_values(
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_value(call_result: ValueAggregateWithProvenance, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
+fn from_value(call_result: WithProvenance<ValueAggregate>, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match &call_result.result.deref() {
         JValue::Array(array) => {
             if array.is_empty() {

@@ -17,7 +17,7 @@
 use super::Iterable;
 use super::IterableItem;
 use super::ValueAggregate;
-use crate::execution_step::ValueAggregateWithProvenance;
+use crate::execution_step::WithProvenance;
 use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
@@ -27,13 +27,13 @@ use std::ops::Deref;
 /// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableResolvedCall {
-    pub(crate) call_result: ValueAggregateWithProvenance,
+    pub(crate) call_result: WithProvenance<ValueAggregate>,
     pub(crate) cursor: usize,
     pub(crate) len: usize,
 }
 
 impl IterableResolvedCall {
-    pub(crate) fn init(call_result: ValueAggregateWithProvenance, len: usize) -> Self {
+    pub(crate) fn init(call_result: WithProvenance<ValueAggregate>, len: usize) -> Self {
         Self {
             call_result,
             cursor: 0,
@@ -58,15 +58,12 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             return None;
         }
 
-        let ValueAggregateWithProvenance {
-            value_aggregate:
-                ValueAggregate {
-                    result,
-                    tetraplet,
-                    trace_pos,
-                },
-            provenance,
-        } = &self.call_result;
+        let ValueAggregate {
+            result,
+            tetraplet,
+            trace_pos,
+        } = &*self.call_result;
+        let provenance = &self.call_result.provenance;
 
         let jvalue = match &result.deref() {
             JValue::Array(array) => &array[self.cursor],

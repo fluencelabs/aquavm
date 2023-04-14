@@ -19,6 +19,7 @@ use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
+use air_interpreter_data::Provenance;
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
@@ -27,7 +28,7 @@ pub(super) fn apply_to_arg(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
     should_touch_trace: bool,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     use ast::ApArgument::*;
 
     let result = match argument {
@@ -52,21 +53,21 @@ fn apply_const(
     value: impl Into<JValue>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     let value = Rc::new(value.into());
     let tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.run_parameters.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let value = ValueAggregate::new(value, tetraplet, position);
-    Ok(ValueAggregateWithProvenance::new(value, Provenance::literal(None)))
+    Ok(WithProvenance::new(value, Provenance::literal(None)))
 }
 
 fn apply_last_error<'i>(
     error_accessor: &Option<LambdaAST<'i>>,
     exec_ctx: &ExecutionCtx<'i>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     let (value, mut tetraplets, provenance) = error_accessor.resolve(exec_ctx)?;
     let value = Rc::new(value);
     // removing is safe because prepare_last_error always returns a vec with one element.
@@ -74,7 +75,7 @@ fn apply_last_error<'i>(
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let value = ValueAggregate::new(value, tetraplet, position);
-    let result = ValueAggregateWithProvenance::new(value, provenance);
+    let result = WithProvenance::new(value, provenance);
     Ok(result)
 }
 
@@ -83,7 +84,7 @@ fn apply_scalar(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
     should_touch_trace: bool,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     use crate::execution_step::ScalarRef;
 
     let scalar = exec_ctx.scalars.get_value(ast_scalar.name)?;
@@ -107,11 +108,11 @@ fn apply_scalar_wl(
     ast_scalar: &ast::ScalarWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     let (value, mut tetraplets, provenance) = ast_scalar.resolve(exec_ctx)?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = ValueAggregate::new(Rc::new(value), tetraplets.remove(0), position);
-    let result = ValueAggregateWithProvenance::new(value, provenance);
+    let result = WithProvenance::new(value, provenance);
 
     Ok(result)
 }
@@ -120,7 +121,7 @@ fn apply_canon_stream(
     ast_stream: &ast::CanonStream<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     // TODO: refactor this code after boxed value
     use crate::execution_step::boxed_value::JValuable;
 
@@ -129,7 +130,7 @@ fn apply_canon_stream(
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = ValueAggregate::new(Rc::new(value), tetraplet, position);
-    let result = ValueAggregateWithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), None));
+    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), None));
     Ok(result)
 }
 
@@ -137,7 +138,7 @@ fn apply_canon_stream_wl(
     ast_stream: &ast::CanonStreamWithLambda<'_>,
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregateWithProvenance> {
+) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     // TODO: refactor this code after boxed value
     use crate::execution_step::boxed_value::JValuable;
 
@@ -148,6 +149,6 @@ fn apply_canon_stream_wl(
     let json_path: Rc<str> = tetraplet.json_path.as_str().into();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = ValueAggregate::new(Rc::new(result.into_owned()), Rc::new(tetraplet), position);
-    let result = ValueAggregateWithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), Some(json_path)));
+    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), Some(json_path)));
     Ok(result)
 }

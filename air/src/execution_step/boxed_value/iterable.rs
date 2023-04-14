@@ -25,7 +25,7 @@ pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;
 
 use super::ValueAggregate;
-use super::ValueAggregateWithProvenance;
+use super::WithProvenance;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
@@ -89,7 +89,7 @@ impl IterableItem<'_> {
         .clone()
     }
 
-    pub(crate) fn into_resolved_result(self) -> ValueAggregateWithProvenance {
+    pub(crate) fn into_resolved_result(self) -> WithProvenance<ValueAggregate> {
         use IterableItem::*;
 
         let (value, tetraplet, pos, provenance) = match self {
@@ -98,10 +98,8 @@ impl IterableItem<'_> {
             RcValue(ingredients) => ingredients,
         };
 
-        ValueAggregateWithProvenance {
-            value_aggregate: ValueAggregate::new(value, tetraplet, pos),
-            provenance,
-        }
+        let value = ValueAggregate::new(value, tetraplet, pos);
+        WithProvenance::new(value, provenance)
     }
 }
 

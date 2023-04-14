@@ -15,13 +15,14 @@
  */
 
 use crate::execution_step::Generation;
-use crate::execution_step::ValueAggregateWithProvenance;
+use crate::execution_step::ValueAggregate;
+use crate::execution_step::WithProvenance;
 
 use air_parser::AirPos;
 use air_trace_handler::merger::ValueSource;
 
 pub(crate) struct StreamValueDescriptor<'stream_name> {
-    pub value: ValueAggregateWithProvenance,
+    pub value: WithProvenance<ValueAggregate>,
     pub name: &'stream_name str,
     pub source: ValueSource,
     pub generation: Generation,
@@ -30,7 +31,7 @@ pub(crate) struct StreamValueDescriptor<'stream_name> {
 
 impl<'stream_name> StreamValueDescriptor<'stream_name> {
     pub fn new(
-        value: ValueAggregateWithProvenance,
+        value: WithProvenance<ValueAggregate>,
         name: &'stream_name str,
         source: ValueSource,
         generation: Generation,

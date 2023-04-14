@@ -26,7 +26,7 @@ pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 pub(crate) use scalar::ScalarRef;
 pub(crate) use scalar::ValueAggregate;
-pub(crate) use scalar::ValueAggregateWithProvenance;
+pub(crate) use scalar::WithProvenance;
 pub(crate) use stream::Generation;
 pub(crate) use stream::Stream;
 pub(crate) use utils::populate_tetraplet_with_lambda;

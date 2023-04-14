@@ -17,19 +17,19 @@
 use super::Iterable;
 use super::IterableItem;
 use super::ValueAggregate;
-use super::ValueAggregateWithProvenance;
+use super::WithProvenance;
 use crate::foldable_next;
 use crate::foldable_prev;
 
 /// Used for iterating over stream with JValues.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableVecResolvedCall {
-    pub(crate) call_results: Vec<ValueAggregateWithProvenance>,
+    pub(crate) call_results: Vec<WithProvenance<ValueAggregate>>,
     pub(crate) cursor: usize,
 }
 
 impl IterableVecResolvedCall {
-    pub(crate) fn init(call_results: Vec<ValueAggregateWithProvenance>) -> Self {
+    pub(crate) fn init(call_results: Vec<WithProvenance<ValueAggregate>>) -> Self {
         Self {
             call_results,
             cursor: 0,
@@ -57,7 +57,7 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
             result,
             tetraplet,
             trace_pos,
-        } = &self.call_results[self.cursor].value_aggregate;
+        } = &*self.call_results[self.cursor];
 
         let result = IterableItem::RcValue((
             result.clone(),

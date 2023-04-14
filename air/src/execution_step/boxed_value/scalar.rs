@@ -37,43 +37,43 @@ pub struct ValueAggregate {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ValueAggregateWithProvenance {
-    pub value_aggregate: ValueAggregate,
+pub struct WithProvenance<ValueAggregate> {
+    pub wrapped: ValueAggregate,
     pub provenance: Provenance,
 }
 
-impl DerefMut for ValueAggregateWithProvenance {
+impl DerefMut for WithProvenance<ValueAggregate> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value_aggregate
+        &mut self.wrapped
     }
 }
 
-impl Deref for ValueAggregateWithProvenance {
+impl Deref for WithProvenance<ValueAggregate> {
     type Target = ValueAggregate;
 
     fn deref(&self) -> &Self::Target {
-        &self.value_aggregate
+        &self.wrapped
     }
 }
 
-impl ValueAggregateWithProvenance {
+impl WithProvenance<ValueAggregate> {
     pub fn new(value_aggregate: ValueAggregate, provenance: Provenance) -> Self {
         Self {
-            value_aggregate,
+            wrapped: value_aggregate,
             provenance,
         }
     }
 }
 
 pub(crate) enum ScalarRef<'i> {
-    Value(&'i ValueAggregateWithProvenance),
+    Value(&'i WithProvenance<ValueAggregate>),
     IterableValue(&'i FoldState<'i>),
 }
 
 impl<'i> ScalarRef<'i> {
     pub(crate) fn into_jvaluable(self) -> (Box<dyn JValuable + 'i>, Provenance) {
         match self {
-            ScalarRef::Value(value) => (Box::new(value.value_aggregate.clone()), value.provenance.clone()),
+            ScalarRef::Value(value) => (Box::new((**value).clone()), value.provenance.clone()),
             ScalarRef::IterableValue(fold_state) => {
                 let peeked_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
                 let provenance = peeked_value.provenance();
