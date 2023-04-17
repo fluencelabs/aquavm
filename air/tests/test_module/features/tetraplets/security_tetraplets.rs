@@ -95,6 +95,101 @@ fn fold_with_inner_call() {
 }
 
 #[test]
+fn fold_stream_with_inner_call() {
+    let init_peer_id = "init_peer_id";
+    let air_script = r#"
+(seq
+   (seq
+      (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+      (seq
+         (call "init_peer_id" ("" "") [] var) ; ok = {"field": 43}
+         (ap var.$.field $stream)))
+   (fold $stream i
+      (seq
+         (call "init_peer_id" ("" "") [i] $s2) ; behaviour = tetraplet
+         (next i))))
+"#;
+    let executor = air_test_framework::AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(init_peer_id),
+        vec![],
+        std::iter::empty(),
+        &air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{}", result.error_message);
+    let data = data_from_result(&result);
+
+    let expected_trace = vec![
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [42]
+        ),
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [43]
+        ),
+    ];
+    assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
+}
+
+#[test]
+fn fold_canon_with_inner_call() {
+    let init_peer_id = "init_peer_id";
+    let air_script = r#"
+(seq
+   (seq
+      (seq
+         (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+         (call "init_peer_id" ("" "") [] var)) ; ok = {"field": 43}
+      (ap var.$.field $stream))
+   (seq
+      (canon "init_peer_id" $stream #can)
+      (fold #can x
+        (seq
+          (call "init_peer_id" ("" "") [x] $s2) ; behaviour=tetraplet
+          (next x))))
+)
+"#;
+    let executor = air_test_framework::AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(init_peer_id),
+        vec![],
+        std::iter::empty(),
+        &air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{}", result.error_message);
+    let data = data_from_result(&result);
+
+    let expected_trace = vec![
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [42]
+        ),
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            1,
+            peer = init_peer_id,
+            service = "..2",
+            args = [43]
+        ),
+    ];
+    assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
+}
+
+#[test]
 fn fold_json_path() {
     let variable_numbers = json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]});
 
