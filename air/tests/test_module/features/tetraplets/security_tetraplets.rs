@@ -16,6 +16,7 @@
 
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
+use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -70,25 +71,24 @@ fn fold_with_inner_call() {
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), script.clone(), "", "");
     let mut data = result.data;
 
-    let first_arg_tetraplet = SecurityTetraplet {
-        peer_pk: set_variable_vm_peer_id,
-        service_id,
-        function_name,
-        json_path: String::new(),
-    };
-
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: test_params.init_peer_id.clone(),
-        service_id: String::new(),
-        function_name: String::new(),
-        json_path: String::new(),
+        ..Default::default()
     };
 
-    let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
-    let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     for i in 0..10 {
         let result = checked_call_vm!(client_vms[i].0, test_params.clone(), script.clone(), "", data);
         data = result.data;
+
+        let first_arg_tetraplet = SecurityTetraplet {
+            peer_pk: set_variable_vm_peer_id.clone(),
+            service_id: service_id.clone(),
+            function_name: function_name.clone(),
+            json_path: format!(".$.[{}]", i),
+        };
+
+        let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet.clone()]];
+        let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
 
         assert_eq!(client_vms[i].1, expected_tetraplets);
     }
