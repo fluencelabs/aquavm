@@ -229,7 +229,7 @@ fn fold_json_path() {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        json_path: String::from(".$.args.[9]"),
+        json_path: String::from(".$.args.$.[9]"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
