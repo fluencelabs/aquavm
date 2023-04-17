@@ -98,17 +98,17 @@ fn fold_with_inner_call() {
 fn fold_stream_with_inner_call() {
     let init_peer_id = "init_peer_id";
     let air_script = r#"
-(seq
-   (seq
-      (call "init_peer_id" ("" "") [] $stream) ; ok = 42
       (seq
-         (call "init_peer_id" ("" "") [] var) ; ok = {"field": 43}
-         (ap var.$.field $stream)))
-   (fold $stream i
-      (seq
-         (call "init_peer_id" ("" "") [i] $s2) ; behaviour = tetraplet
-         (next i))))
-"#;
+         (seq
+            (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+            (seq
+               (call "init_peer_id" ("" "") [] var) ; ok = {"field": 43}
+               (ap var.$.field $stream)))
+         (fold $stream i
+            (seq
+               (call "init_peer_id" ("" "") [i] $s2) ; behaviour = tetraplet
+               (next i))))
+    "#;
     let executor = air_test_framework::AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id(init_peer_id),
         vec![],
@@ -144,20 +144,19 @@ fn fold_stream_with_inner_call() {
 fn fold_canon_with_inner_call() {
     let init_peer_id = "init_peer_id";
     let air_script = r#"
-(seq
-   (seq
       (seq
-         (call "init_peer_id" ("" "") [] $stream) ; ok = 42
-         (call "init_peer_id" ("" "") [] var)) ; ok = {"field": 43}
-      (ap var.$.field $stream))
-   (seq
-      (canon "init_peer_id" $stream #can)
-      (fold #can x
-        (seq
-          (call "init_peer_id" ("" "") [x] $s2) ; behaviour=tetraplet
-          (next x))))
-)
-"#;
+         (seq
+            (seq
+               (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+               (call "init_peer_id" ("" "") [] var)) ; ok = {"field": 43}
+            (ap var.$.field $stream))
+         (seq
+            (canon "init_peer_id" $stream #can)
+            (fold #can x
+              (seq
+                (call "init_peer_id" ("" "") [x] $s2) ; behaviour=tetraplet
+                (next x)))))
+    "#;
     let executor = air_test_framework::AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id(init_peer_id),
         vec![],
