@@ -71,7 +71,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: lcov.info
+          file: lcov.info
 
       - name: Archive code coverage results
         if: inputs.cargo-dependencies == 'null' && !github.event.pull_request.head.repo.fork
