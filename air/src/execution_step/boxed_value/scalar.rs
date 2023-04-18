@@ -37,8 +37,8 @@ pub struct ValueAggregate {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct WithProvenance<ValueAggregate> {
-    pub wrapped: ValueAggregate,
+pub struct WithProvenance<T> {
+    pub wrapped: T,
     pub provenance: Provenance,
 }
 
