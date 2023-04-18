@@ -42,26 +42,23 @@ pub struct WithProvenance<T> {
     pub provenance: Provenance,
 }
 
-impl DerefMut for WithProvenance<ValueAggregate> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.wrapped
-    }
-}
-
-impl Deref for WithProvenance<ValueAggregate> {
-    type Target = ValueAggregate;
+impl<T> Deref for WithProvenance<T> {
+    type Target = T;
 
     fn deref(&self) -> &Self::Target {
         &self.wrapped
     }
 }
 
-impl WithProvenance<ValueAggregate> {
-    pub fn new(value_aggregate: ValueAggregate, provenance: Provenance) -> Self {
-        Self {
-            wrapped: value_aggregate,
-            provenance,
-        }
+impl<T> DerefMut for WithProvenance<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.wrapped
+    }
+}
+
+impl<T> WithProvenance<T> {
+    pub fn new(wrapped: T, provenance: Provenance) -> Self {
+        Self { wrapped, provenance }
     }
 }
 
