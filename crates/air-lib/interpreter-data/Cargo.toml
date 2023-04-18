@@ -22,7 +22,7 @@ air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 polyplets = { version = "0.3.2", path = "../polyplets" }
 
 serde = {version = "1.0.159", features = ["derive", "rc"]}
-serde_json = "1.0.95"
+serde_json = "1.0.96"
 semver = { version = "1.0.17", features = ["serde"] }
 once_cell = "1.17.1"
 tracing = "0.1.37"

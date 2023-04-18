@@ -29,7 +29,7 @@ air-utils = { version = "0.1.0", path = "../crates/air-lib/utils" }
 polyplets = { version = "0.3.2", path = "../crates/air-lib/polyplets" }
 
 serde = { version = "1.0.159", features = [ "derive", "rc" ] }
-serde_json = "1.0.95"
+serde_json = "1.0.96"
 
 boolinator = "2.4.0"
 concat-idents = "1.1.4"
