@@ -70,7 +70,10 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
-        let result = IterableItem::RefValue((jvalue, tetraplet.clone(), *trace_pos, provenance.clone()));
+        let mut tetraplet = (**tetraplet).clone();
+        tetraplet.add_lambda(&format!(".$.[{}]", self.cursor));
+
+        let result = IterableItem::RefValue((jvalue, tetraplet.into(), *trace_pos, provenance.clone()));
         Some(result)
     }
 

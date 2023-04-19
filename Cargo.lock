@@ -229,42 +229,51 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.2.6"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "342258dd14006105c2b75ab1bd7543a03bdf0cfc94383303ac212a04939dff6f"
+checksum = "9e579a7752471abc2a8268df8b20005e3eadd975f585398f17efcfd8d4927371"
 dependencies = [
  "anstyle",
  "anstyle-parse",
+ "anstyle-query",
  "anstyle-wincon",
- "concolor-override",
- "concolor-query",
+ "colorchoice",
  "is-terminal",
  "utf8parse",
 ]
 
 [[package]]
 name = "anstyle"
-version = "0.3.5"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23ea9e81bd02e310c216d080f6223c179012256e5151c41db88d12c88a1684d2"
+checksum = "41ed9a86bf92ae6580e0a31281f65a1b1d867c0cc68d5346e2ae128dddfa6a7d"
 
 [[package]]
 name = "anstyle-parse"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7d1bb534e9efed14f3e5f44e7dd1a4f709384023a4165199a4241e18dff0116"
+checksum = "e765fd216e48e067936442276d1d57399e37bce53c264d6fefbe298080cb57ee"
 dependencies = [
  "utf8parse",
 ]
 
 [[package]]
-name = "anstyle-wincon"
-version = "0.2.0"
+name = "anstyle-query"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3127af6145b149f3287bb9a0d10ad9c5692dba8c53ad48285e5bec4063834fa"
+checksum = "5ca11d4be1bab0c8bc8734a9aa7bf4ee8316d462a08c6ac5052f888fef5b494b"
+dependencies = [
+ "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "anstyle-wincon"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bcd8291a340dd8ac70e18878bc4501dd7b4ff970cfa21c207d36ece51ea88fd"
 dependencies = [
  "anstyle",
- "windows-sys 0.45.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -324,7 +333,7 @@ dependencies = [
  "atty",
  "avm-data-store",
  "avm-interface",
- "clap 4.2.1",
+ "clap 4.2.2",
  "itertools",
  "serde",
  "serde_json",
@@ -698,9 +707,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.2.1"
+version = "4.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "046ae530c528f252094e4a77886ee1374437744b2bff1497aa898bbddbbb29b3"
+checksum = "9b802d85aaf3a1cdb02b224ba472ebdea62014fccfcb269b95a4d76443b5ee5a"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -709,9 +718,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.2.1"
+version = "4.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "223163f58c9a40c3b0a43e1c4b50a9ce09f007ea2cb1ec258a687945b4b7929f"
+checksum = "14a1a858f532119338887a4b8e1af9c60de8249cd7bafd68036a489e261e37b6"
 dependencies = [
  "anstream",
  "anstyle",
@@ -767,6 +776,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "colorchoice"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
+
+[[package]]
 name = "concat-idents"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -774,21 +789,6 @@ checksum = "0fe0e1d9f7de897d18e590a7496b5facbe87813f746cf4b8db596ba77e07e832"
 dependencies = [
  "quote",
  "syn 1.0.107",
-]
-
-[[package]]
-name = "concolor-override"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a855d4a1978dc52fb0536a04d384c2c0c1aa273597f08b77c8c4d3b2eec6037f"
-
-[[package]]
-name = "concolor-query"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d11d52c3d7ca2e6d0040212be9e4dbbcd78b6447f535b6b561f449427944cf"
-dependencies = [
- "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -1695,9 +1695,9 @@ dependencies = [
 
 [[package]]
 name = "it-json-serde"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f91f4d5bc0e54de8cea8aff5da78c06609ad8816872ba3c521058321474df5c"
+checksum = "145ec580d7bd2edbe7177841fa6f48bf820c5bbaa0fc51d4ecef48a8f91889e5"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1894,9 +1894,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-core"
-version = "0.20.1"
+version = "0.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0f8bfd5e13d8791cb3f02d281fe007f2e96458b806e6a9d21ad3a680908c53f"
+checksum = "a69b12be64af53a94221f36b11339b60037c0969b6b884839a34acaa96e10ad4"
 dependencies = [
  "anyhow",
  "bytesize",
@@ -1923,9 +1923,9 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92b3410e5ce417b6cefc497cd7e5c667b6af492b0e1d505f61b489e9f24b9bde"
+checksum = "a2042bcddb83455ba3bf4619fa732b0d61ae52b66fbfd5f3f39397553474658e"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -1940,9 +1940,9 @@ dependencies = [
 
 [[package]]
 name = "marine-it-interfaces"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02fdf6c3d6ff2875d9c6c0ffc9cdde80ad22a4d61a1b4312d5c7ee83b2b7e273"
+checksum = "d3bdc1a0d26f38f8d0375c7f8aa0621de90b5966e38b407c7505ead9649bbd92"
 dependencies = [
  "multimap 0.8.3",
  "wasmer-interface-types-fl",
@@ -1950,9 +1950,9 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f00bb7e477431bf04d8eae80ee18c473fc87ed182d69bf024a14698478e1f56f"
+checksum = "3b64614a1221d786babc99ae3c67c1fd051246476e18e107b0d21764da8ac636"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2002,9 +2002,9 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03e0b20701e6f55911d341f2b659a7d9f36ba94ee15419b8166c00ddc7d65ce7"
+checksum = "b0aab6b0bc63685a4d51d7ec5876b8a0330264d72be09f579fb3a71e9eed4076"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2018,9 +2018,9 @@ dependencies = [
 
 [[package]]
 name = "marine-module-interface"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc19dfc36acc161498a2eb02baa81467ab78535b2d0b0726edd8c50a80263457"
+checksum = "49d8f21255b94f1c8b2731a2b49c2ed34f955ed2e11dae3fb6c580a346d10bdd"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2058,9 +2058,9 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.26.1"
+version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "becc06f602870c90d26b27a6d33fbbed31f3f8727e815fbad425ea4a7f237da2"
+checksum = "f1c708953e847e0d5e6c3b34952ad8db3884f4b4c88dd89891f03c4ddf91832e"
 dependencies = [
  "bytesize",
  "it-json-serde",
@@ -2103,9 +2103,9 @@ checksum = "7e86cb57ff0e2fdc8e188a52d388287d38e5cc781eddd09a82d20f8ee1f48b80"
 
 [[package]]
 name = "marine-wasm-backend-traits"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a31fcefa80ee7d067b22456fa834dd64b2f82de0443cfb7f51ef7df83f9255a"
+checksum = "251d7e65706b84504680f058d6794331e474f89996fc3d4856b43bad6ca1cf21"
 dependencies = [
  "anyhow",
  "it-memory-traits",
@@ -2118,9 +2118,9 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a46d7fc11c8e16f6a2a1c4f88f1389ad2eb2e0379a8bc536ba3264f3dbaf6fe1"
+checksum = "c1a3cb776b7c3c6d7fce69d8f2332b3a1baabecdcfa7b33a9adec278c968d883"
 dependencies = [
  "anyhow",
  "it-memory-traits",
@@ -2200,9 +2200,9 @@ dependencies = [
 
 [[package]]
 name = "multihash"
-version = "0.18.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15e5d911412e631e1de11eb313e4dd71f73fd964401102aab23d6c8327c431ba"
+checksum = "cfd8a792c1694c6da4f68db0a9d707c72bd260994da179e6030a5dcee00bb815"
 dependencies = [
  "core2",
  "digest",

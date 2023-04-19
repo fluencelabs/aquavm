@@ -59,7 +59,9 @@ impl<'ctx> Iterable<'ctx> for IterableLambdaResult {
         }
 
         let jvalue = &self.jvalues[self.cursor];
-        let result = IterableItem::RefRef((jvalue, &self.tetraplet, 0.into(), Provenance::literal(None)));
+        let mut tetraplet = (*self.tetraplet).clone();
+        tetraplet.add_lambda(&format!(".$.[{}]", self.cursor));
+        let result = IterableItem::RefValue((jvalue, tetraplet.into(), 0.into(), Provenance::literal(None)));
 
         Some(result)
     }
