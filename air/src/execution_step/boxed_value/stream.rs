@@ -17,7 +17,6 @@
 use super::ExecutionResult;
 use super::ValueAggregate;
 use crate::ExecutionError;
-use crate::JValue;
 use crate::UncatchableError;
 
 use air_interpreter_data::GenerationIdx;
@@ -149,20 +148,7 @@ impl Stream {
     }
 
     pub(crate) fn is_empty(&self) -> bool {
-        if self.values.is_empty() {
-            return false;
-        }
-
         self.values.iter().all(|v| v.is_empty())
-    }
-
-    pub(crate) fn as_jvalue(&self, generation: Generation) -> Option<JValue> {
-        use std::ops::Deref;
-
-        let iter = self.iter(generation)?;
-        let jvalue_array = iter.map(|r| r.result.deref().clone()).collect::<Vec<_>>();
-
-        Some(JValue::Array(jvalue_array))
     }
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
