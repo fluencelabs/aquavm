@@ -93,17 +93,17 @@ fn issue_211() {
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 4
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 6
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 8
                 },
             ]
@@ -120,17 +120,17 @@ fn issue_211() {
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 4
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 6
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": "", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
                     "trace_pos": 8
                 },
             ]
@@ -144,6 +144,6 @@ fn issue_211() {
         ),
     ]);
 
-    let actual_trace = trace_from_result(&result);
-    assert_eq!(actual_trace, expected_trace);
+    let actual_data = data_from_result(&result);
+    assert_eq!(actual_data.trace, expected_trace, "{:?}", actual_data.cid_info);
 }
