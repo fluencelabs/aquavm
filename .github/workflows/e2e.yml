@@ -144,5 +144,6 @@ jobs:
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@FLU-312
     with:
+      ref: FLU-312
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
