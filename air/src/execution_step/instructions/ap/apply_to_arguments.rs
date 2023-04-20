@@ -60,7 +60,7 @@ fn apply_const(
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let value = ValueAggregate::new(value, tetraplet, position);
-    Ok(WithProvenance::new(value, Provenance::literal(None)))
+    Ok(WithProvenance::new(value, Provenance::literal()))
 }
 
 fn apply_last_error<'i>(
@@ -130,7 +130,7 @@ fn apply_canon_stream(
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = ValueAggregate::new(Rc::new(value), tetraplet, position);
-    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), None));
+    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone()));
     Ok(result)
 }
 
@@ -146,9 +146,8 @@ fn apply_canon_stream_wl(
     let canon_stream_value = &canon_stream.canon_stream;
     let (result, tetraplet) =
         JValuable::apply_lambda_with_tetraplets(&canon_stream_value, &ast_stream.lambda, exec_ctx)?;
-    let json_path: Rc<str> = tetraplet.json_path.as_str().into();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = ValueAggregate::new(Rc::new(result.into_owned()), Rc::new(tetraplet), position);
-    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone(), Some(json_path)));
+    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone()));
     Ok(result)
 }

@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-mod security_tetraplets;
 mod provenance;
+mod security_tetraplets;

@@ -57,7 +57,7 @@ fn call_result() {
                 "function_name": "func",
                 "json_path": "",
             },
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }]
     }));
 
@@ -109,7 +109,7 @@ fn call_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[0]",
             },
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }, {
             "result": 11,
             "tetraplet": {
@@ -118,7 +118,7 @@ fn call_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[1]",
             },
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }, {
             "result": 12,
             "tetraplet": {
@@ -127,7 +127,7 @@ fn call_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[2]",
             },
-            "provenance": Provenance::service_result(val_cid, None),
+            "provenance": Provenance::service_result(val_cid),
         }]
     }));
 
@@ -166,7 +166,7 @@ fn literal() {
                 "function_name": "",
                 "json_path": "",
             },
-            "provenance": Provenance::literal(None),
+            "provenance": Provenance::literal(),
         }]
     }));
 
@@ -213,7 +213,7 @@ fn canon_in_canon() {
         "values": [{
             "result": 1,
             "tetraplet": value_tetraplet,
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }]
     }));
     let canon_cid = extract_canon_result_cid(&canon_val);
@@ -228,7 +228,7 @@ fn canon_in_canon() {
         "values": [{
             "result": 1,
             "tetraplet": value_tetraplet,
-            "provenance": Provenance::service_result(val_cid, None),
+            "provenance": Provenance::service_result(val_cid),
         }, {
             "result": [1],
             "tetraplet": {
@@ -237,7 +237,7 @@ fn canon_in_canon() {
                 "function_name": "",
                 "json_path": "",
             },
-            "provenance": Provenance::canon(canon_cid, None),
+            "provenance": Provenance::canon(canon_cid),
         }]
     }));
 
@@ -297,7 +297,7 @@ fn lambda_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[0].$.field.$.[0]",
             },
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }, {
             "result": 11,
             "tetraplet": {
@@ -306,7 +306,7 @@ fn lambda_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[0].$.field.$.[1]",
             },
-            "provenance": Provenance::service_result(val_cid.clone(), None),
+            "provenance": Provenance::service_result(val_cid.clone()),
         }, {
             "result": 12,
             "tetraplet": {
@@ -315,7 +315,7 @@ fn lambda_result_iteration() {
                 "function_name": "func",
                 "json_path": ".$.[0].$.field.$.[2]",
             },
-            "provenance": Provenance::service_result(val_cid, None),
+            "provenance": Provenance::service_result(val_cid),
         }]
     }));
 

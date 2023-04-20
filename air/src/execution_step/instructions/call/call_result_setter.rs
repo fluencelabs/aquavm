@@ -45,7 +45,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 .map_err(UncatchableError::from)?;
             let executed_result = WithProvenance::new(
                 executed_result,
-                Provenance::service_result(service_result_agg_cid.clone(), None),
+                Provenance::service_result(service_result_agg_cid.clone()),
             );
 
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
@@ -59,7 +59,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 
             let executed_result = WithProvenance::new(
                 executed_result,
-                Provenance::service_result(service_result_agg_cid.clone(), None),
+                Provenance::service_result(service_result_agg_cid.clone()),
             );
 
             let value_descriptor = StreamValueDescriptor::new(
@@ -95,7 +95,7 @@ pub(crate) fn populate_context_from_data<'i>(
             let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             // TODO is it a correct CID?
-            let result = WithProvenance::new(result, Provenance::service_result(cid.clone(), None));
+            let result = WithProvenance::new(result, Provenance::service_result(cid.clone()));
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
             Ok(ValueRef::Scalar(cid))
         }
@@ -103,7 +103,7 @@ pub(crate) fn populate_context_from_data<'i>(
             let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
             let result = ValueAggregate::new(value, tetraplet, trace_pos);
             // TODO is it a correct CID?
-            let result = WithProvenance::new(result, Provenance::service_result(cid.clone(), None));
+            let result = WithProvenance::new(result, Provenance::service_result(cid.clone()));
             let value_descriptor = StreamValueDescriptor::new(
                 result,
                 stream.name,

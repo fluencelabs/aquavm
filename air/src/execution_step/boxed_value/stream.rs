@@ -325,11 +325,11 @@ mod test {
     fn test_slice_iter() {
         let value_1 = WithProvenance::new(
             ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-            Provenance::service_result(CID::new("some fake cid").into(), None),
+            Provenance::service_result(CID::new("some fake cid").into()),
         );
         let value_2 = WithProvenance::new(
             ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-            Provenance::service_result(CID::new("some fake cid").into(), None),
+            Provenance::service_result(CID::new("some fake cid").into()),
         );
         let mut stream = Stream::from_generations_count(2.into(), 0.into());
 
@@ -374,11 +374,11 @@ mod test {
     fn generation_from_current_data() {
         let value_1 = WithProvenance::new(
             ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
-            Provenance::service_result(CID::new("some fake cid").into(), None),
+            Provenance::service_result(CID::new("some fake cid").into()),
         );
         let value_2 = WithProvenance::new(
             ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
-            Provenance::service_result(CID::new("some fake cid").into(), None),
+            Provenance::service_result(CID::new("some fake cid").into()),
         );
         let mut stream = Stream::from_generations_count(5.into(), 5.into());
 

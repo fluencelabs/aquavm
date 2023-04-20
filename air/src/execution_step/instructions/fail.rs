@@ -85,7 +85,7 @@ fn fail_with_literals(
     let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.run_parameters.init_peer_id.as_ref());
     let literal_tetraplet = Rc::new(literal_tetraplet);
     // in (fail x y), x and y are always literals
-    let provenance = Provenance::literal(None);
+    let provenance = Provenance::literal();
 
     fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet), provenance)
 }

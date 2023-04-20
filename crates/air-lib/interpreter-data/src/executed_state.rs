@@ -206,21 +206,14 @@ pub struct CanonCidAggregate {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Provenance {
-    Literal {
-        // TODO does it differ from SecurityTetraplet.lambda_path?
-        // OK, let's remove it if not needed.
-        lambda_path: Option<Rc<str>>,
-    },
+    Literal,
     ServiceResult {
         // the original call result CID; not changed on lambda application
         cid: Rc<CID<ServiceResultAggregate>>,
-        // TODO does it differ from SecurityTetraplet.lambda_path?
-        lambda_path: Option<Rc<str>>,
     },
     Canon {
+        // the original canon CID; not changed on lambda application
         cid: Rc<CID<CanonResultAggregate>>,
-        // TODO ditto
-        lambda_path: Option<Rc<str>>,
     },
 }
 

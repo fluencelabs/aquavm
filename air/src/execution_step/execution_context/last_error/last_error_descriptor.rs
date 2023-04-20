@@ -49,7 +49,7 @@ impl LastErrorDescriptor {
         }
 
         // it is not a call result, but generated from a limited set of unjoinable errors
-        let provenance = Provenance::literal(None);
+        let provenance = Provenance::literal();
 
         self.set_from_ingredients(
             error.to_error_code(),
@@ -107,7 +107,7 @@ impl Default for LastErrorDescriptor {
         let last_error = LastError {
             error: Rc::new(JValue::Null),
             tetraplet: None,
-            provenance: Provenance::literal(None),
+            provenance: Provenance::literal(),
         };
 
         Self {

@@ -281,7 +281,7 @@ fn ap_with_dst_stream() {
             "values": [{
                 "result": {"field": "scalar_2"},
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
-                "provenance": Provenance::service_result(cid_1, None),
+                "provenance": Provenance::service_result(cid_1),
             }]
         })),
         unused!(
@@ -341,7 +341,7 @@ fn ap_canon_stream_with_lambda() {
     "values": [{
         "result": 0,
         "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
-        "provenance": Provenance::service_result(cid_1, None),
+        "provenance": Provenance::service_result(cid_1),
     }, {
         "result": 1,
         "tetraplet": {
@@ -350,7 +350,7 @@ fn ap_canon_stream_with_lambda() {
             "peer_pk": "vm_1_peer_id",
             "service_id": "some_service_name",
         },
-        "provenance": Provenance::service_result(cid_2, None),
+        "provenance": Provenance::service_result(cid_2),
     }]}));
     let canon_cid_1 = extract_canon_result_cid(&canon_1);
 
@@ -365,7 +365,7 @@ fn ap_canon_stream_with_lambda() {
             "values": [{
                 "result": 1,
                 "tetraplet": {"function_name": "some_function_name", "json_path": ".$.[1]", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"},
-                "provenance": Provenance::canon(canon_cid_1, Some(".$.[1]".into())),
+                "provenance": Provenance::canon(canon_cid_1),
             }]
         })),
         unused!(json!([1]), peer = vm_1_peer_id, args = [json!([1])]),
@@ -423,7 +423,7 @@ fn ap_canon_stream() {
     "values": [{
         "result": 0,
         "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
-        "provenance": Provenance::service_result(cid_1, None),
+        "provenance": Provenance::service_result(cid_1),
     }, {
         "result": 1,
         "tetraplet": {
@@ -432,7 +432,7 @@ fn ap_canon_stream() {
             "peer_pk": "vm_1_peer_id",
             "service_id": "some_service_name"
         },
-        "provenance": Provenance::service_result(cid_2, None),
+        "provenance": Provenance::service_result(cid_2),
     }]}));
     let canon_cid_1 = extract_canon_result_cid(&canon_1);
 
@@ -447,7 +447,7 @@ fn ap_canon_stream() {
                 "values": [{
                     "result": [0, 1],
                     "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
-                    "provenance": Provenance::canon(canon_cid_1, None),
+                    "provenance": Provenance::canon(canon_cid_1),
                 }]}
         )),
         unused!(json!([[0, 1]]), peer = vm_1_peer_id, args = [json!([[0, 1]])]),

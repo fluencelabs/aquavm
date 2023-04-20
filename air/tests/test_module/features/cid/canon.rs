@@ -66,7 +66,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
-                    "provenance": Provenance::literal(None),
+                    "provenance": Provenance::literal(),
                 }, {
                     "result": "to canon",
                     "tetraplet": {
@@ -75,7 +75,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
-                    "provenance": Provenance::service_result(service_result_cid, None),
+                    "provenance": Provenance::service_result(service_result_cid),
                 }]
             }),
             &mut cid_state,
@@ -152,7 +152,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
-                    "provenance": Provenance::service_result(service_result_cid_1, None),
+                    "provenance": Provenance::service_result(service_result_cid_1),
                 }, {
                     "result": "other",
                     "tetraplet": {
@@ -161,7 +161,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": other_peer_id,
                         "service_id": "other_serv..1",
                     },
-                    "provenance": Provenance::service_result(service_result_cid_2, None),
+                    "provenance": Provenance::service_result(service_result_cid_2),
                 }]
             }),
             &mut cid_state,
@@ -359,14 +359,14 @@ fn test_canon_agg_not_found() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
-                    "provenance": Provenance::literal(None),
+                    "provenance": Provenance::literal(),
                 }]
             }),
             &mut cid_state,
         ),
     ];
 
-    let missing_cid = "bagaaieraai4q4w3hovs6mbyow6ycut76izwhkas7tm6a6ira4dd3ao3vq4vq";
+    let missing_cid = "bagaaierar6b2hcv2ir66tmbwocj5h7yofseqlzxma2n67z5wybtto5ujrekq";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
     assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
 

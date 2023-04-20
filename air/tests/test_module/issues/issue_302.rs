@@ -72,15 +72,15 @@ fn issue_302() {
             "values": [{
                 "result": 1,
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
-                "provenance": Provenance::service_result(cid_1, None),
+                "provenance": Provenance::service_result(cid_1),
             }, {
                 "result": 2,
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""},
-                "provenance": Provenance::service_result(cid_2, None),
+                "provenance": Provenance::service_result(cid_2),
             }, {
                 "result": 0,
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
-                "provenance": Provenance::service_result(cid_0, None),
+                "provenance": Provenance::service_result(cid_0),
             }],
         })),
         unused!(json!([1, 2, 0]), peer = peer_id_2, args = vec![vec![1, 2, 0]]),

@@ -189,10 +189,7 @@ pub fn canon_tracked(
                 .record_value(CanonCidAggregate {
                     value: value_cid,
                     tetraplet: tetraplet_cid,
-                    provenance: value
-                        .provenance
-                        .clone()
-                        .unwrap_or_else(|| Provenance::literal(None)),
+                    provenance: value.provenance.clone().unwrap_or_else(Provenance::literal),
                 })
         })
         .collect::<Result<Vec<_>, _>>()

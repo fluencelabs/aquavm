@@ -57,9 +57,8 @@ pub(crate) fn resolve_const(
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
-    let lambda_path = tetraplet.json_path.as_str().into();
 
-    Ok((jvalue, vec![tetraplet], Provenance::literal(Some(lambda_path))))
+    Ok((jvalue, vec![tetraplet], Provenance::literal()))
 }
 
 impl Resolvable for Option<LambdaAST<'_>> {
@@ -106,7 +105,7 @@ impl Resolvable for ast::CanonStream<'_> {
         Ok((
             value.as_jvalue().into_owned(),
             tetraplets,
-            Provenance::canon(canon.cid.clone(), None),
+            Provenance::canon(canon.cid.clone()),
         ))
     }
 }
@@ -135,11 +134,10 @@ impl Resolvable for ast::CanonStreamWithLambda<'_> {
         let value: &dyn JValuable = &&canon.canon_stream;
         let (value, tetraplet) = value.apply_lambda_with_tetraplets(&self.lambda, ctx)?;
         let tetraplet = Rc::new(tetraplet);
-        let lambda_path = tetraplet.json_path.as_str().into();
         Ok((
             value.into_owned(),
             vec![tetraplet],
-            Provenance::canon(canon.cid.clone(), Some(lambda_path)),
+            Provenance::canon(canon.cid.clone()),
         ))
     }
 }
