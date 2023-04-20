@@ -18,6 +18,238 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
+fn call_result() {
+    let init_peer_id = "B";
+
+    let air_script = r#"
+        (seq
+            (call "B" ("service" "func") [] $s) ; ok = "some_data"
+            (canon "B" $s #c))
+    "#;
+    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+
+    let result = runner.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+
+    let data = data_from_result(&result);
+    let last_state = data.trace.last().unwrap();
+
+    let val = scalar!(
+        "some_data",
+        peer = init_peer_id,
+        service = "service..0",
+        function = "func"
+    );
+    let val_cid = extract_service_result_cid(&val);
+
+    let expected_state = canon(json!({
+        "tetraplet": {
+            "peer_pk": init_peer_id,
+            "service_id": "",
+            "function_name": "",
+            "json_path": "",
+        },
+        "values": [{
+            "result": "some_data",
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "service..0",
+                "function_name": "func",
+                "json_path": "",
+            },
+            "provenance": Provenance::service_result(val_cid.clone(), None),
+        }]
+    }));
+
+    assert_eq!(last_state, &expected_state);
+}
+
+#[test]
+fn call_result_iteration() {
+    let init_peer_id = "A";
+
+    let air_script = r#"
+        (seq
+            (seq
+                (call "A" ("service" "func") [] x) ; ok = [10, 11, 12]
+                (fold x a
+                    (seq
+                        (ap a $s)
+                        (next a))))
+            (canon "A" $s #c))
+    "#;
+    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+
+    let result = runner.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+
+    let data = data_from_result(&result);
+    let last_state = data.trace.last().unwrap();
+
+    let val = scalar!(
+        json!([10, 11, 12]),
+        peer = init_peer_id,
+        service = "service..0",
+        function = "func"
+    );
+    let val_cid = extract_service_result_cid(&val);
+
+    let expected_state = canon(json!({
+        "tetraplet": {
+            "peer_pk": init_peer_id,
+            "service_id": "",
+            "function_name": "",
+            "json_path": "",
+        },
+        "values": [{
+            "result": 10,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "service..0",
+                "function_name": "func",
+                "json_path": ".$.[0]",
+            },
+            "provenance": Provenance::service_result(val_cid.clone(), None),
+        }, {
+            "result": 11,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "service..0",
+                "function_name": "func",
+                "json_path": ".$.[1]",
+            },
+            "provenance": Provenance::service_result(val_cid.clone(), None),
+        }, {
+            "result": 12,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "service..0",
+                "function_name": "func",
+                "json_path": ".$.[2]",
+            },
+            "provenance": Provenance::service_result(val_cid, None),
+        }]
+    }));
+
+    assert_eq!(last_state, &expected_state);
+}
+
+#[test]
+fn literal() {
+    let init_peer_id = "B";
+
+    let air_script = r#"
+        (seq
+            (ap 1 $s)
+            (canon "B" $s #c))
+    "#;
+    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+
+    let result = runner.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+
+    let data = data_from_result(&result);
+    let last_state = data.trace.last().unwrap();
+
+    let expected_state = canon(json!({
+        "tetraplet": {
+            "peer_pk": init_peer_id,
+            "service_id": "",
+            "function_name": "",
+            "json_path": "",
+        },
+        "values": [{
+            "result": 1,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "",
+                "function_name": "",
+                "json_path": "",
+            },
+            "provenance": Provenance::literal(None),
+        }]
+    }));
+
+    assert_eq!(last_state, &expected_state);
+}
+
+#[test]
+fn canon_in_canon() {
+    let init_peer_id = "B";
+
+    let air_script = r#"
+        (seq
+            (seq
+                (call "B" ("service" "func") [] $s) ; ok = 1
+                (canon "B" $s #c))
+            (seq
+                (ap #c $s)
+                (canon "B" $s #d)))
+    "#;
+    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+
+    let result = runner.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+
+    let data = data_from_result(&result);
+    let last_state = data.trace.last().unwrap();
+
+    let val = scalar!(1, peer = init_peer_id, service = "service..0", function = "func");
+    let val_cid = extract_service_result_cid(&val);
+    let value_tetraplet = json!({
+        "peer_pk": init_peer_id,
+        "service_id": "service..0",
+        "function_name": "func",
+        "json_path": "",
+    });
+
+    let canon_val = canon(json!({
+        "tetraplet": {
+            "peer_pk": init_peer_id,
+            "service_id": "",
+            "function_name": "",
+            "json_path": "",
+        },
+        "values": [{
+            "result": 1,
+            "tetraplet": value_tetraplet,
+            "provenance": Provenance::service_result(val_cid.clone(), None),
+        }]
+    }));
+    let canon_cid = extract_canon_result_cid(&canon_val);
+
+    let expected_state = canon(json!({
+        "tetraplet": {
+            "peer_pk": init_peer_id,
+            "service_id": "",
+            "function_name": "",
+            "json_path": "",
+        },
+        "values": [{
+            "result": 1,
+            "tetraplet": value_tetraplet,
+            "provenance": Provenance::service_result(val_cid, None),
+        }, {
+            "result": [1],
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "",
+                "function_name": "",
+                "json_path": "",
+            },
+            "provenance": Provenance::canon(canon_cid, None),
+        }]
+    }));
+
+    assert_eq!(
+        last_state,
+        &expected_state,
+        "\n{}\n",
+        serde_json::to_string(&data).unwrap()
+    );
+}
+
+#[test]
 fn lambda_result_iteration() {
     let init_peer_id = "A";
 
