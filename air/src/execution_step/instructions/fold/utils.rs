@@ -22,6 +22,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use std::borrow::Cow;
@@ -65,14 +66,15 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
         ScalarRef::Value(variable) => {
             let jvalues = select_by_lambda_from_scalar(&variable.result, lambda, exec_ctx)?;
             let tetraplet = variable.tetraplet.deref().clone();
-            from_jvalue(jvalues, tetraplet, lambda)
+            from_jvalue(jvalues, tetraplet, variable.provenance.clone(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = to_tetraplet(&iterable_value);
+            let provenance = to_provenance(&iterable_value);
 
-            from_jvalue(jvalue, tetraplet, lambda)
+            from_jvalue(jvalue, tetraplet, provenance, lambda)
         }
     }
 }
@@ -141,6 +143,7 @@ fn from_value(call_result: WithProvenance<ValueAggregate>, variable_name: &str) 
 fn from_jvalue(
     jvalue: Cow<'_, JValue>,
     tetraplet: SecurityTetraplet,
+    provenance: Provenance,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
@@ -158,7 +161,7 @@ fn from_jvalue(
     }
 
     let iterable = iterable.to_vec();
-    let foldable = IterableLambdaResult::init(iterable, tetraplet);
+    let foldable = IterableLambdaResult::init(iterable, tetraplet, provenance);
     let iterable = FoldIterableScalar::ScalarBased(Box::new(foldable));
     Ok(iterable)
 }
@@ -173,4 +176,16 @@ fn to_tetraplet(iterable: &IterableItem<'_>) -> SecurityTetraplet {
     };
 
     (*tetraplet).deref().clone()
+}
+
+fn to_provenance(iterable: &IterableItem<'_>) -> Provenance {
+    use IterableItem::*;
+
+    let provenance = match iterable {
+        RefRef((_, _, _, provenance)) => provenance,
+        RefValue((_, _, _, provenance)) => provenance,
+        RcValue((_, _, _, provenance)) => provenance,
+    };
+
+    provenance.clone()
 }
