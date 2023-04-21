@@ -15,6 +15,7 @@
  */
 
 mod canon_stream;
+mod inner_tetraplet;
 mod iterable;
 mod jvaluable;
 mod scalar;
