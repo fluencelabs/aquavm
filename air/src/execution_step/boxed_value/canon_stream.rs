@@ -21,7 +21,7 @@ use crate::execution_step::Generation;
 use crate::JValue;
 
 use air_interpreter_cid::CID;
-use air_interpreter_data::CanonResultAggregate;
+use air_interpreter_data::CanonResultCidAggregate;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -96,11 +96,11 @@ impl fmt::Display for CanonStream {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStreamWithProvenance {
     pub(crate) canon_stream: CanonStream,
-    pub(crate) cid: Rc<CID<CanonResultAggregate>>,
+    pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
 }
 
 impl CanonStreamWithProvenance {
-    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultAggregate>>) -> Self {
+    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
         Self { canon_stream, cid }
     }
 }

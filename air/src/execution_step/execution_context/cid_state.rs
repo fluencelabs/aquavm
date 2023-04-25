@@ -23,10 +23,10 @@ use crate::UncatchableError;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
-use air_interpreter_data::CanonResultAggregate;
+use air_interpreter_data::CanonResultCidAggregate;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::CidTracker;
-use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_data::TracePos;
 use polyplets::SecurityTetraplet;
 
@@ -37,8 +37,8 @@ pub struct ExecutionCidState {
     pub value_tracker: CidTracker<JValue>,
     pub tetraplet_tracker: CidTracker<SecurityTetraplet>,
     pub canon_element_tracker: CidTracker<CanonCidAggregate>,
-    pub canon_result_tracker: CidTracker<CanonResultAggregate>,
-    pub service_result_agg_tracker: CidTracker<ServiceResultAggregate>,
+    pub canon_result_tracker: CidTracker<CanonResultCidAggregate>,
+    pub service_result_agg_tracker: CidTracker<ServiceResultCidAggregate>,
 }
 
 impl ExecutionCidState {
@@ -51,11 +51,11 @@ impl ExecutionCidState {
         value: Rc<JValue>,
         tetraplet: RcSecurityTetraplet,
         argument_hash: Rc<str>,
-    ) -> Result<Rc<CID<ServiceResultAggregate>>, CidCalculationError> {
+    ) -> Result<Rc<CID<ServiceResultCidAggregate>>, CidCalculationError> {
         let value_cid = self.value_tracker.record_value(value)?;
         let tetraplet_cid = self.tetraplet_tracker.record_value(tetraplet)?;
 
-        let service_result_agg = ServiceResultAggregate {
+        let service_result_agg = ServiceResultCidAggregate {
             value_cid,
             argument_hash,
             tetraplet_cid,
@@ -125,8 +125,8 @@ impl ExecutionCidState {
 
     pub(crate) fn get_canon_result_by_cid(
         &self,
-        cid: &CID<CanonResultAggregate>,
-    ) -> Result<Rc<CanonResultAggregate>, UncatchableError> {
+        cid: &CID<CanonResultCidAggregate>,
+    ) -> Result<Rc<CanonResultCidAggregate>, UncatchableError> {
         self.canon_result_tracker
             .get(cid)
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon result aggregate", cid.clone().into()))
@@ -134,8 +134,8 @@ impl ExecutionCidState {
 
     pub(crate) fn get_service_result_agg_by_cid(
         &self,
-        cid: &CID<ServiceResultAggregate>,
-    ) -> Result<Rc<ServiceResultAggregate>, UncatchableError> {
+        cid: &CID<ServiceResultCidAggregate>,
+    ) -> Result<Rc<ServiceResultCidAggregate>, UncatchableError> {
         self.service_result_agg_tracker
             .get(cid)
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("service result aggregate", cid.clone().into()))
@@ -143,7 +143,7 @@ impl ExecutionCidState {
 
     pub(crate) fn resolve_service_value(
         &self,
-        service_result_agg_cid: &CID<ServiceResultAggregate>,
+        service_result_agg_cid: &CID<ServiceResultCidAggregate>,
     ) -> Result<Rc<JValue>, UncatchableError> {
         let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
         self.get_value_by_cid(&service_result_aggregate.value_cid)

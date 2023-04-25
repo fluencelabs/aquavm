@@ -43,12 +43,12 @@ impl CallResult {
         Self::Executed(value_ref)
     }
 
-    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> Self {
+    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
     pub fn executed_stream(
-        cid: Rc<CID<ServiceResultAggregate>>,
+        cid: Rc<CID<ServiceResultCidAggregate>>,
         generation: GenerationIdx,
     ) -> CallResult {
         let value = ValueRef::Stream { cid, generation };
@@ -59,7 +59,7 @@ impl CallResult {
         Self::executed_service_result(ValueRef::Unused(value_cid))
     }
 
-    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
+    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
         CallResult::Failed(service_result_agg_cid)
     }
 }
@@ -93,12 +93,12 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn new(cid: Rc<CID<CanonResultAggregate>>) -> Self {
+    pub fn new(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
         Self(cid)
     }
 }
 
-impl CanonResultAggregate {
+impl CanonResultCidAggregate {
     pub fn new(
         tetraplet: Rc<CID<SecurityTetraplet>>,
         values: Vec<Rc<CID<CanonCidAggregate>>>,
@@ -114,12 +114,12 @@ impl Provenance {
     }
 
     #[inline]
-    pub fn service_result(cid: Rc<CID<ServiceResultAggregate>>) -> Self {
+    pub fn service_result(cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
         Self::ServiceResult { cid }
     }
 
     #[inline]
-    pub fn canon(cid: Rc<CID<CanonResultAggregate>>) -> Self {
+    pub fn canon(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
         Self::Canon { cid }
     }
 }

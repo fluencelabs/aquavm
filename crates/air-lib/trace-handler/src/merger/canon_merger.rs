@@ -30,7 +30,7 @@ pub enum MergerCanonResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CanonResult(Rc<CID<CanonResultAggregate>>),
+    CanonResult(Rc<CID<CanonResultCidAggregate>>),
 }
 
 pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> MergeResult<MergerCanonResult> {

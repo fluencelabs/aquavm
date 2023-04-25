@@ -55,7 +55,7 @@ pub enum CallResult {
     /// The call returned a service error.
     ///
     /// The `JValue` has to be a two element array `[i32, String]`.
-    Failed(Rc<CID<ServiceResultAggregate>>),
+    Failed(Rc<CID<ServiceResultCidAggregate>>),
 }
 
 /*
@@ -83,10 +83,10 @@ pub enum CallResult {
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
     /// The call value is stored to a scalar variable.
-    Scalar(Rc<CID<ServiceResultAggregate>>),
+    Scalar(Rc<CID<ServiceResultCidAggregate>>),
     /// The call value is stored to a stream variable.
     Stream {
-        cid: Rc<CID<ServiceResultAggregate>>,
+        cid: Rc<CID<ServiceResultCidAggregate>>,
         generation: GenerationIdx,
     },
     /// The call value is not stored.
@@ -113,7 +113,7 @@ impl CallServiceFailed {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
-pub struct ServiceResultAggregate {
+pub struct ServiceResultCidAggregate {
     pub value_cid: Rc<CID<JValue>>,
     /// Hash of the call arguments.
     pub argument_hash: Rc<str>,
@@ -186,11 +186,11 @@ pub struct ApResult {
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct CanonResult(pub Rc<CID<CanonResultAggregate>>);
+pub struct CanonResult(pub Rc<CID<CanonResultCidAggregate>>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct CanonResultAggregate {
+pub struct CanonResultCidAggregate {
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
     pub values: Vec<Rc<CID<CanonCidAggregate>>>,
 }
@@ -209,11 +209,11 @@ pub enum Provenance {
     Literal,
     ServiceResult {
         // the original call result CID; not changed on lambda application
-        cid: Rc<CID<ServiceResultAggregate>>,
+        cid: Rc<CID<ServiceResultCidAggregate>>,
     },
     Canon {
         // the original canon CID; not changed on lambda application
-        cid: Rc<CID<CanonResultAggregate>>,
+        cid: Rc<CID<CanonResultCidAggregate>>,
     },
 }
 

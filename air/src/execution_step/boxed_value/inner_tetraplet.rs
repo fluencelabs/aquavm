@@ -15,7 +15,7 @@
  */
 
 use air_interpreter_cid::CID;
-use air_interpreter_data::ServiceResultAggregate;
+use air_interpreter_data::ServiceResultCidAggregate;
 use polyplets::{ResolvedTriplet, SecurityTetraplet};
 use serde::{Deserialize, Serialize};
 
@@ -52,7 +52,7 @@ impl From<&LiteralTetraplet> for SecurityTetraplet {
 pub struct ServiceResultTetraplet {
     pub tetraplet: Box<SecurityTetraplet>,
     #[serde(skip)] // to get consistent CID calculation
-    pub cid_cache: Option<Rc<CID<ServiceResultAggregate>>>,
+    pub cid_cache: Option<Rc<CID<ServiceResultCidAggregate>>>,
 }
 
 impl ServiceResultTetraplet {
@@ -87,7 +87,7 @@ pub struct CanonTetraplet {
     pub peer_id: Rc<str>,
     pub lambda_path: Box<str>,
     #[serde(skip)] // to get consistent CID calculation
-    pub cid_cache: Option<Rc<CID<ServiceResultAggregate>>>,
+    pub cid_cache: Option<Rc<CID<ServiceResultCidAggregate>>>,
 }
 
 impl CanonTetraplet {
