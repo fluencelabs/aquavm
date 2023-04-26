@@ -200,7 +200,7 @@ impl Stream {
         for (generation, values) in self.values.iter().enumerate() {
             for value in values.iter() {
                 trace_ctx
-                    .update_generation(value.trace_pos, generation.into())
+                    .update_generation(value.get_trace_pos(), generation.into())
                     .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
             }
         }
@@ -309,6 +309,8 @@ impl fmt::Display for Generation {
 
 #[cfg(test)]
 mod test {
+    use crate::execution_step::ServiceResultAggregate;
+
     use super::Generation;
     use super::Stream;
     use super::ValueAggregate;
@@ -324,11 +326,17 @@ mod test {
     #[test]
     fn test_slice_iter() {
         let value_1 = WithProvenance::new(
-            ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            ValueAggregate::from_service_result(
+                ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+                CID::new("some fake cid").into(),
+            ),
             Provenance::service_result(CID::new("some fake cid").into()),
         );
         let value_2 = WithProvenance::new(
-            ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            ValueAggregate::from_service_result(
+                ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+                CID::new("some fake cid").into(),
+            ),
             Provenance::service_result(CID::new("some fake cid").into()),
         );
         let mut stream = Stream::from_generations_count(2.into(), 0.into());
@@ -373,11 +381,17 @@ mod test {
     #[test]
     fn generation_from_current_data() {
         let value_1 = WithProvenance::new(
-            ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
+            ValueAggregate::from_service_result(
+                ServiceResultAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
+                CID::new("some fake cid").into(),
+            ),
             Provenance::service_result(CID::new("some fake cid").into()),
         );
         let value_2 = WithProvenance::new(
-            ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
+            ValueAggregate::from_service_result(
+                ServiceResultAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
+                CID::new("some fake cid").into(),
+            ),
             Provenance::service_result(CID::new("some fake cid").into()),
         );
         let mut stream = Stream::from_generations_count(5.into(), 5.into());

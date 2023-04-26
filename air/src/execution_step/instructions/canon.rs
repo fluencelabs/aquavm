@@ -136,11 +136,11 @@ fn create_canon_stream_from_name(
         .iter()
         .map(|val| -> Result<_, UncatchableError> {
             let canon_value_aggregate = CanonCidAggregate {
-                value: exec_ctx.cid_state.value_tracker.record_value(val.result.clone())?,
-                tetraplet: exec_ctx
+                value: exec_ctx
                     .cid_state
-                    .tetraplet_tracker
-                    .record_value(val.tetraplet.clone())?,
+                    .value_tracker
+                    .record_value(val.get_result().clone())?,
+                tetraplet: exec_ctx.cid_state.tetraplet_tracker.record_value(val.get_tetraplet())?,
                 provenance: val.provenance.clone(),
             };
             Ok(exec_ctx

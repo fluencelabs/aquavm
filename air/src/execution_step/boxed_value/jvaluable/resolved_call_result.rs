@@ -30,7 +30,7 @@ use std::ops::Deref;
 
 impl JValuable for ValueAggregate {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        let selected_value = select_by_lambda_from_scalar(&self.result, lambda, exec_ctx)?;
+        let selected_value = select_by_lambda_from_scalar(self.get_result(), lambda, exec_ctx)?;
         Ok(selected_value)
     }
 
@@ -39,21 +39,21 @@ impl JValuable for ValueAggregate {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
-        let selected_value = select_by_lambda_from_scalar(&self.result, lambda, exec_ctx)?;
-        let tetraplet = populate_tetraplet_with_lambda(self.tetraplet.as_ref().clone(), lambda);
+        let selected_value = select_by_lambda_from_scalar(self.get_result(), lambda, exec_ctx)?;
+        let tetraplet = populate_tetraplet_with_lambda(self.get_tetraplet().as_ref().clone(), lambda);
 
         Ok((selected_value, tetraplet))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        Cow::Borrowed(&self.result)
+        Cow::Borrowed(self.get_result())
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        self.result.deref().clone()
+        self.get_result().deref().clone()
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        vec![self.tetraplet.clone()]
+        vec![self.get_tetraplet()]
     }
 }

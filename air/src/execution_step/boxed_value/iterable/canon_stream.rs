@@ -54,10 +54,10 @@ impl<'ctx> Iterable<'ctx> for CanonStreamIterableIngredients {
 
         let value_w_prov = self.canon_stream.nth(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
         let value = &**value_w_prov;
-        let result = IterableItem::RefRef((
-            &value.result,
-            &value.tetraplet,
-            value.trace_pos,
+        let result = IterableItem::RefValue((
+            value.get_result(),
+            value.get_tetraplet(),
+            value.get_trace_pos(),
             value_w_prov.provenance.clone(),
         ));
         Some(result)

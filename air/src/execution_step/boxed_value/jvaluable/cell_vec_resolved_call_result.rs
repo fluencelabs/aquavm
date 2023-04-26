@@ -30,7 +30,7 @@ use std::ops::Deref;
 
 impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        let stream_iter = self.iter().map(|r| r.result.deref());
+        let stream_iter = self.iter().map(|r| r.get_result().deref());
         let select_result = select_by_lambda_from_stream(stream_iter, lambda, exec_ctx)?;
         Ok(select_result.result)
     }
@@ -40,12 +40,12 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
-        let stream_iter = self.iter().map(|r| r.result.deref());
+        let stream_iter = self.iter().map(|r| r.get_result().deref());
         let select_result = select_by_lambda_from_stream(stream_iter, lambda, exec_ctx)?;
 
         let tetraplet = match select_result.tetraplet_idx {
             Some(idx) => {
-                let tetraplet = &self[idx].tetraplet;
+                let tetraplet = self[idx].get_tetraplet();
                 populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda)
             }
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
@@ -55,16 +55,16 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue_array = self.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+        let jvalue_array = self.iter().map(|r| r.get_result().deref().clone()).collect::<Vec<_>>();
         Cow::Owned(JValue::Array(jvalue_array))
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        let jvalue_array = self.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+        let jvalue_array = self.iter().map(|r| r.get_result().deref().clone()).collect::<Vec<_>>();
         JValue::Array(jvalue_array)
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
+        self.iter().map(|r| r.get_tetraplet()).collect::<Vec<_>>()
     }
 }

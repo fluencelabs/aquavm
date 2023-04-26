@@ -114,11 +114,7 @@ impl ExecutionCidState {
 
         let fake_trace_pos = TracePos::default();
         Ok(WithProvenance::new(
-            ValueAggregate {
-                result,
-                tetraplet,
-                trace_pos: fake_trace_pos,
-            },
+            ValueAggregate::new(result, tetraplet, fake_trace_pos, canon_aggregate.provenance.clone()),
             canon_aggregate.provenance.clone(),
         ))
     }

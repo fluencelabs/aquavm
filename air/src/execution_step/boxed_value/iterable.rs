@@ -60,7 +60,6 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, TracePos, Provenance)),
     RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos, Provenance)),
     RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos, Provenance)),
 }
@@ -70,7 +69,6 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         let pos = match self {
-            RefRef((.., pos, _)) => pos,
             RefValue((.., pos, _)) => pos,
             RcValue((.., pos, _)) => pos,
         };
@@ -82,7 +80,6 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         match self {
-            RefRef((.., ref prov)) => prov,
             RefValue((.., ref prov)) => prov,
             RcValue((.., ref prov)) => prov,
         }
@@ -93,12 +90,11 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         let (value, tetraplet, pos, provenance) = match self {
-            RefRef((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet.clone(), pos, prov),
             RefValue((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet, pos, prov),
             RcValue(ingredients) => ingredients,
         };
 
-        let value = ValueAggregate::new(value, tetraplet, pos);
+        let value = ValueAggregate::new(value, tetraplet, pos, provenance.clone());
         WithProvenance::new(value, provenance)
     }
 }

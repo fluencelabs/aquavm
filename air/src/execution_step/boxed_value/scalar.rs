@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
+pub mod values;
+
+pub(crate) use self::values::CanonResultAggregate;
+pub(crate) use self::values::LiteralAggregate;
+pub(crate) use self::values::ServiceResultAggregate;
+
 use super::JValuable;
 use crate::execution_step::FoldState;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
 
+use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResultCidAggregate;
 use air_interpreter_data::Provenance;
+use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_data::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
@@ -31,9 +40,9 @@ use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ValueAggregate {
-    pub result: Rc<JValue>,
-    pub tetraplet: RcSecurityTetraplet,
-    pub trace_pos: TracePos,
+    result: Rc<JValue>,
+    tetraplet: RcSecurityTetraplet,
+    trace_pos: TracePos,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -81,12 +90,75 @@ impl<'i> ScalarRef<'i> {
 }
 
 impl ValueAggregate {
-    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: TracePos) -> Self {
+    pub(crate) fn new(
+        result: Rc<JValue>,
+        tetraplet: RcSecurityTetraplet,
+        trace_pos: TracePos,
+        _provenance: Provenance,
+    ) -> Self {
         Self {
             result,
             tetraplet,
             trace_pos,
         }
+    }
+
+    pub(crate) fn from_literal_result(literal: LiteralAggregate) -> Self {
+        let tetraplet = literal.get_tetraplet();
+
+        Self {
+            result: literal.result,
+            tetraplet,
+            trace_pos: literal.trace_pos,
+        }
+    }
+
+    pub(crate) fn from_service_result(
+        service_result: ServiceResultAggregate,
+        _service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>,
+    ) -> Self {
+        Self {
+            result: service_result.result,
+            tetraplet: service_result.tetraplet,
+            trace_pos: service_result.trace_pos,
+        }
+    }
+
+    pub(crate) fn from_canon_result(
+        canon_result: CanonResultAggregate,
+        _canon_result_agg_cid: Rc<CID<CanonResultCidAggregate>>,
+    ) -> Self {
+        let tetraplet = canon_result.get_tetraplet();
+
+        Self {
+            result: canon_result.result,
+            tetraplet,
+            trace_pos: canon_result.trace_pos,
+        }
+    }
+
+    pub(crate) fn as_inner_parts(&self) -> (&Rc<JValue>, RcSecurityTetraplet, TracePos) {
+        (&self.result, self.tetraplet.clone(), self.trace_pos)
+    }
+
+    #[inline]
+    pub fn get_result(&self) -> &Rc<JValue> {
+        &self.result
+    }
+
+    #[inline]
+    pub fn get_tetraplet(&self) -> RcSecurityTetraplet {
+        self.tetraplet.clone()
+    }
+
+    #[inline]
+    pub fn get_trace_pos(&self) -> TracePos {
+        self.trace_pos
+    }
+
+    #[inline]
+    pub fn set_trace_pos(&mut self, trace_pos: TracePos) {
+        self.trace_pos = trace_pos;
     }
 }
 

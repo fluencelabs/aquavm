@@ -30,7 +30,7 @@ use std::ops::Deref;
 
 impl JValuable for &CanonStream {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        let iter = self.iter().map(|v| v.result.deref());
+        let iter = self.iter().map(|v| v.get_result().deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         Ok(select_result.result)
@@ -41,14 +41,15 @@ impl JValuable for &CanonStream {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
-        let iter = self.iter().map(|v| v.result.deref());
+        let iter = self.iter().map(|v| v.get_result().deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         let tetraplet = match select_result.tetraplet_idx {
             Some(idx) => {
                 let resolved_call = self.nth(idx).expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
-                resolved_call.tetraplet.as_ref().clone()
+                resolved_call.get_tetraplet().deref().clone()
             }
+            // TODO add lambda
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };
         let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
@@ -66,6 +67,6 @@ impl JValuable for &CanonStream {
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
+        self.iter().map(|r| r.get_tetraplet()).collect()
     }
 }

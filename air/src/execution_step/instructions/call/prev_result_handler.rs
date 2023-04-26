@@ -118,7 +118,7 @@ pub(super) fn handle_prev_state<'i>(
 }
 
 use super::call_result_setter::*;
-use crate::execution_step::ValueAggregate;
+use crate::execution_step::ServiceResultAggregate;
 use crate::JValue;
 
 fn update_state_with_service_result<'i>(
@@ -143,7 +143,7 @@ fn update_state_with_service_result<'i>(
 
     let trace_pos = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-    let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
+    let executed_result = ServiceResultAggregate::new(result, tetraplet.clone(), trace_pos);
     let new_call_result =
         populate_context_from_peer_service_result(executed_result, output, tetraplet, argument_hash, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);

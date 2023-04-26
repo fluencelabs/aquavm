@@ -16,7 +16,7 @@
 
 use super::*;
 use crate::execution_step::resolver::Resolvable;
-use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
+use crate::execution_step::{CanonResultAggregate, LiteralAggregate, PEEK_ALLOWED_ON_NON_EMPTY};
 use crate::UncatchableError;
 
 use air_interpreter_data::Provenance;
@@ -59,7 +59,7 @@ fn apply_const(
     let tetraplet = Rc::new(tetraplet);
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-    let value = ValueAggregate::new(value, tetraplet, position);
+    let value = ValueAggregate::new(value, tetraplet, position, Provenance::literal());
     Ok(WithProvenance::new(value, Provenance::literal()))
 }
 
@@ -74,8 +74,8 @@ fn apply_last_error<'i>(
     let tetraplet = tetraplets.remove(0);
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-    let value = ValueAggregate::new(value, tetraplet, position);
-    let result = WithProvenance::new(value, provenance);
+    let value = LiteralAggregate::new(value, tetraplet.peer_pk.as_str().into(), position);
+    let result = WithProvenance::new(ValueAggregate::from_literal_result(value), provenance);
     Ok(result)
 }
 
@@ -98,7 +98,7 @@ fn apply_scalar(
     };
 
     if should_touch_trace {
-        result.trace_pos = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+        result.set_trace_pos(trace_ctx.trace_pos().map_err(UncatchableError::from)?);
     }
 
     Ok(result)
@@ -111,7 +111,7 @@ fn apply_scalar_wl(
 ) -> ExecutionResult<WithProvenance<ValueAggregate>> {
     let (value, mut tetraplets, provenance) = ast_scalar.resolve(exec_ctx)?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = ValueAggregate::new(Rc::new(value), tetraplets.remove(0), position);
+    let value = ValueAggregate::new(Rc::new(value), tetraplets.remove(0), position, provenance.clone());
     let result = WithProvenance::new(value, provenance);
 
     Ok(result)
@@ -129,8 +129,16 @@ fn apply_canon_stream(
     let value = JValuable::as_jvalue(&&canon_stream.canon_stream).into_owned();
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = ValueAggregate::new(Rc::new(value), tetraplet, position);
-    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone()));
+    let value = CanonResultAggregate::new(
+        Rc::new(value),
+        tetraplet.peer_pk.as_str().into(),
+        &tetraplet.json_path,
+        position,
+    );
+    let result = WithProvenance::new(
+        ValueAggregate::from_canon_result(value, canon_stream.cid.clone()),
+        Provenance::canon(canon_stream.cid.clone()),
+    );
     Ok(result)
 }
 
@@ -147,7 +155,17 @@ fn apply_canon_stream_wl(
     let (result, tetraplet) =
         JValuable::apply_lambda_with_tetraplets(&canon_stream_value, &ast_stream.lambda, exec_ctx)?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = ValueAggregate::new(Rc::new(result.into_owned()), Rc::new(tetraplet), position);
-    let result = WithProvenance::new(value, Provenance::canon(canon_stream.cid.clone()));
+
+    // TODO that's wrong, we have to use value's provenance/aggregate
+    let value = CanonResultAggregate::new(
+        Rc::new(result.into_owned()),
+        tetraplet.peer_pk.into(),
+        &tetraplet.json_path,
+        position,
+    );
+    let result = WithProvenance::new(
+        ValueAggregate::from_canon_result(value, canon_stream.cid.clone()),
+        Provenance::canon(canon_stream.cid.clone()),
+    );
     Ok(result)
 }
