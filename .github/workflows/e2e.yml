@@ -153,7 +153,7 @@ jobs:
       - rust-peer-snapshot
       - js-client
 
-    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@FLU-314
     with:
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
