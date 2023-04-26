@@ -16,7 +16,6 @@
 
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::ValueAggregate;
-use crate::execution_step::WithProvenance;
 use crate::JValue;
 use crate::UncatchableError;
 
@@ -104,7 +103,7 @@ impl ExecutionCidState {
     pub(crate) fn get_canon_value_by_cid(
         &self,
         cid: &CID<CanonCidAggregate>,
-    ) -> Result<WithProvenance<ValueAggregate>, UncatchableError> {
+    ) -> Result<ValueAggregate, UncatchableError> {
         let canon_aggregate = self
             .canon_element_tracker
             .get(cid)
@@ -113,8 +112,10 @@ impl ExecutionCidState {
         let tetraplet = self.get_tetraplet_by_cid(&canon_aggregate.tetraplet)?;
 
         let fake_trace_pos = TracePos::default();
-        Ok(WithProvenance::new(
-            ValueAggregate::new(result, tetraplet, fake_trace_pos, canon_aggregate.provenance.clone()),
+        Ok(ValueAggregate::new(
+            result,
+            tetraplet,
+            fake_trace_pos,
             canon_aggregate.provenance.clone(),
         ))
     }

@@ -141,7 +141,7 @@ fn create_canon_stream_from_name(
                     .value_tracker
                     .record_value(val.get_result().clone())?,
                 tetraplet: exec_ctx.cid_state.tetraplet_tracker.record_value(val.get_tetraplet())?,
-                provenance: val.provenance.clone(),
+                provenance: val.get_provenance(),
             };
             Ok(exec_ctx
                 .cid_state

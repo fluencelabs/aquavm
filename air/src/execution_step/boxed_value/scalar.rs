@@ -34,52 +34,31 @@ use air_interpreter_data::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::ops::Deref;
-use std::ops::DerefMut;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ValueAggregate {
-    result: Rc<JValue>,
-    tetraplet: RcSecurityTetraplet,
-    trace_pos: TracePos,
+pub enum ValueAggregate {
+    Literal(LiteralAggregate),
+    ServiceResult {
+        result: ServiceResultAggregate,
+        // the original call result CID; not changed on lambda application
+        cid: Rc<CID<ServiceResultCidAggregate>>,
+    },
+    Canon {
+        result: CanonResultAggregate,
+        // the original canon CID; not changed on lambda application
+        cid: Rc<CID<CanonResultCidAggregate>>,
+    },
 }
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct WithProvenance<T> {
-    pub wrapped: T,
-    pub provenance: Provenance,
-}
-
-impl<T> Deref for WithProvenance<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.wrapped
-    }
-}
-
-impl<T> DerefMut for WithProvenance<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.wrapped
-    }
-}
-
-impl<T> WithProvenance<T> {
-    pub fn new(wrapped: T, provenance: Provenance) -> Self {
-        Self { wrapped, provenance }
-    }
-}
-
 pub(crate) enum ScalarRef<'i> {
-    Value(&'i WithProvenance<ValueAggregate>),
+    Value(&'i ValueAggregate),
     IterableValue(&'i FoldState<'i>),
 }
 
 impl<'i> ScalarRef<'i> {
     pub(crate) fn into_jvaluable(self) -> (Box<dyn JValuable + 'i>, Provenance) {
         match self {
-            ScalarRef::Value(value) => (Box::new((**value).clone()), value.provenance.clone()),
+            ScalarRef::Value(value) => (Box::new(value.clone()), value.get_provenance()),
             ScalarRef::IterableValue(fold_state) => {
                 let peeked_value = fold_state.iterable.peek().expect(PEEK_ALLOWED_ON_NON_EMPTY);
                 let provenance = peeked_value.provenance();
@@ -94,71 +73,143 @@ impl ValueAggregate {
         result: Rc<JValue>,
         tetraplet: RcSecurityTetraplet,
         trace_pos: TracePos,
-        _provenance: Provenance,
+        provenance: Provenance,
     ) -> Self {
-        Self {
-            result,
-            tetraplet,
-            trace_pos,
+        match provenance {
+            Provenance::Literal => ValueAggregate::Literal(LiteralAggregate::new(
+                result,
+                tetraplet.peer_pk.as_str().into(),
+                trace_pos,
+            )),
+            Provenance::ServiceResult { cid } => ValueAggregate::ServiceResult {
+                result: ServiceResultAggregate::new(result, tetraplet, trace_pos),
+                cid,
+            },
+            Provenance::Canon { cid } => ValueAggregate::Canon {
+                result: CanonResultAggregate::new(
+                    result,
+                    tetraplet.peer_pk.as_str().into(),
+                    &tetraplet.json_path,
+                    trace_pos,
+                ),
+                cid,
+            },
         }
     }
 
     pub(crate) fn from_literal_result(literal: LiteralAggregate) -> Self {
-        let tetraplet = literal.get_tetraplet();
-
-        Self {
-            result: literal.result,
-            tetraplet,
-            trace_pos: literal.trace_pos,
-        }
+        Self::Literal(literal)
     }
 
     pub(crate) fn from_service_result(
         service_result: ServiceResultAggregate,
-        _service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>,
+        service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>,
     ) -> Self {
-        Self {
-            result: service_result.result,
-            tetraplet: service_result.tetraplet,
-            trace_pos: service_result.trace_pos,
+        Self::ServiceResult {
+            result: service_result,
+            cid: service_result_agg_cid,
         }
     }
 
     pub(crate) fn from_canon_result(
         canon_result: CanonResultAggregate,
-        _canon_result_agg_cid: Rc<CID<CanonResultCidAggregate>>,
+        canon_result_agg_cid: Rc<CID<CanonResultCidAggregate>>,
     ) -> Self {
-        let tetraplet = canon_result.get_tetraplet();
-
-        Self {
-            result: canon_result.result,
-            tetraplet,
-            trace_pos: canon_result.trace_pos,
+        Self::Canon {
+            result: canon_result,
+            cid: canon_result_agg_cid,
         }
     }
 
     pub(crate) fn as_inner_parts(&self) -> (&Rc<JValue>, RcSecurityTetraplet, TracePos) {
-        (&self.result, self.tetraplet.clone(), self.trace_pos)
+        match self {
+            ValueAggregate::Literal(ref literal) => (&literal.result, literal.get_tetraplet(), literal.trace_pos),
+            ValueAggregate::ServiceResult {
+                result: ref service_result,
+                cid: _,
+            } => (
+                &service_result.result,
+                service_result.tetraplet.clone(),
+                service_result.trace_pos,
+            ),
+            ValueAggregate::Canon {
+                result: ref canon_result,
+                cid: _,
+            } => (
+                &canon_result.result,
+                canon_result.get_tetraplet(),
+                canon_result.trace_pos,
+            ),
+        }
     }
 
     #[inline]
     pub fn get_result(&self) -> &Rc<JValue> {
-        &self.result
+        match self {
+            ValueAggregate::Literal(literal) => &literal.result,
+            ValueAggregate::ServiceResult {
+                result: service_result,
+                cid: _,
+            } => &service_result.result,
+            ValueAggregate::Canon {
+                result: canon_result,
+                cid: _,
+            } => &canon_result.result,
+        }
     }
 
     #[inline]
     pub fn get_tetraplet(&self) -> RcSecurityTetraplet {
-        self.tetraplet.clone()
+        match self {
+            ValueAggregate::Literal(literal) => literal.get_tetraplet(),
+            ValueAggregate::ServiceResult {
+                result: service_result,
+                cid: _,
+            } => service_result.tetraplet.clone(),
+            ValueAggregate::Canon {
+                result: canon_result,
+                cid: _,
+            } => canon_result.get_tetraplet(),
+        }
     }
 
     #[inline]
     pub fn get_trace_pos(&self) -> TracePos {
-        self.trace_pos
+        match self {
+            ValueAggregate::Literal(literal) => literal.trace_pos,
+            ValueAggregate::ServiceResult {
+                result: service_result,
+                cid: _,
+            } => service_result.trace_pos,
+            ValueAggregate::Canon {
+                result: canon_result,
+                cid: _,
+            } => canon_result.trace_pos,
+        }
     }
 
     #[inline]
     pub fn set_trace_pos(&mut self, trace_pos: TracePos) {
-        self.trace_pos = trace_pos;
+        let trace_pos_ref = match self {
+            ValueAggregate::Literal(literal) => &mut literal.trace_pos,
+            ValueAggregate::ServiceResult {
+                result: service_result,
+                cid: _,
+            } => &mut service_result.trace_pos,
+            ValueAggregate::Canon {
+                result: canon_result,
+                cid: _,
+            } => &mut canon_result.trace_pos,
+        };
+        *trace_pos_ref = trace_pos;
+    }
+
+    pub fn get_provenance(&self) -> Provenance {
+        match self {
+            ValueAggregate::Literal(_) => Provenance::Literal,
+            ValueAggregate::ServiceResult { result: _, cid } => Provenance::ServiceResult { cid: cid.clone() },
+            ValueAggregate::Canon { result: _, cid } => Provenance::Canon { cid: cid.clone() },
+        }
     }
 }
 
@@ -166,10 +217,14 @@ use std::fmt;
 
 impl fmt::Display for ValueAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (result, tetraplet, trace_pos) = self.as_inner_parts();
         write!(
             f,
-            "value: {}, tetraplet: {}, position: {} ",
-            self.result, self.tetraplet, self.trace_pos
+            "value: {}, tetraplet: {}, position: {}, provenance: {:?} ",
+            result,
+            tetraplet,
+            trace_pos,
+            self.get_provenance(),
         )
     }
 }

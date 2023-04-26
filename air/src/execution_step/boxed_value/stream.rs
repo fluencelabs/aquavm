@@ -16,7 +16,6 @@
 
 use super::ExecutionResult;
 use super::ValueAggregate;
-use super::WithProvenance;
 use crate::ExecutionError;
 use crate::UncatchableError;
 
@@ -32,7 +31,7 @@ pub struct Stream {
     /// of values that interpreter obtained from one particle. It means that number of generation on
     /// a peer is equal to number of the interpreter runs in context of one particle. And each set of
     /// obtained values from a current_data that were not present in prev_data becomes a new generation.
-    values: Vec<Vec<WithProvenance<ValueAggregate>>>,
+    values: Vec<Vec<ValueAggregate>>,
 
     /// Count of values from previous data.
     previous_gens_count: usize,
@@ -54,7 +53,7 @@ impl Stream {
 
     // streams created with this ctor assumed to have only one generation,
     // for streams that have values in
-    pub(crate) fn from_value(value: WithProvenance<ValueAggregate>) -> Self {
+    pub(crate) fn from_value(value: ValueAggregate) -> Self {
         Self {
             values: vec![vec![value]],
             previous_gens_count: 0,
@@ -65,7 +64,7 @@ impl Stream {
     // be added to given generation
     pub(crate) fn add_value(
         &mut self,
-        value: WithProvenance<ValueAggregate>,
+        value: ValueAggregate,
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<GenerationIdx> {
@@ -153,7 +152,7 @@ impl Stream {
     }
 
     pub(crate) fn iter(&self, generation: Generation) -> Option<StreamIter<'_>> {
-        let iter: Box<dyn Iterator<Item = &WithProvenance<ValueAggregate>>> = match generation {
+        let iter: Box<dyn Iterator<Item = &ValueAggregate>> = match generation {
             Generation::Nth(generation) if generation >= self.generations_count() => return None,
             Generation::Nth(generation) => {
                 Box::new(self.values.iter().take(generation.next().into()).flat_map(|v| v.iter()))
@@ -186,7 +185,7 @@ impl Stream {
         }
 
         let len = (end - start) + 1;
-        let iter: Box<dyn Iterator<Item = &[WithProvenance<ValueAggregate>]>> =
+        let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> =
             Box::new(self.values.iter().skip(start).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
 
@@ -236,12 +235,12 @@ impl Generation {
 }
 
 pub(crate) struct StreamIter<'result> {
-    iter: Box<dyn Iterator<Item = &'result WithProvenance<ValueAggregate>> + 'result>,
+    iter: Box<dyn Iterator<Item = &'result ValueAggregate> + 'result>,
     len: usize,
 }
 
 impl<'result> Iterator for StreamIter<'result> {
-    type Item = &'result WithProvenance<ValueAggregate>;
+    type Item = &'result ValueAggregate;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -258,12 +257,12 @@ impl<'result> Iterator for StreamIter<'result> {
 impl<'result> ExactSizeIterator for StreamIter<'result> {}
 
 pub(crate) struct StreamSliceIter<'slice> {
-    iter: Box<dyn Iterator<Item = &'slice [WithProvenance<ValueAggregate>]> + 'slice>,
+    iter: Box<dyn Iterator<Item = &'slice [ValueAggregate]> + 'slice>,
     pub len: usize,
 }
 
 impl<'slice> Iterator for StreamSliceIter<'slice> {
-    type Item = &'slice [WithProvenance<ValueAggregate>];
+    type Item = &'slice [ValueAggregate];
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
@@ -315,29 +314,21 @@ mod test {
     use super::Stream;
     use super::ValueAggregate;
     use super::ValueSource;
-    use super::WithProvenance;
 
     use air_interpreter_cid::CID;
-    use air_interpreter_data::Provenance;
     use serde_json::json;
 
     use std::rc::Rc;
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = WithProvenance::new(
-            ValueAggregate::from_service_result(
-                ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-                CID::new("some fake cid").into(),
-            ),
-            Provenance::service_result(CID::new("some fake cid").into()),
+        let value_1 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
         );
-        let value_2 = WithProvenance::new(
-            ValueAggregate::from_service_result(
-                ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-                CID::new("some fake cid").into(),
-            ),
-            Provenance::service_result(CID::new("some fake cid").into()),
+        let value_2 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
         );
         let mut stream = Stream::from_generations_count(2.into(), 0.into());
 
@@ -380,19 +371,13 @@ mod test {
 
     #[test]
     fn generation_from_current_data() {
-        let value_1 = WithProvenance::new(
-            ValueAggregate::from_service_result(
-                ServiceResultAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
-                CID::new("some fake cid").into(),
-            ),
-            Provenance::service_result(CID::new("some fake cid").into()),
+        let value_1 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
         );
-        let value_2 = WithProvenance::new(
-            ValueAggregate::from_service_result(
-                ServiceResultAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
-                CID::new("some fake cid").into(),
-            ),
-            Provenance::service_result(CID::new("some fake cid").into()),
+        let value_2 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
+            CID::new("some fake cid").into(),
         );
         let mut stream = Stream::from_generations_count(5.into(), 5.into());
 

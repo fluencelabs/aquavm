@@ -66,7 +66,7 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
         ScalarRef::Value(variable) => {
             let jvalues = select_by_lambda_from_scalar(variable.get_result(), lambda, exec_ctx)?;
             let tetraplet = variable.get_tetraplet().deref().clone();
-            from_jvalue(jvalues, tetraplet, variable.provenance.clone(), lambda)
+            from_jvalue(jvalues, tetraplet, variable.get_provenance(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
@@ -118,7 +118,7 @@ pub(crate) fn construct_stream_iterable_values(
 }
 
 /// Constructs iterable value from resolved call result.
-fn from_value(call_result: WithProvenance<ValueAggregate>, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
+fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match call_result.get_result().deref() {
         JValue::Array(array) => {
             if array.is_empty() {

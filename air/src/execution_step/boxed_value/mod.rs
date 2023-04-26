@@ -30,7 +30,6 @@ pub(crate) use scalar::LiteralAggregate;
 pub(crate) use scalar::ScalarRef;
 pub(crate) use scalar::ServiceResultAggregate;
 pub(crate) use scalar::ValueAggregate;
-pub(crate) use scalar::WithProvenance;
 pub(crate) use stream::Generation;
 pub(crate) use stream::Stream;
 pub(crate) use utils::populate_tetraplet_with_lambda;

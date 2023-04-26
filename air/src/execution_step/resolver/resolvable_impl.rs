@@ -36,7 +36,7 @@ impl Resolvable for ast::ImmutableValue<'_> {
         use ast::ImmutableValue::*;
 
         match self {
-            InitPeerId => resolve_const(ctx.run_parameters.init_peer_id.as_str(), ctx),
+            InitPeerId => resolve_const(ctx.run_parameters.init_peer_id.as_ref(), ctx),
             LastError(error_accessor) => error_accessor.resolve(ctx),
             Literal(value) => resolve_const(value.to_string(), ctx),
             Timestamp => resolve_const(ctx.run_parameters.timestamp, ctx),

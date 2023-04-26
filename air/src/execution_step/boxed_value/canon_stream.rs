@@ -16,7 +16,6 @@
 
 use super::Stream;
 use super::ValueAggregate;
-use super::WithProvenance;
 use crate::execution_step::Generation;
 use crate::JValue;
 
@@ -33,13 +32,13 @@ use std::rc::Rc;
 /// scalars, and represent a stream fixed at some execution point.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStream {
-    pub(crate) values: Vec<WithProvenance<ValueAggregate>>,
+    pub(crate) values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
     pub(crate) tetraplet: Rc<SecurityTetraplet>,
 }
 
 impl CanonStream {
-    pub(crate) fn new(values: Vec<WithProvenance<ValueAggregate>>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+    pub(crate) fn new(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
         Self { values, tetraplet }
     }
 
@@ -71,11 +70,11 @@ impl CanonStream {
         JValue::Array(jvalue_array)
     }
 
-    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &WithProvenance<ValueAggregate>> {
+    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
         self.values.iter()
     }
 
-    pub(crate) fn nth(&self, idx: usize) -> Option<&WithProvenance<ValueAggregate>> {
+    pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
         self.values.get(idx)
     }
 

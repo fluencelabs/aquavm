@@ -47,7 +47,6 @@ pub(super) use boxed_value::ScalarRef;
 pub(super) use boxed_value::ServiceResultAggregate;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
-pub(super) use boxed_value::WithProvenance;
 pub(crate) use errors::Joinable;
 pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;

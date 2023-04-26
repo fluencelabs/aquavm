@@ -22,7 +22,6 @@ use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;
-use crate::execution_step::WithProvenance;
 use values_sparse_matrix::ValuesSparseMatrix;
 
 use std::collections::HashMap;
@@ -85,7 +84,7 @@ pub(crate) struct Scalars<'i> {
     ///   - global variables have 0 depth
     ///   - cells in a row are sorted by depth
     ///   - all depths in cell in one row are unique
-    pub(crate) non_iterable_variables: ValuesSparseMatrix<WithProvenance<ValueAggregate>>,
+    pub(crate) non_iterable_variables: ValuesSparseMatrix<ValueAggregate>,
 
     pub(crate) canon_streams: ValuesSparseMatrix<CanonStreamWithProvenance>,
 
@@ -103,11 +102,7 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_scalar_value(
-        &mut self,
-        name: impl Into<String>,
-        value: WithProvenance<ValueAggregate>,
-    ) -> ExecutionResult<bool> {
+    pub(crate) fn set_scalar_value(&mut self, name: impl Into<String>, value: ValueAggregate) -> ExecutionResult<bool> {
         self.non_iterable_variables.set_value(name, value)
     }
 
@@ -141,10 +136,7 @@ impl<'i> Scalars<'i> {
         self.iterable_variables.remove(name);
     }
 
-    pub(crate) fn get_non_iterable_scalar(
-        &'i self,
-        name: &str,
-    ) -> ExecutionResult<Option<&'i WithProvenance<ValueAggregate>>> {
+    pub(crate) fn get_non_iterable_scalar(&'i self, name: &str) -> ExecutionResult<Option<&'i ValueAggregate>> {
         self.non_iterable_variables.get_value(name)
     }
 
@@ -167,10 +159,10 @@ impl<'i> Scalars<'i> {
     }
 
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
-        let value_with_prov = self.get_non_iterable_scalar(name);
+        let value = self.get_non_iterable_scalar(name);
         let iterable_value_with_prov = self.iterable_variables.get(name);
 
-        match (value_with_prov, iterable_value_with_prov) {
+        match (value, iterable_value_with_prov) {
             (Err(_), None) => Err(CatchableError::VariableNotFound(name.to_string()).into()),
             (Ok(None), _) => Err(CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into()),
             (Ok(Some(value)), None) => Ok(ScalarRef::Value(value)),
