@@ -119,6 +119,15 @@ jobs:
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
 
+  fluence-cli-snapshot:
+    name: "fluence-cli"
+    needs:
+      - js-client
+
+    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@main
+    with:
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
+
   aqua-playground:
     needs:
       - js-client
@@ -129,27 +138,22 @@ jobs:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
-  status:
-    name: "e2e status"
-    runs-on: ubuntu-latest
-    if: always()
+  registry:
     needs:
-      - js-client-tests
-      - aqua-playground
+      - fluence-cli-snapshot
+      - rust-peer-snapshot
 
-    steps:
-      - uses: lwhiteley/dependent-jobs-result-check@v1
-        id: status
-        with:
-          statuses: failure
-          dependencies: ${{ toJSON(needs) }}
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
 
-      - name: Log output
-        run: |
-          echo "statuses:" "${{ steps.status.outputs.statuses }}"
-          echo "jobs:" "${{ steps.status.outputs.jobs }}"
-          echo "found any?:" "${{ steps.status.outputs.found }}"
+  fluence-cli:
+    needs:
+      - rust-peer-snapshot
+      - js-client
 
-      - name: Fail run
-        if: fromJSON(steps.status.outputs.found)
-        run: exit 1
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
