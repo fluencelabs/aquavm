@@ -16,6 +16,7 @@
 
 use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
+use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -70,28 +71,121 @@ fn fold_with_inner_call() {
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), script.clone(), "", "");
     let mut data = result.data;
 
-    let first_arg_tetraplet = SecurityTetraplet {
-        peer_pk: set_variable_vm_peer_id,
-        service_id,
-        function_name,
-        json_path: String::new(),
-    };
-
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: test_params.init_peer_id.clone(),
-        service_id: String::new(),
-        function_name: String::new(),
-        json_path: String::new(),
+        ..Default::default()
     };
 
-    let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
-    let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
     for i in 0..10 {
         let result = checked_call_vm!(client_vms[i].0, test_params.clone(), script.clone(), "", data);
         data = result.data;
 
+        let first_arg_tetraplet = SecurityTetraplet {
+            peer_pk: set_variable_vm_peer_id.clone(),
+            service_id: service_id.clone(),
+            function_name: function_name.clone(),
+            json_path: format!(".$.[{}]", i),
+        };
+
+        let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet.clone()]];
+        let expected_tetraplets = Rc::new(RefCell::new(expected_tetraplets));
+
         assert_eq!(client_vms[i].1, expected_tetraplets);
     }
+}
+
+#[test]
+fn fold_stream_with_inner_call() {
+    let init_peer_id = "init_peer_id";
+    let air_script = r#"
+      (seq
+         (seq
+            (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+            (seq
+               (call "init_peer_id" ("" "") [] var) ; ok = {"field": 43}
+               (ap var.$.field $stream)))
+         (fold $stream i
+            (seq
+               (call "init_peer_id" ("" "") [i] $s2) ; behaviour = tetraplet
+               (next i))))
+    "#;
+    let executor = air_test_framework::AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(init_peer_id),
+        vec![],
+        std::iter::empty(),
+        &air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{}", result.error_message);
+    let data = data_from_result(&result);
+
+    let expected_trace = vec![
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [42]
+        ),
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [43]
+        ),
+    ];
+    assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
+}
+
+#[test]
+fn fold_canon_with_inner_call() {
+    let init_peer_id = "init_peer_id";
+    let air_script = r#"
+      (seq
+         (seq
+            (seq
+               (call "init_peer_id" ("" "") [] $stream) ; ok = 42
+               (call "init_peer_id" ("" "") [] var)) ; ok = {"field": 43}
+            (ap var.$.field $stream))
+         (seq
+            (canon "init_peer_id" $stream #can)
+            (fold #can x
+              (seq
+                (call "init_peer_id" ("" "") [x] $s2) ; behaviour=tetraplet
+                (next x)))))
+    "#;
+    let executor = air_test_framework::AirScriptExecutor::new(
+        TestRunParameters::from_init_peer_id(init_peer_id),
+        vec![],
+        std::iter::empty(),
+        &air_script,
+    )
+    .unwrap();
+
+    let result = executor.execute_one(init_peer_id).unwrap();
+    assert_eq!(result.ret_code, 0, "{}", result.error_message);
+    let data = data_from_result(&result);
+
+    let expected_trace = vec![
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            0,
+            peer = init_peer_id,
+            service = "..2",
+            args = [42]
+        ),
+        stream!(
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            1,
+            peer = init_peer_id,
+            service = "..2",
+            args = [43]
+        ),
+    ];
+    assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
 }
 
 #[test]
@@ -134,7 +228,7 @@ fn fold_json_path() {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        json_path: String::from(".$.args"),
+        json_path: String::from(".$.args.$.[9]"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {

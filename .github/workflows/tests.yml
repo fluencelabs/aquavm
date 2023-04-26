@@ -68,13 +68,13 @@ jobs:
 
       - name: Coveralls upload
         if: inputs.cargo-dependencies == 'null'
-        uses: coverallsapp/github-action@v1
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: lcov.info
+          file: lcov.info
 
       - name: Archive code coverage results
-        if: inputs.cargo-dependencies == 'null'
+        if: inputs.cargo-dependencies == 'null' && !github.event.pull_request.head.repo.fork
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload test report
         uses: dorny/test-reporter@v1
-        if: success() || failure()
+        if: (success() || failure()) && !github.event.pull_request.head.repo.fork
         with:
           name: aquavm report
           path: target/nextest/ci/junit.xml

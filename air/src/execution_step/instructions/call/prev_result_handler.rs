@@ -141,7 +141,7 @@ fn update_state_with_service_result<'i>(
     // try to get service result from call service result
     let result = try_to_service_result(service_result, &argument_hash, &tetraplet, exec_ctx, trace_ctx)?;
 
-    let trace_pos = trace_ctx.trace_pos();
+    let trace_pos = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
     let new_call_result =
@@ -151,11 +151,11 @@ fn update_state_with_service_result<'i>(
     Ok(())
 }
 
-fn handle_service_error<'i>(
+fn handle_service_error(
     service_result: CallServiceResult,
     argument_hash: Rc<str>,
     tetraplet: RcSecurityTetraplet,
-    exec_ctx: &mut ExecutionCtx<'i>,
+    exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<CallServiceResult> {
     use air_interpreter_interface::CALL_SERVICE_SUCCESS;

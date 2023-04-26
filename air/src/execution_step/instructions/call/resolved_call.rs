@@ -20,6 +20,7 @@ use super::call_result_setter::*;
 use super::prev_result_handler::*;
 use super::triplet::resolve;
 use super::*;
+use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
@@ -228,14 +229,12 @@ impl<'i> ResolvedCall<'i> {
         &self,
         exec_ctx: &ExecutionCtx<'i>,
     ) -> ExecutionResult<(Vec<serde_json::Value>, Vec<RcSecurityTetraplets>)> {
-        use crate::execution_step::resolver::resolve_to_args;
-
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::with_capacity(function_args.len());
         let mut tetraplets = Vec::with_capacity(function_args.len());
 
         for instruction_value in function_args {
-            let (arg, tetraplet) = resolve_to_args(instruction_value, exec_ctx)?;
+            let (arg, tetraplet) = instruction_value.resolve(exec_ctx)?;
             call_arguments.push(arg);
             tetraplets.push(tetraplet);
         }

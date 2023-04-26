@@ -82,7 +82,7 @@ fn compute_lens_convolution(fold: &FoldResult, merge_ctx: &MergeCtx) -> MergeRes
     let subtraces_count = fold.lore.len();
     let mut lens = Vec::with_capacity(subtraces_count);
     let mut fold_states_count: usize = 0;
-    let mut last_seen_generation = 0;
+    let mut last_seen_generation = GenerationIdx::from(0);
     let mut last_seen_generation_pos = 0;
     let mut cum_after_len = 0;
 
@@ -155,7 +155,7 @@ fn check_subtrace_lore(subtrace_lore: &FoldSubTraceLore) -> MergeResult<()> {
 }
 
 impl ResolvedFold {
-    pub(crate) fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
+    pub fn new(lore: HashMap<TracePos, ResolvedSubTraceDescs>, fold_states_count: usize) -> Self {
         Self {
             lore,
             fold_states_count,
@@ -164,7 +164,7 @@ impl ResolvedFold {
 }
 
 impl ResolvedSubTraceDescs {
-    pub(self) fn new(before_subtrace: SubTraceDesc, after_subtrace: SubTraceDesc) -> Self {
+    pub fn new(before_subtrace: SubTraceDesc, after_subtrace: SubTraceDesc) -> Self {
         Self {
             before_subtrace,
             after_subtrace,
@@ -240,7 +240,7 @@ mod tests {
 
         let fold_result = FoldResult { lore };
 
-        let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(0))]);
+        let slider = TraceSlider::new(vec![ExecutedState::Ap(ApResult::new(0.into()))]);
         let ctx = MergeCtx { slider };
 
         let (all_states, convoluted_lens) =
@@ -285,9 +285,9 @@ mod tests {
         let fold_result = FoldResult { lore };
 
         let slider = TraceSlider::new(vec![
-            ExecutedState::Ap(ApResult::new(0)),
-            ExecutedState::Ap(ApResult::new(1)),
-            ExecutedState::Ap(ApResult::new(2)),
+            ExecutedState::Ap(ApResult::new(0.into())),
+            ExecutedState::Ap(ApResult::new(1.into())),
+            ExecutedState::Ap(ApResult::new(2.into())),
         ]);
         let ctx = MergeCtx { slider };
 

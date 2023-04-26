@@ -17,6 +17,8 @@
 use super::*;
 use merger::*;
 
+use std::convert::TryInto;
+
 #[derive(Debug, Default)]
 pub struct TraceHandler {
     data_keeper: DataKeeper,
@@ -35,8 +37,12 @@ impl TraceHandler {
 
     /// Returns size of elements inside result trace and intended to provide
     /// a position of next inserted elements.
-    pub fn trace_pos(&self) -> TracePos {
-        self.data_keeper.result_trace.len().into()
+    pub fn trace_pos(&self) -> Result<TracePos, IntConversionError> {
+        self.data_keeper
+            .result_trace
+            .len()
+            .try_into()
+            .map_err(IntConversionError::TryIntoTracePosError)
     }
 
     pub fn into_result_trace(self) -> ExecutionTrace {
@@ -57,7 +63,7 @@ impl TraceHandler {
     pub fn update_generation(
         &mut self,
         trace_pos: TracePos,
-        generation: u32,
+        generation: GenerationIdx,
     ) -> Result<(), GenerationCompatificationError> {
         let state = self
             .data_keeper

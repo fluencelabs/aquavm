@@ -37,3 +37,14 @@ macro_rules! measure {
         $expr
     });
 }
+
+#[macro_export]
+macro_rules! auto_checked_add {
+    [$type:ty] => {
+        impl ::num_traits::CheckedAdd for $type {
+            fn checked_add(&self, other: &Self) -> Option<Self> {
+                self.0.checked_add(other.0).map(Self)
+            }
+        }
+    };
+}

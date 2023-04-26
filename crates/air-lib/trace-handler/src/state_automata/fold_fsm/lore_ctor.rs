@@ -120,7 +120,7 @@ impl SubTraceLoreCtor {
 
 impl PositionsTracker {
     pub(self) fn len(&self) -> usize {
-        self.end_pos - self.start_pos
+        (self.end_pos - self.start_pos).into()
     }
 }
 

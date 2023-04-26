@@ -22,6 +22,8 @@ use crate::TracePos;
 
 use thiserror::Error as ThisError;
 
+use std::num::TryFromIntError;
+
 /// Errors arose out of merging previous data with a new.
 #[derive(ThisError, Debug)]
 pub enum StateFSMError {
@@ -49,6 +51,10 @@ pub enum StateFSMError {
     /// Errors occurred when {0}.fold_states_count + {1} overflows.
     #[error("overflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current position {1}'")]
     FoldPosOverflow(ResolvedFold, TracePos, MergeCtxType),
+
+    /// Errors occurred when {0}.fold_states_count + {1} overflows.
+    #[error("error: {0:?} converting fold states count into suitable representation for resolved fold {1:?} and current position {2}'")]
+    FoldStatesCountOverflow(TryFromIntError, ResolvedFold, MergeCtxType),
 
     /// Errors occurred when {1} - 1{0}.fold_states_count underflows.
     #[error("underflow is occurred while calculating the new position of a {2} slider for resolved fold {0:?} and current subtrace len {1}'")]
