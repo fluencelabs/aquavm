@@ -350,9 +350,8 @@ fn ap_canon_stream_with_lambda() {
             "peer_pk": "vm_1_peer_id",
             "service_id": "some_service_name",
         },
-        "provenance": Provenance::service_result(cid_2),
+        "provenance": Provenance::service_result(cid_2.clone()),
     }]}));
-    let canon_cid_1 = extract_canon_result_cid(&canon_1);
 
     let actual_trace = trace_from_result(&result);
     let expected_state = vec![
@@ -364,8 +363,8 @@ fn ap_canon_stream_with_lambda() {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [{
                 "result": 1,
-                "tetraplet": {"function_name": "some_function_name", "json_path": ".$.[1]", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"},
-                "provenance": Provenance::canon(canon_cid_1),
+                "tetraplet": {"function_name": "some_function_name", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"},
+                "provenance": Provenance::service_result(cid_2),
             }]
         })),
         unused!(json!([1]), peer = vm_1_peer_id, args = [json!([1])]),
@@ -376,7 +375,7 @@ fn ap_canon_stream_with_lambda() {
         vm_1_peer_id,
         service_name,
         function_name,
-        ".$.[1]",
+        "",
     )]]);
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }

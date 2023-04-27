@@ -19,12 +19,14 @@ use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
+use air_interpreter_data::Provenance;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -45,18 +47,19 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
+        _root_provenance: &Provenance,
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         use super::IterableItem::*;
 
-        let (jvalue, tetraplet) = match self {
-            RefValue((jvalue, tetraplet, _, _)) => (*jvalue, tetraplet),
-            RcValue((jvalue, tetraplet, _, _)) => (jvalue.deref(), tetraplet),
+        let (jvalue, tetraplet, provenance) = match self {
+            RefValue((jvalue, tetraplet, _, provenance)) => (*jvalue, tetraplet, provenance),
+            RcValue((jvalue, tetraplet, _, provenance)) => (jvalue.deref(), tetraplet, provenance),
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
         let tetraplet = populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda);
 
-        Ok((selected_value, tetraplet))
+        Ok((selected_value, tetraplet, provenance.clone()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

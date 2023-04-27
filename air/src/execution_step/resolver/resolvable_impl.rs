@@ -121,8 +121,8 @@ impl Resolvable for ast::ImmutableVariable<'_> {
 
 impl Resolvable for ast::ScalarWithLambda<'_> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
-        let (value, provenance) = ctx.scalars.get_value(self.name)?.into_jvaluable();
-        let (value, tetraplet) = value.apply_lambda_with_tetraplets(&self.lambda, ctx)?;
+        let (value, root_provenance) = ctx.scalars.get_value(self.name)?.into_jvaluable();
+        let (value, tetraplet, provenance) = value.apply_lambda_with_tetraplets(&self.lambda, ctx, &root_provenance)?;
         let tetraplet = Rc::new(tetraplet);
         Ok((value.into_owned(), vec![tetraplet], provenance))
     }
@@ -132,13 +132,10 @@ impl Resolvable for ast::CanonStreamWithLambda<'_> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         let canon = ctx.scalars.get_canon_stream(self.name)?;
         let value: &dyn JValuable = &&canon.canon_stream;
-        let (value, tetraplet) = value.apply_lambda_with_tetraplets(&self.lambda, ctx)?;
+        let (value, tetraplet, provenance) =
+            value.apply_lambda_with_tetraplets(&self.lambda, ctx, &Provenance::canon(canon.cid.clone()))?;
         let tetraplet = Rc::new(tetraplet);
-        Ok((
-            value.into_owned(),
-            vec![tetraplet],
-            Provenance::canon(canon.cid.clone()),
-        ))
+        Ok((value.into_owned(), vec![tetraplet], provenance))
     }
 }
 

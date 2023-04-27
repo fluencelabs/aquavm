@@ -19,6 +19,7 @@ use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::{CanonResultAggregate, LiteralAggregate, PEEK_ALLOWED_ON_NON_EMPTY};
 use crate::UncatchableError;
 
+use air_interpreter_data::Provenance;
 use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
@@ -148,17 +149,14 @@ fn apply_canon_stream_wl(
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let canon_stream_value = &canon_stream.canon_stream;
-    let (result, tetraplet) =
-        JValuable::apply_lambda_with_tetraplets(&canon_stream_value, &ast_stream.lambda, exec_ctx)?;
+    let (result, tetraplet, provenance) = JValuable::apply_lambda_with_tetraplets(
+        &canon_stream_value,
+        &ast_stream.lambda,
+        exec_ctx,
+        &Provenance::canon(canon_stream.cid.clone()),
+    )?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-    // TODO that's wrong, we have to use value's provenance/aggregate
-    let value = CanonResultAggregate::new(
-        Rc::new(result.into_owned()),
-        tetraplet.peer_pk.into(),
-        &tetraplet.json_path,
-        position,
-    );
-    let result = ValueAggregate::from_canon_result(value, canon_stream.cid.clone());
+    let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);
     Ok(result)
 }

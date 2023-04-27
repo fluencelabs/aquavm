@@ -25,6 +25,8 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -39,7 +41,8 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
+        root_provenance: &Provenance,
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         let stream_iter = self.iter().map(|r| r.get_result().deref());
         let select_result = select_by_lambda_from_stream(stream_iter, lambda, exec_ctx)?;
 
@@ -51,7 +54,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
             None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };
 
-        Ok((select_result.result, tetraplet))
+        Ok((select_result.result, tetraplet, root_provenance.clone()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

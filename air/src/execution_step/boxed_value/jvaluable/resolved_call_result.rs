@@ -25,6 +25,8 @@ use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -38,11 +40,12 @@ impl JValuable for ValueAggregate {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
+        _root_provenane: &Provenance,
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         let selected_value = select_by_lambda_from_scalar(self.get_result(), lambda, exec_ctx)?;
         let tetraplet = populate_tetraplet_with_lambda(self.get_tetraplet().as_ref().clone(), lambda);
 
-        Ok((selected_value, tetraplet))
+        Ok((selected_value, tetraplet, self.get_provenance()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
