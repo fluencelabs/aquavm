@@ -191,8 +191,8 @@ fn canon_in_canon() {
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
-    let data = data_from_result(&result);
-    let last_state = data.trace.last().unwrap();
+    let trace = trace_from_result(&result);
+    let last_state = trace.last().unwrap();
 
     let val = scalar!(1, peer = init_peer_id, service = "service..0", function = "func");
     let val_cid = extract_service_result_cid(&val);
@@ -244,8 +244,6 @@ fn canon_in_canon() {
     assert_eq!(
         last_state,
         &expected_state,
-        "\n{}\n",
-        serde_json::to_string(&data).unwrap()
     );
 }
 

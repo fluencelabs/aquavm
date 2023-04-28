@@ -58,7 +58,6 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
             result.clone(),
             tetraplet,
             trace_pos,
-            // TODO improve
             self.call_results[self.cursor].get_provenance(),
         ));
         Some(result)

@@ -143,7 +143,6 @@ impl ValueAggregate {
         }
     }
 
-    #[inline]
     pub fn get_result(&self) -> &Rc<JValue> {
         match self {
             ValueAggregate::Literal(literal) => &literal.result,
@@ -158,7 +157,6 @@ impl ValueAggregate {
         }
     }
 
-    #[inline]
     pub fn get_tetraplet(&self) -> RcSecurityTetraplet {
         match self {
             ValueAggregate::Literal(literal) => literal.get_tetraplet(),
@@ -173,7 +171,6 @@ impl ValueAggregate {
         }
     }
 
-    #[inline]
     pub fn get_trace_pos(&self) -> TracePos {
         match self {
             ValueAggregate::Literal(literal) => literal.trace_pos,
@@ -188,7 +185,6 @@ impl ValueAggregate {
         }
     }
 
-    #[inline]
     pub fn set_trace_pos(&mut self, trace_pos: TracePos) {
         let trace_pos_ref = match self {
             ValueAggregate::Literal(literal) => &mut literal.trace_pos,

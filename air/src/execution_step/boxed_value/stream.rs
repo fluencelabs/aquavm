@@ -308,12 +308,11 @@ impl fmt::Display for Generation {
 
 #[cfg(test)]
 mod test {
-    use crate::execution_step::ServiceResultAggregate;
-
     use super::Generation;
     use super::Stream;
     use super::ValueAggregate;
     use super::ValueSource;
+    use crate::execution_step::ServiceResultAggregate;
 
     use air_interpreter_cid::CID;
     use serde_json::json;
