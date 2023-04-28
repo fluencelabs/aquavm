@@ -241,10 +241,7 @@ fn canon_in_canon() {
         }]
     }));
 
-    assert_eq!(
-        last_state,
-        &expected_state,
-    );
+    assert_eq!(last_state, &expected_state,);
 }
 
 #[test]
