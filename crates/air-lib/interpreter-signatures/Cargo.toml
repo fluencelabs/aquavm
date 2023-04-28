@@ -1,0 +1,14 @@
+[package]
+name = "air-interpreter-signatures"
+description = "AIR interpreter signatures util module"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+documentation = "https://docs.rs/air-interpreter-signatures"
+repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/interpreter-signatures"
+keywords = ["fluence", "air", "programming-language"]
+categories = ["wasm"]
+
+[dependencies]
+serde = { version = "1.0.159", features = ["derive"] }

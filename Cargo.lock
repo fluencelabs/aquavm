@@ -110,6 +110,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-interpreter-signatures"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
