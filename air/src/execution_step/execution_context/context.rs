@@ -25,6 +25,7 @@ use air_interpreter_data::CidInfo;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_interface::*;
+use air_interpreter_signatures::SignatureStore;
 
 use std::rc::Rc;
 
@@ -69,6 +70,11 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// CID-to-something trackers.
     pub(crate) cid_state: ExecutionCidState,
+
+    /// Signatures' store.
+    pub(crate) signature_store: SignatureStore,
+    // /// Local signature tracker.
+    // pub(crate) signature_tracker: SignatureTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -87,6 +93,9 @@ impl<'i> ExecutionCtx<'i> {
         );
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
+        // TODO we might keep both stores and merge them only with signature info collected into SignatureTracker
+        let signature_store =
+            SignatureStore::merge(prev_ingredients.signature_store, current_ingredients.signature_store);
 
         Self {
             run_parameters,
@@ -95,6 +104,7 @@ impl<'i> ExecutionCtx<'i> {
             call_results,
             streams,
             cid_state,
+            signature_store,
             ..<_>::default()
         }
     }
@@ -134,6 +144,7 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) last_call_request_id: u32,
     pub(crate) restricted_streams: RestrictedStreamGens,
     pub(crate) cid_info: CidInfo,
+    pub(crate) signature_store: SignatureStore,
 }
 
 use serde::Deserialize;

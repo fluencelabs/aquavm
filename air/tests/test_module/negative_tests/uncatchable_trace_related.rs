@@ -329,7 +329,8 @@ fn invalid_dst_generations() {
             "canon_element_store": {},
             "canon_result_store": {},
             "service_result_store": {}
-        }
+        },
+        "signatures": {}
     });
     let data: Vec<u8> = serde_json::to_vec(&data).unwrap();
     // let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();

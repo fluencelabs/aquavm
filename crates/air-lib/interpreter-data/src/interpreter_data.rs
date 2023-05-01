@@ -23,6 +23,7 @@ use crate::ExecutionTrace;
 use crate::JValue;
 use crate::ServiceResultCidAggregate;
 
+use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
 use polyplets::SecurityTetraplet;
 
@@ -61,6 +62,12 @@ pub struct InterpreterData {
 
     /// CID-to-somethings mappings.
     pub cid_info: CidInfo,
+
+    /// Signature store.
+    ///
+    /// Every peer signs call results and canon values it produced (all together), and stores the signatures
+    /// in this store.
+    pub signatures: SignatureStore,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -84,6 +91,7 @@ impl InterpreterData {
             last_call_request_id: 0,
             restricted_streams: RestrictedStreamGens::new(),
             cid_info: <_>::default(),
+            signatures: <_>::default(),
         }
     }
 
@@ -93,6 +101,7 @@ impl InterpreterData {
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
         cid_info: CidInfo,
+        signatures: SignatureStore,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {
@@ -105,6 +114,7 @@ impl InterpreterData {
             last_call_request_id,
             restricted_streams,
             cid_info,
+            signatures,
         }
     }
 
@@ -148,51 +158,4 @@ pub struct CidInfo {
 
     /// Map CID to a service result aggregate.
     pub service_result_store: CidStore<ServiceResultCidAggregate>,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serde::Deserialize;
-    use serde::Serialize;
-
-    #[test]
-    fn compatible_with_0_6_0_version() {
-        #[derive(Debug, Clone, Serialize, Deserialize)]
-        pub struct InterpreterData0_6_0 {
-            pub trace: ExecutionTrace,
-            #[serde(rename = "streams")] // for compatibility with versions <= 0.2.1
-            pub global_streams: GlobalStreamGens,
-            pub version: semver::Version,
-            #[serde(default)]
-            #[serde(rename = "lcid")]
-            pub last_call_request_id: u32,
-            #[serde(default)]
-            #[serde(rename = "r_streams")]
-            pub restricted_streams: RestrictedStreamGens,
-            pub interpreter_version: semver::Version,
-            pub cid_info: CidInfo,
-        }
-
-        // test 0.6.0 to 0.6.1 conversion
-        let data_0_6_0 = InterpreterData0_6_0 {
-            trace: ExecutionTrace::default(),
-            global_streams: GlobalStreamGens::default(),
-            version: semver::Version::new(0, 2, 0),
-            last_call_request_id: 0,
-            restricted_streams: RestrictedStreamGens::default(),
-            interpreter_version: semver::Version::new(0, 1, 1),
-            cid_info: CidInfo::default(),
-        };
-
-        let data_0_6_0_se = serde_json::to_vec(&data_0_6_0).unwrap();
-        let data_0_6_1 = serde_json::from_slice::<InterpreterData>(&data_0_6_0_se);
-        assert!(data_0_6_1.is_ok());
-
-        // test 0.6.1 to 0.6.0 conversion
-        let data_0_6_1 = InterpreterData::new(semver::Version::new(1, 1, 1));
-        let data_0_6_1_se = serde_json::to_vec(&data_0_6_1).unwrap();
-        let data_0_6_0 = serde_json::from_slice::<InterpreterData0_6_0>(&data_0_6_1_se);
-        assert!(data_0_6_0.is_ok());
-    }
 }

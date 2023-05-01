@@ -25,3 +25,99 @@
     unused_unsafe,
     unreachable_patterns
 )]
+
+use air_interpreter_cid::CID;
+use base64ct::{Base64, Encoding};
+use fluence_keypair::error::SigningError;
+use fluence_keypair::KeyPair;
+use serde::{Deserialize, Serialize};
+
+use std::borrow::Borrow;
+use std::collections::HashMap;
+use std::hash::Hash;
+
+/// An opaque serializable representation of public key.
+///
+/// It can be string or binary, you shouldn't care about it unless you change serialization format.
+#[derive(Debug, Hash, Clone, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct PublicKey(Box<str>);
+
+#[derive(Debug, Hash, Clone, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[serde(transparent)]
+pub struct Signature(Box<str>);
+
+impl Signature {
+    fn new(sign: fluence_keypair::Signature) -> Self {
+        Self(Base64::encode_string(sign.to_vec()).into())
+    }
+}
+
+// TODO we will need to track all peers for verification.
+#[derive(Debug, Default)]
+pub struct SignatureTracker {
+    peer_to_cids: HashMap<String, Vec<Box<str>>>,
+}
+
+impl SignatureTracker {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    // TODO dedicated wrapper to peer id?
+    pub fn register<T>(&mut self, peer_id: String, cid: CID<T>) {
+        self.peer_to_cids
+            .entry(peer_id)
+            .or_default()
+            .push(cid.into_inner().into());
+    }
+
+    pub fn into_signature(
+        &mut self,
+        peer_id: &str,
+        signer: &KeyPair,
+    ) -> Result<Signature, SigningError> {
+        let mut cids = self.peer_to_cids.remove(peer_id).unwrap_or_default();
+        cids.sort_unstable();
+
+        // TODO make pluggable serialization
+        // TODO it will be useful for CID too
+        // TODO please note that using serde::Serializer is not enough
+        let serialized_cids = serde_json::to_vec(&cids).unwrap();
+
+        signer.sign(&serialized_cids).map(Signature::new)
+    }
+}
+
+/// A dictionary-like structure that stores peer public keys and their particle data signatures.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
+
+impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>
+    where
+        Key: Borrow<Q>,
+        Q: Hash + Eq + ?Sized,
+    {
+        self.0.get(peer_pk)
+    }
+
+    pub fn put(&mut self, peer_pk: Key, signature: Sign) {
+        self.0.insert(peer_pk, signature);
+    }
+
+    pub fn merge(prev: Self, _current: Self) -> Self {
+        // TODO STUB
+        prev
+    }
+}
+
+impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}

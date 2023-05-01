@@ -53,6 +53,7 @@ pub(crate) fn prepare<'i>(
         last_call_request_id: prev_data.last_call_request_id,
         restricted_streams: prev_data.restricted_streams,
         cid_info: prev_data.cid_info,
+        signature_store: prev_data.signatures,
     };
 
     let current_ingredients = ExecCtxIngredients {
@@ -60,6 +61,7 @@ pub(crate) fn prepare<'i>(
         last_call_request_id: current_data.last_call_request_id,
         restricted_streams: current_data.restricted_streams,
         cid_info: current_data.cid_info,
+        signature_store: current_data.signatures,
     };
 
     let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, run_parameters)?;
