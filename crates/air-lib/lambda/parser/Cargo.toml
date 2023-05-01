@@ -15,12 +15,12 @@ name = "air_lambda_parser"
 path = "src/lib.rs"
 
 [build-dependencies]
-lalrpop = "0.19.9"
+lalrpop = "0.19.12"
 
 [dependencies]
 air-lambda-ast = { version = "0.1.0", path = "../ast" }
 
-lalrpop-util = "0.19.9"
+lalrpop-util = "0.19.12"
 regex = "1.8.1"
 codespan = "0.11.1"
 codespan-reporting = "0.11.1"
