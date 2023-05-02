@@ -16,11 +16,15 @@
 
 use super::ExecutedState;
 use crate::TracePos;
+
 use serde::Deserialize;
 use serde::Serialize;
+use std::convert::TryInto;
 use std::ops::Deref;
 use std::ops::Index;
 use std::ops::IndexMut;
+
+pub type TraceLen = u32;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -41,6 +45,13 @@ impl ExecutionTrace {
 
     pub fn push(&mut self, value: ExecutedState) {
         self.0.push(value);
+    }
+
+    pub fn trace_states_count(&self) -> TraceLen {
+        self.0
+            .len()
+            .try_into()
+            .expect("there is an overflow in trace_states_count().")
     }
 }
 

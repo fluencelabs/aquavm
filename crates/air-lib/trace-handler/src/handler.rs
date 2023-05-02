@@ -53,7 +53,7 @@ impl TraceHandler {
         &self.data_keeper.result_trace
     }
 
-    pub fn subgraph_sizes(&self) -> (usize, usize) {
+    pub fn subgraph_sizes(&self) -> (TraceLen, TraceLen) {
         let prev_len = self.data_keeper.prev_slider().subtrace_len();
         let current_len = self.data_keeper.current_slider().subtrace_len();
 
