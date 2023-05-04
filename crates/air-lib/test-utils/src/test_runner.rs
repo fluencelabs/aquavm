@@ -39,9 +39,9 @@ pub trait AirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
-        override_current_peer_id: Option<(String, KeyPair)>,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
-        key_pair: KeyPair,
+        key_pair: &KeyPair,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
 
@@ -99,6 +99,14 @@ impl<R: AirRunner> TestRunner<R> {
         let mut call_results = HashMap::new();
         let mut next_peer_pks = HashSet::new();
 
+        let key_pair = override_current_peer_id
+            .as_ref()
+            .map(|pair| &pair.1)
+            .unwrap_or(&self.key_secret);
+        let override_current_peer_id = override_current_peer_id
+            .clone()
+            .map(|(peer_id, _key)| peer_id);
+
         loop {
             let mut outcome: RawAVMOutcome = self
                 .runner
@@ -111,7 +119,7 @@ impl<R: AirRunner> TestRunner<R> {
                     ttl,
                     override_current_peer_id.clone(),
                     call_results,
-                    self.key_secret.clone(),
+                    key_pair,
                 )
                 .map_err(|e| e.to_string())?;
 
@@ -148,6 +156,14 @@ impl<R: AirRunner> TestRunner<R> {
         override_current_peer_id: Option<(String, KeyPair)>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+        let key_pair = override_current_peer_id
+            .as_ref()
+            .map(|pair| &pair.1)
+            .unwrap_or(&self.key_secret);
+        let override_current_peer_id = override_current_peer_id
+            .clone()
+            .map(|(peer_id, _key)| peer_id);
+
         self.runner.call(
             air,
             prev_data,
@@ -157,7 +173,7 @@ impl<R: AirRunner> TestRunner<R> {
             ttl,
             override_current_peer_id,
             call_results,
-            self.key_secret.clone(),
+            key_pair,
         )
     }
 }
@@ -255,7 +271,7 @@ mod tests {
                 0,
                 None,
                 HashMap::new(),
-                key_secret.clone(),
+                &key_secret,
             )
             .expect("call should be success");
 
@@ -280,9 +296,9 @@ mod tests {
                 spell_id,
                 0,
                 0,
-                Some((spell_id.to_owned(), key_secret2)),
+                Some(spell_id.to_owned()),
                 HashMap::new(),
-                key_secret.clone(),
+                &key_secret2,
             )
             .expect("call should be success");
 

@@ -62,10 +62,10 @@ pub fn invoke_tracing(
     data: Vec<u8>,
     params: RunParameters,
     call_results: Vec<u8>,
-    tracing_params: String,
-    tracing_output_mode: u8,
     key_format: u8,
     key_bytes: Vec<u8>,
+    tracing_params: String,
+    tracing_output_mode: u8,
 ) -> InterpreterOutcome {
     logger::init_tracing(tracing_params, tracing_output_mode);
     execute_air(air, prev_data, data, params, call_results, key_format, key_bytes)
