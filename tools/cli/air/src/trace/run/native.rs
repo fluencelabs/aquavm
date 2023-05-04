@@ -17,6 +17,7 @@
 use super::runner::AirRunner;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
+use fluence_keypair::KeyPair;
 
 struct NativeAvmRunner {}
 
@@ -34,6 +35,7 @@ impl AirRunner for NativeAvmRunner {
         // We use externally configured logger.
         _tracing_params: String,
         _tracing_output_mode: u8,
+        keypair: KeyPair,
     ) -> anyhow::Result<RawAVMOutcome> {
         use avm_interface::into_raw_result;
 
@@ -52,6 +54,8 @@ impl AirRunner for NativeAvmRunner {
                 ttl,
             },
             raw_call_results,
+            keypair.key_format().into(),
+            keypair.secret().expect("Failed to get secret key"),
         );
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 

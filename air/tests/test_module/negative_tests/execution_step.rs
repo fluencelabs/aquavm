@@ -27,8 +27,7 @@ fn local_service_error() {
 
     let mut client_vm = create_avm(echo_call_service(), client_peer_id);
     let result = client_vm
-        .runner
-        .call(&script, "", "", client_peer_id, 0, 0, None, <_>::default())
+        .call_single(&script, "", "", client_peer_id, 0, 0, None, <_>::default())
         .unwrap();
 
     let err_msg = "some error".to_string();
@@ -37,8 +36,7 @@ fn local_service_error() {
         1 => call_service_result,
     );
     let result = client_vm
-        .runner
-        .call(script, "", result.data, client_peer_id, 0, 0, None, call_results_4_call)
+        .call_single(script, "", result.data, client_peer_id, 0, 0, None, call_results_4_call)
         .unwrap();
 
     let err_msg = std::rc::Rc::new(f!("\"{err_msg}\""));
@@ -60,8 +58,7 @@ fn variable_not_found_ap_scalar() {
         "#);
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
     let result = vm_2
-        .runner
-        .call(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default())
+        .call_single(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default())
         .unwrap();
     let expected_error = CatchableError::VariableNotFound(var_name);
     assert!(check_error(&result, expected_error));
@@ -84,8 +81,7 @@ fn variable_not_found_ap_canon_stream() {
         "#);
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
     let result = vm_2
-        .runner
-        .call(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default())
+        .call_single(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default())
         .unwrap();
     let expected_error = CatchableError::VariableNotFound(var_name);
     assert!(check_error(&result, expected_error));

@@ -20,7 +20,9 @@ use crate::native_test_runner::NativeAirRunner as AirRunnerImpl;
 use crate::wasm_test_runner::WasmAirRunner as AirRunnerImpl;
 
 use super::CallServiceClosure;
+
 use avm_server::avm_runner::*;
+use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -37,22 +39,42 @@ pub trait AirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
-        override_current_peer_id: Option<String>,
+        override_current_peer_id: Option<(String, KeyPair)>,
         call_results: avm_server::CallResults,
+        key_pair: KeyPair,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
 
 pub struct TestRunner<R = AirRunnerImpl> {
     pub runner: R,
-    pub call_service: CallServiceClosure,
+    call_service: CallServiceClosure,
+    key_secret: KeyPair,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct TestRunParameters {
     pub init_peer_id: String,
     pub timestamp: u64,
     pub ttl: u32,
-    pub override_current_peer_id: Option<String>,
+    pub override_current_peer_id: Option<(String, KeyPair)>,
+}
+
+impl std::fmt::Debug for TestRunParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let override_current_peer_id_with_hidden_secret = &self
+            .override_current_peer_id
+            .as_ref()
+            .map(|pair| (&pair.0, "..."));
+        f.debug_struct("TestRunParameters")
+            .field("init_peer_id", &self.init_peer_id)
+            .field("timestamp", &self.timestamp)
+            .field("ttl", &self.ttl)
+            .field(
+                "override_current_peer_id",
+                override_current_peer_id_with_hidden_secret,
+            )
+            .finish()
+    }
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -89,6 +111,7 @@ impl<R: AirRunner> TestRunner<R> {
                     ttl,
                     override_current_peer_id.clone(),
                     call_results,
+                    self.key_secret.clone(),
                 )
                 .map_err(|e| e.to_string())?;
 
@@ -112,6 +135,31 @@ impl<R: AirRunner> TestRunner<R> {
             data = vec![];
         }
     }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn call_single(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        override_current_peer_id: Option<(String, KeyPair)>,
+        call_results: avm_server::CallResults,
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+        self.runner.call(
+            air,
+            prev_data,
+            data,
+            init_peer_id,
+            timestamp,
+            ttl,
+            override_current_peer_id,
+            call_results,
+            self.key_secret.clone(),
+        )
+    }
 }
 
 pub fn create_avm(
@@ -119,10 +167,13 @@ pub fn create_avm(
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
     let runner = AirRunnerImpl::new(current_peer_id);
+    let key_format = fluence_keypair::KeyFormat::Secp256k1;
+    let key_secret = KeyPair::generate(key_format);
 
     TestRunner {
         runner,
         call_service,
+        key_secret,
     }
 }
 
@@ -184,6 +235,10 @@ mod tests {
             "func".to_owned() => json!("success"),
         };
 
+        let key_format = fluence_keypair::KeyFormat::Secp256k1;
+        let key_secret = KeyPair::generate(key_format);
+        let key_secret2 = KeyPair::generate(key_format);
+
         let mut client = create_avm(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),
             host_peer_id,
@@ -191,7 +246,17 @@ mod tests {
 
         let current_result_1 = client
             .runner
-            .call(&script, "", "", spell_id, 0, 0, None, HashMap::new())
+            .call(
+                &script,
+                "",
+                "",
+                spell_id,
+                0,
+                0,
+                None,
+                HashMap::new(),
+                key_secret.clone(),
+            )
             .expect("call should be success");
 
         let expected_current_call_requests = HashMap::new();
@@ -215,8 +280,9 @@ mod tests {
                 spell_id,
                 0,
                 0,
-                Some(spell_id.to_owned()),
+                Some((spell_id.to_owned(), key_secret2)),
                 HashMap::new(),
+                key_secret.clone(),
             )
             .expect("call should be success");
 

@@ -21,6 +21,7 @@ use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
+use fluence_keypair::KeyPair;
 use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
@@ -76,7 +77,13 @@ impl AVMRunner {
         ttl: u32,
         current_peer_id: impl Into<String>,
         call_results: CallResults,
+        keypair: &KeyPair,
     ) -> RunnerResult<RawAVMOutcome> {
+        let key_format = keypair.key_format();
+        let key_bytes: Vec<u8> = keypair
+            .secret()
+            .unwrap_or_else(|_| panic!("failed to serialize key of format {:?}", key_format));
+
         let args = prepare_args(
             air,
             prev_data,
@@ -86,6 +93,8 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
+            key_format.into(),
+            key_bytes,
         );
 
         let result = measure!(
@@ -118,6 +127,8 @@ impl AVMRunner {
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
+        key_format: u8,
+        key_bytes: Vec<u8>,
     ) -> RunnerResult<RawAVMOutcome> {
         let mut args = prepare_args(
             air,
@@ -128,6 +139,8 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
+            key_format,
+            key_bytes,
         );
         args.push(IValue::String(tracing_params));
         args.push(IValue::U8(tracing_output_mode));
@@ -176,6 +189,8 @@ fn prepare_args(
     timestamp: u64,
     ttl: u32,
     call_results: CallResults,
+    key_format: u8,
+    key_bytes: Vec<u8>,
 ) -> Vec<IValue> {
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
@@ -198,6 +213,8 @@ fn prepare_args(
         IValue::ByteArray(data.into()),
         run_parameters,
         IValue::ByteArray(call_results),
+        IValue::U8(key_format),
+        IValue::ByteArray(key_bytes),
     ]
 }
 

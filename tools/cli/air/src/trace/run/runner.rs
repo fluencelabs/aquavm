@@ -16,6 +16,7 @@
 
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
+use fluence_keypair::KeyPair;
 
 pub(crate) trait AirRunner {
     #[allow(clippy::too_many_arguments)]
@@ -31,5 +32,6 @@ pub(crate) trait AirRunner {
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
+        key_pair: KeyPair,
     ) -> anyhow::Result<RawAVMOutcome>;
 }

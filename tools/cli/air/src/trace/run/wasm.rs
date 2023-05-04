@@ -15,6 +15,7 @@
  */
 use super::runner::AirRunner;
 use air_test_utils::avm_runner::AVMRunner;
+use fluence_keypair::KeyPair;
 use std::path::Path;
 
 pub(crate) struct WasmAvmRunner(AVMRunner);
@@ -32,6 +33,7 @@ impl AirRunner for WasmAvmRunner {
         call_results: avm_interface::CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
+        keypair: KeyPair,
     ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
         Ok(self.0.call_tracing(
             air,
@@ -44,6 +46,8 @@ impl AirRunner for WasmAvmRunner {
             call_results,
             tracing_params,
             tracing_output_mode,
+            keypair.key_format().into(),
+            keypair.secret().expect("Failed to get secret"),
         )?)
     }
 }

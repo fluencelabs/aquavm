@@ -68,11 +68,15 @@ impl AirRunner for WasmAirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
-        override_current_peer_id: Option<String>,
+        override_current_peer_id: Option<String, KeyPair>,
         call_results: avm_server::CallResults,
+        key_secret: KeyPair,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        let current_peer_id =
-            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+        let (current_peer_id, key_secret) =
+            override_current_peer_id.unwrap_or_else(|| (self.current_peer_id.clone(), key_secret));
+
+        let key_format = key_secret.key_format().into();
+        let key_bytes = key_secret.secret().unwrap();
 
         Ok(self.runner.call(
             air,
@@ -83,6 +87,8 @@ impl AirRunner for WasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
+            key_format,
+            key_bytes,
         )?)
     }
 }

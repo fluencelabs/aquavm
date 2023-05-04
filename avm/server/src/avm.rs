@@ -26,6 +26,7 @@ use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::AVMOutcome;
 use avm_interface::CallResults;
 use avm_interface::ParticleParameters;
+use fluence_keypair::KeyPair;
 
 use std::ops::Deref;
 use std::ops::DerefMut;
@@ -84,6 +85,7 @@ impl<E> AVM<E> {
         data: impl Into<Vec<u8>>,
         particle_parameters: ParticleParameters<'_>,
         call_results: CallResults,
+        keypair: &KeyPair,
     ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
         let prev_data = self.data_store.read_data(
@@ -105,6 +107,7 @@ impl<E> AVM<E> {
                 particle_parameters.ttl,
                 particle_parameters.current_peer_id.clone(),
                 call_results.clone(),
+                keypair,
             )
             .map_err(AVMError::RunnerError)?;
 

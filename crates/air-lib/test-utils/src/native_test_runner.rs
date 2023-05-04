@@ -18,6 +18,7 @@ use crate::test_runner::AirRunner;
 use air_interpreter_interface::RunParameters;
 use avm_server::avm_runner::*;
 use avm_server::into_raw_result;
+use fluence_keypair::KeyPair;
 
 pub struct NativeAirRunner {
     current_peer_id: String,
@@ -38,15 +39,19 @@ impl AirRunner for NativeAirRunner {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
-        override_current_peer_id: Option<String>,
+        override_current_peer_id: Option<(String, KeyPair)>,
         call_results: avm_server::CallResults,
+        key_secret: KeyPair,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
         let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
 
-        let current_peer_id =
-            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+        let (current_peer_id, key_secret) =
+            override_current_peer_id.unwrap_or_else(|| (self.current_peer_id.clone(), key_secret));
+
+        let key_format = key_secret.key_format().into();
+        let key_bytes = key_secret.secret().unwrap();
 
         let outcome = air::execute_air(
             air.into(),
@@ -59,6 +64,8 @@ impl AirRunner for NativeAirRunner {
                 ttl,
             },
             raw_call_results,
+            key_format,
+            key_bytes,
         );
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 

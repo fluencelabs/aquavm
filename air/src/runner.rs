@@ -31,6 +31,8 @@ pub fn execute_air(
     data: Vec<u8>,
     params: RunParameters,
     call_results: Vec<u8>,
+    _key_format: u8,
+    _key_bytes: Vec<u8>,
 ) -> InterpreterOutcome {
     use std::convert::identity;
 
