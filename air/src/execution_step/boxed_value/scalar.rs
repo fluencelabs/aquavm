@@ -42,12 +42,14 @@ pub enum ValueAggregate {
     ServiceResult {
         result: ServiceResultAggregate,
         // the original call result CID; not changed on lambda application
-        cid: Rc<CID<ServiceResultCidAggregate>>,
+        #[serde(rename = "cid")]
+        provenance_cid: Rc<CID<ServiceResultCidAggregate>>,
     },
     Canon {
         result: CanonResultAggregate,
         // the original canon CID; not changed on lambda application
-        cid: Rc<CID<CanonResultCidAggregate>>,
+        #[serde(rename = "cid")]
+        provenance_cid: Rc<CID<CanonResultCidAggregate>>,
     },
 }
 pub(crate) enum ScalarRef<'i> {
@@ -83,7 +85,7 @@ impl ValueAggregate {
             )),
             Provenance::ServiceResult { cid } => ValueAggregate::ServiceResult {
                 result: ServiceResultAggregate::new(result, tetraplet, trace_pos),
-                cid,
+                provenance_cid: cid,
             },
             Provenance::Canon { cid } => ValueAggregate::Canon {
                 result: CanonResultAggregate::new(
@@ -92,7 +94,7 @@ impl ValueAggregate {
                     &tetraplet.json_path,
                     trace_pos,
                 ),
-                cid,
+                provenance_cid: cid,
             },
         }
     }
@@ -107,7 +109,7 @@ impl ValueAggregate {
     ) -> Self {
         Self::ServiceResult {
             result: service_result,
-            cid: service_result_agg_cid,
+            provenance_cid: service_result_agg_cid,
         }
     }
 
@@ -117,7 +119,7 @@ impl ValueAggregate {
     ) -> Self {
         Self::Canon {
             result: canon_result,
-            cid: canon_result_agg_cid,
+            provenance_cid: canon_result_agg_cid,
         }
     }
 
@@ -126,7 +128,7 @@ impl ValueAggregate {
             ValueAggregate::Literal(ref literal) => (&literal.result, literal.get_tetraplet(), literal.trace_pos),
             ValueAggregate::ServiceResult {
                 result: ref service_result,
-                cid: _,
+                provenance_cid: _,
             } => (
                 &service_result.result,
                 service_result.tetraplet.clone(),
@@ -134,7 +136,7 @@ impl ValueAggregate {
             ),
             ValueAggregate::Canon {
                 result: ref canon_result,
-                cid: _,
+                provenance_cid: _,
             } => (
                 &canon_result.result,
                 canon_result.get_tetraplet(),
@@ -148,11 +150,11 @@ impl ValueAggregate {
             ValueAggregate::Literal(literal) => &literal.result,
             ValueAggregate::ServiceResult {
                 result: service_result,
-                cid: _,
+                provenance_cid: _,
             } => &service_result.result,
             ValueAggregate::Canon {
                 result: canon_result,
-                cid: _,
+                provenance_cid: _,
             } => &canon_result.result,
         }
     }
@@ -162,11 +164,11 @@ impl ValueAggregate {
             ValueAggregate::Literal(literal) => literal.get_tetraplet(),
             ValueAggregate::ServiceResult {
                 result: service_result,
-                cid: _,
+                provenance_cid: _,
             } => service_result.tetraplet.clone(),
             ValueAggregate::Canon {
                 result: canon_result,
-                cid: _,
+                provenance_cid: _,
             } => canon_result.get_tetraplet(),
         }
     }
@@ -176,11 +178,11 @@ impl ValueAggregate {
             ValueAggregate::Literal(literal) => literal.trace_pos,
             ValueAggregate::ServiceResult {
                 result: service_result,
-                cid: _,
+                provenance_cid: _,
             } => service_result.trace_pos,
             ValueAggregate::Canon {
                 result: canon_result,
-                cid: _,
+                provenance_cid: _,
             } => canon_result.trace_pos,
         }
     }
@@ -190,11 +192,11 @@ impl ValueAggregate {
             ValueAggregate::Literal(literal) => &mut literal.trace_pos,
             ValueAggregate::ServiceResult {
                 result: service_result,
-                cid: _,
+                provenance_cid: _,
             } => &mut service_result.trace_pos,
             ValueAggregate::Canon {
                 result: canon_result,
-                cid: _,
+                provenance_cid: _,
             } => &mut canon_result.trace_pos,
         };
         *trace_pos_ref = trace_pos;
@@ -203,8 +205,8 @@ impl ValueAggregate {
     pub fn get_provenance(&self) -> Provenance {
         match self {
             ValueAggregate::Literal(_) => Provenance::Literal,
-            ValueAggregate::ServiceResult { result: _, cid } => Provenance::ServiceResult { cid: cid.clone() },
-            ValueAggregate::Canon { result: _, cid } => Provenance::Canon { cid: cid.clone() },
+            ValueAggregate::ServiceResult { result: _, provenance_cid: cid } => Provenance::ServiceResult { cid: cid.clone() },
+            ValueAggregate::Canon { result: _, provenance_cid: cid } => Provenance::Canon { cid: cid.clone() },
         }
     }
 }
