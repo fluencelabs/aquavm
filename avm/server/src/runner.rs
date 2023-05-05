@@ -79,10 +79,10 @@ impl AVMRunner {
         call_results: CallResults,
         keypair: &KeyPair,
     ) -> RunnerResult<RawAVMOutcome> {
-        let key_format = keypair.key_format();
-        let key_bytes: Vec<u8> = keypair
+        let keypair_format = keypair.key_format();
+        let keypair_data: Vec<u8> = keypair
             .secret()
-            .unwrap_or_else(|_| panic!("failed to serialize key of format {:?}", key_format));
+            .unwrap_or_else(|_| panic!("failed to serialize key of format {:?}", keypair_format));
 
         let args = prepare_args(
             air,
@@ -93,8 +93,8 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
-            key_format.into(),
-            key_bytes,
+            keypair_format.into(),
+            keypair_data,
         );
 
         let result = measure!(
@@ -127,8 +127,8 @@ impl AVMRunner {
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
-        key_format: u8,
-        key_bytes: Vec<u8>,
+        keypair_format: u8,
+        keypair_data: Vec<u8>,
     ) -> RunnerResult<RawAVMOutcome> {
         let mut args = prepare_args(
             air,
@@ -139,8 +139,8 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
-            key_format,
-            key_bytes,
+            keypair_format,
+            keypair_data,
         );
         args.push(IValue::String(tracing_params));
         args.push(IValue::U8(tracing_output_mode));
@@ -179,7 +179,7 @@ impl AVMRunner {
 }
 
 #[allow(clippy::too_many_arguments)]
-#[tracing::instrument(skip(air, prev_data, data, call_results))]
+#[tracing::instrument(skip(air, prev_data, data, call_results, keypair_data))]
 fn prepare_args(
     air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
@@ -189,14 +189,16 @@ fn prepare_args(
     timestamp: u64,
     ttl: u32,
     call_results: CallResults,
-    key_format: u8,
-    key_bytes: Vec<u8>,
+    keypair_format: u8,
+    keypair_data: Vec<u8>,
 ) -> Vec<IValue> {
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
         current_peer_id,
         timestamp,
         ttl,
+        keypair_format,
+        keypair_data,
     )
     .into_ivalue();
 
@@ -213,8 +215,6 @@ fn prepare_args(
         IValue::ByteArray(data.into()),
         run_parameters,
         IValue::ByteArray(call_results),
-        IValue::U8(key_format),
-        IValue::ByteArray(key_bytes),
     ]
 }
 

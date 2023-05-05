@@ -43,6 +43,9 @@ impl AirRunner for NativeAvmRunner {
         let raw_call_results = into_raw_result(call_results);
         let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
 
+        let keypair_format = keypair.key_format().into();
+        let keypair_data = keypair.secret().expect("Failed to get secret key");
+
         let outcome = air::execute_air(
             air,
             prev_data,
@@ -52,10 +55,10 @@ impl AirRunner for NativeAvmRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
+                keypair_format,
+                keypair_data,
             },
             raw_call_results,
-            keypair.key_format().into(),
-            keypair.secret().expect("Failed to get secret key"),
         );
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 

@@ -59,8 +59,6 @@ pub fn invoke(
     params: Vec<u8>,
     call_results: Vec<u8>,
     log_level: &str,
-    key_format: u8,
-    key_bytes: Vec<u8>,
 ) -> String {
     use std::str::FromStr;
 
@@ -69,7 +67,7 @@ pub fn invoke(
 
     let params: RunParameters = serde_json::from_slice(&params).expect("cannot parse RunParameters");
 
-    let outcome = execute_air(air, prev_data, data, params, call_results, key_format, key_bytes);
+    let outcome = execute_air(air, prev_data, data, params, call_results);
     serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
 }
 

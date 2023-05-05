@@ -48,7 +48,7 @@ pub trait AirRunner {
 pub struct TestRunner<R = AirRunnerImpl> {
     pub runner: R,
     call_service: CallServiceClosure,
-    key_secret: KeyPair,
+    keypair: KeyPair,
 }
 
 #[derive(Default, Clone)]
@@ -102,7 +102,7 @@ impl<R: AirRunner> TestRunner<R> {
         let key_pair = override_current_peer_id
             .as_ref()
             .map(|pair| &pair.1)
-            .unwrap_or(&self.key_secret);
+            .unwrap_or(&self.keypair);
         let override_current_peer_id = override_current_peer_id
             .clone()
             .map(|(peer_id, _key)| peer_id);
@@ -159,7 +159,7 @@ impl<R: AirRunner> TestRunner<R> {
         let key_pair = override_current_peer_id
             .as_ref()
             .map(|pair| &pair.1)
-            .unwrap_or(&self.key_secret);
+            .unwrap_or(&self.keypair);
         let override_current_peer_id = override_current_peer_id
             .clone()
             .map(|(peer_id, _key)| peer_id);
@@ -184,12 +184,12 @@ pub fn create_avm(
 ) -> TestRunner {
     let runner = AirRunnerImpl::new(current_peer_id);
     let key_format = fluence_keypair::KeyFormat::Secp256k1;
-    let key_secret = KeyPair::generate(key_format);
+    let keypair = KeyPair::generate(key_format);
 
     TestRunner {
         runner,
         call_service,
-        key_secret,
+        keypair,
     }
 }
 
@@ -252,8 +252,8 @@ mod tests {
         };
 
         let key_format = fluence_keypair::KeyFormat::Secp256k1;
-        let key_secret = KeyPair::generate(key_format);
-        let key_secret2 = KeyPair::generate(key_format);
+        let keypair = KeyPair::generate(key_format);
+        let keypair2 = KeyPair::generate(key_format);
 
         let mut client = create_avm(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),
@@ -271,7 +271,7 @@ mod tests {
                 0,
                 None,
                 HashMap::new(),
-                &key_secret,
+                &keypair,
             )
             .expect("call should be success");
 
@@ -298,7 +298,7 @@ mod tests {
                 0,
                 Some(spell_id.to_owned()),
                 HashMap::new(),
-                &key_secret2,
+                &keypair2,
             )
             .expect("call should be success");
 

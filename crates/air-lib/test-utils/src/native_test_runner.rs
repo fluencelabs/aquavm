@@ -50,8 +50,8 @@ impl AirRunner for NativeAirRunner {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        let key_format = keypair.key_format().into();
-        let key_bytes = keypair.secret().unwrap();
+        let keypair_format = keypair.key_format().into();
+        let keypair_data = keypair.secret().unwrap();
 
         let outcome = air::execute_air(
             air.into(),
@@ -62,10 +62,10 @@ impl AirRunner for NativeAirRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
+                keypair_format,
+                keypair_data,
             },
             raw_call_results,
-            key_format,
-            key_bytes,
         );
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 

@@ -39,15 +39,27 @@ pub struct RunParameters {
 
     /// TTL set by init peer id in milliseconds.
     pub ttl: u32,
+
+    pub keypair_format: u8,
+    pub keypair_data: Vec<u8>,
 }
 
 impl RunParameters {
-    pub fn new(init_peer_id: String, current_peer_id: String, timestamp: u64, ttl: u32) -> Self {
+    pub fn new(
+        init_peer_id: String,
+        current_peer_id: String,
+        timestamp: u64,
+        ttl: u32,
+        keypair_format: u8,
+        keypair_data: Vec<u8>,
+    ) -> Self {
         Self {
             init_peer_id,
             current_peer_id,
             timestamp,
             ttl,
+            keypair_format,
+            keypair_data,
         }
     }
 
@@ -58,6 +70,8 @@ impl RunParameters {
             IValue::String(self.current_peer_id),
             IValue::U64(self.timestamp),
             IValue::U32(self.ttl),
+            IValue::U8(self.keypair_format),
+            IValue::ByteArray(self.keypair_data),
         ];
         // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();
