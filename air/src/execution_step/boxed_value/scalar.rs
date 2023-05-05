@@ -37,15 +37,18 @@ use serde::Serialize;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
 pub enum ValueAggregate {
     Literal(LiteralAggregate),
     ServiceResult {
+        #[serde(flatten)]
         result: ServiceResultAggregate,
         // the original call result CID; not changed on lambda application
         #[serde(rename = "cid")]
         provenance_cid: Rc<CID<ServiceResultCidAggregate>>,
     },
     Canon {
+        #[serde(flatten)]
         result: CanonResultAggregate,
         // the original canon CID; not changed on lambda application
         #[serde(rename = "cid")]
