@@ -205,8 +205,14 @@ impl ValueAggregate {
     pub fn get_provenance(&self) -> Provenance {
         match self {
             ValueAggregate::Literal(_) => Provenance::Literal,
-            ValueAggregate::ServiceResult { result: _, provenance_cid: cid } => Provenance::ServiceResult { cid: cid.clone() },
-            ValueAggregate::Canon { result: _, provenance_cid: cid } => Provenance::Canon { cid: cid.clone() },
+            ValueAggregate::ServiceResult {
+                result: _,
+                provenance_cid: cid,
+            } => Provenance::ServiceResult { cid: cid.clone() },
+            ValueAggregate::Canon {
+                result: _,
+                provenance_cid: cid,
+            } => Provenance::Canon { cid: cid.clone() },
         }
     }
 }
