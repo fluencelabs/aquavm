@@ -25,11 +25,11 @@ use serde::Serialize;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+// no lambda here are literal + lambda is literal
 pub struct LiteralAggregate {
     pub result: Rc<JValue>,
     // this Rc is not really shared ATM, as execution passes through the Resolvable needle
     pub init_peer_id: Rc<str>,
-    // no lambda here
     // TODO #[serde(skip)]
     pub trace_pos: TracePos,
 }
