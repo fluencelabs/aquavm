@@ -25,6 +25,7 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
 use air_utils::measure;
+use fluence_keypair::KeyPair;
 
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -36,6 +37,7 @@ use std::rc::Rc;
 pub(crate) fn from_success_result(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
+    keypair: &KeyPair,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
@@ -44,7 +46,7 @@ pub(crate) fn from_success_result(
         (farewell_error.to_error_code(), farewell_error.to_string())
     };
 
-    let outcome = populate_outcome_from_contexts(exec_ctx, trace_handler, ret_code, error_message);
+    let outcome = populate_outcome_from_contexts(exec_ctx, trace_handler, ret_code, error_message, keypair);
     Ok(outcome)
 }
 
@@ -64,21 +66,29 @@ pub(crate) fn from_uncatchable_error(
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
 /// set ret_code based on the error.
-#[tracing::instrument(skip(exec_ctx, trace_handler))]
+#[tracing::instrument(skip(exec_ctx, trace_handler, keypair))]
 pub(crate) fn from_execution_error(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
     error: impl ToErrorCode + ToString + Debug,
+    keypair: &KeyPair,
 ) -> InterpreterOutcome {
-    populate_outcome_from_contexts(exec_ctx, trace_handler, error.to_error_code(), error.to_string())
+    populate_outcome_from_contexts(
+        exec_ctx,
+        trace_handler,
+        error.to_error_code(),
+        error.to_string(),
+        keypair,
+    )
 }
 
-#[tracing::instrument(skip(exec_ctx, trace_handler), level = "info")]
+#[tracing::instrument(skip(exec_ctx, trace_handler, keypair), level = "info")]
 fn populate_outcome_from_contexts(
-    exec_ctx: ExecutionCtx<'_>,
+    mut exec_ctx: ExecutionCtx<'_>,
     mut trace_handler: TraceHandler,
     ret_code: i64,
     error_message: String,
+    keypair: &KeyPair,
 ) -> InterpreterOutcome {
     let maybe_gens = exec_ctx
         .streams
@@ -88,6 +98,13 @@ fn populate_outcome_from_contexts(
         Ok(gens) => gens,
         Err(outcome) => return outcome,
     };
+
+    let current_signature = exec_ctx
+        .signature_tracker
+        .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
+        .expect("TODO handle error");
+    let current_pubkey = keypair.public();
+    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
 
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),

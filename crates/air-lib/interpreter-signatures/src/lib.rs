@@ -43,13 +43,25 @@ use std::hash::Hash;
 #[serde(transparent)]
 pub struct PublicKey(Box<str>);
 
+impl From<fluence_keypair::PublicKey> for PublicKey {
+    fn from(value: fluence_keypair::PublicKey) -> Self {
+        Self(base64ct::Base64::encode_string(&value.to_vec()).into())
+    }
+}
+
 #[derive(Debug, Hash, Clone, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct Signature(Box<str>);
 
 impl Signature {
-    fn new(sign: fluence_keypair::Signature) -> Self {
-        Self(Base64::encode_string(sign.to_vec()).into())
+    fn new(signature: fluence_keypair::Signature) -> Self {
+        signature.into()
+    }
+}
+
+impl From<fluence_keypair::Signature> for Signature {
+    fn from(value: fluence_keypair::Signature) -> Self {
+        Self(Base64::encode_string(value.to_vec()).into())
     }
 }
 
@@ -77,7 +89,7 @@ impl SignatureTracker {
         peer_id: &str,
         signer: &KeyPair,
     ) -> Result<Signature, SigningError> {
-        let mut cids = self.peer_to_cids.remove(peer_id).unwrap_or_default();
+        let mut cids = self.peer_to_cids.get(peer_id).cloned().unwrap_or_default();
         cids.sort_unstable();
 
         // TODO make pluggable serialization
@@ -96,6 +108,10 @@ pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<
 impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
     pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>

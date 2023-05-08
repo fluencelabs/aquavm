@@ -23,6 +23,8 @@ use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
 use air_utils::measure;
+use fluence_keypair::KeyFormat;
+use fluence_keypair::KeyPair;
 
 #[tracing::instrument(skip_all)]
 pub fn execute_air(
@@ -65,6 +67,9 @@ fn execute_air_impl(
         Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
     };
 
+    // TODO STUB this is a stub key that is to be replaced by external one in other PR
+    let keypair = KeyPair::from_secret_key([0x1; 32].to_vec(), KeyFormat::Ed25519).expect("TODO convert to error");
+
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
     let exec_result = measure!(
@@ -72,11 +77,17 @@ fn execute_air_impl(
         tracing::Level::INFO,
         "execute",
     );
-    match exec_result {
-        Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
-        // return new collected trace in case of errors
-        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
-        // return the prev data in case of any trace errors
-        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
-    }
+    measure!(
+        match exec_result {
+            Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair),
+            // return new collected trace in case of errors
+            Err(error) if error.is_catchable() => {
+                Err(farewell::from_execution_error(exec_ctx, trace_handler, error, &keypair))
+            }
+            // return the prev data in case of any trace errors
+            Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+        },
+        tracing::Level::INFO,
+        "farewell",
+    )
 }

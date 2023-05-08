@@ -21,11 +21,14 @@ use super::Scalars;
 use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_cid::CID;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
 use air_interpreter_signatures::SignatureStore;
+use air_interpreter_signatures::SignatureTracker;
 
 use std::rc::Rc;
 
@@ -73,8 +76,9 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Signatures' store.
     pub(crate) signature_store: SignatureStore,
-    // /// Local signature tracker.
-    // pub(crate) signature_tracker: SignatureTracker,
+
+    /// Local signature tracker.
+    pub(crate) signature_tracker: SignatureTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -116,6 +120,10 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
         self.last_call_request_id += 1;
         self.last_call_request_id
+    }
+
+    pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: Rc<CID<ServiceResultCidAggregate>>) {
+        self.signature_tracker.register(peer_id.into(), cid.as_ref().clone());
     }
 }
 

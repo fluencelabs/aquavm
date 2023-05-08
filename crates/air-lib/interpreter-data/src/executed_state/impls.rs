@@ -62,6 +62,18 @@ impl CallResult {
     pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
         CallResult::Failed(service_result_agg_cid)
     }
+
+    pub fn get_cid(&self) -> Option<Rc<CID<ServiceResultCidAggregate>>> {
+        match self {
+            CallResult::RequestSentBy(_) => None,
+            CallResult::Executed(executed) => match executed {
+                ValueRef::Scalar(cid) => Some(cid.clone()),
+                ValueRef::Stream { cid, .. } => Some(cid.clone()),
+                ValueRef::Unused(_) => None,
+            },
+            CallResult::Failed(cid) => Some(cid.clone()),
+        }
+    }
 }
 
 impl SubTraceDesc {
