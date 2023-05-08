@@ -6,8 +6,5 @@ rustflags = [
     "-C", "link-args=-zstack-size=52428800",
 ]
 
-[build]
-profiler = true
-
 [registries]
 fluence = { index = "git://crates.fluence.dev/index" }
