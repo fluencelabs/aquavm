@@ -16,6 +16,7 @@
 
 use super::ExecutedState;
 use crate::TracePos;
+use air_interpreter_data::TraceLen;
 use thiserror::Error as ThisError;
 
 /// Errors arose out while accessing various interpreter data.
@@ -27,9 +28,9 @@ pub enum KeeperError {
         but tried to set {requested_subtrace_len} subtrace_len"
     )]
     SetSubtraceLenFailed {
-        requested_subtrace_len: usize,
+        requested_subtrace_len: TraceLen,
         trace_position: TracePos,
-        trace_len: usize,
+        trace_len: TraceLen,
     },
 
     /// Errors occurred when
@@ -40,14 +41,14 @@ pub enum KeeperError {
     )]
     SetSubtraceLenAndPosFailed {
         requested_pos: TracePos,
-        requested_subtrace_len: usize,
-        trace_len: usize,
+        requested_subtrace_len: TraceLen,
+        trace_len: TraceLen,
     },
 
     /// Errors occurred when Fold FSM tries to obtain stream generation by value_pos from a trace,
     /// but this value_pos is bigger than the trace length.
     #[error("requested an element at position '{position}', but executed trace contains only '{trace_len}' elements")]
-    NoElementAtPosition { position: TracePos, trace_len: usize },
+    NoElementAtPosition { position: TracePos, trace_len: TraceLen },
 
     /// Errors occurred when Fold FSM tries to obtain stream generation by value_pos from a trace,
     /// but such state doesn't belong to values in streams (it doesn't contain a generation).

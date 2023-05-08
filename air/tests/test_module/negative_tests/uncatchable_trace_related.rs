@@ -50,7 +50,7 @@ fn par_len_overflow() {
     );
 
     let error_left_pos_value = 1;
-    let error_right_pos_value = u32::MAX;
+    let error_right_pos_value = PosType::MAX;
     let trace = vec![
         executed_state::par(error_left_pos_value, error_right_pos_value),
         executed_state::request_sent_by(vm_peer_id_1),
@@ -81,7 +81,7 @@ fn par_pos_overflow() {
     "#
     );
 
-    let error_pos_value = u32::MAX;
+    let error_pos_value = PosType::MAX;
     let trace = vec![
         executed_state::par(error_pos_value, error_pos_value),
         executed_state::request_sent_by(vm_peer_id_1),
@@ -550,7 +550,7 @@ fn fold_pos_overflow() {
     let value_pos = 1;
     let before_subtrace_pos = 3;
     let after_subtrace_pos = 4;
-    let wrong_after_subtrace_len = u32::MAX - 1;
+    let wrong_after_subtrace_len = TraceLen::MAX - 1;
     let trace = vec![
         executed_state::par(1, 2),
         stream_tracked!(json!([42, 43]), 0, cid_state),
@@ -573,12 +573,101 @@ fn fold_pos_overflow() {
             subtrace_len: wrong_after_subtrace_len,
         },
     );
-    let resolved_fold = ResolvedFold::new(
-        hashmap![value_pos.into() => fold_lore],
-        (wrong_after_subtrace_len + 1) as usize,
-    );
+    let resolved_fold = ResolvedFold::new(hashmap!(value_pos.into() => fold_lore), wrong_after_subtrace_len + 1);
     let expected_error = UncatchableError::TraceError {
         trace_error: StateFSMError(FoldPosOverflow(resolved_fold, before_subtrace_pos.into(), Previous)),
+        instruction: String::from(String::from("fold $s i")),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn subtrace_len_overflow() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let script = format!(
+        r#"
+        (par
+            (call "vm_peer_id_1" ("" "") [] $s)
+            (fold $s i
+                (call "vm_peer_id_2" ("" "") [] a)
+                (next i)
+            )
+        )
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
+    let value_pos = 1;
+    let wrong_subtrace_len = TraceLen::MAX;
+    let trace = vec![
+        executed_state::par(1, 2),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
+        executed_state::fold(vec![executed_state::subtrace_lore(
+            value_pos,
+            subtrace_desc(3, 1),
+            subtrace_desc(4, wrong_subtrace_len),
+        )]),
+        request_sent_by("vm_peer_id_1"),
+    ];
+    let _wrong_data = raw_data_from_trace(trace, cid_state);
+    let result = call_vm!(peer_vm_1, <_>::default(), script, _wrong_data, "");
+
+    let fold_lore = FoldSubTraceLore {
+        value_pos: value_pos.into(),
+        subtraces_desc: vec![
+            SubTraceDesc {
+                begin_pos: 3.into(),
+                subtrace_len: 1,
+            },
+            SubTraceDesc {
+                begin_pos: 4.into(),
+                subtrace_len: wrong_subtrace_len,
+            },
+        ],
+    };
+    let fold_result = FoldResult { lore: vec![fold_lore] };
+    let expected_error = UncatchableError::TraceError {
+        trace_error: MergeError(air_trace_handler::merger::MergeError::IncorrectFoldResult(
+            FoldResultError::SubtraceLenOverflow { fold_result, count: 0 },
+        )),
+        instruction: String::from(String::from("fold $s i")),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn fold_incorrect_subtraces_count() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let script = format!(
+        r#"
+        (par
+            (call "vm_peer_id_1" ("" "") [] $s)
+            (fold $s i
+                (call "vm_peer_id_2" ("" "") [] a)
+                (next i)
+            )
+        )
+    "#
+    );
+    let mut cid_state = ExecutionCidState::new();
+    let value_pos = 1;
+    let wrong_subtrace_lore = vec![subtrace_desc(3, 1), subtrace_desc(4, 0), subtrace_desc(4, 0)];
+    let trace = vec![
+        executed_state::par(1, 2),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
+        executed_state::fold(vec![FoldSubTraceLore {
+            value_pos: value_pos.into(),
+            subtraces_desc: wrong_subtrace_lore.clone(),
+        }]),
+        request_sent_by("vm_peer_id_1"),
+    ];
+    let _wrong_data = raw_data_from_trace(trace, cid_state);
+    let result = call_vm!(peer_vm_1, <_>::default(), script, _wrong_data, "");
+    let expected_error = UncatchableError::TraceError {
+        trace_error: MergeError(air_trace_handler::merger::MergeError::IncorrectFoldResult(
+            FoldResultError::FoldIncorrectSubtracesCount(wrong_subtrace_lore.len()),
+        )),
         instruction: String::from(String::from("fold $s i")),
     };
     assert!(check_error(&result, expected_error));
