@@ -18,6 +18,7 @@ use air_test_utils::prelude::*;
 
 use fstrings::f;
 use fstrings::format_args_f;
+use pretty_assertions::assert_eq;
 
 use std::ops::Deref;
 
@@ -41,10 +42,8 @@ fn canon_moves_execution_flow() {
 #[test]
 fn basic_canon() {
     let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(
-        set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
-        "set_variable",
-    );
+    let data = json!(["1", "2", "3", "4", "5"]);
+    let mut set_variable_vm = create_avm(set_variable_call_service(data.clone()), "set_variable");
 
     let script = r#"
             (seq
@@ -61,13 +60,36 @@ fn basic_canon() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
     let actual_state = &trace_from_result(&result)[6.into()];
 
+    let cids: Vec<_> = (1..=5)
+        .map(|i| {
+            let val = format!("{}", i);
+            extract_service_result_cid(&scalar!(val.clone(), peer = "A", args = [val]))
+        })
+        .collect();
+
     let expected_state = executed_state::canon(
         json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
-        "values": [{"result": "1", "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""}, "trace_pos": 1},
-            {"result": "2", "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""}, "trace_pos": 2},
-            {"result": "3", "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""}, "trace_pos": 3},
-            {"result": "4", "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""}, "trace_pos": 4},
-            {"result": "5", "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""}, "trace_pos": 5}]}),
+        "values": [{
+            "result": "1",
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "provenance": Provenance::service_result(cids[0].clone()),
+        }, {
+            "result": "2",
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "provenance": Provenance::service_result(cids[1].clone()),
+        }, {
+            "result": "3",
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "provenance": Provenance::service_result(cids[2].clone()),
+        }, {
+            "result": "4",
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "provenance": Provenance::service_result(cids[3].clone()),
+        }, {
+            "result": "5",
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "provenance": Provenance::service_result(cids[4].clone()),
+        }]}),
     );
     assert_eq!(actual_state, &expected_state);
 }
@@ -105,18 +127,30 @@ fn canon_fixes_stream_correct() {
     let vm_4_result = checked_call_vm!(vm_4, <_>::default(), &script, "", vm_3_result_1.data.clone());
     let vm_3_result_2 = checked_call_vm!(vm_3, <_>::default(), &script, vm_3_result_1.data, vm_4_result.data);
     let actual_vm_3_result_2_trace = trace_from_result(&vm_3_result_2);
+
+    let val_2 = stream!(2, 0, peer = peer_id_2, args = [2]);
+    let val_3 = stream!(3, 1, peer = peer_id_3, args = [3]);
+    let cid_2 = extract_service_result_cid(&val_2);
+    let cid_3 = extract_service_result_cid(&val_3);
+
     let expected_vm_3_result_2_trace = vec![
         executed_state::par(1, 3),
         executed_state::request_sent_by(peer_id_2),
         executed_state::par(1, 1),
-        stream!(2, 0, peer = peer_id_2, args = [2]),
-        stream!(3, 1, peer = peer_id_3, args = [3]),
+        val_2,
+        val_3,
         unused!(4, peer = peer_id_4, args = [4]),
-        executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
-            "values": [{"result": 2, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""}, "trace_pos": 3},
-                {"result": 3, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""}, "trace_pos": 4}]}),
-        ),
+        executed_state::canon(json!({
+        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+        "values": [{
+            "result": 2,
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+            "provenance": Provenance::service_result(cid_2.clone()),
+        }, {
+            "result": 3,
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+            "provenance": Provenance::service_result(cid_3.clone()),
+        }]})),
         executed_state::par(1, 1),
         unused!(json!([2, 3]), peer = peer_id_3, args = [json!([2, 3])]),
         executed_state::request_sent_by(peer_id_3),
@@ -132,11 +166,18 @@ fn canon_fixes_stream_correct() {
         stream!(2, 1, peer = peer_id_2, args = [2]),
         stream!(3, 2, peer = peer_id_3, args = [3]),
         unused!(4, peer = peer_id_4, args = [4]),
-        executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
-            "values": [{"result": 2, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""}, "trace_pos": 3},
-                {"result": 3, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""}, "trace_pos": 4}]}),
-        ),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+            "values": [{
+                "result": 2,
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+                "provenance": Provenance::service_result(cid_2),
+            }, {
+                "result": 3,
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+                "provenance": Provenance::service_result(cid_3),
+            }]
+        })),
         executed_state::par(1, 1),
         unused!(json!([2, 3]), peer = peer_id_3, args = [json!([2, 3])]),
         unused!(json!([2, 3]), peer = peer_id_1, args = [json!([2, 3])]),

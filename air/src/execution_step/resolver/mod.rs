@@ -21,6 +21,8 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 
+use air_interpreter_data::Provenance;
+
 pub(crate) trait Resolvable {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)>;
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)>;
 }

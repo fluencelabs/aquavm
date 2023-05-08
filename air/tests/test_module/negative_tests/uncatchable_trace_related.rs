@@ -16,7 +16,6 @@
 
 use air::ExecutionCidState;
 use air::UncatchableError;
-use air_interpreter_cid::CID;
 use air_interpreter_data::FoldSubTraceLore;
 use air_interpreter_data::ParResult;
 use air_interpreter_data::SubTraceDesc;
@@ -311,6 +310,7 @@ fn invalid_dst_generations() {
         (ap "a" $s)
     "#
     );
+    // TODO generate data instead, as the code will be apdated on each data change
     let data = json!(
     {
         "version": "0.6.3",
@@ -326,7 +326,8 @@ fn invalid_dst_generations() {
         "cid_info": {
             "value_store": {},
             "tetraplet_store": {},
-            "canon_store": {},
+            "canon_element_store": {},
+            "canon_result_store": {},
             "service_result_store": {}
         }
     });
@@ -401,11 +402,11 @@ fn canon_result_error() {
             {
                 "result": 42,
                 "tetraplet": {"function_name": "s", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
-                "trace_pos": 0,
             },
         ]
     });
     let prev_trace = vec![executed_state::canon(prev_tetraplet)];
+    let prev_cid = extract_canon_result_cid(&prev_trace[0]);
     let prev_data = raw_data_from_trace(prev_trace, <_>::default());
     let curr_tetraplet = json!({
         "tetraplet": {"function_name": "s", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
@@ -413,29 +414,25 @@ fn canon_result_error() {
             {
                 "result": 43,
                 "tetraplet": {"function_name": "s", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
-                "trace_pos": 0,
             },
         ]
     });
+
     let curr_trace = vec![executed_state::canon(curr_tetraplet)];
+    let curr_cid = extract_canon_result_cid(&curr_trace[0]);
     let curr_data = raw_data_from_trace(curr_trace, <_>::default());
     let result = call_vm!(peer_vm_1, <_>::default(), &script, prev_data, curr_data);
+
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectCanonResult(
             CanonResultError::IncompatibleState {
-                prev_canon_result: air_interpreter_data::CanonResult {
-                    tetraplet: CID::new("bagaaierasjgckcjojtq3m3aylofqmzqitnostogfwnj2fzyaqsmxnlquf2la").into(),
-                    values: vec![CID::new("bagaaieraxlk56ks2zevx5umgur2xxhf2cuopflnpopps3m6sgldmzquxumvq").into()],
-                },
-                current_canon_result: air_interpreter_data::CanonResult {
-                    tetraplet: CID::new("bagaaierasjgckcjojtq3m3aylofqmzqitnostogfwnj2fzyaqsmxnlquf2la").into(),
-                    values: vec![CID::new("bagaaierawwlvodborlxavs7j42eea23dmitophllfxg4kvozwe5ru4ywitea").into()],
-                },
+                prev_canon_result: air_interpreter_data::CanonResult::new(prev_cid),
+                current_canon_result: air_interpreter_data::CanonResult::new(curr_cid),
             },
         )),
         instruction: String::from(r#"canon "vm_peer_id_1" $stream #canon"#),
     };
-    assert!(check_error(&result, expected_error));
+    assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
 #[test]

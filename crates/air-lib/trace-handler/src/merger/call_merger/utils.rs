@@ -48,8 +48,8 @@ fn are_scalars_equal(prev_value: &ValueRef, current_value: &ValueRef) -> MergeRe
 }
 
 fn are_streams_equal(
-    prev_result_value: &CID<ServiceResultAggregate>,
-    current_result_value: &CID<ServiceResultAggregate>,
+    prev_result_value: &CID<ServiceResultCidAggregate>,
+    current_result_value: &CID<ServiceResultCidAggregate>,
     prev_value: &ValueRef,
     current_value: &ValueRef,
 ) -> MergeResult<()> {

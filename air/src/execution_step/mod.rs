@@ -40,8 +40,11 @@ pub mod errors_prelude {
 
 pub(super) use self::instructions::ExecutableInstruction;
 pub(super) use self::instructions::FoldState;
+pub(super) use boxed_value::CanonResultAggregate;
 pub(super) use boxed_value::Generation;
+pub(super) use boxed_value::LiteralAggregate;
 pub(super) use boxed_value::ScalarRef;
+pub(super) use boxed_value::ServiceResultAggregate;
 pub(super) use boxed_value::Stream;
 pub(super) use boxed_value::ValueAggregate;
 pub(crate) use errors::Joinable;

@@ -22,6 +22,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use std::borrow::Cow;
@@ -63,16 +64,17 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
 
     match exec_ctx.scalars.get_value(scalar_name)? {
         ScalarRef::Value(variable) => {
-            let jvalues = select_by_lambda_from_scalar(&variable.result, lambda, exec_ctx)?;
-            let tetraplet = variable.tetraplet.deref().clone();
-            from_jvalue(jvalues, tetraplet, lambda)
+            let jvalues = select_by_lambda_from_scalar(variable.get_result(), lambda, exec_ctx)?;
+            let tetraplet = variable.get_tetraplet().deref().clone();
+            from_jvalue(jvalues, tetraplet, variable.get_provenance(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
             let jvalue = iterable_value.apply_lambda(lambda, exec_ctx)?;
             let tetraplet = to_tetraplet(&iterable_value);
+            let provenance = to_provenance(&iterable_value);
 
-            from_jvalue(jvalue, tetraplet, lambda)
+            from_jvalue(jvalue, tetraplet, provenance, lambda)
         }
     }
 }
@@ -88,7 +90,7 @@ pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     }
 
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
-    let iterable_ingredients = CanonStreamIterableIngredients::init(canon_stream.clone());
+    let iterable_ingredients = CanonStreamIterableIngredients::init((**canon_stream).clone());
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))
 }
@@ -117,7 +119,7 @@ pub(crate) fn construct_stream_iterable_values(
 
 /// Constructs iterable value from resolved call result.
 fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
-    let len = match &call_result.result.deref() {
+    let len = match call_result.get_result().deref() {
         JValue::Array(array) => {
             if array.is_empty() {
                 // skip fold if array is empty
@@ -141,6 +143,7 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
 fn from_jvalue(
     jvalue: Cow<'_, JValue>,
     tetraplet: SecurityTetraplet,
+    provenance: Provenance,
     lambda: &LambdaAST<'_>,
 ) -> ExecutionResult<FoldIterableScalar> {
     let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
@@ -158,7 +161,7 @@ fn from_jvalue(
     }
 
     let iterable = iterable.to_vec();
-    let foldable = IterableLambdaResult::init(iterable, tetraplet);
+    let foldable = IterableLambdaResult::init(iterable, tetraplet, provenance);
     let iterable = FoldIterableScalar::ScalarBased(Box::new(foldable));
     Ok(iterable)
 }
@@ -167,10 +170,20 @@ fn to_tetraplet(iterable: &IterableItem<'_>) -> SecurityTetraplet {
     use IterableItem::*;
 
     let tetraplet = match iterable {
-        RefRef((_, tetraplet, _)) => tetraplet,
-        RefValue((_, tetraplet, _)) => tetraplet,
-        RcValue((_, tetraplet, _)) => tetraplet,
+        RefValue((_, tetraplet, _, _)) => tetraplet,
+        RcValue((_, tetraplet, _, _)) => tetraplet,
     };
 
     (*tetraplet).deref().clone()
+}
+
+fn to_provenance(iterable: &IterableItem<'_>) -> Provenance {
+    use IterableItem::*;
+
+    let provenance = match iterable {
+        RefValue((_, _, _, provenance)) => provenance,
+        RcValue((_, _, _, provenance)) => provenance,
+    };
+
+    provenance.clone()
 }

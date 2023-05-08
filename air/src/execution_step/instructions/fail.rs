@@ -26,6 +26,7 @@ use crate::log_instruction;
 use crate::ExecutionError;
 use crate::JValue;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 use air_parser::ast::Fail;
 use polyplets::SecurityTetraplet;
@@ -51,21 +52,21 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
 }
 
 fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet) = scalar.resolve(exec_ctx)?;
+    let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
 
 fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
-    let (value, mut tetraplet) = scalar.resolve(exec_ctx)?;
+    let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet))
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
 
 fn fail_with_literals(
@@ -83,40 +84,47 @@ fn fail_with_literals(
 
     let literal_tetraplet = SecurityTetraplet::literal_tetraplet(exec_ctx.run_parameters.init_peer_id.as_ref());
     let literal_tetraplet = Rc::new(literal_tetraplet);
+    // in (fail x y), x and y are always literals
+    let provenance = Provenance::literal();
 
-    fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet))
+    fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet), provenance)
 }
 
 fn fail_with_canon_stream(
     ast_canon: &ast::CanonStreamWithLambda<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
-    let (value, mut tetraplets) = ast_canon.resolve(exec_ctx)?;
+    let (value, mut tetraplets, provenance) = ast_canon.resolve(exec_ctx)?;
 
     // tetraplets always have one element here and it'll be refactored after boxed value
     check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)))
+    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)), provenance)
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    let LastError { error, tetraplet } = exec_ctx.last_error_descriptor.last_error();
+    let LastError {
+        error,
+        tetraplet,
+        provenance,
+    } = exec_ctx.last_error_descriptor.last_error();
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
     let error = error.clone();
     let tetraplet = tetraplet.clone();
 
-    fail_with_error_object(exec_ctx, error, tetraplet)
+    fail_with_error_object(exec_ctx, error, tetraplet, provenance.clone())
 }
 
 fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: Rc<JValue>,
     tetraplet: Option<RcSecurityTetraplet>,
+    provenance: Provenance,
 ) -> ExecutionResult<()> {
     exec_ctx
         .last_error_descriptor
-        .set_from_error_object(error.clone(), tetraplet);
+        .set_from_error_object(error.clone(), tetraplet, provenance);
     exec_ctx.make_subgraph_incomplete();
 
     Err(ExecutionError::Catchable(Rc::new(CatchableError::UserError { error })))

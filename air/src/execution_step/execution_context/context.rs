@@ -142,9 +142,9 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 
 /// It reflects RunParameters structure due to limitation of the marine macro to support Rc.
-#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) struct RcRunParameters {
-    pub(crate) init_peer_id: Rc<String>,
+    pub(crate) init_peer_id: Rc<str>,
     pub(crate) current_peer_id: Rc<String>,
     pub(crate) timestamp: u64,
     pub(crate) ttl: u32,
@@ -153,10 +153,21 @@ pub(crate) struct RcRunParameters {
 impl RcRunParameters {
     pub(crate) fn from_run_parameters(run_parameters: RunParameters) -> Self {
         Self {
-            init_peer_id: Rc::new(run_parameters.init_peer_id),
+            init_peer_id: run_parameters.init_peer_id.as_str().into(),
             current_peer_id: Rc::new(run_parameters.current_peer_id),
             timestamp: run_parameters.timestamp,
             ttl: run_parameters.ttl,
+        }
+    }
+}
+
+impl Default for RcRunParameters {
+    fn default() -> Self {
+        Self {
+            init_peer_id: "".into(),
+            current_peer_id: Default::default(),
+            timestamp: Default::default(),
+            ttl: Default::default(),
         }
     }
 }

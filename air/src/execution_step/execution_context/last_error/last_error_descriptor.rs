@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use air_interpreter_data::Provenance;
+
 use super::last_error_definition::error_from_raw_fields;
 use super::LastError;
 use crate::execution_step::LastErrorAffectable;
@@ -46,12 +48,16 @@ impl LastErrorDescriptor {
             return false;
         }
 
+        // it is not a call result, but generated from a limited set of unjoinable errors
+        let provenance = Provenance::literal();
+
         self.set_from_ingredients(
             error.to_error_code(),
             &error.to_string(),
             instruction,
             peer_id,
             tetraplet,
+            provenance,
         )
     }
 
@@ -62,14 +68,24 @@ impl LastErrorDescriptor {
         instruction: &str,
         peer_id: &str,
         tetraplet: Option<RcSecurityTetraplet>,
+        provenance: Provenance,
     ) -> bool {
         let error_object = error_from_raw_fields(error_code, error_message, instruction, peer_id);
-        self.set_from_error_object(Rc::new(error_object), tetraplet);
+        self.set_from_error_object(Rc::new(error_object), tetraplet, provenance);
         true
     }
 
-    pub(crate) fn set_from_error_object(&mut self, error: Rc<JValue>, tetraplet: Option<RcSecurityTetraplet>) {
-        self.last_error = LastError { error, tetraplet };
+    pub(crate) fn set_from_error_object(
+        &mut self,
+        error: Rc<JValue>,
+        tetraplet: Option<RcSecurityTetraplet>,
+        provenance: Provenance,
+    ) {
+        self.last_error = LastError {
+            error,
+            tetraplet,
+            provenance,
+        };
         self.error_can_be_set = false;
     }
 
@@ -91,6 +107,7 @@ impl Default for LastErrorDescriptor {
         let last_error = LastError {
             error: Rc::new(JValue::Null),
             tetraplet: None,
+            provenance: Provenance::literal(),
         };
 
         Self {

@@ -17,7 +17,6 @@
 use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
@@ -25,12 +24,14 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for &CanonStream {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        let iter = self.iter().map(|v| v.result.deref());
+        let iter = self.iter().map(|v| v.get_result().deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         Ok(select_result.result)
@@ -40,20 +41,32 @@ impl JValuable for &CanonStream {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
-        let iter = self.iter().map(|v| v.result.deref());
+        root_provenance: &Provenance,
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
+        let iter = self.iter().map(|v| v.get_result().deref());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
-        let tetraplet = match select_result.tetraplet_idx {
+        let (tetraplet, provenance) = match select_result.tetraplet_idx {
             Some(idx) => {
                 let resolved_call = self.nth(idx).expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
-                resolved_call.tetraplet.as_ref().clone()
+                (
+                    resolved_call.get_tetraplet().deref().clone(),
+                    resolved_call.get_provenance(),
+                )
             }
-            None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
+            // TODO it seems it is not covered by tests
+            None => (
+                SecurityTetraplet::new(
+                    exec_ctx.run_parameters.current_peer_id.to_string(),
+                    lambda.to_string(),
+                    "",
+                    "",
+                ),
+                root_provenance.clone(),
+            ),
         };
-        let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
 
-        Ok((select_result.result, tetraplet))
+        Ok((select_result.result, tetraplet, provenance))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
@@ -66,6 +79,6 @@ impl JValuable for &CanonStream {
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        self.iter().map(|r| r.tetraplet.clone()).collect::<Vec<_>>()
+        self.iter().map(|r| r.get_tetraplet()).collect()
     }
 }

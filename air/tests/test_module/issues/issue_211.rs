@@ -73,14 +73,17 @@ fn issue_211() {
 
     let result = engine.execute_one(peer_1_id).unwrap();
 
+    let scalar_2 = scalar!(
+        json!([1, 2, 3]),
+        peer = peer_1_id,
+        service = "getdatasrv..1",
+        function = "nodes"
+    );
+    let cid_2 = extract_service_result_cid(&scalar_2);
+
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(2, peer = peer_1_id, service = "getdatasrv..0", function = "idx"),
-        scalar!(
-            json!([1, 2, 3]),
-            peer = peer_1_id,
-            service = "getdatasrv..1",
-            function = "nodes"
-        ),
+        scalar_2,
         executed_state::par(6, 0),
         executed_state::par(1, 4),
         executed_state::ap(0),
@@ -94,17 +97,17 @@ fn issue_211() {
                 {
                     "result": 1,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 4
+                    "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 6
+                    "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 8
+                    "provenance": Provenance::service_result(cid_2.clone()),
                 },
             ]
         })),
@@ -121,17 +124,17 @@ fn issue_211() {
                 {
                     "result": 1,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 4
+                    "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 6
+                    "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
                     "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
-                    "trace_pos": 8
+                    "provenance": Provenance::service_result(cid_2),
                 },
             ]
         })),

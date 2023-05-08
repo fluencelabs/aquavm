@@ -28,6 +28,7 @@ use super::ValueAggregate;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
+use air_interpreter_data::Provenance;
 use air_interpreter_data::TracePos;
 use std::rc::Rc;
 
@@ -58,9 +59,8 @@ pub(crate) trait Iterable<'ctx> {
 /// through, i.e., it is the `iterable` in the `(fold collection iterable instruction)` statement.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
-    RefRef((&'ctx JValue, &'ctx RcSecurityTetraplet, TracePos)),
-    RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos)),
-    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos)),
+    RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos, Provenance)),
+    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos, Provenance)),
 }
 
 impl IterableItem<'_> {
@@ -68,24 +68,32 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         let pos = match self {
-            RefRef((.., pos)) => pos,
-            RefValue((.., pos)) => pos,
-            RcValue((.., pos)) => pos,
+            RefValue((.., pos, _)) => pos,
+            RcValue((.., pos, _)) => pos,
         };
 
         *pos
     }
 
+    pub(crate) fn provenance(&self) -> Provenance {
+        use IterableItem::*;
+
+        match self {
+            RefValue((.., ref prov)) => prov,
+            RcValue((.., ref prov)) => prov,
+        }
+        .clone()
+    }
+
     pub(crate) fn into_resolved_result(self) -> ValueAggregate {
         use IterableItem::*;
 
-        let (value, tetraplet, pos) = match self {
-            RefRef((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet.clone(), pos),
-            RefValue((value, tetraplet, pos)) => (Rc::new(value.clone()), tetraplet, pos),
+        let (value, tetraplet, pos, provenance) = match self {
+            RefValue((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet, pos, prov),
             RcValue(ingredients) => ingredients,
         };
 
-        ValueAggregate::new(value, tetraplet, pos)
+        ValueAggregate::new(value, tetraplet, pos, provenance)
     }
 }
 

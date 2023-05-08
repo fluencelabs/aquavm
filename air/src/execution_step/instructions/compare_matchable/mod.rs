@@ -26,8 +26,8 @@ pub(crate) fn are_matchable_eq<'ctx>(
     right: &ast::ImmutableValue<'_>,
     exec_ctx: &'ctx ExecutionCtx<'_>,
 ) -> ExecutionResult<bool> {
-    let (left_value, _) = left.resolve(exec_ctx)?;
-    let (right_value, _) = right.resolve(exec_ctx)?;
+    let (left_value, _, _) = left.resolve(exec_ctx)?;
+    let (right_value, _, _) = right.resolve(exec_ctx)?;
 
     Ok(left_value == right_value)
 }

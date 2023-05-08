@@ -19,12 +19,14 @@ use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
+use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
 use crate::SecurityTetraplet;
 
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
+use air_interpreter_data::Provenance;
+
 use std::borrow::Cow;
 use std::ops::Deref;
 
@@ -33,7 +35,6 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         let jvalue = match self {
-            RefRef((jvalue, ..)) => *jvalue,
             RefValue((jvalue, ..)) => jvalue,
             RcValue((jvalue, ..)) => jvalue.deref(),
         };
@@ -46,26 +47,25 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         &self,
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet)> {
+        _root_provenance: &Provenance,
+    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         use super::IterableItem::*;
 
-        let (jvalue, tetraplet) = match self {
-            RefRef((jvalue, tetraplet, _)) => (*jvalue, *tetraplet),
-            RefValue((jvalue, tetraplet, _)) => (*jvalue, tetraplet),
-            RcValue((jvalue, tetraplet, _)) => (jvalue.deref(), tetraplet),
+        let (jvalue, tetraplet, provenance) = match self {
+            RefValue((jvalue, tetraplet, _, provenance)) => (*jvalue, tetraplet, provenance),
+            RcValue((jvalue, tetraplet, _, provenance)) => (jvalue.deref(), tetraplet, provenance),
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
         let tetraplet = populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda);
 
-        Ok((selected_value, tetraplet))
+        Ok((selected_value, tetraplet, provenance.clone()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
         use super::IterableItem::*;
 
         match self {
-            RefRef((jvalue, ..)) => Cow::Borrowed(jvalue),
             RefValue((jvalue, ..)) => Cow::Borrowed(jvalue),
             RcValue((jvalue, ..)) => Cow::Borrowed(jvalue.deref()),
         }
@@ -75,7 +75,6 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         use super::IterableItem::*;
 
         match *self {
-            RefRef((jvalue, ..)) => jvalue.deref().clone(),
             RefValue((jvalue, ..)) => jvalue.clone(),
             RcValue((jvalue, ..)) => jvalue.deref().clone(),
         }
@@ -86,12 +85,8 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
 
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
-            RefRef((_, tetraplet, _)) => {
-                let tetraplet = tetraplet.deref().clone();
-                vec![tetraplet]
-            }
-            RefValue((_, tetraplet, _)) => vec![tetraplet.clone()],
-            RcValue((_, tetraplet, _)) => vec![tetraplet.clone()],
+            RefValue((_, tetraplet, _, _)) => vec![tetraplet.clone()],
+            RcValue((_, tetraplet, _, _)) => vec![tetraplet.clone()],
         }
     }
 }

@@ -41,16 +41,20 @@ fn test_canon_ok() {
 
     let mut cid_state = ExecutionCidState::new();
 
+    let stream_exec_state = stream_tracked!(
+        "to canon",
+        1,
+        cid_state,
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+
+    let service_result_cid = extract_service_result_cid(&stream_exec_state);
+
     let expected_trace = vec![
         ap(0),
-        stream_tracked!(
-            "to canon",
-            1,
-            cid_state,
-            peer = init_peer_id,
-            service = "serv..0",
-            function = "func"
-        ),
+        stream_exec_state,
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -62,6 +66,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
+                    "provenance": Provenance::literal(),
                 }, {
                     "result": "to canon",
                     "tetraplet": {
@@ -70,6 +75,7 @@ fn test_canon_ok() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
+                    "provenance": Provenance::service_result(service_result_cid),
                 }]
             }),
             &mut cid_state,
@@ -79,7 +85,10 @@ fn test_canon_ok() {
     assert_eq!(&*data.trace, expected_trace);
     assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
     assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.canon_element_store,
+        cid_state.canon_element_tracker.into()
+    );
     assert_eq!(
         data.cid_info.service_result_store,
         cid_state.service_result_agg_tracker.into()
@@ -109,23 +118,29 @@ fn test_canon_ok_multi() {
 
     let mut cid_state = ExecutionCidState::new();
 
+    let stream_state_1 = stream_tracked!(
+        "to canon",
+        0,
+        cid_state,
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+    let service_result_cid_1 = extract_service_result_cid(&stream_state_1);
+
+    let stream_state_2 = stream_tracked!(
+        "other",
+        1,
+        cid_state,
+        peer = other_peer_id,
+        service = "other_serv..1",
+        function = "other_func"
+    );
+    let service_result_cid_2 = extract_service_result_cid(&stream_state_2);
+
     let expected_trace = vec![
-        stream_tracked!(
-            "to canon",
-            0,
-            cid_state,
-            peer = init_peer_id,
-            service = "serv..0",
-            function = "func"
-        ),
-        stream_tracked!(
-            "other",
-            1,
-            cid_state,
-            peer = other_peer_id,
-            service = "other_serv..1",
-            function = "other_func"
-        ),
+        stream_state_1,
+        stream_state_2,
         canon_tracked(
             json!({
                 "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
@@ -137,6 +152,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
+                    "provenance": Provenance::service_result(service_result_cid_1),
                 }, {
                     "result": "other",
                     "tetraplet": {
@@ -145,6 +161,7 @@ fn test_canon_ok_multi() {
                         "peer_pk": other_peer_id,
                         "service_id": "other_serv..1",
                     },
+                    "provenance": Provenance::service_result(service_result_cid_2),
                 }]
             }),
             &mut cid_state,
@@ -155,7 +172,10 @@ fn test_canon_ok_multi() {
     assert_eq!(data.cid_info.value_store.len(), 2);
     assert_eq!(data.cid_info.value_store, cid_state.value_tracker.into());
     assert_eq!(data.cid_info.tetraplet_store, cid_state.tetraplet_tracker.into());
-    assert_eq!(data.cid_info.canon_store, cid_state.canon_tracker.into());
+    assert_eq!(
+        data.cid_info.canon_element_store,
+        cid_state.canon_element_tracker.into()
+    );
     assert_eq!(
         data.cid_info.service_result_store,
         cid_state.service_result_agg_tracker.into()
@@ -339,18 +359,19 @@ fn test_canon_agg_not_found() {
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
+                    "provenance": Provenance::literal(),
                 }]
             }),
             &mut cid_state,
         ),
     ];
 
-    let missing_cid = "bagaaierapp2oi35ib4iveexfswax6jcf2zhj3e2ergzjyavm6m7stlzh23ta";
-    let canon_store: CidStore<_> = cid_state.canon_tracker.into();
-    assert!(canon_store.get(&CID::<_>::new(missing_cid)).is_some());
+    let missing_cid = "bagaaierar6b2hcv2ir66tmbwocj5h7yofseqlzxma2n67z5wybtto5ujrekq";
+    let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
+    assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
 
     // Fake data
-    cid_state.canon_tracker = <_>::default();
+    cid_state.canon_element_tracker = <_>::default();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 

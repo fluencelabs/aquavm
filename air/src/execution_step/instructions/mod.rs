@@ -36,7 +36,6 @@ pub(crate) use call::triplet::resolve_peer_id_to_string;
 pub(crate) use fold::FoldState;
 
 use super::boxed_value::ScalarRef;
-use super::boxed_value::ValueAggregate;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;

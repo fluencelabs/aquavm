@@ -60,28 +60,28 @@ pub(super) fn select_by_scalar<'value>(
     use ScalarRef::*;
 
     match scalar_ref {
-        Value(lambda_value) => select_by_jvalue(value, &lambda_value.result),
+        Value(lambda_value) => select_by_jvalue(value, lambda_value.get_result()),
         IterableValue(fold_state) => {
             let accessor = fold_state
                 .iterable
                 .peek()
                 .expect(PEEK_ALLOWED_ON_NON_EMPTY)
                 .into_resolved_result();
-            select_by_jvalue(value, &accessor.result)
+            select_by_jvalue(value, accessor.get_result())
         }
     }
 }
 
 pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> {
     match scalar {
-        ScalarRef::Value(accessor) => try_jvalue_as_idx(&accessor.result),
+        ScalarRef::Value(accessor) => try_jvalue_as_idx(accessor.get_result()),
         ScalarRef::IterableValue(accessor) => {
             let accessor = accessor
                 .iterable
                 .peek()
                 .expect(PEEK_ALLOWED_ON_NON_EMPTY)
                 .into_resolved_result();
-            try_jvalue_as_idx(&accessor.result)
+            try_jvalue_as_idx(accessor.get_result())
         }
     }
 }
