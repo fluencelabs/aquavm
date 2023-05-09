@@ -65,7 +65,6 @@ impl From<fluence_keypair::Signature> for Signature {
     }
 }
 
-// TODO we will need to track all peers for verification.
 #[derive(Debug, Default)]
 pub struct SignatureTracker {
     peer_to_cids: HashMap<String, Vec<Box<str>>>,
@@ -76,7 +75,6 @@ impl SignatureTracker {
         Default::default()
     }
 
-    // TODO dedicated wrapper to peer id?
     pub fn register<T>(&mut self, peer_id: String, cid: CID<T>) {
         self.peer_to_cids
             .entry(peer_id)
@@ -95,7 +93,8 @@ impl SignatureTracker {
         // TODO make pluggable serialization
         // TODO it will be useful for CID too
         // TODO please note that using serde::Serializer is not enough
-        let serialized_cids = serde_json::to_string(&cids).unwrap();
+        let serialized_cids =
+            serde_json::to_string(&cids).expect("default serialization shouldn't fail");
 
         signer.sign(serialized_cids.as_bytes()).map(Signature::new)
     }
