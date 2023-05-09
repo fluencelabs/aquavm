@@ -116,9 +116,12 @@ version = "0.1.0"
 dependencies = [
  "air-interpreter-cid",
  "base64ct",
+ "ed25519-dalek",
  "fluence-keypair",
+ "rand_chacha 0.2.2",
  "serde",
  "serde_json",
+ "sha2 0.10.6",
  "zeroize",
 ]
 

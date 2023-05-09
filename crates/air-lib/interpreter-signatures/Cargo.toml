@@ -18,3 +18,8 @@ base64ct = { version = "1.6.0", features = ["std"] }
 serde = { version = "1.0.159", features = ["derive"] }
 serde_json = "1.0.96"
 zeroize = { version = "1.6.0" }
+
+# TODO to be moved to test-utils:
+ed25519-dalek = "1.0.1"
+rand_chacha = "0.2.2"
+sha2 = "0.10.6"
