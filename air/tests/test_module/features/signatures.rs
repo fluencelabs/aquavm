@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-use air_interpreter_signatures::SignatureTracker;
+use air_interpreter_signatures::{derive_dummy_keypair, SignatureTracker};
 use air_test_framework::{ephemeral::PeerId, AirScriptExecutor};
-use air_test_utils::prelude::extract_service_result_cid;
+use air_test_utils::prelude::*;
 use air_test_utils::test_runner::TestRunParameters;
-use air_test_utils::*;
-
-pub fn stub_keypair(_peer_id: &str) -> fluence_keypair::KeyPair {
-    fluence_keypair::KeyPair::from_secret_key([1; 32].into(), fluence_keypair::KeyFormat::Ed25519).unwrap()
-}
 
 #[test]
 fn test_signature_empty() {
     let script = "(null)";
     let init_peer_id = "init_peer_id";
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
+
     let exec = AirScriptExecutor::new(
         TestRunParameters::from_init_peer_id(init_peer_id),
         vec![],
@@ -38,7 +35,6 @@ fn test_signature_empty() {
     let res = exec.execute_one(init_peer_id).unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
 
-    let keypair = stub_keypair(init_peer_id);
     let expected_signature: air_interpreter_signatures::Signature = keypair.sign(b"[]").unwrap().into();
 
     let data = data_from_result(&res);
@@ -49,6 +45,8 @@ fn test_signature_empty() {
 #[test]
 fn test_signature_call_var() {
     let init_peer_id = "init_peer_id";
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
+
     let air_script = format!(
         r#"
         (call "{init_peer_id}" ("" "") [] var) ; ok = "ok"
@@ -62,8 +60,6 @@ fn test_signature_call_var() {
 
     let expected_call_state = scalar!("ok", peer = init_peer_id, service = "..0");
     let expected_cid = extract_service_result_cid(&expected_call_state);
-
-    let keypair = stub_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
     expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
@@ -90,7 +86,7 @@ fn test_signature_call_stream() {
     let expected_call_state = stream!("ok", 0, peer = init_peer_id, service = "..0");
     let expected_cid = extract_service_result_cid(&expected_call_state);
 
-    let keypair = stub_keypair(init_peer_id);
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
     expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
@@ -114,7 +110,7 @@ fn test_signature_call_ununsed() {
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
-    let keypair = stub_keypair(init_peer_id);
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
@@ -150,7 +146,7 @@ fn test_signature_call_merged() {
     let expected_call_state2 = scalar!("res2", peer = init_peer_id, service = "..2");
     let expected_cid2 = extract_service_result_cid(&expected_call_state2);
 
-    let keypair = stub_keypair(init_peer_id);
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
     expected_tracker.register(init_peer_id.to_owned(), (*expected_cid0).clone());
@@ -184,7 +180,7 @@ fn test_signature_call_double() {
     let expected_call_state = scalar!("ok", peer = init_peer_id, service = "..0");
     let expected_cid = extract_service_result_cid(&expected_call_state);
 
-    let keypair = stub_keypair(init_peer_id);
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut unexpected_tracker = SignatureTracker::new();
     unexpected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
@@ -199,4 +195,250 @@ fn test_signature_call_double() {
 
     let signature = data.signatures.get(&keypair.public().into());
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
+}
+
+#[test]
+fn test_signature_canon_basic() {
+    let init_peer_id = "init_peer_id";
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
+
+    let air_script = format!(
+        r#"
+       (seq
+          (call "{init_peer_id}" ("serv" "func") [] items) ; ok = [1, 2, 3]
+          (seq
+             (fold items i
+                (seq
+                   (ap i $stream)
+                   (next i)))
+             (canon "{init_peer_id}" $stream #canon)))
+    "#
+    );
+    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+
+    let last_result = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
+    let last_data = data_from_result(&last_result);
+
+    let expected_call_result = scalar!(
+        json!([1, 2, 3]),
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+    let expected_call_result_cid = extract_service_result_cid(&expected_call_result);
+
+    let expected_canon_state = canon(json!({
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "values": [{
+            "result": 1,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[0]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }, {
+            "result": 2,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[1]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }, {
+            "result": 3,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[2]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }]
+    }));
+    let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
+
+    let mut expected_tracker = SignatureTracker::new();
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid).clone());
+    let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
+
+    let signature = last_data.signatures.get(&keypair.public().into());
+    assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
+}
+
+#[test]
+fn test_signature_canon_merge() {
+    let init_peer_id = "init_peer_id";
+    let other_peer_id = "other_peer_id";
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
+
+    let air_script = format!(
+        r#"
+        (seq
+           (seq
+              (call "{init_peer_id}" ("serv" "func") [] items) ; ok = [1, 2, 3]
+              (seq
+                 (fold items i
+                    (seq
+                       (ap i $stream)
+                       (next i)))
+                 (canon "{init_peer_id}" $stream #canon)))
+           (seq
+              (call "{other_peer_id}" ("" "") []) ; ok = "ok"
+              (call "{init_peer_id}" ("" "") []))) ; ok = "ok"
+    "#
+    );
+    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+
+    exec.execute_all(init_peer_id);
+    exec.execute_one(other_peer_id);
+
+    let last_result = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
+    let last_data = data_from_result(&last_result);
+
+    let expected_call_result = scalar!(
+        json!([1, 2, 3]),
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+    let expected_call_result_cid = extract_service_result_cid(&expected_call_result);
+
+    let expected_canon_state = canon(json!({
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "values": [{
+            "result": 1,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[0]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }, {
+            "result": 2,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[1]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }, {
+            "result": 3,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[2]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid.clone()),
+        }]
+    }));
+    let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
+
+    let mut expected_tracker = SignatureTracker::new();
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid).clone());
+    let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
+
+    let signature = last_data.signatures.get(&keypair.public().into());
+    assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
+}
+
+#[test]
+fn test_signature_canon_result() {
+    // this test checks that call result in canon doesn't lead to repeadted accounting of the call result
+    let init_peer_id = "init_peer_id";
+    let (keypair, _) = derive_dummy_keypair(init_peer_id);
+
+    let air_script = format!(
+        r#"
+        (seq
+           (seq
+              (call "{init_peer_id}" ("serv" "func") [] items) ; ok = [1, 2, 3]
+              (fold items i
+                 (seq
+                    (ap i $stream)
+                    (next i))))
+           (seq
+              (call "{init_peer_id}" ("serv" "func2") [] $stream) ; ok = 42
+              (canon "{init_peer_id}" $stream #canon)))
+    "#
+    );
+    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+
+    let last_result = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
+    let last_data = data_from_result(&last_result);
+
+    let expected_call_result1 = scalar!(
+        json!([1, 2, 3]),
+        peer = init_peer_id,
+        service = "serv..0",
+        function = "func"
+    );
+    let expected_call_result_cid1 = extract_service_result_cid(&expected_call_result1);
+
+    let expected_call_result2 = stream!(
+        json!(42),
+        1,
+        peer = init_peer_id,
+        service = "serv..1",
+        function = "func2"
+    );
+    let expected_call_result_cid2 = extract_service_result_cid(&expected_call_result2);
+
+    let expected_canon_state = canon(json!({
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "values": [{
+            "result": 1,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[0]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
+        }, {
+            "result": 2,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[1]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
+        }, {
+            "result": 3,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..0",
+                "function_name": "func",
+                "json_path": ".$.[2]",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
+        }, {
+            "result": 42,
+            "tetraplet": {
+                "peer_pk": init_peer_id,
+                "service_id": "serv..1",
+                "function_name": "func2",
+                "json_path": "",
+            },
+            "provenance": Provenance::service_result(expected_call_result_cid2.clone()),
+        }]
+    }));
+    let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
+
+    let mut expected_tracker = SignatureTracker::new();
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid1).clone());
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid2).clone());
+    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
+    let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
+
+    let signature = last_data.signatures.get(&keypair.public().into());
+    assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
 }
