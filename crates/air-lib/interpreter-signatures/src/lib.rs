@@ -27,7 +27,6 @@
 )]
 
 use air_interpreter_cid::CID;
-use base64ct::{Base64, Encoding};
 use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
 use rand_chacha::rand_core::SeedableRng;
@@ -46,7 +45,7 @@ pub struct PublicKey(Box<str>);
 
 impl From<fluence_keypair::PublicKey> for PublicKey {
     fn from(value: fluence_keypair::PublicKey) -> Self {
-        Self(base64ct::Base64::encode_string(&value.to_vec()).into())
+        Self(bs58::encode(&value.to_vec()).into_string().into())
     }
 }
 
@@ -62,7 +61,7 @@ impl Signature {
 
 impl From<fluence_keypair::Signature> for Signature {
     fn from(value: fluence_keypair::Signature) -> Self {
-        Self(Base64::encode_string(value.to_vec()).into())
+        Self(bs58::encode(value.to_vec()).into_string().into())
     }
 }
 
