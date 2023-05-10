@@ -72,4 +72,8 @@ pub enum RunnerError {
     /// This errors are encountered from an call results/params se/de.
     #[error(transparent)]
     CallSeDeErrors(#[from] CallSeDeErrors),
+
+    /// Invalid signing keypair.
+    #[error(transparent)]
+    KeypairError(eyre::Error),
 }

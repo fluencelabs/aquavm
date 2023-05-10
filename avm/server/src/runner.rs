@@ -80,9 +80,7 @@ impl AVMRunner {
         keypair: &KeyPair,
     ) -> RunnerResult<RawAVMOutcome> {
         let keypair_format = keypair.key_format();
-        let keypair_data: Vec<u8> = keypair
-            .secret()
-            .unwrap_or_else(|_| panic!("failed to serialize key of format {:?}", keypair_format));
+        let keypair_data: Vec<u8> = keypair.secret().map_err(RunnerError::KeypairError)?;
 
         let args = prepare_args(
             air,
