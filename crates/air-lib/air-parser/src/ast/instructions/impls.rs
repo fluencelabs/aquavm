@@ -23,16 +23,8 @@ impl<'i> Ap<'i> {
 }
 
 impl<'i> ApMap<'i> {
-    pub fn new(
-        key_argument: ApArgument<'i>,
-        argument: ApArgument<'i>,
-        result: ApResult<'i>,
-    ) -> Self {
-        Self {
-            key_argument,
-            argument,
-            result,
-        }
+    pub fn new(key: ApMapKey<'i>, value: ApArgument<'i>, map: StreamMap<'i>) -> Self {
+        Self { key, value, map }
     }
 }
 

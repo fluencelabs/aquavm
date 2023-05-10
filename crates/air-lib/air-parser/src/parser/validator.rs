@@ -137,13 +137,8 @@ impl<'i> VariableValidator<'i> {
         self.multiple_next_candidates.insert(iterable_name, span);
     }
 
-    pub(super) fn met_ap_kind(
-        &mut self,
-        argument: &ApArgument<'i>,
-        result: &ApResult<'i>,
-        span: Span,
-    ) {
-        match &argument {
+    pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
+        match &ap.argument {
             ApArgument::Number(_)
             | ApArgument::Timestamp
             | ApArgument::TTL
@@ -159,27 +154,19 @@ impl<'i> VariableValidator<'i> {
                 self.met_canon_stream_wl(canon_stream, span)
             }
         }
-        self.met_variable_name_definition(result.name(), span);
-    }
-
-    pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
-        self.met_ap_kind(&ap.argument, &ap.result, span)
+        self.met_variable_name_definition(ap.result.name(), span);
     }
 
     pub(super) fn met_ap_map(&mut self, ap_map: &ApMap<'i>, span: Span) {
-        let key = &ap_map.key_argument;
+        let key = &ap_map.key;
         match key {
-            ApArgument::Literal(_) | ApArgument::Number(_) => {}
-            ApArgument::Scalar(scalar) => self.met_scalar(scalar, span),
-            ApArgument::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
-            ApArgument::CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
-            _ => {
-                let key_type = key.to_string();
-                self.unsupported_map_keys
-                    .push((key_type, ap_map.result.name(), span));
-            }
+            ApMapKey::Literal(_) | ApMapKey::Number(_) => {}
+            ApMapKey::Scalar(scalar) => self.met_scalar(scalar, span),
+            ApMapKey::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            ApMapKey::CanonStream(stream) => self.met_canon_stream(stream, span),
+            ApMapKey::CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
         }
-        self.met_ap_kind(&ap_map.argument, &ap_map.result, span)
+        self.met_variable_name(ap_map.map.name, span);
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {

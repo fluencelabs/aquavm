@@ -72,11 +72,7 @@ impl fmt::Display for Ap<'_> {
 
 impl fmt::Display for ApMap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "ap {} {} {}",
-            self.key_argument, self.argument, self.result
-        )
+        write!(f, "ap {} {} {}", self.key, self.value, self.map)
     }
 }
 

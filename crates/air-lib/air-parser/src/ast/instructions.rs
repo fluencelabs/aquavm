@@ -61,11 +61,13 @@ pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
     pub result: ApResult<'i>,
 }
+
+/// (ap key value %map)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct ApMap<'i> {
-    pub key_argument: ApArgument<'i>,
-    pub argument: ApArgument<'i>,
-    pub result: ApResult<'i>,
+    pub key: ApMapKey<'i>,
+    pub value: ApArgument<'i>,
+    pub map: StreamMap<'i>,
 }
 
 /// (canon peer_id $stream #canon_stream)

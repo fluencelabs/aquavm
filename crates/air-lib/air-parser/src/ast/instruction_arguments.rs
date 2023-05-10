@@ -110,8 +110,16 @@ pub enum ApResult<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
-    #[serde(borrow)]
-    StreamMap(StreamMap<'i>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApMapKey<'i> {
+    Literal(&'i str),
+    Number(Number),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
+    CanonStream(CanonStream<'i>),
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

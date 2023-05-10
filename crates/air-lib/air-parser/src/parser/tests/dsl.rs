@@ -205,9 +205,9 @@ pub(super) fn ap_with_map<'i>(
     result: ApResult<'i>,
 ) -> Instruction<'i> {
     Instruction::ApMap(ApMap {
-        key_argument: key,
-        argument,
-        result,
+        key: key,
+        value: argument,
+        map: result,
     })
 }
 

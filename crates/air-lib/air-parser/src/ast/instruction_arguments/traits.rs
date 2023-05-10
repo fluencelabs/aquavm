@@ -25,7 +25,6 @@ impl fmt::Display for ApResult<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             Stream(stream) => write!(f, "{stream}"),
-            StreamMap(stream_map) => write!(f, "{stream_map}"),
         }
     }
 }
@@ -101,6 +100,21 @@ impl fmt::Display for ApArgument<'_> {
             Number(number) => write!(f, "{number}"),
             Boolean(bool) => write!(f, "{bool}"),
             EmptyArray => write!(f, "[]"),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+        }
+    }
+}
+
+impl fmt::Display for ApMapKey<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ApMapKey::*;
+
+        match self {
+            Literal(str) => write!(f, r#""{str}""#),
+            Number(number) => write!(f, "{number}"),
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),

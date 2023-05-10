@@ -35,9 +35,9 @@ impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         execute_ap_kind(
             &self,
-            Some(&self.key_argument),
-            &self.argument,
-            &self.result,
+            Some(&self.key),
+            &self.value,
+            &self.map,
             exec_ctx,
             trace_ctx,
         )

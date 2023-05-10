@@ -44,8 +44,9 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Ap(apply))
     },
 
-    <left: @L> "(" ap <key:ApArgument> <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
-        let apply = ApMap::new(key, arg, result);
+    <left: @L> "(" ap "(" <key:ApMapKey> <value:ApArgument> ")" <map:StreamMap> ")" <right: @R> => {
+        let map = StreamMap::new(map.0, map.1);
+        let apply = ApMap::new(key, value, map);
 
         let span = Span::new(left, right);
         validator.met_ap_map(&apply, span);
@@ -148,7 +149,15 @@ Triplet: Triplet<'input> = {
 ApResult: ApResult<'input> = {
     <scalar:Scalar> => ApResult::scalar(scalar.0, scalar.1),
     <stream:Stream> => ApResult::stream(stream.0, stream.1),
-    <stream_map:StreamMap> => ApResult::stream_map(stream_map.0, stream_map.1),
+};
+
+ApMapKey: ApMapKey<'input> = {
+    <l:Literal> => ApMapKey::Literal(l),
+    <n:Number> => ApMapKey::Number(n),
+    <scalar:Scalar> => ApMapKey::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => ApMapKey::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStream> => ApMapKey::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
+    <canon_stream:CanonStreamWithLambda> => ApMapKey::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
 };
 
 CallOutput: CallOutputValue<'input> = {

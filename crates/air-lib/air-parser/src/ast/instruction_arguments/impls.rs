@@ -19,7 +19,6 @@ use super::CallOutputValue;
 use super::NewArgument;
 use super::Scalar;
 use super::Stream;
-use super::StreamMap;
 use crate::parser::lexer::AirPos;
 
 impl<'i> NewArgument<'i> {
@@ -42,15 +41,10 @@ impl<'i> ApResult<'i> {
         Self::Stream(Stream { name, position })
     }
 
-    pub fn stream_map(name: &'i str, position: AirPos) -> Self {
-        Self::StreamMap(StreamMap { name, position })
-    }
-
     pub fn name(&self) -> &'i str {
         match self {
             Self::Scalar(scalar) => scalar.name,
             Self::Stream(stream) => stream.name,
-            Self::StreamMap(stream_map) => stream_map.name,
         }
     }
 }
