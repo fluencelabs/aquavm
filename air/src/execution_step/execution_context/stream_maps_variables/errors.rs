@@ -24,7 +24,4 @@ pub enum StreamMapError {
 
     #[error("unsupported type for {variable_name} map's key")]
     UnsupportedMapKeyType { variable_name: String },
-
-    #[error("there must be a key to add a value into {variable_name} map")]
-    MapKeyIsAbsent { variable_name: String },
 }

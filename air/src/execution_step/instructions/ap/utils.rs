@@ -47,7 +47,7 @@ pub(super) fn generate_value_descriptor<'stream>(
     }
 }
 
-pub(super) fn generate_map_value_descriptor<'stream>(
+pub(crate) fn generate_map_value_descriptor<'stream>(
     value: ValueAggregate,
     stream: &'stream ast::StreamMap<'_>,
     ap_result: &MergerApResult,

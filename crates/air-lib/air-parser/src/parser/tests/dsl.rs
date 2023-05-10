@@ -200,9 +200,9 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
 }
 
 pub(super) fn ap_with_map<'i>(
-    key: ApArgument<'i>,
+    key: ApMapKey<'i>,
     argument: ApArgument<'i>,
-    result: ApResult<'i>,
+    result: StreamMap<'i>,
 ) -> Instruction<'i> {
     Instruction::ApMap(ApMap {
         key: key,

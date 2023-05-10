@@ -198,12 +198,9 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApArgument::Literal(key_name),
+        ApMapKey::Literal(key_name),
         ApArgument::Literal(value),
-        ApResult::StreamMap(StreamMap::new(
-            var_name,
-            source_code.find(var_name).unwrap().into(),
-        )),
+        StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
 
@@ -216,15 +213,12 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApArgument::Scalar(Scalar::new(
+        ApMapKey::Scalar(Scalar::new(
             key_name,
             source_code.find(key_name).unwrap().into(),
         )),
         ApArgument::Literal(value),
-        ApResult::StreamMap(StreamMap::new(
-            var_name,
-            source_code.find(var_name).unwrap().into(),
-        )),
+        StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
 
@@ -235,12 +229,9 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApArgument::Literal(key_name),
+        ApMapKey::Literal(key_name),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
-        ApResult::StreamMap(StreamMap::new(
-            var_name,
-            source_code.find(var_name).unwrap().into(),
-        )),
+        StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
 
@@ -253,15 +244,12 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApArgument::Scalar(Scalar::new(
+        ApMapKey::Scalar(Scalar::new(
             key_name,
             source_code.find(key_name).unwrap().into(),
         )),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
-        ApResult::StreamMap(StreamMap::new(
-            var_name,
-            source_code.find(var_name).unwrap().into(),
-        )),
+        StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
 
@@ -273,12 +261,9 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApArgument::Number(Number::Int(key_name)),
+        ApMapKey::Number(Number::Int(key_name)),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
-        ApResult::StreamMap(StreamMap::new(
-            var_name,
-            source_code.find(var_name).unwrap().into(),
-        )),
+        StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
 }
