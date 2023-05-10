@@ -51,30 +51,12 @@ pub struct TestRunner<R = AirRunnerImpl> {
     keypair: KeyPair,
 }
 
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct TestRunParameters {
     pub init_peer_id: String,
     pub timestamp: u64,
     pub ttl: u32,
-    pub override_current_peer_id: Option<(String, KeyPair)>,
-}
-
-impl std::fmt::Debug for TestRunParameters {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let override_current_peer_id_with_hidden_secret = &self
-            .override_current_peer_id
-            .as_ref()
-            .map(|pair| (&pair.0, "..."));
-        f.debug_struct("TestRunParameters")
-            .field("init_peer_id", &self.init_peer_id)
-            .field("timestamp", &self.timestamp)
-            .field("ttl", &self.ttl)
-            .field(
-                "override_current_peer_id",
-                override_current_peer_id_with_hidden_secret,
-            )
-            .finish()
-    }
+    pub override_current_peer_id: Option<String>,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -99,14 +81,6 @@ impl<R: AirRunner> TestRunner<R> {
         let mut call_results = HashMap::new();
         let mut next_peer_pks = HashSet::new();
 
-        let key_pair = override_current_peer_id
-            .as_ref()
-            .map(|pair| &pair.1)
-            .unwrap_or(&self.keypair);
-        let override_current_peer_id = override_current_peer_id
-            .clone()
-            .map(|(peer_id, _key)| peer_id);
-
         loop {
             let mut outcome: RawAVMOutcome = self
                 .runner
@@ -119,7 +93,7 @@ impl<R: AirRunner> TestRunner<R> {
                     ttl,
                     override_current_peer_id.clone(),
                     call_results,
-                    key_pair,
+                    &self.keypair,
                 )
                 .map_err(|e| e.to_string())?;
 
@@ -153,17 +127,9 @@ impl<R: AirRunner> TestRunner<R> {
         init_peer_id: impl Into<String>,
         timestamp: u64,
         ttl: u32,
-        override_current_peer_id: Option<(String, KeyPair)>,
+        override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        let key_pair = override_current_peer_id
-            .as_ref()
-            .map(|pair| &pair.1)
-            .unwrap_or(&self.keypair);
-        let override_current_peer_id = override_current_peer_id
-            .clone()
-            .map(|(peer_id, _key)| peer_id);
-
         self.runner.call(
             air,
             prev_data,
@@ -173,7 +139,7 @@ impl<R: AirRunner> TestRunner<R> {
             ttl,
             override_current_peer_id,
             call_results,
-            key_pair,
+            &self.keypair,
         )
     }
 }
@@ -184,6 +150,7 @@ pub fn create_avm(
 ) -> TestRunner {
     let runner = AirRunnerImpl::new(current_peer_id);
     let key_format = fluence_keypair::KeyFormat::Secp256k1;
+    // TODO generate random key at this stage
     let keypair = KeyPair::generate(key_format);
 
     TestRunner {
