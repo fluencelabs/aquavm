@@ -75,9 +75,14 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) cid_state: ExecutionCidState,
 
     /// Signatures' store.
+    ///
+    /// It contains peers' signatures for verification.
     pub(crate) signature_store: SignatureStore,
 
-    /// Local signature tracker.
+    /// Local signatures tracker.
+    ///
+    /// It gathers peers' CIDs (call results and canon results) stored in the trace either for signing (current peer's
+    /// CIDs) or sign verification (other peers).
     pub(crate) signature_tracker: SignatureTracker,
 }
 

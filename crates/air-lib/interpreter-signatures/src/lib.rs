@@ -39,6 +39,7 @@ use std::hash::Hash;
 /// An opaque serializable representation of public key.
 ///
 /// It can be string or binary, you shouldn't care about it unless you change serialization format.
+// surrent implementation uses string as it is used as a key in a JSON map
 #[derive(Debug, Hash, Clone, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct PublicKey(Box<str>);
@@ -49,6 +50,10 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
     }
 }
 
+/// An opaque serializable representation of signature key.
+///
+/// It can be string or binary, you shouldn't care about it unless you change serialization format.
+// surrent implementation uses string as more compact in JSON representation than number array
 #[derive(Debug, Hash, Clone, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct Signature(Box<str>);
