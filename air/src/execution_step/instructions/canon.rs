@@ -59,9 +59,7 @@ fn handle_seen_canon(
     let tetraplet_cid = canon_result_agg.tetraplet.clone();
     let tetraplet = exec_ctx.cid_state.get_tetraplet_by_cid(&tetraplet_cid)?;
 
-    exec_ctx
-        .signature_tracker
-        .register(tetraplet.peer_pk.clone(), (*canon_result_cid).clone());
+    exec_ctx.record_canon_cid(&tetraplet.peer_pk, canon_result_cid.clone());
 
     let value_cids = canon_result_agg.values.clone();
     let values = value_cids
@@ -167,9 +165,7 @@ fn create_canon_stream_from_name(
         .record_value(canon_result)
         .map_err(UncatchableError::from)?;
 
-    exec_ctx
-        .signature_tracker
-        .register(tetraplet.peer_pk.clone(), (*canon_result_cid).clone());
+    exec_ctx.record_call_cid(&tetraplet.peer_pk, canon_result_cid.clone());
 
     let result = StreamWithSerializedView {
         canon_stream,

@@ -22,6 +22,7 @@ use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResultCidAggregate;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
@@ -128,6 +129,10 @@ impl<'i> ExecutionCtx<'i> {
     }
 
     pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: Rc<CID<ServiceResultCidAggregate>>) {
+        self.signature_tracker.register(peer_id.into(), cid.as_ref().clone());
+    }
+
+    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<String>, cid: Rc<CID<CanonResultCidAggregate>>) {
         self.signature_tracker.register(peer_id.into(), cid.as_ref().clone());
     }
 }
