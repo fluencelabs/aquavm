@@ -34,7 +34,7 @@ pub struct StreamMap {
 }
 
 impl StreamMap {
-    fn envelope(key: &(impl Into<JValue> + Serialize), value: Rc<JValue>) -> Rc<JValue> {
+    fn from_key_value(key: &(impl Into<JValue> + Serialize), value: &JValue) -> Rc<JValue> {
         Rc::new(json!({ "key": key, "value": value }))
     }
 
@@ -45,7 +45,7 @@ impl StreamMap {
     }
 
     pub(crate) fn from_value(key: &(impl Into<JValue> + Serialize), value: ValueAggregate) -> Self {
-        let obj = StreamMap::envelope(key, value.result);
+        let obj = StreamMap::from_key_value(key, value.result.as_ref());
         Self {
             stream: Stream::from_value(ValueAggregate::new(obj, value.tetraplet, value.trace_pos)),
         }
@@ -58,7 +58,7 @@ impl StreamMap {
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<GenerationIdx> {
-        let obj = StreamMap::envelope(key, value.result);
+        let obj = StreamMap::from_key_value(key, value.result.as_ref());
         self.stream.add_value(
             ValueAggregate::new(obj, value.tetraplet, value.trace_pos),
             generation,
@@ -111,7 +111,7 @@ mod test {
 
         let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
-        let examplar = StreamMap::envelope(&key, value.clone());
+        let examplar = StreamMap::from_key_value(&key, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         assert_eq!(internal_stream_iter.next(), None);
 
@@ -123,7 +123,7 @@ mod test {
 
         let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
-        let examplar = StreamMap::envelope(&key, value);
+        let examplar = StreamMap::from_key_value(&key, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         assert_eq!(internal_stream_iter.next(), None);
     }
@@ -141,7 +141,7 @@ mod test {
             .insert(&key12.clone(), va.clone(), generation, ValueSource::CurrentData)
             .unwrap();
         assert_eq!(generation_idx_res, generation_idx);
-        let examplar = StreamMap::envelope(&key12.clone(), value.clone());
+        let examplar = StreamMap::from_key_value(&key12.clone(), value.as_ref());
         let s = stream_map
             .stream
             .iter(generation)
@@ -165,10 +165,10 @@ mod test {
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
         assert_eq!(*v, *examplar.as_ref());
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
-        let examplar = StreamMap::envelope(&key3.clone(), value.clone());
+        let examplar = StreamMap::from_key_value(&key3.clone(), value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
-        let examplar = StreamMap::envelope(&key4, value.clone());
+        let examplar = StreamMap::from_key_value(&key4, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         assert_eq!(internal_stream_iter.next(), None);
     }
