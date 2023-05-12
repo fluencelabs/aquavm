@@ -128,12 +128,12 @@ impl<'i> ExecutionCtx<'i> {
         self.last_call_request_id
     }
 
-    pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: Rc<CID<ServiceResultCidAggregate>>) {
-        self.signature_tracker.register(peer_id.into(), cid.as_ref().clone());
+    pub(crate) fn record_call_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<ServiceResultCidAggregate>) {
+        self.signature_tracker.register(peer_id, cid);
     }
 
-    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<String>, cid: Rc<CID<CanonResultCidAggregate>>) {
-        self.signature_tracker.register(peer_id.into(), cid.as_ref().clone());
+    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<CanonResultCidAggregate>) {
+        self.signature_tracker.register(peer_id, cid);
     }
 }
 

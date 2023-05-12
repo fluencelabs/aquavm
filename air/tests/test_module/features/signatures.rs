@@ -62,7 +62,7 @@ fn test_signature_call_var() {
     let expected_cid = extract_service_result_cid(&expected_call_state);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = data.signatures.get(&keypair.public().into());
@@ -89,7 +89,7 @@ fn test_signature_call_stream() {
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = data.signatures.get(&keypair.public().into());
@@ -149,8 +149,8 @@ fn test_signature_call_merged() {
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid0).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid2).clone());
+    expected_tracker.register(init_peer_id, &expected_cid0);
+    expected_tracker.register(init_peer_id, &expected_cid2);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = data2.signatures.get(&keypair.public().into());
@@ -183,12 +183,12 @@ fn test_signature_call_double() {
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut unexpected_tracker = SignatureTracker::new();
-    unexpected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
+    unexpected_tracker.register(init_peer_id, &expected_cid);
     let unexpected_signature = unexpected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_cid);
+    expected_tracker.register(init_peer_id, &expected_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     assert_ne!(expected_signature, unexpected_signature, "test is incorrect");
@@ -261,8 +261,8 @@ fn test_signature_canon_basic() {
     let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_canon_cid);
+    expected_tracker.register(init_peer_id.to_owned(), &expected_call_result_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = last_data.signatures.get(&keypair.public().into());
@@ -341,8 +341,8 @@ fn test_signature_canon_merge() {
     let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_canon_cid);
+    expected_tracker.register(init_peer_id, &expected_call_result_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = last_data.signatures.get(&keypair.public().into());
@@ -434,9 +434,9 @@ fn test_signature_canon_result() {
     let expected_canon_cid = extract_canon_result_cid(&expected_canon_state);
 
     let mut expected_tracker = SignatureTracker::new();
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid1).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_call_result_cid2).clone());
-    expected_tracker.register(init_peer_id.to_owned(), (*expected_canon_cid).clone());
+    expected_tracker.register(init_peer_id, &expected_call_result_cid1);
+    expected_tracker.register(init_peer_id, &expected_call_result_cid2);
+    expected_tracker.register(init_peer_id, &expected_canon_cid);
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = last_data.signatures.get(&keypair.public().into());

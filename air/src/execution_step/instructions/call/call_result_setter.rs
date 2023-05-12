@@ -38,7 +38,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 ) -> ExecutionResult<CallResult> {
     match output {
         CallOutputValue::Scalar(scalar) => {
-            let peer_id = tetraplet.peer_pk.clone();
+            let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
             let service_result_agg_cid = exec_ctx
                 .cid_state
                 .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
@@ -46,11 +46,11 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
-            exec_ctx.record_call_cid(&peer_id, service_result_agg_cid.clone());
+            exec_ctx.record_call_cid(peer_id, &service_result_agg_cid);
             Ok(CallResult::executed_scalar(service_result_agg_cid))
         }
         CallOutputValue::Stream(stream) => {
-            let peer_id = tetraplet.peer_pk.clone();
+            let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
             let service_result_agg_cid = exec_ctx
                 .cid_state
                 .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
@@ -66,7 +66,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 stream.position,
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-            exec_ctx.record_call_cid(&peer_id, service_result_agg_cid.clone());
+            exec_ctx.record_call_cid(&*peer_id, &service_result_agg_cid);
             Ok(CallResult::executed_stream(service_result_agg_cid, generation))
         }
         CallOutputValue::None => {

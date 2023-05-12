@@ -72,7 +72,7 @@ impl From<fluence_keypair::Signature> for Signature {
 
 #[derive(Debug, Default)]
 pub struct SignatureTracker {
-    peer_to_cids: HashMap<String, Vec<Box<str>>>,
+    peer_to_cids: HashMap<Box<str>, Vec<Box<str>>>,
 }
 
 impl SignatureTracker {
@@ -80,11 +80,11 @@ impl SignatureTracker {
         Default::default()
     }
 
-    pub fn register<T>(&mut self, peer_id: String, cid: CID<T>) {
+    pub fn register<T>(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<T>) {
         self.peer_to_cids
-            .entry(peer_id)
+            .entry(peer_id.into())
             .or_default()
-            .push(cid.into_inner().into());
+            .push(cid.clone().into_inner().into());
     }
 
     pub fn into_signature(
