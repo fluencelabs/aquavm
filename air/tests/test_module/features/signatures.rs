@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod attacks;
+
 use air_interpreter_signatures::{derive_dummy_keypair, SignatureTracker};
 use air_test_framework::{ephemeral::PeerId, AirScriptExecutor};
 use air_test_utils::prelude::*;
