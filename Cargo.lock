@@ -116,12 +116,9 @@ version = "0.1.0"
 dependencies = [
  "air-interpreter-cid",
  "bs58",
- "ed25519-dalek",
  "fluence-keypair",
- "rand_chacha 0.2.2",
  "serde",
  "serde_json",
- "sha2 0.10.6",
 ]
 
 [[package]]
@@ -165,15 +162,18 @@ dependencies = [
  "aquavm-air",
  "avm-interface",
  "avm-server",
+ "ed25519-dalek",
  "fluence-keypair",
  "fstrings",
  "maplit",
  "marine-rs-sdk",
  "object-pool",
  "once_cell",
+ "rand_chacha 0.2.2",
  "semver 1.0.17",
  "serde",
  "serde_json",
+ "sha2 0.10.6",
 ]
 
 [[package]]

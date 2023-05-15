@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::key_utils::derive_dummy_keypair;
 #[cfg(feature = "test_with_native_code")]
 use crate::native_test_runner::NativeAirRunner as AirRunnerImpl;
 #[cfg(not(feature = "test_with_native_code"))]
@@ -148,10 +149,11 @@ pub fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
+    let current_peer_id = current_peer_id.into();
+
+    let (keypair, _) = derive_dummy_keypair(&current_peer_id);
+
     let runner = AirRunnerImpl::new(current_peer_id);
-    let key_format = fluence_keypair::KeyFormat::Secp256k1;
-    // TODO generate random key at this stage
-    let keypair = KeyPair::generate(key_format);
 
     TestRunner {
         runner,
