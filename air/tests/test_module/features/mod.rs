@@ -21,5 +21,6 @@ mod join_behaviour;
 mod lambda;
 mod misc;
 mod scopes;
+mod signatures;
 mod streams;
 mod tetraplets;

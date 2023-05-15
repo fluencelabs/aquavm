@@ -310,28 +310,20 @@ fn invalid_dst_generations() {
         (ap "a" $s)
     "#
     );
-    // TODO generate data instead, as the code will be apdated on each data change
-    let data = json!(
-    {
-        "version": "0.6.3",
-        "interpreter_version": "1.1.1",
-        "trace": [
-            {"ap":
-                {"gens": [42,42]}
-            }
-        ],
-        "streams": {},
-        "r_streams": {},
-        "lcid": 0,
-        "cid_info": {
-            "value_store": {},
-            "tetraplet_store": {},
-            "canon_element_store": {},
-            "canon_result_store": {},
-            "service_result_store": {}
-        }
-    });
-    let data: Vec<u8> = serde_json::to_vec(&data).unwrap();
+
+    let empty_data = InterpreterData::from_execution_result(
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        <_>::default(),
+        semver::Version::new(1, 1, 1),
+    );
+    let mut data_value = serde_json::to_value(&empty_data).unwrap();
+    data_value["trace"] = json!([{"ap": {"gens": [42, 42]}}]);
+
+    let data: Vec<u8> = serde_json::to_vec(&data_value).unwrap();
     // let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
     let result = call_vm!(peer_vm_1, <_>::default(), &script, "", data);
     let expected_error = UncatchableError::TraceError {

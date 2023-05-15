@@ -32,7 +32,7 @@ use serde::Serialize;
 use std::fmt;
 use std::marker::PhantomData;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CID<T: ?Sized>(String, #[serde(skip)] PhantomData<*const T>);
 
@@ -46,6 +46,11 @@ impl<T: ?Sized> CID<T> {
     }
 }
 
+impl<T: ?Sized> Clone for CID<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone(), self.1)
+    }
+}
 impl<T: ?Sized> fmt::Debug for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("CID").field(&self.0).finish()
