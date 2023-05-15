@@ -37,6 +37,7 @@ use std::collections::HashMap;
 
 use std::fmt;
 
+// TODO This module should be unified with its Stream counterpart.
 pub(crate) struct StreamMapValueDescriptor<'stream_name> {
     pub value: ValueAggregate,
     pub name: &'stream_name str,
@@ -161,7 +162,7 @@ impl StreamMaps {
         } = value_descriptor;
 
         match self.get_mut(name, position) {
-            Some(stream_map) => stream_map.insert(key, value, generation, source),
+            Some(stream_map) => stream_map.insert(key, &value, generation, source),
             None => {
                 // streams could be created in three ways:
                 //  - after met new instruction with stream name that isn't present in streams
@@ -170,7 +171,7 @@ impl StreamMaps {
                 //    for global streams
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
-                let stream_map = StreamMap::from_value(key, value);
+                let stream_map = StreamMap::from_value(key, &value);
                 let descriptor = StreamMapDescriptor::global(stream_map);
                 self.stream_maps.insert(name.to_string(), vec![descriptor]);
                 let generation = 0;

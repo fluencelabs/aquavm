@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-pub(crate) mod stream_descriptor;
-pub(crate) mod stream_value_descriptor;
-pub(crate) mod utils;
+mod stream_descriptor;
+mod stream_value_descriptor;
+mod utils;
 
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;

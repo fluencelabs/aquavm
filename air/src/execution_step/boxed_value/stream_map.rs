@@ -44,26 +44,24 @@ impl StreamMap {
         }
     }
 
-    pub(crate) fn from_value(key: &(impl Into<JValue> + Serialize), value: ValueAggregate) -> Self {
+    pub(crate) fn from_value(key: &(impl Into<JValue> + Serialize), value: &ValueAggregate) -> Self {
         let obj = StreamMap::from_key_value(key, value.result.as_ref());
+        let value = ValueAggregate::new(obj, value.tetraplet.clone(), value.trace_pos);
         Self {
-            stream: Stream::from_value(ValueAggregate::new(obj, value.tetraplet, value.trace_pos)),
+            stream: Stream::from_value(value),
         }
     }
 
     pub(crate) fn insert(
         &mut self,
         key: &(impl Into<JValue> + Serialize),
-        value: ValueAggregate,
+        value: &ValueAggregate,
         generation: Generation,
         source: ValueSource,
     ) -> ExecutionResult<GenerationIdx> {
         let obj = StreamMap::from_key_value(key, value.result.as_ref());
-        self.stream.add_value(
-            ValueAggregate::new(obj, value.tetraplet, value.trace_pos),
-            generation,
-            source,
-        )
+        let value = ValueAggregate::new(obj, value.tetraplet.clone(), value.trace_pos);
+        self.stream.add_value(value, generation, source)
     }
 
     pub(crate) fn compactify(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<GenerationIdx> {
@@ -104,10 +102,8 @@ mod test {
 
         let generation_idx = 0;
         let generation = Generation::Nth(generation_idx.into());
-        let stream_map = StreamMap::from_value(
-            &key.clone(),
-            ValueAggregate::new(value.clone(), <_>::default(), 0.into()),
-        );
+        let value_aggregate: ValueAggregate = ValueAggregate::new(value.clone(), <_>::default(), 0.into());
+        let stream_map = StreamMap::from_value(&key.clone(), &value_aggregate);
 
         let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
@@ -116,10 +112,8 @@ mod test {
         assert_eq!(internal_stream_iter.next(), None);
 
         let key = 42;
-        let stream_map = StreamMap::from_value(
-            &key.clone(),
-            ValueAggregate::new(value.clone(), <_>::default(), 0.into()),
-        );
+        let value_aggregate = ValueAggregate::new(value.clone(), <_>::default(), 0.into());
+        let stream_map = StreamMap::from_value(&key.clone(), &value_aggregate);
 
         let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
@@ -134,13 +128,14 @@ mod test {
         let key12 = String::from("some_key");
         let value = Rc::new(obj.clone());
         let generation_idx = 0;
-        let va = ValueAggregate::new(value.clone(), <_>::default(), 0.into());
-        let mut stream_map = StreamMap::from_value(&key12, va.clone());
+        let value_aggregate: ValueAggregate = ValueAggregate::new(value.clone(), <_>::default(), 0.into());
+        let mut stream_map = StreamMap::from_value(&key12, &value_aggregate);
         let generation = Generation::Nth(generation_idx.into());
         let generation_idx_res = stream_map
-            .insert(&key12.clone(), va.clone(), generation, ValueSource::CurrentData)
+            .insert(&key12.clone(), &value_aggregate, generation, ValueSource::CurrentData)
             .unwrap();
         assert_eq!(generation_idx_res, generation_idx);
+
         let examplar = StreamMap::from_key_value(&key12.clone(), value.as_ref());
         let s = stream_map
             .stream
@@ -150,23 +145,27 @@ mod test {
         assert!(s);
         let key3 = "other_key";
         let generation_idx = stream_map
-            .insert(&key3.clone(), va.clone(), generation, ValueSource::CurrentData)
+            .insert(&key3.clone(), &value_aggregate, generation, ValueSource::CurrentData)
             .unwrap();
         assert_eq!(generation_idx_res, generation_idx);
+
         let key4 = 42;
         let generation_idx = stream_map
-            .insert(&key4, va, generation, ValueSource::CurrentData)
+            .insert(&key4, &value_aggregate, generation, ValueSource::CurrentData)
             .unwrap();
         assert_eq!(generation_idx_res, generation_idx);
 
         let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
         assert_eq!(*v, *examplar.as_ref());
+
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
         assert_eq!(*v, *examplar.as_ref());
+
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
         let examplar = StreamMap::from_key_value(&key3.clone(), value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
+
         let v = internal_stream_iter.next().map(|e| e.result.as_ref()).unwrap();
         let examplar = StreamMap::from_key_value(&key4, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());

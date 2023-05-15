@@ -21,20 +21,20 @@ use air_parser::AirPos;
 
 use std::fmt;
 
-pub(crate) struct StreamDescriptor {
-    pub(crate) span: Span,
-    pub(crate) stream: Stream,
+pub(super) struct StreamDescriptor {
+    pub(super) span: Span,
+    pub(super) stream: Stream,
 }
 
 impl StreamDescriptor {
-    pub(crate) fn global(stream: Stream) -> Self {
+    pub(super) fn global(stream: Stream) -> Self {
         Self {
             span: Span::new(0.into(), usize::MAX.into()),
             stream,
         }
     }
 
-    pub(crate) fn restricted(stream: Stream, span: Span) -> Self {
+    pub(super) fn restricted(stream: Stream, span: Span) -> Self {
         Self { span, stream }
     }
 }
@@ -45,7 +45,7 @@ impl fmt::Display for StreamDescriptor {
     }
 }
 
-pub(crate) fn find_closest<'d>(
+pub(super) fn find_closest<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d StreamDescriptor>,
     position: AirPos,
 ) -> Option<&'d Stream> {
@@ -59,7 +59,7 @@ pub(crate) fn find_closest<'d>(
     None
 }
 
-pub(crate) fn find_closest_mut<'d>(
+pub(super) fn find_closest_mut<'d>(
     descriptors: impl DoubleEndedIterator<Item = &'d mut StreamDescriptor>,
     position: AirPos,
 ) -> Option<&'d mut Stream> {

@@ -34,6 +34,8 @@ mod par;
 mod seq;
 mod xor;
 
+use std::rc::Rc;
+
 pub(crate) use call::triplet::resolve_peer_id_to_string;
 pub(crate) use fold::FoldState;
 
@@ -140,6 +142,16 @@ macro_rules! log_instruction {
             $trace_ctx.as_result_trace()
         );
     };
+}
+
+pub trait FoldStreamLikeIngredients {
+    type Item;
+
+    fn iterable_name(&self) -> &str;
+    fn iterable_pos(&self) -> air_parser::AirPos;
+    fn iterator_name(&self) -> &str;
+    fn instruction(&self) -> Rc<Instruction<'_>>;
+    fn last_instruction(&self) -> Option<Rc<Instruction<'_>>>;
 }
 
 /// This macro converts joinable errors to Ok and sets subgraph complete to false.

@@ -77,7 +77,6 @@ fn to_merger_ap_result(
 fn populate_context<'ctx>(
     ap_result: &ast::ApResult<'ctx>,
     merger_ap_result: &MergerApResult,
-    // key_argument: Option<&ApArgument<'ctx>>,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<Option<GenerationIdx>> {

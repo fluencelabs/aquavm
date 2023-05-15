@@ -166,7 +166,7 @@ impl<'i> VariableValidator<'i> {
             ApMapKey::CanonStream(stream) => self.met_canon_stream(stream, span),
             ApMapKey::CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
         }
-        self.met_variable_name(ap_map.map.name, span);
+        self.met_variable_name_definition(ap_map.map.name, span);
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {

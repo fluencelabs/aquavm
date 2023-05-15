@@ -433,8 +433,8 @@ fn ap_stream_map() {
     let script = f!(r#"
         (seq
             (seq
-                (ap "{vm_1_peer_id}" "{service_name1}" %map)
-                (ap "{vm_1_peer_id}" "{service_name2}" %map)
+                (ap ("{vm_1_peer_id}" "{service_name1}") %map)
+                (ap ("{vm_1_peer_id}" "{service_name2}") %map)
             )
             (fold %map i
                 (seq

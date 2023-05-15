@@ -62,7 +62,7 @@ pub struct Ap<'i> {
     pub result: ApResult<'i>,
 }
 
-/// (ap key value %map)
+/// (ap (key value) %map)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct ApMap<'i> {
     pub key: ApMapKey<'i>,

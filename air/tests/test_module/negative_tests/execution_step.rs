@@ -552,7 +552,7 @@ fn float_map_key_is_unsupported() {
 
     let map_name = "%map";
     let join_stream_script = f!(r#"
-        (ap 0.5 "serv1" %map)
+        (ap (0.5 "serv1") %map)
      "#);
 
     let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
@@ -570,7 +570,7 @@ fn unsupported_map_key_type() {
     let join_stream_script = f!(r#"
     (seq
         (ap "a" some)
-        (ap some "serv1" %map)
+        (ap (some "serv1") %map)
     )
      "#);
 

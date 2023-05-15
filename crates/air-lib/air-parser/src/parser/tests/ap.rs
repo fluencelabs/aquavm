@@ -193,7 +193,7 @@ fn ap_with_stream_map() {
     let value = "some_string";
     let source_code = format!(
         r#"
-        (ap "{key_name}" "{value}" %stream_map)
+        (ap ("{key_name}" "{value}") %stream_map)
     "#
     );
     let actual = parse(source_code.as_str());
@@ -208,7 +208,7 @@ fn ap_with_stream_map() {
     // but populate_context will raise an error
     let source_code = format!(
         r#"
-        (ap {key_name} "{value}" %stream_map)
+        (ap ({key_name} "{value}") %stream_map)
     "#
     );
     let actual = parse(source_code.as_str());
@@ -224,7 +224,7 @@ fn ap_with_stream_map() {
 
     let source_code = format!(
         r#"
-        (ap "{key_name}" {value} %stream_map)
+        (ap ("{key_name}" {value}) %stream_map)
     "#
     );
     let actual = parse(source_code.as_str());
@@ -239,7 +239,7 @@ fn ap_with_stream_map() {
     // but populate_context will raise an error
     let source_code = format!(
         r#"
-        (ap {key_name} {value} %stream_map)
+        (ap ({key_name} {value}) %stream_map)
     "#
     );
     let actual = parse(source_code.as_str());
@@ -256,7 +256,7 @@ fn ap_with_stream_map() {
     let key_name = 123;
     let source_code = format!(
         r#"
-        (ap {key_name} {value} %stream_map)
+        (ap ({key_name} {value}) %stream_map)
     "#
     );
     let actual = parse(source_code.as_str());

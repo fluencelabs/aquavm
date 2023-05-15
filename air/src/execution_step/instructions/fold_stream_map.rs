@@ -17,6 +17,7 @@
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
+use super::FoldStreamLikeIngredients;
 use super::TraceHandler;
 use crate::execution_step::instructions::fold_stream::execute_with_stream;
 use crate::execution_step::Stream;
@@ -44,14 +45,7 @@ impl<'i> ExecutableInstruction<'i> for FoldStreamMap<'i> {
             trace_ctx,
             get_mut_stream_from_context,
             get_stream_from_context,
-            self.iterable.name,
-            &self.iterable.position,
-            (
-                self,
-                self.iterator.name,
-                self.instruction.clone(),
-                self.last_instruction.clone(),
-            ),
+            self,
         )
     }
 }
@@ -68,4 +62,28 @@ fn get_mut_stream_from_context<'c>(name: &str, position: AirPos, exec_ctx: &'c m
 /// Safety: this function should be called iff stream is present in context
 fn get_stream_from_context<'c>(name: &str, position: AirPos, exec_ctx: &'c mut ExecutionCtx<'_>) -> &'c Stream {
     exec_ctx.stream_maps.get_mut(name, position).unwrap().get_stream_ref()
+}
+
+impl<'i> FoldStreamLikeIngredients for FoldStreamMap<'i> {
+    type Item = air_parser::ast::StreamMap<'i>;
+
+    fn iterable_name(&self) -> &'i str {
+        self.iterable.name
+    }
+
+    fn iterable_pos(&self) -> air_parser::AirPos {
+        self.iterable.position
+    }
+
+    fn iterator_name(&self) -> &'i str {
+        self.iterator.name
+    }
+
+    fn instruction(&self) -> std::rc::Rc<air_parser::ast::Instruction<'_>> {
+        self.instruction.clone()
+    }
+
+    fn last_instruction(&self) -> Option<std::rc::Rc<air_parser::ast::Instruction<'_>>> {
+        self.last_instruction.clone()
+    }
 }

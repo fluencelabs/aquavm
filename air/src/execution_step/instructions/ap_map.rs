@@ -29,8 +29,6 @@ use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::CatchableError;
 
-// use crate::log_instruction;
-
 use air_interpreter_data::GenerationIdx;
 use air_parser::ast::ApMap;
 use air_parser::ast::ApMapKey;
