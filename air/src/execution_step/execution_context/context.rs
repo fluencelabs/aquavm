@@ -21,10 +21,15 @@ use super::Scalars;
 use super::Streams;
 
 use air_execution_info_collector::InstructionTracker;
+use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResultCidAggregate;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
+use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
+use air_interpreter_signatures::SignatureStore;
+use air_interpreter_signatures::SignatureTracker;
 
 use std::rc::Rc;
 
@@ -69,6 +74,17 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// CID-to-something trackers.
     pub(crate) cid_state: ExecutionCidState,
+
+    /// Signatures' store.
+    ///
+    /// It contains peers' signatures for verification.
+    pub(crate) signature_store: SignatureStore,
+
+    /// Local signatures tracker.
+    ///
+    /// It gathers peers' CIDs (call results and canon results) stored in the trace either for signing (current peer's
+    /// CIDs) or sign verification (other peers).
+    pub(crate) signature_tracker: SignatureTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -87,6 +103,9 @@ impl<'i> ExecutionCtx<'i> {
         );
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
+        // TODO we might keep both stores and merge them only with signature info collected into SignatureTracker
+        let signature_store =
+            SignatureStore::merge(prev_ingredients.signature_store, current_ingredients.signature_store);
 
         Self {
             run_parameters,
@@ -95,6 +114,7 @@ impl<'i> ExecutionCtx<'i> {
             call_results,
             streams,
             cid_state,
+            signature_store,
             ..<_>::default()
         }
     }
@@ -106,6 +126,14 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
         self.last_call_request_id += 1;
         self.last_call_request_id
+    }
+
+    pub(crate) fn record_call_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<ServiceResultCidAggregate>) {
+        self.signature_tracker.register(peer_id, cid);
+    }
+
+    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<CanonResultCidAggregate>) {
+        self.signature_tracker.register(peer_id, cid);
     }
 }
 
@@ -134,6 +162,7 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) last_call_request_id: u32,
     pub(crate) restricted_streams: RestrictedStreamGens,
     pub(crate) cid_info: CidInfo,
+    pub(crate) signature_store: SignatureStore,
 }
 
 use serde::Deserialize;
@@ -142,9 +171,9 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 
 /// It reflects RunParameters structure due to limitation of the marine macro to support Rc.
-#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) struct RcRunParameters {
-    pub(crate) init_peer_id: Rc<String>,
+    pub(crate) init_peer_id: Rc<str>,
     pub(crate) current_peer_id: Rc<String>,
     pub(crate) timestamp: u64,
     pub(crate) ttl: u32,
@@ -153,10 +182,21 @@ pub(crate) struct RcRunParameters {
 impl RcRunParameters {
     pub(crate) fn from_run_parameters(run_parameters: RunParameters) -> Self {
         Self {
-            init_peer_id: Rc::new(run_parameters.init_peer_id),
+            init_peer_id: run_parameters.init_peer_id.as_str().into(),
             current_peer_id: Rc::new(run_parameters.current_peer_id),
             timestamp: run_parameters.timestamp,
             ttl: run_parameters.ttl,
+        }
+    }
+}
+
+impl Default for RcRunParameters {
+    fn default() -> Self {
+        Self {
+            init_peer_id: "".into(),
+            current_peer_id: Default::default(),
+            timestamp: Default::default(),
+            ttl: Default::default(),
         }
     }
 }

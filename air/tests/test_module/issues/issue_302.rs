@@ -54,30 +54,34 @@ fn issue_302() {
     let result_4 = checked_call_vm!(peer_vm_2, <_>::default(), &script, result_1.data, result_3.data);
     let actual_trace = trace_from_result(&result_4);
 
+    let val_2 = stream!(2, 1, peer = peer_id_1, args = vec![2]);
+    let val_1 = stream!(1, 0, peer = peer_id_2, args = vec![1]);
+    let val_0 = stream!(0, 2, peer = peer_id_3, args = vec![0]);
+
+    let cid_2 = extract_service_result_cid(&val_2);
+    let cid_1 = extract_service_result_cid(&val_1);
+    let cid_0 = extract_service_result_cid(&val_0);
+
     let expected_trace = vec![
         executed_state::par(1, 4),
-        stream!(2, 1, peer = peer_id_1, args = vec![2]),
-        stream!(1, 0, peer = peer_id_2, args = vec![1]),
-        stream!(0, 2, peer = peer_id_3, args = vec![0]),
+        val_2,
+        val_1,
+        val_0,
         executed_state::canon(json!({
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
-            "values": [
-                {
-                    "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
-                    "trace_pos": 2
-                },
-               {
-                    "result": 2,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""},
-                    "trace_pos": 1
-                },
-            {
-                    "result": 0,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
-                    "trace_pos": 3
-                },
-            ]
+            "values": [{
+                "result": 1,
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+                "provenance": Provenance::service_result(cid_1),
+            }, {
+                "result": 2,
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""},
+                "provenance": Provenance::service_result(cid_2),
+            }, {
+                "result": 0,
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+                "provenance": Provenance::service_result(cid_0),
+            }],
         })),
         unused!(json!([1, 2, 0]), peer = peer_id_2, args = vec![vec![1, 2, 0]]),
     ];

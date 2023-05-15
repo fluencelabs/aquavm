@@ -24,6 +24,7 @@ use crate::JValue;
 use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
+use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use serde_json::json;
@@ -31,11 +32,11 @@ use std::rc::Rc;
 
 /// Resolve value to called function arguments.
 impl Resolvable for ast::ImmutableValue<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         use ast::ImmutableValue::*;
 
         match self {
-            InitPeerId => resolve_const(ctx.run_parameters.init_peer_id.as_str(), ctx),
+            InitPeerId => resolve_const(ctx.run_parameters.init_peer_id.as_ref(), ctx),
             LastError(error_accessor) => error_accessor.resolve(ctx),
             Literal(value) => resolve_const(value.to_string(), ctx),
             Timestamp => resolve_const(ctx.run_parameters.timestamp, ctx),
@@ -52,19 +53,23 @@ impl Resolvable for ast::ImmutableValue<'_> {
 pub(crate) fn resolve_const(
     arg: impl Into<JValue>,
     ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
     let jvalue = arg.into();
     let tetraplet = SecurityTetraplet::literal_tetraplet(ctx.run_parameters.init_peer_id.as_ref());
     let tetraplet = Rc::new(tetraplet);
 
-    Ok((jvalue, vec![tetraplet]))
+    Ok((jvalue, vec![tetraplet], Provenance::literal()))
 }
 
 impl Resolvable for Option<LambdaAST<'_>> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         use crate::LastError;
 
-        let LastError { error, tetraplet } = ctx.last_error();
+        let LastError {
+            error,
+            tetraplet,
+            provenance,
+        } = ctx.last_error();
 
         let jvalue = match self {
             Some(error_accessor) => select_by_lambda_from_scalar(error.as_ref(), error_accessor, ctx)?.into_owned(),
@@ -80,28 +85,33 @@ impl Resolvable for Option<LambdaAST<'_>> {
             }
         };
 
-        Ok((jvalue, tetraplets))
+        Ok((jvalue, tetraplets, provenance.clone()))
     }
 }
 
 impl Resolvable for ast::Scalar<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-        let value = ctx.scalars.get_value(self.name)?.into_jvaluable();
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let (value, provenance) = ctx.scalars.get_value(self.name)?.into_jvaluable();
         let tetraplets = value.as_tetraplets();
-        Ok((value.into_jvalue(), tetraplets))
+        Ok((value.into_jvalue(), tetraplets, provenance))
     }
 }
 
 impl Resolvable for ast::CanonStream<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-        let value: &dyn JValuable = &ctx.scalars.get_canon_stream(self.name)?;
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon = ctx.scalars.get_canon_stream(self.name)?;
+        let value: &dyn JValuable = &&canon.canon_stream;
         let tetraplets = value.as_tetraplets();
-        Ok((value.as_jvalue().into_owned(), tetraplets))
+        Ok((
+            value.as_jvalue().into_owned(),
+            tetraplets,
+            Provenance::canon(canon.cid.clone()),
+        ))
     }
 }
 
 impl Resolvable for ast::ImmutableVariable<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
@@ -110,25 +120,27 @@ impl Resolvable for ast::ImmutableVariable<'_> {
 }
 
 impl Resolvable for ast::ScalarWithLambda<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-        let value = ctx.scalars.get_value(self.name)?.into_jvaluable();
-        let (value, tetraplet) = value.apply_lambda_with_tetraplets(&self.lambda, ctx)?;
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let (value, root_provenance) = ctx.scalars.get_value(self.name)?.into_jvaluable();
+        let (value, tetraplet, provenance) = value.apply_lambda_with_tetraplets(&self.lambda, ctx, &root_provenance)?;
         let tetraplet = Rc::new(tetraplet);
-        Ok((value.into_owned(), vec![tetraplet]))
+        Ok((value.into_owned(), vec![tetraplet], provenance))
     }
 }
 
 impl Resolvable for ast::CanonStreamWithLambda<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
-        let value: &dyn JValuable = &ctx.scalars.get_canon_stream(self.name)?;
-        let (value, tetraplet) = value.apply_lambda_with_tetraplets(&self.lambda, ctx)?;
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon = ctx.scalars.get_canon_stream(self.name)?;
+        let value: &dyn JValuable = &&canon.canon_stream;
+        let (value, tetraplet, provenance) =
+            value.apply_lambda_with_tetraplets(&self.lambda, ctx, &Provenance::canon(canon.cid.clone()))?;
         let tetraplet = Rc::new(tetraplet);
-        Ok((value.into_owned(), vec![tetraplet]))
+        Ok((value.into_owned(), vec![tetraplet], provenance))
     }
 }
 
 impl Resolvable for ast::ImmutableVariableWithLambda<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets)> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),

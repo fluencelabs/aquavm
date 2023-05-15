@@ -19,15 +19,18 @@ use super::ValueAggregate;
 use crate::execution_step::Generation;
 use crate::JValue;
 
+use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResultCidAggregate;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::ops::Deref;
 use std::rc::Rc;
 
 /// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
 /// scalars, and represent a stream fixed at some execution point.
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStream {
     values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
@@ -58,10 +61,12 @@ impl CanonStream {
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
-        use std::ops::Deref;
-
         // TODO: this clone will be removed after boxed values
-        let jvalue_array = self.values.iter().map(|r| r.result.deref().clone()).collect::<Vec<_>>();
+        let jvalue_array = self
+            .values
+            .iter()
+            .map(|r| r.get_result().deref().clone())
+            .collect::<Vec<_>>();
         JValue::Array(jvalue_array)
     }
 
@@ -84,8 +89,29 @@ impl fmt::Display for CanonStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for value in self.values.iter() {
-            write!(f, "{value}, ")?;
+            // TODO debug? only aggregate? should we drop Display entirely?
+            write!(f, "{value:?}, ")?;
         }
         write!(f, "]")
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CanonStreamWithProvenance {
+    pub(crate) canon_stream: CanonStream,
+    pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
+}
+
+impl CanonStreamWithProvenance {
+    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+        Self { canon_stream, cid }
+    }
+}
+
+impl Deref for CanonStreamWithProvenance {
+    type Target = CanonStream;
+
+    fn deref(&self) -> &Self::Target {
+        &self.canon_stream
     }
 }

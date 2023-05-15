@@ -260,7 +260,7 @@ where
 
 impl<T> fmt::Display for ValuesSparseMatrix<T>
 where
-    T: fmt::Display,
+    T: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "current_depth: {}", self.current_depth)?;
@@ -269,7 +269,7 @@ where
             write!(f, "{name}: ")?;
 
             for value in values.iter() {
-                write!(f, "{value} ")?;
+                write!(f, "{value:?} ")?;
             }
             writeln!(f)?;
         }
@@ -281,8 +281,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::execution_step::ValueAggregate;
-    use polyplets::SecurityTetraplet;
+    use crate::execution_step::{LiteralAggregate, ValueAggregate};
 
     use serde_json::json;
 
@@ -293,11 +292,9 @@ mod test {
     fn test_local_cleanup() {
         let mut scalars = ValuesSparseMatrix::new();
 
-        let tetraplet = SecurityTetraplet::default();
-        let rc_tetraplet = Rc::new(tetraplet);
         let value = json!(1u64);
         let rc_value = Rc::new(value);
-        let value_aggregate = ValueAggregate::new(rc_value, rc_tetraplet, 1.into());
+        let value_aggregate = ValueAggregate::from_literal_result(LiteralAggregate::new(rc_value, "".into(), 1.into()));
         let value_1_name = "name_1";
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 

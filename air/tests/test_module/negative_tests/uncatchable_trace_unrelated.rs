@@ -130,7 +130,7 @@ fn malformed_call_service_failed() {
     let value_cid = cid_state.value_tracker.record_value(value.clone()).unwrap();
     let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
     let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
-    let service_result_agg = ServiceResultAggregate {
+    let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash: "0000000000000".into(),
         tetraplet_cid,

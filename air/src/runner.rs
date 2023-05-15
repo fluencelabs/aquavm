@@ -21,6 +21,7 @@ use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_signatures::derive_dummy_keypair;
 use air_log_targets::RUN_PARAMS;
 use air_utils::measure;
 
@@ -55,6 +56,9 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    // TODO STUB this is a stub key that is to be replaced by external one in other PR
+    let (keypair, _) = derive_dummy_keypair(&params.current_peer_id);
+
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
@@ -72,11 +76,17 @@ fn execute_air_impl(
         tracing::Level::INFO,
         "execute",
     );
-    match exec_result {
-        Ok(_) => farewell::from_success_result(exec_ctx, trace_handler),
-        // return new collected trace in case of errors
-        Err(error) if error.is_catchable() => Err(farewell::from_execution_error(exec_ctx, trace_handler, error)),
-        // return the prev data in case of any trace errors
-        Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
-    }
+    measure!(
+        match exec_result {
+            Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair),
+            // return new collected trace in case of errors
+            Err(error) if error.is_catchable() => {
+                Err(farewell::from_execution_error(exec_ctx, trace_handler, error, &keypair))
+            }
+            // return the prev data in case of any trace errors
+            Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+        },
+        tracing::Level::INFO,
+        "farewell",
+    )
 }

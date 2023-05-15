@@ -184,7 +184,7 @@ impl Stream {
             return None;
         }
 
-        let len = end - start + 1;
+        let len = (end - start) + 1;
         let iter: Box<dyn Iterator<Item = &[ValueAggregate]>> =
             Box::new(self.values.iter().skip(start).take(len).map(|v| v.as_slice()));
         let iter = StreamSliceIter { iter, len };
@@ -199,7 +199,7 @@ impl Stream {
         for (generation, values) in self.values.iter().enumerate() {
             for value in values.iter() {
                 trace_ctx
-                    .update_generation(value.trace_pos, generation.into())
+                    .update_generation(value.get_trace_pos(), generation.into())
                     .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
             }
         }
@@ -311,16 +311,24 @@ mod test {
     use super::Generation;
     use super::Stream;
     use super::ValueAggregate;
+    use super::ValueSource;
+    use crate::execution_step::ServiceResultAggregate;
 
+    use air_interpreter_cid::CID;
     use serde_json::json;
 
-    use air_trace_handler::merger::ValueSource;
     use std::rc::Rc;
 
     #[test]
     fn test_slice_iter() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into());
+        let value_1 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
+        );
+        let value_2 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
+        );
         let mut stream = Stream::from_generations_count(2.into(), 0.into());
 
         stream
@@ -362,8 +370,14 @@ mod test {
 
     #[test]
     fn generation_from_current_data() {
-        let value_1 = ValueAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into());
-        let value_2 = ValueAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into());
+        let value_1 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
+        );
+        let value_2 = ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
+            CID::new("some fake cid").into(),
+        );
         let mut stream = Stream::from_generations_count(5.into(), 5.into());
 
         stream

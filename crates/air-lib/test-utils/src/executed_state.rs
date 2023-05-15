@@ -17,6 +17,7 @@
 use super::ApResult;
 use super::CallResult;
 use super::CanonResult;
+use super::CanonResultCidAggregate;
 use super::ExecutedState;
 use super::JValue;
 use super::ParResult;
@@ -31,8 +32,10 @@ use crate::SubTraceDesc;
 use air::ExecutionCidState;
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CID;
-use air_interpreter_data::ServiceResultAggregate;
-use air_interpreter_data::{CanonCidAggregate, GenerationIdx};
+use air_interpreter_data::CanonCidAggregate;
+use air_interpreter_data::GenerationIdx;
+use air_interpreter_data::Provenance;
+use air_interpreter_data::ServiceResultCidAggregate;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -42,7 +45,7 @@ use std::rc::Rc;
 pub fn simple_value_aggregate_cid(
     result: impl Into<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultAggregate>> {
+) -> Rc<CID<ServiceResultCidAggregate>> {
     let value_cid = cid_state
         .value_tracker
         .record_value(Rc::new(result.into()))
@@ -52,7 +55,7 @@ pub fn simple_value_aggregate_cid(
         .tetraplet_tracker
         .record_value(Rc::new(tetraplet))
         .unwrap();
-    let service_result_agg = ServiceResultAggregate {
+    let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash: "".into(),
         tetraplet_cid,
@@ -68,7 +71,7 @@ pub fn value_aggregate_cid(
     tetraplet: SecurityTetraplet,
     args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultAggregate>> {
+) -> Rc<CID<ServiceResultCidAggregate>> {
     let value_cid = cid_state
         .value_tracker
         .record_value(Rc::new(result.into()))
@@ -81,7 +84,7 @@ pub fn value_aggregate_cid(
     let arguments = serde_json::Value::Array(args);
     let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
 
-    let service_result_agg = ServiceResultAggregate {
+    let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash,
         tetraplet_cid,
@@ -140,6 +143,8 @@ pub fn ap(generation: impl Into<GenerationIdx>) -> ExecutedState {
 pub struct ValueAggregateAlike {
     pub result: Rc<JValue>,
     pub tetraplet: Rc<SecurityTetraplet>,
+    // TODO convert data and remove Provenance
+    pub provenance: Option<Provenance>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -179,15 +184,23 @@ pub fn canon_tracked(
             let tetraplet_cid = cid_state
                 .tetraplet_tracker
                 .record_value(value.tetraplet.clone())?;
-            cid_state.canon_tracker.record_value(CanonCidAggregate {
-                value: value_cid,
-                tetraplet: tetraplet_cid,
-            })
+            cid_state
+                .canon_element_tracker
+                .record_value(CanonCidAggregate {
+                    value: value_cid,
+                    tetraplet: tetraplet_cid,
+                    provenance: value.provenance.clone().unwrap_or_else(Provenance::literal),
+                })
         })
         .collect::<Result<Vec<_>, _>>()
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_input.values));
-    let canon_result = CanonResult::new(tetraplet_cid, value_cids);
-    ExecutedState::Canon(canon_result)
+
+    let canon_result = CanonResultCidAggregate::new(tetraplet_cid, value_cids);
+    let canon_result_cid = cid_state
+        .canon_result_tracker
+        .record_value(canon_result.clone())
+        .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_result));
+    ExecutedState::Canon(CanonResult::new(canon_result_cid))
 }
 
 #[macro_export]
@@ -361,6 +374,23 @@ impl ExecutedCallBuilder {
             generation: (generation as usize).into(),
         };
         ExecutedState::Call(CallResult::Executed(value))
+    }
+}
+
+pub fn extract_service_result_cid(
+    stream_exec_state: &ExecutedState,
+) -> Rc<CID<ServiceResultCidAggregate>> {
+    match stream_exec_state {
+        ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid, .. })) => cid.clone(),
+        ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))) => cid.clone(),
+        _ => panic!("the function is intended for call results values only"),
+    }
+}
+
+pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> Rc<CID<CanonResultCidAggregate>> {
+    match canon_state {
+        ExecutedState::Canon(CanonResult(cid)) => cid.clone(),
+        _ => panic!("the function is intended for canon only"),
     }
 }
 

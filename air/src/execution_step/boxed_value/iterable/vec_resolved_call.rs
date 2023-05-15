@@ -52,13 +52,14 @@ impl<'ctx> Iterable<'ctx> for IterableVecResolvedCall {
             return None;
         }
 
-        let ValueAggregate {
-            result,
+        let (result, tetraplet, trace_pos) = self.call_results[self.cursor].as_inner_parts();
+
+        let result = IterableItem::RcValue((
+            result.clone(),
             tetraplet,
             trace_pos,
-        } = &self.call_results[self.cursor];
-
-        let result = IterableItem::RcValue((result.clone(), tetraplet.clone(), *trace_pos));
+            self.call_results[self.cursor].get_provenance(),
+        ));
         Some(result)
     }
 

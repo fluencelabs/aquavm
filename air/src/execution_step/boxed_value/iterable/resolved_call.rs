@@ -57,26 +57,23 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
             return None;
         }
 
-        let ValueAggregate {
-            result,
-            tetraplet,
-            trace_pos,
-        } = &self.call_result;
+        let (result, tetraplet, trace_pos) = self.call_result.as_inner_parts();
+        let provenance = self.call_result.get_provenance();
 
         let jvalue = match &result.deref() {
             JValue::Array(array) => &array[self.cursor],
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
 
-        let mut tetraplet = (**tetraplet).clone();
+        let mut tetraplet = (*tetraplet).clone();
         tetraplet.add_lambda(&format!(".$.[{}]", self.cursor));
 
-        let result = IterableItem::RefValue((jvalue, tetraplet.into(), *trace_pos));
+        let result = IterableItem::RefValue((jvalue, tetraplet.into(), trace_pos, provenance));
         Some(result)
     }
 
     fn len(&self) -> usize {
-        match self.call_result.result.deref() {
+        match self.call_result.get_result().deref() {
             JValue::Array(array) => array.len(),
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         }

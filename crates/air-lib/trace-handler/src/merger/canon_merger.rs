@@ -18,7 +18,6 @@ use super::*;
 use crate::merger::errors::CanonResultError;
 
 use air_interpreter_cid::CID;
-use polyplets::SecurityTetraplet;
 
 use std::rc::Rc;
 
@@ -31,10 +30,7 @@ pub enum MergerCanonResult {
 
     /// There was a state in at least one of the contexts. If there were two states in
     /// both contexts, they were successfully merged.
-    CanonResult {
-        tetraplet: Rc<CID<SecurityTetraplet>>,
-        values: Vec<Rc<CID<CanonCidAggregate>>>,
-    },
+    CanonResult(Rc<CID<CanonResultCidAggregate>>),
 }
 
 pub(crate) fn try_merge_next_state_as_canon(data_keeper: &mut DataKeeper) -> MergeResult<MergerCanonResult> {
@@ -65,10 +61,7 @@ fn prepare_both_canon_result(
 }
 
 fn prepare_single_canon_result(canon_result: CanonResult) -> MergeResult<MergerCanonResult> {
-    Ok(MergerCanonResult::CanonResult {
-        tetraplet: canon_result.tetraplet,
-        values: canon_result.values,
-    })
+    Ok(MergerCanonResult::CanonResult(canon_result.0))
 }
 
 fn check_canon_results(

@@ -43,12 +43,12 @@ impl CallResult {
         Self::Executed(value_ref)
     }
 
-    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> Self {
+    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
     pub fn executed_stream(
-        cid: Rc<CID<ServiceResultAggregate>>,
+        cid: Rc<CID<ServiceResultCidAggregate>>,
         generation: GenerationIdx,
     ) -> CallResult {
         let value = ValueRef::Stream { cid, generation };
@@ -59,8 +59,20 @@ impl CallResult {
         Self::executed_service_result(ValueRef::Unused(value_cid))
     }
 
-    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultAggregate>>) -> CallResult {
+    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
         CallResult::Failed(service_result_agg_cid)
+    }
+
+    pub fn get_cid(&self) -> Option<Rc<CID<ServiceResultCidAggregate>>> {
+        match self {
+            CallResult::RequestSentBy(_) => None,
+            CallResult::Executed(executed) => match executed {
+                ValueRef::Scalar(cid) => Some(cid.clone()),
+                ValueRef::Stream { cid, .. } => Some(cid.clone()),
+                ValueRef::Unused(_) => None,
+            },
+            CallResult::Failed(cid) => Some(cid.clone()),
+        }
     }
 }
 
@@ -93,11 +105,34 @@ impl ApResult {
 }
 
 impl CanonResult {
+    pub fn new(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+        Self(cid)
+    }
+}
+
+impl CanonResultCidAggregate {
     pub fn new(
         tetraplet: Rc<CID<SecurityTetraplet>>,
         values: Vec<Rc<CID<CanonCidAggregate>>>,
     ) -> Self {
         Self { tetraplet, values }
+    }
+}
+
+impl Provenance {
+    #[inline]
+    pub fn literal() -> Self {
+        Self::Literal
+    }
+
+    #[inline]
+    pub fn service_result(cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
+        Self::ServiceResult { cid }
+    }
+
+    #[inline]
+    pub fn canon(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+        Self::Canon { cid }
     }
 }
 

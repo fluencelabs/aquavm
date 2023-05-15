@@ -61,6 +61,7 @@ pub(super) fn handle_prev_state<'i>(
                 serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
+            exec_ctx.record_call_cid(&*tetraplet.peer_pk, failed_cid);
             trace_ctx.meet_call_end(met_result.result);
 
             let err_msg = call_service_failed.message;
@@ -101,6 +102,8 @@ pub(super) fn handle_prev_state<'i>(
         }
         // this instruction's been already executed
         Executed(value) => {
+            use air_interpreter_data::ValueRef;
+
             let resulted_value = populate_context_from_data(
                 value,
                 tetraplet.clone(),
@@ -109,6 +112,14 @@ pub(super) fn handle_prev_state<'i>(
                 output,
                 exec_ctx,
             )?;
+
+            match &resulted_value {
+                ValueRef::Scalar(ref cid) | ValueRef::Stream { ref cid, .. } => {
+                    exec_ctx.record_call_cid(&*tetraplet.peer_pk, cid);
+                }
+                ValueRef::Unused(_) => {}
+            }
+
             let call_result = CallResult::Executed(resulted_value);
             trace_ctx.meet_call_end(call_result);
 
@@ -118,7 +129,7 @@ pub(super) fn handle_prev_state<'i>(
 }
 
 use super::call_result_setter::*;
-use crate::execution_step::ValueAggregate;
+use crate::execution_step::ServiceResultAggregate;
 use crate::JValue;
 
 fn update_state_with_service_result<'i>(
@@ -143,7 +154,7 @@ fn update_state_with_service_result<'i>(
 
     let trace_pos = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-    let executed_result = ValueAggregate::new(result, tetraplet.clone(), trace_pos);
+    let executed_result = ServiceResultAggregate::new(result, tetraplet.clone(), trace_pos);
     let new_call_result =
         populate_context_from_peer_service_result(executed_result, output, tetraplet, argument_hash, exec_ctx)?;
     trace_ctx.meet_call_end(new_call_result);
@@ -170,11 +181,13 @@ fn handle_service_error(
 
     let failed_value = CallServiceFailed::new(service_result.ret_code, error_message).to_value();
 
+    let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
     let service_result_agg_cid = exec_ctx
         .cid_state
         .insert_value(failed_value.into(), tetraplet, argument_hash)
         .map_err(UncatchableError::from)?;
 
+    exec_ctx.record_call_cid(peer_id, &service_result_agg_cid);
     trace_ctx.meet_call_end(Failed(service_result_agg_cid));
 
     Err(error.into())

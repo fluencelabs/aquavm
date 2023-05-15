@@ -20,11 +20,10 @@ mod utils;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::instructions::ValueAggregate;
+use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
-use crate::SecurityTetraplet;
 use apply_to_arguments::*;
 use utils::*;
 

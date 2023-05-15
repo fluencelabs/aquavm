@@ -87,6 +87,7 @@ version = "0.7.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-interface",
+ "air-interpreter-signatures",
  "air-utils",
  "aquavm-air-parser",
  "newtype_derive",
@@ -107,6 +108,22 @@ dependencies = [
  "marine-rs-sdk",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "air-interpreter-signatures"
+version = "0.1.0"
+dependencies = [
+ "air-interpreter-cid",
+ "base64ct",
+ "bs58",
+ "ed25519-dalek",
+ "fluence-keypair",
+ "rand_chacha 0.2.2",
+ "serde",
+ "serde_json",
+ "sha2 0.10.6",
+ "zeroize",
 ]
 
 [[package]]
@@ -291,6 +308,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-signatures",
  "air-lambda-ast",
  "air-lambda-parser",
  "air-log-targets",
@@ -336,7 +354,7 @@ dependencies = [
  "avm-data-store",
  "avm-interface",
  "bs58",
- "clap 4.2.5",
+ "clap 4.2.7",
  "fluence-keypair",
  "itertools",
  "serde",
@@ -499,6 +517,12 @@ name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
+
+[[package]]
+name = "base64ct"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bimap"
@@ -800,9 +824,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.2.5"
+version = "4.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a1f23fa97e1d1641371b51f35535cb26959b8e27ab50d167a8b996b5bada819"
+checksum = "34d21f9bf1b425d2968943631ec91202fe5e837264063503708b83013f8fc938"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -811,9 +835,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.2.5"
+version = "4.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fdc5d93c358224b4d6867ef1356d740de2303e9892edc06c5340daeccd96bab"
+checksum = "914c8c79fb560f238ef6429439a30023c862f7a28e688c58f7203f12b29970bd"
 dependencies = [
  "anstream",
  "anstyle",
@@ -3277,9 +3301,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.95"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d721eca97ac802aa7777b701877c8004d950fc142651367300d21c1cc0194744"
+checksum = "057d394a50403bcac12672b2b18fb387ab6d289d957dab67dd201875391e52f1"
 dependencies = [
  "itoa",
  "ryu",
