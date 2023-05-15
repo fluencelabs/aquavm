@@ -115,7 +115,6 @@ name = "air-interpreter-signatures"
 version = "0.1.0"
 dependencies = [
  "air-interpreter-cid",
- "base64ct",
  "bs58",
  "ed25519-dalek",
  "fluence-keypair",
@@ -123,7 +122,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.6",
- "zeroize",
 ]
 
 [[package]]
@@ -517,12 +515,6 @@ name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
-
-[[package]]
-name = "base64ct"
-version = "1.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bimap"
