@@ -11,7 +11,7 @@ keywords = ["fluence", "air", "programming-language"]
 categories = ["wasm"]
 
 [dependencies]
-air-interpreter-cid = { path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
 fluence-keypair = "0.10.1"
 
 base64ct = { version = "1.6.0", features = ["std"] }
