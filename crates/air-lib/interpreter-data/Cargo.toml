@@ -19,7 +19,7 @@ air-utils = { version = "0.1.0", path = "../utils" }
 aquavm-air-parser = { version = "0.7.4", path = "../air-parser" }
 air-interpreter-interface = { version = "0.13.0", path = "../interpreter-interface" }
 air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
-air-interpreter-signatures = { path = "../interpreter-signatures" }
+air-interpreter-signatures = { version = "0.1.0", path = "../interpreter-signatures" }
 polyplets = { version = "0.3.2", path = "../polyplets" }
 
 serde = {version = "1.0.159", features = ["derive", "rc"]}
