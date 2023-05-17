@@ -117,7 +117,9 @@ pub(super) fn handle_prev_state<'i>(
                 ValueRef::Scalar(ref cid) | ValueRef::Stream { ref cid, .. } => {
                     exec_ctx.record_call_cid(&*tetraplet.peer_pk, cid);
                 }
-                ValueRef::Unused(_) => {}
+                ValueRef::Unused(ref cid) => {
+                    exec_ctx.record_value_cid(&*tetraplet.peer_pk, cid)
+                }
             }
 
             let call_result = CallResult::Executed(resulted_value);

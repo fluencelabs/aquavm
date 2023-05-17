@@ -19,6 +19,7 @@ use super::LastError;
 use super::LastErrorDescriptor;
 use super::Scalars;
 use super::Streams;
+use crate::JValue;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
@@ -133,6 +134,10 @@ impl<'i> ExecutionCtx<'i> {
     }
 
     pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<CanonResultCidAggregate>) {
+        self.signature_tracker.register(peer_id, cid);
+    }
+
+    pub(crate) fn record_value_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<JValue>) {
         self.signature_tracker.register(peer_id, cid);
     }
 }

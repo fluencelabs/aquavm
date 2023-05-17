@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_signatures::{derive_dummy_keypair, SignatureTracker};
 use air_test_framework::{ephemeral::PeerId, AirScriptExecutor};
 use air_test_utils::prelude::*;
@@ -113,6 +114,7 @@ fn test_signature_call_ununsed() {
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
     let mut expected_tracker = SignatureTracker::new();
+    expected_tracker.register(init_peer_id, &value_to_json_cid(&json!("ok")).unwrap());
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = data.signatures.get(&keypair.public().into());
@@ -343,6 +345,7 @@ fn test_signature_canon_merge() {
     let mut expected_tracker = SignatureTracker::new();
     expected_tracker.register(init_peer_id, &expected_canon_cid);
     expected_tracker.register(init_peer_id, &expected_call_result_cid);
+    expected_tracker.register(init_peer_id, &value_to_json_cid(&json!("ok")).unwrap());
     let expected_signature = expected_tracker.into_signature(init_peer_id, &keypair).unwrap();
 
     let signature = last_data.signatures.get(&keypair.public().into());

@@ -66,14 +66,15 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
                 stream.position,
             );
             let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-            exec_ctx.record_call_cid(&*peer_id, &service_result_agg_cid);
+            exec_ctx.record_call_cid(peer_id, &service_result_agg_cid);
             Ok(CallResult::executed_stream(service_result_agg_cid, generation))
         }
         CallOutputValue::None => {
-            let value_cid = value_to_json_cid(&*executed_result.result)
-                .map_err(UncatchableError::from)?
-                .into();
+            let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
+            let value_cid = value_to_json_cid(&*executed_result.result).map_err(UncatchableError::from)?;
+            exec_ctx.record_value_cid(peer_id, &value_cid);
 
+            let value_cid = Rc::new(value_cid);
             Ok(CallResult::executed_unused(value_cid))
         }
     }
