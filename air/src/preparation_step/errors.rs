@@ -16,6 +16,7 @@
 
 use crate::ToErrorCode;
 use air_interpreter_data::data_version;
+use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::Versions;
 
 use serde_json::Error as SerdeJsonError;
@@ -77,6 +78,10 @@ pub enum PreparationError {
         actual_version: semver::Version,
         required_version: semver::Version,
     },
+
+    /// Failed to verify CidStore contents of the current data.
+    #[error(transparent)]
+    CidStoreVerificationError(#[from] CidStoreVerificationError),
 }
 
 impl ToErrorCode for PreparationError {

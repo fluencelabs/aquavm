@@ -21,6 +21,7 @@ use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
+use thiserror::Error as ThisError;
 
 use std::{collections::HashMap, rc::Rc};
 
@@ -45,6 +46,34 @@ impl<Val> CidStore<Val> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
+}
+
+impl<Val: Serialize> CidStore<Val> {
+    pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
+        for (cid, value) in &self.0 {
+            let expected_cid = value_to_json_cid::<Val>(value)?;
+            if expected_cid != **cid {
+                return Err(CidStoreVerificationError::MismatchError {
+                    type_name: std::any::type_name::<Val>(),
+                    cid_repr: (**cid).clone().into_inner(),
+                });
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(ThisError, Debug)]
+pub enum CidStoreVerificationError {
+    #[error("Failed to recalculate CID during the verification: {0}")]
+    CidCalculationError(#[from] CidCalculationError),
+
+    #[error("Value mismatch in the {type_name:?} store for CID {cid_repr:?}")]
+    MismatchError {
+        // nb: type_name is std::any::type_name() result that may be inconsistent between the Rust compiler versions
+        type_name: &'static str,
+        cid_repr: String,
+    },
 }
 
 impl<Val> Default for CidStore<Val> {

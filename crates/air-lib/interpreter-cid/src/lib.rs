@@ -51,6 +51,7 @@ impl<T: ?Sized> Clone for CID<T> {
         Self(self.0.clone(), self.1)
     }
 }
+
 impl<T: ?Sized> fmt::Debug for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("CID").field(&self.0).finish()
