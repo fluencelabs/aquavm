@@ -162,6 +162,7 @@ pub struct CidInfo {
 }
 
 impl CidInfo {
+    #[tracing::instrument(skip_all)]
     pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
         self.value_store.verify()?;
         self.tetraplet_store.verify()?;
