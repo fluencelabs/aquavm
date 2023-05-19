@@ -90,3 +90,4 @@ def intermediate_temp_file(target_file: str):
             os.remove(out.name)
         except OSError:
             pass
+        raise
