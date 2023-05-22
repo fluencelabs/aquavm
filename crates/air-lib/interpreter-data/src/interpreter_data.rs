@@ -16,17 +16,11 @@
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
-use crate::cid_store::CidStore;
-use crate::CanonCidAggregate;
-use crate::CanonResultCidAggregate;
-use crate::CidStoreVerificationError;
+use crate::CidInfo;
 use crate::ExecutionTrace;
-use crate::JValue;
-use crate::ServiceResultCidAggregate;
 
 use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
-use polyplets::SecurityTetraplet;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -140,35 +134,5 @@ impl Versions {
             data_version: crate::data_version().clone(),
             interpreter_version,
         }
-    }
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CidInfo {
-    /// Map CID to value.
-    pub value_store: CidStore<JValue>,
-
-    /// Map CID to a tetraplet.
-    pub tetraplet_store: CidStore<SecurityTetraplet>,
-
-    /// Map CID to a canon element value.
-    pub canon_element_store: CidStore<CanonCidAggregate>,
-
-    /// Map CID to a canon result.
-    pub canon_result_store: CidStore<CanonResultCidAggregate>,
-
-    /// Map CID to a service result aggregate.
-    pub service_result_store: CidStore<ServiceResultCidAggregate>,
-}
-
-impl CidInfo {
-    #[tracing::instrument(skip_all)]
-    pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
-        self.value_store.verify()?;
-        self.tetraplet_store.verify()?;
-        self.canon_element_store.verify()?;
-        self.canon_result_store.verify()?;
-        self.service_result_store.verify()?;
-        Ok(())
     }
 }

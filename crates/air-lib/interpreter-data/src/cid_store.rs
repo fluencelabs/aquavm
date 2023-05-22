@@ -46,6 +46,25 @@ impl<Val> CidStore<Val> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&Rc<CID<Val>>, &Rc<Val>)> {
+        self.0.iter()
+    }
+
+    pub fn check_reference<Src>(
+        &self,
+        _source_cid: &CID<Src>,
+        target_cid: &Rc<CID<Val>>,
+    ) -> Result<(), CidStoreVerificationError> {
+        self.0
+            .get(target_cid)
+            .ok_or_else(|| CidStoreVerificationError::MissingReference {
+                source_type_name: std::any::type_name::<Src>(),
+                target_type_name: std::any::type_name::<Val>(),
+                target_cid_repr: (**target_cid).clone().into_inner(),
+            })?;
+        Ok(())
+    }
 }
 
 impl<Val: Serialize> CidStore<Val> {
@@ -73,6 +92,13 @@ pub enum CidStoreVerificationError {
         // nb: type_name is std::any::type_name() result that may be inconsistent between the Rust compiler versions
         type_name: &'static str,
         cid_repr: String,
+    },
+
+    #[error("Reference CID {target_cid_repr:?} from type {source_type_name:?} to {target_type_name:?} was not found")]
+    MissingReference {
+        source_type_name: &'static str,
+        target_type_name: &'static str,
+        target_cid_repr: String,
     },
 }
 
