@@ -97,6 +97,14 @@ pub enum UncatchableError {
 
     #[error("failed to deserialize to CallServiceFailed: {0}")]
     MalformedCallServiceFailed(serde_json::Error),
+
+    /// Argument hash or tetraplet mismatch in a call merged from current_data
+    #[error("call's {param} doesn't match expected parameters: expected {expected_value}, got {current_value} ")]
+    CallParametersMismatch {
+        param: &'static str,
+        expected_value: String,
+        current_value: String,
+    },
 }
 
 impl ToErrorCode for UncatchableError {

@@ -141,9 +141,11 @@ impl ExecutionCidState {
     pub(crate) fn resolve_service_value(
         &self,
         service_result_agg_cid: &CID<ServiceResultCidAggregate>,
-    ) -> Result<Rc<JValue>, UncatchableError> {
+    ) -> Result<(Rc<JValue>, RcSecurityTetraplet, Rc<ServiceResultCidAggregate>), UncatchableError> {
         let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
-        self.get_value_by_cid(&service_result_aggregate.value_cid)
+        let val = self.get_value_by_cid(&service_result_aggregate.value_cid)?;
+        let tetraplet = self.get_tetraplet_by_cid(&service_result_aggregate.tetraplet_cid)?;
+        Ok((val, tetraplet, service_result_aggregate))
     }
 }
 

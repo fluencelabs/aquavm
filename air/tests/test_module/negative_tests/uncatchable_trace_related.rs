@@ -145,7 +145,7 @@ fn set_subtrace_len_and_pos_failed() {
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             1,
             subtrace_desc(5, 1),
@@ -184,7 +184,7 @@ fn no_element_at_position() {
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             42,
             subtrace_desc(3, 1),
@@ -224,7 +224,7 @@ fn no_stream_state() {
     let wrong_state = request_sent_by("vm_peer_id_1");
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, &mut tracker, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             3,
             subtrace_desc(3, 1), // try to change the number of elems to 3
@@ -446,7 +446,7 @@ fn several_records_with_same_pos() {
     let value_pos = 1;
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, &mut cid_state, peer = vm_peer_id_1),
         fold(vec![
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
@@ -545,7 +545,7 @@ fn fold_pos_overflow() {
     let wrong_after_subtrace_len = TraceLen::MAX - 1;
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         fold(vec![subtrace_lore(
             value_pos,
             subtrace_desc(before_subtrace_pos, 1),

@@ -53,10 +53,18 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
-            let err_value = exec_ctx
+            let (err_value, current_tetraplet, service_agg) = exec_ctx
                 .cid_state
                 .resolve_service_value(failed_cid)
                 .map_err(UncatchableError::from)?;
+
+            verifier::verify_call(
+                &service_agg.argument_hash,
+                tetraplet,
+                &service_agg.argument_hash,
+                &current_tetraplet,
+            )?;
+
             let call_service_failed: CallServiceFailed =
                 serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
 
@@ -106,6 +114,7 @@ pub(super) fn handle_prev_state<'i>(
 
             let resulted_value = populate_context_from_data(
                 value,
+                argument_hash.as_ref().unwrap(),
                 tetraplet.clone(),
                 met_result.trace_pos,
                 met_result.source,

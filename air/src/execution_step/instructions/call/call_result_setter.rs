@@ -81,6 +81,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 
 pub(crate) fn populate_context_from_data<'i>(
     value: ValueRef,
+    argument_hash: &str,
     tetraplet: RcSecurityTetraplet,
     trace_pos: TracePos,
     value_source: ValueSource,
@@ -89,14 +90,30 @@ pub(crate) fn populate_context_from_data<'i>(
 ) -> ExecutionResult<ValueRef> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
-            let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
+            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_value(&cid)?;
+
+            verifier::verify_call(
+                argument_hash,
+                &tetraplet,
+                &service_result_agg.argument_hash,
+                &current_tetraplet,
+            )?;
+
             let result = ServiceResultAggregate::new(value, tetraplet, trace_pos);
             let result = ValueAggregate::from_service_result(result, cid.clone());
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
             Ok(ValueRef::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
-            let value = exec_ctx.cid_state.resolve_service_value(&cid)?;
+            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_value(&cid)?;
+
+            verifier::verify_call(
+                argument_hash,
+                &tetraplet,
+                &service_result_agg.argument_hash,
+                &current_tetraplet,
+            )?;
+
             let result = ServiceResultAggregate::new(value, tetraplet, trace_pos);
             let result = ValueAggregate::from_service_result(result, cid.clone());
             let value_descriptor = StreamValueDescriptor::new(
