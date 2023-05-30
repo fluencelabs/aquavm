@@ -92,6 +92,7 @@ impl<'i> ExecutionCtx<'i> {
         prev_ingredients: ExecCtxIngredients,
         current_ingredients: ExecCtxIngredients,
         call_results: CallResults,
+        signature_store: SignatureStore,
         run_parameters: RunParameters,
     ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
@@ -103,9 +104,6 @@ impl<'i> ExecutionCtx<'i> {
         );
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
-        // TODO we might keep both stores and merge them only with signature info collected into SignatureTracker
-        let signature_store =
-            SignatureStore::merge(prev_ingredients.signature_store, current_ingredients.signature_store);
 
         Self {
             run_parameters,
@@ -162,7 +160,6 @@ pub(crate) struct ExecCtxIngredients {
     pub(crate) last_call_request_id: u32,
     pub(crate) restricted_streams: RestrictedStreamGens,
     pub(crate) cid_info: CidInfo,
-    pub(crate) signature_store: SignatureStore,
 }
 
 use serde::Deserialize;

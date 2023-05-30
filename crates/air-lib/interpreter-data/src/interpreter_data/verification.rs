@@ -64,9 +64,8 @@ impl<'data> DataVerifier<'data> {
             .signatures
             .iter()
             .map(|(public_key, signature)| {
-                let pk = public_key.to_public_key();
                 (
-                    pk.to_peer_id().to_string().into(),
+                    public_key.to_peer_id().to_string().into(),
                     PeerInfo::new(public_key, signature),
                 )
             })

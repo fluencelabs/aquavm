@@ -19,8 +19,10 @@ use crate::execution_step::execution_context::ExecCtxIngredients;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
+use air_interpreter_data::verification;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
@@ -50,12 +52,17 @@ pub(crate) fn prepare<'i>(
 
     current_data.cid_info.verify()?;
 
+    // prev_data is always correct
+    let prev_data_verifier = verification::Verifier::new(&prev_data).unwrap();
+    let current_data_verifier = verification::Verifier::new(&current_data).expect("TODO");
+    current_data_verifier.verify().expect("TODO");
+    let signature_store = prev_data_verifier.merge(current_data_verifier).expect("TODO");
+
     let prev_ingredients = ExecCtxIngredients {
         global_streams: prev_data.global_streams,
         last_call_request_id: prev_data.last_call_request_id,
         restricted_streams: prev_data.restricted_streams,
         cid_info: prev_data.cid_info,
-        signature_store: prev_data.signatures,
     };
 
     let current_ingredients = ExecCtxIngredients {
@@ -63,10 +70,15 @@ pub(crate) fn prepare<'i>(
         last_call_request_id: current_data.last_call_request_id,
         restricted_streams: current_data.restricted_streams,
         cid_info: current_data.cid_info,
-        signature_store: current_data.signatures,
     };
 
-    let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, run_parameters)?;
+    let exec_ctx = make_exec_ctx(
+        prev_ingredients,
+        current_ingredients,
+        call_results,
+        signature_store,
+        run_parameters,
+    )?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
     let result = PreparationDescriptor {
@@ -100,12 +112,19 @@ fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
+    signature_store: SignatureStore,
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
 
-    let ctx = ExecutionCtx::new(prev_ingredients, current_ingredients, call_results, run_parameters);
+    let ctx = ExecutionCtx::new(
+        prev_ingredients,
+        current_ingredients,
+        call_results,
+        signature_store,
+        run_parameters,
+    );
     Ok(ctx)
 }
 

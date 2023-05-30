@@ -188,11 +188,6 @@ impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
         self.0.insert(peer_pk, signature);
     }
 
-    pub fn merge(prev: Self, _current: Self) -> Self {
-        // TODO STUB
-        prev
-    }
-
     pub fn iter(&self) -> <&HashMap<Key, Sign> as IntoIterator>::IntoIter {
         self.0.iter()
     }
