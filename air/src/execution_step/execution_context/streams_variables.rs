@@ -106,7 +106,7 @@ impl Streams {
                 //    for global streams
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
-                let stream = Stream::from_value(value);
+                let stream = Stream::from_new_value(value);
                 let descriptor = StreamDescriptor::global(stream);
                 self.streams.insert(name.to_string(), vec![descriptor]);
                 let generation = 0;
