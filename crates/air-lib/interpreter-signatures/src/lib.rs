@@ -36,6 +36,7 @@ use serde::{Deserialize, Serialize};
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
 
@@ -78,6 +79,27 @@ impl Deref for PublicKey {
 impl Hash for PublicKey {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.to_vec().hash(state);
+    }
+}
+
+impl PublicKey {
+    pub fn to_public_key(&self) -> fluence_keypair::PublicKey {
+        let pk = fluence_keypair::PublicKey::from_base58(&self.0).expect("TODO");
+        pk
+    }
+
+    pub fn verify<T: Serialize + ?Sized>(
+        &self,
+        value: &T,
+        signature: &Signature,
+    ) -> Result<(), fluence_keypair::error::DecodingError> {
+        let pk = self.to_public_key();
+        let sig = fluence_keypair::Signature::try_from(signature)?;
+
+        let serialized_cids = serde_json::to_vec(&value)
+            .expect("default serialization shouldn't fail");
+
+        Ok(pk.verify(&serialized_cids, &sig)?)
     }
 }
 
@@ -124,6 +146,15 @@ impl From<fluence_keypair::Signature> for Signature {
 impl From<Signature> for fluence_keypair::Signature {
     fn from(value: Signature) -> Self {
         value.0
+    }
+}
+
+impl TryFrom<&Signature> for fluence_keypair::Signature {
+    type Error = fluence_keypair::error::DecodingError;
+
+    fn try_from(value: &Signature) -> Result<Self, Self::Error> {
+        let sig_bytes = bs58::decode(&value.0.as_bytes()).into_vec().expect("TODO");
+        fluence_keypair::Signature::decode(sig_bytes)
     }
 }
 
@@ -191,6 +222,10 @@ impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     pub fn merge(prev: Self, _current: Self) -> Self {
         // TODO STUB
         prev
+    }
+
+    pub fn iter(&self) -> <&HashMap<Key, Sign> as IntoIterator>::IntoIter {
+        self.0.iter()
     }
 }
 

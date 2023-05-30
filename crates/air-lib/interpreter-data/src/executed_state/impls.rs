@@ -178,6 +178,16 @@ impl std::fmt::Display for ExecutedState {
     }
 }
 
+impl ValueRef {
+    pub(crate) fn get_cid(&self) -> Option<&Rc<CID<ServiceResultCidAggregate>>> {
+        match self {
+            ValueRef::Scalar(cid) => Some(cid),
+            ValueRef::Stream { cid, .. } => Some(cid),
+            ValueRef::Unused(_) => None,
+        }
+    }
+}
+
 impl std::fmt::Display for ValueRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {

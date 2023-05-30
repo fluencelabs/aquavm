@@ -88,3 +88,13 @@ impl PartialEq<Vec<ExecutedState>> for ExecutionTrace {
         &self.0 == other
     }
 }
+
+impl<'trace> IntoIterator for &'trace ExecutionTrace {
+    type Item = &'trace ExecutedState;
+
+    type IntoIter = <&'trace Vec<ExecutedState> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}

@@ -90,6 +90,7 @@ dependencies = [
  "air-interpreter-signatures",
  "air-utils",
  "aquavm-air-parser",
+ "fluence-keypair",
  "newtype_derive",
  "num-traits",
  "once_cell",

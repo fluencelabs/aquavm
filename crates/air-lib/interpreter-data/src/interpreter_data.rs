@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+pub mod verification;
+
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;
 use crate::CidInfo;
