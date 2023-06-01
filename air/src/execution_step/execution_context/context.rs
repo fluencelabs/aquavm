@@ -28,13 +28,12 @@ use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
+use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
-use air_interpreter_signatures::SignatureTracker;
 
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
-#[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
     pub(crate) scalars: Scalars<'i>,
@@ -82,9 +81,8 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Local signatures tracker.
     ///
-    /// It gathers peers' CIDs (call results and canon results) stored in the trace either for signing (current peer's
-    /// CIDs) or sign verification (other peers).
-    pub(crate) signature_tracker: SignatureTracker,
+    /// It gathers current peer's CIDs (call results and canon results) for signing.
+    pub(crate) signature_tracker: PeerCidTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -105,6 +103,8 @@ impl<'i> ExecutionCtx<'i> {
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
 
+        let signature_tracker = PeerCidTracker::new(run_parameters.current_peer_id.clone());
+
         Self {
             run_parameters,
             subgraph_completeness: true,
@@ -113,7 +113,12 @@ impl<'i> ExecutionCtx<'i> {
             streams,
             cid_state,
             signature_store,
-            ..<_>::default()
+            signature_tracker,
+            scalars: <_>::default(),
+            next_peer_pks: <_>::default(),
+            last_error_descriptor: <_>::default(),
+            tracker: <_>::default(),
+            call_requests: <_>::default(),
         }
     }
 
@@ -126,11 +131,11 @@ impl<'i> ExecutionCtx<'i> {
         self.last_call_request_id
     }
 
-    pub(crate) fn record_call_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<ServiceResultCidAggregate>) {
+    pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: &CID<ServiceResultCidAggregate>) {
         self.signature_tracker.register(peer_id, cid);
     }
 
-    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<CanonResultCidAggregate>) {
+    pub(crate) fn record_canon_cid(&mut self, peer_id: &str, cid: &CID<CanonResultCidAggregate>) {
         self.signature_tracker.register(peer_id, cid);
     }
 }

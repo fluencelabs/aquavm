@@ -101,7 +101,7 @@ fn populate_outcome_from_contexts(
 
     let current_signature = exec_ctx
         .signature_tracker
-        .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
+        .gen_signature(keypair)
         .expect("siging shouldn't fail");
     let current_pubkey = keypair.public();
     exec_ctx.signature_store.put(current_pubkey.into(), current_signature);

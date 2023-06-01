@@ -38,6 +38,7 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::Deref;
+use std::rc::Rc;
 
 /// An opaque serializable representation of a public key.
 ///
@@ -127,40 +128,42 @@ impl From<Signature> for fluence_keypair::Signature {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct SignatureTracker {
-    // from peer id to CID strings
-    peer_to_cids: HashMap<Box<str>, Vec<Box<str>>>,
+/// The tracker that collect current peer's CIDs only.
+#[derive(Debug)]
+pub struct PeerCidTracker {
+    current_peer_id: Rc<String>,
+    cids: Vec<Box<str>>,
 }
 
-impl SignatureTracker {
-    pub fn new() -> Self {
-        Default::default()
+impl PeerCidTracker {
+    pub fn new(current_peer_id: impl Into<Rc<String>>) -> Self {
+        Self {
+            current_peer_id: current_peer_id.into(),
+            cids: vec![],
+        }
     }
 
-    pub fn register<T>(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<T>) {
-        self.peer_to_cids
-            .entry(peer_id.into())
-            .or_default()
-            .push(cid.clone().into_inner().into());
+    pub fn register<T>(&mut self, peer: &str, cid: &CID<T>) {
+        if peer == *self.current_peer_id {
+            self.cids.push(cid.clone().into_inner().into())
+        }
     }
 
-    pub fn into_signature(
-        &mut self,
-        peer_id: &str,
-        signer: &KeyPair,
-    ) -> Result<Signature, SigningError> {
-        let mut cids = self.peer_to_cids.get(peer_id).cloned().unwrap_or_default();
-        cids.sort_unstable();
-
-        // TODO make pluggable serialization
-        // TODO it will be useful for CID too
-        // TODO please note that using serde::Serializer is not enough
-        let serialized_cids =
-            serde_json::to_string(&cids).expect("default serialization shouldn't fail");
-
-        signer.sign(serialized_cids.as_bytes()).map(Signature::new)
+    pub fn gen_signature(self, keypair: &KeyPair) -> Result<Signature, SigningError> {
+        sign_cids(self.cids, keypair)
     }
+}
+
+pub fn sign_cids(mut cids: Vec<Box<str>>, keypair: &KeyPair) -> Result<Signature, SigningError> {
+    cids.sort_unstable();
+
+    // TODO make pluggable serialization
+    // TODO it will be useful for CID too
+    // TODO please note that using serde::Serializer is not enough
+    let serialized_cids =
+        serde_json::to_string(&cids).expect("default serialization shouldn't fail");
+
+    keypair.sign(serialized_cids.as_bytes()).map(Signature::new)
 }
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.

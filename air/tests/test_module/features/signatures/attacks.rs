@@ -15,7 +15,7 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_signatures::{derive_dummy_keypair, SignatureStore, SignatureTracker};
+use air_interpreter_signatures::{derive_dummy_keypair, PeerCidTracker, SignatureStore};
 use air_test_utils::prelude::*;
 use semver::Version;
 
@@ -36,28 +36,24 @@ fn test_attack_injection_current_peer_scalar() {
     );
 
     let mut alice_cid_tracker = ExecutionCidState::new();
-    let mut alice_signature_tracker = SignatureTracker::new();
+    let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
     let mut alice_signature_store = SignatureStore::new();
 
     let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_tracker, peer = &alice_peer_id);
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
     let alice_trace = vec![alice_call_1.clone()];
-    let alice_signature = alice_signature_tracker
-        .into_signature(&alice_peer_id, &alice_keypair)
-        .unwrap();
+    let alice_signature = alice_signature_tracker.gen_signature(&alice_keypair).unwrap();
     alice_signature_store.put(alice_keypair.public().into(), alice_signature);
 
     let mut mallory_cid_tracker = alice_cid_tracker.clone();
-    let mut mallory_signature_tracker = SignatureTracker::new();
+    let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     let mut mallory_signature_store = alice_signature_store.clone();
 
     let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = &mallory_peer_id);
     let fake_call_3 = scalar_tracked!("fake result", &mut mallory_cid_tracker, peer = &alice_peer_id);
     mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
-    let mallory_signature = mallory_signature_tracker
-        .into_signature(&mallory_peer_id, &mallory_keypair)
-        .unwrap();
+    let mallory_signature = mallory_signature_tracker.gen_signature(&mallory_keypair).unwrap();
     mallory_signature_store.put(mallory_keypair.public().into(), mallory_signature);
 
     let alice_data = InterpreterData::from_execution_result(
