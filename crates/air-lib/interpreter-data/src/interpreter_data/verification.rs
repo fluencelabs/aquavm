@@ -16,7 +16,7 @@
 
 use crate::{CanonResult, ExecutedState, InterpreterData};
 
-use air_interpreter_signatures::{PublicKey, Signature, SignatureStore};
+use air_interpreter_signatures::{FullSignatureStore, PublicKey, Signature};
 use thiserror::Error as ThisError;
 
 use std::collections::HashMap;
@@ -172,7 +172,7 @@ impl<'data> DataVerifier<'data> {
                 }
             }
         }
-        let mut store = SignatureStore::new();
+        let mut store = FullSignatureStore::new();
         for peer_info in self.grouped_cids.into_values() {
             store.put(peer_info.public_key.clone(), peer_info.signature.clone())
         }

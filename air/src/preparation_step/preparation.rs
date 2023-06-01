@@ -22,7 +22,7 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_data::verification;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
-use air_interpreter_signatures::SignatureStore;
+use air_interpreter_signatures::FullSignatureStore;
 use air_parser::ast::Instruction;
 
 type PreparationResult<T> = Result<T, PreparationError>;
@@ -112,7 +112,7 @@ fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
-    signature_store: SignatureStore,
+    signature_store: FullSignatureStore,
     run_parameters: RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)

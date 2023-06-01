@@ -15,7 +15,7 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, PeerCidTracker};
+use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, FullSignatureStore, PeerCidTracker};
 use air_test_utils::prelude::*;
 use semver::Version;
 
@@ -37,7 +37,7 @@ fn test_attack_injection_current_peer_scalar() {
 
     let mut alice_cid_tracker = ExecutionCidState::new();
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
-    let mut alice_signature_store = SignatureStore::new();
+    let mut alice_signature_store = FullSignatureStore::new();
 
     let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_tracker, peer = &alice_peer_id);
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));

@@ -27,18 +27,18 @@
 )]
 
 mod sede;
+mod stores;
 mod trackers;
+
+pub use crate::stores::*;
+pub use crate::trackers::*;
 
 use fluence_keypair::KeyPair;
 use rand_chacha::rand_core::SeedableRng;
 use serde::{Deserialize, Serialize};
 
-use std::borrow::Borrow;
-use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::Deref;
-
-pub use crate::trackers::*;
 
 /// An opaque serializable representation of a public key.
 ///
@@ -125,42 +125,6 @@ impl From<fluence_keypair::Signature> for Signature {
 impl From<Signature> for fluence_keypair::Signature {
     fn from(value: Signature) -> Self {
         value.0
-    }
-}
-
-/// A dictionary-like structure that stores peer public keys and their particle data signatures.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
-
-impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>
-    where
-        Key: Borrow<Q>,
-        Q: Hash + Eq + ?Sized,
-    {
-        self.0.get(peer_pk)
-    }
-
-    pub fn put(&mut self, peer_pk: Key, signature: Sign) {
-        self.0.insert(peer_pk, signature);
-    }
-
-    pub fn iter(&self) -> <&HashMap<Key, Sign> as IntoIterator>::IntoIter {
-        self.0.iter()
-    }
-}
-
-impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
-    fn default() -> Self {
-        Self(Default::default())
     }
 }
 
