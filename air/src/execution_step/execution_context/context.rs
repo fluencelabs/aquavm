@@ -28,6 +28,7 @@ use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
+use air_interpreter_signatures::CidTracker;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
 
