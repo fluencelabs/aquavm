@@ -100,6 +100,7 @@ pub fn raw_data_from_trace(
         <_>::default(),
         <_>::default(),
         cid_state.into(),
+        <_>::default(),
         0,
         semver::Version::new(1, 1, 1),
     );
@@ -121,6 +122,7 @@ pub fn raw_data_from_trace_with_canon(
             canon_result_store: cid_state.canon_result_tracker.into(),
             service_result_store: cid_state.service_result_agg_tracker.into(),
         },
+        <_>::default(),
         0,
         semver::Version::new(1, 1, 1),
     );

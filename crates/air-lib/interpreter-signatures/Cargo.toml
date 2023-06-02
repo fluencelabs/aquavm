@@ -1,0 +1,26 @@
+[package]
+name = "air-interpreter-signatures"
+description = "AIR interpreter signatures util module"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+license = "Apache-2.0"
+documentation = "https://docs.rs/air-interpreter-signatures"
+repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/interpreter-signatures"
+keywords = ["fluence", "air", "programming-language"]
+categories = ["wasm"]
+
+[dependencies]
+air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
+fluence-keypair = "0.10.1"
+
+base64ct = { version = "1.6.0", features = ["std"] }
+serde = { version = "1.0.159", features = ["derive"] }
+serde_json = "1.0.96"
+zeroize = { version = "1.6.0" }
+
+# TODO to be moved to test-utils:
+ed25519-dalek = "1.0.1"
+rand_chacha = "0.2.2"
+sha2 = "0.10.6"
+bs58 = "0.4.0"
