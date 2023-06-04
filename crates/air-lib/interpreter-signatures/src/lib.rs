@@ -57,14 +57,13 @@ impl PublicKey {
         &self,
         value: &T,
         signature: &fluence_keypair::Signature,
-    ) -> Result<(), fluence_keypair::error::DecodingError> {
+    ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
         let serialized_value =
             serde_json::to_vec(value).expect("default serialization shouldn't fail");
 
-        pk.verify(&serialized_value, signature).expect("TODO");
-        Ok(())
+        pk.verify(&serialized_value, signature)
     }
 }
 
