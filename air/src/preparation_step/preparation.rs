@@ -19,7 +19,6 @@ use crate::execution_step::execution_context::ExecCtxIngredients;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
-use air_interpreter_data::verification;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_signatures::FullSignatureStore;
@@ -34,29 +33,36 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) air: Instruction<'i>,
 }
 
-/// Parse and prepare supplied data and AIR script.
+pub(crate) struct ParsedDatas {
+    pub(crate) prev_data: InterpreterData,
+    pub(crate) current_data: InterpreterData,
+}
+
+/// Parse data and check its version.
 #[tracing::instrument(skip_all)]
-pub(crate) fn prepare<'i>(
-    prev_data: &[u8],
-    current_data: &[u8],
-    raw_air: &'i str,
-    call_results: &[u8],
-    run_parameters: RunParameters,
-) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
+pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDatas> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
     check_version_compatibility(&current_data)?;
 
+    Ok(ParsedDatas {
+        prev_data,
+        current_data,
+    })
+}
+
+/// Parse and prepare supplied data and AIR script.
+#[tracing::instrument(skip_all)]
+pub(crate) fn prepare<'i>(
+    prev_data: InterpreterData,
+    current_data: InterpreterData,
+    raw_air: &'i str,
+    call_results: &[u8],
+    run_parameters: RunParameters,
+    signature_store: FullSignatureStore,
+) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
-
-    current_data.cid_info.verify()?;
-
-    // prev_data is always correct
-    let prev_data_verifier = verification::Verifier::new(&prev_data).unwrap();
-    let current_data_verifier = verification::Verifier::new(&current_data).expect("TODO");
-    current_data_verifier.verify().expect("TODO");
-    let signature_store = prev_data_verifier.merge(current_data_verifier).expect("TODO");
 
     let prev_ingredients = ExecCtxIngredients {
         global_streams: prev_data.global_streams,
@@ -90,7 +96,7 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     // treat empty slice as an empty data,
     // it allows abstracting from an internal format for an empty data
     if raw_data.is_empty() {
@@ -128,7 +134,7 @@ fn make_exec_ctx(
     Ok(ctx)
 }
 
-fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
+pub(crate) fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
     if &data.versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
             actual_version: data.versions.interpreter_version.clone(),

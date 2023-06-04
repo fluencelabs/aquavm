@@ -105,6 +105,9 @@ pub enum UncatchableError {
         expected_value: String,
         current_value: String,
     },
+
+    #[error("failed to sign data: {0}")]
+    SigningError(#[from] fluence_keypair::error::SigningError),
 }
 
 impl ToErrorCode for UncatchableError {

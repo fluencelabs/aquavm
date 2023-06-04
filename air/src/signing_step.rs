@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-mod errors;
-mod interpreter_versions;
-mod preparation;
+use crate::{ExecutionError, UncatchableError};
 
-pub use errors::PreparationError;
+// TODO rename to SigningTracker
+use air_interpreter_signatures::{CidTracker as _, FullSignatureStore, PeerCidTracker};
 
-pub(crate) use preparation::parse_data;
-pub(crate) use preparation::prepare;
-pub(crate) use preparation::ParsedDatas;
-pub(crate) use preparation::PreparationDescriptor;
-
-use interpreter_versions::interpreter_version;
-use interpreter_versions::min_supported_version;
+pub(crate) fn sign_produced_cids(
+    signature_tracker: &mut PeerCidTracker,
+    signature_store: &mut FullSignatureStore,
+    keypair: &fluence_keypair::KeyPair,
+) -> Result<(), ExecutionError> {
+    let signature = signature_tracker
+        .gen_signature(keypair)
+        .map_err(UncatchableError::SigningError)?;
+    let public_key = keypair.public().into();
+    signature_store.put(public_key, signature);
+    Ok(())
+}

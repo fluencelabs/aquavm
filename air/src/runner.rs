@@ -16,8 +16,12 @@
 
 use crate::execution_step::ExecutableInstruction;
 use crate::farewell_step as farewell;
+use crate::preparation_step::parse_data;
 use crate::preparation_step::prepare;
+use crate::preparation_step::ParsedDatas;
 use crate::preparation_step::PreparationDescriptor;
+use crate::signing_step::sign_produced_cids;
+use crate::verification_step::verify;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
@@ -51,22 +55,44 @@ pub fn execute_air(
 #[allow(clippy::result_large_err)]
 fn execute_air_impl(
     air: String,
-    prev_data: Vec<u8>,
-    data: Vec<u8>,
+    raw_prev_data: Vec<u8>,
+    raw_current_data: Vec<u8>,
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     // TODO STUB this is a stub key that is to be replaced by external one in other PR
     let (keypair, _) = derive_dummy_keypair(&params.current_peer_id);
 
+    let ParsedDatas {
+        prev_data,
+        current_data,
+    } = match parse_data(&raw_prev_data, &raw_current_data) {
+        Ok(parsed_datas) => parsed_datas,
+        // return the prev data in case of errors
+        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
+    };
+
+    let signature_store = match verify(&prev_data, &current_data) {
+        Ok(signature_store) => signature_store,
+        // return the prev data in case of errors
+        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
+    };
+
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
-    } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
+    } = match prepare(
+        prev_data,
+        current_data,
+        air.as_str(),
+        &call_results,
+        params,
+        signature_store,
+    ) {
         Ok(descriptor) => descriptor,
         // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
+        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
     };
 
     // match here is used instead of map_err, because the compiler can't determine that
@@ -76,6 +102,12 @@ fn execute_air_impl(
         tracing::Level::INFO,
         "execute",
     );
+
+    match sign_produced_cids(&mut exec_ctx.signature_tracker, &mut exec_ctx.signature_store, &keypair) {
+        Ok(()) => {}
+        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
+    }
+
     measure!(
         match exec_result {
             Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair),
@@ -84,7 +116,7 @@ fn execute_air_impl(
                 Err(farewell::from_execution_error(exec_ctx, trace_handler, error, &keypair))
             }
             // return the prev data in case of any trace errors
-            Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+            Err(error) => Err(farewell::from_uncatchable_error(raw_prev_data, error)),
         },
         tracing::Level::INFO,
         "farewell",

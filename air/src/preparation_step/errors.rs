@@ -16,6 +16,7 @@
 
 use crate::ToErrorCode;
 use air_interpreter_data::data_version;
+use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::Versions;
 
@@ -82,6 +83,10 @@ pub enum PreparationError {
     /// Failed to verify CidStore contents of the current data.
     #[error(transparent)]
     CidStoreVerificationError(#[from] CidStoreVerificationError),
+
+    /// Failed to check peers' signatures.
+    #[error(transparent)]
+    DataSignatureCheckError(#[from] DataVerifierError),
 }
 
 impl ToErrorCode for PreparationError {

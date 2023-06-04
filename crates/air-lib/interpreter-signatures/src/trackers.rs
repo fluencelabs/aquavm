@@ -27,7 +27,7 @@ pub trait CidTracker {
 
     fn register<T>(&mut self, peer: &str, cid: &CID<T>);
 
-    fn gen_signature(self, keypair: &KeyPair) -> Result<Self::Signature, SigningError>;
+    fn gen_signature(&self, keypair: &KeyPair) -> Result<Self::Signature, SigningError>;
 }
 
 /// The tracker that collect current peer's CIDs only.
@@ -39,6 +39,7 @@ pub struct PeerCidTracker {
 
 impl CidTracker for PeerCidTracker {
     type Signature = crate::Signature;
+
     fn new(current_peer_id: impl Into<Rc<String>>) -> Self {
         Self {
             current_peer_id: current_peer_id.into(),
@@ -52,8 +53,8 @@ impl CidTracker for PeerCidTracker {
         }
     }
 
-    fn gen_signature(self, keypair: &KeyPair) -> Result<Self::Signature, SigningError> {
-        sign_cids(self.cids, keypair)
+    fn gen_signature(&self, keypair: &KeyPair) -> Result<Self::Signature, SigningError> {
+        sign_cids(self.cids.clone(), keypair)
     }
 }
 
@@ -69,7 +70,7 @@ impl CidTracker for NullCidTracker {
 
     fn register<T>(&mut self, _peer: &str, _cid: &CID<T>) {}
 
-    fn gen_signature(self, _keypair: &KeyPair) -> Result<(), SigningError> {
+    fn gen_signature(&self, _keypair: &KeyPair) -> Result<(), SigningError> {
         Ok(())
     }
 }
