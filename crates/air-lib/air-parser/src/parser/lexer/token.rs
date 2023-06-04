@@ -46,6 +46,11 @@ pub enum Token<'input> {
         lambda: LambdaAST<'input>,
         position: AirPos,
     },
+    StreamMapWithLambda {
+        name: &'input str,
+        lambda: LambdaAST<'input>,
+        position: AirPos,
+    },
     CanonStream {
         name: &'input str,
         position: AirPos,
@@ -53,6 +58,10 @@ pub enum Token<'input> {
     CanonStreamWithLambda {
         name: &'input str,
         lambda: LambdaAST<'input>,
+        position: AirPos,
+    },
+    StreamMap {
+        name: &'input str,
         position: AirPos,
     },
 

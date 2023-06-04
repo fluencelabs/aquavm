@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-mod apply_to_arguments;
-mod utils;
+pub(super) mod apply_to_arguments;
+pub(super) mod utils;
 
 use super::ExecutionCtx;
 use super::ExecutionResult;
@@ -24,7 +24,8 @@ use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
-use apply_to_arguments::*;
+
+use apply_to_arguments::apply_to_arg;
 use utils::*;
 
 use air_interpreter_data::GenerationIdx;

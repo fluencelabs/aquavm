@@ -199,6 +199,23 @@ fn stream() {
 }
 
 #[test]
+fn stream_map() {
+    const STREAM_MAP: &str = "%stream_map____asdasd";
+
+    lexer_test(
+        STREAM_MAP,
+        Single(Ok((
+            0.into(),
+            Token::StreamMap {
+                name: STREAM_MAP,
+                position: 0.into(),
+            },
+            STREAM_MAP.len().into(),
+        ))),
+    );
+}
+
+#[test]
 fn canon_stream() {
     const CANON_STREAM: &str = "#stream____asdasd";
 

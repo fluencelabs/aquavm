@@ -27,6 +27,7 @@ impl<'i> NewArgument<'i> {
             Self::Scalar(scalar) => scalar.name,
             Self::Stream(stream) => stream.name,
             Self::CanonStream(canon_stream) => canon_stream.name,
+            Self::StreamMap(stream_map) => stream_map.name,
         }
     }
 }

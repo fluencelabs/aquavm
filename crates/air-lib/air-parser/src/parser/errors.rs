@@ -46,6 +46,13 @@ pub enum ParserError {
         "multiple next instructions for iterator '{iterator_name}' found for one fold, that is prohibited"
     )]
     MultipleNextInFold { span: Span, iterator_name: String },
+
+    #[error("unsupported variable key type in (ap {ap_key_type} value {ap_result_name})")]
+    UnsupportedMapKeyType {
+        span: Span,
+        ap_key_type: String,
+        ap_result_name: String,
+    },
 }
 
 impl ParserError {
@@ -59,6 +66,7 @@ impl ParserError {
             Self::IteratorRestrictionNotAllowed { span, .. } => *span,
             Self::MultipleIterableValuesForOneIterator { span, .. } => *span,
             Self::MultipleNextInFold { span, .. } => *span,
+            Self::UnsupportedMapKeyType { span, .. } => *span,
         }
     }
 
@@ -94,6 +102,18 @@ impl ParserError {
         Self::MultipleNextInFold {
             span,
             iterator_name: iterator_name.into(),
+        }
+    }
+
+    pub fn unsupported_map_key_type(
+        span: Span,
+        ap_key_type: impl Into<String>,
+        ap_result_name: impl Into<String>,
+    ) -> Self {
+        Self::UnsupportedMapKeyType {
+            span,
+            ap_key_type: ap_key_type.into(),
+            ap_result_name: ap_result_name.into(),
         }
     }
 }

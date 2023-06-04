@@ -26,6 +26,7 @@ impl fmt::Display for Instruction<'_> {
             Call(call) => write!(f, "{call}"),
             Canon(canon) => write!(f, "{canon}"),
             Ap(ap) => write!(f, "{ap}"),
+            ApMap(ap_map) => write!(f, "{ap_map}"),
             Seq(seq) => write!(f, "{seq}"),
             Par(par) => write!(f, "{par}"),
             Xor(xor) => write!(f, "{xor}"),
@@ -34,6 +35,7 @@ impl fmt::Display for Instruction<'_> {
             Fail(fail) => write!(f, "{fail}"),
             FoldScalar(fold) => write!(f, "{fold}"),
             FoldStream(fold) => write!(f, "{fold}"),
+            FoldStreamMap(fold) => write!(f, "{fold}"),
             Never(never) => write!(f, "{never}"),
             Next(next) => write!(f, "{next}"),
             New(new) => write!(f, "{new}"),
@@ -68,6 +70,12 @@ impl fmt::Display for Ap<'_> {
     }
 }
 
+impl fmt::Display for ApMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ap ({} {}) {}", self.key, self.value, self.map)
+    }
+}
+
 impl fmt::Display for Fail<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -92,6 +100,12 @@ impl fmt::Display for FoldScalar<'_> {
 }
 
 impl fmt::Display for FoldStream<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for FoldStreamMap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "fold {} {}", self.iterable, self.iterator)
     }
