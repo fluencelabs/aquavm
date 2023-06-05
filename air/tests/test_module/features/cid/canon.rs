@@ -308,7 +308,7 @@ fn test_canon_tetraplet_not_found() {
                         "function_name": "func",
                         "json_path": "",
                         "peer_pk": "peer_1",
-                        "service_id": "serv",
+                        "service_id": "serv..0",
                     },
                 }]
             }),
@@ -316,7 +316,7 @@ fn test_canon_tetraplet_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaieracu6twiik6az3cosyzlplrscon3ek6rnu3lkjnflibphqkw6kcdiq";
+    let missing_cid = "bagaaierawgvzxeomczgjfgaf7jhbap27kqihlzm4i4na42uoi36lgzfrzwdq";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
 
@@ -330,7 +330,7 @@ fn test_canon_tetraplet_not_found() {
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
-    assert!(check_error(&result, expected_error));
+    assert!(check_error(&result, expected_error), "{}", result.error_message);
 }
 
 #[test]
