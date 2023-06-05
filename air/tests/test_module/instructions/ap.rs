@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -455,4 +456,68 @@ fn ap_canon_stream() {
 
     let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new(vm_1_peer_id, "", "", "")]]);
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
+}
+
+#[test]
+fn ap_stream_map() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let service_name1 = "serv1";
+    let service_name2 = "serv2";
+    let script = f!(r#"
+        (seq
+            (seq
+                (ap ("{vm_1_peer_id}" "{service_name1}") %map)
+                (ap ("{vm_1_peer_id}" "{service_name2}") %map)
+            )
+            (fold %map i
+                (seq
+                    (call i.$.key (i.$.key i.$.value) [i] u)
+                    (next i)
+                )
+            )
+        )
+        "#);
+
+    let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
+    let actual_trace = trace_from_result(&result);
+    let generation_idx = 0;
+    let mut cid_tracker = ExecutionCidState::new();
+    let service_result1 = json!({
+      "key": vm_1_peer_id,
+      "value": service_name1,
+    });
+    let service_result2 = json!({
+      "key": vm_1_peer_id,
+      "value": service_name2,
+    });
+    let service_args1 = vec![service_result1.clone()];
+    let service_args2 = vec![service_result2.clone()];
+
+    let expected_state = ExecutionTrace::from(vec![
+        executed_state::ap(generation_idx),
+        executed_state::ap(generation_idx),
+        executed_state::fold(vec![
+            subtrace_lore(0, SubTraceDesc::new(3.into(), 1), SubTraceDesc::new(5.into(), 0)),
+            subtrace_lore(1, SubTraceDesc::new(4.into(), 1), SubTraceDesc::new(5.into(), 0)),
+        ]),
+        scalar_tracked!(
+            service_result1,
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = vm_1_peer_id,
+            function = service_name1,
+            args = service_args1
+        ),
+        scalar_tracked!(
+            service_result2,
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = vm_1_peer_id,
+            function = service_name2,
+            args = service_args2
+        ),
+    ]);
+    assert_eq!(actual_trace, expected_state);
 }

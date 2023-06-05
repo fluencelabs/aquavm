@@ -105,3 +105,19 @@ fn iterators_cant_be_restricted() {
         ParserError::IteratorRestrictionNotAllowed { .. }
     ));
 }
+
+#[test]
+fn parse_new_with_stream_map() {
+    let source_code = r#"(new %stream
+            (null)
+        )
+        "#;
+
+    let instruction = parse(source_code);
+    let expected = new(
+        NewArgument::StreamMap(StreamMap::new("%stream", 5.into())),
+        null(),
+        Span::new(0.into(), 41.into()),
+    );
+    assert_eq!(instruction, expected);
+}

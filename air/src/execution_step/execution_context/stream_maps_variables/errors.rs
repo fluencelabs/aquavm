@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-mod cid_state;
-mod context;
-mod last_error;
-mod scalar_variables;
-mod stream_maps_variables;
-mod streams_variables;
+use thiserror::Error as ThisError;
 
-pub use last_error::*;
+/// Describes errors related to applying lambdas to values.
+#[derive(Debug, Clone, ThisError)]
+pub enum StreamMapError {
+    #[error("unsupported type for {variable_name} map's key")]
+    UnsupportedMapKeyType { variable_name: String },
+}
 
-pub use cid_state::ExecutionCidState;
-pub(crate) use context::*;
-pub(crate) use scalar_variables::*;
-pub(crate) use stream_maps_variables::*;
-pub(crate) use streams_variables::*;
+pub fn unsupported_map_key_type(variable_name: &str) -> StreamMapError {
+    StreamMapError::UnsupportedMapKeyType {
+        variable_name: variable_name.to_string(),
+    }
+}

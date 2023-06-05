@@ -16,6 +16,7 @@
 
 use super::Joinable;
 use super::LastErrorAffectable;
+use crate::execution_step::execution_context::errors::StreamMapError;
 use crate::execution_step::execution_context::LastErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
@@ -93,6 +94,10 @@ pub enum CatchableError {
         variable_name: String,
         actual_value: JValue,
     },
+
+    /// Stream map related errors.
+    #[error(transparent)]
+    StreamMapError(#[from] StreamMapError),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {
