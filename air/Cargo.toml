@@ -62,6 +62,7 @@ serde_json = "1.0.61"
 
 [features]
 check_signatures = []
+sign_cids = []
 
 [[bench]]
 name = "call_benchmark"
