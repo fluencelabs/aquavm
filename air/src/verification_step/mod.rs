@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-use air_interpreter_data::verification;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_signatures::FullSignatureStore;
 
 // TODO replace with VerificationError
 use crate::PreparationError;
 
+#[cfg(feature = "check_signatures")]
 #[tracing::instrument(skip_all)]
 pub(crate) fn verify(
     prev_data: &InterpreterData,
     current_data: &InterpreterData,
 ) -> Result<FullSignatureStore, PreparationError> {
+    use air_interpreter_data::verification;
+
     current_data.cid_info.verify()?;
 
     let prev_data_verifier = verification::DataVerifier::new(prev_data);
@@ -35,4 +37,13 @@ pub(crate) fn verify(
 
     let signature_store = prev_data_verifier.merge(current_data_verifier)?;
     Ok(signature_store)
+}
+
+#[cfg(not(feature = "check_signatures"))]
+#[tracing::instrument(skip_all)]
+pub(crate) fn verify(
+    _prev_data: &InterpreterData,
+    _current_data: &InterpreterData,
+) -> Result<FullSignatureStore, PreparationError> {
+    Ok(<_>::default())
 }

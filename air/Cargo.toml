@@ -60,6 +60,9 @@ env_logger = "0.7.1"
 pretty_assertions = "0.6.1"
 serde_json = "1.0.61"
 
+[features]
+check_signatures = []
+
 [[bench]]
 name = "call_benchmark"
 harness = false
