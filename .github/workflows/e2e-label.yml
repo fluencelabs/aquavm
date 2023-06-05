@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   label:
-    name: "Add e2e label to approver PR"
+    name: "Add e2e label to approved PR"
     if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
