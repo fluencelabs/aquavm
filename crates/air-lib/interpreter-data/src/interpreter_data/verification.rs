@@ -56,7 +56,7 @@ pub struct DataVerifier<'data> {
 impl<'data> DataVerifier<'data> {
     // it can be further optimized if only required parts are passed
     // SignatureStore is not used elsewhere
-    pub fn new(data: &'data InterpreterData) -> Self {
+    pub fn new(data: &'data InterpreterData) -> Result<Self, DataVerifierError> {
         use crate::CallResult::*;
 
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error
@@ -91,12 +91,14 @@ impl<'data> DataVerifier<'data> {
                             .tetraplet_store
                             .get(&service_result.tetraplet_cid)
                             .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+
                         let peer_pk = tetraplet.peer_pk.as_str();
-                        grouped_cids
-                            .get_mut(peer_pk)
-                            .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE)
-                            .cids
-                            .push((**cid).clone().into_inner().into())
+                        match grouped_cids.get_mut(peer_pk) {
+                            Some(peer_info) => {
+                                peer_info.cids.push((**cid).clone().into_inner().into())
+                            }
+                            None => return Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
+                        }
                     }
                 }
                 ExecutedState::Canon(CanonResult(ref cid)) => {
@@ -111,12 +113,12 @@ impl<'data> DataVerifier<'data> {
                         .tetraplet_store
                         .get(&canon_result.tetraplet)
                         .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+
                     let peer_pk = tetraplet.peer_pk.as_str();
-                    grouped_cids
-                        .get_mut(peer_pk)
-                        .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE)
-                        .cids
-                        .push((**cid).clone().into_inner().into())
+                    match grouped_cids.get_mut(peer_pk) {
+                        Some(peer_info) => peer_info.cids.push((**cid).clone().into_inner().into()),
+                        None => return Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
+                    }
                 }
                 _ => {}
             };
@@ -128,7 +130,7 @@ impl<'data> DataVerifier<'data> {
             peer_info.cids.sort_unstable();
         }
 
-        Self { grouped_cids }
+        Ok(Self { grouped_cids })
     }
 
     pub fn verify(&self) -> Result<(), DataVerifierError> {

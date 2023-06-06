@@ -30,8 +30,8 @@ pub(crate) fn verify(
 
     current_data.cid_info.verify()?;
 
-    let prev_data_verifier = verification::DataVerifier::new(prev_data);
-    let current_data_verifier = verification::DataVerifier::new(current_data);
+    let prev_data_verifier = verification::DataVerifier::new(prev_data)?;
+    let current_data_verifier = verification::DataVerifier::new(current_data)?;
     // prev_data is always correct, check only current_data
     current_data_verifier.verify()?;
 
