@@ -16,10 +16,12 @@
 
 use crate::{CanonResult, ExecutedState, InterpreterData};
 
+use air_interpreter_cid::CID;
 use air_interpreter_signatures::{FullSignatureStore, PublicKey, Signature};
 use thiserror::Error as ThisError;
 
 use std::collections::HashMap;
+use std::rc::Rc;
 
 const CANNOT_HAPPEN_IN_VERIFIED_CID_STORE: &str = "cannot happen in a checked CID store";
 
@@ -57,8 +59,6 @@ impl<'data> DataVerifier<'data> {
     // it can be further optimized if only required parts are passed
     // SignatureStore is not used elsewhere
     pub fn new(data: &'data InterpreterData) -> Result<Self, DataVerifierError> {
-        use crate::CallResult::*;
-
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error
         let mut grouped_cids: HashMap<Box<str>, PeerInfo<'data>> = data
             .signatures
@@ -71,61 +71,9 @@ impl<'data> DataVerifier<'data> {
             })
             .collect();
 
-        for elt in &data.trace {
-            match elt {
-                ExecutedState::Call(ref call) => {
-                    let cid = match call {
-                        RequestSentBy(_) => None,
-                        Executed(executed) => executed.get_cid(),
-                        Failed(failed) => Some(failed),
-                    };
-                    if let Some(cid) = cid {
-                        // TODO refactor
-                        let service_result = data
-                            .cid_info
-                            .service_result_store
-                            .get(cid)
-                            .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-                        let tetraplet = data
-                            .cid_info
-                            .tetraplet_store
-                            .get(&service_result.tetraplet_cid)
-                            .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-
-                        let peer_pk = tetraplet.peer_pk.as_str();
-                        match grouped_cids.get_mut(peer_pk) {
-                            Some(peer_info) => {
-                                peer_info.cids.push((**cid).clone().into_inner().into())
-                            }
-                            None => return Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
-                        }
-                    }
-                }
-                ExecutedState::Canon(CanonResult(ref cid)) => {
-                    // TODO refactor
-                    let canon_result = data
-                        .cid_info
-                        .canon_result_store
-                        .get(cid)
-                        .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-                    let tetraplet = data
-                        .cid_info
-                        .tetraplet_store
-                        .get(&canon_result.tetraplet)
-                        .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-
-                    let peer_pk = tetraplet.peer_pk.as_str();
-                    match grouped_cids.get_mut(peer_pk) {
-                        Some(peer_info) => peer_info.cids.push((**cid).clone().into_inner().into()),
-                        None => return Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
-                    }
-                }
-                _ => {}
-            };
-        }
+        collect_peers_cids(data, &mut grouped_cids)?;
 
         // sort cids for canonicalization
-        // TODO wrapper type for sorted data
         for peer_info in grouped_cids.values_mut() {
             peer_info.cids.sort_unstable();
         }
@@ -179,6 +127,67 @@ impl<'data> DataVerifier<'data> {
             store.put(peer_info.public_key.clone(), peer_info.signature.clone())
         }
         Ok(store)
+    }
+}
+
+fn collect_peers_cids<'data>(
+    data: &'data InterpreterData,
+    grouped_cids: &mut HashMap<Box<str>, PeerInfo<'data>>,
+) -> Result<(), DataVerifierError> {
+    for elt in &data.trace {
+        match elt {
+            ExecutedState::Call(ref call) => {
+                let cid = call.get_cid();
+                if let Some(cid) = cid {
+                    // TODO refactor
+                    let service_result = data
+                        .cid_info
+                        .service_result_store
+                        .get(cid)
+                        .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+                    let tetraplet = data
+                        .cid_info
+                        .tetraplet_store
+                        .get(&service_result.tetraplet_cid)
+                        .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+
+                    let peer_pk = tetraplet.peer_pk.as_str();
+                    try_push_cid(grouped_cids, peer_pk, cid)?;
+                }
+            }
+            ExecutedState::Canon(CanonResult(ref cid)) => {
+                // TODO refactor
+                let canon_result = data
+                    .cid_info
+                    .canon_result_store
+                    .get(cid)
+                    .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+                let tetraplet = data
+                    .cid_info
+                    .tetraplet_store
+                    .get(&canon_result.tetraplet)
+                    .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
+
+                let peer_pk = tetraplet.peer_pk.as_str();
+                try_push_cid(grouped_cids, peer_pk, cid)?;
+            }
+            _ => {}
+        };
+    }
+    Ok(())
+}
+
+fn try_push_cid<T>(
+    grouped_cids: &mut HashMap<Box<str>, PeerInfo<'_>>,
+    peer_pk: &str,
+    cid: &Rc<CID<T>>,
+) -> Result<(), DataVerifierError> {
+    match grouped_cids.get_mut(peer_pk) {
+        Some(peer_info) => {
+            peer_info.cids.push((**cid).clone().into_inner().into());
+            Ok(())
+        }
+        None => Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
     }
 }
 
