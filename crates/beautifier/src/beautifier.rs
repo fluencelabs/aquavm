@@ -125,6 +125,7 @@ impl<W: io::Write> Beautifier<W> {
         match node {
             ast::Instruction::Call(call) => self.beautify_call(call, indent),
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
+            ast::Instruction::ApMap(ap_map) => self.beautify_simple(ap_map, indent),
             ast::Instruction::Canon(canon) => self.beautify_simple(canon, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),
@@ -137,6 +138,9 @@ impl<W: io::Write> Beautifier<W> {
             }
             ast::Instruction::FoldStream(fold_stream) => {
                 self.beautify_fold_stream(fold_stream, indent)
+            }
+            ast::Instruction::FoldStreamMap(fold_stream_map) => {
+                self.beautify_fold_stream_map(fold_stream_map, indent)
             }
             ast::Instruction::Never(never) => self.beautify_simple(never, indent),
             ast::Instruction::New(new) => self.beautify_new(new, indent),
@@ -210,6 +214,14 @@ impl<W: io::Write> Beautifier<W> {
     fn beautify_fold_stream(
         &mut self,
         fold: &ast::FoldStream<'_>,
+        indent: usize,
+    ) -> io::Result<()> {
+        compound!(self, indent, fold)
+    }
+
+    fn beautify_fold_stream_map(
+        &mut self,
+        fold: &ast::FoldStreamMap<'_>,
         indent: usize,
     ) -> io::Result<()> {
         compound!(self, indent, fold)

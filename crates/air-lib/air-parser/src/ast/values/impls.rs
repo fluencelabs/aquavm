@@ -119,3 +119,9 @@ impl<'i> ImmutableVariableWithLambda<'i> {
         Self::Scalar(scalar)
     }
 }
+
+impl<'i> StreamMap<'i> {
+    pub fn new(name: &'i str, position: AirPos) -> Self {
+        Self { name, position }
+    }
+}

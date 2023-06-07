@@ -24,6 +24,7 @@ use super::ImmutableVariableWithLambda;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
+use super::StreamMap;
 
 use air_lambda_ast::LambdaAST;
 
@@ -112,6 +113,15 @@ pub enum ApResult<'i> {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ApMapKey<'i> {
+    Literal(&'i str),
+    Number(Number),
+    Scalar(Scalar<'i>),
+    ScalarWithLambda(ScalarWithLambda<'i>),
+    CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Number {
     Int(i64),
     Float(f64),
@@ -135,6 +145,8 @@ pub enum NewArgument<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     Stream(Stream<'i>),
+    #[serde(borrow)]
+    StreamMap(StreamMap<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
 }

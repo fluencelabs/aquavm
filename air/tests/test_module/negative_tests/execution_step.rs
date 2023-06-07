@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+use air::unsupported_map_key_type;
 use air::CatchableError;
 use air::LambdaError;
+
 use air_test_utils::prelude::*;
 
 #[test]
@@ -540,5 +542,38 @@ fn canon_stream_not_have_enough_values_call_arg() {
     assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
     let expected_error =
         CatchableError::LambdaApplierError(LambdaError::CanonStreamNotHaveEnoughValues { stream_size: 0, idx: 0 });
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn unsupported_map_keytype_float() {
+    let mut local_vm = create_avm(unit_call_service(), "local_peer_id");
+
+    let map_name = "%map";
+    let join_stream_script = f!(r#"
+        (ap (0.5 "serv1") %map)
+     "#);
+
+    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let expected_error = CatchableError::StreamMapError(unsupported_map_key_type(map_name));
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn unsupported_map_keytype() {
+    let local_peer_id = "local_peer_id";
+    let obj_arg = json!({"a": {"b": 1},});
+    let mut local_vm = create_avm(set_variable_call_service(obj_arg), local_peer_id);
+
+    let map_name = "%map";
+    let join_stream_script = f!(r#"
+    (seq
+        (call "{local_peer_id}" ("" "") [] scalar)
+        (ap (scalar.$.a "serv1") %map)
+    )
+     "#);
+
+    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let expected_error = CatchableError::StreamMapError(unsupported_map_key_type(map_name));
     assert!(check_error(&result, expected_error));
 }

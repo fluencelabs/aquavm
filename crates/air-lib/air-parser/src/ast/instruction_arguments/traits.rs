@@ -108,6 +108,20 @@ impl fmt::Display for ApArgument<'_> {
     }
 }
 
+impl fmt::Display for ApMapKey<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ApMapKey::*;
+
+        match self {
+            Literal(str) => write!(f, r#""{str}""#),
+            Number(number) => write!(f, "{number}"),
+            Scalar(scalar) => write!(f, "{scalar}"),
+            ScalarWithLambda(scalar) => write!(f, "{scalar}"),
+            CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+        }
+    }
+}
+
 impl fmt::Display for Triplet<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -124,6 +138,7 @@ impl fmt::Display for NewArgument<'_> {
             Self::Scalar(scalar) => write!(f, "{scalar}"),
             Self::Stream(stream) => write!(f, "{stream}"),
             Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            Self::StreamMap(stream_map) => write!(f, "{stream_map}"),
         }
     }
 }

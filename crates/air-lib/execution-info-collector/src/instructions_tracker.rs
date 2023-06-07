@@ -68,6 +68,7 @@ pub struct NewTracker {
     pub executed_count: HashMap<AirPos, u32>,
 }
 
+// TODO: return seen_count from other methods of this structure
 impl InstructionTracker {
     pub fn meet_ap(&mut self) {
         self.ap.seen_count += 1;
@@ -89,8 +90,9 @@ impl InstructionTracker {
         self.fold.seen_scalar_count += 1;
     }
 
-    pub fn meet_fold_stream(&mut self) {
+    pub fn meet_fold_stream(&mut self) -> u32 {
         self.fold.seen_stream_count += 1;
+        self.fold.seen_stream_count
     }
 
     pub fn meet_match(&mut self) {
