@@ -116,6 +116,7 @@ impl<'i> ExecutionCtx<'i> {
             last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
+            stream_maps: <_>::default(),
             cid_state,
             signature_store,
             signature_tracker,

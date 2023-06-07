@@ -21,7 +21,7 @@ mod join_behaviour;
 mod lambda;
 mod misc;
 mod scopes;
-// #[cfg(feature = "check_signatures")]
+#[cfg(feature = "check_signatures")]
 mod signatures;
 mod streams;
 mod tetraplets;
