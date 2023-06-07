@@ -6,6 +6,7 @@ on:
       - "**.md"
       - ".github/**"
       - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/e2e-label.yml"
       - "!.github/workflows/snapshot.yml"
     types:
       - "labeled"
