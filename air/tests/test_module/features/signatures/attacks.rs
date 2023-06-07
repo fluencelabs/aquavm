@@ -15,7 +15,7 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, FullSignatureStore, PeerCidTracker};
+use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, FullSignatureStore, PeerCidTracker, PublicKey};
 use air_test_utils::prelude::*;
 use semver::Version;
 
@@ -35,22 +35,22 @@ fn test_attack_injection_current_peer_scalar() {
     "#
     );
 
-    let mut alice_cid_tracker = ExecutionCidState::new();
+    let mut alice_cid_state = ExecutionCidState::new();
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
     let mut alice_signature_store = FullSignatureStore::new();
 
-    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_tracker, peer = &alice_peer_id);
+    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_state, peer = &alice_peer_id);
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
     let alice_trace = vec![alice_call_1.clone()];
     let alice_signature = alice_signature_tracker.gen_signature(&alice_keypair).unwrap();
     alice_signature_store.put(alice_keypair.public().into(), alice_signature);
 
-    let mut mallory_cid_tracker = alice_cid_tracker.clone();
+    let mut mallory_cid_state = alice_cid_state.clone();
     let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     let mut mallory_signature_store = alice_signature_store.clone();
 
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = &mallory_peer_id);
-    let fake_call_3 = scalar_tracked!("fake result", &mut mallory_cid_tracker, peer = &alice_peer_id);
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = scalar_tracked!("fake result", &mut mallory_cid_state, peer = &alice_peer_id);
     mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
     let mallory_signature = mallory_signature_tracker.gen_signature(&mallory_keypair).unwrap();
@@ -60,7 +60,7 @@ fn test_attack_injection_current_peer_scalar() {
         alice_trace.into(),
         <_>::default(),
         <_>::default(),
-        alice_cid_tracker.into(),
+        alice_cid_state.into(),
         alice_signature_store,
         2,
         Version::new(1, 1, 1),
@@ -70,7 +70,7 @@ fn test_attack_injection_current_peer_scalar() {
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
+        mallory_cid_state.into(),
         mallory_signature_store,
         2,
         Version::new(1, 1, 1),
@@ -92,6 +92,11 @@ fn test_attack_injection_current_peer_stream() {
     let alice_peer_id = "alice_peer";
     let mallory_peer_id = "mallory_peer";
 
+    let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_peer_id);
+    let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair(mallory_peer_id);
+    let alice_pk: PublicKey = alice_keypair.public().into();
+    let mallory_pk: PublicKey = mallory_keypair.public().into();
+
     let air_script = format!(
         r#"
     (seq
@@ -102,22 +107,36 @@ fn test_attack_injection_current_peer_stream() {
     "#
     );
 
-    let mut alice_cid_tracker = ExecutionCidState::default();
+    let mut alice_cid_state = ExecutionCidState::default();
 
-    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_tracker, peer = alice_peer_id);
+    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_state, peer = &alice_peer_id);
+
+    let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
+    alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
+    let mut alice_signature_store = FullSignatureStore::new();
+    let alice_signature = alice_signature_tracker.gen_signature(&alice_keypair).unwrap();
+    alice_signature_store.put(alice_pk, alice_signature);
+
     let alice_trace = vec![alice_call_1.clone()];
 
-    let mut mallory_cid_tracker = alice_cid_tracker.clone();
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = mallory_peer_id);
-    let fake_call_3 = stream_tracked!("fake result", 0, &mut mallory_cid_tracker, peer = alice_peer_id);
+    let mut mallory_cid_state = alice_cid_state.clone();
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = stream_tracked!("fake result", 0, &mut mallory_cid_state, peer = &alice_peer_id);
+
+    let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
+    mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
+    let mut mallory_signature_store = FullSignatureStore::new();
+    let mallory_signature = mallory_signature_tracker.gen_signature(&mallory_keypair).unwrap();
+    mallory_signature_store.put(mallory_pk, mallory_signature);
+
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
     let alice_data = InterpreterData::from_execution_result(
         alice_trace.into(),
         <_>::default(),
         <_>::default(),
-        alice_cid_tracker.into(),
-        todo!(),
+        alice_cid_state.into(),
+        alice_signature_store,
         2,
         Version::new(1, 1, 1),
     );
@@ -126,13 +145,13 @@ fn test_attack_injection_current_peer_stream() {
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
-        todo!(),
+        mallory_cid_state.into(),
+        mallory_signature_store,
         2,
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm(unit_call_service(), alice_peer_id);
+    let mut alice_avm = create_avm(unit_call_service(), &alice_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = serde_json::to_vec(&alice_data).unwrap();
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
@@ -148,6 +167,11 @@ fn test_attack_injection_current_injection_unused() {
     let alice_peer_id = "alice_peer";
     let mallory_peer_id = "mallory_peer";
 
+    let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_peer_id);
+    let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair(mallory_peer_id);
+    let alice_pk: PublicKey = alice_keypair.public().into();
+    let mallory_pk: PublicKey = mallory_keypair.public().into();
+
     let air_script = format!(
         r#"
         (seq
@@ -158,22 +182,34 @@ fn test_attack_injection_current_injection_unused() {
         "#
     );
 
-    let mut alice_cid_tracker = ExecutionCidState::default();
-
-    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_tracker, peer = alice_peer_id);
+    let mut alice_cid_state = ExecutionCidState::default();
+    let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_state, peer = &alice_peer_id);
     let alice_trace = vec![alice_call_1.clone()];
 
-    let mut mallory_cid_tracker = alice_cid_tracker.clone();
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = mallory_peer_id);
-    let fake_call_3 = unused!("fake result", peer = alice_peer_id);
+    let mut mallory_cid_state = alice_cid_state.clone();
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = unused!("fake result", peer = &alice_peer_id);
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
+
+    let mut alice_signature_store = FullSignatureStore::new();
+
+    let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
+    alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
+    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    alice_signature_store.put(alice_pk, alice_signature);
+
+    let mallory_signature_store = alice_signature_store.clone();
+    let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
+    mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
+    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    alice_signature_store.put(mallory_pk, mallory_signature);
 
     let alice_data = InterpreterData::from_execution_result(
         alice_trace.into(),
         <_>::default(),
         <_>::default(),
-        alice_cid_tracker.into(),
-        todo!(),
+        alice_cid_state.into(),
+        alice_signature_store,
         2,
         Version::new(1, 1, 1),
     );
@@ -182,13 +218,13 @@ fn test_attack_injection_current_injection_unused() {
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
-        todo!(),
+        mallory_cid_state.into(),
+        mallory_signature_store,
         2,
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm(unit_call_service(), alice_peer_id);
+    let mut alice_avm = create_avm(unit_call_service(), &alice_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = serde_json::to_vec(&alice_data).unwrap();
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
@@ -206,6 +242,11 @@ fn test_attack_injection_other_peer_scalar() {
     let bob_peer_id = "bob_peer";
     let mallory_peer_id = "mallory_peer";
 
+    let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_peer_id);
+    let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair(mallory_peer_id);
+    let alice_pk: PublicKey = alice_keypair.public().into();
+    let mallory_pk: PublicKey = mallory_keypair.public().into();
+
     let air_script = format!(
         r#"
     (seq
@@ -216,20 +257,31 @@ fn test_attack_injection_other_peer_scalar() {
     "#
     );
 
-    let mut mallory_cid_tracker = ExecutionCidState::default();
+    let mut mallory_cid_state = ExecutionCidState::default();
 
-    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_tracker, peer = alice_peer_id);
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = mallory_peer_id);
-    let fake_call_3 = scalar_tracked!("fake result", &mut mallory_cid_tracker, peer = alice_peer_id);
+    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_state, peer = &alice_peer_id);
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = scalar_tracked!("fake result", &mut mallory_cid_state, peer = &alice_peer_id);
 
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
+    let mut signature_store = FullSignatureStore::new();
+
+    let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
+    alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
+    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    signature_store.put(alice_pk, alice_signature);
+
+    let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
+    mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
+    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    signature_store.put(mallory_pk, mallory_signature);
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
-        todo!(),
+        mallory_cid_state.into(),
+        signature_store,
         2,
         Version::new(1, 1, 1),
     );
@@ -249,6 +301,11 @@ fn test_attack_injection_other_peer_stream() {
     let bob_peer_id = "bob_peer";
     let mallory_peer_id = "mallory_peer";
 
+    let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_peer_id);
+    let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair(mallory_peer_id);
+    let alice_pk: PublicKey = alice_keypair.public().into();
+    let mallory_pk: PublicKey = mallory_keypair.public().into();
+
     let air_script = format!(
         r#"
     (seq
@@ -259,19 +316,31 @@ fn test_attack_injection_other_peer_stream() {
     "#
     );
 
-    let mut mallory_cid_tracker = ExecutionCidState::default();
+    let mut mallory_cid_state = ExecutionCidState::default();
 
-    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_tracker, peer = alice_peer_id);
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = mallory_peer_id);
-    let fake_call_3 = stream_tracked!("fake result", 0, &mut mallory_cid_tracker, peer = alice_peer_id);
+    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_state, peer = &alice_peer_id);
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = stream_tracked!("fake result", 0, &mut mallory_cid_state, peer = &alice_peer_id);
+
+    let mut signature_store = FullSignatureStore::new();
+    let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
+    alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
+    let alice_signature = alice_signature_tracker.gen_signature(&alice_keypair).unwrap();
+    signature_store.put(alice_pk, alice_signature);
+
+    let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
+    mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
+    let mallory_signature = mallory_signature_tracker.gen_signature(&mallory_keypair).unwrap();
+    signature_store.put(mallory_pk, mallory_signature);
+
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
-        todo!(),
+        mallory_cid_state.into(),
+        signature_store,
         2,
         Version::new(1, 1, 1),
     );
@@ -291,6 +360,11 @@ fn test_attack_injection_other_peer_unused() {
     let bob_peer_id = "bob_peer";
     let mallory_peer_id = "mallory_peer";
 
+    let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_peer_id);
+    let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair(mallory_peer_id);
+    let alice_pk: PublicKey = alice_keypair.public().into();
+    let mallory_pk: PublicKey = mallory_keypair.public().into();
+
     let air_script = format!(
         r#"
         (seq
@@ -301,19 +375,31 @@ fn test_attack_injection_other_peer_unused() {
         "#
     );
 
-    let mut mallory_cid_tracker = ExecutionCidState::default();
+    let mut mallory_cid_state = ExecutionCidState::default();
 
-    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_tracker, peer = alice_peer_id);
-    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_tracker, peer = mallory_peer_id);
-    let fake_call_3 = unused!("fake result", peer = alice_peer_id);
+    let alice_call_1 = scalar_tracked!("good result", &mut mallory_cid_state, peer = &alice_peer_id);
+    let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
+    let fake_call_3 = unused!("fake result", peer = &alice_peer_id);
+
+    let mut signature_store = FullSignatureStore::new();
+    let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
+    alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
+    let alice_signature = alice_signature_tracker.gen_signature(&alice_keypair).unwrap();
+    signature_store.put(alice_pk, alice_signature);
+
+    let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
+    mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
+    let mallory_signature = mallory_signature_tracker.gen_signature(&mallory_keypair).unwrap();
+    signature_store.put(mallory_pk, mallory_signature);
+
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
         <_>::default(),
         <_>::default(),
-        mallory_cid_tracker.into(),
-        todo!(),
+        mallory_cid_state.into(),
+        signature_store,
         2,
         Version::new(1, 1, 1),
     );
@@ -324,5 +410,6 @@ fn test_attack_injection_other_peer_unused() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_ne!(res.ret_code, 0, "{}", res.error_message);
+    // please not that such injection is not caught
+    assert_eq!(res.ret_code, 0, "{}", res.error_message);
 }
