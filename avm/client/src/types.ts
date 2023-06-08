@@ -16,6 +16,10 @@
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
+/**
+ * From fluence-keypair crate:
+ * https://github.com/fluencelabs/trust-graph/blob/f7ef0f8da095fe1fef80faaa0b0c2d5ef854bd16/keypair/src/key_pair.rs#L79-L82
+ */
 export enum KeyPairFormat {
     Ed25519 = 0,
     Rsa = 1,
