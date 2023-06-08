@@ -19,7 +19,6 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
-
 use std::cell::RefCell;
 
 #[test]
