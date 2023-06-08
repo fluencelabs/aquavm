@@ -174,24 +174,22 @@ fn test_signature_call_twice() {
                     (next i))))
         "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(&init_peer_id), &air_script).unwrap();
 
-    let res = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
+    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
-    let expected_call_state = scalar!("ok", peer = init_peer_id, service = "..0");
+    let expected_call_state = scalar!("ok", peer = &init_peer_id, service = "..0");
     let expected_cid = extract_service_result_cid(&expected_call_state);
 
-    let (keypair, _) = derive_dummy_keypair(init_peer_id);
-
     let mut unexpected_tracker = PeerCidTracker::new(init_peer_id.to_owned());
-    unexpected_tracker.register(init_peer_id, &expected_cid);
+    unexpected_tracker.register(&init_peer_id, &expected_cid);
     let unexpected_signature = unexpected_tracker.gen_signature(&keypair).unwrap();
 
     let mut expected_tracker = PeerCidTracker::new(init_peer_id.to_owned());
-    expected_tracker.register(init_peer_id, &expected_cid);
-    expected_tracker.register(init_peer_id, &expected_cid);
+    expected_tracker.register(&init_peer_id, &expected_cid);
+    expected_tracker.register(&init_peer_id, &expected_cid);
     let expected_signature = expected_tracker.gen_signature(&keypair).unwrap();
 
     assert_ne!(expected_signature, unexpected_signature, "test is incorrect");
