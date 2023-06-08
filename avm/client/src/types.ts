@@ -16,6 +16,12 @@
 
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
+export enum KeyPairFormat {
+    Ed25519 = 0,
+    Rsa = 1,
+    Secp256k1 = 2,
+}
+
 /**
  * Parameters that a host side should pass to an interpreter and that necessary for execution.
  */
@@ -29,6 +35,16 @@ export interface RunParameters {
      * Peer id of a current peer.
      */
     currentPeerId: string;
+
+    /**
+     * Key pair format of the current peer Ed25519, Rsa or Secp256k1.
+     */
+    keyPairFormat: KeyPairFormat;
+
+    /**
+     * They key itself protobuf serialized into 32 byte Uint8Array using libp2p marshal
+     */
+    keyPairData: Uint8Array;
 
     /**
      * Unix timestamp from a particle in milliseconds.
