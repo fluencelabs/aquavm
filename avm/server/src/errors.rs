@@ -73,7 +73,7 @@ pub enum RunnerError {
     #[error(transparent)]
     CallSeDeErrors(#[from] CallSeDeErrors),
 
-    /// Invalid signing keypair.
+    /// Invalid secret key.
     #[error(transparent)]
-    KeypairError(eyre::Error),
+    KeyError(eyre::Error),
 }

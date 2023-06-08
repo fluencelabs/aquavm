@@ -72,8 +72,8 @@ pub(crate) fn prepare<'i>(
     let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, &run_parameters)?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
-    let keypair_format = KeyFormat::try_from(run_parameters.keypair_format)?;
-    let keypair = KeyPair::from_secret_key(run_parameters.keypair_data, keypair_format)?;
+    let key_format = KeyFormat::try_from(run_parameters.key_format)?;
+    let keypair = KeyPair::from_secret_key(run_parameters.secret_key_bytes, key_format)?;
 
     let result = PreparationDescriptor {
         exec_ctx,

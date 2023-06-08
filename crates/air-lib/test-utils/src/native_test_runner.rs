@@ -50,8 +50,8 @@ impl AirRunner for NativeAirRunner {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        let keypair_format = keypair.key_format().into();
-        let keypair_data = keypair.secret().unwrap();
+        let key_format = keypair.key_format().into();
+        let secret_key_bytes = keypair.secret().unwrap();
 
         let outcome = air::execute_air(
             air.into(),
@@ -62,8 +62,8 @@ impl AirRunner for NativeAirRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
-                keypair_format,
-                keypair_data,
+                key_format,
+                secret_key_bytes,
             },
             raw_call_results,
         );

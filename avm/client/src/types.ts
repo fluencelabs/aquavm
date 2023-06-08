@@ -41,14 +41,14 @@ export interface RunParameters {
     currentPeerId: string;
 
     /**
-     * Key pair format of the current peer Ed25519, Rsa or Secp256k1.
+     * Key format of the current peer Ed25519, Rsa or Secp256k1.
      */
-    keyPairFormat: KeyPairFormat;
+    keyFormat: KeyPairFormat;
 
     /**
-     * They key itself protobuf serialized into 32 byte Uint8Array using libp2p marshal
+     * They secret key itself serialized into 32 byte Uint8Array using libp2p marshal
      */
-    keyPairData: Uint8Array;
+    secretKeyData: Uint8Array;
 
     /**
      * Unix timestamp from a particle in milliseconds.
