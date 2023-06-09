@@ -48,7 +48,7 @@ export interface RunParameters {
     /**
      * They secret key itself serialized into 32 byte Uint8Array using libp2p marshal
      */
-    secretKeyData: Uint8Array;
+    secretKeyBytes: Uint8Array;
 
     /**
      * Unix timestamp from a particle in milliseconds.
