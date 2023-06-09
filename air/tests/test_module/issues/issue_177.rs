@@ -67,7 +67,7 @@ fn issue_177() {
 
     // client 1: demand result for (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
     let client_result_1 = client
-        .call_single(script, "", "", client_peer_id, 0, 0, None, HashMap::new())
+        .call_single(script, "", "", client_peer_id, 0, 0, None, HashMap::new(), "")
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         1 => CallRequestParams::new("getDataSrv", "-relay-", vec![], vec![]),
@@ -89,6 +89,7 @@ fn issue_177() {
             0,
             None,
             call_results,
+            "",
         )
         .expect("call should be success");
     assert!(client_result_2.call_requests.is_empty());
@@ -105,6 +106,7 @@ fn issue_177() {
             0,
             None,
             HashMap::new(),
+            "",
         )
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
@@ -127,6 +129,7 @@ fn issue_177() {
             0,
             None,
             call_results,
+            "",
         )
         .expect("call should be success");
     assert!(relay_result_2.next_peer_pks.is_empty());
@@ -145,6 +148,7 @@ fn issue_177() {
             0,
             None,
             call_results,
+            "",
         )
         .expect("call should be success");
     assert!(relay_result_3.next_peer_pks.is_empty());
@@ -163,6 +167,7 @@ fn issue_177() {
             0,
             None,
             call_results,
+            "",
         )
         .expect("call should be success");
 
@@ -178,6 +183,7 @@ fn issue_177() {
             0,
             None,
             HashMap::new(),
+            "",
         )
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
@@ -201,6 +207,7 @@ fn issue_177() {
             0,
             None,
             call_results,
+            "",
         )
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
@@ -225,6 +232,7 @@ fn issue_177() {
         0,
         None,
         call_results,
+        "",
     );
     // before patch the interpreter crashed here
     assert!(client_result_5.is_ok());

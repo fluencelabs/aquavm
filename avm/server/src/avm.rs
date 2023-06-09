@@ -108,6 +108,7 @@ impl<E> AVM<E> {
                 particle_parameters.current_peer_id.clone(),
                 call_results.clone(),
                 keypair,
+                particle_parameters.particle_id.to_string(),
             )
             .map_err(AVMError::RunnerError)?;
 

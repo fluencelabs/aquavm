@@ -43,6 +43,7 @@ pub trait AirRunner {
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
         key_pair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
 
@@ -58,6 +59,7 @@ pub struct TestRunParameters {
     pub timestamp: u64,
     pub ttl: u32,
     pub override_current_peer_id: Option<String>,
+    pub particle_id: String,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -77,6 +79,7 @@ impl<R: AirRunner> TestRunner<R> {
             timestamp,
             ttl,
             override_current_peer_id,
+            particle_id,
         } = test_run_params;
 
         let mut call_results = HashMap::new();
@@ -95,6 +98,7 @@ impl<R: AirRunner> TestRunner<R> {
                     override_current_peer_id.clone(),
                     call_results,
                     &self.keypair,
+                    particle_id.clone(),
                 )
                 .map_err(|e| e.to_string())?;
 
@@ -130,6 +134,7 @@ impl<R: AirRunner> TestRunner<R> {
         ttl: u32,
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
+        particle_id: impl Into<String>,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         self.runner.call(
             air,
@@ -141,6 +146,7 @@ impl<R: AirRunner> TestRunner<R> {
             override_current_peer_id,
             call_results,
             &self.keypair,
+            particle_id.into(),
         )
     }
 }
@@ -163,39 +169,39 @@ pub fn create_avm(
 }
 
 impl TestRunParameters {
-    pub fn new(init_peer_id: impl Into<String>, timestamp: u64, ttl: u32) -> Self {
+    pub fn new(
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        particle_id: impl Into<String>,
+    ) -> Self {
         Self {
             init_peer_id: init_peer_id.into(),
             timestamp,
             ttl,
             override_current_peer_id: None,
+            particle_id: particle_id.into(),
         }
     }
 
     pub fn from_init_peer_id(init_peer_id: impl Into<String>) -> Self {
         Self {
             init_peer_id: init_peer_id.into(),
-            timestamp: 0,
-            ttl: 0,
-            override_current_peer_id: None,
+            ..<_>::default()
         }
     }
 
     pub fn from_timestamp(timestamp: u64) -> Self {
         Self {
-            init_peer_id: String::new(),
             timestamp,
-            ttl: 0,
-            override_current_peer_id: None,
+            ..<_>::default()
         }
     }
 
     pub fn from_ttl(ttl: u32) -> Self {
         Self {
-            init_peer_id: String::new(),
-            timestamp: 0,
             ttl,
-            override_current_peer_id: None,
+            ..<_>::default()
         }
     }
 }
@@ -241,6 +247,7 @@ mod tests {
                 None,
                 HashMap::new(),
                 &keypair,
+                "".to_owned(),
             )
             .expect("call should be success");
 
@@ -268,6 +275,7 @@ mod tests {
                 Some(spell_id.to_owned()),
                 HashMap::new(),
                 &keypair2,
+                "".to_owned(),
             )
             .expect("call should be success");
 

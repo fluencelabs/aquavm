@@ -41,6 +41,9 @@ pub(crate) struct PlainDataArgs {
     prev_data_path: Option<PathBuf>,
     #[clap(long = "current-data")]
     current_data_path: Option<PathBuf>,
+
+    #[clap(long = "particle-id")]
+    particle_id: Option<String>,
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
@@ -60,7 +63,10 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
 
     let particle = ParticleParameters::new(
         init_peer_id.into(),
-        "".into(),
+        args.particle_id
+            .as_ref()
+            .map(Into::into)
+            .unwrap_or("".into()),
         timestamp,
         ttl,
         current_peer_id.into(),

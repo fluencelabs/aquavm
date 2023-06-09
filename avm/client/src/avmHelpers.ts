@@ -51,6 +51,7 @@ export function serializeAvmArgs(
         current_peer_id: runParams.currentPeerId,
         key_format: runParams.keyFormat,
         secret_key_bytes: runParams.secretKeyBytes,
+        particle_id: runParams.particleId,
     };
 
     return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encoded)];

@@ -42,6 +42,7 @@ impl AirRunner for NativeAirRunner {
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
         keypair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
@@ -64,6 +65,7 @@ impl AirRunner for NativeAirRunner {
                 ttl,
                 key_format,
                 secret_key_bytes,
+                particle_id,
             },
             raw_call_results,
         );

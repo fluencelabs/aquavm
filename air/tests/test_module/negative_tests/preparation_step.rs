@@ -93,6 +93,7 @@ fn invalid_callresults() {
         0,
         keypair.key_format().into(),
         keypair.secret().unwrap(),
+        "".to_owned(),
     );
 
     let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone());

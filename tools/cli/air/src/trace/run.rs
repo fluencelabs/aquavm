@@ -145,7 +145,8 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                 call_results.clone(),
                 args.tracing_params.clone(),
                 tracing_json,
-                key_pair.clone(),
+                &key_pair,
+                particle.particle_id.clone().into_owned(),
             )
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {

@@ -32,6 +32,7 @@ pub(crate) trait AirRunner {
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
-        key_pair: KeyPair,
+        key_pair: &KeyPair,
+        particle_id: String,
     ) -> anyhow::Result<RawAVMOutcome>;
 }

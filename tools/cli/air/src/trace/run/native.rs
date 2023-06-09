@@ -35,7 +35,8 @@ impl AirRunner for NativeAvmRunner {
         // We use externally configured logger.
         _tracing_params: String,
         _tracing_output_mode: u8,
-        keypair: KeyPair,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> anyhow::Result<RawAVMOutcome> {
         use avm_interface::into_raw_result;
 
@@ -57,6 +58,7 @@ impl AirRunner for NativeAvmRunner {
                 ttl,
                 key_format,
                 secret_key_bytes,
+                particle_id,
             },
             raw_call_results,
         );

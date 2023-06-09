@@ -49,6 +49,9 @@ pub struct RunParameters {
     /// The value is the result `fluence_keypair::KeyPair::secret`, for compatibility
     /// with JS client who can only serialize to secret key, not to keypair.
     pub secret_key_bytes: Vec<u8>,
+
+    /// Unique particle ID.
+    pub particle_id: String,
 }
 
 impl RunParameters {
@@ -59,6 +62,7 @@ impl RunParameters {
         ttl: u32,
         key_format: u8,
         secret_key_bytes: Vec<u8>,
+        particle_id: String,
     ) -> Self {
         Self {
             init_peer_id,
@@ -67,6 +71,7 @@ impl RunParameters {
             ttl,
             key_format,
             secret_key_bytes,
+            particle_id,
         }
     }
 

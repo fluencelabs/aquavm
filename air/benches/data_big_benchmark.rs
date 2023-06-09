@@ -15,7 +15,7 @@ const SCRIPT: &str = include_str!("data/big.air");
 const VALUES_DATA: &str = include_str!("data/anomaly_big.json");
 
 fn data_big_calls(prev_data: &str, current_data: &str) -> Result<RawAVMOutcome, String> {
-    let run_parameters = TestRunParameters::new("test_peer_id", 0, 1);
+    let run_parameters = TestRunParameters::new("test_peer_id", 0, 1, "");
     VM.with(|vm| vm.borrow_mut().call(SCRIPT, prev_data, current_data, run_parameters))
 }
 

@@ -60,6 +60,11 @@ export interface RunParameters {
      * TTL set by init peer id in milliseconds.
      */
     ttl: number;
+
+    /**
+     * Unique particle ID
+     */
+    particleId: String;
 }
 
 /**

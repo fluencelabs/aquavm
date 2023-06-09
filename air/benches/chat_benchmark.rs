@@ -41,7 +41,7 @@ fn chat_sent_message_benchmark() -> Result<RawAVMOutcome, String> {
             )
         "#;
 
-    let run_parameters = TestRunParameters::new("A", 0, 1);
+    let run_parameters = TestRunParameters::new("A", 0, 1, "");
     let result = CLIENT_1_VM
         .with(|vm| vm.borrow_mut().call(script, "", "", run_parameters.clone()))
         .unwrap();

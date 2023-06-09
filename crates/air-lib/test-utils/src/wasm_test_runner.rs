@@ -73,6 +73,7 @@ impl AirRunner for WasmAirRunner {
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
         keypair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
@@ -87,6 +88,7 @@ impl AirRunner for WasmAirRunner {
             current_peer_id,
             call_results,
             keypair,
+            particle_id,
         )?)
     }
 }

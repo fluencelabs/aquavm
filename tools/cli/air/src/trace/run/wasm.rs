@@ -33,7 +33,8 @@ impl AirRunner for WasmAvmRunner {
         call_results: avm_interface::CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
-        keypair: KeyPair,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
         Ok(self.0.call_tracing(
             air,
@@ -48,6 +49,7 @@ impl AirRunner for WasmAvmRunner {
             tracing_output_mode,
             keypair.key_format().into(),
             keypair.secret().expect("Failed to get secret"),
+            particle_id,
         )?)
     }
 }
