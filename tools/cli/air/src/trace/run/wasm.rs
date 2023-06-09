@@ -36,7 +36,7 @@ impl AirRunner for WasmAvmRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
-        Ok(self.0.call_tracing(
+        let call_tracing = self.0.call_tracing(
             air,
             prev_data,
             data,
@@ -50,7 +50,11 @@ impl AirRunner for WasmAvmRunner {
             keypair.key_format().into(),
             keypair.secret().expect("Failed to get secret"),
             particle_id,
-        )?)
+        );
+        let memory_stats = self.0.memory_stats();
+        tracing::warn!(memory_size = memory_stats.memory_size);
+
+        Ok(call_tracing?)
     }
 }
 
