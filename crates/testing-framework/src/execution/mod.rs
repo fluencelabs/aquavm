@@ -297,8 +297,6 @@ mod tests {
         )
         .unwrap();
 
-        let peer1_id = exec.resolve_name(peer1_name).to_string();
-
         let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect();
 
         assert_eq!(result_init.len(), 1);
@@ -330,13 +328,13 @@ mod tests {
                 ExecutionTrace::from(vec![
                     scalar!(
                         json!([{"p":peer2_id,"v":2},{"p":peer3_id,"v":3}]),
-                        peer = &peer1_id,
+                        peer_name = &peer1_name,
                         service = "service..0",
                         function = "func"
                     ),
                     scalar!(
                         12,
-                        peer = &peer2_id,
+                        peer_name = &peer2_name,
                         service = "service..1",
                         function = "func",
                         args = vec![json!({"p":peer2_id,"v":2}), json!(1)]
@@ -359,13 +357,13 @@ mod tests {
                 ExecutionTrace::from(vec![
                     scalar!(
                         json!([{"p":peer2_id,"v":2},{"p":peer3_id,"v":3}]),
-                        peer = &peer1_id,
+                        peer_name = &peer1_name,
                         service = "service..0",
                         function = "func"
                     ),
                     scalar!(
                         12,
-                        peer = &peer2_id,
+                        peer_name = &peer2_name,
                         service = "service..1",
                         function = "func",
                         args = vec![json!({"p":peer2_id,"v":2}), json!(1)]
@@ -401,7 +399,6 @@ mod tests {
             ),
         )
         .unwrap();
-        let peer1_id = exec.resolve_name(peer1_name).to_string();
 
         let result_init: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
 
@@ -434,11 +431,21 @@ mod tests {
                 vec![
                     scalar!(
                         json!([peer2_id, peer3_id]),
-                        peer = peer1_id,
+                        peer_name = peer1_name,
                         service = "..0"
                     ),
-                    unused!(42, peer = &peer2_id, service = "..1", args = vec![peer2_id]),
-                    unused!(43, peer = &peer3_id, service = "..1", args = vec![peer3_id]),
+                    unused!(
+                        42,
+                        peer_name = &peer2_name,
+                        service = "..1",
+                        args = vec![peer2_id]
+                    ),
+                    unused!(
+                        43,
+                        peer_name = &peer3_name,
+                        service = "..1",
+                        args = vec![peer3_id]
+                    ),
                 ]
             );
         }
@@ -470,7 +477,6 @@ mod tests {
         let peer2_name = "peer2";
         let peer3_name = "peer3";
         let peer4_name = "peer4";
-        let (_peer1_pk, peer1_id) = derive_dummy_keypair(peer1_name);
         let (_peer2_pk, peer2_id) = derive_dummy_keypair(peer2_name);
         let (_peer3_pk, peer3_id) = derive_dummy_keypair(peer3_name);
         let (_peer4_pk, peer4_id) = derive_dummy_keypair(peer4_name);
@@ -524,13 +530,13 @@ mod tests {
                 ExecutionTrace::from(vec![
                     scalar!(
                         json!([{"p":peer2_id,"v":2},{"p":peer3_id,"v":3},{"p":peer4_id}]),
-                        peer = &peer1_id,
+                        peer_name = &peer1_name,
                         service = "service..0",
                         function = "func"
                     ),
                     scalar!(
                         12,
-                        peer = &peer2_id,
+                        peer_name = &peer2_name,
                         service = "service..1",
                         function = "func",
                         args = vec![2, 1]
@@ -554,13 +560,13 @@ mod tests {
                 ExecutionTrace::from(vec![
                     scalar!(
                         json!([{"p":peer2_id,"v":2},{"p":peer3_id,"v":3},{"p":peer4_id}]),
-                        peer = peer1_id,
+                        peer_name = peer1_name,
                         service = "service..0",
                         function = "func"
                     ),
                     scalar!(
                         12,
-                        peer = &peer2_id,
+                        peer_name = peer2_name,
                         service = "service..1",
                         function = "func",
                         args = vec![2, 1]
@@ -611,7 +617,7 @@ mod tests {
             ExecutionTrace::from(vec![
                 scalar!(
                     1,
-                    peer = &peer1_id,
+                    peer_name = &peer1_name,
                     service = "service..0",
                     function = "func",
                     args = vec![1, 22]
@@ -623,39 +629,42 @@ mod tests {
 
     #[test]
     fn test_transformed_distinct() {
-        let peer = "peer1";
+        let peer_name = "peer1";
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
 
         let transformed1 = TransformedAirScript::new(
-            &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
+            &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 42"#),
             network.clone(),
         )
         .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
-            TestRunParameters::from_init_peer_id(peer),
+            TestRunParameters::from_init_peer_id(peer_name),
             transformed1,
         )
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(
-            &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
+            &format!(
+                r#"(call "{}" ("service" "function") []) ; ok = 24"#,
+                peer_name
+            ),
             network,
         )
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
-            TestRunParameters::from_init_peer_id(peer),
+            TestRunParameters::from_init_peer_id(peer_name),
             transformed2,
         )
         .unwrap();
 
-        let trace1 = exectution1.execute_one(peer).unwrap();
-        let trace2 = exectution2.execute_one(peer).unwrap();
+        let trace1 = exectution1.execute_one(peer_name).unwrap();
+        let trace2 = exectution2.execute_one(peer_name).unwrap();
 
         assert_eq!(
             trace_from_result(&trace1),
             ExecutionTrace::from(vec![unused!(
                 42,
-                peer = peer,
+                peer_name = peer_name,
                 service = "service..0",
                 function = "function"
             )]),
@@ -664,7 +673,7 @@ mod tests {
             trace_from_result(&trace2),
             ExecutionTrace::from(vec![unused!(
                 24,
-                peer = peer,
+                peer_name = peer_name,
                 service = "service..1",
                 function = "function"
             )]),
@@ -691,30 +700,30 @@ mod tests {
             vec![service.to_handle()],
         );
 
-        let peer = "peer1";
-        let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
+        let peer_name = "peer1";
+        let air_script = format!(r#"(call "{}" ("service" "function") [])"#, peer_name);
         let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
-            TestRunParameters::from_init_peer_id(peer),
+            TestRunParameters::from_init_peer_id(peer_name),
             transformed1,
         )
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(&air_script, network).unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
-            TestRunParameters::from_init_peer_id(peer),
+            TestRunParameters::from_init_peer_id(peer_name),
             transformed2,
         )
         .unwrap();
 
-        let trace1 = exectution1.execute_one(peer).unwrap();
-        let trace2 = exectution2.execute_one(peer).unwrap();
+        let trace1 = exectution1.execute_one(peer_name).unwrap();
+        let trace2 = exectution2.execute_one(peer_name).unwrap();
 
         assert_eq!(
             trace_from_result(&trace1),
             ExecutionTrace::from(vec![unused!(
                 42,
-                peer = peer,
+                peer_name = peer_name,
                 service = "service",
                 function = "function"
             ),]),
@@ -723,7 +732,7 @@ mod tests {
             trace_from_result(&trace2),
             ExecutionTrace::from(vec![unused!(
                 24,
-                peer = peer,
+                peer_name = peer_name,
                 service = "service",
                 function = "function"
             ),]),
@@ -778,7 +787,7 @@ mod tests {
             trace_from_result(outcome),
             ExecutionTrace::from(vec![scalar!(
                 "service",
-                peer = peer_id,
+                peer_name = peer_name,
                 service = "service..0",
                 function = "func",
                 args = vec![1, 22]
@@ -810,7 +819,7 @@ mod tests {
             trace_from_result(outcome),
             ExecutionTrace::from(vec![scalar!(
                 "func",
-                peer = peer_id,
+                peer_name = peer_name,
                 service = "service..0",
                 function = "func",
                 args = vec![1, 22]
@@ -842,7 +851,7 @@ mod tests {
             trace_from_result(outcome),
             ExecutionTrace::from(vec![scalar!(
                 22,
-                peer = peer_id,
+                peer_name = peer_name,
                 service = "service..0",
                 function = "func",
                 args = vec![1, 22]
@@ -884,7 +893,7 @@ mod tests {
                     "peer_pk": &peer_id,
                     "service_id": "",
                 }]]),
-                peer = peer_id,
+                peer_name = peer_name,
                 service = "service..0",
                 function = "func",
                 args = vec![1, 22]

@@ -38,3 +38,7 @@ pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
     let peer_id = keypair.public().to_peer_id().to_string();
     (keypair, peer_id)
 }
+
+pub fn at(peer_name: &str) -> String {
+    derive_dummy_keypair(peer_name).1
+}

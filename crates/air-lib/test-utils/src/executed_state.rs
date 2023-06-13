@@ -24,6 +24,7 @@ use super::ParResult;
 use super::Sender;
 use super::TracePos;
 use super::ValueRef;
+use crate::key_utils::at;
 use crate::FoldLore;
 use crate::FoldResult;
 use crate::FoldSubTraceLore;
@@ -304,6 +305,11 @@ impl ExecutedCallBuilder {
 
     pub fn peer(mut self, peer_pk: impl Into<String>) -> Self {
         self.tetraplet.peer_pk = peer_pk.into();
+        self
+    }
+
+    pub fn peer_name(mut self, peer_name: impl AsRef<str>) -> Self {
+        self.tetraplet.peer_pk = at(peer_name.as_ref());
         self
     }
 
