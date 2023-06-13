@@ -16,7 +16,7 @@
 
 use air_test_utils::test_runner::{AirRunner, DefaultAirRunner};
 
-use super::{Call, Sexp};
+use super::{Call, Canon, Sexp};
 use crate::ephemeral::Network;
 
 use std::{fmt::Write, ops::Deref, rc::Rc, str::FromStr};
@@ -74,6 +74,7 @@ impl<R: AirRunner> Transformer<'_, R> {
     pub(crate) fn transform(&self, sexp: &mut Sexp) {
         match sexp {
             Sexp::Call(call) => self.handle_call(call),
+            Sexp::Canon(canon) => self.handle_canon(canon),
             Sexp::List(children) => {
                 for child in children.iter_mut().skip(1) {
                     self.transform(child);
@@ -104,6 +105,15 @@ impl<R: AirRunner> Transformer<'_, R> {
                 }
                 _ => panic!("Incorrect script: non-string service string not supported"),
             }
+        }
+    }
+
+    fn handle_canon(&self, canon: &mut Canon) {
+        if let Sexp::String(ref mut peer_name) = &mut canon.peer {
+            *peer_name = self
+                .network
+                .ensure_named_peer(peer_name.as_str())
+                .to_string();
         }
     }
 }
@@ -218,6 +228,8 @@ mod tests {
 
     #[test]
     fn test_peers() {
+        use pretty_assertions::assert_eq;
+
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
    (call "peer_id1" ("service_id" func) [a 11]) ; ok={"test":"me"}
@@ -225,17 +237,39 @@ mod tests {
       (call "peer_id2" ("service_id" func) [b])
       (call "peer_id1" ("service_id" func) [1]) ; ok=true
       (call peer_id3 ("service_id" func) [b])
+      (canon "peer_id4" $stream #canon)
 ))"#;
 
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let _ = TransformedAirScript::new_unvalidated(script, network.clone());
+        let t = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
 
         let (_peer_pk, peer_id1) = derive_dummy_keypair("peer_id1");
         let (_peer_pk, peer_id2) = derive_dummy_keypair("peer_id2");
+        let (_peer_pk, peer_id4) = derive_dummy_keypair("peer_id4");
 
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),
-            HashSet::from_iter(vec![PeerId::from(peer_id1), PeerId::from(peer_id2)]),
-        )
+            HashSet::from_iter(vec![
+                PeerId::from(peer_id1.as_str()),
+                PeerId::from(peer_id2.as_str()),
+                PeerId::from(peer_id4.as_str()),
+            ]),
+        );
+
+        let expected = format!(
+            concat!(
+                "(seq",
+                r#" (call "{peer_id1}" ("service_id..0" func) [a 11])"#,
+                " (seq",
+                r#" (call "{peer_id2}" ("service_id" func) [b])"#,
+                r#" (call "{peer_id1}" ("service_id..1" func) [1])"#,
+                r#" (call peer_id3 ("service_id" func) [b])"#,
+                r#" (canon "{peer_id4}" $stream #canon)))"#
+            ),
+            peer_id1 = peer_id1,
+            peer_id2 = peer_id2,
+            peer_id4 = peer_id4
+        );
+        assert_eq!(*t, expected);
     }
 }

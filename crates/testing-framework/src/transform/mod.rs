@@ -21,17 +21,25 @@ use crate::asserts::ServiceDefinition;
 
 type Triplet = (Sexp, Sexp, Sexp);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) struct Call {
-    triplet: Box<Triplet>,
+    triplet: Triplet,
     args: Vec<Sexp>,
     var: Option<Box<Sexp>>,
     service_desc: Option<ServiceDefinition>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) struct Canon {
+    peer: Sexp,
+    stream: Sexp,
+    target: Sexp,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Sexp {
-    Call(Call),
+    Call(Box<Call>),
+    Canon(Box<Canon>),
     List(Vec<Sexp>),
     Symbol(String),
     String(String),
@@ -50,6 +58,14 @@ impl Sexp {
         Self::String(value.to_string())
     }
 
+    pub(crate) fn canon(peer: Sexp, stream: Sexp, target: Sexp) -> Self {
+        Self::Canon(Box::new(Canon {
+            peer,
+            stream,
+            target,
+        }))
+    }
+
     pub(crate) fn inject(&mut self, service_definition: ServiceDefinition) -> Result<(), String> {
         match self {
             Sexp::Call(ref mut call) => {
@@ -60,6 +76,9 @@ impl Sexp {
                 Some(last) => last.inject(service_definition),
                 None => Err("cannot attach a service definition an empty list".to_owned()),
             },
+            Sexp::Canon(_) => Err(format!(
+                "cannot attach a service definition to a canon {self:?}"
+            )),
             Sexp::Symbol(s) => Err(format!(
                 "cannot attach a service definition to a symbol {s:?}"
             )),
@@ -78,8 +97,8 @@ impl std::fmt::Display for Sexp {
             Sexp::Call(call) => {
                 write!(
                     f,
-                    "(call {peer_id} ({service} {func}) [{args}]{var})",
-                    peer_id = call.triplet.0,
+                    "(call {peer} ({service} {func}) [{args}]{var})",
+                    peer = call.triplet.0,
                     service = call.triplet.1,
                     func = call.triplet.2,
                     args = call.args.iter().format(" "),
@@ -87,6 +106,15 @@ impl std::fmt::Display for Sexp {
                         Some(var) => format!(" {var}"),
                         None => "".to_owned(),
                     }
+                )
+            }
+            Sexp::Canon(canon) => {
+                write!(
+                    f,
+                    "(canon {peer} {stream} {target})",
+                    peer = canon.peer,
+                    stream = canon.stream,
+                    target = canon.target,
                 )
             }
             Sexp::List(items) => write!(f, "({})", items.iter().format(" ")),
@@ -114,6 +142,20 @@ mod tests {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"] var)"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
+    }
+
+    #[test]
+    fn test_parse_canon() {
+        let sexp_str = r#"(canon "my_id" $stream #canon)"#;
+        let sexp = Sexp::from_str(sexp_str).unwrap();
+        assert_eq!(
+            sexp,
+            Sexp::canon(
+                Sexp::string("my_id"),
+                Sexp::symbol("$stream"),
+                Sexp::symbol("#canon"),
+            )
+        );
     }
 
     #[test]
