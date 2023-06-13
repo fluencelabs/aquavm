@@ -31,6 +31,7 @@ pub struct TransformedAirScript<R = DefaultAirRunner> {
 }
 
 impl<R: AirRunner> TransformedAirScript<R> {
+    // TODO peer transformation mode
     pub fn new(annotated_air_script: &str, network: Rc<Network<R>>) -> Result<Self, String> {
         // validate the AIR script with the standard parser first
         air_parser::parse(annotated_air_script)?;
@@ -52,7 +53,7 @@ impl<R: AirRunner> TransformedAirScript<R> {
         })
     }
 
-    pub(crate) fn get_network(&self) -> Rc<Network<R>> {
+    pub fn get_network(&self) -> Rc<Network<R>> {
         self.network.clone()
     }
 }
@@ -84,8 +85,11 @@ impl<R: AirRunner> Transformer<'_, R> {
 
     fn handle_call(&self, call: &mut Call) {
         // collect peers...
-        if let Sexp::String(peer_id) = &call.triplet.0 {
-            self.network.ensure_peer(peer_id.clone());
+        if let Sexp::String(ref mut peer_name) = &mut call.triplet.0 {
+            *peer_name = self
+                .network
+                .ensure_named_peer(peer_name.as_str())
+                .to_string();
         }
 
         let result_store = self.network.get_services().get_result_store();
@@ -106,6 +110,8 @@ impl<R: AirRunner> Transformer<'_, R> {
 
 #[cfg(test)]
 mod tests {
+    use air_test_utils::key_utils::derive_dummy_keypair;
+
     use super::*;
     use crate::{asserts::ServiceDefinition, ephemeral::PeerId, services::results::ResultStore};
     use air_test_utils::test_runner::NativeAirRunner;
@@ -150,9 +156,12 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let transformer = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
+
+        let (_peer_pk, peer_id) = derive_dummy_keypair("peer_id");
+
         assert_eq!(
             &*transformer,
-            r#"(call "peer_id" ("service_id..0" func) [])"#
+            &format!(r#"(call "{peer_id}" ("service_id..0" func) [])"#)
         );
 
         assert_eq!(
@@ -166,7 +175,7 @@ mod tests {
 
         assert_eq!(
             network.get_peers().collect::<Vec<_>>(),
-            vec![PeerId::new("peer_id")],
+            vec![PeerId::from(peer_id)],
         );
     }
 
@@ -221,9 +230,12 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let _ = TransformedAirScript::new_unvalidated(script, network.clone());
 
+        let (_peer_pk, peer_id1) = derive_dummy_keypair("peer_id1");
+        let (_peer_pk, peer_id2) = derive_dummy_keypair("peer_id2");
+
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),
-            HashSet::from_iter(vec![PeerId::new("peer_id1"), PeerId::new("peer_id2")]),
+            HashSet::from_iter(vec![PeerId::from(peer_id1), PeerId::from(peer_id2)]),
         )
     }
 }

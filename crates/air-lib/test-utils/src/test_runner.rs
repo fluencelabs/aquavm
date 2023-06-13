@@ -49,6 +49,8 @@ pub trait AirRunner {
         key_pair: &KeyPair,
         particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
+
+    fn get_current_peer_id(&self) -> &str;
 }
 
 pub struct TestRunner<R = DefaultAirRunner> {
@@ -170,6 +172,17 @@ pub fn create_custom_avm<R: AirRunner>(
 
     let (keypair, _) = derive_dummy_keypair(&current_peer_id);
 
+    let runner = R::new(current_peer_id);
+
+    TestRunner {
+        runner,
+        call_service,
+        keypair,
+    }
+}
+
+pub fn create_avm_with_key<R: AirRunner>(keypair: KeyPair, call_service: CallServiceClosure) -> TestRunner<R> {
+    let current_peer_id = keypair.public().to_peer_id().to_string();
     let runner = R::new(current_peer_id);
 
     TestRunner {

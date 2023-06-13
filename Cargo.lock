@@ -184,6 +184,7 @@ version = "0.2.1"
 dependencies = [
  "air-test-utils",
  "aquavm-air-parser",
+ "fluence-keypair",
  "itertools",
  "maplit",
  "nom",

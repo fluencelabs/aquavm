@@ -36,11 +36,11 @@ fn issue_221() {
             (seq
                 (seq
                     ;; let's peers be an array of two values [peer_1_id, peer_2_id]
-                    (call "{set_variable_id}" ("" "") [] peers) ; ok = ["{peer_1_id}", "{peer_2_id}"]
+                    (call "{set_variable_id}" ("" "") [] peers) ; ok = [@"{peer_1_id}", @"{peer_2_id}"]
                     (fold peers peer
                         (par
                             (seq
-                                (call peer ("" "") [peer] value) ; map = {{"{peer_1_id}": "{peer_1_value}", "{peer_2_id}": "{peer_2_value}"}}
+                                (call peer ("" "") [peer] value) ; map = {{@"{peer_1_id}": "{peer_1_value}", @"{peer_2_id}": "{peer_2_value}"}}
                                 ;; it's crucial to reproduce this bug to add value to stream
                                 ;; with help of ap instruction
                                 (ap value $stream)

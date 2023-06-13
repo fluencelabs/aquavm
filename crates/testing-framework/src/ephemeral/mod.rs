@@ -23,18 +23,25 @@ use crate::{
 };
 
 use air_test_utils::{
-    test_runner::{create_custom_avm, AirRunner, DefaultAirRunner, TestRunParameters, TestRunner},
+    key_utils::derive_dummy_keypair,
+    test_runner::{create_avm_with_key, TestRunParameters, TestRunner, AirRunner, DefaultAirRunner},
     RawAVMOutcome,
 };
+use fluence_keypair::KeyPair;
 
-use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, ops::Deref, rc::Rc};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[repr(transparent)]
 pub struct PeerId(Rc<str>);
 
 impl PeerId {
     pub fn new<'any>(peer_id: impl Into<&'any str>) -> Self {
         Self(peer_id.into().into())
+    }
+
+    pub fn from_keypair(keypair: &KeyPair) -> Self {
+        Self::new(keypair.public().to_peer_id().to_string().as_str())
     }
 }
 impl From<String> for PeerId {
@@ -49,8 +56,22 @@ impl From<&str> for PeerId {
     }
 }
 
+impl From<&PeerId> for PeerId {
+    fn from(value: &PeerId) -> Self {
+        value.clone()
+    }
+}
+
 impl Borrow<str> for PeerId {
     fn borrow(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Deref for PeerId {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
@@ -63,12 +84,17 @@ pub struct Peer<R> {
 }
 
 impl<R: AirRunner> Peer<R> {
-    pub fn new(peer_id: impl Into<PeerId>, services: Rc<[MarineServiceHandle]>) -> Self {
-        let peer_id = Into::into(peer_id);
+    pub fn new(keypair: KeyPair, services: Rc<[MarineServiceHandle]>) -> Self {
         let call_service = services_to_call_service_closure(services);
-        let runner = create_custom_avm(call_service, &*peer_id.0);
+
+        let runner = create_avm_with_key::<R>(keypair, call_service);
+        let peer_id = runner.runner.get_current_peer_id().into();
 
         Self { peer_id, runner }
+    }
+
+    pub fn get_peer_id(&self) -> &PeerId {
+        &self.peer_id
     }
 
     pub(crate) fn invoke(
@@ -98,7 +124,12 @@ impl<R: AirRunner> std::fmt::Debug for Peer<R> {
 
 pub struct Network<R = DefaultAirRunner> {
     peers: RefCell<HashMap<PeerId, Rc<RefCell<PeerEnv<R>>>>>,
+
+    // Default peer services.
     services: Rc<NetworkServices>,
+
+    // Resolves human-readable peer names to real peer IDs.
+    resolver: RefCell<HashMap<PeerId, PeerId>>,
 }
 
 // it is implemented only for the default runner for compatibility reasons
@@ -112,15 +143,16 @@ impl Network<DefaultAirRunner> {
 
 impl<R: AirRunner> Network<R> {
     pub fn new(
-        peers: impl Iterator<Item = impl Into<PeerId>>,
+        named_peers: impl Iterator<Item = impl Into<PeerId>>,
         common_services: Vec<MarineServiceHandle>,
     ) -> Rc<Self> {
         let network = Rc::new(Self {
             peers: Default::default(),
             services: NetworkServices::new(common_services).into(),
+            resolver: Default::default(),
         });
-        for peer_id in peers {
-            network.ensure_peer(peer_id);
+        for peer_name in named_peers {
+            network.ensure_named_peer(peer_name);
         }
         network
     }
@@ -145,15 +177,23 @@ impl<R: AirRunner> Network<R> {
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    pub fn ensure_peer(self: &Rc<Self>, peer_id: impl Into<PeerId>) {
-        let peer_id = peer_id.into();
-        let exists = {
-            let peers_ref = self.peers.borrow();
-            peers_ref.contains_key(&peer_id)
-        };
-        if !exists {
-            let peer = Peer::new(peer_id, self.services.get_services());
-            self.add_peer(peer);
+    pub fn ensure_named_peer(self: &Rc<Self>, name: impl Into<PeerId>) -> PeerId {
+        use std::collections::hash_map::Entry;
+
+        let name = name.into();
+
+        match self.resolver.borrow_mut().entry(name.clone()) {
+            Entry::Occupied(entry) => entry.get().clone(),
+            Entry::Vacant(empty) => {
+                let (keypair, _) = derive_dummy_keypair(&name);
+                let peer = Peer::new(keypair, self.services.get_services());
+                let peer_id = peer.get_peer_id().clone();
+                self.add_peer(peer);
+
+                empty.insert(peer_id.clone());
+
+                peer_id
+            }
         }
     }
 
@@ -165,75 +205,89 @@ impl<R: AirRunner> Network<R> {
     }
 
     fn insert_peer_env_entry(&self, peer_id: PeerId, peer_env: PeerEnv<R>) {
+        use std::collections::hash_map::Entry;
+
         let mut peers_ref = self.peers.borrow_mut();
         let peer_env = Rc::new(peer_env.into());
         // It will be simplified with entry_insert stabilization
         // https://github.com/rust-lang/rust/issues/65225
         match peers_ref.entry(peer_id) {
-            std::collections::hash_map::Entry::Occupied(ent) => {
+            Entry::Occupied(ent) => {
                 let cell = ent.into_mut();
                 *cell = peer_env;
                 cell
             }
-            std::collections::hash_map::Entry::Vacant(ent) => ent.insert(peer_env),
+            Entry::Vacant(ent) => ent.insert(peer_env),
         };
     }
 
-    pub fn set_peer_failed<Id>(&mut self, peer_id: &Id, failed: bool)
+    // TODO named peer
+    pub fn set_peer_failed<Id>(&mut self, name: &Id, failed: bool)
     where
-        PeerId: Borrow<Id>,
+        PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Hash + Eq + ?Sized,
     {
+        let peer_id = self.resolve_peer(name);
         let mut peers_ref = self.peers.borrow_mut();
         peers_ref
-            .get_mut(peer_id)
+            .get_mut::<PeerId>(&peer_id)
             .expect("unknown peer")
             .as_ref()
             .borrow_mut()
             .set_failed(failed);
     }
 
-    pub fn fail_peer_for<Id>(&mut self, source_peer_id: &Id, target_peer_id: impl Into<PeerId>)
+    // TODO named peer
+    pub fn fail_peer_for<Id1, Id2>(&mut self, source_peer_name: &Id1, target_peer_name: &Id2)
     where
-        PeerId: Borrow<Id>,
-        Id: Hash + Eq + ?Sized,
-    {
-        let mut peers_ref = self.peers.borrow_mut();
-        peers_ref
-            .get_mut(source_peer_id)
-            .expect("unknown peer")
-            .as_ref()
-            .borrow_mut()
-            .get_neighborhood_mut()
-            .set_target_unreachable(target_peer_id);
-    }
-
-    pub fn unfail_peer_for<Id1, Id2>(&mut self, source_peer_id: &Id1, target_peer_id: &Id2)
-    where
-        PeerId: Borrow<Id1>,
+        PeerId: Borrow<Id1> + for<'a> From<&'a Id1>,
         Id1: Hash + Eq + ?Sized,
-        PeerId: Borrow<Id2>,
+        PeerId: Borrow<Id2> + for<'a> From<&'a Id2>,
         Id2: Hash + Eq + ?Sized,
     {
+        let source_peer_id = self.resolve_peer(source_peer_name);
+        let target_peer_id = self.resolve_peer(target_peer_name);
+
         let mut peers_ref = self.peers.borrow_mut();
         peers_ref
-            .get_mut(source_peer_id)
+            .get_mut::<PeerId>(&source_peer_id)
             .expect("unknown peer")
             .as_ref()
             .borrow_mut()
             .get_neighborhood_mut()
-            .unset_target_unreachable(target_peer_id);
+            .set_target_unreachable(&target_peer_id);
+    }
+
+    // TODO named peer
+    pub fn unfail_peer_for<Id1, Id2>(&mut self, source_peer_name: &Id1, target_peer_name: &Id2)
+    where
+        PeerId: Borrow<Id1> + for<'a> From<&'a Id1>,
+        Id1: Hash + Eq + ?Sized,
+        PeerId: Borrow<Id2> + for<'a> From<&'a Id2>,
+        Id2: Hash + Eq + ?Sized,
+    {
+        let source_peer_id = self.resolve_peer(source_peer_name);
+        let target_peer_id = self.resolve_peer(target_peer_name);
+        let mut peers_ref = self.peers.borrow_mut();
+        peers_ref
+            .get_mut(&source_peer_id)
+            .expect("unknown peer")
+            .as_ref()
+            .borrow_mut()
+            .get_neighborhood_mut()
+            .unset_target_unreachable(&target_peer_id);
     }
 
     // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
     // the latters panic on unknown peer; perhaps, it's OK
     pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerEnv<R>>>>
     where
-        PeerId: Borrow<Id>,
+        PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Hash + Eq + ?Sized,
     {
+        let peer_id: PeerId = self.resolve_peer(peer_id);
         let peers_ref = self.peers.borrow();
-        peers_ref.get(peer_id).cloned()
+        peers_ref.get::<PeerId>(&peer_id).cloned()
     }
 
     pub(crate) fn get_services(&self) -> Rc<NetworkServices> {
@@ -243,5 +297,17 @@ impl<R: AirRunner> Network<R> {
     pub fn get_peers(&self) -> impl Iterator<Item = PeerId> {
         let peers_ref = self.peers.borrow();
         peers_ref.keys().cloned().collect::<Vec<_>>().into_iter()
+    }
+
+    // TODO it sounds cool, but actually, name and PeerId should be
+    // distinct and have distinct API for working with a peer by name: &str
+    // and by PeerId
+    pub fn resolve_peer<Id>(&self, name: &Id) -> PeerId
+    where
+        PeerId: Borrow<Id> + for<'a> From<&'a Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        let resolver = self.resolver.borrow();
+        resolver.get(name).cloned().unwrap_or_else(|| (name).into())
     }
 }
