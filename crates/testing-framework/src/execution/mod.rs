@@ -767,7 +767,6 @@ mod tests {
     #[test]
     fn test_behaviour_service() {
         let peer_name = "peer1";
-        let (_peer_pk, peer_id) = derive_dummy_keypair(peer_name);
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
@@ -798,7 +797,6 @@ mod tests {
     #[test]
     fn test_behaviour_function() {
         let peer_name = "peer1";
-        let (_peer_pk, peer_id) = derive_dummy_keypair(peer_name);
 
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
@@ -830,7 +828,6 @@ mod tests {
     #[test]
     fn test_behaviour_arg() {
         let peer_name = "peer1";
-        let (_, peer_id) = derive_dummy_keypair(peer_name);
 
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),

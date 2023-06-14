@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-use air_test_utils::test_runner::{AirRunner, DefaultAirRunner};
-
 use super::{Call, Canon, Sexp};
 use crate::ephemeral::Network;
 
-use std::{fmt::Write, ops::Deref, rc::Rc, str::FromStr};
+use air_test_utils::key_utils::at;
+use air_test_utils::test_runner::{AirRunner, DefaultAirRunner};
+
+use std::{borrow::Cow, fmt::Write, ops::Deref, rc::Rc, str::FromStr};
 
 /// Transformed script represents transformed script's services' state within the network.
 /// Executions that use the same transformed script share same generated services' state.
@@ -33,18 +34,20 @@ pub struct TransformedAirScript<R = DefaultAirRunner> {
 impl<R: AirRunner> TransformedAirScript<R> {
     // TODO peer transformation mode
     pub fn new(annotated_air_script: &str, network: Rc<Network<R>>) -> Result<Self, String> {
-        // validate the AIR script with the standard parser first
-        air_parser::parse(annotated_air_script)?;
+        let at_transformed_air_script = at_transform(annotated_air_script);
 
-        Self::new_unvalidated(annotated_air_script, network)
+        // validate the AIR script with the standard parser first
+        air_parser::parse(&at_transformed_air_script)?;
+
+        Self::new_unvalidated(&at_transformed_air_script, network)
     }
 
     pub(crate) fn new_unvalidated(
-        annotated_air_script: &str,
+        at_transformed_air_script: &str,
         network: Rc<Network<R>>,
     ) -> Result<Self, String> {
         let transformer = Transformer { network: &network };
-        let mut sexp = Sexp::from_str(annotated_air_script)?;
+        let mut sexp = Sexp::from_str(at_transformed_air_script)?;
         transformer.transform(&mut sexp);
 
         Ok(Self {
@@ -118,13 +121,27 @@ impl<R: AirRunner> Transformer<'_, R> {
     }
 }
 
+/// Replace substrings for the form @"peer_name" by a derived peer ID.
+///
+/// It works like a pre-processor.
+fn at_transform(air_script: &str) -> Cow<'_, str> {
+    let transformer = regex::Regex::new(r#"@"([-a-z0-9_]+)""#).unwrap();
+    transformer.replace_all(air_script, |c: &regex::Captures| {
+        // no escaping needed for peer ID
+        format!(r#""{}""#, at(&c[1]))
+    })
+}
+
 #[cfg(test)]
 mod tests {
-    use air_test_utils::key_utils::derive_dummy_keypair;
-
     use super::*;
-    use crate::{asserts::ServiceDefinition, ephemeral::PeerId, services::results::ResultStore};
-    use air_test_utils::test_runner::NativeAirRunner;
+    use crate::{
+        asserts::ServiceDefinition, ephemeral::PeerId, services::results::ResultStore,
+        AirScriptExecutor,
+    };
+
+    use air_test_utils::key_utils::at;
+    use air_test_utils::prelude::*;
 
     use std::{
         collections::{HashMap, HashSet},
@@ -167,7 +184,7 @@ mod tests {
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let transformer = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
 
-        let (_peer_pk, peer_id) = derive_dummy_keypair("peer_id");
+        let peer_id = at("peer_id");
 
         assert_eq!(
             &*transformer,
@@ -228,8 +245,6 @@ mod tests {
 
     #[test]
     fn test_peers() {
-        use pretty_assertions::assert_eq;
-
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
    (call "peer_id1" ("service_id" func) [a 11]) ; ok={"test":"me"}
@@ -243,9 +258,9 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let t = TransformedAirScript::new_unvalidated(script, network.clone()).unwrap();
 
-        let (_peer_pk, peer_id1) = derive_dummy_keypair("peer_id1");
-        let (_peer_pk, peer_id2) = derive_dummy_keypair("peer_id2");
-        let (_peer_pk, peer_id4) = derive_dummy_keypair("peer_id4");
+        let peer_id1 = at("peer_id1");
+        let peer_id2 = at("peer_id2");
+        let peer_id4 = at("peer_id4");
 
         assert_eq!(
             network.get_peers().collect::<HashSet<_>>(),
@@ -271,5 +286,42 @@ mod tests {
             peer_id4 = peer_id4
         );
         assert_eq!(*t, expected);
+    }
+
+    #[test]
+    fn test_at_transform() {
+        let script = r#"(call "peer_id1" ("service_id" "func") [1 @"peer_id3"] x) ; ok={"test":@"peer_id2"}"#;
+
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
+        let t = TransformedAirScript::new(script, network.clone()).unwrap();
+
+        let peer_id1 = at("peer_id1");
+        let peer_id2 = at("peer_id2");
+        let peer_id3 = at("peer_id3");
+
+        let expected = format!(
+            r#"(call "{peer_id1}" ("service_id..0" "func") [1 "{peer_id3}"] x)"#,
+            peer_id1 = peer_id1,
+            peer_id3 = peer_id3,
+        );
+        assert_eq!(*t, expected);
+
+        let peer_name1 = "peer_id1";
+        let exec = AirScriptExecutor::from_transformed_air_script(
+            TestRunParameters::from_init_peer_id(peer_name1),
+            t,
+        )
+        .unwrap();
+        let res = exec.execute_one(peer_name1).unwrap();
+        assert_eq!(
+            trace_from_result(&res),
+            ExecutionTrace::from(vec![scalar!(
+                json!({ "test": peer_id2 }),
+                peer_name = peer_name1,
+                service = "service_id..0",
+                function = "func",
+                args = vec![json!(1), json!(peer_id3)]
+            )])
+        )
     }
 }
