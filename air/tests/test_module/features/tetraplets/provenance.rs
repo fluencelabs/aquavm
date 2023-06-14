@@ -15,11 +15,11 @@
  */
 
 use air_test_framework::AirScriptExecutor;
-use air_test_utils::prelude::*;
+use air_test_utils::{key_utils::at, prelude::*};
 
 #[test]
 fn call_result() {
-    let init_peer_id = "B";
+    let init_peer_name = "B";
 
     let air_script = r#"
         (seq
@@ -27,9 +27,9 @@ fn call_result() {
             (canon "B" $s #c))
     "#;
     let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
 
-    let result = runner.execute_one(init_peer_id).unwrap();
+    let result = runner.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
@@ -37,11 +37,13 @@ fn call_result() {
 
     let val = scalar!(
         "some_data",
-        peer = init_peer_id,
+        peer_name = init_peer_name,
         service = "service..0",
         function = "func"
     );
     let val_cid = extract_service_result_cid(&val);
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_state = canon(json!({
         "tetraplet": {
@@ -67,7 +69,7 @@ fn call_result() {
 
 #[test]
 fn call_result_iteration() {
-    let init_peer_id = "A";
+    let init_peer_name = "A";
 
     let air_script = r#"
         (seq
@@ -80,17 +82,19 @@ fn call_result_iteration() {
             (canon "A" $s #c))
     "#;
     let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
 
-    let result = runner.execute_one(init_peer_id).unwrap();
+    let result = runner.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
     let last_state = data.trace.last().unwrap();
 
+    let init_peer_id = at(init_peer_name);
+
     let val = scalar!(
         json!([10, 11, 12]),
-        peer = init_peer_id,
+        peer_name = init_peer_name,
         service = "service..0",
         function = "func"
     );
@@ -138,7 +142,7 @@ fn call_result_iteration() {
 
 #[test]
 fn literal() {
-    let init_peer_id = "B";
+    let init_peer_name = "B";
 
     let air_script = r#"
         (seq
@@ -146,13 +150,15 @@ fn literal() {
             (canon "B" $s #c))
     "#;
     let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
 
-    let result = runner.execute_one(init_peer_id).unwrap();
+    let result = runner.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
     let last_state = data.trace.last().unwrap();
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_state = canon(json!({
         "tetraplet": {
@@ -178,7 +184,7 @@ fn literal() {
 
 #[test]
 fn canon_in_canon() {
-    let init_peer_id = "B";
+    let init_peer_name = "B";
 
     let air_script = r#"
         (seq
@@ -190,15 +196,17 @@ fn canon_in_canon() {
                 (canon "B" $s #d)))
     "#;
     let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
 
-    let result = runner.execute_one(init_peer_id).unwrap();
+    let result = runner.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let trace = trace_from_result(&result);
     let last_state = trace.last().unwrap();
 
-    let val = scalar!(1, peer = init_peer_id, service = "service..0", function = "func");
+    let init_peer_id = at(init_peer_name);
+
+    let val = scalar!(1, peer_name = init_peer_name, service = "service..0", function = "func");
     let val_cid = extract_service_result_cid(&val);
     let value_tetraplet = json!({
         "peer_pk": init_peer_id,
@@ -250,7 +258,7 @@ fn canon_in_canon() {
 
 #[test]
 fn lambda_result_iteration() {
-    let init_peer_id = "A";
+    let init_peer_name = "A";
 
     let air_script = r#"
         (seq
@@ -266,17 +274,19 @@ fn lambda_result_iteration() {
             (canon "A" $s #c))
     "#;
     let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
 
-    let result = runner.execute_one(init_peer_id).unwrap();
+    let result = runner.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
     let last_state = data.trace.last().unwrap();
 
+    let init_peer_id = at(init_peer_name);
+
     let val = scalar!(
         json!([{"field": [10, 11, 12]}]),
-        peer = init_peer_id,
+        peer_name = init_peer_name,
         service = "service..0",
         function = "func"
     );
