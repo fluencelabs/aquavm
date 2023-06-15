@@ -66,7 +66,7 @@ impl<R: AirRunner> AirScriptExecutor<R> {
 
         let queue = ExecutionQueue::new();
         // Seed execution
-        queue.distribute_to_peers(&network, &[init_peer_id], &<_>::default());
+        queue.distribute_to_peers(&network, &[real_init_peer_id], &<_>::default());
 
         Ok(Self {
             transformed_air_script,

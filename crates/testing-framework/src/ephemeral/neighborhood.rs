@@ -95,7 +95,7 @@ impl<R: AirRunner> Neighborhood<R> {
     pub fn is_reachable(&self, target: impl Into<PeerId>) -> bool {
         let target = target.into();
         let network = self.network.upgrade().expect(EXPECT_VALID_NETWORK);
-        if network.get_peer_env::<PeerId>(&target).is_some()
+        if network.get_named_peer_env::<PeerId>(&target).is_some()
             || self.altered.get(&target) == Some(&AlterState::Added)
         {
             !self.unreachable.contains(&target)

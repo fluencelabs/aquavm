@@ -280,14 +280,23 @@ impl<R: AirRunner> Network<R> {
 
     // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
     // the latters panic on unknown peer; perhaps, it's OK
+    // TODO named peer
     pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerEnv<R>>>>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Hash + Eq + ?Sized,
     {
-        let peer_id: PeerId = self.resolve_peer(peer_id);
         let peers_ref = self.peers.borrow();
-        peers_ref.get::<PeerId>(&peer_id).cloned()
+        peers_ref.get(peer_id).cloned()
+    }
+
+    pub fn get_named_peer_env<Id>(&self, peer_name: &Id) -> Option<Rc<RefCell<PeerEnv>>>
+    where
+        PeerId: Borrow<Id> + for<'a> From<&'a Id>,
+        Id: Hash + Eq + ?Sized,
+    {
+        let peer_id: PeerId = self.resolve_peer(peer_name);
+        self.get_peer_env::<PeerId>(&peer_id)
     }
 
     pub(crate) fn get_services(&self) -> Rc<NetworkServices> {

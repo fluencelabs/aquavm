@@ -88,7 +88,7 @@ impl ExecutionQueue {
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
     {
-        let peer_env = network.get_peer_env(peer_id);
+        let peer_env = network.get_named_peer_env(peer_id);
 
         peer_env.map(|peer_env_cell| {
             std::iter::from_fn(move || {
@@ -111,11 +111,15 @@ impl ExecutionQueue {
         for peer_id in peers {
             let peer_id: &str = peer_id;
             match network.get_peer_env(peer_id) {
-                Some(peer_env_cell) => {
-                    let peer_env_ref = RefCell::borrow(&peer_env_cell);
-                    self.get_peer_queue_cell(peer_env_ref.peer.peer_id.clone())
-                        .push_data(data.clone());
-                }
+                Some(peer_env_cell) => match peer_env_cell.try_borrow() {
+                    Ok(peer_env_ref) => {
+                        self.get_peer_queue_cell(peer_env_ref.peer.peer_id.clone())
+                            .push_data(data.clone());
+                    }
+                    Err(_) => {
+                        panic!("distributing data from peer to itself; probably, peer naming issue")
+                    }
+                },
                 None => panic!("Unknown peer {:?}", peer_id),
             }
         }
