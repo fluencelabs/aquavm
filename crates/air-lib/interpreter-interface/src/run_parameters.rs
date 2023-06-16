@@ -84,6 +84,7 @@ impl RunParameters {
             IValue::U32(self.ttl),
             IValue::U8(self.key_format),
             IValue::ByteArray(self.secret_key_bytes),
+            IValue::String(self.particle_id),
         ];
         // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();
