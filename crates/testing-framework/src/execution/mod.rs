@@ -21,7 +21,10 @@ use crate::{
     transform::walker::TransformedAirScript,
 };
 
-use air_test_utils::{test_runner::{TestRunParameters, AirRunner, DefaultAirRunner}, RawAVMOutcome};
+use air_test_utils::{
+    test_runner::{AirRunner, DefaultAirRunner, TestRunParameters},
+    RawAVMOutcome,
+};
 
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
@@ -32,7 +35,6 @@ pub struct AirScriptExecutor<R = DefaultAirRunner> {
     test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
-
 
 impl AirScriptExecutor<DefaultAirRunner> {
     /// Simple constructor where everything is generated from the annotated_air_script.
@@ -624,7 +626,10 @@ mod tests {
         let service = Service {
             state: vec![json!(42), json!(24)].into_iter().into(),
         };
-        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![service.to_handle()]);
+        let network = Network::<NativeAirRunner>::new(
+            std::iter::empty::<PeerId>(),
+            vec![service.to_handle()],
+        );
 
         let peer = "peer1";
         let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);

@@ -23,7 +23,7 @@ use crate::{
 };
 
 use air_test_utils::{
-    test_runner::{create_custom_avm, TestRunParameters, TestRunner, AirRunner, DefaultAirRunner},
+    test_runner::{create_custom_avm, AirRunner, DefaultAirRunner, TestRunParameters, TestRunner},
     RawAVMOutcome,
 };
 

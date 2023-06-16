@@ -16,7 +16,10 @@
 
 use crate::ephemeral::{Data, Network, PeerId};
 
-use air_test_utils::{test_runner::{TestRunParameters, AirRunner}, RawAVMOutcome};
+use air_test_utils::{
+    test_runner::{AirRunner, TestRunParameters},
+    RawAVMOutcome,
+};
 
 use std::{
     borrow::Borrow,
@@ -97,8 +100,12 @@ impl ExecutionQueue {
         })
     }
 
-    pub fn distribute_to_peers<Id, R: AirRunner>(&self, network: &Network<R>, peers: &[Id], data: &Data)
-    where
+    pub fn distribute_to_peers<Id, R: AirRunner>(
+        &self,
+        network: &Network<R>,
+        peers: &[Id],
+        data: &Data,
+    ) where
         Id: Deref<Target = str>,
     {
         for peer_id in peers {
