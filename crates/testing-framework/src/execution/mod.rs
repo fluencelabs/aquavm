@@ -21,22 +21,38 @@ use crate::{
     transform::walker::TransformedAirScript,
 };
 
-use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
+use air_test_utils::{test_runner::{TestRunParameters, AirRunner, DefaultAirRunner}, RawAVMOutcome};
 
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
 /// A executor for an AIR script. Several executors may share same TransformedAirScript
 /// and its state.
-pub struct AirScriptExecutor {
-    transformed_air_script: TransformedAirScript,
+pub struct AirScriptExecutor<R = DefaultAirRunner> {
+    transformed_air_script: TransformedAirScript<R>,
     test_parameters: TestRunParameters,
     queue: ExecutionQueue,
 }
 
-impl AirScriptExecutor {
+
+impl AirScriptExecutor<DefaultAirRunner> {
+    /// Simple constructor where everything is generated from the annotated_air_script.
+    pub fn simple(
+        test_parameters: TestRunParameters,
+        annotated_air_script: &str,
+    ) -> Result<Self, String> {
+        Self::new(
+            test_parameters,
+            vec![],
+            std::iter::empty(),
+            annotated_air_script,
+        )
+    }
+}
+
+impl<R: AirRunner> AirScriptExecutor<R> {
     pub fn from_transformed_air_script(
         test_parameters: TestRunParameters,
-        transformed_air_script: TransformedAirScript,
+        transformed_air_script: TransformedAirScript<R>,
     ) -> Result<Self, String> {
         let network = transformed_air_script.get_network();
         let init_peer_id = test_parameters.init_peer_id.as_str();
@@ -69,22 +85,9 @@ impl AirScriptExecutor {
         Self::from_transformed_air_script(test_parameters, transformed)
     }
 
-    /// Simple constructor where everything is generated from the annotated_air_script.
-    pub fn simple(
-        test_parameters: TestRunParameters,
-        annotated_air_script: &str,
-    ) -> Result<Self, String> {
-        Self::new(
-            test_parameters,
-            vec![],
-            std::iter::empty(),
-            annotated_air_script,
-        )
-    }
-
     pub fn from_network(
         test_parameters: TestRunParameters,
-        network: Rc<Network>,
+        network: Rc<Network<R>>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
         let transformed = TransformedAirScript::new(annotated_air_script, network)?;
@@ -142,7 +145,7 @@ mod tests {
 
     #[test]
     fn test_execution() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -173,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_call_result_success() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -202,7 +205,7 @@ mod tests {
 
     #[test]
     fn test_call_result_error() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -240,7 +243,7 @@ mod tests {
 
     #[test]
     fn test_seq_ok() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -337,7 +340,7 @@ mod tests {
 
     #[test]
     fn test_map() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -403,7 +406,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_map_no_arg() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("peer1"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -417,7 +420,7 @@ mod tests {
 
     #[test]
     fn test_seq_error() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             IntoIterator::into_iter(["peer2", "peer3"]).map(Into::into),
@@ -515,7 +518,7 @@ mod tests {
 
     #[test]
     fn test_echo() {
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -559,7 +562,7 @@ mod tests {
     #[test]
     fn test_transformed_distinct() {
         let peer = "peer1";
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
 
         let transformed1 = TransformedAirScript::new(
             &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
@@ -621,7 +624,7 @@ mod tests {
         let service = Service {
             state: vec![json!(42), json!(24)].into_iter().into(),
         };
-        let network = Network::new(std::iter::empty::<PeerId>(), vec![service.to_handle()]);
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![service.to_handle()]);
 
         let peer = "peer1";
         let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
@@ -664,7 +667,7 @@ mod tests {
 
     #[test]
     fn test_invalid_air() {
-        let res = AirScriptExecutor::new(
+        let res = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
@@ -690,7 +693,7 @@ mod tests {
     #[test]
     fn test_behaviour_service() {
         let peer = "peer1";
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer),
             vec![],
             std::iter::empty(),
@@ -720,7 +723,7 @@ mod tests {
     #[test]
     fn test_behaviour_function() {
         let peer = "peer1";
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer),
             vec![],
             std::iter::empty(),
@@ -750,7 +753,7 @@ mod tests {
     #[test]
     fn test_behaviour_arg() {
         let peer = "peer1";
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer),
             vec![],
             std::iter::empty(),
@@ -780,7 +783,7 @@ mod tests {
     #[test]
     fn test_behaviour_tetraplet() {
         let peer = "peer1";
-        let exec = AirScriptExecutor::new(
+        let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer),
             vec![],
             std::iter::empty(),

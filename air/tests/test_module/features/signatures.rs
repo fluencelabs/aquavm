@@ -25,7 +25,7 @@ fn test_signature_empty() {
     let init_peer_id = "init_peer_id";
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
-    let exec = AirScriptExecutor::new(
+    let exec = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id(init_peer_id),
         vec![],
         vec![PeerId::from(init_peer_id)].into_iter(),

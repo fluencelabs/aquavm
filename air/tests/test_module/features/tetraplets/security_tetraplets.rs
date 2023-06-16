@@ -109,10 +109,8 @@ fn fold_stream_with_inner_call() {
                (call "init_peer_id" ("" "") [i] $s2) ; behaviour = tetraplet
                (next i))))
     "#;
-    let executor = air_test_framework::AirScriptExecutor::new(
+    let executor = air_test_framework::AirScriptExecutor::simple(
         TestRunParameters::from_init_peer_id(init_peer_id),
-        vec![],
-        std::iter::empty(),
         &air_script,
     )
     .unwrap();
@@ -157,10 +155,8 @@ fn fold_canon_with_inner_call() {
                 (call "init_peer_id" ("" "") [x] $s2) ; behaviour=tetraplet
                 (next x)))))
     "#;
-    let executor = air_test_framework::AirScriptExecutor::new(
+    let executor = air_test_framework::AirScriptExecutor::simple(
         TestRunParameters::from_init_peer_id(init_peer_id),
-        vec![],
-        std::iter::empty(),
         &air_script,
     )
     .unwrap();

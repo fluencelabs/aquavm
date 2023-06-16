@@ -78,10 +78,8 @@ fn test_scalar_cid() {
           (call "{vm_peer_id}" ("service" "call2") [] y) ; ok="ipld"
        )"#
     );
-    let executor = AirScriptExecutor::new(
+    let executor = AirScriptExecutor::simple(
         TestRunParameters::from_init_peer_id(vm_peer_id),
-        vec![],
-        std::iter::empty(),
         &annotated_air_script,
     )
     .unwrap();
@@ -127,10 +125,8 @@ fn test_stream_cid() {
           (call "{vm_peer_id}" ("service" "call2") [] $x) ; ok="ipld"
        )"#
     );
-    let executor = AirScriptExecutor::new(
+    let executor = AirScriptExecutor::simple(
         TestRunParameters::from_init_peer_id(vm_peer_id),
-        vec![],
-        std::iter::empty(),
         &annotated_air_script,
     )
     .unwrap();
@@ -178,10 +174,8 @@ fn test_unused_cid() {
           (call "{vm_peer_id}" ("service" "call2") []) ; ok="ipld"
        )"#
     );
-    let executor = AirScriptExecutor::new(
+    let executor = AirScriptExecutor::simple(
         TestRunParameters::from_init_peer_id(vm_peer_id),
-        vec![],
-        std::iter::empty(),
         &annotated_air_script,
     )
     .unwrap();

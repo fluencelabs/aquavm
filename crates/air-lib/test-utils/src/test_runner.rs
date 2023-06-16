@@ -15,9 +15,12 @@
  */
 
 #[cfg(feature = "test_with_native_code")]
-use crate::native_test_runner::NativeAirRunner as AirRunnerImpl;
+pub use crate::native_test_runner::NativeAirRunner as DefaultAirRunner;
 #[cfg(not(feature = "test_with_native_code"))]
-use crate::wasm_test_runner::WasmAirRunner as AirRunnerImpl;
+pub use crate::wasm_test_runner::WasmAirRunner as DefaultAirRunner;
+
+pub use crate::native_test_runner::NativeAirRunner;
+pub use crate::wasm_test_runner::WasmAirRunner;
 
 use super::CallServiceClosure;
 use avm_server::avm_runner::*;
@@ -42,7 +45,7 @@ pub trait AirRunner {
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
 }
 
-pub struct TestRunner<R = AirRunnerImpl> {
+pub struct TestRunner<R = DefaultAirRunner> {
     pub runner: R,
     pub call_service: CallServiceClosure,
 }
@@ -118,7 +121,14 @@ pub fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
-    let runner = AirRunnerImpl::new(current_peer_id);
+    create_custom_avm(call_service, current_peer_id)
+}
+
+pub fn create_custom_avm<R: AirRunner>(
+    call_service: CallServiceClosure,
+    current_peer_id: impl Into<String>,
+) -> TestRunner<R> {
+    let runner = R::new(current_peer_id);
 
     TestRunner {
         runner,
@@ -170,21 +180,19 @@ mod tests {
     use crate::call_services::{set_variables_call_service, VariableOptionSource};
 
     use avm_interface::CallRequestParams;
-    use fstrings::f;
-    use fstrings::format_args_f;
     use serde_json::json;
 
     #[test]
     fn test_override_current_peer_id() {
         let spell_id = "spell_id";
         let host_peer_id = "host_peer_id";
-        let script = f!(r#"(call "{}" ("service" "func") [])"#, spell_id);
+        let script = format!(r#"(call "{spell_id}" ("service" "func") [])"#);
 
         let variables = maplit::hashmap! {
             "func".to_owned() => json!("success"),
         };
 
-        let mut client = create_avm(
+        let mut client = create_custom_avm::<NativeAirRunner>(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),
             host_peer_id,
         );

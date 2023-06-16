@@ -16,7 +16,7 @@
 
 use crate::ephemeral::{Data, Network, PeerId};
 
-use air_test_utils::{test_runner::TestRunParameters, RawAVMOutcome};
+use air_test_utils::{test_runner::{TestRunParameters, AirRunner}, RawAVMOutcome};
 
 use std::{
     borrow::Borrow,
@@ -74,10 +74,10 @@ impl ExecutionQueue {
 
     /// Iterator for handling al the queued data.  It borrows peer env's `RefCell` only temporarily.
     /// Following test-utils' call_vm macro, it panics on failed VM.
-    pub fn execution_iter<'ctx, Id>(
+    pub fn execution_iter<'ctx, Id, R: AirRunner + 'ctx>(
         &'ctx self,
         air: &'ctx str,
-        network: Rc<Network>,
+        network: Rc<Network<R>>,
         test_parameters: &'ctx TestRunParameters,
         peer_id: &Id,
     ) -> Option<impl Iterator<Item = RawAVMOutcome> + 'ctx>
@@ -97,7 +97,7 @@ impl ExecutionQueue {
         })
     }
 
-    pub fn distribute_to_peers<Id>(&self, network: &Network, peers: &[Id], data: &Data)
+    pub fn distribute_to_peers<Id, R: AirRunner>(&self, network: &Network<R>, peers: &[Id], data: &Data)
     where
         Id: Deref<Target = str>,
     {

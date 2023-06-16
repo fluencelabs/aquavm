@@ -23,7 +23,7 @@ use crate::{
 };
 
 use air_test_utils::{
-    test_runner::{create_avm, TestRunParameters, TestRunner},
+    test_runner::{create_custom_avm, TestRunParameters, TestRunner, AirRunner, DefaultAirRunner},
     RawAVMOutcome,
 };
 
@@ -57,16 +57,16 @@ impl Borrow<str> for PeerId {
 
 pub type Data = Vec<u8>;
 
-pub struct Peer {
+pub struct Peer<R> {
     pub(crate) peer_id: PeerId,
-    runner: TestRunner,
+    runner: TestRunner<R>,
 }
 
-impl Peer {
+impl<R: AirRunner> Peer<R> {
     pub fn new(peer_id: impl Into<PeerId>, services: Rc<[MarineServiceHandle]>) -> Self {
         let peer_id = Into::into(peer_id);
         let call_service = services_to_call_service_closure(services);
-        let runner = create_avm(call_service, &*peer_id.0);
+        let runner = create_custom_avm(call_service, &*peer_id.0);
 
         Self { peer_id, runner }
     }
@@ -87,7 +87,7 @@ impl Peer {
     }
 }
 
-impl std::fmt::Debug for Peer {
+impl<R: AirRunner> std::fmt::Debug for Peer<R> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Peer")
             .field("peer_id", &self.peer_id)
@@ -96,16 +96,18 @@ impl std::fmt::Debug for Peer {
     }
 }
 
-pub struct Network {
-    peers: RefCell<HashMap<PeerId, Rc<RefCell<PeerEnv>>>>,
+pub struct Network<R = DefaultAirRunner> {
+    peers: RefCell<HashMap<PeerId, Rc<RefCell<PeerEnv<R>>>>>,
     services: Rc<NetworkServices>,
 }
 
-impl Network {
+impl Network<DefaultAirRunner> {
     pub fn empty() -> Rc<Self> {
         Self::new(std::iter::empty::<PeerId>(), vec![])
     }
+}
 
+impl<R: AirRunner> Network<R> {
     pub fn new(
         peers: impl Iterator<Item = impl Into<PeerId>>,
         common_services: Vec<MarineServiceHandle>,
@@ -120,8 +122,8 @@ impl Network {
         network
     }
 
-    pub fn from_peers(nodes: Vec<Peer>) -> Rc<Self> {
-        let network = Self::empty();
+    pub fn from_peers(nodes: Vec<Peer<R>>) -> Rc<Self> {
+        let network = Self::new(std::iter::empty::<PeerId>(), vec![]);
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             network.add_peer_env(peer, neighborhood.iter().cloned());
@@ -131,7 +133,7 @@ impl Network {
 
     pub fn add_peer_env(
         self: &Rc<Self>,
-        peer: Peer,
+        peer: Peer<R>,
         neighborhood: impl IntoIterator<Item = impl Into<PeerId>>,
     ) {
         let peer_id = peer.peer_id.clone();
@@ -153,13 +155,13 @@ impl Network {
     }
 
     /// Add a peer with default neighborhood.
-    pub fn add_peer(self: &Rc<Self>, peer: Peer) {
+    pub fn add_peer(self: &Rc<Self>, peer: Peer<R>) {
         let peer_id = peer.peer_id.clone();
         let peer_env = PeerEnv::new(peer, self);
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    fn insert_peer_env_entry(&self, peer_id: PeerId, peer_env: PeerEnv) {
+    fn insert_peer_env_entry(&self, peer_id: PeerId, peer_env: PeerEnv<R>) {
         let mut peers_ref = self.peers.borrow_mut();
         let peer_env = Rc::new(peer_env.into());
         // It will be simplified with entry_insert stabilization
@@ -222,7 +224,7 @@ impl Network {
 
     // TODO there is some kind of unsymmetry between these methods and the fail/unfail:
     // the latters panic on unknown peer; perhaps, it's OK
-    pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerEnv>>>
+    pub fn get_peer_env<Id>(&self, peer_id: &Id) -> Option<Rc<RefCell<PeerEnv<R>>>>
     where
         PeerId: Borrow<Id>,
         Id: Hash + Eq + ?Sized,
