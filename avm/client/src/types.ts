@@ -64,7 +64,7 @@ export interface RunParameters {
     /**
      * Unique particle ID
      */
-    particleId: String;
+    particleId: string;
 }
 
 /**

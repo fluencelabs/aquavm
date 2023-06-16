@@ -46,11 +46,12 @@ export function serializeAvmArgs(
 
     const encoded = encoder.encode(JSON.stringify(callResultsToPass));
     const runParamsSnakeCase = {
-        ...runParams,
         init_peer_id: runParams.initPeerId,
         current_peer_id: runParams.currentPeerId,
         key_format: runParams.keyFormat,
-        secret_key_bytes: runParams.secretKeyBytes,
+        secret_key_bytes: Array.from(runParams.secretKeyBytes),
+        timestamp: runParams.timestamp,
+        ttl: runParams.ttl,
         particle_id: runParams.particleId,
     };
 
