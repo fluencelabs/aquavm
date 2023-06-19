@@ -36,6 +36,9 @@ pub struct AirScriptExecutor<R = DefaultAirRunner> {
     queue: ExecutionQueue,
 }
 
+// it is implemented only for the default runner for compatibility reasons
+// Rust fails to deduce type for `AirScriptExecutor::simple()` without
+//   extencive test code changes
 impl AirScriptExecutor<DefaultAirRunner> {
     /// Simple constructor where everything is generated from the annotated_air_script.
     pub fn simple(

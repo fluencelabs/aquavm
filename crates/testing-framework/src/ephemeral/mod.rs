@@ -101,6 +101,9 @@ pub struct Network<R = DefaultAirRunner> {
     services: Rc<NetworkServices>,
 }
 
+// it is implemented only for the default runner for compatibility reasons
+// Rust fails to deduce type for `Network::empty()` without
+//   extencive test code changes
 impl Network<DefaultAirRunner> {
     pub fn empty() -> Rc<Self> {
         Self::new(std::iter::empty::<PeerId>(), vec![])
