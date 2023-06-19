@@ -20,6 +20,7 @@ pub use crate::native_test_runner::NativeAirRunner as DefaultAirRunner;
 pub use crate::wasm_test_runner::WasmAirRunner as DefaultAirRunner;
 
 pub use crate::native_test_runner::NativeAirRunner;
+pub use crate::wasm_test_runner::ReleaseWasmAirRunner;
 pub use crate::wasm_test_runner::WasmAirRunner;
 
 use super::CallServiceClosure;

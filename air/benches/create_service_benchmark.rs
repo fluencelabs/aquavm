@@ -8,7 +8,7 @@ use criterion::Criterion;
 
 use std::cell::RefCell;
 
-thread_local!(static VM: RefCell<TestRunner> = RefCell::new({
+thread_local!(static VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new({
     let add_module_response = String::from("add_module response");
     let add_blueprint_response = String::from("add_blueprint response");
     let create_response = String::from("create response");
@@ -24,10 +24,10 @@ thread_local!(static VM: RefCell<TestRunner> = RefCell::new({
         CallServiceResult::ok(json!(response))
     });
 
-    create_avm(call_service, "A")
+    create_custom_avm(call_service, "A")
 }));
 
-thread_local!(static SET_VARIABLES_VM: RefCell<TestRunner> = RefCell::new({
+thread_local!(static SET_VARIABLES_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new({
     let module = "greeting";
     let module_config = json!(
         {
@@ -51,7 +51,7 @@ thread_local!(static SET_VARIABLES_VM: RefCell<TestRunner> = RefCell::new({
         String::from("blueprint") => json!(blueprint),
     );
 
-    create_avm(set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)), "set_variables")
+    create_custom_avm(set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)), "set_variables")
 }));
 
 fn create_service_benchmark() -> Result<RawAVMOutcome, String> {
