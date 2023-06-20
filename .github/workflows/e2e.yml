@@ -55,6 +55,7 @@ jobs:
 
     uses: fluencelabs/rust-peer/.github/workflows/build.yml@aquavm_0.39.1
     with:
+      ref: aquavm_0.39.1
       cargo-dependencies: |
         [
           {
