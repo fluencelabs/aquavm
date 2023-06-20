@@ -80,26 +80,36 @@ enum Source {
 #[group(required = true, multiple = false)]
 struct Keys {
     #[arg(long)]
-    random: bool,
+    random_key: bool,
     #[arg(long)]
-    ed25519: Option<PathBuf>,
+    ed25519_key: Option<PathBuf>,
 }
 
 impl Keys {
     fn get_keypair(&self) -> anyhow::Result<fluence_keypair::KeyPair> {
         use fluence_keypair::{KeyFormat, KeyPair};
 
-        match (self.random, self.ed25519.as_ref()) {
+        match (self.random_key, self.ed25519_key.as_ref()) {
             (true, None) => Ok(KeyPair::generate_ed25519()),
             (false, Some(path)) => {
                 // It follows rust-peer format
                 let mut file = std::fs::File::open(path)?;
-                let mut file_content = Vec::with_capacity(file.metadata()?.len().try_into()?);
-                file.read_to_end(&mut file_content)?;
-                let key_data = bs58::decode(&file_content).into_vec()?;
+                let mut file_content = String::with_capacity(
+                    file.metadata()?
+                        .len()
+                        .try_into()
+                        .context("failed to convert file length")?,
+                );
+                file.read_to_string(&mut file_content)?;
+                let key_data = bs58::decode(file_content.trim())
+                    .into_vec()
+                    .context("failed to decode the base58 key material")?;
                 file_content.zeroize();
 
-                Ok(KeyPair::from_vec(key_data, KeyFormat::Ed25519)?)
+                Ok(
+                    KeyPair::from_vec(key_data, KeyFormat::Ed25519)
+                        .context("malformed key data")?,
+                )
             }
             _ => unreachable!("clap shouldn't allow providing both keys options"),
         }
@@ -129,7 +139,10 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
-    let key_pair = args.keys.get_keypair()?;
+    let key_pair = args
+        .keys
+        .get_keypair()
+        .context("failed to get the keypair")?;
 
     let repeat = args.repeat.unwrap_or(1);
     for _ in 0..repeat {
