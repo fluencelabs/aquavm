@@ -115,15 +115,10 @@ name = "air-interpreter-signatures"
 version = "0.1.0"
 dependencies = [
  "air-interpreter-cid",
- "base64ct",
  "bs58",
- "ed25519-dalek",
  "fluence-keypair",
- "rand_chacha 0.2.2",
  "serde",
  "serde_json",
- "sha2 0.10.6",
- "zeroize",
 ]
 
 [[package]]
@@ -167,14 +162,18 @@ dependencies = [
  "aquavm-air",
  "avm-interface",
  "avm-server",
+ "ed25519-dalek",
+ "fluence-keypair",
  "fstrings",
  "maplit",
  "marine-rs-sdk",
  "object-pool",
  "once_cell",
+ "rand_chacha 0.2.2",
  "semver 1.0.17",
  "serde",
  "serde_json",
+ "sha2 0.10.6",
 ]
 
 [[package]]
@@ -352,13 +351,16 @@ dependencies = [
  "atty",
  "avm-data-store",
  "avm-interface",
+ "bs58",
  "clap 4.2.7",
+ "fluence-keypair",
  "itertools",
  "serde",
  "serde_json",
  "termcolor",
  "tracing",
  "tracing-subscriber",
+ "zeroize",
 ]
 
 [[package]]
@@ -491,6 +493,7 @@ dependencies = [
  "avm-data-store",
  "avm-interface",
  "eyre",
+ "fluence-keypair",
  "log",
  "maplit",
  "marine-runtime",
@@ -513,12 +516,6 @@ name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
-
-[[package]]
-name = "base64ct"
-version = "1.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bimap"
@@ -2020,9 +2017,9 @@ dependencies = [
 
 [[package]]
 name = "keccak"
-version = "0.1.4"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f6d5ed8676d904364de097082f4e7d240b571b67989ced0240f08b7f966f940"
+checksum = "3afef3b6eff9ce9d8ff9b3601125eec7f0c8cbac7abd14f355d053fa56c98768"
 dependencies = [
  "cpufeatures",
 ]
