@@ -22,6 +22,34 @@
     * avm-interface bumped from 0.28.2 to 0.28.3
     * avm-server bumped from 0.30.1 to 0.31.0
 
+## [0.6.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.5.0...air-test-utils-v0.6.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598))
+
+### Features
+
+* **air:** introduce explicit types for generation numbers ([#530](https://github.com/fluencelabs/aquavm/issues/530)) ([d62fa6f](https://github.com/fluencelabs/aquavm/commit/d62fa6fe6006e59d63d30549074e7b30f80bf687))
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598)) ([f8b734a](https://github.com/fluencelabs/aquavm/commit/f8b734abde8181cc2b2f11423f9d3bddd48f9fd1))
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+* **interpreter-data:** Introduce source information for `canon` data ([#577](https://github.com/fluencelabs/aquavm/issues/577)) ([1d98afe](https://github.com/fluencelabs/aquavm/commit/1d98afeb34b1ee45defc05995c8cf24021449f2b))
+* **trace-handler:** TracePos becomes a wrapper for u32 alias [fixes VM-267] ([#544](https://github.com/fluencelabs/aquavm/issues/544)) ([658daf1](https://github.com/fluencelabs/aquavm/commit/658daf1d3f6e733c15a21afc40ddf468ed745d43))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.39.0 to 0.40.0
+    * air-interpreter-cid bumped from 0.2.0 to 0.3.0
+    * air-interpreter-data bumped from 0.7.0 to 0.8.0
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * avm-interface bumped from 0.28.3 to 0.28.4
+    * avm-server bumped from 0.31.0 to 0.32.0
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.4.7...air-test-utils-v0.5.0) (2023-03-21)
 
 

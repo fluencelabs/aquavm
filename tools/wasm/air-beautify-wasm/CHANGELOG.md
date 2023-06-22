@@ -1,5 +1,9 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-beautifier bumped from 0.1.3 to 0.1.4
+
 ## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-beautify-wasm-v0.1.2...air-beautify-wasm-v0.2.0) (2023-03-15)
 
 
