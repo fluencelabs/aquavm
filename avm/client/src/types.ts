@@ -19,11 +19,11 @@ export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 
 /**
  * From fluence-keypair crate:
  * https://github.com/fluencelabs/trust-graph/blob/f7ef0f8da095fe1fef80faaa0b0c2d5ef854bd16/keypair/src/key_pair.rs#L79-L82
+ *
+ * We define here only the supported subset of formats.  This enum is used for future extention.
  */
 export enum KeyPairFormat {
     Ed25519 = 0,
-    Rsa = 1,
-    Secp256k1 = 2,
 }
 
 /**
@@ -41,7 +41,7 @@ export interface RunParameters {
     currentPeerId: string;
 
     /**
-     * Key format of the current peer Ed25519, Rsa or Secp256k1.
+     * Key format of the current peer Ed25519.
      */
     keyFormat: KeyPairFormat;
 

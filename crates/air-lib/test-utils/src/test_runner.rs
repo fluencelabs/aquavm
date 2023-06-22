@@ -226,7 +226,7 @@ mod tests {
             "func".to_owned() => json!("success"),
         };
 
-        let key_format = fluence_keypair::KeyFormat::Secp256k1;
+        let key_format = fluence_keypair::KeyFormat::Ed25519;
         let keypair = KeyPair::generate(key_format);
         let keypair2 = KeyPair::generate(key_format);
 

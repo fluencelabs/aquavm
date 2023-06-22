@@ -44,7 +44,8 @@ pub struct RunParameters {
     ///
     /// This value is the result of `fluence_keypair::KeyType::into`.
     pub key_format: u8,
-    /// A secret key data.
+
+    /// A secret key material.
     ///
     /// The value is the result `fluence_keypair::KeyPair::secret`, for compatibility
     /// with JS client who can only serialize to secret key, not to keypair.
