@@ -107,7 +107,7 @@ jobs:
       - avm
       - rust-peer-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
@@ -116,7 +116,7 @@ jobs:
     needs:
       - avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
 
