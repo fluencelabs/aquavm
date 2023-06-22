@@ -53,9 +53,8 @@ jobs:
     needs:
       - cargo
 
-    uses: fluencelabs/rust-peer/.github/workflows/build.yml@aquavm_0.39.1
+    uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
     with:
-      ref: aquavm_0.39.1
       cargo-dependencies: |
         [
           {
@@ -75,7 +74,7 @@ jobs:
     needs:
       - rust-peer
 
-    uses: fluencelabs/rust-peer/.github/workflows/container.yml@aquavm_0.39.1
+    uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       flavour: "minimal"
@@ -86,9 +85,8 @@ jobs:
     needs:
       - cargo
 
-    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@aquavm_0.39.1
+    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
     with:
-      ref: aquavm_0.39.1
       cargo-dependencies: |
         [
           {
@@ -109,20 +107,18 @@ jobs:
       - avm
       - rust-peer-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@feat/add-signatures
+    uses: fluencelabs/js-client/.github/workflows/tests.yml
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
-      ref: feat/add-signatures
 
   js-client:
     needs:
       - avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@feat/add-signatures
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
-      ref: feat/add-signatures
 
   fluence-cli-snapshot:
     name: "fluence-cli"
