@@ -63,10 +63,7 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
 
     let particle = ParticleParameters::new(
         init_peer_id.into(),
-        args.particle_id
-            .as_ref()
-            .map(Into::into)
-            .unwrap_or("".into()),
+        args.particle_id.as_deref().unwrap_or_default().into(),
         timestamp,
         ttl,
         current_peer_id.into(),
