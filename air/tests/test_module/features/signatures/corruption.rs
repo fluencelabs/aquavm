@@ -15,11 +15,11 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_signatures::derive_dummy_keypair;
 use air_interpreter_signatures::CidTracker as _;
 use air_interpreter_signatures::FullSignatureStore;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::PublicKey;
+use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 use semver::Version;

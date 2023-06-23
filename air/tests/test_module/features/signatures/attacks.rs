@@ -15,7 +15,8 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, FullSignatureStore, PeerCidTracker, PublicKey};
+use air_interpreter_signatures::{CidTracker, FullSignatureStore, PeerCidTracker, PublicKey};
+use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use semver::Version;
 

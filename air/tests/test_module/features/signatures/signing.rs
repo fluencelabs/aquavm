@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use air_interpreter_signatures::{derive_dummy_keypair, CidTracker, PeerCidTracker};
+use air_interpreter_signatures::{CidTracker, PeerCidTracker};
 use air_test_framework::{ephemeral::PeerId, AirScriptExecutor};
+use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use air_test_utils::test_runner::TestRunParameters;
 
