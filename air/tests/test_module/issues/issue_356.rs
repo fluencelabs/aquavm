@@ -51,7 +51,7 @@ fn issue_356() {
         )
         "#;
 
-    let engine = AirScriptExecutor::new(
+    let engine = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id("client"),
         vec![],
         vec!["p1", "p2", "p3"].into_iter().map(Into::into),

@@ -7,7 +7,9 @@ use serde_json::Value;
 
 use std::cell::RefCell;
 
-thread_local!(static VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "test_peer_id")));
+thread_local!(static VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new(
+    create_custom_avm(unit_call_service(), "test_peer_id")
+));
 // effectively, we measure just loading time
 const SCRIPT: &str = "(par (null) (null))";
 

@@ -68,7 +68,7 @@ fn issue_221() {
         )
     "#);
 
-    let executor = AirScriptExecutor::new(
+    let executor = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id("set_variable_id"),
         vec![],
         vec![peer_1_id, peer_2_id].into_iter().map(Into::into),
