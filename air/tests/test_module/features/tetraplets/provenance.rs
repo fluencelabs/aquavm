@@ -26,7 +26,8 @@ fn call_result() {
             (call "B" ("service" "func") [] $s) ; ok = "some_data"
             (canon "B" $s #c))
     "#;
-    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+    let runner =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
 
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
@@ -78,7 +79,8 @@ fn call_result_iteration() {
                         (next a))))
             (canon "A" $s #c))
     "#;
-    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+    let runner =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
 
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
@@ -143,7 +145,8 @@ fn literal() {
             (ap 1 $s)
             (canon "B" $s #c))
     "#;
-    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+    let runner =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
 
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
@@ -186,7 +189,8 @@ fn canon_in_canon() {
                 (ap #c $s)
                 (canon "B" $s #d)))
     "#;
-    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+    let runner =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
 
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
@@ -261,7 +265,8 @@ fn lambda_result_iteration() {
                         (next y))))
             (canon "A" $s #c))
     "#;
-    let runner = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
+    let runner =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), air_script).unwrap();
 
     let result = runner.execute_one(init_peer_id).unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);

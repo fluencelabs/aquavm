@@ -7,17 +7,25 @@ use serde_json::json;
 
 use std::cell::RefCell;
 
-thread_local!(static RELAY_1_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "Relay1")));
-thread_local!(static RELAY_2_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "Relay2")));
-thread_local!(static REMOTE_VM: RefCell<TestRunner> = RefCell::new({
+thread_local!(static RELAY_1_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new(
+    create_custom_avm(unit_call_service(), "Relay1")
+));
+thread_local!(static RELAY_2_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new(
+    create_custom_avm(unit_call_service(), "Relay2")
+));
+thread_local!(static REMOTE_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new({
     let members_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!([["A", "Relay1"], ["B", "Relay2"]]))
     });
 
-    create_avm(members_call_service, "Remote")
+    create_custom_avm(members_call_service, "Remote")
 }));
-thread_local!(static CLIENT_1_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "A")));
-thread_local!(static CLIENT_2_VM: RefCell<TestRunner> = RefCell::new(create_avm(unit_call_service(), "B")));
+thread_local!(static CLIENT_1_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new(
+    create_custom_avm(unit_call_service(), "A")
+));
+thread_local!(static CLIENT_2_VM: RefCell<TestRunner<ReleaseWasmAirRunner>> = RefCell::new(
+    create_custom_avm(unit_call_service(), "B")
+));
 
 fn chat_sent_message_benchmark() -> Result<RawAVMOutcome, String> {
     let script = r#"
