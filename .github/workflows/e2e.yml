@@ -79,7 +79,6 @@ jobs:
       image-name: "docker.fluence.dev/aquavm"
       flavour: "minimal"
       nox-sha: "${{ needs.nox.outputs.rust-peer-sha }}"
-      ref: FLU-353
 
   nox-tests:
     name: "nox"
