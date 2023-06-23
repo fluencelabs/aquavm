@@ -13,6 +13,24 @@
   * dev-dependencies
     * air-test-utils bumped from 0.5.0 to 0.6.0
 
+## [0.3.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.2.1...air-testing-framework-v0.3.0) (2023-06-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609))
+
+### Miscellaneous Chores
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609)) ([c332cca](https://github.com/fluencelabs/aquavm/commit/c332cca6b75e804412e1f1cc51bdfe0580ea5fdd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.6.0 to 0.7.0
+
 ## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.1.7...air-testing-framework-v0.2.0) (2023-03-21)
 
 
