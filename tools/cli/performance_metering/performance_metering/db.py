@@ -19,7 +19,7 @@ import datetime
 import json
 import logging
 import platform
-from typing import Optional
+from typing import List, Optional
 
 from .helpers import get_host_id, get_aquavm_version, intermediate_temp_file
 
@@ -61,16 +61,25 @@ class Db:
             logging.warning("cannot open data at %r: %s", json_path, ex)
             self.data = {}
 
-    def record(self, bench, stats, total_time):
+    def record(
+            self, bench, stats, total_time, memory_sizes: Optional[List[str]]
+    ):
         """Record the bench stats."""
         if self.host_id not in self.data:
             self.data[self.host_id] = {"benches": {}}
         bench_name = bench.get_name()
 
-        self.data[self.host_id]["benches"][bench_name] = {
+        bench_info = {
             "stats": stats,
             "total_time": total_time,
         }
+        if memory_sizes is not None:
+            bench_info["memory_sizes"] = memory_sizes
+
+        comment = bench.get_comment()
+        if comment is not None:
+            bench_info["comment"] = comment
+        self.data[self.host_id]["benches"][bench_name] = bench_info
         self.data[self.host_id]["platform"] = platform.platform()
         self.data[self.host_id]["datetime"] = str(
             datetime.datetime.now(datetime.timezone.utc)
@@ -78,10 +87,6 @@ class Db:
         self.data[self.host_id]["version"] = get_aquavm_version(
             AQUAVM_TOML_PATH
         )
-
-        comment = bench.get_comment()
-        if comment is not None:
-            self.data[self.host_id]["benches"][bench_name]["comment"] = comment
 
     def save(self):
         """Save the database to JSON."""

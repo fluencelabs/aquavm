@@ -74,7 +74,8 @@ def run(args):
 
             combined_stats = walker.to_json(args.repeat)
             total_time = walker.get_total_time(args.repeat)
-            db.record(bench, combined_stats, total_time)
+            memory_sizes = walker.get_memory_sizes(args.repeat)
+            db.record(bench, combined_stats, total_time, memory_sizes)
 
             with (
                     intermediate_temp_file(

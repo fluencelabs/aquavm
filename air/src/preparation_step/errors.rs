@@ -80,6 +80,13 @@ pub enum PreparationError {
         required_version: semver::Version,
     },
 
+    /// Malformed keypair format data.
+    #[error("malformed keypair format: {error:?}")]
+    MalformedKeyPairData {
+        #[from]
+        error: fluence_keypair::error::DecodingError,
+    },
+
     /// Failed to verify CidStore contents of the current data.
     #[error(transparent)]
     CidStoreVerificationError(#[from] CidStoreVerificationError),

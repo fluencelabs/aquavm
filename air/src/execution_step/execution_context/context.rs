@@ -96,7 +96,7 @@ impl<'i> ExecutionCtx<'i> {
         current_ingredients: ExecCtxIngredients,
         call_results: CallResults,
         signature_store: FullSignatureStore,
-        run_parameters: RunParameters,
+        run_parameters: &RunParameters,
     ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
         let streams = Streams::from_data(
@@ -188,10 +188,10 @@ pub(crate) struct RcRunParameters {
 }
 
 impl RcRunParameters {
-    pub(crate) fn from_run_parameters(run_parameters: RunParameters) -> Self {
+    pub(crate) fn from_run_parameters(run_parameters: &RunParameters) -> Self {
         Self {
             init_peer_id: run_parameters.init_peer_id.as_str().into(),
-            current_peer_id: Rc::new(run_parameters.current_peer_id),
+            current_peer_id: Rc::new(run_parameters.current_peer_id.clone()),
             timestamp: run_parameters.timestamp,
             ttl: run_parameters.ttl,
         }

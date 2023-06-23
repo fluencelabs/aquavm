@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.4](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.1.3...air-beautifier-v0.1.4) (2023-06-22)
+
+
+### Features
+
+* **execution-engine:** Stream Map initial support [fixes VM-283,VM-284] ([#592](https://github.com/fluencelabs/aquavm/issues/592)) ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **execution-engine:** StreamMap initial support for ap and new instructions [fixes VM-283,VM-284] ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.7.4 to 0.7.5
+
 ## [0.1.3](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.1.2...air-beautifier-v0.1.3) (2023-03-15)
 
 

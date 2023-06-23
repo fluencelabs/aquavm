@@ -39,15 +39,40 @@ pub struct RunParameters {
 
     /// TTL set by init peer id in milliseconds.
     pub ttl: u32,
+
+    /// A key format.
+    ///
+    /// This value is the result of `fluence_keypair::KeyType::into`.
+    pub key_format: u8,
+
+    /// A secret key material.
+    ///
+    /// The value is the result `fluence_keypair::KeyPair::secret`, for compatibility
+    /// with JS client who can only serialize to secret key, not to keypair.
+    pub secret_key_bytes: Vec<u8>,
+
+    /// Unique particle ID.
+    pub particle_id: String,
 }
 
 impl RunParameters {
-    pub fn new(init_peer_id: String, current_peer_id: String, timestamp: u64, ttl: u32) -> Self {
+    pub fn new(
+        init_peer_id: String,
+        current_peer_id: String,
+        timestamp: u64,
+        ttl: u32,
+        key_format: u8,
+        secret_key_bytes: Vec<u8>,
+        particle_id: String,
+    ) -> Self {
         Self {
             init_peer_id,
             current_peer_id,
             timestamp,
             ttl,
+            key_format,
+            secret_key_bytes,
+            particle_id,
         }
     }
 
@@ -58,6 +83,9 @@ impl RunParameters {
             IValue::String(self.current_peer_id),
             IValue::U64(self.timestamp),
             IValue::U32(self.ttl),
+            IValue::U8(self.key_format),
+            IValue::ByteArray(self.secret_key_bytes),
+            IValue::String(self.particle_id),
         ];
         // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();

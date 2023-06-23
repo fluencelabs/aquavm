@@ -4,6 +4,34 @@
   * dependencies
     * air-parser bumped from 0.7.2 to 0.7.3
 
+## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.7.0...air-interpreter-data-v0.8.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598))
+
+### Features
+
+* **air:** introduce explicit types for generation numbers ([#530](https://github.com/fluencelabs/aquavm/issues/530)) ([d62fa6f](https://github.com/fluencelabs/aquavm/commit/d62fa6fe6006e59d63d30549074e7b30f80bf687))
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598)) ([f8b734a](https://github.com/fluencelabs/aquavm/commit/f8b734abde8181cc2b2f11423f9d3bddd48f9fd1))
+* **execution-engine:** Stream Map initial support [fixes VM-283,VM-284] ([#592](https://github.com/fluencelabs/aquavm/issues/592)) ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **execution-engine:** StreamMap initial support for ap and new instructions [fixes VM-283,VM-284] ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **interpreter-data:** Introduce source information for `canon` data ([#577](https://github.com/fluencelabs/aquavm/issues/577)) ([1d98afe](https://github.com/fluencelabs/aquavm/commit/1d98afeb34b1ee45defc05995c8cf24021449f2b))
+* **trace-handler:** sub/-trace len dedicated alias to replace usize [fixes VM-282] ([b480e01](https://github.com/fluencelabs/aquavm/commit/b480e018b4b69b088d4258497866c3b31774b6b1))
+* **trace-handler:** TracePos becomes a wrapper for u32 alias [fixes VM-267] ([#544](https://github.com/fluencelabs/aquavm/issues/544)) ([658daf1](https://github.com/fluencelabs/aquavm/commit/658daf1d3f6e733c15a21afc40ddf468ed745d43))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-utils bumped from 0.1.0 to 0.1.1
+    * aquavm-air-parser bumped from 0.7.4 to 0.7.5
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * air-interpreter-cid bumped from 0.2.0 to 0.3.0
+    * air-interpreter-signatures bumped from 0.1.0 to 0.1.1
+
 ## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.6.4...air-interpreter-data-v0.7.0) (2023-03-21)
 
 

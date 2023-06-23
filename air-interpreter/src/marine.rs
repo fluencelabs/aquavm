@@ -52,6 +52,7 @@ pub fn invoke(
     execute_air(air, prev_data, data, params, call_results)
 }
 
+#[allow(clippy::too_many_arguments)]
 #[marine]
 pub fn invoke_tracing(
     air: String,

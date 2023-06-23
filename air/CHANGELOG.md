@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.40.0](https://github.com/fluencelabs/aquavm/compare/air-v0.39.0...air-v0.40.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598))
+* **aquavm-air-cli:** Usability enhancements ([#540](https://github.com/fluencelabs/aquavm/issues/540))
+
+### Features
+
+* **air:** introduce explicit types for generation numbers ([#530](https://github.com/fluencelabs/aquavm/issues/530)) ([d62fa6f](https://github.com/fluencelabs/aquavm/commit/d62fa6fe6006e59d63d30549074e7b30f80bf687))
+* **aquavm-air-cli:** Usability enhancements ([#540](https://github.com/fluencelabs/aquavm/issues/540)) ([73c1ba7](https://github.com/fluencelabs/aquavm/commit/73c1ba70cca9ba4f6e73880141e738d450565798))
+* **aquavm-air,air-interpreter-signature,air-interpreter-data:** Peer signatures ([#598](https://github.com/fluencelabs/aquavm/issues/598)) ([f8b734a](https://github.com/fluencelabs/aquavm/commit/f8b734abde8181cc2b2f11423f9d3bddd48f9fd1))
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+* **execution-engine:** introduce resolver ([#574](https://github.com/fluencelabs/aquavm/issues/574)) ([a66541d](https://github.com/fluencelabs/aquavm/commit/a66541de497e0b2f0ed97631d63e35a25215bca3))
+* **execution-engine:** remove stream jvaluable implementation ([#576](https://github.com/fluencelabs/aquavm/issues/576)) ([513d33a](https://github.com/fluencelabs/aquavm/commit/513d33a1c5faf972907bd402dfd6ad39cacd1eff))
+* **execution-engine:** Stream Map initial support [fixes VM-283,VM-284] ([#592](https://github.com/fluencelabs/aquavm/issues/592)) ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **execution-engine:** StreamMap initial support for ap and new instructions [fixes VM-283,VM-284] ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **interpreter-data:** Introduce source information for `canon` data ([#577](https://github.com/fluencelabs/aquavm/issues/577)) ([1d98afe](https://github.com/fluencelabs/aquavm/commit/1d98afeb34b1ee45defc05995c8cf24021449f2b))
+* **trace-handler:** sub/-trace len dedicated alias to replace usize [fixes VM-282] ([b480e01](https://github.com/fluencelabs/aquavm/commit/b480e018b4b69b088d4258497866c3b31774b6b1))
+* **trace-handler:** TracePos becomes a wrapper for u32 alias [fixes VM-267] ([#544](https://github.com/fluencelabs/aquavm/issues/544)) ([658daf1](https://github.com/fluencelabs/aquavm/commit/658daf1d3f6e733c15a21afc40ddf468ed745d43))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.7.1 ([#568](https://github.com/fluencelabs/aquavm/issues/568)) ([648f297](https://github.com/fluencelabs/aquavm/commit/648f297a2badde312c88d3db9eec085170211aa6))
+* **execution-engine:** Fold-over-scalar values' wrong lambda ([#578](https://github.com/fluencelabs/aquavm/issues/578)) ([88fd1f3](https://github.com/fluencelabs/aquavm/commit/88fd1f3095fc47862472baf30ff79964ec662b37))
+* **execution-engine:** this removes an unused and impossible check ([#575](https://github.com/fluencelabs/aquavm/issues/575)) ([70f27f7](https://github.com/fluencelabs/aquavm/commit/70f27f7cb6e0ff21be9695a082b1fadf3a2dd05f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.7.4 to 0.7.5
+    * air-execution-info-collector bumped from 0.7.4 to 0.7.5
+    * air-interpreter-cid bumped from 0.2.0 to 0.3.0
+    * air-interpreter-data bumped from 0.7.0 to 0.8.0
+    * air-interpreter-signatures bumped from 0.1.0 to 0.1.1
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * air-trace-handler bumped from 0.2.0 to 0.2.1
+    * air-utils bumped from 0.1.0 to 0.1.1
+
 ## [0.39.0](https://github.com/fluencelabs/aquavm/compare/air-v0.38.0...air-v0.39.0) (2023-03-21)
 
 

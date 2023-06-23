@@ -21,6 +21,7 @@ use air_interpreter_interface::InterpreterOutcome;
 use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
+use fluence_keypair::KeyPair;
 use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
@@ -76,7 +77,14 @@ impl AVMRunner {
         ttl: u32,
         current_peer_id: impl Into<String>,
         call_results: CallResults,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> RunnerResult<RawAVMOutcome> {
+        let key_format = keypair.key_format();
+        // we use secret() for compatibility with JS client that doesn't have keypair type,
+        // it can serialize a secret key only
+        let secret_key_bytes: Vec<u8> = keypair.secret().map_err(RunnerError::KeyError)?;
+
         let args = prepare_args(
             air,
             prev_data,
@@ -86,6 +94,9 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
+            key_format.into(),
+            secret_key_bytes,
+            particle_id,
         );
 
         let result = measure!(
@@ -118,6 +129,9 @@ impl AVMRunner {
         call_results: CallResults,
         tracing_params: String,
         tracing_output_mode: u8,
+        key_format: u8,
+        secret_key_bytes: Vec<u8>,
+        particle_id: String,
     ) -> RunnerResult<RawAVMOutcome> {
         let mut args = prepare_args(
             air,
@@ -128,6 +142,9 @@ impl AVMRunner {
             timestamp,
             ttl,
             call_results,
+            key_format,
+            secret_key_bytes,
+            particle_id,
         );
         args.push(IValue::String(tracing_params));
         args.push(IValue::U8(tracing_output_mode));
@@ -166,7 +183,7 @@ impl AVMRunner {
 }
 
 #[allow(clippy::too_many_arguments)]
-#[tracing::instrument(skip(air, prev_data, data, call_results))]
+#[tracing::instrument(skip(air, prev_data, data, call_results, secret_key_bytes))]
 fn prepare_args(
     air: impl Into<String>,
     prev_data: impl Into<Vec<u8>>,
@@ -176,12 +193,18 @@ fn prepare_args(
     timestamp: u64,
     ttl: u32,
     call_results: CallResults,
+    key_format: u8,
+    secret_key_bytes: Vec<u8>,
+    particle_id: String,
 ) -> Vec<IValue> {
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
         current_peer_id,
         timestamp,
         ttl,
+        key_format,
+        secret_key_bytes,
+        particle_id,
     )
     .into_ivalue();
 

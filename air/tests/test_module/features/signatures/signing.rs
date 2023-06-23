@@ -25,7 +25,7 @@ fn test_signature_empty() {
     let init_peer_id = "init_peer_id";
     let (keypair, _) = derive_dummy_keypair(init_peer_id);
 
-    let exec = AirScriptExecutor::new(
+    let exec = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id(init_peer_id),
         vec![],
         vec![PeerId::from(init_peer_id)].into_iter(),
@@ -52,7 +52,8 @@ fn test_signature_call_var() {
         (call "{init_peer_id}" ("" "") [] var) ; ok = "ok"
         "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(&init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(&init_peer_id), &air_script).unwrap();
 
     let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
@@ -77,7 +78,8 @@ fn test_signature_call_stream() {
         (call "{init_peer_id}" ("" "") [] $var) ; ok = "ok"
         "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
 
     let res = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
@@ -104,7 +106,8 @@ fn test_signature_call_ununsed() {
         (call "{init_peer_id}" ("" "") []) ; ok = "ok"
         "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
 
     let res = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
@@ -135,7 +138,8 @@ fn test_signature_call_merged() {
     "#
     );
 
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
     let _ = exec.execute_one(init_peer_id).unwrap();
     let _ = exec.execute_one(other_peer_id).unwrap();
     let res2 = exec.execute_one(init_peer_id).unwrap();
@@ -174,7 +178,8 @@ fn test_signature_call_twice() {
                     (next i))))
         "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(&init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(&init_peer_id), &air_script).unwrap();
 
     let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
@@ -215,7 +220,8 @@ fn test_signature_canon_basic() {
              (canon "{init_peer_id}" $stream #canon)))
     "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
 
     let last_result = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
     let last_data = data_from_result(&last_result);
@@ -292,7 +298,8 @@ fn test_signature_canon_merge() {
               (call "{init_peer_id}" ("" "") []))) ; ok = "ok"
     "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
 
     exec.execute_all(init_peer_id);
     exec.execute_one(other_peer_id);
@@ -370,7 +377,8 @@ fn test_signature_canon_result() {
               (canon "{init_peer_id}" $stream #canon)))
     "#
     );
-    let exec = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
+    let exec =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &air_script).unwrap();
 
     let last_result = exec.execution_iter(init_peer_id).unwrap().last().unwrap();
     let last_data = data_from_result(&last_result);
