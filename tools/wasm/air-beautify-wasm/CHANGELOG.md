@@ -4,6 +4,17 @@
   * dependencies
     * air-beautifier bumped from 0.1.3 to 0.1.4
 
+## [0.3.0](https://github.com/fluencelabs/aquavm/compare/air-beautify-wasm-v0.2.1...air-beautify-wasm-v0.3.0) (2023-06-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* this package is now intended for use in nodejs
+
+### Features
+
+* set nodejs target for air-beautify ([#613](https://github.com/fluencelabs/aquavm/issues/613)) ([5e36c22](https://github.com/fluencelabs/aquavm/commit/5e36c223a43c6705e4f1e55246a25d9888a91786))
+
 ## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-beautify-wasm-v0.1.2...air-beautify-wasm-v0.2.0) (2023-03-15)
 
 
