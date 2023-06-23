@@ -79,6 +79,7 @@ jobs:
       image-name: "docker.fluence.dev/aquavm"
       flavour: "minimal"
       nox-sha: "${{ needs.nox.outputs.rust-peer-sha }}"
+      ref: FLU-353
 
   nox-tests:
     name: "nox"
@@ -111,6 +112,7 @@ jobs:
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
+      ref: FLU-353
 
   js-client:
     needs:
@@ -119,6 +121,7 @@ jobs:
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
+      ref: FLU-353
 
   flox-snapshot:
     name: "flox"
@@ -128,6 +131,7 @@ jobs:
     uses: fluencelabs/flox/.github/workflows/snapshot.yml@FLU-353
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
+      ref: FLU-353
 
   aqua:
     needs:
@@ -138,6 +142,7 @@ jobs:
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
+      ref: FLU-353
 
   registry:
     needs:
@@ -148,6 +153,7 @@ jobs:
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       flox-version: "${{ needs.flox-snapshot.outputs.version }}"
+      ref: FLU-353
 
   flox:
     needs:
@@ -158,3 +164,4 @@ jobs:
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
+      ref: FLU-353
