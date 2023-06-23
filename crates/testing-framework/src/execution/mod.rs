@@ -41,7 +41,7 @@ pub struct AirScriptExecutor<R = DefaultAirRunner> {
 //   extencive test code changes
 impl AirScriptExecutor<DefaultAirRunner> {
     /// Simple constructor where everything is generated from the annotated_air_script.
-    pub fn simple(
+    pub fn from_annotated(
         test_parameters: TestRunParameters,
         annotated_air_script: &str,
     ) -> Result<Self, String> {

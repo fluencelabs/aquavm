@@ -79,7 +79,8 @@ fn test_scalar_cid() {
        )"#
     );
     let executor =
-        AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
+            .unwrap();
 
     let result = executor.execute_one(vm_peer_id).unwrap();
     let data = data_from_result(&result);
@@ -123,7 +124,8 @@ fn test_stream_cid() {
        )"#
     );
     let executor =
-        AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
+            .unwrap();
 
     let result = executor.execute_one(vm_peer_id).unwrap();
     let data = data_from_result(&result);
@@ -169,7 +171,8 @@ fn test_unused_cid() {
        )"#
     );
     let executor =
-        AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
+            .unwrap();
 
     let result = executor.execute_one(vm_peer_id).unwrap();
     let data = data_from_result(&result);
