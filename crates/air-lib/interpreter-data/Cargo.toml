@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-data"
 description = "Data format of the AIR interpreter"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -15,11 +15,11 @@ name = "air_interpreter_data"
 path = "src/lib.rs"
 
 [dependencies]
-air-utils = { version = "0.1.0", path = "../utils" }
-aquavm-air-parser = { version = "0.7.4", path = "../air-parser" }
-air-interpreter-interface = { version = "0.13.0", path = "../interpreter-interface" }
-air-interpreter-cid = { version = "0.2.0", path = "../interpreter-cid" }
-air-interpreter-signatures = { version = "0.1.0", path = "../interpreter-signatures" }
+air-utils = { version = "0.1.1", path = "../utils" }
+aquavm-air-parser = { version = "0.7.5", path = "../air-parser" }
+air-interpreter-interface = { version = "0.14.0", path = "../interpreter-interface" }
+air-interpreter-cid = { version = "0.3.0", path = "../interpreter-cid" }
+air-interpreter-signatures = { version = "0.1.1", path = "../interpreter-signatures" }
 polyplets = { version = "0.3.2", path = "../polyplets" }
 
 serde = {version = "1.0.159", features = ["derive", "rc"]}

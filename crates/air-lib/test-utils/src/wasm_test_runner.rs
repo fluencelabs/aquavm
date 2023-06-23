@@ -15,9 +15,11 @@
  */
 
 use crate::test_runner::AirRunner;
-use avm_server::avm_runner::*;
 
+use avm_server::avm_runner::*;
+use fluence_keypair::KeyPair;
 use once_cell::sync::OnceCell;
+
 use std::path::PathBuf;
 
 // 10 Mb
@@ -71,6 +73,8 @@ impl AirRunner for WasmAirRunner {
         ttl: u32,
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
@@ -84,6 +88,8 @@ impl AirRunner for WasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
+            keypair,
+            particle_id,
         )?)
     }
 }
@@ -122,6 +128,8 @@ impl AirRunner for ReleaseWasmAirRunner {
         ttl: u32,
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
@@ -135,6 +143,8 @@ impl AirRunner for ReleaseWasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
+            keypair,
+            particle_id,
         )?)
     }
 }

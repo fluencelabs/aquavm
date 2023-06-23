@@ -17,6 +17,7 @@
 use super::runner::AirRunner;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
+use fluence_keypair::KeyPair;
 
 struct NativeAvmRunner {}
 
@@ -34,12 +35,17 @@ impl AirRunner for NativeAvmRunner {
         // We use externally configured logger.
         _tracing_params: String,
         _tracing_output_mode: u8,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> anyhow::Result<RawAVMOutcome> {
         use avm_interface::into_raw_result;
 
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
         let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
+
+        let key_format = keypair.key_format().into();
+        let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
 
         let outcome = air::execute_air(
             air,
@@ -50,6 +56,9 @@ impl AirRunner for NativeAvmRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
+                key_format,
+                secret_key_bytes,
+                particle_id,
             },
             raw_call_results,
         );

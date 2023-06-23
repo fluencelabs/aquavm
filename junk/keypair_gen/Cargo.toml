@@ -1,0 +1,12 @@
+[package]
+name = "keypair_gen"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+air-test-utils = { version = "0.5.0", path = "../../crates/air-lib/test-utils" }
+bs58 = "0.5.0"
+clap = { version = "4.3.4", features = ["derive"] }
+fluence-keypair = "0.10.1"

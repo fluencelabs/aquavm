@@ -85,7 +85,17 @@ fn invalid_callresults() {
     let data = Vec::<u8>::new();
     let wrong_call_results = Vec::<u32>::new();
     let wrong_call_results = serde_json::to_vec(&wrong_call_results).unwrap();
-    let run_parameters = RunParameters::new(client_peer_id.clone(), client_peer_id.clone(), 0, 0);
+    let keypair = fluence_keypair::KeyPair::generate_ed25519();
+    let run_parameters = RunParameters::new(
+        client_peer_id.clone(),
+        client_peer_id.clone(),
+        0,
+        0,
+        keypair.key_format().into(),
+        keypair.secret().unwrap(),
+        "".to_owned(),
+    );
+
     let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone());
     let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
 

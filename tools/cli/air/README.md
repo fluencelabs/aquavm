@@ -25,6 +25,7 @@ All common parameters are optional.  Their position is always before the mode se
 + with the `--json` option, tracing info is output (to stderr) in machine-readable JSON format.  The output can be later processed with `air stats` subcommand.
 + `--tracing-params` defines tracing logging levels for AquaVM.  By default, it is equal to `info` and does trace the most high-level AquaVM constructions (data parsing, AIR script parsing, execution).  With `debug` level it traces some individual commands, and with `trace` level it traces even more fine grained functionality, but it induce more overhead.
 + `--runner-tracing-params` defines tracing logging level for the runner.  By default, it is equal to `warn`. 
++ `--random-key` or `--ed25519-key keyfile` (required): use random signing key or load it from a file.
 
 The important option is `--native`.  It runs the AquaVM as the native code that can be profiled with any native profiler.  As input data deserialization and serialization time can be comparable to particle execution time, and short execution times provides less reliable results, one can use `--repeat N` option to repeat particle execution several times.  Execution result is not printed in this case, so you may run `--repeat 1` to suppress it.
 

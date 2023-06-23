@@ -77,6 +77,13 @@ pub enum PreparationError {
         actual_version: semver::Version,
         required_version: semver::Version,
     },
+
+    /// Malformed keypair format data.
+    #[error("malformed keypair format: {error:?}")]
+    MalformedKeyPairData {
+        #[from]
+        error: fluence_keypair::error::DecodingError,
+    },
 }
 
 impl ToErrorCode for PreparationError {

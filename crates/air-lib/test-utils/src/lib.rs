@@ -28,6 +28,7 @@
 
 pub mod call_services;
 pub mod executed_state;
+pub mod key_utils;
 pub mod test_runner;
 
 pub mod native_test_runner;

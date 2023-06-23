@@ -18,9 +18,8 @@ use once_cell::sync::Lazy;
 
 use std::str::FromStr;
 
-// TODO: change to 0.35.0 in the next PR
 static MINIMAL_SUPPORTED_VERSION: Lazy<semver::Version> =
-    Lazy::new(|| semver::Version::from_str("0.31.2").expect("valid minimal supported version specified"));
+    Lazy::new(|| semver::Version::from_str("0.40.0").expect("valid minimal supported version specified"));
 
 static INTERPRETER_VERSION: Lazy<semver::Version> =
     Lazy::new(|| semver::Version::from_str(env!("CARGO_PKG_VERSION")).expect("invalid data format version specified"));

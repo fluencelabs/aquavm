@@ -21,7 +21,6 @@ use crate::preparation_step::PreparationDescriptor;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
-use air_interpreter_signatures::derive_dummy_keypair;
 use air_log_targets::RUN_PARAMS;
 use air_utils::measure;
 
@@ -56,13 +55,11 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
-    // TODO STUB this is a stub key that is to be replaced by external one in other PR
-    let (keypair, _) = derive_dummy_keypair(&params.current_peer_id);
-
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
+        keypair,
     } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
         Ok(descriptor) => descriptor,
         // return the prev data in case of errors

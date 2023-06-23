@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.13.0...air-interpreter-interface-v0.14.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+
+### Features
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-it-types to 0.4.1 ([#545](https://github.com/fluencelabs/aquavm/issues/545)) ([138501f](https://github.com/fluencelabs/aquavm/commit/138501fff91aaa4082351f65b0e493215b338fbf))
+
 ## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.12.1...air-interpreter-interface-v0.13.0) (2023-03-15)
 
 
