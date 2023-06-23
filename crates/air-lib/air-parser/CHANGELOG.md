@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.5](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.7.4...air-parser-v0.7.5) (2023-06-22)
+
+
+### Features
+
+* **execution-engine:** Stream Map initial support [fixes VM-283,VM-284] ([#592](https://github.com/fluencelabs/aquavm/issues/592)) ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+* **execution-engine:** StreamMap initial support for ap and new instructions [fixes VM-283,VM-284] ([9d7d34a](https://github.com/fluencelabs/aquavm/commit/9d7d34a452cb65e968ed68decc67f3bc523a5115))
+
 ## [0.7.4](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.7.3...air-parser-v0.7.4) (2023-03-15)
 
 

@@ -30,8 +30,7 @@ fn unprocessed_call_result() {
     );
 
     let result = client_vm
-        .runner
-        .call(air, prev_data, "", client_peer_id, 0, 0, None, call_results_4_call)
+        .call_single(air, prev_data, "", client_peer_id, 0, 0, None, call_results_4_call, "")
         .unwrap();
 
     let expected_call_service_result = air_interpreter_interface::CallServiceResult::ok(&json!("null"));

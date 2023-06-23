@@ -15,14 +15,17 @@
  */
 
 use crate::test_runner::AirRunner;
-use avm_server::avm_runner::*;
 
+use avm_server::avm_runner::*;
+use fluence_keypair::KeyPair;
 use once_cell::sync::OnceCell;
+
 use std::path::PathBuf;
 
 // 10 Mb
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
 const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
+const RELEASE_AIR_WASM_PATH: &str = "../target/wasm32-wasi/release/air_interpreter_server.wasm";
 
 pub struct WasmAirRunner {
     current_peer_id: String,
@@ -70,6 +73,8 @@ impl AirRunner for WasmAirRunner {
         ttl: u32,
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
+        keypair: &KeyPair,
+        particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
@@ -83,6 +88,63 @@ impl AirRunner for WasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
+            keypair,
+            particle_id,
+        )?)
+    }
+}
+
+/// WASM runner that runs release build form benchmarking.
+pub struct ReleaseWasmAirRunner {
+    current_peer_id: String,
+    // these instances are not cached, as benches create relatively small number of instances
+    runner: AVMRunner,
+}
+
+impl AirRunner for ReleaseWasmAirRunner {
+    fn new(current_peer_id: impl Into<String>) -> Self {
+        let logging_mask = i32::MAX;
+
+        let runner = AVMRunner::new(
+            PathBuf::from(RELEASE_AIR_WASM_PATH),
+            Some(AVM_MAX_HEAP_SIZE),
+            logging_mask,
+        )
+        .expect("vm should be created");
+
+        Self {
+            current_peer_id: current_peer_id.into(),
+            runner,
+        }
+    }
+
+    fn call(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        override_current_peer_id: Option<String>,
+        call_results: avm_server::CallResults,
+        keypair: &KeyPair,
+        particle_id: String,
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+        let current_peer_id =
+            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+
+        Ok(self.runner.call(
+            air,
+            prev_data,
+            data,
+            init_peer_id,
+            timestamp,
+            ttl,
+            current_peer_id,
+            call_results,
+            keypair,
+            particle_id,
         )?)
     }
 }

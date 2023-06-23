@@ -49,7 +49,7 @@ fn issue_331() {
         )
     "#);
 
-    let parameters = TestRunParameters::new(peer_id_1, 1, 1);
+    let parameters = TestRunParameters::new(peer_id_1, 1, 1, "");
     let result = call_vm!(peer_vm_1, parameters, &script, "", "");
     assert_eq!(result.ret_code, INTERPRETER_SUCCESS);
 }

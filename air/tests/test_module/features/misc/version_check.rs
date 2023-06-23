@@ -30,7 +30,7 @@ fn minimal_version_check() {
 
     let expected_error = PreparationError::UnsupportedInterpreterVersion {
         actual_version,
-        required_version: semver::Version::new(0, 31, 2),
+        required_version: semver::Version::new(0, 40, 0),
     };
 
     assert!(check_error(&result, expected_error));
@@ -42,12 +42,12 @@ fn publish_version_check() {
     let script = "(null)";
 
     let actual_version =
-        semver::Version::parse("0.36.2-feat-VM-173-add-interpreter-version-in-data-a2d575b-205-1.0").unwrap();
+        semver::Version::parse("0.40.2-feat-VM-173-add-interpreter-version-in-data-a2d575b-205-1.0").unwrap();
     let current_data = InterpreterData::new(actual_version);
     let current_data = serde_json::to_vec(&current_data).expect("default serializer shouldn't fail");
     let result = call_vm!(vm, <_>::default(), script, "", current_data);
 
-    assert_eq!(result.ret_code, INTERPRETER_SUCCESS);
+    assert_eq!(result.ret_code, INTERPRETER_SUCCESS, "{:?}", result.error_message);
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn publish_unsupported_version_check() {
 
     let expected_error = PreparationError::UnsupportedInterpreterVersion {
         actual_version,
-        required_version: semver::Version::new(0, 31, 2),
+        required_version: semver::Version::new(0, 40, 0),
     };
 
     assert!(check_error(&result, expected_error));

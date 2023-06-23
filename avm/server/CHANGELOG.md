@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.31.0...avm-server-v0.32.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+
+### Features
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-runtime to 0.26.1 ([#546](https://github.com/fluencelabs/aquavm/issues/546)) ([76d263b](https://github.com/fluencelabs/aquavm/commit/76d263b4c80d908ffc8da35fbca9a8862359e6d3))
+* **deps:** update rust crate marine-runtime to 0.26.3 ([#558](https://github.com/fluencelabs/aquavm/issues/558)) ([f5c61af](https://github.com/fluencelabs/aquavm/commit/f5c61af7e2da13cb189e3c47f262ac5ae09002a4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * air-utils bumped from 0.1.0 to 0.1.1
+    * avm-data-store bumped from 0.6.1 to 0.6.2
+    * avm-interface bumped from 0.28.3 to 0.28.4
+
 ## [0.31.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.30.1...avm-server-v0.31.0) (2023-03-15)
 
 

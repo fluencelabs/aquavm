@@ -61,6 +61,7 @@ class Bench:
         self.prev_data_path = discover_file(bench_path, "prev_data.json")
         self.cur_data_path = discover_file(bench_path, "cur_data.json")
         self.air_script_path = discover_file(bench_path, "script.air")
+        self.keypair = discover_file(bench_path, "keypair.ed25519")
         self.native = native
 
     def run(self, repeat, tracing_params):
@@ -81,6 +82,7 @@ class Bench:
                     "run",
                     "--json",
                     "--repeat", "1",
+                    "--ed25519-key", self.keypair,
                 ] + (
                     ["--native"] if self.native else []
                 ) + [

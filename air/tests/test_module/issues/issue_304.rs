@@ -33,7 +33,7 @@ fn issue_304() {
     "#;
 
     let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::simple(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
         .expect("invalid test AIR script");
 
     let res = executor.execute_one(init_peer_id).unwrap();
