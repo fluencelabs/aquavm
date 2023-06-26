@@ -78,9 +78,11 @@ fn test_scalar_cid() {
           (call "{vm_peer_name}" ("service" "call2") [] y) ; ok="ipld"
        )"#
     );
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_name), &annotated_air_script)
-            .unwrap();
+    let executor = AirScriptExecutor::from_annotated(
+        TestRunParameters::from_init_peer_id(vm_peer_name),
+        &annotated_air_script,
+    )
+    .unwrap();
 
     let result = executor.execute_one(vm_peer_name).unwrap();
     let data = data_from_result(&result);
@@ -123,9 +125,11 @@ fn test_stream_cid() {
           (call "{vm_peer_name}" ("service" "call2") [] $x) ; ok="ipld"
        )"#
     );
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_name), &annotated_air_script)
-            .unwrap();
+    let executor = AirScriptExecutor::from_annotated(
+        TestRunParameters::from_init_peer_id(vm_peer_name),
+        &annotated_air_script,
+    )
+    .unwrap();
 
     let result = executor.execute_one(vm_peer_name).unwrap();
     let data = data_from_result(&result);

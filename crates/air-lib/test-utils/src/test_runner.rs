@@ -181,7 +181,10 @@ pub fn create_custom_avm<R: AirRunner>(
     }
 }
 
-pub fn create_avm_with_key<R: AirRunner>(keypair: KeyPair, call_service: CallServiceClosure) -> TestRunner<R> {
+pub fn create_avm_with_key<R: AirRunner>(
+    keypair: KeyPair,
+    call_service: CallServiceClosure,
+) -> TestRunner<R> {
     let current_peer_id = keypair.public().to_peer_id().to_string();
     let runner = R::new(current_peer_id);
 

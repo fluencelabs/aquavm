@@ -114,7 +114,8 @@ fn test_canon_ok_multi() {
     )"#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
+    let executor =
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
     let _result1 = executor.execute_one(init_peer_name).unwrap();
     let _result2 = executor.execute_one(other_peer_name).unwrap();
     let result3 = executor.execute_one(init_peer_name).unwrap();

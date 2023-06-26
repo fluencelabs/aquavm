@@ -31,7 +31,7 @@ fn length_functor_for_array_scalar() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
@@ -55,7 +55,7 @@ fn length_functor_for_non_array_scalar() {
         )
         "#);
 
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
         .expect("invalid test AIR script");
 
@@ -80,7 +80,7 @@ fn length_functor_for_stream() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 

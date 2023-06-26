@@ -24,7 +24,9 @@ use crate::{
 
 use air_test_utils::{
     key_utils::derive_dummy_keypair,
-    test_runner::{create_avm_with_key, TestRunParameters, TestRunner, AirRunner, DefaultAirRunner},
+    test_runner::{
+        create_avm_with_key, AirRunner, DefaultAirRunner, TestRunParameters, TestRunner,
+    },
     RawAVMOutcome,
 };
 use fluence_keypair::KeyPair;
@@ -290,7 +292,7 @@ impl<R: AirRunner> Network<R> {
         peers_ref.get(peer_id).cloned()
     }
 
-    pub fn get_named_peer_env<Id>(&self, peer_name: &Id) -> Option<Rc<RefCell<PeerEnv>>>
+    pub fn get_named_peer_env<Id>(&self, peer_name: &Id) -> Option<Rc<RefCell<PeerEnv<R>>>>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Hash + Eq + ?Sized,

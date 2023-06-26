@@ -226,8 +226,8 @@ impl<'a, R: AirRunner> IntoIterator for &'a PeerEnv<R> {
 mod tests {
     use super::*;
 
-    use air_test_utils::prelude::*;
     use air_test_utils::key_utils::derive_dummy_keypair;
+    use air_test_utils::prelude::*;
 
     use std::{iter::FromIterator, rc::Rc};
 
