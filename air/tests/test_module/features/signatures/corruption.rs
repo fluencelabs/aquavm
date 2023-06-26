@@ -15,6 +15,7 @@
  */
 
 use air::ExecutionCidState;
+use air::PreparationError;
 use air_interpreter_signatures::CidTracker as _;
 use air_interpreter_signatures::FullSignatureStore;
 use air_interpreter_signatures::PeerCidTracker;
@@ -90,13 +91,12 @@ fn test_attack_replace_value() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "serde_json::value::Value" store"#,
-            r#" for CID "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "serde_json::value::Value",
+            cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".to_owned(),
+        })
     );
 }
 
@@ -166,13 +166,12 @@ fn test_attack_replace_tetraplet() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "polyplets::tetraplet::SecurityTetraplet" store"#,
-            r#" for CID "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "polyplets::tetraplet::SecurityTetraplet",
+            cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".to_owned(),
+        })
     );
 }
 
@@ -249,13 +248,12 @@ fn test_attack_replace_call_result() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "air_interpreter_data::executed_state::ServiceResultCidAggregate" store"#,
-            r#" for CID "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
+            cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".to_owned(),
+        })
     );
 }
 
@@ -339,13 +337,12 @@ fn test_attack_replace_canon_value() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "air_interpreter_data::executed_state::CanonCidAggregate" store"#,
-            r#" for CID "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
+            cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".to_owned(),
+        })
     );
 }
 
@@ -438,13 +435,12 @@ fn test_attack_replace_canon_result_values() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "air_interpreter_data::executed_state::CanonResultCidAggregate" store"#,
-            r#" for CID "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
+            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".to_owned(),
+        })
     );
 }
 
@@ -541,12 +537,11 @@ fn test_attack_replace_canon_result_tetraplet() {
     let cur_data = serde_json::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
-    assert_eq!(res.ret_code, 6, "{}", res.error_message);
-    assert_eq!(
-        res.error_message,
-        concat!(
-            r#"Value mismatch in the "air_interpreter_data::executed_state::CanonResultCidAggregate" store"#,
-            r#" for CID "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq""#
-        )
+    assert_error_eq!(
+        &res,
+        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
+            type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
+            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".to_owned(),
+        })
     );
 }
