@@ -140,7 +140,7 @@ dependencies = [
  "codespan-reporting",
  "itertools",
  "lalrpop",
- "lalrpop-util 0.19.12",
+ "lalrpop-util",
  "multimap 0.9.0",
  "regex",
  "serde",
@@ -375,7 +375,7 @@ dependencies = [
  "fstrings",
  "itertools",
  "lalrpop",
- "lalrpop-util 0.19.12",
+ "lalrpop-util",
  "multimap 0.9.0",
  "non-empty-vec",
  "regex",
@@ -2036,7 +2036,7 @@ dependencies = [
  "ena",
  "is-terminal",
  "itertools",
- "lalrpop-util 0.20.0",
+ "lalrpop-util",
  "petgraph",
  "pico-args",
  "regex",
@@ -2046,12 +2046,6 @@ dependencies = [
  "tiny-keccak",
  "unicode-xid",
 ]
-
-[[package]]
-name = "lalrpop-util"
-version = "0.19.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3c48237b9604c5a4702de6b824e02006c3214327564636aef27c1028a8fa0ed"
 
 [[package]]
 name = "lalrpop-util"
