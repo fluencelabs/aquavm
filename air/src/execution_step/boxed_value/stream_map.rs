@@ -21,7 +21,6 @@ use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
 use air_interpreter_data::GenerationIdx;
-use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
@@ -33,14 +32,12 @@ fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
 
 #[derive(Debug, Default, Clone)]
 pub struct StreamMap {
-    stream: Stream,
+    stream: Stream<ValueAggregate>,
 }
 
 impl StreamMap {
-    pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
-        Self {
-            stream: Stream::from_generations_count(previous_count, current_count),
-        }
+    pub(crate) fn new() -> Self {
+        Self { stream: Stream::new() }
     }
 
     pub(crate) fn from_value(key: StreamMapKey<'_>, value: &ValueAggregate) -> Self {
@@ -56,13 +53,7 @@ impl StreamMap {
         }
     }
 
-    pub(crate) fn insert(
-        &mut self,
-        key: StreamMapKey<'_>,
-        value: &ValueAggregate,
-        generation: Generation,
-        source: ValueSource,
-    ) -> ExecutionResult<GenerationIdx> {
+    pub(crate) fn insert(&mut self, key: StreamMapKey<'_>, value: &ValueAggregate, generation: Generation) {
         let obj = from_key_value(key, value.get_result());
         let value = ValueAggregate::new(
             obj,
@@ -70,14 +61,14 @@ impl StreamMap {
             value.get_trace_pos(),
             value.get_provenance(),
         );
-        self.stream.add_value(value, generation, source)
+        self.stream.add_value(value, generation)
     }
 
-    pub(crate) fn compactify(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<GenerationIdx> {
+    pub(crate) fn compactify(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         self.stream.compactify(trace_ctx)
     }
 
-    pub(crate) fn get_mut_stream_ref(&mut self) -> &mut Stream {
+    pub(crate) fn get_mut_stream_ref(&mut self) -> &mut Stream<ValueAggregate> {
         &mut self.stream
     }
 }

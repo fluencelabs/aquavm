@@ -90,26 +90,15 @@ fn populate_outcome_from_contexts(
     error_message: String,
     keypair: &KeyPair,
 ) -> InterpreterOutcome {
-    let maybe_gens = exec_ctx
-        .streams
-        .into_streams_data(&mut trace_handler)
-        .map_err(execution_error_into_outcome);
-    let (global_streams, restricted_streams) = match maybe_gens {
-        Ok(gens) => gens,
-        Err(outcome) => return outcome,
-    };
-
     let current_signature = exec_ctx
         .signature_tracker
         .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
-        .expect("siging shouldn't fail");
+        .expect("signing shouldn't fail");
     let current_pubkey = keypair.public();
     exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
 
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
-        global_streams,
-        restricted_streams,
         exec_ctx.cid_state.into(),
         exec_ctx.signature_store,
         exec_ctx.last_call_request_id,

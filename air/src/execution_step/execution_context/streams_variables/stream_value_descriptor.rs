@@ -18,28 +18,19 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 
 use air_parser::AirPos;
-use air_trace_handler::merger::ValueSource;
 
 pub(crate) struct StreamValueDescriptor<'stream_name> {
     pub value: ValueAggregate,
     pub name: &'stream_name str,
-    pub source: ValueSource,
     pub generation: Generation,
     pub position: AirPos,
 }
 
 impl<'stream_name> StreamValueDescriptor<'stream_name> {
-    pub fn new(
-        value: ValueAggregate,
-        name: &'stream_name str,
-        source: ValueSource,
-        generation: Generation,
-        position: AirPos,
-    ) -> Self {
+    pub fn new(value: ValueAggregate, name: &'stream_name str, generation: Generation, position: AirPos) -> Self {
         Self {
             value,
             name,
-            source,
             generation,
             position,
         }

@@ -24,8 +24,6 @@ use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GenerationIdx;
-use air_interpreter_data::RestrictedStreamGens;
-use air_interpreter_data::RestrictedStreamMapGens;
 use air_parser::ast::Span;
 use air_parser::AirPos;
 use air_trace_handler::merger::ValueSource;

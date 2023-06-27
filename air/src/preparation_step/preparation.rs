@@ -49,17 +49,13 @@ pub(crate) fn prepare<'i>(
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
     let prev_ingredients = ExecCtxIngredients {
-        global_streams: prev_data.global_streams,
         last_call_request_id: prev_data.last_call_request_id,
-        restricted_streams: prev_data.restricted_streams,
         cid_info: prev_data.cid_info,
         signature_store: prev_data.signatures,
     };
 
     let current_ingredients = ExecCtxIngredients {
-        global_streams: current_data.global_streams,
         last_call_request_id: current_data.last_call_request_id,
-        restricted_streams: current_data.restricted_streams,
         cid_info: current_data.cid_info,
         signature_store: current_data.signatures,
     };
