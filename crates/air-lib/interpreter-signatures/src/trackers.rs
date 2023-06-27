@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::SaltedData;
+
 use air_interpreter_cid::CID;
 use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
@@ -93,8 +95,8 @@ pub fn sign_cids(
     // TODO make pluggable serialization
     // TODO it will be useful for CID too
     // TODO please note that using serde::Serializer is not enough
-    let serialized_cids =
-        serde_json::to_string(&(&cids, particle_id)).expect("default serialization shouldn't fail");
+    let serialized_cids = serde_json::to_string(&SaltedData::new(&cids, particle_id))
+        .expect("default serialization shouldn't fail");
 
     keypair
         .sign(serialized_cids.as_bytes())

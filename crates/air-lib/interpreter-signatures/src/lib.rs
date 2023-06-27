@@ -60,7 +60,7 @@ impl PublicKey {
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value = serde_json::to_vec(&(value, particle_id))
+        let serialized_value = serde_json::to_vec(&SaltedData::new(&value, particle_id))
             .expect("default serialization shouldn't fail");
 
         pk.verify(&serialized_value, signature)
@@ -124,5 +124,14 @@ impl From<fluence_keypair::Signature> for Signature {
 impl From<Signature> for fluence_keypair::Signature {
     fn from(value: Signature) -> Self {
         value.0
+    }
+}
+
+#[derive(Serialize)]
+pub(crate) struct SaltedData<'ctx, Data>(&'ctx Data, &'ctx str);
+
+impl<'ctx, Data: Serialize> SaltedData<'ctx, Data> {
+    pub(crate) fn new(data: &'ctx Data, particle_id: &'ctx str) -> Self {
+        Self(data, particle_id)
     }
 }
