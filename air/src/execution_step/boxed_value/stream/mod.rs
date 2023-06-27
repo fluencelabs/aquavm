@@ -16,5 +16,8 @@
 
 mod recursive_stream;
 mod stream_definition;
-mod values_matrix;
+pub(self) mod values_matrix;
 
+pub(crate) use stream_definition::Generation;
+pub(crate) use stream_definition::Stream;
+pub(crate) use recursive_stream::RecursiveStream;

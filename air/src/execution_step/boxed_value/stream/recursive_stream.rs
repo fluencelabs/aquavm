@@ -14,40 +14,45 @@
  * limitations under the License.
  */
 
-pub struct RecursiveStream<'stream, T> {
-    stream: &'stream Stream<T>,
-    last_new_generation: GenerationIdx,
-}
+use super::Stream;
+use crate::execution_step::boxed_value::Iterable;
+use crate::execution_step::boxed_value::IterableItem;
+use crate::execution_step::boxed_value::IterableVecResolvedCall;
+
+use air_interpreter_data::GenerationIdx;
+
+pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
+
+pub(crate) struct RecursiveStream;
 
 pub(crate) enum IterationResult {
     Stop,
     Continue,
 }
 
-impl<'stream, T> RecursiveStream<'stream, T> {
-    pub fn new(stream: &'stream Stream<T>) -> Self {
-        let last_new_generation = stream.new_values.values.len();
-        let last_new_generation = last_new_generation.into();
-
-        Self {
-            stream,
-            last_new_generation,
-        }
+impl<T> RecursiveStream {
+    pub fn fold_started(stream: &mut Stream<T>) -> Vec<IterableItem> {
+        stream.new_values().add_new_generation();
+        Self::slice_iter_to_iterable(stream.slice_iter())
     }
 
-    pub fn iteration_start_met(&mut self) {
-        self.stream.new_values.values.push(vec![]);
-
-        let last_new_generation = self.stream.new_values.values.len();
-        self.last_new_generation = last_new_generation.into();
-    }
-
-    pub fn iteration_end_met(&mut self) -> IterationResult {
-        if self.stream.new_values.values[self.last_new_generation].is_empty() {
-            self.stream.new_values.values.pop();
-            return IterationResult::Stop;
+    pub fn next_iteration(stream: &mut Stream<T>) -> Vec<IterableItem> {
+        let new_values = stream.new_values();
+        let new_values_since_last_visit = Self::slice_iter_to_iterable(new_values);
+        if new_values_since_last_visit.is_empty() {
+            new_values.remove_last_generation();
         }
 
-        IterationResult::Continue
+        new_values_since_last_visit
+    }
+
+    fn slice_iter_to_iterable(iter: impl Iterator<Item = &[T]>) -> Vec<IterableItem> {
+        iter
+            .map(|iterable| {
+                let foldable = IterableVecResolvedCall::init(iterable.to_vec());
+                let foldable: IterableValue = Box::new(foldable);
+                foldable
+            })
+            .collect::<Vec<_>>()
     }
 }
