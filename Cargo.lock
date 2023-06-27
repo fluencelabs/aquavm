@@ -323,6 +323,7 @@ dependencies = [
  "concat-idents",
  "criterion 0.3.6",
  "csv",
+ "ed25519-dalek",
  "env_logger 0.7.1",
  "fluence-app-service",
  "fluence-keypair",

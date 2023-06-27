@@ -102,7 +102,7 @@ jobs:
           RUST_TEST_THREADS: 1
         run: |
           # Temporary solution until signatures works: it depends on other PRs
-          cargo test --features test_with_native_code,check_signatures --target x86_64-unknown-linux-gnu signatures
+          cargo test --features test_with_native_code,sign_cids,check_signatures --target x86_64-unknown-linux-gnu features::signatures
 
       - name: Run cargo fmt
         run: cargo fmt --all -- --check

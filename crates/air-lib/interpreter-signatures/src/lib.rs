@@ -55,12 +55,13 @@ impl PublicKey {
     pub fn verify<T: Serialize + ?Sized>(
         &self,
         value: &T,
+        particle_id: &str,
         signature: &fluence_keypair::Signature,
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value =
-            serde_json::to_vec(value).expect("default serialization shouldn't fail");
+        let serialized_value = serde_json::to_vec(&(value, particle_id))
+            .expect("default serialization shouldn't fail");
 
         pk.verify(&serialized_value, signature)
     }

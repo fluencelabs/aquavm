@@ -53,12 +53,16 @@ pub enum DataVerifierError {
 
 pub struct DataVerifier<'data> {
     grouped_cids: HashMap<Box<str>, PeerInfo<'data>>,
+    particle_id: &'data str,
 }
 
 impl<'data> DataVerifier<'data> {
     // it can be further optimized if only required parts are passed
     // SignatureStore is not used elsewhere
-    pub fn new(data: &'data InterpreterData) -> Result<Self, DataVerifierError> {
+    pub fn new(
+        data: &'data InterpreterData,
+        particle_id: &'data str,
+    ) -> Result<Self, DataVerifierError> {
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error
         let mut grouped_cids: HashMap<Box<str>, PeerInfo<'data>> = data
             .signatures
@@ -78,14 +82,17 @@ impl<'data> DataVerifier<'data> {
             peer_info.cids.sort_unstable();
         }
 
-        Ok(Self { grouped_cids })
+        Ok(Self {
+            grouped_cids,
+            particle_id,
+        })
     }
 
     pub fn verify(&self) -> Result<(), DataVerifierError> {
         for peer_info in self.grouped_cids.values() {
             peer_info
                 .public_key
-                .verify(&peer_info.cids, peer_info.signature)
+                .verify(&peer_info.cids, self.particle_id, peer_info.signature)
                 .map_err(|error| DataVerifierError::SignatureMismatch {
                     error,
                     cids: peer_info.cids.clone(),

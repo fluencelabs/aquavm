@@ -27,7 +27,11 @@ pub trait CidTracker {
 
     fn register<T>(&mut self, peer: &str, cid: &CID<T>);
 
-    fn gen_signature(&self, keypair: &KeyPair) -> Result<Self::Signature, SigningError>;
+    fn gen_signature(
+        &self,
+        particle_id: &str,
+        keypair: &KeyPair,
+    ) -> Result<Self::Signature, SigningError>;
 }
 
 /// The tracker that collect current peer's CIDs only.
@@ -53,8 +57,12 @@ impl CidTracker for PeerCidTracker {
         }
     }
 
-    fn gen_signature(&self, keypair: &KeyPair) -> Result<Self::Signature, SigningError> {
-        sign_cids(self.cids.clone(), keypair)
+    fn gen_signature(
+        &self,
+        particle_id: &str,
+        keypair: &KeyPair,
+    ) -> Result<Self::Signature, SigningError> {
+        sign_cids(self.cids.clone(), particle_id, keypair)
     }
 }
 
@@ -70,13 +78,14 @@ impl CidTracker for NullCidTracker {
 
     fn register<T>(&mut self, _peer: &str, _cid: &CID<T>) {}
 
-    fn gen_signature(&self, _keypair: &KeyPair) -> Result<(), SigningError> {
+    fn gen_signature(&self, _partcle_id: &str, _keypair: &KeyPair) -> Result<(), SigningError> {
         Ok(())
     }
 }
 
 pub fn sign_cids(
     mut cids: Vec<Box<str>>,
+    particle_id: &str,
     keypair: &KeyPair,
 ) -> Result<crate::Signature, SigningError> {
     cids.sort_unstable();
@@ -85,7 +94,7 @@ pub fn sign_cids(
     // TODO it will be useful for CID too
     // TODO please note that using serde::Serializer is not enough
     let serialized_cids =
-        serde_json::to_string(&cids).expect("default serialization shouldn't fail");
+        serde_json::to_string(&(&cids, particle_id)).expect("default serialization shouldn't fail");
 
     keypair
         .sign(serialized_cids.as_bytes())

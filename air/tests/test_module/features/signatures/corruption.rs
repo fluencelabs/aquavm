@@ -67,12 +67,12 @@ fn test_attack_replace_value() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(
@@ -142,12 +142,12 @@ fn test_attack_replace_tetraplet() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(
@@ -224,12 +224,12 @@ fn test_attack_replace_call_result() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(
@@ -313,12 +313,12 @@ fn test_attack_replace_canon_value() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[3]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(
@@ -411,12 +411,12 @@ fn test_attack_replace_canon_result_values() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[3]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(
@@ -513,12 +513,12 @@ fn test_attack_replace_canon_result_tetraplet() {
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));
-    let alice_signature = alice_cid_tracker.gen_signature(&alice_keypair).unwrap();
+    let alice_signature = alice_cid_tracker.gen_signature("", &alice_keypair).unwrap();
     signature_store.put(alice_pk, alice_signature);
 
     let mut mallory_cid_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[3]));
-    let mallory_signature = mallory_cid_tracker.gen_signature(&mallory_keypair).unwrap();
+    let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
     let mallory_data = InterpreterData::from_execution_result(

@@ -68,7 +68,8 @@ fn execute_air_impl(
         Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
     };
 
-    let signature_store = match verify(&prev_data, &current_data) {
+    let particle_id = params.particle_id.clone();
+    let signature_store = match verify(&prev_data, &current_data, &particle_id) {
         Ok(signature_store) => signature_store,
         // return the prev data in case of errors
         Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
@@ -100,7 +101,12 @@ fn execute_air_impl(
         "execute",
     );
 
-    match sign_produced_cids(&mut exec_ctx.signature_tracker, &mut exec_ctx.signature_store, &keypair) {
+    match sign_produced_cids(
+        &mut exec_ctx.signature_tracker,
+        &mut exec_ctx.signature_store,
+        &particle_id,
+        &keypair,
+    ) {
         Ok(()) => {}
         Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
     }

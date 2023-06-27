@@ -231,6 +231,11 @@ impl TestRunParameters {
             ..<_>::default()
         }
     }
+
+    pub fn with_particle_id(mut self, particle_id: impl Into<String>) -> Self {
+        self.particle_id = particle_id.into();
+        self
+    }
 }
 
 #[cfg(test)]

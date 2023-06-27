@@ -183,6 +183,7 @@ use std::fmt::Formatter;
 pub(crate) struct RcRunParameters {
     pub(crate) init_peer_id: Rc<str>,
     pub(crate) current_peer_id: Rc<String>,
+    pub(crate) particle_id: Rc<str>,
     pub(crate) timestamp: u64,
     pub(crate) ttl: u32,
 }
@@ -192,12 +193,14 @@ impl RcRunParameters {
         Self {
             init_peer_id: run_parameters.init_peer_id.as_str().into(),
             current_peer_id: Rc::new(run_parameters.current_peer_id.clone()),
+            particle_id: run_parameters.particle_id.as_str().into(),
             timestamp: run_parameters.timestamp,
             ttl: run_parameters.ttl,
         }
     }
 }
 
+/*
 impl Default for RcRunParameters {
     fn default() -> Self {
         Self {
@@ -208,6 +211,7 @@ impl Default for RcRunParameters {
         }
     }
 }
+*/
 
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

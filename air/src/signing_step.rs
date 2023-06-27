@@ -23,13 +23,14 @@ use air_interpreter_signatures::{FullSignatureStore, PeerCidTracker};
 pub(crate) fn sign_produced_cids(
     signature_tracker: &mut PeerCidTracker,
     signature_store: &mut FullSignatureStore,
+    particle_id: &str,
     keypair: &fluence_keypair::KeyPair,
 ) -> Result<(), ExecutionError> {
     use crate::UncatchableError;
     use air_interpreter_signatures::CidTracker as _;
 
     let signature = signature_tracker
-        .gen_signature(keypair)
+        .gen_signature(particle_id, keypair)
         .map_err(UncatchableError::SigningError)?;
     let public_key = keypair.public().into();
     signature_store.put(public_key, signature);
@@ -40,6 +41,7 @@ pub(crate) fn sign_produced_cids(
 pub(crate) fn sign_produced_cids(
     _signature_tracker: &mut PeerCidTracker,
     _signature_store: &mut FullSignatureStore,
+    _particle_id: &str,
     _keypair: &fluence_keypair::KeyPair,
 ) -> Result<(), ExecutionError> {
     Ok(())
