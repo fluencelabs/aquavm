@@ -19,7 +19,7 @@ use fluence_keypair::KeyFormat;
 use fluence_keypair::KeyPair;
 
 #[test]
-fn canon_generates_hope() {
+fn canon_generates_hop() {
     let client_peer_id = "client";
     let mut client_vm = create_avm(unit_call_service(), client_peer_id);
 

@@ -24,4 +24,4 @@ mod scopes;
 mod signatures;
 mod streams;
 mod tetraplets;
-mod topology_hopes;
+mod topology_hops;
