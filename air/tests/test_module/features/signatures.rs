@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "check_signatures")]
 mod attacks;
+#[cfg(feature = "check_signatures")]
 mod corruption;
-#[cfg(feature = "sign_cids")]
+#[cfg(feature = "gen_signatures")]
 mod signing;

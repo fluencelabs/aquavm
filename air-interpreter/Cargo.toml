@@ -37,4 +37,4 @@ tracing-subscriber = { version = "0.3.17", default-features = false, features = 
 # indicates that this library should be compiled for the marine target,
 # otherwise it will be compiled for the wasm bindgen target
 marine = []
-sign_cids = ["aquavm-air/sign_cids"]
+gen_signatures = ["aquavm-air/gen_signatures"]

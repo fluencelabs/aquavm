@@ -19,7 +19,7 @@ use crate::ExecutionError;
 // TODO rename to SigningTracker
 use air_interpreter_signatures::{FullSignatureStore, PeerCidTracker};
 
-#[cfg(feature = "sign_cids")]
+#[cfg(feature = "gen_signatures")]
 pub(crate) fn sign_produced_cids(
     signature_tracker: &mut PeerCidTracker,
     signature_store: &mut FullSignatureStore,
@@ -37,7 +37,7 @@ pub(crate) fn sign_produced_cids(
     Ok(())
 }
 
-#[cfg(not(feature = "sign_cids"))]
+#[cfg(not(feature = "gen_signatures"))]
 pub(crate) fn sign_produced_cids(
     _signature_tracker: &mut PeerCidTracker,
     _signature_store: &mut FullSignatureStore,
