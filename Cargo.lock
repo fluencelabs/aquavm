@@ -169,7 +169,7 @@ dependencies = [
  "marine-rs-sdk",
  "object-pool",
  "once_cell",
- "rand_chacha 0.2.2",
+ "rand_chacha 0.3.1",
  "semver 1.0.17",
  "serde",
  "serde_json",

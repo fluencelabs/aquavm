@@ -32,7 +32,7 @@ serde = { version = "1.0.159", features = ["derive"] }
 fluence-keypair = "0.10.1"
 
 ed25519-dalek = "1.0.1"
-rand_chacha = "0.2.2"
+rand_chacha = "0.3.1"
 sha2 = "0.10.6"
 
 [dev-dependencies]
