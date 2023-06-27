@@ -15,7 +15,7 @@ name = "air_lambda_parser"
 path = "src/lib.rs"
 
 [build-dependencies]
-lalrpop = "0.19.12"
+lalrpop = "0.20.0"
 
 [dependencies]
 air-lambda-ast = { version = "0.1.0", path = "../ast" }
