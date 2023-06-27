@@ -18,9 +18,13 @@ use once_cell::sync::Lazy;
 
 use std::str::FromStr;
 
-static MINIMAL_SUPPORTED_VERSION: Lazy<semver::Version> =
+/// Minimal supported interpreter version, should be updated according to
+/// [./docs/update-guide.md]
+static MINIMAL_INTERPRETER_VERSION: Lazy<semver::Version> =
     Lazy::new(|| semver::Version::from_str("0.40.0").expect("valid minimal supported version specified"));
 
+/// Current interpreter version, more info in
+/// [./docs/update-guide.md]
 static INTERPRETER_VERSION: Lazy<semver::Version> =
     Lazy::new(|| semver::Version::from_str(env!("CARGO_PKG_VERSION")).expect("invalid data format version specified"));
 
@@ -29,7 +33,7 @@ thread_local!(static _MINIMAL_SUPPORTED_VERSION_CHECK: &'static semver::Version 
 
 /// Returns a minimal support version by this interpreter.
 pub fn min_supported_version() -> &'static semver::Version {
-    Lazy::force(&MINIMAL_SUPPORTED_VERSION)
+    Lazy::force(&MINIMAL_INTERPRETER_VERSION)
 }
 
 /// Returns a current interpreter version.
