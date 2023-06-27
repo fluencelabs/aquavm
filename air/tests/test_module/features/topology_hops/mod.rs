@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,5 @@
  * limitations under the License.
  */
 
-mod cid;
-mod data_merging;
-mod errors;
-mod join_behaviour;
-mod lambda;
-mod misc;
-mod scopes;
-mod signatures;
-mod streams;
-mod tetraplets;
-mod topology_hops;
+mod call_guided_topology;
+mod canon_guided_topology;
