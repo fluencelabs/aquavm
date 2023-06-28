@@ -58,3 +58,22 @@ fn canon_with_variable_peer_id() {
 
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn canon_with_stream_map() {
+    let peer_id = "peer_id";
+    let stream_map = "%stream_map";
+    let scalar = "scalar";
+    let source_code = f!(r#"
+        (canon {peer_id} {stream_map} {scalar})
+    "#);
+
+    let actual = parse(&source_code);
+    let expected = canon_stream_map_scalar(
+        ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
+        StreamMap::new(stream_map, 24.into()),
+        Scalar::new(scalar, 36.into()),
+    );
+
+    assert_eq!(actual, expected, "{:#?} {:#?}", actual, expected);
+}

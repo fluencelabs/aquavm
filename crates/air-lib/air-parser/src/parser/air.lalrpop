@@ -34,6 +34,15 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Canon(canon))
     },
 
+    <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <scalar_pair:Scalar> ")" <right: @R> => {
+        let scalar = Scalar::new(scalar_pair.0, scalar_pair.1);
+        let canon = CanonStreamMapScalar::new(peer_id, stream_map, scalar);
+
+        let span = Span::new(left, right);
+        validator.met_canon_map_scalar(&canon, span);
+
+        Box::new(Instruction::CanonStreamMapScalar(canon))
+    },
 
     <left: @L> "(" ap <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
         let apply = Ap::new(arg, result);
@@ -251,6 +260,10 @@ ApArgument: ApArgument<'input> = {
 
 StreamArgument: Stream<'input> = {
     <stream:Stream> => Stream::new(stream.0, stream.1),
+}
+
+StreamMapArgument: StreamMap<'input> = {
+    <stream_map:StreamMap> => StreamMap::new(stream_map.0, stream_map.1),
 }
 
 CanonStreamArgument: CanonStream<'input> = {
