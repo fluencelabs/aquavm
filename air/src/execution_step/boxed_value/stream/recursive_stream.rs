@@ -18,27 +18,27 @@ use super::Stream;
 use crate::execution_step::boxed_value::Iterable;
 use crate::execution_step::boxed_value::IterableItem;
 use crate::execution_step::boxed_value::IterableVecResolvedCall;
-
-use air_interpreter_data::GenerationIdx;
+use crate::execution_step::ValueAggregate;
 
 pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
 pub(crate) struct RecursiveStream;
 
-pub(crate) enum IterationResult {
-    Stop,
-    Continue,
-}
+impl RecursiveStream {
+    pub fn fold_started(stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
+        let iterable = Self::slice_iter_to_iterable(stream.slice_iter());
+        if !iterable.is_empty() {
+            // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
+            // write operation to this stream to write to this new generation
+            stream.new_values().add_new_generation();
+        }
 
-impl<T> RecursiveStream {
-    pub fn fold_started(stream: &mut Stream<T>) -> Vec<IterableItem> {
-        stream.new_values().add_new_generation();
-        Self::slice_iter_to_iterable(stream.slice_iter())
+        iterable
     }
 
-    pub fn next_iteration(stream: &mut Stream<T>) -> Vec<IterableItem> {
+    pub fn next_iteration(stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
         let new_values = stream.new_values();
-        let new_values_since_last_visit = Self::slice_iter_to_iterable(new_values);
+        let new_values_since_last_visit = Self::slice_iter_to_iterable(new_values.slice_iter());
         if new_values_since_last_visit.is_empty() {
             new_values.remove_last_generation();
         }
@@ -46,13 +46,12 @@ impl<T> RecursiveStream {
         new_values_since_last_visit
     }
 
-    fn slice_iter_to_iterable(iter: impl Iterator<Item = &[T]>) -> Vec<IterableItem> {
-        iter
-            .map(|iterable| {
-                let foldable = IterableVecResolvedCall::init(iterable.to_vec());
-                let foldable: IterableValue = Box::new(foldable);
-                foldable
-            })
-            .collect::<Vec<_>>()
+    fn slice_iter_to_iterable<'value>(iter: impl Iterator<Item = &'value [ValueAggregate]>) -> Vec<IterableValue> {
+        iter.map(|iterable| {
+            let foldable = IterableVecResolvedCall::init(iterable.to_vec());
+            let foldable: IterableValue = Box::new(foldable);
+            foldable
+        })
+        .collect::<Vec<_>>()
     }
 }

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-use super::stream::*;
+use super::Generation;
+use super::Stream;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
-use air_interpreter_data::GenerationIdx;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
@@ -30,9 +31,9 @@ fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
     Rc::new(json!({ "key": key, "value": value }))
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct StreamMap {
-    stream: Stream<ValueAggregate>,
+    stream: Stream,
 }
 
 impl StreamMap {
@@ -49,7 +50,7 @@ impl StreamMap {
             value.get_provenance(),
         );
         Self {
-            stream: Stream::from_value(value),
+            stream: Stream::from_new_value(value),
         }
     }
 
@@ -68,7 +69,7 @@ impl StreamMap {
         self.stream.compactify(trace_ctx)
     }
 
-    pub(crate) fn get_mut_stream_ref(&mut self) -> &mut Stream<ValueAggregate> {
+    pub(crate) fn get_mut_stream_ref(&mut self) -> &mut Stream {
         &mut self.stream
     }
 }

@@ -16,6 +16,7 @@
 
 use super::values_matrix::NewValuesMatrix;
 use super::values_matrix::ValuesMatrix;
+use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 
 use air_interpreter_data::GenerationIdx;
@@ -24,7 +25,7 @@ use air_trace_handler::TraceHandler;
 /// Streams are CRDT-like append only data structures. They are guaranteed to have locally
 /// the same order of values on each peer.
 #[derive(Debug, Default, Clone)]
-pub(crate) struct Stream<T> {
+pub struct Stream<T> {
     /// Values from previous data.
     previous_values: ValuesMatrix<T>,
 
@@ -35,7 +36,7 @@ pub(crate) struct Stream<T> {
     new_values: NewValuesMatrix<T>,
 }
 
-impl<T> Stream<T> {
+impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
     pub(crate) fn new() -> Self {
         Self {
             previous_values: ValuesMatrix::new(),
@@ -60,13 +61,15 @@ impl<T> Stream<T> {
         }
     }
 
+    /*
     pub(crate) fn is_empty(&self) -> bool {
-        let is_prev_empty = self.previous_values.iter().all(|v| v.is_empty());
-        let is_curr_empty = self.current_values.iter().all(|v| v.is_empty());
-        let is_new_empty = self.new_values.iter().all(|v| v.is_empty());
+        let is_prev_empty = self.previous_values.slice_iter().all(|v| v.is_empty());
+        let is_curr_empty = self.current_values.slice_iter().all(|v| v.is_empty());
+        let is_new_empty = self.new_values.slice_iter().all(|v| v.is_empty());
 
         is_prev_empty && is_curr_empty && is_new_empty
     }
+     */
 
     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
         self.previous_values
@@ -90,13 +93,13 @@ impl<T> Stream<T> {
         self.new_values.remove_empty_generations();
 
         let start_idx = 0.into();
-        Self::update_generations(&self.previous_values, start_idx, trace_ctx)?;
+        Self::update_generations(self.previous_values.slice_iter(), start_idx, trace_ctx)?;
 
         let start_idx = self.previous_values.len();
-        Self::update_generations(&self.current_values, start_idx, trace_ctx)?;
+        Self::update_generations(self.current_values.slice_iter(), start_idx, trace_ctx)?;
 
         let start_idx = start_idx.checked_add(self.current_values.len()).unwrap();
-        Self::update_generations(&self.new_values, start_idx, trace_ctx)?;
+        Self::update_generations(self.new_values.slice_iter(), start_idx, trace_ctx)?;
 
         Ok(())
     }
@@ -106,7 +109,7 @@ impl<T> Stream<T> {
     }
 
     fn update_generations(
-        values: impl Iterator<Item = &T>,
+        values: impl Iterator<Item = &'value [T]>,
         start_idx: GenerationIdx,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<()> {
@@ -126,8 +129,11 @@ impl<T> Stream<T> {
     }
 }
 
+use air_trace_handler::merger::MetApResult;
+use air_trace_handler::merger::ValueSource;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum Generation {
+pub enum Generation {
     Previous(GenerationIdx),
     Current(GenerationIdx),
     New,
@@ -152,6 +158,17 @@ impl Generation {
         Self::Current(generation_idx)
     }
 
+    pub fn from_met_result(result: &MetApResult) -> Self {
+        Self::from_data(result.value_source, result.generation)
+    }
+
+    pub fn from_data(data_type: ValueSource, generation: GenerationIdx) -> Self {
+        match data_type {
+            ValueSource::PreviousData => Generation::Previous(generation),
+            ValueSource::CurrentData => Generation::Current(generation),
+        }
+    }
+
     pub fn new() -> Self {
         Self::New
     }
@@ -170,8 +187,9 @@ impl<T: fmt::Display> fmt::Display for Stream<T> {
 impl fmt::Display for Generation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Generation::Nth(generation) => write!(f, "{}", generation),
-            Generation::Last => write!(f, "Last"),
+            Generation::Previous(generation) => write!(f, "previous({})", generation),
+            Generation::Current(generation) => write!(f, "current({})", generation),
+            Generation::New => write!(f, "new"),
         }
     }
 }

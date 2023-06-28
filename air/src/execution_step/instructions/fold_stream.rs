@@ -15,10 +15,8 @@
  */
 
 pub(super) mod completeness_updater;
-mod stream_cursor;
 pub(super) mod stream_execute_helpers;
 
-use super::fold::*;
 use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;

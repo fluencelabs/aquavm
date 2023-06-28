@@ -17,7 +17,6 @@
 use super::FarewellError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
-use crate::ExecutionError;
 use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
@@ -85,7 +84,7 @@ pub(crate) fn from_execution_error(
 #[tracing::instrument(skip(exec_ctx, trace_handler, keypair), level = "info")]
 fn populate_outcome_from_contexts(
     mut exec_ctx: ExecutionCtx<'_>,
-    mut trace_handler: TraceHandler,
+    trace_handler: TraceHandler,
     ret_code: i64,
     error_message: String,
     keypair: &KeyPair,
@@ -117,12 +116,6 @@ fn populate_outcome_from_contexts(
     );
 
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
-}
-
-// this method is called only if there is an internal error in the interpreter and
-// new execution trace was corrupted
-fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
-    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
 }
 
 /// Deduplicate values in a supplied vector.

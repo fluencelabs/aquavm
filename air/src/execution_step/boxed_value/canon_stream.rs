@@ -16,7 +16,6 @@
 
 use super::Stream;
 use super::ValueAggregate;
-use crate::execution_step::Generation;
 use crate::JValue;
 
 use air_interpreter_cid::CID;
@@ -44,7 +43,7 @@ impl CanonStream {
 
     pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
         // it's always possible to iter over all generations of a stream
-        let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
+        let values = stream.iter().cloned().collect::<Vec<_>>();
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
             values,

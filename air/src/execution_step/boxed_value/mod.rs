@@ -22,8 +22,7 @@ mod stream;
 mod stream_map;
 mod utils;
 
-pub(crate) type Stream = stream::Stream<ValueAggregate>;
-pub(crate) type RecursiveStream<'stream> = stream::RecursiveStream<'stream, ValueAggregate>;
+pub type Stream = stream::Stream<ValueAggregate>;
 
 pub(crate) use canon_stream::*;
 pub(crate) use iterable::*;
@@ -32,9 +31,14 @@ pub(crate) use scalar::CanonResultAggregate;
 pub(crate) use scalar::LiteralAggregate;
 pub(crate) use scalar::ScalarRef;
 pub(crate) use scalar::ServiceResultAggregate;
+pub(crate) use scalar::TracePosOperate;
 pub(crate) use scalar::ValueAggregate;
+
 pub(crate) use stream::Generation;
+pub(crate) use stream::IterableValue;
+pub(crate) use stream::RecursiveStream;
 pub(crate) use stream_map::StreamMap;
+
 pub(crate) use utils::populate_tetraplet_with_lambda;
 
 use super::ExecutionResult;

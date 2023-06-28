@@ -17,6 +17,7 @@
 use super::Iterable;
 use super::IterableItem;
 use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::boxed_value::TracePosOperate;
 use crate::foldable_next;
 use crate::foldable_prev;
 

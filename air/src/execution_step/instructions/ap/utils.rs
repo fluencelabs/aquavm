@@ -27,21 +27,12 @@ pub(super) fn generate_value_descriptor<'stream>(
     stream: &'stream ast::Stream<'_>,
     ap_result: &MergerApResult,
 ) -> StreamValueDescriptor<'stream> {
-    use air_trace_handler::merger::ValueSource;
-
     match ap_result {
-        MergerApResult::NotMet => StreamValueDescriptor::new(
-            value,
-            stream.name,
-            ValueSource::PreviousData,
-            Generation::Last,
-            stream.position,
-        ),
+        MergerApResult::NotMet => StreamValueDescriptor::new(value, stream.name, Generation::new(), stream.position),
         MergerApResult::Met(met_result) => StreamValueDescriptor::new(
             value,
             stream.name,
-            met_result.value_source,
-            Generation::Nth(met_result.generation),
+            Generation::from_met_result(met_result),
             stream.position,
         ),
     }
@@ -52,21 +43,12 @@ pub(crate) fn generate_map_value_descriptor<'stream>(
     stream: &'stream ast::StreamMap<'_>,
     ap_result: &MergerApResult,
 ) -> StreamMapValueDescriptor<'stream> {
-    use air_trace_handler::merger::ValueSource;
-
     match ap_result {
-        MergerApResult::NotMet => StreamMapValueDescriptor::new(
-            value,
-            stream.name,
-            ValueSource::PreviousData,
-            Generation::Last,
-            stream.position,
-        ),
+        MergerApResult::NotMet => StreamMapValueDescriptor::new(value, stream.name, Generation::new(), stream.position),
         MergerApResult::Met(met_result) => StreamMapValueDescriptor::new(
             value,
             stream.name,
-            met_result.value_source,
-            Generation::Nth(met_result.generation),
+            Generation::from_met_result(met_result),
             stream.position,
         ),
     }

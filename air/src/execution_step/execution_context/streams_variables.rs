@@ -19,7 +19,6 @@ mod stream_value_descriptor;
 
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;
-use crate::ExecutionError;
 
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;

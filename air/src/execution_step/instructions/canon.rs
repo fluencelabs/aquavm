@@ -179,6 +179,8 @@ fn create_canon_stream_from_name(
 /// it's crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346
 fn get_stream_or_default<'ctx>(ast_canon: &ast::Canon<'_>, exec_ctx: &'ctx ExecutionCtx<'_>) -> Cow<'ctx, Stream> {
-    let maybe_stream = exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position);
-    maybe_stream.map(Cow::Borrowed).unwrap_or_default()
+    match exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position) {
+        Some(stream) => Cow::Borrowed(stream),
+        None => Cow::Owned(Stream::new()),
+    }
 }
