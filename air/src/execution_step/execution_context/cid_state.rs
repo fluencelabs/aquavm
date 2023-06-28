@@ -138,7 +138,7 @@ impl ExecutionCidState {
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("service result aggregate", cid.clone().into()))
     }
 
-    pub(crate) fn resolve_service_value(
+    pub(crate) fn resolve_service_info(
         &self,
         service_result_agg_cid: &CID<ServiceResultCidAggregate>,
     ) -> Result<(Rc<JValue>, RcSecurityTetraplet, Rc<ServiceResultCidAggregate>), UncatchableError> {

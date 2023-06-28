@@ -55,7 +55,7 @@ pub(super) fn handle_prev_state<'i>(
         Failed(ref failed_cid) => {
             let (err_value, current_tetraplet, service_agg) = exec_ctx
                 .cid_state
-                .resolve_service_value(failed_cid)
+                .resolve_service_info(failed_cid)
                 .map_err(UncatchableError::from)?;
 
             verifier::verify_call(

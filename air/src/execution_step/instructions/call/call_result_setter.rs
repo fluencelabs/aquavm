@@ -90,7 +90,7 @@ pub(crate) fn populate_context_from_data<'i>(
 ) -> ExecutionResult<ValueRef> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
-            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_value(&cid)?;
+            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_info(&cid)?;
 
             verifier::verify_call(
                 argument_hash,
@@ -105,7 +105,7 @@ pub(crate) fn populate_context_from_data<'i>(
             Ok(ValueRef::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
-            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_value(&cid)?;
+            let (value, current_tetraplet, service_result_agg) = exec_ctx.cid_state.resolve_service_info(&cid)?;
 
             verifier::verify_call(
                 argument_hash,

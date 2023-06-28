@@ -29,6 +29,7 @@ const CANNOT_HAPPEN_IN_VERIFIED_CID_STORE: &str = "cannot happen in a checked CI
 pub enum DataVerifierError {
     #[error(transparent)]
     MalformedKey(fluence_keypair::error::DecodingError),
+
     #[error(transparent)]
     MalformedSignature(fluence_keypair::error::DecodingError),
 
