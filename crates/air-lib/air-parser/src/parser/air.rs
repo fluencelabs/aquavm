@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.12"
+// auto-generated: "lalrpop 0.20.0"
 // sha3: a584af3b0901586f855a537280c5ee9b01ab7ab3ba07323996bd51b20e661fef
 use crate::ast::*;
 use crate::parser::ParserError;
@@ -15,9 +15,9 @@ use self::__lalrpop_util::state_machine as __state_machine;
 extern crate core;
 extern crate alloc;
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
+#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 mod __parse__AIR {
-    #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 
     use crate::ast::*;
     use crate::parser::ParserError;
@@ -784,48 +784,68 @@ mod __parse__AIR {
             _ => 0,
         }
     }
+    const __TERMINAL: &[&str] = &[
+        r###""(""###,
+        r###"")""###,
+        r###""[""###,
+        r###""]""###,
+        r###"Boolean"###,
+        r###"CanonStream"###,
+        r###"CanonStreamWithLambda"###,
+        r###"F64"###,
+        r###"I64"###,
+        r###"InitPeerId"###,
+        r###"LastError"###,
+        r###"LastErrorWithLambda"###,
+        r###"Literal"###,
+        r###"Scalar"###,
+        r###"ScalarWithLambda"###,
+        r###"Stream"###,
+        r###"StreamMap"###,
+        r###"TTL"###,
+        r###"Timestamp"###,
+        r###"ap"###,
+        r###"call"###,
+        r###"canon"###,
+        r###"fail"###,
+        r###"fold"###,
+        r###"match_"###,
+        r###"mismatch"###,
+        r###"never"###,
+        r###"new"###,
+        r###"next"###,
+        r###"null"###,
+        r###"par"###,
+        r###"seq"###,
+        r###"xor"###,
+    ];
     fn __expected_tokens(__state: i16) -> alloc::vec::Vec<alloc::string::String> {
-        const __TERMINAL: &[&str] = &[
-            r###""(""###,
-            r###"")""###,
-            r###""[""###,
-            r###""]""###,
-            r###"Boolean"###,
-            r###"CanonStream"###,
-            r###"CanonStreamWithLambda"###,
-            r###"F64"###,
-            r###"I64"###,
-            r###"InitPeerId"###,
-            r###"LastError"###,
-            r###"LastErrorWithLambda"###,
-            r###"Literal"###,
-            r###"Scalar"###,
-            r###"ScalarWithLambda"###,
-            r###"Stream"###,
-            r###"StreamMap"###,
-            r###"TTL"###,
-            r###"Timestamp"###,
-            r###"ap"###,
-            r###"call"###,
-            r###"canon"###,
-            r###"fail"###,
-            r###"fold"###,
-            r###"match_"###,
-            r###"mismatch"###,
-            r###"never"###,
-            r###"new"###,
-            r###"next"###,
-            r###"null"###,
-            r###"par"###,
-            r###"seq"###,
-            r###"xor"###,
-        ];
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
             let next_state = __action(__state, index);
             if next_state == 0 {
                 None
             } else {
                 Some(alloc::string::ToString::to_string(terminal))
+            }
+        }).collect()
+    }
+    fn __expected_tokens_from_states<
+        'err,
+        'input,
+        'v,
+    >(
+        __states: &[i16],
+        _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
+    ) -> alloc::vec::Vec<alloc::string::String>
+    where
+        'input: 'err,
+        'input: 'v,
+    {
+        __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
+            if __accepts(None, __states, Some(index), core::marker::PhantomData::<(&(), &(), &())>) {
+                Some(alloc::string::ToString::to_string(terminal))
+            } else {
+                None
             }
         }).collect()
     }
@@ -892,6 +912,10 @@ mod __parse__AIR {
 
         fn expected_tokens(&self, state: i16) -> alloc::vec::Vec<alloc::string::String> {
             __expected_tokens(state)
+        }
+
+        fn expected_tokens_from_states(&self, states: &[i16]) -> alloc::vec::Vec<alloc::string::String> {
+            __expected_tokens_from_states(states, core::marker::PhantomData::<(&(), &(), &())>)
         }
 
         #[inline]
@@ -1692,17 +1716,17 @@ mod __parse__AIR {
         'input,
         'v,
     >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
-        validator: &'v mut VariableValidator<'input>,
-        __error_state: i16,
-        __states: & [i16],
+        __error_state: Option<i16>,
+        __states: &[i16],
         __opt_integer: Option<usize>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> bool
+    where
+        'input: 'err,
+        'input: 'v,
     {
         let mut __states = __states.to_vec();
-        __states.push(__error_state);
+        __states.extend(__error_state);
         loop {
             let mut __states_len = __states.len();
             let __top = __states[__states_len - 1];
@@ -2050,8 +2074,8 @@ mod __parse__AIR {
             102 => {
                 // __AIR = AIR => ActionFn(0);
                 let __sym0 = __pop_Variant12(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
+                let __start = __sym0.0;
+                let __end = __sym0.2;
                 let __nt = super::__action0::<>(input, errors, validator, __sym0);
                 return Some(Ok(__nt));
             }
@@ -2402,8 +2426,8 @@ mod __parse__AIR {
     {
         // (<Arg>) = Arg => ActionFn(89);
         let __sym0 = __pop_Variant9(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action89::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 0)
@@ -2443,8 +2467,8 @@ mod __parse__AIR {
     {
         // (<Arg>)* = (<Arg>)+ => ActionFn(88);
         let __sym0 = __pop_Variant10(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action88::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 1)
@@ -2464,8 +2488,8 @@ mod __parse__AIR {
     {
         // (<Arg>)+ = Arg => ActionFn(98);
         let __sym0 = __pop_Variant9(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action98::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 2)
@@ -2487,8 +2511,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant9(__symbols);
         let __sym0 = __pop_Variant10(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action99::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (2, 2)
@@ -2548,8 +2572,8 @@ mod __parse__AIR {
     {
         // AIR = Instr => ActionFn(1);
         let __sym0 = __pop_Variant12(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action1::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 5)
@@ -2569,8 +2593,8 @@ mod __parse__AIR {
     {
         // ApArgument = InitPeerId => ActionFn(72);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action72::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2590,8 +2614,8 @@ mod __parse__AIR {
     {
         // ApArgument = LastError => ActionFn(73);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action73::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2611,8 +2635,8 @@ mod __parse__AIR {
     {
         // ApArgument = LastErrorWithLambda => ActionFn(74);
         let __sym0 = __pop_Variant6(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action74::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2632,8 +2656,8 @@ mod __parse__AIR {
     {
         // ApArgument = Timestamp => ActionFn(75);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action75::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2653,8 +2677,8 @@ mod __parse__AIR {
     {
         // ApArgument = TTL => ActionFn(76);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action76::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2674,8 +2698,8 @@ mod __parse__AIR {
     {
         // ApArgument = Literal => ActionFn(77);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action77::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2695,8 +2719,8 @@ mod __parse__AIR {
     {
         // ApArgument = Number => ActionFn(78);
         let __sym0 = __pop_Variant25(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action78::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2716,8 +2740,8 @@ mod __parse__AIR {
     {
         // ApArgument = Boolean => ActionFn(79);
         let __sym0 = __pop_Variant1(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action79::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2739,8 +2763,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action80::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (2, 6)
@@ -2760,8 +2784,8 @@ mod __parse__AIR {
     {
         // ApArgument = Scalar => ActionFn(81);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action81::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2781,8 +2805,8 @@ mod __parse__AIR {
     {
         // ApArgument = ScalarWithLambda => ActionFn(82);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action82::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2802,8 +2826,8 @@ mod __parse__AIR {
     {
         // ApArgument = CanonStream => ActionFn(83);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action83::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2823,8 +2847,8 @@ mod __parse__AIR {
     {
         // ApArgument = CanonStreamWithLambda => ActionFn(84);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action84::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
@@ -2844,8 +2868,8 @@ mod __parse__AIR {
     {
         // ApMapKey = Literal => ActionFn(24);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action24::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
@@ -2865,8 +2889,8 @@ mod __parse__AIR {
     {
         // ApMapKey = Number => ActionFn(25);
         let __sym0 = __pop_Variant25(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action25::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
@@ -2886,8 +2910,8 @@ mod __parse__AIR {
     {
         // ApMapKey = Scalar => ActionFn(26);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action26::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
@@ -2907,8 +2931,8 @@ mod __parse__AIR {
     {
         // ApMapKey = ScalarWithLambda => ActionFn(27);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action27::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
@@ -2928,8 +2952,8 @@ mod __parse__AIR {
     {
         // ApMapKey = CanonStreamWithLambda => ActionFn(28);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action28::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
@@ -2949,8 +2973,8 @@ mod __parse__AIR {
     {
         // ApResult = Scalar => ActionFn(22);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action22::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 8)
@@ -2970,8 +2994,8 @@ mod __parse__AIR {
     {
         // ApResult = Stream => ActionFn(23);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action23::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 8)
@@ -2991,8 +3015,8 @@ mod __parse__AIR {
     {
         // Arg = Value => ActionFn(58);
         let __sym0 = __pop_Variant9(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action58::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 9)
@@ -3014,8 +3038,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action100::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (2, 10)
@@ -3038,8 +3062,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant10(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action101::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (3, 10)
@@ -3059,8 +3083,8 @@ mod __parse__AIR {
     {
         // CallOutput = Scalar => ActionFn(29);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action29::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (1, 11)
@@ -3080,8 +3104,8 @@ mod __parse__AIR {
     {
         // CallOutput = Stream => ActionFn(30);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action30::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (1, 11)
@@ -3101,8 +3125,8 @@ mod __parse__AIR {
     {
         // CallOutput? = CallOutput => ActionFn(93);
         let __sym0 = __pop_Variant17(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action93::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (1, 12)
@@ -3142,8 +3166,8 @@ mod __parse__AIR {
     {
         // CanonStreamArgument = CanonStream => ActionFn(86);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action86::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (1, 13)
@@ -3163,8 +3187,8 @@ mod __parse__AIR {
     {
         // FailBody = Scalar => ActionFn(31);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action31::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
@@ -3184,8 +3208,8 @@ mod __parse__AIR {
     {
         // FailBody = ScalarWithLambda => ActionFn(32);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action32::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
@@ -3207,8 +3231,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant7(__symbols);
         let __sym0 = __pop_Variant5(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action33::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (2, 14)
@@ -3228,8 +3252,8 @@ mod __parse__AIR {
     {
         // FailBody = CanonStreamWithLambda => ActionFn(34);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action34::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
@@ -3249,8 +3273,8 @@ mod __parse__AIR {
     {
         // FailBody = LastError => ActionFn(114);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action114::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
@@ -3270,8 +3294,8 @@ mod __parse__AIR {
     {
         // FoldScalarIterable = Scalar => ActionFn(36);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action36::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
@@ -3291,8 +3315,8 @@ mod __parse__AIR {
     {
         // FoldScalarIterable = ScalarWithLambda => ActionFn(37);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action37::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
@@ -3312,8 +3336,8 @@ mod __parse__AIR {
     {
         // FoldScalarIterable = CanonStream => ActionFn(38);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action38::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
@@ -3335,8 +3359,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action39::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (2, 15)
@@ -3356,8 +3380,8 @@ mod __parse__AIR {
     {
         // Function = ResolvableToStringVariable => ActionFn(41);
         let __sym0 = __pop_Variant22(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action41::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 16)
@@ -3383,8 +3407,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant28(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action126::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3409,8 +3433,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant28(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action127::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3436,8 +3460,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant26(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action116::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3462,8 +3486,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant13(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action117::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3491,8 +3515,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym7.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym7.2;
         let __nt = super::__action118::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6, __sym7);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (8, 17)
@@ -3517,8 +3541,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant12(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action6::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3543,8 +3567,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant12(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action7::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3567,8 +3591,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action8::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (3, 17)
@@ -3591,8 +3615,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action9::<>(input, errors, validator, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (3, 17)
@@ -3617,8 +3641,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant24(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action119::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3642,8 +3666,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant20(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action11::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
@@ -3670,8 +3694,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant21(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym6.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym6.2;
         let __nt = super::__action128::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
@@ -3697,8 +3721,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant21(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action129::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3725,8 +3749,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym6.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym6.2;
         let __nt = super::__action130::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
@@ -3752,8 +3776,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action131::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3780,8 +3804,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym6.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym6.2;
         let __nt = super::__action132::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
@@ -3807,8 +3831,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action133::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3832,8 +3856,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action123::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
@@ -3858,8 +3882,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant12(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action16::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
@@ -3885,8 +3909,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant9(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action124::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3912,8 +3936,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant9(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym5.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym5.2;
         let __nt = super::__action125::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
@@ -3933,8 +3957,8 @@ mod __parse__AIR {
     {
         // Instr = error => ActionFn(19);
         let __sym0 = __pop_Variant8(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action19::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 17)
@@ -3954,8 +3978,8 @@ mod __parse__AIR {
     {
         // Instr? = Instr => ActionFn(90);
         let __sym0 = __pop_Variant12(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action90::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (1, 18)
@@ -3995,8 +4019,8 @@ mod __parse__AIR {
     {
         // NewArgument = Scalar => ActionFn(52);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action52::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
@@ -4016,8 +4040,8 @@ mod __parse__AIR {
     {
         // NewArgument = Stream => ActionFn(53);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action53::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
@@ -4037,8 +4061,8 @@ mod __parse__AIR {
     {
         // NewArgument = StreamMap => ActionFn(54);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action54::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
@@ -4058,8 +4082,8 @@ mod __parse__AIR {
     {
         // NewArgument = CanonStream => ActionFn(55);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action55::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
@@ -4079,8 +4103,8 @@ mod __parse__AIR {
     {
         // Number = I64 => ActionFn(56);
         let __sym0 = __pop_Variant5(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action56::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 20)
@@ -4100,8 +4124,8 @@ mod __parse__AIR {
     {
         // Number = F64 => ActionFn(57);
         let __sym0 = __pop_Variant4(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action57::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 20)
@@ -4121,8 +4145,8 @@ mod __parse__AIR {
     {
         // PeerId = ResolvableToPeerIdVariable => ActionFn(40);
         let __sym0 = __pop_Variant26(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action40::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 21)
@@ -4142,8 +4166,8 @@ mod __parse__AIR {
     {
         // ResolvableToPeerIdVariable = InitPeerId => ActionFn(43);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action43::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
@@ -4163,8 +4187,8 @@ mod __parse__AIR {
     {
         // ResolvableToPeerIdVariable = Literal => ActionFn(44);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action44::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
@@ -4184,8 +4208,8 @@ mod __parse__AIR {
     {
         // ResolvableToPeerIdVariable = Scalar => ActionFn(45);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action45::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
@@ -4205,8 +4229,8 @@ mod __parse__AIR {
     {
         // ResolvableToPeerIdVariable = ScalarWithLambda => ActionFn(46);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action46::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
@@ -4226,8 +4250,8 @@ mod __parse__AIR {
     {
         // ResolvableToPeerIdVariable = CanonStreamWithLambda => ActionFn(47);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action47::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
@@ -4247,8 +4271,8 @@ mod __parse__AIR {
     {
         // ResolvableToStringVariable = Literal => ActionFn(48);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action48::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
@@ -4268,8 +4292,8 @@ mod __parse__AIR {
     {
         // ResolvableToStringVariable = Scalar => ActionFn(49);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action49::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
@@ -4289,8 +4313,8 @@ mod __parse__AIR {
     {
         // ResolvableToStringVariable = ScalarWithLambda => ActionFn(50);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action50::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
@@ -4310,8 +4334,8 @@ mod __parse__AIR {
     {
         // ResolvableToStringVariable = CanonStreamWithLambda => ActionFn(51);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action51::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
@@ -4331,8 +4355,8 @@ mod __parse__AIR {
     {
         // ServiceId = ResolvableToStringVariable => ActionFn(42);
         let __sym0 = __pop_Variant22(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action42::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 24)
@@ -4352,8 +4376,8 @@ mod __parse__AIR {
     {
         // StreamArgument = Stream => ActionFn(85);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action85::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant27(__nt), __end));
         (1, 25)
@@ -4378,8 +4402,8 @@ mod __parse__AIR {
         let __sym2 = __pop_Variant22(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant26(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action21::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (5, 26)
@@ -4399,8 +4423,8 @@ mod __parse__AIR {
     {
         // Value = InitPeerId => ActionFn(59);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action59::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4420,8 +4444,8 @@ mod __parse__AIR {
     {
         // Value = LastError => ActionFn(60);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action60::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4441,8 +4465,8 @@ mod __parse__AIR {
     {
         // Value = LastErrorWithLambda => ActionFn(61);
         let __sym0 = __pop_Variant6(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action61::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4462,8 +4486,8 @@ mod __parse__AIR {
     {
         // Value = Literal => ActionFn(62);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action62::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4483,8 +4507,8 @@ mod __parse__AIR {
     {
         // Value = Timestamp => ActionFn(63);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action63::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4504,8 +4528,8 @@ mod __parse__AIR {
     {
         // Value = TTL => ActionFn(64);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action64::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4525,8 +4549,8 @@ mod __parse__AIR {
     {
         // Value = Number => ActionFn(65);
         let __sym0 = __pop_Variant25(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action65::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4546,8 +4570,8 @@ mod __parse__AIR {
     {
         // Value = Boolean => ActionFn(66);
         let __sym0 = __pop_Variant1(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action66::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4569,8 +4593,8 @@ mod __parse__AIR {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action67::<>(input, errors, validator, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (2, 27)
@@ -4590,8 +4614,8 @@ mod __parse__AIR {
     {
         // Value = Scalar => ActionFn(68);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action68::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4611,8 +4635,8 @@ mod __parse__AIR {
     {
         // Value = ScalarWithLambda => ActionFn(69);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action69::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4632,8 +4656,8 @@ mod __parse__AIR {
     {
         // Value = CanonStream => ActionFn(70);
         let __sym0 = __pop_Variant2(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action70::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4653,8 +4677,8 @@ mod __parse__AIR {
     {
         // Value = CanonStreamWithLambda => ActionFn(71);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action71::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 27)
@@ -4663,6 +4687,7 @@ mod __parse__AIR {
 pub use self::__parse__AIR::AIRParser;
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action0<
     'err,
     'input,
@@ -4678,6 +4703,7 @@ fn __action0<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action1<
     'err,
     'input,
@@ -4693,6 +4719,7 @@ fn __action1<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action2<
     'err,
     'input,
@@ -4724,6 +4751,7 @@ fn __action2<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action3<
     'err,
     'input,
@@ -4753,6 +4781,7 @@ fn __action3<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action4<
     'err,
     'input,
@@ -4781,6 +4810,7 @@ fn __action4<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action5<
     'err,
     'input,
@@ -4813,6 +4843,7 @@ fn __action5<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action6<
     'err,
     'input,
@@ -4832,6 +4863,7 @@ fn __action6<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action7<
     'err,
     'input,
@@ -4851,6 +4883,7 @@ fn __action7<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action8<
     'err,
     'input,
@@ -4868,6 +4901,7 @@ fn __action8<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action9<
     'err,
     'input,
@@ -4885,6 +4919,7 @@ fn __action9<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action10<
     'err,
     'input,
@@ -4913,6 +4948,7 @@ fn __action10<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action11<
     'err,
     'input,
@@ -4933,6 +4969,7 @@ fn __action11<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action12<
     'err,
     'input,
@@ -4964,6 +5001,7 @@ fn __action12<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action13<
     'err,
     'input,
@@ -4996,6 +5034,7 @@ fn __action13<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action14<
     'err,
     'input,
@@ -5028,6 +5067,7 @@ fn __action14<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action15<
     'err,
     'input,
@@ -5055,6 +5095,7 @@ fn __action15<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action16<
     'err,
     'input,
@@ -5074,6 +5115,7 @@ fn __action16<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action17<
     'err,
     'input,
@@ -5102,6 +5144,7 @@ fn __action17<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action18<
     'err,
     'input,
@@ -5130,6 +5173,7 @@ fn __action18<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action19<
     'err,
     'input,
@@ -5145,6 +5189,7 @@ fn __action19<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action20<
     'err,
     'input,
@@ -5162,6 +5207,7 @@ fn __action20<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action21<
     'err,
     'input,
@@ -5185,6 +5231,7 @@ fn __action21<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action22<
     'err,
     'input,
@@ -5200,6 +5247,7 @@ fn __action22<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action23<
     'err,
     'input,
@@ -5215,6 +5263,7 @@ fn __action23<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action24<
     'err,
     'input,
@@ -5230,6 +5279,7 @@ fn __action24<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action25<
     'err,
     'input,
@@ -5245,6 +5295,7 @@ fn __action25<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action26<
     'err,
     'input,
@@ -5260,6 +5311,7 @@ fn __action26<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action27<
     'err,
     'input,
@@ -5275,6 +5327,7 @@ fn __action27<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action28<
     'err,
     'input,
@@ -5290,6 +5343,7 @@ fn __action28<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action29<
     'err,
     'input,
@@ -5305,6 +5359,7 @@ fn __action29<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action30<
     'err,
     'input,
@@ -5320,6 +5375,7 @@ fn __action30<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action31<
     'err,
     'input,
@@ -5335,6 +5391,7 @@ fn __action31<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action32<
     'err,
     'input,
@@ -5350,6 +5407,7 @@ fn __action32<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action33<
     'err,
     'input,
@@ -5369,6 +5427,7 @@ fn __action33<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action34<
     'err,
     'input,
@@ -5384,6 +5443,7 @@ fn __action34<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action35<
     'err,
     'input,
@@ -5403,6 +5463,7 @@ fn __action35<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action36<
     'err,
     'input,
@@ -5418,6 +5479,7 @@ fn __action36<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action37<
     'err,
     'input,
@@ -5433,6 +5495,7 @@ fn __action37<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action38<
     'err,
     'input,
@@ -5448,6 +5511,7 @@ fn __action38<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action39<
     'err,
     'input,
@@ -5464,6 +5528,7 @@ fn __action39<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action40<
     'err,
     'input,
@@ -5479,6 +5544,7 @@ fn __action40<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action41<
     'err,
     'input,
@@ -5494,6 +5560,7 @@ fn __action41<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action42<
     'err,
     'input,
@@ -5509,6 +5576,7 @@ fn __action42<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action43<
     'err,
     'input,
@@ -5524,6 +5592,7 @@ fn __action43<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action44<
     'err,
     'input,
@@ -5539,6 +5608,7 @@ fn __action44<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action45<
     'err,
     'input,
@@ -5554,6 +5624,7 @@ fn __action45<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action46<
     'err,
     'input,
@@ -5569,6 +5640,7 @@ fn __action46<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action47<
     'err,
     'input,
@@ -5584,6 +5656,7 @@ fn __action47<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action48<
     'err,
     'input,
@@ -5599,6 +5672,7 @@ fn __action48<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action49<
     'err,
     'input,
@@ -5614,6 +5688,7 @@ fn __action49<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action50<
     'err,
     'input,
@@ -5629,6 +5704,7 @@ fn __action50<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action51<
     'err,
     'input,
@@ -5644,6 +5720,7 @@ fn __action51<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action52<
     'err,
     'input,
@@ -5659,6 +5736,7 @@ fn __action52<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action53<
     'err,
     'input,
@@ -5674,6 +5752,7 @@ fn __action53<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action54<
     'err,
     'input,
@@ -5689,6 +5768,7 @@ fn __action54<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action55<
     'err,
     'input,
@@ -5704,6 +5784,7 @@ fn __action55<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action56<
     'err,
     'input,
@@ -5719,6 +5800,7 @@ fn __action56<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action57<
     'err,
     'input,
@@ -5734,6 +5816,7 @@ fn __action57<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action58<
     'err,
     'input,
@@ -5749,6 +5832,7 @@ fn __action58<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action59<
     'err,
     'input,
@@ -5764,6 +5848,7 @@ fn __action59<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action60<
     'err,
     'input,
@@ -5779,6 +5864,7 @@ fn __action60<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action61<
     'err,
     'input,
@@ -5794,6 +5880,7 @@ fn __action61<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action62<
     'err,
     'input,
@@ -5809,6 +5896,7 @@ fn __action62<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action63<
     'err,
     'input,
@@ -5824,6 +5912,7 @@ fn __action63<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action64<
     'err,
     'input,
@@ -5839,6 +5928,7 @@ fn __action64<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action65<
     'err,
     'input,
@@ -5854,6 +5944,7 @@ fn __action65<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action66<
     'err,
     'input,
@@ -5869,6 +5960,7 @@ fn __action66<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action67<
     'err,
     'input,
@@ -5885,6 +5977,7 @@ fn __action67<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action68<
     'err,
     'input,
@@ -5900,6 +5993,7 @@ fn __action68<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action69<
     'err,
     'input,
@@ -5915,6 +6009,7 @@ fn __action69<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action70<
     'err,
     'input,
@@ -5930,6 +6025,7 @@ fn __action70<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action71<
     'err,
     'input,
@@ -5945,6 +6041,7 @@ fn __action71<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action72<
     'err,
     'input,
@@ -5960,6 +6057,7 @@ fn __action72<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action73<
     'err,
     'input,
@@ -5975,6 +6073,7 @@ fn __action73<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action74<
     'err,
     'input,
@@ -5990,6 +6089,7 @@ fn __action74<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action75<
     'err,
     'input,
@@ -6005,6 +6105,7 @@ fn __action75<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action76<
     'err,
     'input,
@@ -6020,6 +6121,7 @@ fn __action76<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action77<
     'err,
     'input,
@@ -6035,6 +6137,7 @@ fn __action77<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action78<
     'err,
     'input,
@@ -6050,6 +6153,7 @@ fn __action78<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action79<
     'err,
     'input,
@@ -6065,6 +6169,7 @@ fn __action79<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action80<
     'err,
     'input,
@@ -6081,6 +6186,7 @@ fn __action80<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action81<
     'err,
     'input,
@@ -6096,6 +6202,7 @@ fn __action81<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action82<
     'err,
     'input,
@@ -6111,6 +6218,7 @@ fn __action82<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action83<
     'err,
     'input,
@@ -6126,6 +6234,7 @@ fn __action83<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action84<
     'err,
     'input,
@@ -6141,6 +6250,7 @@ fn __action84<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action85<
     'err,
     'input,
@@ -6156,6 +6266,7 @@ fn __action85<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action86<
     'err,
     'input,
@@ -6171,6 +6282,7 @@ fn __action86<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action87<
     'err,
     'input,
@@ -6187,6 +6299,7 @@ fn __action87<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action88<
     'err,
     'input,
@@ -6202,6 +6315,7 @@ fn __action88<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action89<
     'err,
     'input,
@@ -6217,6 +6331,7 @@ fn __action89<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action90<
     'err,
     'input,
@@ -6232,6 +6347,7 @@ fn __action90<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action91<
     'err,
     'input,
@@ -6260,10 +6376,11 @@ fn __action92<
     __lookahead: &AirPos,
 ) -> AirPos
 {
-    __lookbehind.clone()
+    *__lookbehind
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action93<
     'err,
     'input,
@@ -6279,6 +6396,7 @@ fn __action93<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action94<
     'err,
     'input,
@@ -6307,10 +6425,11 @@ fn __action95<
     __lookahead: &AirPos,
 ) -> AirPos
 {
-    __lookahead.clone()
+    *__lookahead
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action96<
     'err,
     'input,
@@ -6326,6 +6445,7 @@ fn __action96<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action97<
     'err,
     'input,
@@ -6342,6 +6462,7 @@ fn __action97<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action98<
     'err,
     'input,
@@ -6353,8 +6474,8 @@ fn __action98<
     __0: (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.2;
     let __temp0 = __action89(
         input,
         errors,
@@ -6371,6 +6492,7 @@ fn __action98<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action99<
     'err,
     'input,
@@ -6383,8 +6505,8 @@ fn __action99<
     __1: (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
 {
-    let __start0 = __1.0.clone();
-    let __end0 = __1.2.clone();
+    let __start0 = __1.0;
+    let __end0 = __1.2;
     let __temp0 = __action89(
         input,
         errors,
@@ -6402,6 +6524,7 @@ fn __action99<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action100<
     'err,
     'input,
@@ -6414,8 +6537,8 @@ fn __action100<
     __1: (AirPos, Token<'input>, AirPos),
 ) -> Vec<ImmutableValue<'input>>
 {
-    let __start0 = __0.2.clone();
-    let __end0 = __1.0.clone();
+    let __start0 = __0.2;
+    let __end0 = __1.0;
     let __temp0 = __action87(
         input,
         errors,
@@ -6435,6 +6558,7 @@ fn __action100<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action101<
     'err,
     'input,
@@ -6448,8 +6572,8 @@ fn __action101<
     __2: (AirPos, Token<'input>, AirPos),
 ) -> Vec<ImmutableValue<'input>>
 {
-    let __start0 = __1.0.clone();
-    let __end0 = __1.2.clone();
+    let __start0 = __1.0;
+    let __end0 = __1.2;
     let __temp0 = __action88(
         input,
         errors,
@@ -6468,6 +6592,7 @@ fn __action101<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action102<
     'err,
     'input,
@@ -6480,8 +6605,8 @@ fn __action102<
     __1: (AirPos, AirPos, AirPos),
 ) -> Fail<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6501,6 +6626,7 @@ fn __action102<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action103<
     'err,
     'input,
@@ -6518,8 +6644,8 @@ fn __action103<
     __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6544,6 +6670,7 @@ fn __action103<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action104<
     'err,
     'input,
@@ -6561,8 +6688,8 @@ fn __action104<
     __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6587,6 +6714,7 @@ fn __action104<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action105<
     'err,
     'input,
@@ -6603,8 +6731,8 @@ fn __action105<
     __5: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6628,6 +6756,7 @@ fn __action105<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action106<
     'err,
     'input,
@@ -6647,8 +6776,8 @@ fn __action106<
     __8: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6675,6 +6804,7 @@ fn __action106<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action107<
     'err,
     'input,
@@ -6691,8 +6821,8 @@ fn __action107<
     __5: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6716,6 +6846,7 @@ fn __action107<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action108<
     'err,
     'input,
@@ -6734,8 +6865,8 @@ fn __action108<
     __7: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6761,6 +6892,7 @@ fn __action108<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action109<
     'err,
     'input,
@@ -6779,8 +6911,8 @@ fn __action109<
     __7: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6806,6 +6938,7 @@ fn __action109<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action110<
     'err,
     'input,
@@ -6824,8 +6957,8 @@ fn __action110<
     __7: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6851,6 +6984,7 @@ fn __action110<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action111<
     'err,
     'input,
@@ -6866,8 +7000,8 @@ fn __action111<
     __4: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6890,6 +7024,7 @@ fn __action111<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action112<
     'err,
     'input,
@@ -6907,8 +7042,8 @@ fn __action112<
     __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6933,6 +7068,7 @@ fn __action112<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action113<
     'err,
     'input,
@@ -6950,8 +7086,8 @@ fn __action113<
     __6: (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action95(
         input,
         errors,
@@ -6976,6 +7112,7 @@ fn __action113<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action114<
     'err,
     'input,
@@ -6987,8 +7124,8 @@ fn __action114<
     __0: (AirPos, Token<'input>, AirPos),
 ) -> Fail<'input>
 {
-    let __start0 = __0.2.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.2;
+    let __end0 = __0.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7007,6 +7144,7 @@ fn __action114<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action115<
     'err,
     'input,
@@ -7023,8 +7161,8 @@ fn __action115<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.2;
+    let __end0 = __5.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7048,6 +7186,7 @@ fn __action115<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action116<
     'err,
     'input,
@@ -7064,8 +7203,8 @@ fn __action116<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.2;
+    let __end0 = __5.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7089,6 +7228,7 @@ fn __action116<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action117<
     'err,
     'input,
@@ -7104,8 +7244,8 @@ fn __action117<
     __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.2.clone();
-    let __end0 = __4.2.clone();
+    let __start0 = __4.2;
+    let __end0 = __4.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7128,6 +7268,7 @@ fn __action117<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action118<
     'err,
     'input,
@@ -7146,8 +7287,8 @@ fn __action118<
     __7: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __7.2.clone();
-    let __end0 = __7.2.clone();
+    let __start0 = __7.2;
+    let __end0 = __7.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7173,6 +7314,7 @@ fn __action118<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action119<
     'err,
     'input,
@@ -7188,8 +7330,8 @@ fn __action119<
     __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.2.clone();
-    let __end0 = __4.2.clone();
+    let __start0 = __4.2;
+    let __end0 = __4.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7212,6 +7354,7 @@ fn __action119<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action120<
     'err,
     'input,
@@ -7229,8 +7372,8 @@ fn __action120<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __6.2.clone();
-    let __end0 = __6.2.clone();
+    let __start0 = __6.2;
+    let __end0 = __6.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7255,6 +7398,7 @@ fn __action120<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action121<
     'err,
     'input,
@@ -7272,8 +7416,8 @@ fn __action121<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __6.2.clone();
-    let __end0 = __6.2.clone();
+    let __start0 = __6.2;
+    let __end0 = __6.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7298,6 +7442,7 @@ fn __action121<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action122<
     'err,
     'input,
@@ -7315,8 +7460,8 @@ fn __action122<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __6.2.clone();
-    let __end0 = __6.2.clone();
+    let __start0 = __6.2;
+    let __end0 = __6.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7341,6 +7486,7 @@ fn __action122<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action123<
     'err,
     'input,
@@ -7355,8 +7501,8 @@ fn __action123<
     __3: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __3.2.clone();
-    let __end0 = __3.2.clone();
+    let __start0 = __3.2;
+    let __end0 = __3.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7378,6 +7524,7 @@ fn __action123<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action124<
     'err,
     'input,
@@ -7394,8 +7541,8 @@ fn __action124<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.2;
+    let __end0 = __5.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7419,6 +7566,7 @@ fn __action124<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action125<
     'err,
     'input,
@@ -7435,8 +7583,8 @@ fn __action125<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.2.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.2;
+    let __end0 = __5.2;
     let __temp0 = __action92(
         input,
         errors,
@@ -7460,6 +7608,7 @@ fn __action125<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action126<
     'err,
     'input,
@@ -7476,8 +7625,8 @@ fn __action126<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.0.clone();
-    let __end0 = __4.2.clone();
+    let __start0 = __4.0;
+    let __end0 = __4.2;
     let __temp0 = __action93(
         input,
         errors,
@@ -7499,6 +7648,7 @@ fn __action126<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action127<
     'err,
     'input,
@@ -7514,8 +7664,8 @@ fn __action127<
     __4: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __3.2.clone();
-    let __end0 = __4.0.clone();
+    let __start0 = __3.2;
+    let __end0 = __4.0;
     let __temp0 = __action94(
         input,
         errors,
@@ -7538,6 +7688,7 @@ fn __action127<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action128<
     'err,
     'input,
@@ -7555,8 +7706,8 @@ fn __action128<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.0.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.0;
+    let __end0 = __5.2;
     let __temp0 = __action90(
         input,
         errors,
@@ -7579,6 +7730,7 @@ fn __action128<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action129<
     'err,
     'input,
@@ -7595,8 +7747,8 @@ fn __action129<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.2.clone();
-    let __end0 = __5.0.clone();
+    let __start0 = __4.2;
+    let __end0 = __5.0;
     let __temp0 = __action91(
         input,
         errors,
@@ -7620,6 +7772,7 @@ fn __action129<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action130<
     'err,
     'input,
@@ -7637,8 +7790,8 @@ fn __action130<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.0.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.0;
+    let __end0 = __5.2;
     let __temp0 = __action90(
         input,
         errors,
@@ -7661,6 +7814,7 @@ fn __action130<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action131<
     'err,
     'input,
@@ -7677,8 +7831,8 @@ fn __action131<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.2.clone();
-    let __end0 = __5.0.clone();
+    let __start0 = __4.2;
+    let __end0 = __5.0;
     let __temp0 = __action91(
         input,
         errors,
@@ -7702,6 +7856,7 @@ fn __action131<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action132<
     'err,
     'input,
@@ -7719,8 +7874,8 @@ fn __action132<
     __6: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __5.0.clone();
-    let __end0 = __5.2.clone();
+    let __start0 = __5.0;
+    let __end0 = __5.2;
     let __temp0 = __action90(
         input,
         errors,
@@ -7743,6 +7898,7 @@ fn __action132<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action133<
     'err,
     'input,
@@ -7759,8 +7915,8 @@ fn __action133<
     __5: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __4.2.clone();
-    let __end0 = __5.0.clone();
+    let __start0 = __4.2;
+    let __end0 = __5.0;
     let __temp0 = __action91(
         input,
         errors,
@@ -7782,6 +7938,7 @@ fn __action133<
         __5,
     )
 }
+#[allow(clippy::type_complexity)]
 
 pub trait __ToTriple<'err, 'input, 'v, >
 {

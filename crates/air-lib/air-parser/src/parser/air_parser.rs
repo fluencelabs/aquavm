@@ -102,7 +102,7 @@ fn errors_to_labels(
             ParseError::ExtraToken {
                 token: (start, _, end),
             } => Label::primary(file_id, start.into()..end.into()).with_message("extra token"),
-            ParseError::UnrecognizedEOF { location, expected } => {
+            ParseError::UnrecognizedEof { location, expected } => {
                 Label::primary(file_id, location.into()..(location + 1).into())
                     .with_message(format!("expected {}", pretty_expected(expected)))
             }
