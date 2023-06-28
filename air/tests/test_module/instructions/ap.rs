@@ -18,6 +18,7 @@ use air::ExecutionCidState;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
+use std::rc::Rc;
 
 #[test]
 fn ap_with_scalars() {
@@ -384,7 +385,15 @@ fn ap_canon_stream_with_lambda() {
 #[test]
 fn ap_canon_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service());
+    let arg_tetraplets = Rc::new(RefCell::new(vec![]));
+
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+        let arg_tetraplets_inner = arg_tetraplets.clone();
+        arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
+        CallServiceResult::ok(params.arguments.remove(0))
+    });
+
+    let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
     let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id);
 
     let service_name = "some_service_name";
