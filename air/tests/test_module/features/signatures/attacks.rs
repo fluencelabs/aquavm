@@ -464,6 +464,7 @@ fn test_attack_replay() {
     let expected = PreparationError::DataSignatureCheckError(verification::DataVerifierError::SignatureMismatch {
         error: nested_error,
         cids,
+        peer_id: alice_peer_id,
     });
     assert_error_eq!(&res_replay, expected);
 }

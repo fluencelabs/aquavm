@@ -36,10 +36,11 @@ pub enum DataVerifierError {
     #[error("peer_id doens't match any public key: {0:?}")]
     PeerIdNotFound(String),
 
-    #[error("signature mismatch: {error:?}, values: CIDS: {cids:?}")]
+    #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
     SignatureMismatch {
         error: fluence_keypair::error::VerificationError,
         cids: Vec<Box<str>>,
+        peer_id: String,
     },
 
     #[error(
@@ -97,6 +98,7 @@ impl<'data> DataVerifier<'data> {
                 .map_err(|error| DataVerifierError::SignatureMismatch {
                     error,
                     cids: peer_info.cids.clone(),
+                    peer_id: peer_info.public_key.to_peer_id().to_string(),
                 })?;
         }
         Ok(())
