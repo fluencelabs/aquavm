@@ -15,7 +15,7 @@
  */
 
 use air_interpreter_data::InterpreterData;
-use air_interpreter_signatures::FullSignatureStore;
+use air_interpreter_signatures::SignatureStore;
 
 // TODO replace with VerificationError
 use crate::PreparationError;
@@ -26,7 +26,7 @@ pub(crate) fn verify(
     prev_data: &InterpreterData,
     current_data: &InterpreterData,
     particle_id: &str,
-) -> Result<FullSignatureStore, PreparationError> {
+) -> Result<SignatureStore, PreparationError> {
     use air_interpreter_data::verification;
 
     current_data.cid_info.verify()?;
@@ -46,6 +46,6 @@ pub(crate) fn verify(
     _prev_data: &InterpreterData,
     _current_data: &InterpreterData,
     _particle_id: &str,
-) -> Result<FullSignatureStore, PreparationError> {
+) -> Result<SignatureStore, PreparationError> {
     Ok(<_>::default())
 }

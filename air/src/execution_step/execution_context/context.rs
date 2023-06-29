@@ -29,9 +29,8 @@ use air_interpreter_data::GlobalStreamGens;
 use air_interpreter_data::RestrictedStreamGens;
 use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
-use air_interpreter_signatures::CidTracker;
-use air_interpreter_signatures::FullSignatureStore;
 use air_interpreter_signatures::PeerCidTracker;
+use air_interpreter_signatures::SignatureStore;
 
 use std::rc::Rc;
 
@@ -82,7 +81,7 @@ pub(crate) struct ExecutionCtx<'i> {
     /// Signatures' store.
     ///
     /// It contains peers' signatures for verification.
-    pub(crate) signature_store: FullSignatureStore,
+    pub(crate) signature_store: SignatureStore,
 
     /// Local signatures tracker.
     ///
@@ -95,7 +94,7 @@ impl<'i> ExecutionCtx<'i> {
         prev_ingredients: ExecCtxIngredients,
         current_ingredients: ExecCtxIngredients,
         call_results: CallResults,
-        signature_store: FullSignatureStore,
+        signature_store: SignatureStore,
         run_parameters: &RunParameters,
     ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);

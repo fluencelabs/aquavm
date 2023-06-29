@@ -22,20 +22,6 @@ use fluence_keypair::KeyPair;
 
 use std::rc::Rc;
 
-pub trait CidTracker {
-    type Signature;
-
-    fn new(current_peer_id: impl Into<Rc<String>>) -> Self;
-
-    fn register<T>(&mut self, peer: &str, cid: &CID<T>);
-
-    fn gen_signature(
-        &self,
-        particle_id: &str,
-        keypair: &KeyPair,
-    ) -> Result<Self::Signature, SigningError>;
-}
-
 /// The tracker that collect current peer's CIDs only.
 #[derive(Debug)]
 pub struct PeerCidTracker {
@@ -43,45 +29,26 @@ pub struct PeerCidTracker {
     cids: Vec<Box<str>>,
 }
 
-impl CidTracker for PeerCidTracker {
-    type Signature = crate::Signature;
-
-    fn new(current_peer_id: impl Into<Rc<String>>) -> Self {
+impl PeerCidTracker {
+    pub fn new(current_peer_id: impl Into<Rc<String>>) -> Self {
         Self {
             current_peer_id: current_peer_id.into(),
             cids: vec![],
         }
     }
 
-    fn register<T>(&mut self, peer: &str, cid: &CID<T>) {
+    pub fn register<T>(&mut self, peer: &str, cid: &CID<T>) {
         if peer == *self.current_peer_id {
             self.cids.push(cid.clone().into_inner().into())
         }
     }
 
-    fn gen_signature(
+    pub fn gen_signature(
         &self,
         particle_id: &str,
         keypair: &KeyPair,
-    ) -> Result<Self::Signature, SigningError> {
+    ) -> Result<crate::Signature, SigningError> {
         sign_cids(self.cids.clone(), particle_id, keypair)
-    }
-}
-
-#[derive(Debug)]
-pub struct NullCidTracker;
-
-impl CidTracker for NullCidTracker {
-    type Signature = ();
-
-    fn new(_current_peer_id: impl Into<Rc<String>>) -> Self {
-        Self
-    }
-
-    fn register<T>(&mut self, _peer: &str, _cid: &CID<T>) {}
-
-    fn gen_signature(&self, _partcle_id: &str, _keypair: &KeyPair) -> Result<(), SigningError> {
-        Ok(())
     }
 }
 

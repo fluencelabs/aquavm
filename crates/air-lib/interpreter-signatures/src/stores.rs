@@ -25,9 +25,9 @@ use std::hash::Hash;
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct FullSignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
+pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
 
-impl<Key: Hash + Eq, Sign> FullSignatureStore<Key, Sign> {
+impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     pub fn new() -> Self {
         Default::default()
     }
@@ -53,7 +53,7 @@ impl<Key: Hash + Eq, Sign> FullSignatureStore<Key, Sign> {
     }
 }
 
-impl<Key: Hash + Eq, Sign> Default for FullSignatureStore<Key, Sign> {
+impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
     fn default() -> Self {
         Self(Default::default())
     }

@@ -17,7 +17,7 @@
 use crate::{CanonResult, ExecutedState, InterpreterData};
 
 use air_interpreter_cid::CID;
-use air_interpreter_signatures::{FullSignatureStore, PublicKey, Signature};
+use air_interpreter_signatures::{PublicKey, Signature, SignatureStore};
 use thiserror::Error as ThisError;
 
 use std::collections::HashMap;
@@ -103,7 +103,7 @@ impl<'data> DataVerifier<'data> {
     }
 
     // TODO enforce merging only verified sets
-    pub fn merge(mut self, other: Self) -> Result<FullSignatureStore, DataVerifierError> {
+    pub fn merge(mut self, other: Self) -> Result<SignatureStore, DataVerifierError> {
         use std::collections::hash_map::Entry::*;
 
         for (other_peer_pk, mut other_info) in other.grouped_cids {
@@ -130,7 +130,7 @@ impl<'data> DataVerifier<'data> {
                 }
             }
         }
-        let mut store = FullSignatureStore::new();
+        let mut store = SignatureStore::new();
         for peer_info in self.grouped_cids.into_values() {
             store.put(peer_info.public_key.clone(), peer_info.signature.clone())
         }

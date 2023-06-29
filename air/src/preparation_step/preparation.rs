@@ -21,7 +21,7 @@ use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
-use air_interpreter_signatures::FullSignatureStore;
+use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use fluence_keypair::KeyFormat;
 use fluence_keypair::KeyPair;
@@ -65,7 +65,7 @@ pub(crate) fn prepare<'i>(
     raw_air: &'i str,
     call_results: &[u8],
     run_parameters: RunParameters,
-    signature_store: FullSignatureStore,
+    signature_store: SignatureStore,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
@@ -127,7 +127,7 @@ fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
-    signature_store: FullSignatureStore,
+    signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)

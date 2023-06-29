@@ -21,7 +21,7 @@ use super::RestrictedStreamGens;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
-use air_interpreter_signatures::FullSignatureStore;
+use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
 
 use serde::Deserialize;
@@ -64,7 +64,7 @@ pub struct InterpreterData {
     ///
     /// Every peer signs call results and canon values it produced (all together), and stores the signatures
     /// in this store.
-    pub signatures: FullSignatureStore,
+    pub signatures: SignatureStore,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -98,7 +98,7 @@ impl InterpreterData {
         streams: GlobalStreamGens,
         restricted_streams: RestrictedStreamGens,
         cid_info: CidInfo,
-        signatures: FullSignatureStore,
+        signatures: SignatureStore,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
     ) -> Self {

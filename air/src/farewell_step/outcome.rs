@@ -24,7 +24,6 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
-use air_interpreter_signatures::CidTracker;
 use air_utils::measure;
 use fluence_keypair::KeyPair;
 

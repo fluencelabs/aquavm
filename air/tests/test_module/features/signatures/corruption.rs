@@ -16,10 +16,9 @@
 
 use air::ExecutionCidState;
 use air::PreparationError;
-use air_interpreter_signatures::CidTracker as _;
-use air_interpreter_signatures::FullSignatureStore;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::PublicKey;
+use air_interpreter_signatures::SignatureStore;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
@@ -63,7 +62,7 @@ fn test_attack_replace_value() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
@@ -138,7 +137,7 @@ fn test_attack_replace_tetraplet() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
@@ -220,7 +219,7 @@ fn test_attack_replace_call_result() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
@@ -309,7 +308,7 @@ fn test_attack_replace_canon_value() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));
@@ -407,7 +406,7 @@ fn test_attack_replace_canon_result_values() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));
@@ -509,7 +508,7 @@ fn test_attack_replace_canon_result_tetraplet() {
     }
     assert_eq!(cnt, 1, "test validity failed");
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_canon_result_cid(&mallory_trace[2]));

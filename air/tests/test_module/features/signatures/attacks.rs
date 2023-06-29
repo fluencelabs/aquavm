@@ -15,7 +15,7 @@
  */
 
 use air::{ExecutionCidState, PreparationError};
-use air_interpreter_signatures::{CidTracker, FullSignatureStore, PeerCidTracker, PublicKey};
+use air_interpreter_signatures::{SignatureStore, PeerCidTracker, PublicKey};
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use semver::Version;
@@ -38,7 +38,7 @@ fn test_attack_injection_current_peer_scalar() {
 
     let mut alice_cid_state = ExecutionCidState::new();
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
-    let mut alice_signature_store = FullSignatureStore::new();
+    let mut alice_signature_store = SignatureStore::new();
 
     let alice_call_1 = scalar_tracked!("good result", &mut alice_cid_state, peer = &alice_peer_id);
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
@@ -114,7 +114,7 @@ fn test_attack_injection_current_peer_stream() {
 
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
-    let mut alice_signature_store = FullSignatureStore::new();
+    let mut alice_signature_store = SignatureStore::new();
     let alice_signature = alice_signature_tracker.gen_signature("", &alice_keypair).unwrap();
     alice_signature_store.put(alice_pk, alice_signature);
 
@@ -126,7 +126,7 @@ fn test_attack_injection_current_peer_stream() {
 
     let mut mallory_signature_tracker = PeerCidTracker::new(mallory_peer_id.clone());
     mallory_signature_tracker.register(&*mallory_peer_id, &extract_service_result_cid(&mallory_call_2));
-    let mut mallory_signature_store = FullSignatureStore::new();
+    let mut mallory_signature_store = SignatureStore::new();
     let mallory_signature = mallory_signature_tracker.gen_signature("", &mallory_keypair).unwrap();
     mallory_signature_store.put(mallory_pk, mallory_signature);
 
@@ -192,7 +192,7 @@ fn test_attack_injection_current_injection_unused() {
     let fake_call_3 = unused!("fake result", peer = &alice_peer_id);
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
-    let mut alice_signature_store = FullSignatureStore::new();
+    let mut alice_signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
@@ -267,7 +267,7 @@ fn test_attack_injection_other_peer_scalar() {
 
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
 
     let mut alice_cid_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_cid_tracker.register(&alice_peer_id, &extract_service_result_cid(&mallory_trace[0]));
@@ -325,7 +325,7 @@ fn test_attack_injection_other_peer_stream() {
     let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
     let fake_call_3 = stream_tracked!("fake result", 0, &mut mallory_cid_state, peer = &alice_peer_id);
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
     let alice_signature = alice_signature_tracker.gen_signature("", &alice_keypair).unwrap();
@@ -385,7 +385,7 @@ fn test_attack_injection_other_peer_unused() {
     let mallory_call_2 = scalar_tracked!("valid result", &mut mallory_cid_state, peer = &mallory_peer_id);
     let fake_call_3 = unused!("fake result", peer = &alice_peer_id);
 
-    let mut signature_store = FullSignatureStore::new();
+    let mut signature_store = SignatureStore::new();
     let mut alice_signature_tracker = PeerCidTracker::new(alice_peer_id.clone());
     alice_signature_tracker.register(&*alice_peer_id, &extract_service_result_cid(&alice_call_1));
     let alice_signature = alice_signature_tracker.gen_signature("", &alice_keypair).unwrap();

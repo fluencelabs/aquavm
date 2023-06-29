@@ -17,17 +17,16 @@
 use crate::ExecutionError;
 
 // TODO rename to SigningTracker
-use air_interpreter_signatures::{FullSignatureStore, PeerCidTracker};
+use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
 
 #[cfg(feature = "gen_signatures")]
 pub(crate) fn sign_produced_cids(
     signature_tracker: &mut PeerCidTracker,
-    signature_store: &mut FullSignatureStore,
+    signature_store: &mut SignatureStore,
     particle_id: &str,
     keypair: &fluence_keypair::KeyPair,
 ) -> Result<(), ExecutionError> {
     use crate::UncatchableError;
-    use air_interpreter_signatures::CidTracker as _;
 
     let signature = signature_tracker
         .gen_signature(particle_id, keypair)
@@ -40,7 +39,7 @@ pub(crate) fn sign_produced_cids(
 #[cfg(not(feature = "gen_signatures"))]
 pub(crate) fn sign_produced_cids(
     _signature_tracker: &mut PeerCidTracker,
-    _signature_store: &mut FullSignatureStore,
+    _signature_store: &mut SignatureStore,
     _particle_id: &str,
     _keypair: &fluence_keypair::KeyPair,
 ) -> Result<(), ExecutionError> {
