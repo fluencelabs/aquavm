@@ -32,43 +32,21 @@ pub(crate) struct ValuesMatrix<T> {
     values: TiVec<GenerationIdx, Vec<T>>,
 }
 
-impl<T: Clone> ValuesMatrix<T> {
+impl<T> ValuesMatrix<T> {
     pub fn new() -> Self {
         Self { values: TiVec::new() }
-    }
-
-    /*
-    pub fn from_value(value: T, generation_idx: GenerationIdx) -> Self {
-        let mut values = Self::new();
-        values.add_value_to_generation(value, generation_idx);
-
-        values
-    }
-     */
-
-    pub fn add_value_to_generation(&mut self, value: T, generation_idx: GenerationIdx) {
-        if generation_idx >= self.values.len() {
-            self.values.resize(generation_idx.into(), Vec::new());
-        }
-
-        self.values[generation_idx].push(value);
     }
 
     pub fn remove_empty_generations(&mut self) {
         self.values.retain(|generation| generation.is_empty())
     }
 
-    /*
-    pub fn is_empty(&self) -> bool {
-        self.values.is_empty()
-    }
-     */
-
     pub fn len(&self) -> GenerationIdx {
         self.values.len().into()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &T> {
+        println!("inside value matrix iter");
         self.values.iter().flat_map(|generation| generation.iter())
     }
 
@@ -80,11 +58,21 @@ impl<T: Clone> ValuesMatrix<T> {
     }
 }
 
+impl<T: Clone> ValuesMatrix<T> {
+    pub fn add_value_to_generation(&mut self, value: T, generation_idx: GenerationIdx) {
+        if generation_idx >= self.values.len() {
+            self.values.resize(generation_idx.into(), Vec::new());
+        }
+
+        self.values[generation_idx].push(value);
+    }
+}
+
 /// It's intended to handle new values from call results.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct NewValuesMatrix<T>(ValuesMatrix<T>);
 
-impl<T: Clone> NewValuesMatrix<T> {
+impl<T> NewValuesMatrix<T> {
     pub fn new() -> Self {
         let values = ValuesMatrix::new();
         Self(values)
@@ -98,21 +86,9 @@ impl<T: Clone> NewValuesMatrix<T> {
         Self(values_matrix)
     }
 
-    pub fn add_to_last_generation(&mut self, value: T) {
-        let last_generation_idx = self.last_generation_idx();
-        self.0.add_value_to_generation(value, last_generation_idx);
-    }
-
     pub fn add_new_generation(&mut self) {
         self.0.values.push(vec![]);
     }
-
-    /*
-    pub fn last_generation(&self) -> &[T] {
-        let last_generation_idx = self.last_generation_idx();
-        &self.0.values[last_generation_idx]
-    }
-     */
 
     pub fn remove_empty_generations(&mut self) {
         self.0.remove_empty_generations();
@@ -123,6 +99,7 @@ impl<T: Clone> NewValuesMatrix<T> {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &T> {
+        println!("new values iter");
         self.0.iter()
     }
 
@@ -136,6 +113,13 @@ impl<T: Clone> NewValuesMatrix<T> {
         }
 
         self.0.values.len().into()
+    }
+}
+
+impl<T: Clone> NewValuesMatrix<T> {
+    pub fn add_to_last_generation(&mut self, value: T) {
+        let last_generation_idx = self.last_generation_idx();
+        self.0.add_value_to_generation(value, last_generation_idx);
     }
 }
 

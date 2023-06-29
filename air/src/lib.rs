@@ -26,6 +26,8 @@
     unreachable_patterns
 )]
 
+extern crate core;
+
 mod execution_step;
 mod farewell_step;
 mod preparation_step;

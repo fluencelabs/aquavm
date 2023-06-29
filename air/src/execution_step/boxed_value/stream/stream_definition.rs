@@ -61,21 +61,13 @@ impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
         }
     }
 
-    /*
-    pub(crate) fn is_empty(&self) -> bool {
-        let is_prev_empty = self.previous_values.slice_iter().all(|v| v.is_empty());
-        let is_curr_empty = self.current_values.slice_iter().all(|v| v.is_empty());
-        let is_new_empty = self.new_values.slice_iter().all(|v| v.is_empty());
-
-        is_prev_empty && is_curr_empty && is_new_empty
-    }
-     */
-
     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
-        self.previous_values
+        let t = self.previous_values
             .iter()
             .chain(self.current_values.iter())
-            .chain(self.new_values.iter())
+            .chain(self.new_values.iter());
+        println!("after chaining");
+        t
     }
 
     // Contract: all slices will be non-empty
@@ -197,96 +189,259 @@ impl fmt::Display for Generation {
 #[cfg(test)]
 mod test {
     use super::Generation;
-    use super::Stream;
-    use super::ValueAggregate;
-    use super::ValueSource;
     use crate::execution_step::ServiceResultAggregate;
+    use crate::execution_step::ValueAggregate;
+    use crate::JValue;
 
     use air_interpreter_cid::CID;
     use serde_json::json;
 
     use std::rc::Rc;
 
+    type Stream = super::Stream<ValueAggregate>;
+
+    fn create_value(value: JValue) -> ValueAggregate {
+        ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(value), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
+        )
+    }
+
     #[test]
-    fn test_slice_iter() {
-        let value_1 = ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-            CID::new("some fake cid").into(),
-        );
-        let value_2 = ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(json!("value")), <_>::default(), 1.into()),
-            CID::new("some fake cid").into(),
-        );
-        let mut stream = Stream::from_generations_count(2.into(), 0.into());
+    fn test_iter() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let mut stream = Stream::new();
 
-        stream
-            .add_value(value_1, Generation::previous(0), ValueSource::PreviousData)
-            .unwrap();
-        stream
-            .add_value(value_2, Generation::previous(1), ValueSource::PreviousData)
-            .unwrap();
+        stream.add_value(value_1.clone(), Generation::previous(0));
+        stream.add_value(value_2.clone(), Generation::previous(1));
 
-        let slice = stream
-            .slice_iter(Generation::previous(0), Generation::previous(1))
-            .unwrap();
-        assert_eq!(slice.len, 2);
+        let mut iter = stream.iter();
+        println!("after getting iter");
+        assert_eq!(iter.next(), Some(&value_1));
+        assert_eq!(iter.next(), Some(&value_2));
+        assert_eq!(iter.next(), None);
+    }
 
-        let slice = stream.slice_iter(Generation::previous(0), Generation::Last).unwrap();
-        assert_eq!(slice.len, 2);
+    #[test]
+    fn test_slice_iter_prev() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let value_4 = create_value(json!("value_4"));
+        let mut stream = Stream::new();
 
-        let slice = stream
-            .slice_iter(Generation::previous(0), Generation::previous(0))
-            .unwrap();
-        assert_eq!(slice.len, 1);
+        stream.add_value(value_1.clone(), Generation::previous(0));
+        stream.add_value(value_2.clone(), Generation::previous(0));
+        stream.add_value(value_3.clone(), Generation::previous(0));
+        stream.add_value(value_4.clone(), Generation::previous(0));
 
-        let slice = stream.slice_iter(Generation::Last, Generation::Last).unwrap();
-        assert_eq!(slice.len, 1);
+        let mut slice_iter = stream.slice_iter();
+        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(slice_iter.next(), None);
+    }
+
+    #[test]
+    fn test_slice_iter_current() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let value_4 = create_value(json!("value_4"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_2.clone(), Generation::current(0));
+        stream.add_value(value_3.clone(), Generation::current(0));
+        stream.add_value(value_4.clone(), Generation::current(0));
+
+        let mut slice_iter = stream.slice_iter();
+        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(slice_iter.next(), None);
+    }
+
+    #[test]
+    fn test_slice_iter_new() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let value_4 = create_value(json!("value_4"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::new());
+        stream.add_value(value_2.clone(), Generation::new());
+        stream.add_value(value_3.clone(), Generation::new());
+        stream.add_value(value_4.clone(), Generation::new());
+
+        let mut slice_iter = stream.slice_iter();
+        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(slice_iter.next(), None);
+    }
+
+    #[test]
+    fn test_iter_on_empty_stream() {
+        let stream = Stream::new();
+
+        let mut slice = stream.iter();
+        assert_eq!(slice.next(), None);
     }
 
     #[test]
     fn test_slice_on_empty_stream() {
-        let stream = Stream::from_generations_count(2.into(), 0.into());
+        let stream = Stream::new();
 
-        let slice = stream.slice_iter(Generation::previous(0), Generation::previous(1));
-        assert!(slice.is_none());
-
-        let slice = stream.slice_iter(Generation::previous(0), Generation::Last);
-        assert!(slice.is_none());
-
-        let slice = stream.slice_iter(Generation::previous(0), Generation::previous(0));
-        assert!(slice.is_none());
-
-        let slice = stream.slice_iter(Generation::Last, Generation::Last);
-        assert!(slice.is_none());
+        let mut slice = stream.slice_iter();
+        assert_eq!(slice.next(), None);
     }
 
     #[test]
-    fn generation_from_current_data() {
-        let value_1 = ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(json!("value_1")), <_>::default(), 1.into()),
-            CID::new("some fake cid").into(),
-        );
-        let value_2 = ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(json!("value_2")), <_>::default(), 2.into()),
-            CID::new("some fake cid").into(),
-        );
-        let mut stream = Stream::from_generations_count(5.into(), 5.into());
+    fn generation_from_current_data_after_previous() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let mut stream = Stream::new();
 
-        stream
-            .add_value(value_1.clone(), Generation::previous(2), ValueSource::CurrentData)
-            .unwrap();
-        stream
-            .add_value(value_2.clone(), Generation::previous(4), ValueSource::PreviousData)
-            .unwrap();
+        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_2.clone(), Generation::previous(0));
 
-        let generations_count = stream.generations_count();
-        assert_eq!(generations_count, 10);
+        let mut iter = stream.iter();
+        assert_eq!(iter.next(), Some(&value_2));
+        assert_eq!(iter.next(), Some(&value_1));
+        assert_eq!(iter.next(), None);
+    }
 
-        let mut iter = stream.iter(Generation::Last).unwrap();
-        let stream_value_1 = iter.next().unwrap();
-        let stream_value_2 = iter.next().unwrap();
+    #[test]
+    fn generation_from_new_data_after_current_and_previous() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let mut stream = Stream::new();
 
-        assert_eq!(stream_value_1, &value_2);
-        assert_eq!(stream_value_2, &value_1);
+        stream.add_value(value_1.clone(), Generation::new());
+        stream.add_value(value_2.clone(), Generation::current(0));
+        stream.add_value(value_3.clone(), Generation::previous(0));
+
+        let mut iter = stream.iter();
+        assert_eq!(iter.next(), Some(&value_3));
+        assert_eq!(iter.next(), Some(&value_2));
+        assert_eq!(iter.next(), Some(&value_1));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn empty_generations_skipped_in_slice_iter_prev() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::previous(0));
+        stream.add_value(value_2.clone(), Generation::previous(1));
+        stream.add_value(value_3.clone(), Generation::previous(3));
+
+        let mut slice_iter = stream.slice_iter();
+        assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
+        assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
+        assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));
+        assert_eq!(slice_iter.next(), None);
+    }
+
+    #[test]
+    fn empty_generations_skipped_in_slice_iter_current() {
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_2.clone(), Generation::current(1));
+        stream.add_value(value_3.clone(), Generation::current(3));
+
+        let mut slice_iter = stream.slice_iter();
+        assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
+        assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
+        assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));
+        assert_eq!(slice_iter.next(), None);
+    }
+
+    #[test]
+    fn compatification_works() {
+        use super::TraceHandler;
+        use air_interpreter_data::ApResult;
+        use air_interpreter_data::ExecutedState;
+        use air_interpreter_data::ExecutionTrace;
+        use air_interpreter_data::GenerationIdx;
+
+        let value_1 = create_value(json!("value_1"));
+        let value_2 = create_value(json!("value_2"));
+        let value_3 = create_value(json!("value_3"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_2.clone(), Generation::current(1));
+        stream.add_value(value_3.clone(), Generation::current(3));
+
+        let prev_trace = vec![
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(0)],
+            }),
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(0)],
+            }),
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(0)],
+            }),
+        ];
+        let prev_trace = ExecutionTrace::from(prev_trace);
+        let curr_trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(prev_trace, curr_trace);
+
+        let compatification_result = stream.compactify(&mut trace_ctx);
+        assert!(compatification_result.is_ok());
+
+        let actual_trace = trace_ctx.into_result_trace();
+        let expected_trace = vec![
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(0)],
+            }),
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(1)],
+            }),
+            ExecutedState::Ap(ApResult {
+                res_generations: vec![GenerationIdx::from(2)],
+            }),
+        ];
+        let expected_trace = ExecutionTrace::from(expected_trace);
+
+        assert_eq!(actual_trace, expected_trace);
+    }
+
+    #[test]
+    fn compatification_error() {
+        use super::TraceHandler;
+        use crate::ExecutionError;
+        use crate::UncatchableError;
+        use air_interpreter_data::ExecutedState;
+        use air_interpreter_data::ExecutionTrace;
+        use air_interpreter_data::ParResult;
+
+        let value_1 = create_value(json!("value_1"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::current(0));
+
+        let prev_trace = vec![ExecutedState::Par(ParResult {
+            left_size: 0,
+            right_size: 0,
+        })];
+        let prev_trace = ExecutionTrace::from(prev_trace);
+        let curr_trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(prev_trace, curr_trace);
+
+        let compatification_result = stream.compactify(&mut trace_ctx);
+        assert!(matches!(
+            compatification_result,
+            Err(ExecutionError::Uncatchable(
+                UncatchableError::GenerationCompatificationError(_)
+            ))
+        ));
     }
 }

@@ -15,7 +15,6 @@
  */
 
 use air_interpreter_data::ExecutionTrace;
-use air_parser::AirPos;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -90,15 +89,6 @@ fn new_with_global_streams_seq() {
         scalar!(json!([1, 2]), peer = local_vm_peer_id_1, args = [json!([1, 2])]),
     ];
     assert_eq!(actual_trace, expected_trace);
-
-    let data = data_from_result(&vm_2_result);
-    let actual_restricted_streams = data.restricted_streams;
-    let expected_restricted_streams = maplit::hashmap! {
-        "$stream".to_string() => maplit::hashmap! {
-            AirPos::from(282) => vec![1.into(), 1.into()]
-        }
-    };
-    assert_eq!(actual_restricted_streams, expected_restricted_streams);
 }
 
 #[test]
@@ -360,15 +350,6 @@ fn new_in_fold_with_ap() {
         scalar!(json!(["none"]), peer = vm_peer_id, args = [json!(["none"])]),
     ];
     assert_eq!(actual_trace, expected_trace);
-
-    let data = data_from_result(&result);
-    let actual_restricted_streams = data.restricted_streams;
-    let expected_restricted_streams = maplit::hashmap! {
-        "$s1".to_string() => maplit::hashmap! {
-            AirPos::from(146) => vec![1.into(), 1.into(), 1.into(), 1.into(), 1.into()]
-        }
-    };
-    assert_eq!(actual_restricted_streams, expected_restricted_streams);
 }
 
 #[test]
@@ -411,25 +392,6 @@ fn new_with_streams_with_errors() {
         ),
     ];
     assert_eq!(actual_trace, expected_trace);
-
-    let data = data_from_result(&result);
-
-    let actual_restricted_streams = data.restricted_streams;
-    let expected_restricted_streams = maplit::hashmap! {
-        "$restricted_stream_2".to_string() => maplit::hashmap! {
-            AirPos::from(216) => vec![1.into()]
-        },
-        "$restricted_stream_1".to_string() => maplit::hashmap! {
-            AirPos::from(141) => vec![0.into()]
-        }
-    };
-    assert_eq!(actual_restricted_streams, expected_restricted_streams);
-
-    let actual_global_streams = data.global_streams;
-    let expected_global_streams = maplit::hashmap! {
-        "$global_stream".to_string() => 1.into(),
-    };
-    assert_eq!(actual_global_streams, expected_global_streams);
 }
 
 #[test]
