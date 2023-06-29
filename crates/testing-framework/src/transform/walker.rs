@@ -322,6 +322,6 @@ mod tests {
                 function = "func",
                 args = vec![json!(1), json!(peer_id3)]
             )])
-        )
+        );
     }
 }

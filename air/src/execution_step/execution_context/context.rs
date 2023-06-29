@@ -199,19 +199,6 @@ impl RcRunParameters {
     }
 }
 
-/*
-impl Default for RcRunParameters {
-    fn default() -> Self {
-        Self {
-            init_peer_id: "".into(),
-            current_peer_id: Default::default(),
-            timestamp: Default::default(),
-            ttl: Default::default(),
-        }
-    }
-}
-*/
-
 impl<'i> Display for ExecutionCtx<'i> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "scalars:")?;
