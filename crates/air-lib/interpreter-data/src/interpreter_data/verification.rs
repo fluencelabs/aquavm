@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::{CanonResult, ExecutedState, InterpreterData};
+use crate::{CanonResult, CidInfo, ExecutedState, ExecutionTrace, InterpreterData};
 
 use air_interpreter_cid::CID;
 use air_interpreter_signatures::{PublicKey, Signature, SignatureStore};
@@ -76,7 +76,7 @@ impl<'data> DataVerifier<'data> {
             })
             .collect();
 
-        collect_peers_cids(data, &mut grouped_cids)?;
+        collect_peers_cids_from_trace(&data.trace, &data.cid_info, &mut grouped_cids)?;
 
         // sort cids for canonicalization
         for peer_info in grouped_cids.values_mut() {
@@ -138,23 +138,22 @@ impl<'data> DataVerifier<'data> {
     }
 }
 
-fn collect_peers_cids<'data>(
-    data: &'data InterpreterData,
+fn collect_peers_cids_from_trace<'data>(
+    trace: &'data ExecutionTrace,
+    cid_info: &'data CidInfo,
     grouped_cids: &mut HashMap<Box<str>, PeerInfo<'data>>,
 ) -> Result<(), DataVerifierError> {
-    for elt in &data.trace {
+    for elt in trace {
         match elt {
             ExecutedState::Call(ref call) => {
                 let cid = call.get_cid();
                 if let Some(cid) = cid {
                     // TODO refactor
-                    let service_result = data
-                        .cid_info
+                    let service_result = cid_info
                         .service_result_store
                         .get(cid)
                         .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-                    let tetraplet = data
-                        .cid_info
+                    let tetraplet = cid_info
                         .tetraplet_store
                         .get(&service_result.tetraplet_cid)
                         .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
@@ -165,13 +164,11 @@ fn collect_peers_cids<'data>(
             }
             ExecutedState::Canon(CanonResult(ref cid)) => {
                 // TODO refactor
-                let canon_result = data
-                    .cid_info
+                let canon_result = cid_info
                     .canon_result_store
                     .get(cid)
                     .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);
-                let tetraplet = data
-                    .cid_info
+                let tetraplet = cid_info
                     .tetraplet_store
                     .get(&canon_result.tetraplet)
                     .expect(CANNOT_HAPPEN_IN_VERIFIED_CID_STORE);

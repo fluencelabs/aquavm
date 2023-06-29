@@ -16,7 +16,6 @@
 
 use crate::ExecutionError;
 
-// TODO rename to SigningTracker
 use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
 
 #[cfg(feature = "gen_signatures")]

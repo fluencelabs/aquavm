@@ -102,7 +102,7 @@ fn execute_air_impl(
     );
 
     match sign_produced_cids(
-        &mut exec_ctx.signature_tracker,
+        &mut exec_ctx.peer_cid_tracker,
         &mut exec_ctx.signature_store,
         &particle_id,
         &keypair,

@@ -83,10 +83,10 @@ pub(crate) struct ExecutionCtx<'i> {
     /// It contains peers' signatures for verification.
     pub(crate) signature_store: SignatureStore,
 
-    /// Local signatures tracker.
+    /// Current peer's CID tracker.
     ///
-    /// It gathers current peer's CIDs (call results and canon results) for signing.
-    pub(crate) signature_tracker: PeerCidTracker,
+    /// It gathers current peer's CIDs (call results and canon results) for further signing.
+    pub(crate) peer_cid_tracker: PeerCidTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -107,7 +107,7 @@ impl<'i> ExecutionCtx<'i> {
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
 
-        let signature_tracker = PeerCidTracker::new(run_parameters.current_peer_id.clone());
+        let peer_cid_tracker = PeerCidTracker::new(run_parameters.current_peer_id.clone());
 
         Self {
             run_parameters,
@@ -118,7 +118,7 @@ impl<'i> ExecutionCtx<'i> {
             stream_maps: <_>::default(),
             cid_state,
             signature_store,
-            signature_tracker,
+            peer_cid_tracker,
             scalars: <_>::default(),
             next_peer_pks: <_>::default(),
             last_error_descriptor: <_>::default(),
@@ -137,11 +137,11 @@ impl<'i> ExecutionCtx<'i> {
     }
 
     pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: &CID<ServiceResultCidAggregate>) {
-        self.signature_tracker.register(peer_id, cid);
+        self.peer_cid_tracker.register(peer_id, cid);
     }
 
     pub(crate) fn record_canon_cid(&mut self, peer_id: &str, cid: &CID<CanonResultCidAggregate>) {
-        self.signature_tracker.register(peer_id, cid);
+        self.peer_cid_tracker.register(peer_id, cid);
     }
 }
 

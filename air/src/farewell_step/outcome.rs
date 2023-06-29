@@ -100,7 +100,7 @@ fn populate_outcome_from_contexts(
     };
 
     let current_signature = exec_ctx
-        .signature_tracker
+        .peer_cid_tracker
         .gen_signature(&exec_ctx.run_parameters.particle_id, keypair)
         .expect("siging shouldn't fail");
     let current_pubkey = keypair.public();
