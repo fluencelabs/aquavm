@@ -19,6 +19,7 @@ use crate::ExecutionError;
 use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
 
 #[cfg(feature = "gen_signatures")]
+#[tracing::instrument(skip_all)]
 pub(crate) fn sign_produced_cids(
     signature_tracker: &mut PeerCidTracker,
     signature_store: &mut SignatureStore,
@@ -36,6 +37,7 @@ pub(crate) fn sign_produced_cids(
 }
 
 #[cfg(not(feature = "gen_signatures"))]
+#[tracing::instrument(skip_all)]
 pub(crate) fn sign_produced_cids(
     _signature_tracker: &mut PeerCidTracker,
     _signature_store: &mut SignatureStore,
