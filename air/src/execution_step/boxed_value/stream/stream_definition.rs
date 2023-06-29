@@ -36,7 +36,7 @@ pub struct Stream<T> {
     new_values: NewValuesMatrix<T>,
 }
 
-impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
+impl<'value, T: 'value> Stream<T> {
     pub(crate) fn new() -> Self {
         Self {
             previous_values: ValuesMatrix::new(),
@@ -53,21 +53,11 @@ impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
         }
     }
 
-    pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
-        match generation {
-            Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
-            Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
-            Generation::New => self.new_values.add_to_last_generation(value),
-        }
-    }
-
     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
-        let t = self.previous_values
+        self.previous_values
             .iter()
             .chain(self.current_values.iter())
-            .chain(self.new_values.iter());
-        println!("after chaining");
-        t
+            .chain(self.new_values.iter())
     }
 
     // Contract: all slices will be non-empty
@@ -78,6 +68,22 @@ impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
             .chain(self.new_values.slice_iter())
     }
 
+    pub(super) fn new_values(&mut self) -> &mut NewValuesMatrix<T> {
+        &mut self.new_values
+    }
+}
+
+impl<'value, T: 'value + Clone> Stream<T> {
+    pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
+        match generation {
+            Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
+            Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
+            Generation::New => self.new_values.add_to_last_generation(value),
+        }
+    }
+}
+
+impl<'value, T: 'value + TracePosOperate> Stream<T> {
     /// Removes empty generations updating data.
     pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         self.previous_values.remove_empty_generations();
@@ -94,10 +100,6 @@ impl<'value, T: 'value + Clone + TracePosOperate> Stream<T> {
         Self::update_generations(self.new_values.slice_iter(), start_idx, trace_ctx)?;
 
         Ok(())
-    }
-
-    pub(super) fn new_values(&mut self) -> &mut NewValuesMatrix<T> {
-        &mut self.new_values
     }
 
     fn update_generations(
@@ -189,11 +191,20 @@ impl fmt::Display for Generation {
 #[cfg(test)]
 mod test {
     use super::Generation;
+    use super::TraceHandler;
+    use crate::ExecutionError;
+    use crate::UncatchableError;
     use crate::execution_step::ServiceResultAggregate;
     use crate::execution_step::ValueAggregate;
     use crate::JValue;
 
     use air_interpreter_cid::CID;
+    use air_interpreter_data::ApResult;
+    use air_interpreter_data::CanonResult;
+    use air_interpreter_data::TracePos;
+    use air_interpreter_data::ExecutedState;
+    use air_interpreter_data::ExecutionTrace;
+    use air_trace_handler::GenerationCompatificationError;
     use serde_json::json;
 
     use std::rc::Rc;
@@ -203,6 +214,13 @@ mod test {
     fn create_value(value: JValue) -> ValueAggregate {
         ValueAggregate::from_service_result(
             ServiceResultAggregate::new(Rc::new(value), <_>::default(), 1.into()),
+            CID::new("some fake cid").into(),
+        )
+    }
+
+    fn create_value_with_pos(value: JValue, trace_pos: TracePos) -> ValueAggregate {
+        ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(value), <_>::default(), trace_pos),
             CID::new("some fake cid").into(),
         )
     }
@@ -364,50 +382,30 @@ mod test {
 
     #[test]
     fn compatification_works() {
-        use super::TraceHandler;
-        use air_interpreter_data::ApResult;
-        use air_interpreter_data::ExecutedState;
-        use air_interpreter_data::ExecutionTrace;
-        use air_interpreter_data::GenerationIdx;
-
-        let value_1 = create_value(json!("value_1"));
-        let value_2 = create_value(json!("value_2"));
-        let value_3 = create_value(json!("value_3"));
+        let value_1 = create_value_with_pos(json!("value_1"), 0.into());
+        let value_2 = create_value_with_pos(json!("value_2"), 1.into());
+        let value_3 = create_value_with_pos(json!("value_3"), 2.into());
         let mut stream = Stream::new();
 
         stream.add_value(value_1.clone(), Generation::current(0));
-        stream.add_value(value_2.clone(), Generation::current(1));
-        stream.add_value(value_3.clone(), Generation::current(3));
+        stream.add_value(value_2.clone(), Generation::current(2));
+        stream.add_value(value_3.clone(), Generation::current(4));
 
-        let prev_trace = vec![
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(0)],
-            }),
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(0)],
-            }),
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(0)],
-            }),
-        ];
-        let prev_trace = ExecutionTrace::from(prev_trace);
-        let curr_trace = ExecutionTrace::from(vec![]);
-        let mut trace_ctx = TraceHandler::from_trace(prev_trace, curr_trace);
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+        let ap_result = ApResult::stub();
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result);
 
         let compatification_result = stream.compactify(&mut trace_ctx);
         assert!(compatification_result.is_ok());
 
         let actual_trace = trace_ctx.into_result_trace();
         let expected_trace = vec![
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(0)],
-            }),
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(1)],
-            }),
-            ExecutedState::Ap(ApResult {
-                res_generations: vec![GenerationIdx::from(2)],
-            }),
+            ExecutedState::Ap(ApResult::new(0.into())),
+            ExecutedState::Ap(ApResult::new(1.into())),
+            ExecutedState::Ap(ApResult::new(2.into())),
         ];
         let expected_trace = ExecutionTrace::from(expected_trace);
 
@@ -415,32 +413,87 @@ mod test {
     }
 
     #[test]
-    fn compatification_error() {
-        use super::TraceHandler;
-        use crate::ExecutionError;
-        use crate::UncatchableError;
-        use air_interpreter_data::ExecutedState;
-        use air_interpreter_data::ExecutionTrace;
-        use air_interpreter_data::ParResult;
+    fn compatification_works_with_mixed_generations() {
+        let value_1 = create_value_with_pos(json!("value_1"), 0.into());
+        let value_2 = create_value_with_pos(json!("value_2"), 1.into());
+        let value_3 = create_value_with_pos(json!("value_3"), 2.into());
+        let value_4 = create_value_with_pos(json!("value_1"), 3.into());
+        let value_5 = create_value_with_pos(json!("value_2"), 4.into());
+        let value_6 = create_value_with_pos(json!("value_3"), 5.into());
+        let mut stream = Stream::new();
 
+        stream.add_value(value_1.clone(), Generation::new());
+        stream.add_value(value_2.clone(), Generation::current(4));
+        stream.add_value(value_3.clone(), Generation::current(0));
+        stream.add_value(value_4.clone(), Generation::previous(100));
+        stream.add_value(value_5.clone(), Generation::new());
+        stream.add_value(value_6.clone(), Generation::current(2));
+
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+        let ap_result = ApResult::stub();
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result);
+
+        let compatification_result = stream.compactify(&mut trace_ctx);
+        assert!(compatification_result.is_ok());
+
+        let actual_trace = trace_ctx.into_result_trace();
+        let expected_trace = vec![
+            ExecutedState::Ap(ApResult::new(4.into())),
+            ExecutedState::Ap(ApResult::new(3.into())),
+            ExecutedState::Ap(ApResult::new(1.into())),
+            ExecutedState::Ap(ApResult::new(0.into())),
+            ExecutedState::Ap(ApResult::new(4.into())),
+            ExecutedState::Ap(ApResult::new(2.into())),
+        ];
+        let expected_trace = ExecutionTrace::from(expected_trace);
+
+        assert_eq!(actual_trace, expected_trace);
+    }
+
+    #[test]
+    fn compatification_invalid_state_error() {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
 
         stream.add_value(value_1.clone(), Generation::current(0));
 
-        let prev_trace = vec![ExecutedState::Par(ParResult {
-            left_size: 0,
-            right_size: 0,
-        })];
-        let prev_trace = ExecutionTrace::from(prev_trace);
-        let curr_trace = ExecutionTrace::from(vec![]);
-        let mut trace_ctx = TraceHandler::from_trace(prev_trace, curr_trace);
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+        let canon_result = CanonResult(Rc::new(CID::new("fake canon CID")));
+        trace_ctx.meet_canon_end(canon_result.clone());
+        trace_ctx.meet_canon_end(canon_result.clone());
+        trace_ctx.meet_canon_end(canon_result);
 
         let compatification_result = stream.compactify(&mut trace_ctx);
         assert!(matches!(
             compatification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(_)
+                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToInvalidState {..})
+            ))
+        ));
+    }
+
+    #[test]
+    fn compatification_points_to_nowhere_error() {
+        let value_1 = create_value(json!("value_1"));
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::current(0));
+
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+
+        let compatification_result = stream.compactify(&mut trace_ctx);
+        assert!(matches!(
+            compatification_result,
+            Err(ExecutionError::Uncatchable(
+                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToNowhere {..})
             ))
         ));
     }
