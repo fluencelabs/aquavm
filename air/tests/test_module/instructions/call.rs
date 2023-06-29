@@ -62,7 +62,7 @@ fn call_with_timestamp() {
 
     let script = r#"(call %init_peer_id% ("" "") [%timestamp%] result_name)"#;
 
-    let test_params = TestRunParameters::new(vm_peer_id, 1337, 0);
+    let test_params = TestRunParameters::new(vm_peer_id, 1337, 0, "");
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_trace = trace_from_result(&result);

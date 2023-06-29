@@ -45,11 +45,13 @@ use serde_json::Value as JValue;
 
 use std::str::FromStr;
 
-static DATA_FORMAT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
+/// Interpreter data version, more info in
+/// [./docs/update-guide.md]
+static INTERPRETER_DATA_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str(env!("CARGO_PKG_VERSION"))
         .expect("invalid data format version specified")
 });
 
 pub fn data_version() -> &'static semver::Version {
-    Lazy::force(&DATA_FORMAT_VERSION)
+    Lazy::force(&INTERPRETER_DATA_VERSION)
 }

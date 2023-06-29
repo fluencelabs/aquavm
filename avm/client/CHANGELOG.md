@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.41.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.40.0...avm-client-v0.41.0) (2023-06-23)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.40.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.39.0...avm-client-v0.40.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+
+### Features
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+
 ## [0.39.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.38.0...avm-client-v0.39.0) (2023-03-21)
 
 

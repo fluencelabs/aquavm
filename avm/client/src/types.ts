@@ -17,6 +17,16 @@
 export type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
 /**
+ * From fluence-keypair crate:
+ * https://github.com/fluencelabs/trust-graph/blob/f7ef0f8da095fe1fef80faaa0b0c2d5ef854bd16/keypair/src/key_pair.rs#L79-L82
+ *
+ * We define here only the supported subset of formats.  This enum is used for future extention.
+ */
+export enum KeyPairFormat {
+    Ed25519 = 0,
+}
+
+/**
  * Parameters that a host side should pass to an interpreter and that necessary for execution.
  */
 export interface RunParameters {
@@ -31,6 +41,16 @@ export interface RunParameters {
     currentPeerId: string;
 
     /**
+     * Key format of the current peer Ed25519.
+     */
+    keyFormat: KeyPairFormat;
+
+    /**
+     * They secret key itself serialized into 32 byte Uint8Array using libp2p marshal
+     */
+    secretKeyBytes: Uint8Array;
+
+    /**
      * Unix timestamp from a particle in milliseconds.
      * It represents time when this particle was sent from the init peer id.
      */
@@ -40,6 +60,11 @@ export interface RunParameters {
      * TTL set by init peer id in milliseconds.
      */
     ttl: number;
+
+    /**
+     * Unique particle ID
+     */
+    particleId: string;
 }
 
 /**

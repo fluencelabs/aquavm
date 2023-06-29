@@ -17,7 +17,7 @@
 use super::{Network, Peer, PeerId};
 use crate::queue::ExecutionQueue;
 
-use air_test_utils::test_runner::TestRunParameters;
+use air_test_utils::test_runner::{AirRunner, DefaultAirRunner, TestRunParameters};
 
 use std::{
     borrow::Borrow,
@@ -39,15 +39,15 @@ pub enum AlterState {
 
 /// Neighbors of particular node, including set of nodes unreachable from this one (but they might be
 /// reachable from others).
-pub struct Neighborhood {
+pub struct Neighborhood<R = DefaultAirRunner> {
     // the value is true is link from this peer to neighbor is failng
-    network: Weak<Network>,
+    network: Weak<Network<R>>,
     unreachable: HashSet<PeerId>,
     altered: HashMap<PeerId, AlterState>,
 }
 
-impl Neighborhood {
-    pub fn new(network: &Rc<Network>) -> Self {
+impl<R: AirRunner> Neighborhood<R> {
+    pub fn new(network: &Rc<Network<R>>) -> Self {
         Self {
             network: Rc::downgrade(network),
             unreachable: <_>::default(),
@@ -109,7 +109,7 @@ impl Neighborhood {
     }
 }
 
-impl std::iter::IntoIterator for &Neighborhood {
+impl<R: AirRunner> std::iter::IntoIterator for &Neighborhood<R> {
     type Item = PeerId;
 
     type IntoIter = std::collections::hash_set::IntoIter<PeerId>;
@@ -129,15 +129,15 @@ impl std::iter::IntoIterator for &Neighborhood {
     }
 }
 
-pub struct PeerEnv {
-    pub(crate) peer: Peer,
+pub struct PeerEnv<R> {
+    pub(crate) peer: Peer<R>,
     // failed for everyone
     failed: bool,
-    neighborhood: Neighborhood,
+    neighborhood: Neighborhood<R>,
 }
 
-impl PeerEnv {
-    pub fn new(peer: Peer, network: &Rc<Network>) -> Self {
+impl<R: AirRunner> PeerEnv<R> {
+    pub fn new(peer: Peer<R>, network: &Rc<Network<R>>) -> Self {
         Self {
             peer,
             failed: false,
@@ -180,11 +180,11 @@ impl PeerEnv {
         }
     }
 
-    pub fn get_neighborhood(&self) -> &Neighborhood {
+    pub fn get_neighborhood(&self) -> &Neighborhood<R> {
         &self.neighborhood
     }
 
-    pub fn get_neighborhood_mut(&mut self) -> &mut Neighborhood {
+    pub fn get_neighborhood_mut(&mut self) -> &mut Neighborhood<R> {
         &mut self.neighborhood
     }
 
@@ -195,7 +195,7 @@ impl PeerEnv {
     pub(crate) fn execute_once(
         &mut self,
         air: impl Into<String>,
-        network: &Network,
+        network: &Network<R>,
         queue: &ExecutionQueue,
         test_parameters: &TestRunParameters,
     ) -> Option<Result<air_test_utils::RawAVMOutcome, String>> {
@@ -217,9 +217,9 @@ impl PeerEnv {
     }
 }
 
-impl<'a> IntoIterator for &'a PeerEnv {
-    type Item = <&'a Neighborhood as IntoIterator>::Item;
-    type IntoIter = <&'a Neighborhood as IntoIterator>::IntoIter;
+impl<'a, R: AirRunner> IntoIterator for &'a PeerEnv<R> {
+    type Item = <&'a Neighborhood<R> as IntoIterator>::Item;
+    type IntoIter = <&'a Neighborhood<R> as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
         self.neighborhood.into_iter()
@@ -228,13 +228,15 @@ impl<'a> IntoIterator for &'a PeerEnv {
 
 #[cfg(test)]
 mod tests {
-    use std::{iter::FromIterator, rc::Rc};
-
     use super::*;
+
+    use air_test_utils::prelude::*;
+
+    use std::{iter::FromIterator, rc::Rc};
 
     #[test]
     fn test_empty_neighborhood() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
@@ -244,7 +246,7 @@ mod tests {
 
     #[test]
     fn test_no_self_disconnect() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
@@ -268,7 +270,7 @@ mod tests {
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
 
         let penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         // iter is empty
@@ -282,7 +284,7 @@ mod tests {
 
     #[test]
     fn test_insert() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
@@ -299,7 +301,7 @@ mod tests {
 
     #[test]
     fn test_ensure() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let other_id2: PeerId = "other2".into();
@@ -317,7 +319,7 @@ mod tests {
 
     #[test]
     fn test_insert_insert() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id1: PeerId = "other1".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
@@ -335,7 +337,7 @@ mod tests {
 
     #[test]
     fn test_extend_neighborhood() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
@@ -350,7 +352,7 @@ mod tests {
 
     #[test]
     fn test_remove_from_neiborhood() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
@@ -367,7 +369,7 @@ mod tests {
     }
     #[test]
     fn test_fail() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
@@ -383,7 +385,7 @@ mod tests {
 
     #[test]
     fn test_fail_remove() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
@@ -404,7 +406,7 @@ mod tests {
 
     #[test]
     fn test_fail_unfail() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
@@ -421,7 +423,7 @@ mod tests {
 
     #[test]
     fn test_failed() {
-        let network = Network::empty();
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let peer_id: PeerId = "someone".into();
         let other_id: PeerId = "other".into();
         let remote_id: PeerId = "remote".into();

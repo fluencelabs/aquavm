@@ -50,6 +50,7 @@ pub fn main() {
     log::set_max_level(LevelFilter::Info);
 }
 
+#[allow(clippy::too_many_arguments)]
 #[wasm_bindgen]
 pub fn invoke(
     air: String,

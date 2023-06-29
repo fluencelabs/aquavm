@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * avm-interface bumped from 0.28.2 to 0.28.3
 
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-interface bumped from 0.28.3 to 0.28.4
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/avm-data-store-v0.5.0...avm-data-store-v0.6.0) (2023-02-27)
 
 

@@ -22,6 +22,10 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
 use air_parser::ast::Instruction;
+use fluence_keypair::KeyFormat;
+use fluence_keypair::KeyPair;
+
+use std::convert::TryFrom;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -30,6 +34,7 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_handler: TraceHandler,
     pub(crate) air: Instruction<'i>,
+    pub(crate) keypair: KeyPair,
 }
 
 /// Parse and prepare supplied data and AIR script.
@@ -60,13 +65,17 @@ pub(crate) fn prepare<'i>(
         signature_store: current_data.signatures,
     };
 
-    let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, run_parameters)?;
+    let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, &run_parameters)?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
+
+    let key_format = KeyFormat::try_from(run_parameters.key_format)?;
+    let keypair = KeyPair::from_secret_key(run_parameters.secret_key_bytes, key_format)?;
 
     let result = PreparationDescriptor {
         exec_ctx,
         trace_handler,
         air,
+        keypair,
     };
 
     Ok(result)
@@ -94,7 +103,7 @@ fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
-    run_parameters: RunParameters,
+    run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;

@@ -45,20 +45,17 @@ export function serializeAvmArgs(
     }
 
     const encoded = encoder.encode(JSON.stringify(callResultsToPass));
+    const runParamsSnakeCase = {
+        init_peer_id: runParams.initPeerId,
+        current_peer_id: runParams.currentPeerId,
+        key_format: runParams.keyFormat,
+        secret_key_bytes: Array.from(runParams.secretKeyBytes),
+        timestamp: runParams.timestamp,
+        ttl: runParams.ttl,
+        particle_id: runParams.particleId,
+    };
 
-    return [
-        // force new line
-        air,
-        Array.from(prevData),
-        Array.from(data),
-        {
-            init_peer_id: runParams.initPeerId,
-            current_peer_id: runParams.currentPeerId,
-            timestamp: runParams.timestamp,
-            ttl: runParams.ttl,
-        },
-        Array.from(encoded),
-    ];
+    return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encoded)];
 }
 
 /**

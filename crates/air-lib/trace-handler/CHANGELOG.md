@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.1](https://github.com/fluencelabs/aquavm/compare/air-trace-handler-v0.2.0...air-trace-handler-v0.2.1) (2023-06-22)
+
+
+### Features
+
+* **air:** introduce explicit types for generation numbers ([#530](https://github.com/fluencelabs/aquavm/issues/530)) ([d62fa6f](https://github.com/fluencelabs/aquavm/commit/d62fa6fe6006e59d63d30549074e7b30f80bf687))
+* **interpreter-data:** Introduce source information for `canon` data ([#577](https://github.com/fluencelabs/aquavm/issues/577)) ([1d98afe](https://github.com/fluencelabs/aquavm/commit/1d98afeb34b1ee45defc05995c8cf24021449f2b))
+* **trace-handler:** sub/-trace len dedicated alias to replace usize [fixes VM-282] ([b480e01](https://github.com/fluencelabs/aquavm/commit/b480e018b4b69b088d4258497866c3b31774b6b1))
+* **trace-handler:** TracePos becomes a wrapper for u32 alias [fixes VM-267] ([#544](https://github.com/fluencelabs/aquavm/issues/544)) ([658daf1](https://github.com/fluencelabs/aquavm/commit/658daf1d3f6e733c15a21afc40ddf468ed745d43))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.2.0 to 0.3.0
+    * air-interpreter-data bumped from 0.7.0 to 0.8.0
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * aquavm-air-parser bumped from 0.7.4 to 0.7.5
+
 ## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-trace-handler-v0.1.3...air-trace-handler-v0.2.0) (2023-03-21)
 
 

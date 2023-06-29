@@ -31,7 +31,6 @@ mod sede;
 use air_interpreter_cid::CID;
 use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
-use rand_chacha::rand_core::SeedableRng;
 use serde::{Deserialize, Serialize};
 
 use std::borrow::Borrow;
@@ -198,26 +197,4 @@ impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
     fn default() -> Self {
         Self(Default::default())
     }
-}
-
-///  Derive fake keypair for testing proposes.
-///
-///  This function should be used in production, but it is yet.
-///  It returns a keypair determinisitically derived from seed, and a corresponding peer ID
-///  that might be useful in tests.
-// Should be moved to test lib when keypair interface PR is merged.
-pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
-    use sha2::{Digest as _, Sha256};
-
-    let mut rng = {
-        let mut hasher = Sha256::new();
-        hasher.update(seed);
-        rand_chacha::ChaCha8Rng::from_seed(hasher.finalize().into())
-    };
-
-    let keypair_ed25519 = ed25519_dalek::Keypair::generate(&mut rng);
-    let keypair: KeyPair = KeyPair::Ed25519(keypair_ed25519.into());
-
-    let peer_id = keypair.public().to_peer_id().to_string();
-    (keypair, peer_id)
 }

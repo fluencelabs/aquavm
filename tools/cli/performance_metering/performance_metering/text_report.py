@@ -48,9 +48,17 @@ class TextReporter:
                 bench_name, bench, indent=nested_indent, file=file)
 
     def _save_bench(self, bench_name, bench, indent, file):
+        bracketed_text = bench["total_time"]
+        try:
+            bracketed_text += '; {}'.format(', '.join(bench['memory_sizes']))
+        except KeyError:
+            pass
         _print_indent(
             "{} ({}): {}".format(
-                bench_name, bench["total_time"], bench["comment"]),
+                bench_name,
+                bracketed_text,
+                bench["comment"],
+            ),
             indent=indent, file=file)
         for fname, stats in _sorted_items(bench["stats"]):
             self._save_stats(fname, stats, indent + self.indent_step, file)

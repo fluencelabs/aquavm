@@ -25,8 +25,13 @@ use avm_interface::CallResults;
 
 use anyhow::Context as _;
 use clap::{Parser, Subcommand};
+use fluence_keypair::KeyPair;
+use zeroize::Zeroize;
 
-use std::path::{Path, PathBuf};
+use std::{
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]
@@ -56,6 +61,9 @@ pub(crate) struct Args {
     #[clap(long = "no-fail", help = "Do not fail if AquaVM returns error")]
     no_fail: bool,
 
+    #[command(flatten)]
+    keys: Keys,
+
     #[clap(subcommand)]
     source: Source,
 }
@@ -67,6 +75,25 @@ enum Source {
     Anomaly(self::data::anomaly::AnomalyDataArgs),
     #[clap(name = "--plain")]
     PlainData(self::data::plain::PlainDataArgs),
+}
+
+#[derive(clap::Args, Debug)]
+#[group(required = true, multiple = false)]
+struct Keys {
+    #[arg(long)]
+    random_key: bool,
+    #[arg(long)]
+    ed25519_key: Option<PathBuf>,
+}
+
+impl Keys {
+    fn get_keypair(&self) -> anyhow::Result<KeyPair> {
+        match (self.random_key, self.ed25519_key.as_ref()) {
+            (true, None) => Ok(KeyPair::generate_ed25519()),
+            (false, Some(path)) => load_keypair_ed25519(path),
+            _ => unreachable!("clap should allow to provide one and only one key option"),
+        }
+    }
 }
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
@@ -92,6 +119,11 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
+    let key_pair = args
+        .keys
+        .get_keypair()
+        .context("failed to get the keypair")?;
+
     let repeat = args.repeat.unwrap_or(1);
     for _ in 0..repeat {
         let result = runner
@@ -106,6 +138,8 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                 call_results.clone(),
                 args.tracing_params.clone(),
                 tracing_json,
+                &key_pair,
+                particle.particle_id.clone().into_owned(),
             )
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {
@@ -181,4 +215,26 @@ fn load_data_or_default(
 
 fn load_data(data_path: &Path) -> anyhow::Result<String> {
     Ok(std::fs::read_to_string(data_path)?)
+}
+
+fn load_keypair_ed25519(path: &PathBuf) -> Result<KeyPair, anyhow::Error> {
+    use fluence_keypair::KeyFormat;
+
+    // It follows rust-peer format
+    let mut file = std::fs::File::open(path)?;
+
+    let mut file_content = String::with_capacity(
+        file.metadata()?
+            .len()
+            .try_into()
+            .context("failed to convert file length")?,
+    );
+    file.read_to_string(&mut file_content)?;
+
+    let key_data = bs58::decode(file_content.trim())
+        .into_vec()
+        .context("failed to decode the base58 key material")?;
+    file_content.zeroize();
+
+    KeyPair::from_vec(key_data, KeyFormat::Ed25519).context("malformed key data")
 }

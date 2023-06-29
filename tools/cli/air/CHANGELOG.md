@@ -26,6 +26,38 @@
     * aquavm-air bumped from 0.38.0 to 0.39.0
     * air-test-utils bumped from 0.4.7 to 0.5.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.40.0 to 0.41.0
+    * air-test-utils bumped from 0.6.0 to 0.7.0
+
+## [0.3.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.2.9...aquavm-air-cli-v0.3.0) (2023-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593))
+* **aquavm-air-cli:** Usability enhancements ([#540](https://github.com/fluencelabs/aquavm/issues/540))
+
+### Features
+
+* **aquavm-air-cli,performance_metering:** memory size in performance report ([#600](https://github.com/fluencelabs/aquavm/issues/600)) ([93c6899](https://github.com/fluencelabs/aquavm/commit/93c68994290a5e3be6af467b894b6b2f9337935e))
+* **aquavm-air-cli:** Usability enhancements ([#540](https://github.com/fluencelabs/aquavm/issues/540)) ([73c1ba7](https://github.com/fluencelabs/aquavm/commit/73c1ba70cca9ba4f6e73880141e738d450565798))
+* **avm-server,air-interpreter,aquavm-air:** secret key and particle ID arguments ([#593](https://github.com/fluencelabs/aquavm/issues/593)) ([8ce8af3](https://github.com/fluencelabs/aquavm/commit/8ce8af38232de3f1ac359214386b895356550428))
+* **tools:** merge some tools into the `air` CLI tool ([#509](https://github.com/fluencelabs/aquavm/issues/509)) ([79ac153](https://github.com/fluencelabs/aquavm/commit/79ac153f1dcfc0a77ec511c6e25285728312ad4c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.39.0 to 0.40.0
+    * air-beautifier bumped from 0.1.3 to 0.1.4
+    * avm-data-store bumped from 0.6.1 to 0.6.2
+    * avm-interface bumped from 0.28.3 to 0.28.4
+    * air-interpreter-interface bumped from 0.13.0 to 0.14.0
+    * air-test-utils bumped from 0.5.0 to 0.6.0
+
 ## [0.2.6](https://github.com/fluencelabs/aquavm/compare/air-trace-v0.2.5...air-trace-v0.2.6) (2023-03-13)
 
 
