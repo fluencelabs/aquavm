@@ -17,8 +17,8 @@
 mod stream_descriptor;
 mod stream_value_descriptor;
 
-use crate::execution_step::ExecutionResult;
 use crate::execution_step::Stream;
+use crate::execution_step::ExecutionResult;
 
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
@@ -101,13 +101,23 @@ impl Streams {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_descriptors = self.streams.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
-        let last_descriptor = stream_descriptors.pop().unwrap();
+        let mut last_descriptor = stream_descriptors.pop().unwrap();
         if stream_descriptors.is_empty() {
             // streams should contain only non-empty stream embodiments
             self.streams.remove(&name);
         }
 
         last_descriptor.stream.compactify(trace_ctx)
+    }
+
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        for (_, descriptors) in self.streams.iter_mut() {
+            for descriptor in descriptors {
+                descriptor.stream.compactify(trace_ctx)?;
+            }
+        }
+
+        Ok(())
     }
 }
 

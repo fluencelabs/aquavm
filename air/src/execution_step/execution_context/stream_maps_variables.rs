@@ -164,13 +164,23 @@ impl StreamMaps {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_map_descriptors = self.stream_maps.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
-        let last_descriptor = stream_map_descriptors.pop().unwrap();
+        let mut last_descriptor = stream_map_descriptors.pop().unwrap();
         if stream_map_descriptors.is_empty() {
             // streams should contain only non-empty stream embodiments
             self.stream_maps.remove(&name);
         }
 
         last_descriptor.stream_map.compactify(trace_ctx)
+    }
+
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        for (_, descriptors) in self.stream_maps.iter_mut() {
+            for descriptor in descriptors.iter_mut() {
+                descriptor.stream_map.compactify(trace_ctx)?;
+            }
+        }
+
+        Ok(())
     }
 }
 

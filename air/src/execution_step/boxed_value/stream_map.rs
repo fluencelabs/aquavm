@@ -65,7 +65,7 @@ impl StreamMap {
         self.stream.add_value(value, generation)
     }
 
-    pub(crate) fn compactify(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         self.stream.compactify(trace_ctx)
     }
 
@@ -90,8 +90,8 @@ mod test {
     use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
     use crate::execution_step::ValueAggregate;
     use crate::ExecutionError;
-    use crate::UncatchableError;
     use crate::JValue;
+    use crate::UncatchableError;
 
     use air_interpreter_cid::CID;
     use air_interpreter_data::ExecutionTrace;
@@ -201,7 +201,9 @@ mod test {
         assert!(matches!(
             compatification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToInvalidState {..})
+                UncatchableError::GenerationCompatificationError(
+                    GenerationCompatificationError::TracePosPointsToInvalidState { .. }
+                )
             ))
         ));
     }
@@ -222,9 +224,10 @@ mod test {
         assert!(matches!(
             compatification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToNowhere {..})
+                UncatchableError::GenerationCompatificationError(
+                    GenerationCompatificationError::TracePosPointsToNowhere { .. }
+                )
             ))
         ));
     }
-
 }

@@ -30,7 +30,7 @@ impl RecursiveStream {
         if !iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
-            stream.new_values().add_new_generation();
+            stream.new_values().add_new_empty_generation();
         }
 
         iterable
@@ -38,12 +38,16 @@ impl RecursiveStream {
 
     pub fn next_iteration(stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
         let new_values = stream.new_values();
-        let new_values_since_last_visit = Self::slice_iter_to_iterable(new_values.slice_iter());
-        if new_values_since_last_visit.is_empty() {
+        if new_values.last_generation().is_empty() {
             new_values.remove_last_generation();
+            return vec![];
         }
 
-        new_values_since_last_visit
+        let last_generation = stream.new_values().last_generation();
+        let next_iteration_values = Self::slice_iter_to_iterable(std::iter::once(last_generation));
+        stream.new_values().add_new_empty_generation();
+
+        next_iteration_values
     }
 
     fn slice_iter_to_iterable<'value>(iter: impl Iterator<Item = &'value [ValueAggregate]>) -> Vec<IterableValue> {
@@ -53,5 +57,77 @@ impl RecursiveStream {
             foldable
         })
         .collect::<Vec<_>>()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::RecursiveStream;
+    use super::Stream;
+    use super::ValueAggregate;
+    use crate::execution_step::Generation;
+    use crate::execution_step::ServiceResultAggregate;
+    use crate::JValue;
+
+    use air_interpreter_cid::CID;
+    use serde_json::json;
+
+    use std::rc::Rc;
+
+    fn create_value(value: JValue) -> ValueAggregate {
+        ValueAggregate::from_service_result(
+            ServiceResultAggregate::new(Rc::new(value), <_>::default(), 0.into()),
+            CID::new("some fake cid").into(),
+        )
+    }
+
+    #[test]
+    fn fold_started_empty_if_no_values() {
+        let mut stream = Stream::new();
+        let iterable_values = RecursiveStream::fold_started(&mut stream);
+
+        assert!(iterable_values.is_empty())
+    }
+
+    #[test]
+    fn next_iteration_empty_if_no_values() {
+        let mut stream = Stream::new();
+        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+
+        assert!(iterable_values.is_empty())
+    }
+
+    #[test]
+    fn next_iteration_empty_if_no_values_added() {
+        let mut stream = Stream::new();
+
+        let value = create_value(json!("1"));
+        stream.add_value(value, Generation::Current(0.into()));
+
+        let iterable_values = RecursiveStream::fold_started(&mut stream);
+        assert_eq!(iterable_values.len(), 1);
+
+        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        assert!(iterable_values.is_empty());
+    }
+
+    #[test]
+    fn one_recursive_iteration() {
+        let mut stream = Stream::new();
+
+        let value = create_value(json!("1"));
+        stream.add_value(value.clone(), Generation::Current(0.into()));
+
+        let iterable_values = RecursiveStream::fold_started(&mut stream);
+        assert_eq!(iterable_values.len(), 1);
+
+        stream.add_value(value.clone(), Generation::New);
+        stream.add_value(value, Generation::New);
+
+        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        assert_eq!(iterable_values.len(), 1);
+
+        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        assert!(iterable_values.is_empty());
     }
 }

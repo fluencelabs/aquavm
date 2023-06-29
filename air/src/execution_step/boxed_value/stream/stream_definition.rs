@@ -85,7 +85,7 @@ impl<'value, T: 'value + Clone> Stream<T> {
 
 impl<'value, T: 'value + TracePosOperate> Stream<T> {
     /// Removes empty generations updating data.
-    pub(crate) fn compactify(mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         self.previous_values.remove_empty_generations();
         self.current_values.remove_empty_generations();
         self.new_values.remove_empty_generations();
@@ -192,18 +192,18 @@ impl fmt::Display for Generation {
 mod test {
     use super::Generation;
     use super::TraceHandler;
-    use crate::ExecutionError;
-    use crate::UncatchableError;
     use crate::execution_step::ServiceResultAggregate;
     use crate::execution_step::ValueAggregate;
+    use crate::ExecutionError;
     use crate::JValue;
+    use crate::UncatchableError;
 
     use air_interpreter_cid::CID;
     use air_interpreter_data::ApResult;
     use air_interpreter_data::CanonResult;
-    use air_interpreter_data::TracePos;
     use air_interpreter_data::ExecutedState;
     use air_interpreter_data::ExecutionTrace;
+    use air_interpreter_data::TracePos;
     use air_trace_handler::GenerationCompatificationError;
     use serde_json::json;
 
@@ -255,7 +255,10 @@ mod test {
         stream.add_value(value_4.clone(), Generation::previous(0));
 
         let mut slice_iter = stream.slice_iter();
-        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(
+            slice_iter.next(),
+            Some(vec![value_1, value_2, value_3, value_4].as_slice())
+        );
         assert_eq!(slice_iter.next(), None);
     }
 
@@ -273,7 +276,10 @@ mod test {
         stream.add_value(value_4.clone(), Generation::current(0));
 
         let mut slice_iter = stream.slice_iter();
-        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(
+            slice_iter.next(),
+            Some(vec![value_1, value_2, value_3, value_4].as_slice())
+        );
         assert_eq!(slice_iter.next(), None);
     }
 
@@ -285,13 +291,16 @@ mod test {
         let value_4 = create_value(json!("value_4"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::new());
-        stream.add_value(value_2.clone(), Generation::new());
-        stream.add_value(value_3.clone(), Generation::new());
-        stream.add_value(value_4.clone(), Generation::new());
+        stream.add_value(value_1.clone(), Generation::New);
+        stream.add_value(value_2.clone(), Generation::New);
+        stream.add_value(value_3.clone(), Generation::New);
+        stream.add_value(value_4.clone(), Generation::New);
 
         let mut slice_iter = stream.slice_iter();
-        assert_eq!(slice_iter.next(), Some(vec![value_1, value_2, value_3, value_4].as_slice()));
+        assert_eq!(
+            slice_iter.next(),
+            Some(vec![value_1, value_2, value_3, value_4].as_slice())
+        );
         assert_eq!(slice_iter.next(), None);
     }
 
@@ -333,7 +342,7 @@ mod test {
         let value_3 = create_value(json!("value_3"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::new());
+        stream.add_value(value_1.clone(), Generation::New);
         stream.add_value(value_2.clone(), Generation::current(0));
         stream.add_value(value_3.clone(), Generation::previous(0));
 
@@ -422,11 +431,11 @@ mod test {
         let value_6 = create_value_with_pos(json!("value_3"), 5.into());
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::new());
+        stream.add_value(value_1.clone(), Generation::New);
         stream.add_value(value_2.clone(), Generation::current(4));
         stream.add_value(value_3.clone(), Generation::current(0));
         stream.add_value(value_4.clone(), Generation::previous(100));
-        stream.add_value(value_5.clone(), Generation::new());
+        stream.add_value(value_5.clone(), Generation::New);
         stream.add_value(value_6.clone(), Generation::current(2));
 
         let trace = ExecutionTrace::from(vec![]);
@@ -474,7 +483,9 @@ mod test {
         assert!(matches!(
             compatification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToInvalidState {..})
+                UncatchableError::GenerationCompatificationError(
+                    GenerationCompatificationError::TracePosPointsToInvalidState { .. }
+                )
             ))
         ));
     }
@@ -493,7 +504,9 @@ mod test {
         assert!(matches!(
             compatification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(GenerationCompatificationError::TracePosPointsToNowhere {..})
+                UncatchableError::GenerationCompatificationError(
+                    GenerationCompatificationError::TracePosPointsToNowhere { .. }
+                )
             ))
         ));
     }

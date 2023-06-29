@@ -59,7 +59,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
             let value_descriptor =
-                StreamValueDescriptor::new(executed_result, stream.name, Generation::new(), stream.position);
+                StreamValueDescriptor::new(executed_result, stream.name, Generation::New, stream.position);
             exec_ctx.streams.add_stream_value(value_descriptor);
             exec_ctx.record_call_cid(&*peer_id, &service_result_agg_cid);
             Ok(CallResult::executed_stream_stub(service_result_agg_cid))

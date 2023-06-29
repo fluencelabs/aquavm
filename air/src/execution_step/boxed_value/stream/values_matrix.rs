@@ -86,7 +86,7 @@ impl<T> NewValuesMatrix<T> {
         Self(values_matrix)
     }
 
-    pub fn add_new_generation(&mut self) {
+    pub fn add_new_empty_generation(&mut self) {
         self.0.values.push(vec![]);
     }
 
@@ -104,6 +104,14 @@ impl<T> NewValuesMatrix<T> {
 
     pub fn slice_iter(&self) -> impl Iterator<Item = &[T]> {
         self.0.slice_iter()
+    }
+
+    pub fn last_generation(&self) -> &[T] {
+        if self.0.values.is_empty() {
+            return &[];
+        }
+
+        &self.0.values[self.last_generation_idx()]
     }
 
     pub fn last_generation_idx(&self) -> GenerationIdx {

@@ -28,7 +28,7 @@ pub(super) fn generate_value_descriptor<'stream>(
     ap_result: &MergerApResult,
 ) -> StreamValueDescriptor<'stream> {
     match ap_result {
-        MergerApResult::NotMet => StreamValueDescriptor::new(value, stream.name, Generation::new(), stream.position),
+        MergerApResult::NotMet => StreamValueDescriptor::new(value, stream.name, Generation::New, stream.position),
         MergerApResult::Met(met_result) => StreamValueDescriptor::new(
             value,
             stream.name,
@@ -44,7 +44,7 @@ pub(crate) fn generate_map_value_descriptor<'stream>(
     ap_result: &MergerApResult,
 ) -> StreamMapValueDescriptor<'stream> {
     match ap_result {
-        MergerApResult::NotMet => StreamMapValueDescriptor::new(value, stream.name, Generation::new(), stream.position),
+        MergerApResult::NotMet => StreamMapValueDescriptor::new(value, stream.name, Generation::New, stream.position),
         MergerApResult::Met(met_result) => StreamMapValueDescriptor::new(
             value,
             stream.name,

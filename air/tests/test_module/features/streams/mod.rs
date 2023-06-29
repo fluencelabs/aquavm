@@ -15,6 +15,7 @@
  */
 
 mod ap_with_fold;
+mod compactification;
 mod merging;
 mod recursive_streams;
 mod streams;

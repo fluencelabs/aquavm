@@ -17,6 +17,7 @@
 use super::FarewellError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
+use crate::ExecutionError;
 use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
@@ -24,6 +25,7 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
 use air_utils::measure;
+use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
 
 use std::fmt::Debug;
@@ -84,17 +86,20 @@ pub(crate) fn from_execution_error(
 #[tracing::instrument(skip(exec_ctx, trace_handler, keypair), level = "info")]
 fn populate_outcome_from_contexts(
     mut exec_ctx: ExecutionCtx<'_>,
-    trace_handler: TraceHandler,
+    mut trace_handler: TraceHandler,
     ret_code: i64,
     error_message: String,
     keypair: &KeyPair,
 ) -> InterpreterOutcome {
-    let current_signature = exec_ctx
-        .signature_tracker
-        .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
-        .expect("signing shouldn't fail");
-    let current_pubkey = keypair.public();
-    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
+    match compactify_streams(&mut exec_ctx, &mut trace_handler) {
+        Ok(()) => {}
+        Err(outcome) => return outcome,
+    };
+
+    match sign_result(&mut exec_ctx, keypair) {
+        Ok(()) => {}
+        Err(outcome) => return outcome,
+    };
 
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
@@ -108,14 +113,44 @@ fn populate_outcome_from_contexts(
         tracing::Level::TRACE,
         "serde_json::to_vec(data)"
     );
+
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = measure!(
         serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
         tracing::Level::TRACE,
         "serde_json::to_vec(call_results)",
     );
-
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
+}
+
+fn compactify_streams(exec_ctx: &mut ExecutionCtx<'_>, trace_ctx: &mut TraceHandler) -> Result<(), InterpreterOutcome> {
+    exec_ctx
+        .streams
+        .compactify(trace_ctx)
+        .and_then(|_| exec_ctx.stream_maps.compactify(trace_ctx))
+        .map_err(execution_error_into_outcome)
+}
+
+fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(), InterpreterOutcome> {
+    let current_signature = exec_ctx
+        .signature_tracker
+        .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
+        .map_err(signing_error_into_outcome)?;
+
+    let current_pubkey = keypair.public();
+    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
+
+    Ok(())
+}
+
+// these methods are called only if there is an internal error in the interpreter and
+// new execution trace was corrupted
+fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
+}
+
+fn signing_error_into_outcome(error: SigningError) -> InterpreterOutcome {
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
 }
 
 /// Deduplicate values in a supplied vector.
