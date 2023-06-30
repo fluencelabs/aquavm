@@ -30,6 +30,7 @@ use air_interpreter_data::CanonResult;
 use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCanonResult;
+use polyplets::SecurityTetraplet;
 
 use std::borrow::Cow;
 use std::rc::Rc;
@@ -55,9 +56,14 @@ fn handle_seen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
+    let peer_id = crate::execution_step::instructions::resolve_peer_id_to_string(&ast_canon.peer_id, exec_ctx)?;
+    let expected_tetraplet = SecurityTetraplet::new(peer_id, "", "", "");
+
     let canon_result_agg = exec_ctx.cid_state.get_canon_result_by_cid(&canon_result_cid)?;
     let tetraplet_cid = canon_result_agg.tetraplet.clone();
     let tetraplet = exec_ctx.cid_state.get_tetraplet_by_cid(&tetraplet_cid)?;
+
+    verify_canon(&expected_tetraplet, &tetraplet)?;
 
     exec_ctx.record_canon_cid(&tetraplet.peer_pk, &canon_result_cid);
 
@@ -181,4 +187,18 @@ fn create_canon_stream_from_name(
 fn get_stream_or_default<'ctx>(ast_canon: &ast::Canon<'_>, exec_ctx: &'ctx ExecutionCtx<'_>) -> Cow<'ctx, Stream> {
     let maybe_stream = exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position);
     maybe_stream.map(Cow::Borrowed).unwrap_or_default()
+}
+
+pub(crate) fn verify_canon(
+    expected_tetraplet: &SecurityTetraplet,
+    stored_tetraplet: &SecurityTetraplet,
+) -> Result<(), UncatchableError> {
+    if expected_tetraplet != stored_tetraplet {
+        return Err(UncatchableError::InstructionParametersMismatch {
+            param: "canon tetraplet",
+            expected_value: format!("{expected_tetraplet:?}"),
+            stored_value: format!("{stored_tetraplet:?}"),
+        });
+    }
+    Ok(())
 }

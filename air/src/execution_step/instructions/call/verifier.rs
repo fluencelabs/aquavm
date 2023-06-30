@@ -26,15 +26,15 @@ pub(crate) fn verify_call(
     stored_tetraplet: &SecurityTetraplet,
 ) -> Result<(), UncatchableError> {
     if expected_argument_hash != stored_argument_hash {
-        return Err(UncatchableError::CallParametersMismatch {
-            param: "argument_hash",
+        return Err(UncatchableError::InstructionParametersMismatch {
+            param: "call argument_hash",
             expected_value: expected_argument_hash.to_owned(),
             stored_value: stored_argument_hash.to_owned(),
         });
     }
     if expected_tetraplet != stored_tetraplet {
-        return Err(UncatchableError::CallParametersMismatch {
-            param: "tetraplet",
+        return Err(UncatchableError::InstructionParametersMismatch {
+            param: "call tetraplet",
             expected_value: format!("{expected_tetraplet:?}"),
             stored_value: format!("{stored_tetraplet:?}"),
         });
