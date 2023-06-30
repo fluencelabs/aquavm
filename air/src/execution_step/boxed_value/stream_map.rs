@@ -82,8 +82,8 @@ impl StreamMap {
         &mut self.stream
     }
 
-    pub(crate) fn get_unique_map_keys_stream(&mut self) -> Cow<'_, Stream> {
-        self.stream.get_unique_map_keys_stream()
+    pub(crate) fn get_unique_map_keys_stream(&mut self, policy: ConflictResolustionPolicy) -> Cow<'_, Stream> {
+        self.stream.get_unique_map_keys_stream(policy)
     }
 }
 

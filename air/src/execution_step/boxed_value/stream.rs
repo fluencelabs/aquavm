@@ -27,6 +27,12 @@ use air_trace_handler::TraceHandler;
 use std::borrow::Cow;
 use std::collections::HashSet;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ConflictResolustionPolicy {
+    LWW,
+    FWW,
+}
+
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
 #[derive(Debug, Default, Clone)]
@@ -216,9 +222,38 @@ impl Stream {
         self.values.retain(|values| !values.is_empty());
     }
 
-    pub(crate) fn get_unique_map_keys_stream(&self) -> Cow<'_, Stream> {
+    pub(crate) fn get_unique_map_keys_stream(&self, policy: ConflictResolustionPolicy) -> Cow<'_, Stream> {
         let mut distinct_values = HashSet::new();
         let mut new_values = vec![];
+        // WIP
+        if policy == ConflictResolustionPolicy::FWW {
+            for values in self.values.iter() {
+                let distinct_values_vec = values
+                    .iter()
+                    .filter(|v| {
+                        StreamMapKey::from_kvpair(v)
+                            .map(|key| distinct_values.insert(key))
+                            .unwrap_or(false)
+                    })
+                    .cloned()
+                    .collect::<_>();
+                new_values.push(distinct_values_vec);
+            }
+        } else {
+            for values in self.values.iter().rev() {
+                let distinct_values_vec = values
+                    .iter()
+                    .rev()
+                    .filter(|v| {
+                        StreamMapKey::from_kvpair(v)
+                            .map(|key| distinct_values.insert(key))
+                            .unwrap_or(false)
+                    })
+                    .cloned()
+                    .collect::<_>();
+                new_values.push(distinct_values_vec);
+            }
+        };
 
         for values in self.values.iter() {
             let distinct_values_vec = values
@@ -338,6 +373,8 @@ mod test {
     use super::Stream;
     use super::ValueAggregate;
     use super::ValueSource;
+    use crate::execution_step::boxed_value::stream::ConflictResolustionPolicy::FWW;
+    use crate::execution_step::boxed_value::stream::ConflictResolustionPolicy::LWW;
     use crate::execution_step::boxed_value::stream_map::from_key_value;
     use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
     use crate::execution_step::ServiceResultAggregate;
@@ -428,7 +465,7 @@ mod test {
     }
 
     #[test]
-    fn test_get_unique_map_keys_stream() {
+    fn test_get_unique_map_keys_stream_fww() {
         let key_prefix = "some_key".to_string();
 
         let values = (0..3)
@@ -465,7 +502,7 @@ mod test {
             .add_value(values[1].clone(), Generation::nth(4), ValueSource::CurrentData)
             .unwrap();
 
-        let unique_keys_only = stream.get_unique_map_keys_stream();
+        let unique_keys_only = stream.get_unique_map_keys_stream(FWW);
         let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
 
         assert_eq!(&values[0], iter.next().unwrap());
@@ -484,12 +521,78 @@ mod test {
             .add_value(values[2].clone(), Generation::nth(3), ValueSource::CurrentData)
             .unwrap();
 
-        let unique_keys_only = stream.get_unique_map_keys_stream();
+        let unique_keys_only = stream.get_unique_map_keys_stream(FWW);
         let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
 
         assert_eq!(&values[0], iter.next().unwrap());
         assert_eq!(&values[1], iter.next().unwrap());
         assert_eq!(&values[2], iter.next().unwrap());
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_get_unique_map_keys_stream_lww() {
+        let key_prefix = "some_key".to_string();
+
+        let values = (0..3)
+            .map(|id| {
+                let key = key_prefix.clone() + &id.to_string();
+                let key = StreamMapKey::Str(Cow::Borrowed(key.as_str()));
+                let value = json!([{"top_level": [{"first": 42 + id },{"second": 43 - id}]}]);
+                let obj = from_key_value(key, &value);
+                ValueAggregate::new(
+                    obj,
+                    <_>::default(),
+                    0.into(),
+                    air_interpreter_data::Provenance::literal(),
+                )
+            })
+            .collect::<Vec<_>>();
+        let mut stream = Stream::from_generations_count(5.into(), 5.into());
+        stream
+            .add_value(values[0].clone(), Generation::nth(0), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[0].clone(), Generation::nth(1), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[2].clone(), Generation::nth(1), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[2].clone(), Generation::nth(3), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[2].clone(), Generation::nth(4), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[1].clone(), Generation::nth(4), ValueSource::CurrentData)
+            .unwrap();
+
+        let unique_keys_only = stream.get_unique_map_keys_stream(LWW);
+        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+
+        assert_eq!(&values[1], iter.next().unwrap());
+        assert_eq!(&values[2], iter.next().unwrap());
+        assert_eq!(&values[0], iter.next().unwrap());
+        assert_eq!(iter.next(), None);
+
+        let mut stream = Stream::from_generations_count(5.into(), 5.into());
+        stream
+            .add_value(values[0].clone(), Generation::nth(0), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[1].clone(), Generation::nth(2), ValueSource::CurrentData)
+            .unwrap();
+        stream
+            .add_value(values[2].clone(), Generation::nth(3), ValueSource::CurrentData)
+            .unwrap();
+
+        let unique_keys_only = stream.get_unique_map_keys_stream(LWW);
+        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+
+        assert_eq!(&values[2], iter.next().unwrap());
+        assert_eq!(&values[1], iter.next().unwrap());
+        assert_eq!(&values[0], iter.next().unwrap());
         assert_eq!(iter.next(), None);
     }
 }

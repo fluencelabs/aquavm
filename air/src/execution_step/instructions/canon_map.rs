@@ -17,14 +17,15 @@
 use super::canon::handle_seen_canon;
 use super::canon::handle_unseen_canon;
 use super::canon::GetStreamClosure;
-use super::canon_stream_map_scalar::get_stream_or_default_function;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStreamMap;
 use crate::execution_step::boxed_value::CanonStreamMapWithProvenance;
+use crate::execution_step::boxed_value::ConflictResolustionPolicy::LWW;
 use crate::execution_step::instructions::canon::CanonEpilogClosure;
 use crate::execution_step::instructions::canon::StreamWithSerializedView;
+use crate::execution_step::instructions::canon_stream_map_scalar::get_stream_or_default_function;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -47,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
                 canon_result_cid,
             } = stream_with_positions;
 
-            let canon_stream_map: CanonStreamMap<'_> = canon_stream.into();
+            let canon_stream_map: CanonStreamMap<'_> = CanonStreamMap::from_canon_stream(&canon_stream)?;
 
             let value = CanonStreamMapWithProvenance::new(canon_stream_map, canon_result_cid.clone());
             exec_ctx
@@ -55,17 +56,6 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
                 .set_canon_map_value(self.canon_stream_map.name, value)?;
 
             trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
-
-            // let value = JValuable::as_jvalue(&&canon_stream).into_owned();
-            // let tetraplet = canon_stream.tetraplet().clone();
-            // let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-            // let value = CanonResultAggregate::new(
-            //     Rc::new(value),
-            //     tetraplet.peer_pk.as_str().into(),
-            //     &tetraplet.json_path,
-            //     position,
-            // );
-            // let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
 
             Ok(())
         };
@@ -76,7 +66,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
             }
             MergerCanonResult::Empty => {
                 let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position);
+                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position, LWW);
                 handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
