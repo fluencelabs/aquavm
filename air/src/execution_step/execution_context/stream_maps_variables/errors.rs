@@ -21,6 +21,10 @@ use thiserror::Error as ThisError;
 pub enum StreamMapError {
     #[error("unsupported type for {variable_name} map's key")]
     UnsupportedMapKeyType { variable_name: String },
+
+    #[error("unsupported kvpair object or map
+    key type")]
+    UnsupportedKVPairObjectOrMapKeyType,
 }
 
 pub fn unsupported_map_key_type(variable_name: &str) -> StreamMapError {

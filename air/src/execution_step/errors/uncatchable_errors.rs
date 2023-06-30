@@ -16,6 +16,7 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::StreamMapError;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
@@ -97,6 +98,10 @@ pub enum UncatchableError {
 
     #[error("failed to deserialize to CallServiceFailed: {0}")]
     MalformedCallServiceFailed(serde_json::Error),
+
+    /// Stream map related errors.
+    #[error(transparent)]
+    StreamMapError(#[from] StreamMapError),
 }
 
 impl ToErrorCode for UncatchableError {
