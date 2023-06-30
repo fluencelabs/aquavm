@@ -435,6 +435,10 @@ impl MetTag {
         matches!(self, Self::CanonStream)
     }
 
+    // fn is_canon_stream_map(&self) -> bool {
+    //     matches!(self, Self::CanonStreamMap)
+    // }
+
     fn is_tag(&self) -> bool {
         !matches!(self, Self::None)
     }

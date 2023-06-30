@@ -15,6 +15,7 @@
  */
 
 mod canon_stream;
+mod canon_stream_map;
 mod iterable;
 mod jvaluable;
 mod scalar;
@@ -23,6 +24,7 @@ mod stream_map;
 mod utils;
 
 pub(crate) use canon_stream::*;
+pub(crate) use canon_stream_map::*;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 pub(crate) use scalar::CanonResultAggregate;

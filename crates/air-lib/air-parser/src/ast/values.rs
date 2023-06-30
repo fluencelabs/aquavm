@@ -53,9 +53,25 @@ pub struct CanonStream<'i> {
     pub position: AirPos,
 }
 
+/// A canonicalized stream map without a lambda.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct CanonStreamMap<'i> {
+    pub name: &'i str,
+    pub position: AirPos,
+}
+
 /// A canonicalized stream with a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct CanonStreamWithLambda<'i> {
+    pub name: &'i str,
+    #[serde(borrow)]
+    pub lambda: LambdaAST<'i>,
+    pub position: AirPos,
+}
+
+/// A canonicalized stream map with a lambda.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct CanonStreamMapWithLambda<'i> {
     pub name: &'i str,
     #[serde(borrow)]
     pub lambda: LambdaAST<'i>,
