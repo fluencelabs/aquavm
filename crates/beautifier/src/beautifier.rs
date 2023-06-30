@@ -126,6 +126,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
             ast::Instruction::ApMap(ap_map) => self.beautify_simple(ap_map, indent),
             ast::Instruction::Canon(canon) => self.beautify_simple(canon, indent),
+            ast::Instruction::CanonMap(canon_map) => self.beautify_simple(canon_map, indent),
             ast::Instruction::CanonStreamMapScalar(canon) => self.beautify_simple(canon, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),

@@ -23,7 +23,7 @@ use crate::JValue;
 use serde::Serialize;
 use std::borrow::Cow;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum StreamMapKey<'i> {
     Str(Cow<'i, str>),
     U64(u64),

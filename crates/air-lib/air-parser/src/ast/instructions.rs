@@ -31,6 +31,7 @@ pub enum Instruction<'i> {
     Ap(Ap<'i>),
     ApMap(ApMap<'i>),
     Canon(Canon<'i>),
+    CanonMap(CanonMap<'i>),
     CanonStreamMapScalar(CanonStreamMapScalar<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
@@ -79,7 +80,15 @@ pub struct Canon<'i> {
     pub canon_stream: CanonStream<'i>,
 }
 
-/// (canon peer_id #stream_map scalar)
+/// (canon peer_id %stream_map #%canon_stream_map)
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct CanonMap<'i> {
+    pub peer_id: ResolvableToPeerIdVariable<'i>,
+    pub stream_map: StreamMap<'i>,
+    pub canon_stream_map: CanonStreamMap<'i>,
+}
+
+/// (canon peer_id %stream_map scalar)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct CanonStreamMapScalar<'i> {
     pub peer_id: ResolvableToPeerIdVariable<'i>,

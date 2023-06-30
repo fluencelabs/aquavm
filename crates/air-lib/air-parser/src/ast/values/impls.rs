@@ -57,6 +57,22 @@ impl<'i> CanonStreamWithLambda<'i> {
     }
 }
 
+impl<'i> CanonStreamMap<'i> {
+    pub fn new(name: &'i str, position: AirPos) -> Self {
+        Self { name, position }
+    }
+}
+
+impl<'i> CanonStreamMapWithLambda<'i> {
+    pub fn new(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
+        Self {
+            name,
+            lambda,
+            position,
+        }
+    }
+}
+
 impl<'i> Scalar<'i> {
     pub fn new(name: &'i str, position: AirPos) -> Self {
         Self { name, position }

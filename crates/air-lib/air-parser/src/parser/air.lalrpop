@@ -34,6 +34,15 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Canon(canon))
     },
 
+    <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <canon_stream_map:CanonStreamMapArgument> ")" <right: @R> => {
+        let canon_map = CanonMap::new(peer_id, stream_map, canon_stream_map);
+
+        let span = Span::new(left, right);
+        validator.met_canon_map(&canon_map, span);
+
+        Box::new(Instruction::CanonMap(canon_map))
+    },
+
     <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <scalar_pair:Scalar> ")" <right: @R> => {
         let scalar = Scalar::new(scalar_pair.0, scalar_pair.1);
         let canon = CanonStreamMapScalar::new(peer_id, stream_map, scalar);
@@ -270,6 +279,10 @@ CanonStreamArgument: CanonStream<'input> = {
     <canon_stream:CanonStream> => CanonStream::new(canon_stream.0, canon_stream.1),
 }
 
+CanonStreamMapArgument: CanonStreamMap<'input> = {
+    <canon_stream_map:CanonStreamMap> => CanonStreamMap::new(canon_stream_map.0, canon_stream_map.1),
+}
+
 extern {
     type Location = AirPos;
     type Error = ParserError;
@@ -285,6 +298,7 @@ extern {
         Stream => Token::Stream { name: <&'input str>, position: <AirPos> },
         StreamMap => Token::StreamMap { name: <&'input str>, position: <AirPos> },
         CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
+        CanonStreamMap => Token::CanonStreamMap { name: <&'input str>, position: <AirPos> },
         CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 
         Literal => Token::StringLiteral(<&'input str>),
