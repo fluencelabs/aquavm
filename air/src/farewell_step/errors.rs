@@ -20,9 +20,9 @@ use air_interpreter_interface::CallResults;
 use fluence_keypair::error::SigningError;
 use strum::EnumCount;
 use strum::IntoEnumIterator;
+use strum_macros::EnumCount as EnumCountMacro;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
-use strum_macros::EnumCount as EnumCountMacro;
 use thiserror::Error as ThisError;
 
 /// Errors happened during the interpreter farewell step.

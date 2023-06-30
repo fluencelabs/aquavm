@@ -56,11 +56,8 @@ fn basic_canon() {
                     (canon "A" $stream #canon_stream)))
                     "#;
 
-    println!("1");
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script, "", "");
-    println!("2");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
-    println!("3");
     let actual_state = &trace_from_result(&result)[6.into()];
 
     let cids: Vec<_> = (1..=5)

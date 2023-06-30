@@ -15,6 +15,7 @@
  */
 
 use super::Stream;
+use super::RecursiveCursor;
 use crate::execution_step::boxed_value::Iterable;
 use crate::execution_step::boxed_value::IterableItem;
 use crate::execution_step::boxed_value::IterableVecResolvedCall;
@@ -22,31 +23,40 @@ use crate::execution_step::ValueAggregate;
 
 pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
-pub(crate) struct RecursiveStream;
+pub(crate) struct RecursiveStream {
+    cursor: RecursiveCursor,
+}
 
 impl RecursiveStream {
-    pub fn fold_started(stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
-        let iterable = Self::slice_iter_to_iterable(stream.slice_iter());
+    pub fn new() -> Self {
+        Self {
+            cursor: RecursiveCursor::empty(),
+        }
+    }
+
+    pub fn fold_started(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
+        let slice_iter = stream.slice_iter(self.cursor);
+        let iterable = Self::slice_iter_to_iterable(slice_iter);
         if !iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
             stream.new_values().add_new_empty_generation();
         }
 
+        self.cursor = stream.cursor();
         iterable
     }
 
-    pub fn next_iteration(stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
-        let new_values = stream.new_values();
-        if new_values.last_generation().is_empty() {
-            new_values.remove_last_generation();
-            return vec![];
+    pub fn next_iteration(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
+        let slice_iter = stream.slice_iter(self.cursor);
+        let next_iteration_values = Self::slice_iter_to_iterable(slice_iter);
+        self.cursor = stream.cursor();
+        if next_iteration_values.is_empty() {
+            stream.new_values().remove_last_generation();
+            return next_iteration_values;
         }
 
-        let last_generation = stream.new_values().last_generation();
-        let next_iteration_values = Self::slice_iter_to_iterable(std::iter::once(last_generation));
         stream.new_values().add_new_empty_generation();
-
         next_iteration_values
     }
 

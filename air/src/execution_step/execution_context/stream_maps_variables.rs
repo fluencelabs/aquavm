@@ -138,7 +138,8 @@ impl StreamMaps {
                 //    for global streams
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
-                let stream_map = StreamMap::from_new_value(key, &value);
+                let mut stream_map = StreamMap::new();
+                stream_map.insert(key, &value, generation);
                 let descriptor = StreamMapDescriptor::global(stream_map);
                 self.stream_maps.insert(name.to_string(), vec![descriptor]);
             }

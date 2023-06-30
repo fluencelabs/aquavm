@@ -41,19 +41,6 @@ impl StreamMap {
         Self { stream: Stream::new() }
     }
 
-    pub(crate) fn from_new_value(key: StreamMapKey<'_>, value: &ValueAggregate) -> Self {
-        let obj = from_key_value(key, value.get_result());
-        let value = ValueAggregate::new(
-            obj,
-            value.get_tetraplet(),
-            value.get_trace_pos(),
-            value.get_provenance(),
-        );
-        Self {
-            stream: Stream::from_new_value(value),
-        }
-    }
-
     pub(crate) fn insert(&mut self, key: StreamMapKey<'_>, value: &ValueAggregate, generation: Generation) {
         let obj = from_key_value(key, value.get_result());
         let value = ValueAggregate::new(
@@ -95,7 +82,7 @@ mod test {
 
     use air_interpreter_cid::CID;
     use air_interpreter_data::ExecutionTrace;
-    use air_trace_handler::GenerationCompatificationError;
+    use air_trace_handler::GenerationCompactificationError;
     use air_trace_handler::TraceHandler;
     use serde_json::json;
 
@@ -128,7 +115,8 @@ mod test {
         let value = Rc::new(json!("1"));
         let value_aggregate = create_value_aggregate(value.clone());
 
-        let stream_map = StreamMap::from_new_value(key.clone(), &value_aggregate);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
         let mut iter = stream_map.stream.iter();
 
         assert!(compare_stream_iter(&mut iter, key, &value));
@@ -141,7 +129,8 @@ mod test {
         let value = Rc::new(json!("1"));
         let value_aggregate = create_value_aggregate(value.clone());
 
-        let stream_map = StreamMap::from_new_value(key.clone(), &value_aggregate);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
         let mut iter = stream_map.stream.iter();
 
         assert!(compare_stream_iter(&mut iter, key, &value));
@@ -157,7 +146,8 @@ mod test {
         let value_2 = Rc::new(json!("2"));
         let value_aggregate_2 = create_value_aggregate(value_2.clone());
 
-        let mut stream_map = StreamMap::from_new_value(key_1_2.clone(), &value_aggregate_1);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key_1_2.clone(), &value_aggregate_1, Generation::New);
         stream_map.insert(key_1_2.clone(), &value_aggregate_2, Generation::Current(0.into()));
 
         let key_3 = StreamMapKey::Str(Cow::Borrowed("other_key"));
@@ -180,7 +170,7 @@ mod test {
     }
 
     #[test]
-    fn compatification_invalid_state_error() {
+    fn compactification_invalid_state_error() {
         use air_interpreter_data::CanonResult;
 
         let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
@@ -197,19 +187,19 @@ mod test {
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);
 
-        let compatification_result = stream_map.compactify(&mut trace_ctx);
+        let compactification_result = stream_map.compactify(&mut trace_ctx);
         assert!(matches!(
-            compatification_result,
+            compactification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(
-                    GenerationCompatificationError::TracePosPointsToInvalidState { .. }
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToInvalidState { .. }
                 )
             ))
         ));
     }
 
     #[test]
-    fn compatification_points_to_nowhere_error() {
+    fn compactification_points_to_nowhere_error() {
         let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
         let value = Rc::new(json!("1"));
         let value_aggregate = create_value_aggregate(value.clone());
@@ -220,12 +210,12 @@ mod test {
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
 
-        let compatification_result = stream_map.compactify(&mut trace_ctx);
+        let compactification_result = stream_map.compactify(&mut trace_ctx);
         assert!(matches!(
-            compatification_result,
+            compactification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(
-                    GenerationCompatificationError::TracePosPointsToNowhere { .. }
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToNowhere { .. }
                 )
             ))
         ));

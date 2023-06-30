@@ -49,10 +49,11 @@ impl<T> ValuesMatrix<T> {
         self.values.iter().flat_map(|generation| generation.iter())
     }
 
-    pub fn slice_iter(&self) -> impl Iterator<Item = &[T]> {
+    pub fn slice_iter(&self, skip: GenerationIdx) -> impl Iterator<Item = &[T]> {
         self.values
             .iter()
             .filter(|generation| !generation.is_empty())
+            .skip(skip.into())
             .map(|generation| generation.as_ref())
     }
 }
@@ -78,14 +79,6 @@ impl<T> NewValuesMatrix<T> {
         Self(values)
     }
 
-    pub fn from_value(value: T) -> Self {
-        let mut values = TiVec::new();
-        values.push(vec![value]);
-        let values_matrix = ValuesMatrix { values };
-
-        Self(values_matrix)
-    }
-
     pub fn add_new_empty_generation(&mut self) {
         self.0.values.push(vec![]);
     }
@@ -102,16 +95,12 @@ impl<T> NewValuesMatrix<T> {
         self.0.iter()
     }
 
-    pub fn slice_iter(&self) -> impl Iterator<Item = &[T]> {
-        self.0.slice_iter()
+    pub fn slice_iter(&self, skip: GenerationIdx) -> impl Iterator<Item = &[T]> {
+        self.0.slice_iter(skip)
     }
 
-    pub fn last_generation(&self) -> &[T] {
-        if self.0.values.is_empty() {
-            return &[];
-        }
-
-        &self.0.values[self.last_generation_idx()]
+    pub fn len(&self) -> GenerationIdx {
+        self.0.len()
     }
 
     pub fn last_generation_idx(&self) -> GenerationIdx {

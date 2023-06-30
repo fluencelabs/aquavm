@@ -22,3 +22,4 @@ pub(crate) use recursive_stream::IterableValue;
 pub(crate) use recursive_stream::RecursiveStream;
 pub(crate) use stream_definition::Generation;
 pub(crate) use stream_definition::Stream;
+pub(crate) use stream_definition::RecursiveCursor;

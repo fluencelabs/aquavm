@@ -36,20 +36,19 @@ pub struct Stream<T> {
     new_values: NewValuesMatrix<T>,
 }
 
+#[derive(Clone, Copy)]
+pub struct RecursiveCursor {
+    previous_start_idx: GenerationIdx,
+    current_start_idx: GenerationIdx,
+    new_start_idx: GenerationIdx,
+}
+
 impl<'value, T: 'value> Stream<T> {
     pub(crate) fn new() -> Self {
         Self {
             previous_values: ValuesMatrix::new(),
             current_values: ValuesMatrix::new(),
             new_values: NewValuesMatrix::new(),
-        }
-    }
-
-    pub(crate) fn from_new_value(value: T) -> Self {
-        Self {
-            previous_values: ValuesMatrix::new(),
-            current_values: ValuesMatrix::new(),
-            new_values: NewValuesMatrix::from_value(value),
         }
     }
 
@@ -61,11 +60,19 @@ impl<'value, T: 'value> Stream<T> {
     }
 
     // Contract: all slices will be non-empty
-    pub(crate) fn slice_iter(&self) -> impl Iterator<Item = &[T]> {
+    pub(crate) fn slice_iter(&self, cursor: RecursiveCursor) -> impl Iterator<Item = &[T]> {
         self.previous_values
-            .slice_iter()
-            .chain(self.current_values.slice_iter())
-            .chain(self.new_values.slice_iter())
+            .slice_iter(cursor.previous_start_idx)
+            .chain(self.current_values.slice_iter(cursor.current_start_idx))
+            .chain(self.new_values.slice_iter(cursor.new_start_idx))
+    }
+
+    pub(crate) fn cursor(&self) -> RecursiveCursor {
+        RecursiveCursor {
+            previous_start_idx: self.previous_values.len(),
+            current_start_idx: self.current_values.len(),
+            new_start_idx: self.new_values.len(),
+        }
     }
 
     pub(super) fn new_values(&mut self) -> &mut NewValuesMatrix<T> {
@@ -75,6 +82,8 @@ impl<'value, T: 'value> Stream<T> {
 
 impl<'value, T: 'value + Clone> Stream<T> {
     pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
+        println!("add value to {}", generation);
+
         match generation {
             Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
             Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
@@ -91,13 +100,13 @@ impl<'value, T: 'value + TracePosOperate> Stream<T> {
         self.new_values.remove_empty_generations();
 
         let start_idx = 0.into();
-        Self::update_generations(self.previous_values.slice_iter(), start_idx, trace_ctx)?;
+        Self::update_generations(self.previous_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
         let start_idx = self.previous_values.len();
-        Self::update_generations(self.current_values.slice_iter(), start_idx, trace_ctx)?;
+        Self::update_generations(self.current_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
         let start_idx = start_idx.checked_add(self.current_values.len()).unwrap();
-        Self::update_generations(self.new_values.slice_iter(), start_idx, trace_ctx)?;
+        Self::update_generations(self.new_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
         Ok(())
     }
@@ -115,11 +124,21 @@ impl<'value, T: 'value + TracePosOperate> Stream<T> {
             for value in values.iter() {
                 trace_ctx
                     .update_generation(value.get_trace_pos(), generation)
-                    .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompatificationError(e)))?;
+                    .map_err(|e| ExecutionError::Uncatchable(UncatchableError::GenerationCompactificationError(e)))?;
             }
         }
 
         Ok(())
+    }
+}
+
+impl RecursiveCursor {
+    pub(crate) fn empty() -> Self {
+        Self {
+            previous_start_idx: GenerationIdx::from(0),
+            current_start_idx: GenerationIdx::from(0),
+            new_start_idx: GenerationIdx::from(0),
+        }
     }
 }
 
@@ -191,6 +210,7 @@ impl fmt::Display for Generation {
 #[cfg(test)]
 mod test {
     use super::Generation;
+    use super::RecursiveCursor;
     use super::TraceHandler;
     use crate::execution_step::ServiceResultAggregate;
     use crate::execution_step::ValueAggregate;
@@ -204,7 +224,7 @@ mod test {
     use air_interpreter_data::ExecutedState;
     use air_interpreter_data::ExecutionTrace;
     use air_interpreter_data::TracePos;
-    use air_trace_handler::GenerationCompatificationError;
+    use air_trace_handler::GenerationCompactificationError;
     use serde_json::json;
 
     use std::rc::Rc;
@@ -390,7 +410,35 @@ mod test {
     }
 
     #[test]
-    fn compatification_works() {
+    fn compactification_with_previous_new_generation() {
+        let value_1 = create_value_with_pos(json!("value_1"), 0.into());
+        let value_2 = create_value_with_pos(json!("value_2"), 1.into());
+        let mut stream = Stream::new();
+
+        stream.add_value(value_1.clone(), Generation::previous(0));
+        stream.add_value(value_2.clone(), Generation::New);
+
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+        let ap_result = ApResult::stub();
+        trace_ctx.meet_ap_end(ap_result.clone());
+        trace_ctx.meet_ap_end(ap_result);
+
+        let compactification_result = stream.compactify(&mut trace_ctx);
+        assert!(compactification_result.is_ok());
+
+        let actual_trace = trace_ctx.into_result_trace();
+        let expected_trace = vec![
+            ExecutedState::Ap(ApResult::new(0.into())),
+            ExecutedState::Ap(ApResult::new(1.into())),
+        ];
+        let expected_trace = ExecutionTrace::from(expected_trace);
+
+        assert_eq!(actual_trace, expected_trace);
+    }
+
+    #[test]
+    fn compactification_with_current_generation() {
         let value_1 = create_value_with_pos(json!("value_1"), 0.into());
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
         let value_3 = create_value_with_pos(json!("value_3"), 2.into());
@@ -407,8 +455,8 @@ mod test {
         trace_ctx.meet_ap_end(ap_result.clone());
         trace_ctx.meet_ap_end(ap_result);
 
-        let compatification_result = stream.compactify(&mut trace_ctx);
-        assert!(compatification_result.is_ok());
+        let compactification_result = stream.compactify(&mut trace_ctx);
+        assert!(compactification_result.is_ok());
 
         let actual_trace = trace_ctx.into_result_trace();
         let expected_trace = vec![
@@ -422,7 +470,7 @@ mod test {
     }
 
     #[test]
-    fn compatification_works_with_mixed_generations() {
+    fn compactification_works_with_mixed_generations() {
         let value_1 = create_value_with_pos(json!("value_1"), 0.into());
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
         let value_3 = create_value_with_pos(json!("value_3"), 2.into());
@@ -448,8 +496,8 @@ mod test {
         trace_ctx.meet_ap_end(ap_result.clone());
         trace_ctx.meet_ap_end(ap_result);
 
-        let compatification_result = stream.compactify(&mut trace_ctx);
-        assert!(compatification_result.is_ok());
+        let compactification_result = stream.compactify(&mut trace_ctx);
+        assert!(compactification_result.is_ok());
 
         let actual_trace = trace_ctx.into_result_trace();
         let expected_trace = vec![
@@ -466,7 +514,7 @@ mod test {
     }
 
     #[test]
-    fn compatification_invalid_state_error() {
+    fn compactification_invalid_state_error() {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
 
@@ -479,19 +527,19 @@ mod test {
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);
 
-        let compatification_result = stream.compactify(&mut trace_ctx);
+        let compactification_result = stream.compactify(&mut trace_ctx);
         assert!(matches!(
-            compatification_result,
+            compactification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(
-                    GenerationCompatificationError::TracePosPointsToInvalidState { .. }
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToInvalidState { .. }
                 )
             ))
         ));
     }
 
     #[test]
-    fn compatification_points_to_nowhere_error() {
+    fn compactification_points_to_nowhere_error() {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
 
@@ -500,12 +548,12 @@ mod test {
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
 
-        let compatification_result = stream.compactify(&mut trace_ctx);
+        let compactification_result = stream.compactify(&mut trace_ctx);
         assert!(matches!(
-            compatification_result,
+            compactification_result,
             Err(ExecutionError::Uncatchable(
-                UncatchableError::GenerationCompatificationError(
-                    GenerationCompatificationError::TracePosPointsToNowhere { .. }
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToNowhere { .. }
                 )
             ))
         ));

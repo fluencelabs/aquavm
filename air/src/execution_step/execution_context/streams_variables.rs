@@ -17,8 +17,8 @@
 mod stream_descriptor;
 mod stream_value_descriptor;
 
-use crate::execution_step::Stream;
 use crate::execution_step::ExecutionResult;
+use crate::execution_step::Stream;
 
 use stream_descriptor::*;
 pub(crate) use stream_value_descriptor::StreamValueDescriptor;
@@ -75,7 +75,8 @@ impl Streams {
                 //    for global streams
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
-                let stream = Stream::from_new_value(value);
+                let mut stream = Stream::new();
+                stream.add_value(value, generation);
                 let descriptor = StreamDescriptor::global(stream);
                 self.streams.insert(name.to_string(), vec![descriptor]);
             }

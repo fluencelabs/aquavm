@@ -64,12 +64,12 @@ impl TraceHandler {
         &mut self,
         trace_pos: TracePos,
         generation: GenerationIdx,
-    ) -> Result<(), GenerationCompatificationError> {
+    ) -> Result<(), GenerationCompactificationError> {
         let state = self
             .data_keeper
             .result_trace
             .get_mut(trace_pos)
-            .ok_or_else(|| GenerationCompatificationError::points_to_nowhere(trace_pos))?;
+            .ok_or_else(|| GenerationCompactificationError::points_to_nowhere(trace_pos))?;
 
         match state {
             ExecutedState::Ap(ap_result) => ap_result.res_generations = vec![generation],
@@ -78,7 +78,7 @@ impl TraceHandler {
                 ..
             })) => *call_generation = generation,
             state => {
-                return Err(GenerationCompatificationError::points_to_invalid_state(
+                return Err(GenerationCompactificationError::points_to_invalid_state(
                     trace_pos,
                     state.clone(),
                 ))
