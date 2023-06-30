@@ -133,6 +133,7 @@ impl Resolvable for ast::ImmutableVariable<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
+            Self::CanonStreamMap(canon_stream_map) => canon_stream_map.resolve(ctx),
         }
     }
 }
@@ -162,6 +163,47 @@ impl Resolvable for ast::ImmutableVariableWithLambda<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
+            Self::CanonStreamMap(canon_stream_map) => canon_stream_map.resolve(ctx),
         }
+    }
+}
+
+impl Resolvable for ast::StreamMapKeyClause<'_> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        match self {
+            ast::StreamMapKeyClause::Literal(value) => resolve_const(value.to_string(), ctx),
+            ast::StreamMapKeyClause::Int(value) => resolve_const(*value, ctx),
+            ast::StreamMapKeyClause::Scalar(scalar) => scalar.resolve(ctx),
+            ast::StreamMapKeyClause::ScalarWithLambda(scalar_with_lambda) => scalar_with_lambda.resolve(ctx),
+            ast::StreamMapKeyClause::CanonStreamWithLambda(canon_with_lambda) => canon_with_lambda.resolve(ctx),
+        }
+    }
+}
+
+impl Resolvable for ast::CanonStreamMap<'_> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon_stream_map_name = self.name;
+        let canon_stream_map_with_prov = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+        let canon_stream_map = &canon_stream_map_with_prov.canon_stream_map;
+        let value: &dyn JValuable = &canon_stream_map;
+        let tetraplets = value.as_tetraplets();
+        let provenance = Provenance::canon(canon_stream_map_with_prov.cid.clone());
+
+        Ok((value.as_jvalue().into_owned(), tetraplets, provenance))
+    }
+}
+
+impl Resolvable for ast::CanonStreamMapWithLambda<'_> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon_stream_map_name = self.name;
+        let canon_stream_map_with_prov = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+        let canon_stream_map = &canon_stream_map_with_prov.canon_stream_map;
+        let root_provenance = Provenance::canon(canon_stream_map_with_prov.cid.clone());
+        let (value, tetraplet, provenance) =
+            canon_stream_map.apply_lambda_with_tetraplets(&self.lambda, ctx, &root_provenance)?;
+
+        let tetraplet = Rc::new(tetraplet);
+
+        Ok((value.into_owned(), vec![tetraplet], provenance))
     }
 }

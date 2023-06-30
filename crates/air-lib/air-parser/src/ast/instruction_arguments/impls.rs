@@ -28,6 +28,7 @@ impl<'i> NewArgument<'i> {
             Self::Stream(stream) => stream.name,
             Self::CanonStream(canon_stream) => canon_stream.name,
             Self::StreamMap(stream_map) => stream_map.name,
+            Self::CanonStreamMap(canon_stream_map) => canon_stream_map.name,
         }
     }
 }

@@ -47,6 +47,18 @@ impl fmt::Display for CanonStreamWithLambda<'_> {
     }
 }
 
+impl fmt::Display for CanonStreamMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
+impl fmt::Display for CanonStreamMapWithLambda<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}{}", self.name, self.lambda)
+    }
+}
+
 impl fmt::Display for ImmutableVariable<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use ImmutableVariable::*;
@@ -54,6 +66,7 @@ impl fmt::Display for ImmutableVariable<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -65,6 +78,7 @@ impl fmt::Display for ImmutableVariableWithLambda<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }

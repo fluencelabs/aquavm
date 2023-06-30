@@ -18,6 +18,7 @@ mod ap;
 mod ap_map;
 mod call;
 mod canon;
+mod canon_map;
 mod canon_stream_map_scalar;
 mod canon_utils;
 mod compare_matchable;
@@ -74,6 +75,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
             Instruction::Canon(canon) => execute!(self, canon, exec_ctx, trace_ctx),
+            Instruction::CanonMap(canon_map) => execute!(self, canon_map, exec_ctx, trace_ctx),
             Instruction::CanonStreamMapScalar(canon) => execute!(self, canon, exec_ctx, trace_ctx),
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::ApMap(ap_map) => execute!(self, ap_map, exec_ctx, trace_ctx),

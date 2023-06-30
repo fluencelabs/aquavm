@@ -18,6 +18,8 @@ mod impls;
 mod traits;
 
 use super::CanonStream;
+use super::CanonStreamMap;
+use super::CanonStreamMapWithLambda;
 use super::CanonStreamWithLambda;
 use super::ImmutableVariable;
 use super::ImmutableVariableWithLambda;
@@ -41,6 +43,7 @@ pub enum ResolvableToPeerIdVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 /// Contains all variable variants that could be resolved to a string type.
@@ -51,6 +54,7 @@ pub enum ResolvableToStringVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 /// Triplet represents a location of the executable code in the network.
@@ -104,7 +108,9 @@ pub enum ApArgument<'i> {
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
     CanonStream(CanonStream<'i>),
+    CanonStreamMap(CanonStreamMap<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -116,9 +122,9 @@ pub enum ApResult<'i> {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum ApMapKey<'i> {
+pub enum StreamMapKeyClause<'i> {
     Literal(&'i str),
-    Number(Number),
+    Int(i64),
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
@@ -139,6 +145,8 @@ pub enum FoldScalarIterable<'i> {
     // it's important not to have lambda here
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
+    CanonStreamMap(CanonStreamMap<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
     EmptyArray,
 }
 
@@ -152,4 +160,6 @@ pub enum NewArgument<'i> {
     StreamMap(StreamMap<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
+    #[serde(borrow)]
+    CanonStreamMap(CanonStreamMap<'i>),
 }

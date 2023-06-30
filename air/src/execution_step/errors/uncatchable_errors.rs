@@ -16,6 +16,9 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::CanonStreamMapError;
+use crate::StreamMapError;
+use crate::StreamMapKeyError;
 use crate::execution_step::STREAM_MAX_SIZE;
 use crate::ToErrorCode;
 
@@ -102,6 +105,18 @@ pub enum UncatchableError {
     /// Stream size estimate goes over a hardcoded limit.
     #[error("stream size goes over the allowed limit of {STREAM_MAX_SIZE}")]
     StreamSizeLimitExceeded,
+
+    /// CanonStreamMapKey related errors.
+    #[error(transparent)]
+    StreamMapKeyError(#[from] StreamMapKeyError),
+
+    /// Stream map related errors.
+    #[error(transparent)]
+    StreamMapError(#[from] StreamMapError),
+
+    /// CanonStreamMap related errors.
+    #[error(transparent)]
+    CanonStreamMapError(#[from] CanonStreamMapError),
 }
 
 impl ToErrorCode for UncatchableError {
