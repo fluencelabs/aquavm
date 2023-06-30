@@ -59,7 +59,7 @@ pub(super) fn handle_prev_state<'i>(
                 .map_err(UncatchableError::from)?;
 
             verifier::verify_call(
-                &service_agg.argument_hash,
+                argument_hash.as_ref().unwrap(),
                 tetraplet,
                 &service_agg.argument_hash,
                 &current_tetraplet,

@@ -15,10 +15,14 @@
  */
 
 use air::{ExecutionCidState, PreparationError};
-use air_interpreter_signatures::{SignatureStore, PeerCidTracker, PublicKey};
+use air_interpreter_signatures::{PeerCidTracker, PublicKey, SignatureStore};
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use semver::Version;
+
+/// This testing modules assert AquaVM resistance to various attacks.
+///
+/// CID store manipulations are checked in the `corruption` module.
 
 #[test]
 fn test_attack_injection_current_peer_scalar() {

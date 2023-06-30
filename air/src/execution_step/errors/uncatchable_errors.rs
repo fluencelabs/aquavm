@@ -99,11 +99,11 @@ pub enum UncatchableError {
     MalformedCallServiceFailed(serde_json::Error),
 
     /// Argument hash or tetraplet mismatch in a call merged from current_data
-    #[error("call's {param} doesn't match expected parameters: expected {expected_value}, got {current_value} ")]
+    #[error("call's {param} doesn't match expected parameters: expected {expected_value}, got {stored_value} ")]
     CallParametersMismatch {
         param: &'static str,
         expected_value: String,
-        current_value: String,
+        stored_value: String,
     },
 
     #[error("failed to sign data: {0}")]

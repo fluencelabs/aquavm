@@ -20,23 +20,23 @@ use polyplets::SecurityTetraplet;
 
 /// Check that computed call parameters match the parameters from current data.
 pub(crate) fn verify_call(
-    argument_hash: &str,
-    tetraplet: &SecurityTetraplet,
-    current_argument_hash: &str,
-    current_tetraplet: &SecurityTetraplet,
+    expected_argument_hash: &str,
+    expected_tetraplet: &SecurityTetraplet,
+    stored_argument_hash: &str,
+    stored_tetraplet: &SecurityTetraplet,
 ) -> Result<(), UncatchableError> {
-    if argument_hash != current_argument_hash {
+    if expected_argument_hash != stored_argument_hash {
         return Err(UncatchableError::CallParametersMismatch {
             param: "argument_hash",
-            expected_value: argument_hash.to_owned(),
-            current_value: current_argument_hash.to_owned(),
+            expected_value: expected_argument_hash.to_owned(),
+            stored_value: stored_argument_hash.to_owned(),
         });
     }
-    if tetraplet != current_tetraplet {
+    if expected_tetraplet != stored_tetraplet {
         return Err(UncatchableError::CallParametersMismatch {
             param: "tetraplet",
-            expected_value: format!("{tetraplet:?}"),
-            current_value: format!("{current_tetraplet}"),
+            expected_value: format!("{expected_tetraplet:?}"),
+            stored_value: format!("{stored_tetraplet:?}"),
         });
     }
     Ok(())

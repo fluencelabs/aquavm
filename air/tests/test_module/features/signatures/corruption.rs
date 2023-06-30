@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/// This test module asserts CID store verification functionality:
+/// values forged in the CID stores.
 use air::ExecutionCidState;
 use air::PreparationError;
 use air_interpreter_signatures::PeerCidTracker;
