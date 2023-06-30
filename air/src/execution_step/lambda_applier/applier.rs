@@ -16,6 +16,8 @@
 
 use super::utils::*;
 use super::LambdaError;
+use crate::execution_step::value_types::CanonStreamMap;
+use crate::execution_step::value_types::ValueAndIndex;
 use crate::execution_step::CatchableError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
@@ -31,7 +33,7 @@ use non_empty_vec::NonEmpty;
 use std::borrow::Cow;
 use std::rc::Rc;
 
-pub(crate) struct StreamSelectResult<'value> {
+pub(crate) struct LambdaResult<'value> {
     pub(crate) result: Cow<'value, JValue>,
     pub(crate) tetraplet_idx: Option<usize>,
 }
@@ -40,10 +42,21 @@ pub(crate) fn select_by_lambda_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<StreamSelectResult<'value>> {
+) -> ExecutionResult<LambdaResult<'value>> {
     match lambda {
         LambdaAST::ValuePath(value_path) => select_by_path_from_stream(stream, value_path, exec_ctx),
         LambdaAST::Functor(functor) => Ok(select_by_functor_from_stream(stream, functor)),
+    }
+}
+
+pub(crate) fn select_by_lambda_from_canon_map<'value>(
+    canon_map: &'value CanonStreamMap<'_>,
+    lambda: &LambdaAST<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<LambdaResult<'value>> {
+    match lambda {
+        LambdaAST::ValuePath(value_path) => select_by_path_from_canon_map(canon_map, value_path, exec_ctx),
+        LambdaAST::Functor(functor) => Ok(select_by_functor_from_canon_map(canon_map, functor)),
     }
 }
 
@@ -62,7 +75,7 @@ fn select_by_path_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<StreamSelectResult<'value>> {
+) -> ExecutionResult<LambdaResult<'value>> {
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
         ValueAccessor::ArrayAccess { idx } => *idx,
@@ -77,26 +90,59 @@ fn select_by_path_from_stream<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
-
+    let idx = idx as usize;
     let stream_size = stream.len();
     let value = lambda_to_execution_error!(stream
         .peekable()
-        .nth(idx as usize)
+        .nth(idx)
         .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
 
     let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
-    let select_result = StreamSelectResult::from_cow(result, idx);
+    let select_result = LambdaResult::from_cow(result, idx);
+    Ok(select_result)
+}
+
+fn select_by_path_from_canon_map<'value>(
+    canon_map: &'value CanonStreamMap<'_>,
+    lambda: &NonEmpty<ValueAccessor<'_>>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<LambdaResult<'value>> {
+    let (prefix, body) = lambda.split_first();
+    let stream_map_key = match prefix {
+        ValueAccessor::ArrayAccess { idx } => (*idx).into(),
+        ValueAccessor::FieldAccessByName { field_name } => (*field_name).into(),
+        ValueAccessor::FieldAccessByScalar { scalar_name } => {
+            let scalar = exec_ctx.scalars.get_value(scalar_name)?;
+            lambda_to_execution_error!(try_scalar_ref_as_stream_map_key(scalar))?
+        }
+        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
+    };
+    let ValueAndIndex {
+        value,
+        value_aggregate_array_index,
+    } = canon_map.index(&stream_map_key)?;
+    let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
+    let select_result = LambdaResult::from_cow(result, value_aggregate_array_index);
     Ok(select_result)
 }
 
 fn select_by_functor_from_stream<'value>(
     stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
     functor: &Functor,
-) -> StreamSelectResult<'value> {
+) -> LambdaResult<'value> {
     match functor {
         Functor::Length => {
             let result = serde_json::json!(stream.len());
-            StreamSelectResult::from_value(result)
+            LambdaResult::from_value(result)
+        }
+    }
+}
+
+fn select_by_functor_from_canon_map<'value>(canon_map: &CanonStreamMap<'_>, functor: &Functor) -> LambdaResult<'value> {
+    match functor {
+        Functor::Length => {
+            let result = serde_json::json!(canon_map.len());
+            LambdaResult::from_value(result)
         }
     }
 }
@@ -139,11 +185,11 @@ fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> Execution
     }
 }
 
-impl<'value> StreamSelectResult<'value> {
-    pub(self) fn from_cow(result: Cow<'value, JValue>, tetraplet_idx: u32) -> Self {
+impl<'value> LambdaResult<'value> {
+    pub(self) fn from_cow(result: Cow<'value, JValue>, tetraplet_idx: usize) -> Self {
         Self {
             result,
-            tetraplet_idx: Some(tetraplet_idx as usize),
+            tetraplet_idx: Some(tetraplet_idx),
         }
     }
 

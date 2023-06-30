@@ -34,6 +34,15 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Canon(canon))
     },
 
+    <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <canon_stream_map:CanonStreamMapArgument> ")" <right: @R> => {
+        let canon_map = CanonMap::new(peer_id, stream_map, canon_stream_map);
+
+        let span = Span::new(left, right);
+        validator.met_canon_map(&canon_map, span);
+
+        Box::new(Instruction::CanonMap(canon_map))
+    },
+
     <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <scalar_pair:Scalar> ")" <right: @R> => {
         let scalar = Scalar::new(scalar_pair.0, scalar_pair.1);
         let canon = CanonStreamMapScalar::new(peer_id, stream_map, scalar);
@@ -53,7 +62,7 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::Ap(apply))
     },
 
-    <left: @L> "(" ap "(" <key:ApMapKey> <value:ApArgument> ")" <map:StreamMap> ")" <right: @R> => {
+    <left: @L> "(" ap "(" <key:StreamMapKeyClause> <value:ApArgument> ")" <map:StreamMap> ")" <right: @R> => {
         let map = StreamMap::new(map.0, map.1);
         let apply = ApMap::new(key, value, map);
 
@@ -103,13 +112,11 @@ Instr: Box<Instruction<'input>> = {
     },
 
     <left: @L> "(" fold <stream_map:StreamMap> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
-        let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
+        let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
-
         validator.meet_fold_stream_map(&fold, span);
-
         Box::new(Instruction::FoldStreamMap(fold))
     },
 
@@ -160,12 +167,12 @@ ApResult: ApResult<'input> = {
     <stream:Stream> => ApResult::stream(stream.0, stream.1),
 };
 
-ApMapKey: ApMapKey<'input> = {
-    <l:Literal> => ApMapKey::Literal(l),
-    <n:Number> => ApMapKey::Number(n),
-    <scalar:Scalar> => ApMapKey::Scalar(Scalar::new(scalar.0, scalar.1)),
-    <scalar:ScalarWithLambda> => ApMapKey::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
-    <canon_stream:CanonStreamWithLambda> => ApMapKey::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+StreamMapKeyClause: StreamMapKeyClause<'input> = {
+    <l:Literal> => StreamMapKeyClause::Literal(l),
+    <integer:I64> => StreamMapKeyClause::Int(integer),
+    <scalar:Scalar> => StreamMapKeyClause::Scalar(Scalar::new(scalar.0, scalar.1)),
+    <scalar:ScalarWithLambda> => StreamMapKeyClause::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
+    <canon_stream:CanonStreamWithLambda> => StreamMapKeyClause::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
 };
 
 CallOutput: CallOutputValue<'input> = {
@@ -190,6 +197,7 @@ FoldScalarIterable: FoldScalarIterable<'input> = {
     <scalar:Scalar> => FoldScalarIterable::Scalar(Scalar::new(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => FoldScalarIterable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => FoldScalarIterable::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
+    <canon_stream_map:CanonStreamMap> => FoldScalarIterable::CanonStreamMap(CanonStreamMap::new(canon_stream_map.0, canon_stream_map.1)),
     "[" "]" => FoldScalarIterable::EmptyArray,
 };
 
@@ -203,6 +211,7 @@ ResolvableToPeerIdVariable: ResolvableToPeerIdVariable<'input> = {
     <scalar:Scalar> => ResolvableToPeerIdVariable::Scalar(Scalar::new(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStreamWithLambda> => ResolvableToPeerIdVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map:CanonStreamMapWithLambda> => ResolvableToPeerIdVariable::CanonStreamMapWithLambda(CanonStreamMapWithLambda::new(canon_stream_map.0, canon_stream_map.1, canon_stream_map.2)),
 }
 
 ResolvableToStringVariable: ResolvableToStringVariable<'input> = {
@@ -210,6 +219,7 @@ ResolvableToStringVariable: ResolvableToStringVariable<'input> = {
     <scalar:Scalar> => ResolvableToStringVariable::Scalar(Scalar::new(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => ResolvableToStringVariable::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStreamWithLambda> => ResolvableToStringVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map:CanonStreamMapWithLambda> => ResolvableToStringVariable::CanonStreamMapWithLambda(CanonStreamMapWithLambda::new(canon_stream_map.0, canon_stream_map.1, canon_stream_map.2)),
 }
 
 NewArgument: NewArgument<'input> = {
@@ -217,6 +227,7 @@ NewArgument: NewArgument<'input> = {
     <stream:Stream> => NewArgument::Stream(Stream::new(stream.0, stream.1)),
     <stream:StreamMap> => NewArgument::StreamMap(StreamMap::new(stream.0, stream.1)),
     <canon_stream:CanonStream> => NewArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
+    <canon_stream_map:CanonStreamMap> => NewArgument::CanonStreamMap(CanonStreamMap::new(canon_stream_map.0, canon_stream_maps.1)),
 }
 
 Number: Number = {
@@ -240,6 +251,8 @@ Value: ImmutableValue<'input> = {
     <scalar:ScalarWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::scalar(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => ImmutableValue::Variable(ImmutableVariable::canon_stream(canon_stream.0, canon_stream.1)),
     <canon_stream:CanonStreamWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map:CanonStreamMap> => ImmutableValue::Variable(ImmutableVariable::canon_stream_map(canon_stream_map.0, canon_stream_map.1)),
+    <canon_stream_map:CanonStreamMapWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(canon_stream_map.0, canon_stream_map.1, canon_stream_map.2)),
 }
 
 ApArgument: ApArgument<'input> = {
@@ -256,6 +269,7 @@ ApArgument: ApArgument<'input> = {
     <scalar:ScalarWithLambda> => ApArgument::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => ApArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
     <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map:CanonStreamMapWithLambda> => ApArgument::CanonStreamMapWithLambda(CanonStreamMapWithLambda::new(canon_stream_map.0, canon_stream_map.1, canon_stream_map.2)),
 }
 
 StreamArgument: Stream<'input> = {
@@ -268,6 +282,10 @@ StreamMapArgument: StreamMap<'input> = {
 
 CanonStreamArgument: CanonStream<'input> = {
     <canon_stream:CanonStream> => CanonStream::new(canon_stream.0, canon_stream.1),
+}
+
+CanonStreamMapArgument: CanonStreamMap<'input> = {
+    <canon_stream_map:CanonStreamMap> => CanonStreamMap::new(canon_stream_map.0, canon_stream_map.1),
 }
 
 extern {
@@ -285,7 +303,9 @@ extern {
         Stream => Token::Stream { name: <&'input str>, position: <AirPos> },
         StreamMap => Token::StreamMap { name: <&'input str>, position: <AirPos> },
         CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
+        CanonStreamMap => Token::CanonStreamMap { name: <&'input str>, position: <AirPos> },
         CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
+        CanonStreamMapWithLambda => Token::CanonStreamMapWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 
         Literal => Token::StringLiteral(<&'input str>),
         I64 => Token::I64(<i64>),

@@ -21,7 +21,7 @@ use non_empty_vec::NonEmpty;
 use serde::Deserialize;
 use serde::Serialize;
 
-// TODO: rename lambda to smth more appropriate
+// TODO: rename lambda into lens
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum LambdaAST<'input> {
     /// Various functors that could applied to a value.

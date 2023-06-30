@@ -140,6 +140,22 @@ pub(super) fn fold_scalar_canon_stream<'i>(
     })
 }
 
+pub(super) fn fold_scalar_canon_stream_map<'i>(
+    canon_stream_map: CanonStreamMap<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
+    span: Span,
+) -> Instruction<'i> {
+    Instruction::FoldScalar(FoldScalar {
+        iterable: FoldScalarIterable::CanonStreamMap(canon_stream_map),
+        iterator,
+        instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
+        span,
+    })
+}
+
 pub(super) fn fold_scalar_empty_array<'i>(
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,
@@ -200,7 +216,7 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
 }
 
 pub(super) fn ap_with_map<'i>(
-    key: ApMapKey<'i>,
+    key: StreamMapKeyClause<'i>,
     argument: ApArgument<'i>,
     result: StreamMap<'i>,
 ) -> Instruction<'i> {
@@ -232,6 +248,18 @@ pub(super) fn canon_stream_map_scalar<'i>(
         peer_id: peer_pk,
         stream_map,
         scalar,
+    })
+}
+
+pub(super) fn canon_stream_map_canon_map<'i>(
+    peer_pk: ResolvableToPeerIdVariable<'i>,
+    stream_map: StreamMap<'i>,
+    canon_stream_map: CanonStreamMap<'i>,
+) -> Instruction<'i> {
+    Instruction::CanonMap(CanonMap {
+        peer_id: peer_pk,
+        stream_map,
+        canon_stream_map,
     })
 }
 

@@ -23,6 +23,28 @@ pub enum StreamMapError {
     UnsupportedMapKeyType { variable_name: String },
 }
 
+/// CanonStreamMap related errors.
+#[derive(Debug, Clone, ThisError)]
+pub enum CanonStreamMapError {
+    #[error("there is no such index in the canon stream map")]
+    IndexIsAbsentInTheMap,
+
+    #[error("there is an index with no corresponding value")]
+    NonexistentMappingIdx,
+}
+
+#[derive(Debug, Clone, ThisError)]
+pub enum StreamMapKeyError {
+    #[error("the value must be an object with key and value fields")]
+    NotAnObject,
+
+    #[error("the value must the value field")]
+    ValueFieldIsAbsent,
+
+    #[error("unsupported kvpair object or map key type")]
+    UnsupportedKVPairObjectOrMapKeyType,
+}
+
 pub fn unsupported_map_key_type(variable_name: &str) -> StreamMapError {
     StreamMapError::UnsupportedMapKeyType {
         variable_name: variable_name.to_string(),

@@ -89,6 +89,10 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_name_definition(canon.canon_stream.name, span);
     }
 
+    pub(super) fn met_canon_map(&mut self, canon_map: &CanonMap<'i>, span: Span) {
+        self.met_variable_name_definition(canon_map.canon_stream_map.name, span);
+    }
+
     pub(super) fn met_canon_map_scalar(
         &mut self,
         canon_stream_map_scalar: &CanonStreamMapScalar<'i>,
@@ -114,6 +118,7 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStream(canon_stream) => self.met_canon_stream(canon_stream, span),
+            CanonStreamMap(canon_stream_map) => self.met_canon_stream_map(canon_stream_map, span),
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
@@ -161,19 +166,31 @@ impl<'i> VariableValidator<'i> {
             ApArgument::CanonStreamWithLambda(canon_stream) => {
                 self.met_canon_stream_wl(canon_stream, span)
             }
+            ApArgument::CanonStreamMap(canon_stream_map) => {
+                self.met_canon_stream_map(canon_stream_map, span)
+            }
+            ApArgument::CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
         self.met_variable_name_definition(ap.result.name(), span);
     }
 
     pub(super) fn met_ap_map(&mut self, ap_map: &ApMap<'i>, span: Span) {
         let key = &ap_map.key;
-        match key {
-            ApMapKey::Literal(_) | ApMapKey::Number(_) => {}
-            ApMapKey::Scalar(scalar) => self.met_scalar(scalar, span),
-            ApMapKey::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
-            ApMapKey::CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
-        }
+        self.met_map_key(key, span);
         self.met_variable_name_definition(ap_map.map.name, span);
+    }
+
+    fn met_map_key(&mut self, key: &StreamMapKeyClause<'i>, span: Span) {
+        match key {
+            StreamMapKeyClause::Literal(_) | StreamMapKeyClause::Int(_) => {}
+            StreamMapKeyClause::Scalar(scalar) => self.met_scalar(scalar, span),
+            StreamMapKeyClause::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
+            StreamMapKeyClause::CanonStreamWithLambda(stream) => {
+                self.met_canon_stream_wl(stream, span)
+            }
+        }
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {
@@ -205,6 +222,9 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+            CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
     }
 
@@ -220,6 +240,9 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+            CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
     }
 
@@ -256,9 +279,18 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_name(stream.name, span);
     }
 
+    fn met_canon_stream_map(&mut self, canon_stream_map: &CanonStreamMap<'i>, span: Span) {
+        self.met_variable_name(canon_stream_map.name, span);
+    }
+
     fn met_canon_stream_wl(&mut self, stream: &CanonStreamWithLambda<'i>, span: Span) {
         self.met_variable_name(stream.name, span);
         self.met_lambda(&stream.lambda, span);
+    }
+
+    fn met_canon_stream_map_wl(&mut self, stream_map: &CanonStreamMapWithLambda<'i>, span: Span) {
+        self.met_variable_name(stream_map.name, span);
+        self.met_lambda(&stream_map.lambda, span);
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {

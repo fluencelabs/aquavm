@@ -17,6 +17,7 @@
 mod values_sparse_matrix;
 
 use crate::execution_step::errors_prelude::*;
+use crate::execution_step::value_types::CanonStreamMapWithProvenance;
 use crate::execution_step::value_types::CanonStreamWithProvenance;
 use crate::execution_step::value_types::ScalarRef;
 use crate::execution_step::ExecutionResult;
@@ -88,14 +89,18 @@ pub(crate) struct Scalars<'i> {
 
     pub(crate) canon_streams: ValuesSparseMatrix<CanonStreamWithProvenance>,
 
+    pub(crate) canon_maps: ValuesSparseMatrix<CanonStreamMapWithProvenance<'i>>,
+
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 }
 
+#[allow(dead_code)]
 impl<'i> Scalars<'i> {
     pub fn new() -> Self {
         Self {
             non_iterable_variables: ValuesSparseMatrix::new(),
             canon_streams: ValuesSparseMatrix::new(),
+            canon_maps: ValuesSparseMatrix::new(),
             iterable_variables: HashMap::new(),
         }
     }
@@ -114,6 +119,16 @@ impl<'i> Scalars<'i> {
         value: CanonStreamWithProvenance,
     ) -> ExecutionResult<bool> {
         self.canon_streams.set_value(name, value)
+    }
+
+    /// Returns true if there was a previous value for the provided key on the same
+    /// fold block.
+    pub(crate) fn set_canon_map_value<'k: 'i>(
+        &mut self,
+        name: impl Into<String>,
+        value: CanonStreamMapWithProvenance<'k>,
+    ) -> ExecutionResult<bool> {
+        self.canon_maps.set_value(name, value)
     }
 
     pub(crate) fn set_iterable_value(
@@ -158,6 +173,12 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
     }
 
+    pub(crate) fn get_canon_map(&'i self, name: &str) -> ExecutionResult<&'i CanonStreamMapWithProvenance<'i>> {
+        self.canon_maps
+            .get_value(name)?
+            .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
+    }
+
     pub(crate) fn get_value(&'i self, name: &str) -> ExecutionResult<ScalarRef<'i>> {
         let value = self.get_non_iterable_scalar(name);
         let iterable_value_with_prov = self.iterable_variables.get(name);
@@ -179,23 +200,27 @@ impl<'i> Scalars<'i> {
     pub(crate) fn meet_fold_start(&mut self) {
         self.non_iterable_variables.meet_fold_start();
         self.canon_streams.meet_fold_start();
+        self.canon_maps.meet_fold_start();
     }
 
     // meet next before recursion
     pub(crate) fn meet_next_before(&mut self) {
         self.non_iterable_variables.meet_next_before();
         self.canon_streams.meet_next_before();
+        self.canon_maps.meet_next_before();
     }
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
         self.non_iterable_variables.meet_next_after();
         self.canon_streams.meet_next_after();
+        self.canon_maps.meet_next_after();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
         self.non_iterable_variables.meet_fold_end();
         self.canon_streams.meet_fold_end();
+        self.canon_maps.meet_fold_end();
     }
 
     pub(crate) fn meet_new_start_scalar(&mut self, scalar_name: String) {
@@ -206,12 +231,20 @@ impl<'i> Scalars<'i> {
         self.canon_streams.meet_new_start(canon_stream_name);
     }
 
+    pub(crate) fn meet_new_start_canon_stream_map(&mut self, canon_stream_map_name: String) {
+        self.canon_maps.meet_new_start(canon_stream_map_name);
+    }
+
     pub(crate) fn meet_new_end_scalar(&mut self, scalar_name: &str) -> ExecutionResult<()> {
         self.non_iterable_variables.meet_new_end(scalar_name)
     }
 
     pub(crate) fn meet_new_end_canon_stream(&mut self, canon_name: &str) -> ExecutionResult<()> {
         self.canon_streams.meet_new_end(canon_name)
+    }
+
+    pub(crate) fn meet_new_end_canon_stream_map(&mut self, canon_stream_map_name: &str) -> ExecutionResult<()> {
+        self.canon_maps.meet_new_end(canon_stream_map_name)
     }
 }
 
