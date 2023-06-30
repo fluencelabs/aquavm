@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::CanonStreamWithProvenance;
+// use crate::execution_step::boxed_value::CanonStreamWithProvenance;
 use crate::execution_step::instructions::resolve_peer_id_to_string;
 use crate::execution_step::Stream;
 use crate::log_instruction;
@@ -56,7 +57,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
             } = stream_with_positions;
 
             let value = CanonStreamWithProvenance::new(canon_stream, canon_result_cid.clone());
-            exec_ctx.scalars.set_canon_value(self.canon_stream.name, value)?;
+            exec_ctx.scalars.set_canon_stream_value(self.canon_stream.name, value)?;
 
             trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
             Ok(())

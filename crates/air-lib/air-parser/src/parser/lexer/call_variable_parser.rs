@@ -314,6 +314,12 @@ impl<'input> CallVariableParser<'input> {
                 name,
                 position: self.start_pos,
             },
+            MetTag::Canon if self.state.canon_type_tag.is_canon_stream_map() => {
+                Token::CanonStreamMap {
+                    name,
+                    position: self.start_pos,
+                }
+            }
             MetTag::Canon if self.state.canon_type_tag.is_canon_stream() => Token::CanonStream {
                 name,
                 position: self.start_pos,
@@ -341,6 +347,13 @@ impl<'input> CallVariableParser<'input> {
                 lambda,
                 position: self.start_pos,
             },
+            MetTag::Canon if self.state.canon_type_tag.is_canon_stream_map() => {
+                Token::CanonStreamMapWithLambda {
+                    name,
+                    lambda,
+                    position: self.start_pos,
+                }
+            }
             MetTag::Canon if self.state.canon_type_tag.is_canon_stream() => {
                 Token::CanonStreamWithLambda {
                     name,
@@ -450,6 +463,10 @@ impl CanonTypeTag {
 
     fn is_canon_stream(&self) -> bool {
         matches!(self, Self::CanonStream)
+    }
+
+    fn is_canon_stream_map(&self) -> bool {
+        matches!(self, Self::CanonStreamMap)
     }
 
     fn is_tag(&self) -> bool {

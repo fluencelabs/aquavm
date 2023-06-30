@@ -89,6 +89,10 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_name_definition(canon.canon_stream.name, span);
     }
 
+    pub(super) fn met_canon_map(&mut self, canon_map: &CanonMap<'i>, span: Span) {
+        self.met_variable_name_definition(canon_map.canon_stream_map.name, span);
+    }
+
     pub(super) fn met_canon_map_scalar(
         &mut self,
         canon_stream_map_scalar: &CanonStreamMapScalar<'i>,

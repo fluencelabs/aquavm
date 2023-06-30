@@ -56,6 +56,20 @@ impl<'i> Canon<'i> {
     }
 }
 
+impl<'i> CanonMap<'i> {
+    pub fn new(
+        peer_id: ResolvableToPeerIdVariable<'i>,
+        stream_map: StreamMap<'i>,
+        canon_stream_map: CanonStreamMap<'i>,
+    ) -> Self {
+        Self {
+            peer_id,
+            stream_map,
+            canon_stream_map,
+        }
+    }
+}
+
 impl<'i> CanonStreamMapScalar<'i> {
     pub fn new(
         peer_id: ResolvableToPeerIdVariable<'i>,
