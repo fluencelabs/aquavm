@@ -32,9 +32,9 @@ use std::rc::Rc;
 /// scalars, and represent a stream fixed at some execution point.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStream {
-    values: Vec<ValueAggregate>,
+    pub (super) values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
-    tetraplet: Rc<SecurityTetraplet>,
+    pub (super) tetraplet: Rc<SecurityTetraplet>,
 }
 
 impl CanonStream {

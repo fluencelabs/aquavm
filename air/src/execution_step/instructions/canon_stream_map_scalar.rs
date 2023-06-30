@@ -20,6 +20,8 @@ use super::canon::GetStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::boxed_value::ConflictResolustionPolicy;
+use crate::execution_step::boxed_value::ConflictResolustionPolicy::FWW;
 use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::instructions::canon::CanonEpilogClosure;
 use crate::execution_step::instructions::canon::StreamWithSerializedView;
@@ -75,7 +77,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
             }
             MergerCanonResult::Empty => {
                 let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position);
+                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position, FWW);
                 handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -89,12 +91,13 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
 pub(super) fn get_stream_or_default_function<'obj, 'n: 'obj>(
     stream_map_name: &'n str,
     position: AirPos,
+    policy: ConflictResolustionPolicy,
 ) -> Box<GetStreamClosure<'obj>> {
     Box::new(move |exec_ctx: &mut ExecutionCtx<'_>| -> Cow<'_, Stream> {
         exec_ctx
             .stream_maps
             .get_mut(stream_map_name, position)
-            .map(|stream_map| stream_map.get_unique_map_keys_stream())
+            .map(|stream_map| stream_map.get_unique_map_keys_stream(policy))
             .or_else(<_>::default)
             .unwrap()
     })

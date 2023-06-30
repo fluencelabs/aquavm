@@ -19,6 +19,9 @@ use super::{CanonStream, ValueAggregate};
 // use crate::execution_step::Generation;
 // use crate::JValue;
 
+use crate::execution_step::ExecutionResult;
+use crate::StreamMapError::UnsupportedKVPairObjectOrMapKeyType;
+use crate::UncatchableError;
 // use air_interpreter_cid::CID;
 // use air_interpreter_data::CanonResultCidAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
@@ -44,11 +47,34 @@ pub struct CanonStreamMap<'a> {
     tetraplet: Rc<SecurityTetraplet>,
 }
 
+fn from_obj_idx_pair<'a>(pair: (usize, &ValueAggregate)) -> ExecutionResult<(StreamMapKey<'a>, usize)> {
+    let (idx, obj) = pair;
+    let opt_key = StreamMapKey::from_kvpair(obj);
+    if opt_key.is_none() {
+        return Err(UncatchableError::StreamMapError(UnsupportedKVPairObjectOrMapKeyType).into());
+    } else {
+        Ok((opt_key.unwrap(), idx))
+    }
+}
+
 #[allow(dead_code)]
-impl CanonStreamMap<'_> {
+impl<'l> CanonStreamMap<'l> {
     pub(crate) fn new(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
         let map = <_>::default();
         Self { values, map, tetraplet }
+    }
+
+    pub(crate) fn from_canon_stream<'i>(canon_stream: &'i CanonStream) -> ExecutionResult<CanonStreamMap<'l>> {
+        let values = canon_stream.values.clone();
+        let tetraplet = canon_stream.tetraplet.clone();
+        // let mut map: HashMap<StreamMapKey<'i>, usize> = <_>::default();
+        let map: ExecutionResult<HashMap<StreamMapKey<'_>, usize>> =
+            canon_stream.iter().enumerate().map(from_obj_idx_pair).collect();
+        Ok(Self {
+            values,
+            map: map?,
+            tetraplet,
+        })
     }
 
     // pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
@@ -124,11 +150,5 @@ impl<'a> Deref for CanonStreamMapWithProvenance<'a> {
 
     fn deref(&self) -> &Self::Target {
         &self.canon_stream_map
-    }
-}
-
-impl<'i> From<CanonStream> for CanonStreamMap<'i> {
-    fn from(_canon_stream: CanonStream) -> CanonStreamMap<'i> {
-        todo!()
     }
 }
