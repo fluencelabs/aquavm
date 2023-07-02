@@ -60,6 +60,7 @@ impl<T> ValuesMatrix<T> {
 
 impl<T: Clone> ValuesMatrix<T> {
     pub fn add_value_to_generation(&mut self, value: T, generation_idx: GenerationIdx) {
+        //println!("  add_value_to_generation {}", generation_idx);
         if generation_idx >= self.values.len() {
             let new_size = generation_idx.checked_add(1.into()).unwrap();
             self.values.resize(new_size.into(), Vec::new());
@@ -91,6 +92,14 @@ impl<T> NewValuesMatrix<T> {
         self.0.values.pop();
     }
 
+    pub fn last_generation_is_empty(&mut self) -> bool {
+        if self.0.values.is_empty() {
+            return true;
+        }
+
+        self.0.values[self.last_generation_idx()].is_empty()
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.0.iter()
     }
@@ -104,6 +113,7 @@ impl<T> NewValuesMatrix<T> {
     }
 
     pub fn last_generation_idx(&self) -> GenerationIdx {
+        //println!("  last_generation_idx {}", self.0.values.len());
         let values_len = self.0.values.len();
         if values_len == 0 {
             return 0.into();
@@ -116,6 +126,7 @@ impl<T> NewValuesMatrix<T> {
 impl<T: Clone> NewValuesMatrix<T> {
     pub fn add_to_last_generation(&mut self, value: T) {
         let last_generation_idx = self.last_generation_idx();
+        //println!("  add_to_last_generation {}", last_generation_idx);
         self.0.add_value_to_generation(value, last_generation_idx);
     }
 }

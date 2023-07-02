@@ -90,7 +90,7 @@ impl<R: AirRunner> TestRunner<R> {
         let mut next_peer_pks = HashSet::new();
 
         loop {
-            println!("next run\n\n");
+            // println!("next run\n\n");
             let mut outcome: RawAVMOutcome = self
                 .runner
                 .call(
@@ -106,6 +106,8 @@ impl<R: AirRunner> TestRunner<R> {
                     particle_id.clone(),
                 )
                 .map_err(|e| e.to_string())?;
+
+            // super::print_trace(&outcome, "");
 
             next_peer_pks.extend(outcome.next_peer_pks);
 

@@ -45,8 +45,8 @@ fn global_streams_are_compactified() {
             1,
             cid_state,
             peer = peer_id,
-            service = "..1",
-            function = "..1"
+            service = "..0",
+            function = ""
         ),
     ];
 
@@ -76,7 +76,7 @@ fn global_stream_maps_are_compactified() {
             1,
             cid_state,
             peer = peer_id,
-            service = "",
+            service = "..0",
             function = ""
         ),
     ];
@@ -109,8 +109,8 @@ fn local_streams_are_compactified() {
             1,
             cid_state,
             peer = peer_id,
-            service = "..1",
-            function = "..1"
+            service = "..0",
+            function = ""
         ),
     ];
 

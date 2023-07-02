@@ -36,7 +36,7 @@ pub struct Stream<T> {
     new_values: NewValuesMatrix<T>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct RecursiveCursor {
     previous_start_idx: GenerationIdx,
     current_start_idx: GenerationIdx,
@@ -80,21 +80,25 @@ impl<'value, T: 'value> Stream<T> {
     }
 }
 
-impl<'value, T: 'value + Clone> Stream<T> {
+impl<'value, T: 'value + Clone + fmt::Display> Stream<T> {
     pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
-        println!("add value to {}", generation);
+        // println!("  add value {} to {}", value, generation);
 
         match generation {
             Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
             Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
             Generation::New => self.new_values.add_to_last_generation(value),
         }
+        // println!("  new values after adding {}", self.new_values);
     }
 }
 
-impl<'value, T: 'value + TracePosOperate> Stream<T> {
+impl<'value, T: 'value + TracePosOperate + fmt::Display> Stream<T> {
     /// Removes empty generations updating data.
     pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        // println!("  prev {}", self.previous_values);
+        // println!("  current {}", self.current_values);
+        // println!("  new {}", self.new_values);
         self.previous_values.remove_empty_generations();
         self.current_values.remove_empty_generations();
         self.new_values.remove_empty_generations();
@@ -255,7 +259,7 @@ mod test {
         stream.add_value(value_2.clone(), Generation::previous(1));
 
         let mut iter = stream.iter();
-        println!("after getting iter");
+        println!("  after getting iter");
         assert_eq!(iter.next(), Some(&value_1));
         assert_eq!(iter.next(), Some(&value_2));
         assert_eq!(iter.next(), None);
@@ -274,7 +278,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::previous(0));
         stream.add_value(value_4.clone(), Generation::previous(0));
 
-        let mut slice_iter = stream.slice_iter();
+        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -295,7 +299,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::current(0));
         stream.add_value(value_4.clone(), Generation::current(0));
 
-        let mut slice_iter = stream.slice_iter();
+        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -316,7 +320,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::New);
         stream.add_value(value_4.clone(), Generation::New);
 
-        let mut slice_iter = stream.slice_iter();
+        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -336,7 +340,7 @@ mod test {
     fn test_slice_on_empty_stream() {
         let stream = Stream::new();
 
-        let mut slice = stream.slice_iter();
+        let mut slice = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(slice.next(), None);
     }
 
@@ -384,7 +388,7 @@ mod test {
         stream.add_value(value_2.clone(), Generation::previous(1));
         stream.add_value(value_3.clone(), Generation::previous(3));
 
-        let mut slice_iter = stream.slice_iter();
+        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));
@@ -402,7 +406,7 @@ mod test {
         stream.add_value(value_2.clone(), Generation::current(1));
         stream.add_value(value_3.clone(), Generation::current(3));
 
-        let mut slice_iter = stream.slice_iter();
+        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));

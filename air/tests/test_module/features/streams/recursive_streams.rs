@@ -139,15 +139,18 @@ fn recursive_stream_many_iterations() {
         executed_state::subtrace_lore(1, subtrace_desc(5, 2), subtrace_desc(7, 0)),
         executed_state::subtrace_lore(4, subtrace_desc(7, 2), subtrace_desc(11, 0)),
         executed_state::subtrace_lore(6, subtrace_desc(9, 2), subtrace_desc(11, 0)),
-        executed_state::subtrace_lore(8, subtrace_desc(11, 2), subtrace_desc(15, 0)),
+        executed_state::subtrace_lore(8, subtrace_desc(11, 2), subtrace_desc(13, 0)),
         executed_state::subtrace_lore(10, subtrace_desc(13, 2), subtrace_desc(15, 0)),
-        executed_state::subtrace_lore(12, subtrace_desc(15, 2), subtrace_desc(18, 0)),
+        executed_state::subtrace_lore(12, subtrace_desc(15, 2), subtrace_desc(17, 0)),
         executed_state::subtrace_lore(14, subtrace_desc(17, 1), subtrace_desc(18, 0)),
         executed_state::subtrace_lore(16, subtrace_desc(18, 2), subtrace_desc(20, 0)),
         executed_state::subtrace_lore(19, subtrace_desc(20, 1), subtrace_desc(21, 0)),
     ]);
 
     let test_passed = (actual_fold == &expected_fold_v1) || (actual_fold == &expected_fold_v2);
+    if !test_passed {
+        print_trace(&result, "");
+    }
     assert!(test_passed);
 
     let actual_last_state = actual_trace.last().unwrap();

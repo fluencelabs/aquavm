@@ -37,26 +37,32 @@ impl RecursiveStream {
     pub fn fold_started(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
         let slice_iter = stream.slice_iter(self.cursor);
         let iterable = Self::slice_iter_to_iterable(slice_iter);
+        self.cursor = stream.cursor();
         if !iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
+            //println!("  recursive stream: add new generation");
             stream.new_values().add_new_empty_generation();
         }
 
-        self.cursor = stream.cursor();
         iterable
     }
 
     pub fn next_iteration(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
+        //println!("  recursive stream: next iteration before {:?}", self.cursor);
         let slice_iter = stream.slice_iter(self.cursor);
         let next_iteration_values = Self::slice_iter_to_iterable(slice_iter);
-        self.cursor = stream.cursor();
-        if next_iteration_values.is_empty() {
+        if stream.new_values().last_generation_is_empty() {
+            //println!("  recursive stream: remove the last generation");
             stream.new_values().remove_last_generation();
-            return next_iteration_values;
         }
 
-        stream.new_values().add_new_empty_generation();
+        self.cursor = stream.cursor();
+        //println!("  recursive stream: next iteration after {:?}", self.cursor);
+
+        if !stream.new_values().last_generation_is_empty() {
+            stream.new_values().add_new_empty_generation();
+        }
         next_iteration_values
     }
 
@@ -94,7 +100,8 @@ mod test {
     #[test]
     fn fold_started_empty_if_no_values() {
         let mut stream = Stream::new();
-        let iterable_values = RecursiveStream::fold_started(&mut stream);
+        let mut recursive_stream = RecursiveStream::new();
+        let iterable_values = recursive_stream.fold_started(&mut stream);
 
         assert!(iterable_values.is_empty())
     }
@@ -102,7 +109,8 @@ mod test {
     #[test]
     fn next_iteration_empty_if_no_values() {
         let mut stream = Stream::new();
-        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        let mut recursive_stream =  RecursiveStream::new();
+        let iterable_values = recursive_stream.next_iteration(&mut stream);
 
         assert!(iterable_values.is_empty())
     }
@@ -110,34 +118,36 @@ mod test {
     #[test]
     fn next_iteration_empty_if_no_values_added() {
         let mut stream = Stream::new();
+        let mut recursive_stream = RecursiveStream::new();
 
         let value = create_value(json!("1"));
         stream.add_value(value, Generation::Current(0.into()));
 
-        let iterable_values = RecursiveStream::fold_started(&mut stream);
+        let iterable_values = recursive_stream.fold_started(&mut stream);
         assert_eq!(iterable_values.len(), 1);
 
-        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        let iterable_values = recursive_stream.next_iteration(&mut stream);
         assert!(iterable_values.is_empty());
     }
 
     #[test]
     fn one_recursive_iteration() {
         let mut stream = Stream::new();
+        let mut recursive_stream = RecursiveStream::new();
 
         let value = create_value(json!("1"));
         stream.add_value(value.clone(), Generation::Current(0.into()));
 
-        let iterable_values = RecursiveStream::fold_started(&mut stream);
+        let iterable_values = recursive_stream.fold_started(&mut stream);
         assert_eq!(iterable_values.len(), 1);
 
         stream.add_value(value.clone(), Generation::New);
         stream.add_value(value, Generation::New);
 
-        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        let iterable_values = recursive_stream.next_iteration(&mut stream);
         assert_eq!(iterable_values.len(), 1);
 
-        let iterable_values = RecursiveStream::next_iteration(&mut stream);
+        let iterable_values = recursive_stream.next_iteration(&mut stream);
         assert!(iterable_values.is_empty());
     }
 }
