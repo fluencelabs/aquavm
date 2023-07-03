@@ -1,0 +1,18 @@
+[package]
+name = "gen-bench-data"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aquavm-air = { version = "0.41.0", path = "../../air", features = ["gen_signatures", "check_signatures"] }
+air-test-utils = { version = "0.7.0", path = "../../crates/air-lib/test-utils" }
+air-testing-framework = { version = "0.3.0", path = "../../crates/testing-framework" }
+bs58 = "0.5.0"
+clap = { version = "4.3.5", features = ["derive"] }
+fluence-keypair = "0.10.1"
+itertools = "0.10.5"
+maplit = "1.0.2"
+serde_json = "1.0.97"
+serde = "1.0.165"

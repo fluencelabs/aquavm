@@ -152,6 +152,14 @@ impl<R: AirRunner> AirScriptExecutor<R> {
     pub fn resolve_name(&self, name: &str) -> PeerId {
         self.transformed_air_script.get_network().resolve_peer(name)
     }
+
+    pub fn get_network(&self) -> Rc<Network<R>> {
+        self.transformed_air_script.get_network()
+    }
+
+    pub fn get_transformed_air_script(&self) -> &TransformedAirScript<R> {
+        &self.transformed_air_script
+    }
 }
 
 #[cfg(test)]

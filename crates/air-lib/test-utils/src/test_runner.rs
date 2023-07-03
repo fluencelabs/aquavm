@@ -56,7 +56,7 @@ pub trait AirRunner {
 pub struct TestRunner<R = DefaultAirRunner> {
     pub runner: R,
     call_service: CallServiceClosure,
-    keypair: KeyPair,
+    pub keypair: KeyPair,
 }
 
 #[derive(Debug, Default, Clone)]

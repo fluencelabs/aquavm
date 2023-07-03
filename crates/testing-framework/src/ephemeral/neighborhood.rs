@@ -211,6 +211,10 @@ impl<R: AirRunner> PeerEnv<R> {
             res
         })
     }
+
+    pub fn get_peer(&self) -> &Peer<R> {
+        &self.peer
+    }
 }
 
 impl<'a, R: AirRunner> IntoIterator for &'a PeerEnv<R> {

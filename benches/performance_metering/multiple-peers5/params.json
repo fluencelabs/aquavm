@@ -1,1 +1,6 @@
-{"comment":"verifying many CIDs for many peers"}
+{
+  "init-peer-id": "12D3KooWPeUMWXdtEveZonecW8hhFdt4wfT4AyYpp4yrFGti7w5m",
+  "current-peer-id": "12D3KooWPeUMWXdtEveZonecW8hhFdt4wfT4AyYpp4yrFGti7w5m",
+  "comment": "verifying many CIDs for many peers",
+  "particle-id": "0123456789ABCDEF"
+}

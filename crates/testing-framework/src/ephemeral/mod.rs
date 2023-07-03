@@ -113,6 +113,10 @@ impl<R: AirRunner> Peer<R> {
         }
         res
     }
+
+    pub fn get_keypair(&self) -> &KeyPair {
+        &self.runner.keypair
+    }
 }
 
 impl<R: AirRunner> std::fmt::Debug for Peer<R> {
