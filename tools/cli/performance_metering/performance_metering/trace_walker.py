@@ -150,7 +150,8 @@ class TraceWalker:
             if "message" in raw_fields:
                 message = raw_fields["message"]
                 if message in ("enter", "close"):
-                    span = raw_rec["span"].get("name", "ERROR_missing_span.name")
+                    span = raw_rec["span"].get(
+                        "name", "ERROR_missing_span.name")
                     target = raw_rec.get("target", None)
                     spans = [sp["name"] for sp in raw_rec.get("spans", [])]
                     logger.debug("Message: %r", message)
@@ -163,7 +164,8 @@ class TraceWalker:
                         rec.execution_time += parse_trace_timedelta(time_busy)
                     elif message == "enter":
                         assert span == spans[-1]
-                        rec = TraceRecord(message, span, target, None, spans[:-1])
+                        rec = TraceRecord(
+                            message, span, target, None, spans[:-1])
                         self._inject_enter_rec(rec)
             if "memory_size" in raw_fields:
                 self._handle_memory_stat(raw_fields["memory_size"])
@@ -195,8 +197,7 @@ class TraceWalker:
             min_size = self.memory_sizes[0]
             max_size = self.memory_sizes[-1]
             return [format_size(min_size), format_size(max_size)]
-        else:
-            return None
+        return None
 
     def _find_parent(self, rec: TraceRecord) -> TraceRecord:
         parent = _RootStub(self.root)

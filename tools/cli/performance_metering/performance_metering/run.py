@@ -36,9 +36,13 @@ logger = logging.getLogger(__name__)
 def _prepare(args):
     """Prepare the environment: build the tools required."""
     if args.prepare_binaries:
+        if args.features:
+            features = 'marine,' + args.features
+        else:
+            features = 'marine'
         logger.info("Build air-interpreter...")
         subprocess.check_call([
-            "marine", "build", "--release", "--features", "marine",
+            "marine", "build", "--release", "--features", features,
             "--package", "air-interpreter",
         ])
         logger.info("Build air-trace...")
@@ -66,7 +70,7 @@ def run(args):
     _prepare(args)
 
     suite = discover_tests(args.bench_dir)
-    with Db(args.path, args.host_id) as db:
+    with Db(args.path, features=args.features, host_id=args.host_id) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
             walker = TraceWalker()

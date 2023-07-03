@@ -84,10 +84,20 @@ def intermediate_temp_file(target_file: str):
         yield out
         out.flush()
         os.rename(out.name, target_file)
-    except:
-        out.close()
-        try:
-            os.remove(out.name)
-        except OSError:
-            pass
-        raise
+        out = None
+    finally:
+        if out is not None:
+            out.close()
+            try:
+                os.remove(out.name)
+            except OSError:
+                pass
+
+
+def canonicalize_features(features: Optional[str]) -> Optional[str]:
+    """Canonicalize comma-separate Rust feature list."""
+    if features is None:
+        return None
+    uniq_features = set(features.split(','))
+    sorted_features = sorted(uniq_features)
+    return ','.join(sorted_features)
