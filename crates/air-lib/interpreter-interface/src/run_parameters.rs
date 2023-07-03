@@ -25,7 +25,7 @@ use serde::Serialize;
 
 /// Parameters that a host side should pass to an interpreter and that necessary for execution.
 #[cfg_attr(feature = "marine", marine)]
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RunParameters {
     /// Peer id of a peer that start this particle.
     pub init_peer_id: String,

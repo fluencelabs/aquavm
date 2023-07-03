@@ -1,0 +1,12 @@
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "../methods" }
+interface = { path = "../core" }
+risc0-zkvm = { version = "0.15.3" }
+serde = "1.0"
+anyhow = "1.0.71"
+serde_json = "1.0.99"

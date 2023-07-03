@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.8"
+// auto-generated: "lalrpop 0.19.12"
 // sha3: 592663f5597c21f4cc9cb3ad5cb93fa0a7db3635fc4d677c2b6130d33b6e22fd
 use crate::ValueAccessor;
 use crate::parser::lambda_parser::RawLambdaAST;
