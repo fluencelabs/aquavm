@@ -322,7 +322,6 @@ dependencies = [
  "env_logger 0.7.1",
  "fluence-app-service",
  "fluence-keypair",
- "fstrings",
  "log",
  "maplit",
  "marine-rs-sdk",

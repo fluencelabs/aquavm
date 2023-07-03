@@ -28,9 +28,6 @@ use air_parser::ast::CallOutputValue;
 use air_trace_handler::merger::MetCallResult;
 use air_trace_handler::TraceHandler;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct StateDescriptor {
     should_execute: bool,
@@ -203,8 +200,9 @@ fn try_to_service_result(
     match serde_json::from_str(&service_result.result) {
         Ok(result) => Ok(Rc::new(result)),
         Err(e) => {
-            let error_msg =
-                f!("call_service result '{service_result}' can't be serialized or deserialized with an error: {e}");
+            let error_msg = format!(
+                "call_service result '{service_result}' can't be serialized or deserialized with an error: {e}"
+            );
             let error_msg = Rc::new(error_msg);
 
             let failed_value = CallServiceFailed::new(i32::MAX, error_msg.clone()).to_value();
