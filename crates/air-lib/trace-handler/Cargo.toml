@@ -15,7 +15,6 @@ path = "src/lib.rs"
 [dependencies]
 air-interpreter-cid = { version = "0.3.0", path = "../interpreter-cid" }
 air-interpreter-data = { version = "0.8.0", path = "../interpreter-data" }
-air-interpreter-interface = { version = "0.14.0", path = "../interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../log-targets" }
 aquavm-air-parser = { version = "0.7.5", path = "../air-parser" }
 polyplets = { version = "0.3.2", path = "../polyplets" }
