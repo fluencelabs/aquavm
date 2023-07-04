@@ -210,15 +210,17 @@ mod tests {
 
     #[test]
     fn test_call_result_error() {
+        let script = r#"
+        (seq
+            (call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
+            (call "peer2" ("service" "func") [arg]) ; ok = 43
+        )
+        "#;
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
-            r#"(seq
-(call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
-(call "peer2" ("service" "func") [arg]) ; ok = 43
-)
-"#,
+            script,
         )
         .unwrap();
 

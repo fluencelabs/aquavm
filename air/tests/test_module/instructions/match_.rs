@@ -16,6 +16,7 @@
 
 use air::CatchableError;
 use air::ExecutionCidState;
+use air::ToErrorCode;
 use air::NO_ERROR_ERROR_CODE;
 use air::NO_ERROR_MESSAGE;
 use air_test_framework::AirScriptExecutor;
@@ -297,6 +298,7 @@ fn match_without_xor() {
     let result = call_vm!(vm, <_>::default(), &script, "", result.data);
 
     let expected_error = CatchableError::MatchValuesNotEqual;
+    assert_eq!(expected_error.to_error_code(), 10001);
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, <_>::default(), script, "", result.data);
