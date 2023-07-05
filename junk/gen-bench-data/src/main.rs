@@ -27,6 +27,10 @@ enum Bench {
     MultipleCids50,
     MultiplePeers5,
     MultiplePeers14,
+    MultiplePeers25,
+    MultipleSigs10,
+    MultipleSigs50,
+    MultipleSigs200,
     Dashboard,
     NetworkExplore,
 }
@@ -39,6 +43,10 @@ fn main() {
         Bench::MultipleCids50 => multiple_cids(50),
         Bench::MultiplePeers5 => multiple_peers(5),
         Bench::MultiplePeers14 => multiple_peers(14),
+        Bench::MultiplePeers25 => multiple_peers(25),
+        Bench::MultipleSigs10 => multiple_sigs(10),
+        Bench::MultipleSigs50 => multiple_sigs(50),
+        Bench::MultipleSigs200 => multiple_sigs(200),
         Bench::Dashboard => dashboard::dashboard(),
         Bench::NetworkExplore => network_explore::network_explore(),
     };
@@ -95,7 +103,6 @@ pub(crate) struct Data {
     pub(crate) keypair: String,
 }
 
-// TODO testing-framework script in a separate file
 fn multiple_cids(size: usize) -> Data {
     let data = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("multiple_cids.air.tmpl"), data = data);
@@ -175,6 +182,48 @@ fn multiple_peers(size: usize) -> Data {
         cur_data: cur_res.data,
         params_json: hashmap! {
             "comment".to_owned() => "verifying many CIDs for many peers".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn multiple_sigs(size: usize) -> Data {
+    let data = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(include_str!("multiple_sigs.air.tmpl"), data = data);
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    ).unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let cur_res = exec.execute_one("other_peer_id").unwrap();
+
+    assert!(!prev_res.next_peer_pks.is_empty());
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("init_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: prev_res.data,
+        cur_data: cur_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "signing multiple CIDs".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
