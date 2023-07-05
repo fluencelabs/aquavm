@@ -22,6 +22,7 @@ use super::{CanonStream, ValueAggregate};
 use crate::execution_step::ExecutionResult;
 use crate::StreamMapError::UnsupportedKVPairObjectOrMapKeyType;
 use crate::UncatchableError;
+use crate::JValue;
 // use air_interpreter_cid::CID;
 // use air_interpreter_data::CanonResultCidAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
@@ -67,7 +68,6 @@ impl<'l> CanonStreamMap<'l> {
     pub(crate) fn from_canon_stream<'i>(canon_stream: &'i CanonStream) -> ExecutionResult<CanonStreamMap<'l>> {
         let values = canon_stream.values.clone();
         let tetraplet = canon_stream.tetraplet.clone();
-        // let mut map: HashMap<StreamMapKey<'i>, usize> = <_>::default();
         let map: ExecutionResult<HashMap<StreamMapKey<'_>, usize>> =
             canon_stream.iter().enumerate().map(from_obj_idx_pair).collect();
         Ok(Self {
@@ -87,35 +87,36 @@ impl<'l> CanonStreamMap<'l> {
     //     }
     // }
 
-    // pub(crate) fn len(&self) -> usize {
-    //     self.values.len()
-    // }
+    pub(crate) fn len(&self) -> usize {
+        self.values.len()
+    }
 
-    // pub(crate) fn is_empty(&self) -> bool {
-    //     self.values.is_empty()
-    // }
+    pub(crate) fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
 
-    // pub(crate) fn as_jvalue(&self) -> JValue {
-    //     // TODO: this clone will be removed after boxed values
-    //     let jvalue_array = self
-    //         .values
-    //         .iter()
-    //         .map(|r| r.get_result().deref().clone())
-    //         .collect::<Vec<_>>();
-    //     JValue::Array(jvalue_array)
-    // }
+    // WIP move into a generic function?
+    pub(crate) fn as_jvalue(&self) -> JValue {
+        // TODO: this clone will be removed after boxed values
+        let jvalue_array = self
+            .values
+            .iter()
+            .map(|r| r.get_result().deref().clone())
+            .collect::<Vec<_>>();
+        JValue::Array(jvalue_array)
+    }
 
-    // pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
-    //     self.values.iter()
-    // }
+    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
+        self.values.iter()
+    }
 
-    // pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
-    //     self.values.get(idx)
-    // }
+    pub(crate) fn nth(&self, idx: usize) -> Option<&ValueAggregate> {
+        self.values.get(idx)
+    }
 
-    // pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
-    //     &self.tetraplet
-    // }
+    pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
+        &self.tetraplet
+    }
 }
 
 use std::fmt;
