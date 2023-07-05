@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aquavm-air = { version = "0.41.0", path = "../../air", features = ["gen_signatures", "check_signatures"] }
-air-test-utils = { version = "0.7.0", path = "../../crates/air-lib/test-utils" }
+aquavm-air = { path = "../../air", features = ["gen_signatures", "check_signatures"] }
+air-interpreter-signatures = { path = "../../crates/air-lib/interpreter-signatures" }
+air-test-utils = { path = "../../crates/air-lib/test-utils" }
 air-testing-framework = { version = "0.3.0", path = "../../crates/testing-framework" }
 bs58 = "0.5.0"
 clap = { version = "4.3.5", features = ["derive"] }

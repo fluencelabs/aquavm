@@ -1,3 +1,6 @@
 {
-    "comment": "Loading a trace with huge values"
+    "comment": "Loading a trace with huge values",
+    "init-peer-id": "12D3KooWPeUMWXdtEveZonecW8hhFdt4wfT4AyYpp4yrFGti7w5m",
+    "current-peer-id": "12D3KooWPeUMWXdtEveZonecW8hhFdt4wfT4AyYpp4yrFGti7w5m",
+    "particle-id": "particle_id"
 }

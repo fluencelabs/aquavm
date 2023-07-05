@@ -4,12 +4,12 @@ One may need to regenerate data on changing data format.  Here is the instructio
 
 ## `parser_10000_100`
 
-Data is empty, no regeneration required.
+Datas are empty, no regeneration required.
 
-## `dashboard` and `network_explore`
+## `dashboard`, `network_explore`, `multiple-cids{N}` and `multiple-peers{N}`
 
-Run `junk/gen_test_data`.  No WASM binary required.  It will generate prev and current data as JSON files
-with prefixes `dashboard` and `explore`.
+Run `junk/gen-bench-data`.  No WASM binary required.  It will save all required benchmark files into
+a dest directory, including params and keypair.
 
 ## `big_data` and `long_data`
 

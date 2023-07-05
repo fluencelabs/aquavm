@@ -15,7 +15,7 @@
  */
 
 pub(crate) mod parser;
-pub(crate) mod walker;
+pub mod walker;
 
 use crate::asserts::ServiceDefinition;
 

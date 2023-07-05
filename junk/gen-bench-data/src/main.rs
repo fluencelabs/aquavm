@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf};
 
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 
+mod dashboard;
+mod network_explore;
+
 #[derive(Debug, Parser)]
 struct Cli {
     #[command(subcommand)]
@@ -24,6 +27,8 @@ enum Bench {
     MultipleCids50,
     MultiplePeers5,
     MultiplePeers14,
+    Dashboard,
+    NetworkExplore,
 }
 
 fn main() {
@@ -34,6 +39,8 @@ fn main() {
         Bench::MultipleCids50 => multiple_cids(50),
         Bench::MultiplePeers5 => multiple_peers(5),
         Bench::MultiplePeers14 => multiple_peers(14),
+        Bench::Dashboard => dashboard::dashboard(),
+        Bench::NetworkExplore => network_explore::network_explore(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -79,13 +86,13 @@ fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> Result<
 }
 
 #[derive(Debug, Default)]
-struct Data {
-    air: String,
-    prev_data: Vec<u8>,
-    cur_data: Vec<u8>,
-    params_json: HashMap<String, String>,
-    call_results: Option<serde_json::Value>,
-    keypair: String,
+pub(crate) struct Data {
+    pub(crate) air: String,
+    pub(crate) prev_data: Vec<u8>,
+    pub(crate) cur_data: Vec<u8>,
+    pub(crate) params_json: HashMap<String, String>,
+    pub(crate) call_results: Option<serde_json::Value>,
+    pub(crate) keypair: String,
 }
 
 // TODO testing-framework script in a separate file
@@ -124,7 +131,7 @@ fn multiple_cids(size: usize) -> Data {
             "comment".to_owned() => "verifying multiple CIDs for single peer".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
-            "init-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -170,7 +177,7 @@ fn multiple_peers(size: usize) -> Data {
             "comment".to_owned() => "verifying many CIDs for many peers".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
-            "init-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),

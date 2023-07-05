@@ -33,6 +33,8 @@ mod trackers;
 pub use crate::stores::*;
 pub use crate::trackers::*;
 
+pub use fluence_keypair::KeyPair;
+
 use serde::{Deserialize, Serialize};
 
 use std::hash::Hash;

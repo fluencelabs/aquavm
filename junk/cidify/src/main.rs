@@ -1,4 +1,8 @@
 use air_interpreter_data::ExecutedState;
+use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
+use air_test_utils::key_utils::derive_dummy_keypair;
+use air_test_utils::prelude::*;
+use std::collections::HashMap;
 
 use clap::Parser;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -58,6 +62,10 @@ fn main() {
     let mut data: PreCidInterpeterData = read_data(args.data_path);
     let calls: TraceCalls = read_data(args.calls_path);
     let mut calls = calls.into_iter();
+    // STUB
+    let (keypair, id) = derive_dummy_keypair("init_peer_id");
+    let mut peer_id_cache = HashMap::<String, String>::new();
+    let mut signature_tracker = PeerCidTracker::new(id);
 
     let mut cid_state = air::ExecutionCidState::new();
 
@@ -67,7 +75,13 @@ fn main() {
             if let Some(executed) = call.as_object_mut().unwrap().get_mut("executed") {
                 if let Some(scalar) = executed.as_object_mut().unwrap().get_mut("scalar") {
                     let call_info = calls.next().expect("More calls than call_info");
-                    let state = transform_cid(scalar.take(), call_info, &mut cid_state);
+                    let state = transform_cid(
+                        scalar.take(),
+                        call_info,
+                        &mut cid_state,
+                        &mut peer_id_cache,
+                        &mut signature_tracker,
+                    );
                     *elt = json!(state);
                 }
             }
@@ -81,8 +95,21 @@ fn main() {
     data.other_fields
         .as_object_mut()
         .unwrap()
-        .insert("interpreter_version".to_owned(), json!("0.35.1"));
+        .insert("interpreter_version".to_owned(), json!("0.41.0"));
+    let mut ss = <SignatureStore>::new();
+    ss.put(keypair.public().into(), signature_tracker.gen_signature("particle_id", &keypair).unwrap());
+    data.other_fields
+        .as_object_mut()
+        .unwrap()
+        .insert("signatures".to_owned(), json!(ss));
     serde_json::to_writer(std::io::stdout(), &data).unwrap();
+}
+
+fn derive_peer_id(peer_name: &str, peer_id_cache: &mut HashMap<String, String>) -> String {
+    peer_id_cache
+        .entry(peer_name.to_owned())
+        .or_insert_with(|| derive_dummy_keypair(peer_name).1)
+        .clone()
 }
 
 fn read_data<T: DeserializeOwned>(path: PathBuf) -> T {
@@ -94,11 +121,13 @@ fn transform_cid(
     value: Value,
     meta: CallInfo,
     cid_state: &mut air::ExecutionCidState,
+    peer_id_state: &mut HashMap<String, String>,
+    signature_tracker: &mut PeerCidTracker,
 ) -> ExecutedState {
-    use air_test_utils::executed_state::ExecutedCallBuilder;
+    let peer = derive_peer_id(&meta.peer, peer_id_state);
 
     let mut builder = ExecutedCallBuilder::new(value);
-    builder = builder.peer(meta.peer);
+    builder = builder.peer(peer.clone());
 
     if let Some(service) = meta.service {
         builder = builder.service(service);
@@ -113,8 +142,14 @@ fn transform_cid(
         builder = builder.json_path(json_path);
     }
 
+
     match meta.kind {
-        Some(Kind::Scalar) | None => builder.scalar_tracked(cid_state),
+        Some(Kind::Scalar) | None => {
+            let state = builder.scalar_tracked(cid_state);
+            let cid = extract_service_result_cid(&state);
+            signature_tracker.register(&peer, &cid);
+            state
+        }
         Some(Kind::Unused) => builder.unused(),
         Some(Kind::Stream) => unimplemented!("no stream in test data"),
     }
