@@ -205,13 +205,11 @@ fn check_cid_multiset_consistency(
 ) -> Result<(), DataVerifierError> {
     let larger_cids = &larger_pair.cids;
     let smaller_cids = &smaller_pair.cids;
-    use std::collections::HashSet;
-    // TODO bug: it should be a multiset; hashset provides weaker check
-    // TODO we may use the fact that cids are sorted and write the check manually
-    let larger_set: HashSet<_> = larger_cids.iter().collect();
-    let smaller_set: HashSet<_> = smaller_cids.iter().collect();
 
-    if larger_set.is_superset(&smaller_set) {
+    let larger_count_map = to_count_map(larger_cids);
+    let smaller_count_map = to_count_map(smaller_cids);
+
+    if check_count_maps_consistency(larger_count_map, smaller_count_map) {
         Ok(())
     } else {
         Err(DataVerifierError::MergeMismatch {
@@ -220,6 +218,28 @@ fn check_cid_multiset_consistency(
             smaller_cids: smaller_cids.clone(),
         })
     }
+}
+
+fn to_count_map(cids: &Vec<Box<str>>) -> HashMap<&str, usize> {
+    let mut count_map = HashMap::<_, usize>::new();
+    for cid in cids {
+        // the counter should never overflow
+        *count_map.entry(&**cid).or_default() += 1;
+    }
+    count_map
+}
+
+fn check_count_maps_consistency(
+    larger_count_set: HashMap<&str, usize>,
+    smaller_count_set: HashMap<&str, usize>,
+) -> bool {
+    for (cid, &smaller_count) in &smaller_count_set {
+        let larger_count = larger_count_set.get(cid).cloned().unwrap_or_default();
+        if larger_count < smaller_count {
+            return false;
+        }
+    }
+    true
 }
 
 struct PeerInfo<'data> {
