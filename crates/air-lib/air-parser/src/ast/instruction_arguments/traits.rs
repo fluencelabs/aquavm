@@ -104,6 +104,8 @@ impl fmt::Display for ApArgument<'_> {
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }

@@ -18,6 +18,8 @@ mod impls;
 mod traits;
 
 use super::CanonStream;
+use super::CanonStreamMap;
+use super::CanonStreamMapWithLambda;
 use super::CanonStreamWithLambda;
 use super::ImmutableVariable;
 use super::ImmutableVariableWithLambda;
@@ -101,7 +103,9 @@ pub enum ApArgument<'i> {
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
     CanonStream(CanonStream<'i>),
+    CanonStreamMap(CanonStreamMap<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]

@@ -15,6 +15,7 @@
  */
 
 mod canon_stream;
+mod canon_stream_map;
 mod lambda_result;
 mod resolved_call;
 mod vec_resolved_call;
