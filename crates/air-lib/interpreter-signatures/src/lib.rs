@@ -35,6 +35,7 @@ pub use crate::trackers::*;
 
 pub use fluence_keypair::KeyPair;
 
+use borsh::BorshSerialize;
 use serde::{Deserialize, Serialize};
 
 use std::hash::Hash;
@@ -54,7 +55,7 @@ pub struct PublicKey(
 );
 
 impl PublicKey {
-    pub fn verify<T: Serialize + ?Sized>(
+    pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
         particle_id: &str,
@@ -62,9 +63,7 @@ impl PublicKey {
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value = serde_json::to_vec(&SaltedData::new(&value, particle_id))
-            .expect("default serialization shouldn't fail");
-
+        let serialized_value = SaltedData::new(&value, particle_id).serialize();
         pk.verify(&serialized_value, signature)
     }
 }
@@ -129,11 +128,18 @@ impl From<Signature> for fluence_keypair::Signature {
     }
 }
 
-#[derive(Serialize)]
-pub(crate) struct SaltedData<'ctx, Data>(&'ctx Data, &'ctx str);
+#[derive(borsh_derive::BorshSerialize)]
+pub(crate) struct SaltedData<'ctx, Data: BorshSerialize>(&'ctx Data, &'ctx str);
 
-impl<'ctx, Data: Serialize> SaltedData<'ctx, Data> {
+impl<'ctx, Data: BorshSerialize> SaltedData<'ctx, Data> {
     pub(crate) fn new(data: &'ctx Data, particle_id: &'ctx str) -> Self {
         Self(data, particle_id)
+    }
+
+    pub(crate) fn serialize(&self) -> Vec<u8> {
+        // TODO make pluggable serialization
+        // TODO it will be useful for CID too
+        // TODO please note that using serde::Serializer is not enough
+        borsh::to_vec(&self).expect("borsh serializer shouldn't fail")
     }
 }

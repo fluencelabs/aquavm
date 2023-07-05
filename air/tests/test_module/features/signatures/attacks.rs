@@ -461,7 +461,8 @@ fn test_attack_replay() {
     let dalek_error = ed25519_dalek::ed25519::Error::from_source("Verification equation was not satisfied");
     let nested_error = fluence_keypair::error::VerificationError::Ed25519(
         dalek_error,
-        "2XNyeQMxiZnW6NGJdn1eP1RDGTgMA8DXKoh7VrWyn3tpLi9nC6X1AcyGeHUkH3m1gDNtHeRpcBfFLMe2wYgCNJCM".to_owned(),
+        // will break if signed data format changes
+        "3eSuF5uvjQvmvSC6vu5Kmb8bJcswXhNUcqsSG9USEad1oNgnpAcBNm2maM4Tyk3BsLYnwdwNEj4KiJ4pqence7XF".to_owned(),
         "6m3zmtymxDL56KBpNgKqc7QiGRuWuxr82bG2q7dF5xCD".to_owned(),
     );
     let cids: Vec<Box<str>> = vec!["bagaaieraazcwm4lxybe4pwlisvcgpv4mii63nxouogvf4ihkmz762mnhea7a".into()];

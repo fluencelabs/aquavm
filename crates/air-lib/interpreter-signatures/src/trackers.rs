@@ -52,20 +52,13 @@ impl PeerCidTracker {
     }
 }
 
-pub fn sign_cids(
+fn sign_cids(
     mut cids: Vec<Box<str>>,
     particle_id: &str,
     keypair: &KeyPair,
 ) -> Result<crate::Signature, SigningError> {
     cids.sort_unstable();
 
-    // TODO make pluggable serialization
-    // TODO it will be useful for CID too
-    // TODO please note that using serde::Serializer is not enough
-    let serialized_cids = serde_json::to_string(&SaltedData::new(&cids, particle_id))
-        .expect("default serialization shouldn't fail");
-
-    keypair
-        .sign(serialized_cids.as_bytes())
-        .map(crate::Signature::new)
+    let serialized_cids = SaltedData::new(&cids, particle_id).serialize();
+    keypair.sign(&serialized_cids).map(crate::Signature::new)
 }
