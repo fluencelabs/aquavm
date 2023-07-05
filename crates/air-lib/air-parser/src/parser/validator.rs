@@ -165,6 +165,12 @@ impl<'i> VariableValidator<'i> {
             ApArgument::CanonStreamWithLambda(canon_stream) => {
                 self.met_canon_stream_wl(canon_stream, span)
             }
+            ApArgument::CanonStreamMap(canon_stream_map) => {
+                self.met_canon_stream_map(canon_stream_map, span)
+            }
+            ApArgument::CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
         self.met_variable_name_definition(ap.result.name(), span);
     }
@@ -263,6 +269,15 @@ impl<'i> VariableValidator<'i> {
     fn met_canon_stream_wl(&mut self, stream: &CanonStreamWithLambda<'i>, span: Span) {
         self.met_variable_name(stream.name, span);
         self.met_lambda(&stream.lambda, span);
+    }
+
+    fn met_canon_stream_map(&mut self, stream_map: &CanonStreamMap<'i>, span: Span) {
+        self.met_variable_name(stream_map.name, span);
+    }
+
+    fn met_canon_stream_map_wl(&mut self, stream_map: &CanonStreamMapWithLambda<'i>, span: Span) {
+        self.met_variable_name(stream_map.name, span);
+        self.met_lambda(&stream_map.lambda, span);
     }
 
     fn met_variable_name(&mut self, name: &'i str, span: Span) {

@@ -22,7 +22,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStreamMap;
 use crate::execution_step::boxed_value::CanonStreamMapWithProvenance;
-use crate::execution_step::boxed_value::ConflictResolustionPolicy::LWW;
+use crate::execution_step::boxed_value::ConflictResolustionPolicy::Lww;
 use crate::execution_step::instructions::canon::CanonEpilogClosure;
 use crate::execution_step::instructions::canon::StreamWithSerializedView;
 use crate::execution_step::instructions::canon_stream_map_scalar::get_stream_or_default_function;
@@ -66,7 +66,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
             }
             MergerCanonResult::Empty => {
                 let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position, LWW);
+                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position, Lww);
                 handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
             }
         }

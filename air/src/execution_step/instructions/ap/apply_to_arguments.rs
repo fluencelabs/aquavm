@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::boxed_value::JValuable;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::{CanonResultAggregate, LiteralAggregate, PEEK_ALLOWED_ON_NON_EMPTY};
 use crate::UncatchableError;
@@ -44,6 +45,8 @@ pub(crate) fn apply_to_arg(
         ScalarWithLambda(scalar) => apply_scalar_wl(scalar, exec_ctx, trace_ctx),
         CanonStream(canon_stream) => apply_canon_stream(canon_stream, exec_ctx, trace_ctx),
         CanonStreamWithLambda(canon_stream) => apply_canon_stream_wl(canon_stream, exec_ctx, trace_ctx),
+        CanonStreamMap(canon_stream_map) => apply_canon_stream_map(canon_stream_map, exec_ctx, trace_ctx),
+        CanonStreamMapWithLambda(canon_stream_map) => apply_canon_stream_map_wl(canon_stream_map, exec_ctx, trace_ctx),
     }?;
 
     Ok(result)
@@ -123,7 +126,6 @@ fn apply_canon_stream(
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
-    use crate::execution_step::boxed_value::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let value = JValuable::as_jvalue(&&canon_stream.canon_stream).into_owned();
@@ -145,8 +147,6 @@ fn apply_canon_stream_wl(
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
-    use crate::execution_step::boxed_value::JValuable;
-
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let canon_stream_value = &canon_stream.canon_stream;
     let (result, tetraplet, provenance) = JValuable::apply_lambda_with_tetraplets(
@@ -160,3 +160,43 @@ fn apply_canon_stream_wl(
     let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);
     Ok(result)
 }
+
+// WIP unify these two and the upper two
+fn apply_canon_stream_map(
+    ast_canon_stream_map: &ast::CanonStreamMap<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> Result<ValueAggregate, crate::ExecutionError> {
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+    let value = JValuable::as_jvalue(&&canon_stream_map.canon_stream_map).into_owned();
+    let tetraplet = canon_stream_map.tetraplet().clone();
+    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+    let value = CanonResultAggregate::new(
+        Rc::new(value),
+        tetraplet.peer_pk.as_str().into(),
+        &tetraplet.json_path,
+        position,
+    );
+    let result = ValueAggregate::from_canon_result(value, canon_stream_map.cid.clone());
+    Ok(result)
+}
+
+fn apply_canon_stream_map_wl(
+    ast_canon_stream_map: &ast::CanonStreamMapWithLambda<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> Result<ValueAggregate, crate::ExecutionError> {
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+    let canon_stream_value = &canon_stream_map.canon_stream_map;
+    let (result, tetraplet, provenance) = JValuable::apply_lambda_with_tetraplets(
+        &canon_stream_value,
+        &ast_canon_stream_map.lambda,
+        exec_ctx,
+        &Provenance::canon(canon_stream_map.cid.clone()),
+    )?;
+    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+
+    let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);
+    Ok(result)
+}
+
