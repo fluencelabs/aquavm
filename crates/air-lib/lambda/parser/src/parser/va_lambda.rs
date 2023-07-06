@@ -1,4 +1,4 @@
-// auto-generated: "lalrpop 0.19.12"
+// auto-generated: "lalrpop 0.20.0"
 // sha3: 592663f5597c21f4cc9cb3ad5cb93fa0a7db3635fc4d677c2b6130d33b6e22fd
 use crate::ValueAccessor;
 use crate::parser::lambda_parser::RawLambdaAST;
@@ -13,9 +13,9 @@ use self::__lalrpop_util::state_machine as __state_machine;
 extern crate core;
 extern crate alloc;
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
+#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 mod __parse__RawLambdaAST {
-    #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::all)]
 
     use crate::ValueAccessor;
     use crate::parser::lambda_parser::RawLambdaAST;
@@ -164,23 +164,41 @@ mod __parse__RawLambdaAST {
             _ => 0,
         }
     }
+    const __TERMINAL: &[&str] = &[
+        r###""!""###,
+        r###"".""###,
+        r###"".$""###,
+        r###""[""###,
+        r###""]""###,
+        r###"length_functor"###,
+        r###"number_accessor"###,
+        r###"string_accessor"###,
+    ];
     fn __expected_tokens(__state: i8) -> alloc::vec::Vec<alloc::string::String> {
-        const __TERMINAL: &[&str] = &[
-            r###""!""###,
-            r###"".""###,
-            r###"".$""###,
-            r###""[""###,
-            r###""]""###,
-            r###"length_functor"###,
-            r###"number_accessor"###,
-            r###"string_accessor"###,
-        ];
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
             let next_state = __action(__state, index);
             if next_state == 0 {
                 None
             } else {
                 Some(alloc::string::ToString::to_string(terminal))
+            }
+        }).collect()
+    }
+    fn __expected_tokens_from_states<
+        'err,
+        'input,
+    >(
+        __states: &[i8],
+        _: core::marker::PhantomData<(&'err (), &'input ())>,
+    ) -> alloc::vec::Vec<alloc::string::String>
+    where
+        'input: 'err,
+    {
+        __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
+            if __accepts(None, __states, Some(index), core::marker::PhantomData::<(&(), &())>) {
+                Some(alloc::string::ToString::to_string(terminal))
+            } else {
+                None
             }
         }).collect()
     }
@@ -246,6 +264,10 @@ mod __parse__RawLambdaAST {
 
         fn expected_tokens(&self, state: i8) -> alloc::vec::Vec<alloc::string::String> {
             __expected_tokens(state)
+        }
+
+        fn expected_tokens_from_states(&self, states: &[i8]) -> alloc::vec::Vec<alloc::string::String> {
+            __expected_tokens_from_states(states, core::marker::PhantomData::<(&(), &())>)
         }
 
         #[inline]
@@ -518,16 +540,16 @@ mod __parse__RawLambdaAST {
         'err,
         'input,
     >(
-        input: &'input str,
-        errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, LexerError>>,
-        __error_state: i8,
-        __states: & [i8],
+        __error_state: Option<i8>,
+        __states: &[i8],
         __opt_integer: Option<usize>,
         _: core::marker::PhantomData<(&'err (), &'input ())>,
     ) -> bool
+    where
+        'input: 'err,
     {
         let mut __states = __states.to_vec();
-        __states.push(__error_state);
+        __states.extend(__error_state);
         loop {
             let mut __states_len = __states.len();
             let __top = __states[__states_len - 1];
@@ -636,8 +658,8 @@ mod __parse__RawLambdaAST {
             23 => {
                 // __RawLambdaAST = RawLambdaAST => ActionFn(0);
                 let __sym0 = __pop_Variant5(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
+                let __start = __sym0.0;
+                let __end = __sym0.2;
                 let __nt = super::__action0::<>(input, errors, __sym0);
                 return Some(Ok(__nt));
             }
@@ -755,8 +777,8 @@ mod __parse__RawLambdaAST {
     {
         // "!"? = "!" => ActionFn(8);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action8::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 0)
@@ -792,8 +814,8 @@ mod __parse__RawLambdaAST {
     {
         // "."? = "." => ActionFn(10);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action10::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 1)
@@ -829,8 +851,8 @@ mod __parse__RawLambdaAST {
     {
         // RawLambdaAST = ".$" => ActionFn(30);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action30::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
@@ -850,8 +872,8 @@ mod __parse__RawLambdaAST {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant7(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action31::<>(input, errors, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (2, 2)
@@ -869,8 +891,8 @@ mod __parse__RawLambdaAST {
     {
         // RawLambdaAST = length_functor => ActionFn(2);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action2::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
@@ -888,8 +910,8 @@ mod __parse__RawLambdaAST {
     {
         // RawLambdaAST = error => ActionFn(3);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action3::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
@@ -912,8 +934,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant1(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action22::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 3)
@@ -935,8 +957,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant1(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action23::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
@@ -958,8 +980,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant1(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action24::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
@@ -980,8 +1002,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant1(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action25::<>(input, errors, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
@@ -1004,8 +1026,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym4.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym4.2;
         let __nt = super::__action26::<>(input, errors, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 3)
@@ -1027,8 +1049,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action27::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
@@ -1050,8 +1072,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant2(__symbols);
         let __sym1 = __pop_Variant0(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym3.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym3.2;
         let __nt = super::__action28::<>(input, errors, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 3)
@@ -1072,8 +1094,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action29::<>(input, errors, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
@@ -1094,8 +1116,8 @@ mod __parse__RawLambdaAST {
         let __sym2 = __pop_Variant0(__symbols);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym2.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym2.2;
         let __nt = super::__action20::<>(input, errors, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 3)
@@ -1115,8 +1137,8 @@ mod __parse__RawLambdaAST {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant2(__symbols);
         let __sym0 = __pop_Variant0(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action21::<>(input, errors, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 3)
@@ -1134,8 +1156,8 @@ mod __parse__RawLambdaAST {
     {
         // ValueAccessor = error => ActionFn(7);
         let __sym0 = __pop_Variant3(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action7::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 3)
@@ -1171,8 +1193,8 @@ mod __parse__RawLambdaAST {
     {
         // ValueAccessor* = ValueAccessor+ => ActionFn(13);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action13::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 4)
@@ -1190,8 +1212,8 @@ mod __parse__RawLambdaAST {
     {
         // ValueAccessor+ = ValueAccessor => ActionFn(14);
         let __sym0 = __pop_Variant6(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym0.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym0.2;
         let __nt = super::__action14::<>(input, errors, __sym0);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 5)
@@ -1211,8 +1233,8 @@ mod __parse__RawLambdaAST {
         assert!(__symbols.len() >= 2);
         let __sym1 = __pop_Variant6(__symbols);
         let __sym0 = __pop_Variant7(__symbols);
-        let __start = __sym0.0.clone();
-        let __end = __sym1.2.clone();
+        let __start = __sym0.0;
+        let __end = __sym1.2;
         let __nt = super::__action15::<>(input, errors, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 5)
@@ -1221,6 +1243,7 @@ mod __parse__RawLambdaAST {
 pub(crate) use self::__parse__RawLambdaAST::RawLambdaASTParser;
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action0<
     'err,
     'input,
@@ -1234,6 +1257,7 @@ fn __action0<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action1<
     'err,
     'input,
@@ -1248,6 +1272,7 @@ fn __action1<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action2<
     'err,
     'input,
@@ -1261,6 +1286,7 @@ fn __action2<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action3<
     'err,
     'input,
@@ -1274,6 +1300,7 @@ fn __action3<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action4<
     'err,
     'input,
@@ -1293,6 +1320,7 @@ fn __action4<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action5<
     'err,
     'input,
@@ -1312,6 +1340,7 @@ fn __action5<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action6<
     'err,
     'input,
@@ -1329,6 +1358,7 @@ fn __action6<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action7<
     'err,
     'input,
@@ -1342,6 +1372,7 @@ fn __action7<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action8<
     'err,
     'input,
@@ -1355,6 +1386,7 @@ fn __action8<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action9<
     'err,
     'input,
@@ -1369,6 +1401,7 @@ fn __action9<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action10<
     'err,
     'input,
@@ -1382,6 +1415,7 @@ fn __action10<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action11<
     'err,
     'input,
@@ -1396,6 +1430,7 @@ fn __action11<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action12<
     'err,
     'input,
@@ -1410,6 +1445,7 @@ fn __action12<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action13<
     'err,
     'input,
@@ -1423,6 +1459,7 @@ fn __action13<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action14<
     'err,
     'input,
@@ -1436,6 +1473,7 @@ fn __action14<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action15<
     'err,
     'input,
@@ -1450,6 +1488,7 @@ fn __action15<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action16<
     'err,
     'input,
@@ -1463,8 +1502,8 @@ fn __action16<
     __4: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __4.0.clone();
-    let __end0 = __4.2.clone();
+    let __start0 = __4.0;
+    let __end0 = __4.2;
     let __temp0 = __action8(
         input,
         errors,
@@ -1483,6 +1522,7 @@ fn __action16<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action17<
     'err,
     'input,
@@ -1495,8 +1535,8 @@ fn __action17<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __3.2.clone();
-    let __end0 = __3.2.clone();
+    let __start0 = __3.2;
+    let __end0 = __3.2;
     let __temp0 = __action9(
         input,
         errors,
@@ -1516,6 +1556,7 @@ fn __action17<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action18<
     'err,
     'input,
@@ -1529,8 +1570,8 @@ fn __action18<
     __4: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __4.0.clone();
-    let __end0 = __4.2.clone();
+    let __start0 = __4.0;
+    let __end0 = __4.2;
     let __temp0 = __action8(
         input,
         errors,
@@ -1549,6 +1590,7 @@ fn __action18<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action19<
     'err,
     'input,
@@ -1561,8 +1603,8 @@ fn __action19<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __3.2.clone();
-    let __end0 = __3.2.clone();
+    let __start0 = __3.2;
+    let __end0 = __3.2;
     let __temp0 = __action9(
         input,
         errors,
@@ -1582,6 +1624,7 @@ fn __action19<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action20<
     'err,
     'input,
@@ -1593,8 +1636,8 @@ fn __action20<
     __2: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __2.0.clone();
-    let __end0 = __2.2.clone();
+    let __start0 = __2.0;
+    let __end0 = __2.2;
     let __temp0 = __action8(
         input,
         errors,
@@ -1611,6 +1654,7 @@ fn __action20<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action21<
     'err,
     'input,
@@ -1621,8 +1665,8 @@ fn __action21<
     __1: (usize, &'input str, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __1.2.clone();
-    let __end0 = __1.2.clone();
+    let __start0 = __1.2;
+    let __end0 = __1.2;
     let __temp0 = __action9(
         input,
         errors,
@@ -1640,6 +1684,7 @@ fn __action21<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action22<
     'err,
     'input,
@@ -1653,8 +1698,8 @@ fn __action22<
     __4: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.2;
     let __temp0 = __action10(
         input,
         errors,
@@ -1673,6 +1718,7 @@ fn __action22<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action23<
     'err,
     'input,
@@ -1685,8 +1731,8 @@ fn __action23<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action11(
         input,
         errors,
@@ -1706,6 +1752,7 @@ fn __action23<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action24<
     'err,
     'input,
@@ -1718,8 +1765,8 @@ fn __action24<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.2;
     let __temp0 = __action10(
         input,
         errors,
@@ -1737,6 +1784,7 @@ fn __action24<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action25<
     'err,
     'input,
@@ -1748,8 +1796,8 @@ fn __action25<
     __2: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action11(
         input,
         errors,
@@ -1768,6 +1816,7 @@ fn __action25<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action26<
     'err,
     'input,
@@ -1781,8 +1830,8 @@ fn __action26<
     __4: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.2;
     let __temp0 = __action10(
         input,
         errors,
@@ -1801,6 +1850,7 @@ fn __action26<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action27<
     'err,
     'input,
@@ -1813,8 +1863,8 @@ fn __action27<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action11(
         input,
         errors,
@@ -1834,6 +1884,7 @@ fn __action27<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action28<
     'err,
     'input,
@@ -1846,8 +1897,8 @@ fn __action28<
     __3: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.2;
     let __temp0 = __action10(
         input,
         errors,
@@ -1865,6 +1916,7 @@ fn __action28<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action29<
     'err,
     'input,
@@ -1876,8 +1928,8 @@ fn __action29<
     __2: (usize, Token<'input>, usize),
 ) -> ValueAccessor<'input>
 {
-    let __start0 = __0.0.clone();
-    let __end0 = __0.0.clone();
+    let __start0 = __0.0;
+    let __end0 = __0.0;
     let __temp0 = __action11(
         input,
         errors,
@@ -1896,6 +1948,7 @@ fn __action29<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action30<
     'err,
     'input,
@@ -1905,8 +1958,8 @@ fn __action30<
     __0: (usize, Token<'input>, usize),
 ) -> RawLambdaAST<'input>
 {
-    let __start0 = __0.2.clone();
-    let __end0 = __0.2.clone();
+    let __start0 = __0.2;
+    let __end0 = __0.2;
     let __temp0 = __action12(
         input,
         errors,
@@ -1923,6 +1976,7 @@ fn __action30<
 }
 
 #[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
 fn __action31<
     'err,
     'input,
@@ -1933,8 +1987,8 @@ fn __action31<
     __1: (usize, alloc::vec::Vec<ValueAccessor<'input>>, usize),
 ) -> RawLambdaAST<'input>
 {
-    let __start0 = __1.0.clone();
-    let __end0 = __1.2.clone();
+    let __start0 = __1.0;
+    let __end0 = __1.2;
     let __temp0 = __action13(
         input,
         errors,
@@ -1948,6 +2002,7 @@ fn __action31<
         __temp0,
     )
 }
+#[allow(clippy::type_complexity)]
 
 pub trait __ToTriple<'err, 'input, >
 {

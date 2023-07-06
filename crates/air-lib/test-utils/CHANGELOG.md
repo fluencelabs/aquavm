@@ -22,6 +22,24 @@
     * avm-interface bumped from 0.28.2 to 0.28.3
     * avm-server bumped from 0.30.1 to 0.31.0
 
+## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.6.0...air-test-utils-v0.7.0) (2023-06-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609))
+
+### Miscellaneous Chores
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609)) ([c332cca](https://github.com/fluencelabs/aquavm/commit/c332cca6b75e804412e1f1cc51bdfe0580ea5fdd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.40.0 to 0.41.0
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.5.0...air-test-utils-v0.6.0) (2023-06-22)
 
 

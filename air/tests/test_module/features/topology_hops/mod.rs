@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,5 @@
  * limitations under the License.
  */
 
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-pub fn beautify(air_script: String) -> Result<String, JsError> {
-    let mut output = vec![];
-    air_beautifier::beautify(&air_script, &mut output)?;
-    Ok(unsafe { String::from_utf8_unchecked(output) })
-}
+mod call_guided_topology;
+mod canon_guided_topology;

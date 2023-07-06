@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.41.0](https://github.com/fluencelabs/aquavm/compare/air-v0.40.0...air-v0.41.0) (2023-06-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609))
+
+### Miscellaneous Chores
+
+* **testing-framework:** restore WASM test executor ([#609](https://github.com/fluencelabs/aquavm/issues/609)) ([c332cca](https://github.com/fluencelabs/aquavm/commit/c332cca6b75e804412e1f1cc51bdfe0580ea5fdd))
+
 ## [0.40.0](https://github.com/fluencelabs/aquavm/compare/air-v0.39.0...air-v0.40.0) (2023-06-22)
 
 

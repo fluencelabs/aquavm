@@ -83,10 +83,18 @@ impl<'i> VariableValidator<'i> {
         };
     }
 
-    // canon doesn't check stream to be defined, because empty streams are considered to be emtpy
-    // and it's useful for code generation
+    // canon doesn't check stream to be defined, because empty streams are considered to be empty
+    // and it is useful for code generation
     pub(super) fn met_canon(&mut self, canon: &Canon<'i>, span: Span) {
         self.met_variable_name_definition(canon.canon_stream.name, span);
+    }
+
+    pub(super) fn met_canon_map_scalar(
+        &mut self,
+        canon_stream_map_scalar: &CanonStreamMapScalar<'i>,
+        span: Span,
+    ) {
+        self.met_variable_name_definition(canon_stream_map_scalar.scalar.name, span);
     }
 
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {

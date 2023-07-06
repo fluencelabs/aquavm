@@ -15,6 +15,7 @@
  */
 
 use crate::execution_step::execution_context::stream_maps_variables::errors::unsupported_map_key_type;
+use crate::execution_step::ValueAggregate;
 use crate::CatchableError;
 use crate::ExecutionError;
 use crate::JValue;
@@ -22,7 +23,7 @@ use crate::JValue;
 use serde::Serialize;
 use std::borrow::Cow;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub(crate) enum StreamMapKey<'i> {
     Str(Cow<'i, str>),
     U64(u64),
@@ -36,6 +37,17 @@ impl<'i> StreamMapKey<'i> {
             JValue::Number(n) if n.is_i64() => Ok(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Ok(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => Err(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into()),
+        }
+    }
+
+    pub(crate) fn from_kvpair(value: &ValueAggregate) -> Option<Self> {
+        let object = value.get_result().as_object()?;
+        let key = object.get("key")?.to_owned();
+        match key {
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
+            JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
+            JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
+            _ => None,
         }
     }
 }

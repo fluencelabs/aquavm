@@ -264,7 +264,7 @@ jobs:
 
       - name: Build wasm
         working-directory: tools/wasm/air-beautify-wasm
-        run: wasm-pack build --release -m force
+        run: wasm-pack build --release -m force --target nodejs
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.5.0
