@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "air",
     "air-interpreter",
+    "air",
     "avm/interface",
     "avm/server",
     "crates/air-lib/air-parser",
