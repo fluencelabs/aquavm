@@ -74,7 +74,7 @@ jobs:
     needs:
       - nox
 
-    uses: fluencelabs/nox/.github/workflows/container.yml@FLU-353
+    uses: fluencelabs/nox/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       flavour: "minimal"
@@ -107,11 +107,10 @@ jobs:
       - avm
       - nox-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      ref: FLU-353
 
   js-client:
     needs:
@@ -120,47 +119,42 @@ jobs:
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
-      ref: FLU-353
 
   flox-snapshot:
     name: "flox"
     needs:
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/snapshot.yml@FLU-353
+    uses: fluencelabs/flox/.github/workflows/snapshot.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
-      ref: FLU-353
 
   aqua:
     needs:
       - js-client
       - nox-snapshot
 
-    uses: fluencelabs/aqua/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/aqua/.github/workflows/tests.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      ref: FLU-353
 
   registry:
     needs:
       - flox-snapshot
       - nox-snapshot
 
-    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       flox-version: "${{ needs.flox-snapshot.outputs.version }}"
-      ref: FLU-353
 
   flox:
     needs:
       - nox-snapshot
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/flox/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
-      ref: FLU-353
