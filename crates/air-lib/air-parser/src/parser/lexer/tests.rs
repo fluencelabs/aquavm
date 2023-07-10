@@ -215,37 +215,66 @@ fn stream_map() {
 
 #[test]
 fn canon_stream() {
-    const CANON_STREAM: &str = "#stream____asdasd";
+    for canon_stream_name in vec!["#stream____asdasd", "#$stream____asdasd"] {
+        lexer_test(
+            canon_stream_name,
+            Single(Ok((
+                0.into(),
+                Token::CanonStream {
+                    name: canon_stream_name,
+                    position: 0.into(),
+                },
+                canon_stream_name.len().into(),
+            ))),
+        );
+    }
 
+    let cannon_stream_name = "#s$stream____asdasd";
     lexer_test(
-        CANON_STREAM,
-        Single(Ok((
-            0.into(),
-            Token::CanonStream {
-                name: CANON_STREAM,
-                position: 0.into(),
-            },
-            CANON_STREAM.len().into(),
-        ))),
+        cannon_stream_name,
+        Single(Err(LexerError::is_not_alphanumeric(2.into()..2.into()))),
+    );
+
+    let cannon_stream_name = "#";
+    lexer_test(
+        cannon_stream_name,
+        Single(Err(LexerError::empty_tagged_name(0.into()..0.into()))),
     );
 }
 
 #[test]
 fn canon_stream_with_functor() {
-    let canon_stream_name = "#canon_stream";
-    let canon_stream_with_functor: String = format!("{canon_stream_name}.length");
+    for canon_stream_name in vec!["#canon_stream", "#$canon_stream"] {
+        let canon_stream_with_functor: String = format!("{canon_stream_name}.length");
 
+        lexer_test(
+            &canon_stream_with_functor,
+            Single(Ok((
+                0.into(),
+                Token::CanonStreamWithLambda {
+                    name: canon_stream_name,
+                    lambda: LambdaAST::Functor(Functor::Length),
+                    position: 0.into(),
+                },
+                canon_stream_with_functor.len().into(),
+            ))),
+        );
+    }
+
+    let cannon_stream_name = "#s$stream____asdasd.length";
     lexer_test(
-        &canon_stream_with_functor,
-        Single(Ok((
-            0.into(),
-            Token::CanonStreamWithLambda {
-                name: canon_stream_name,
-                lambda: LambdaAST::Functor(Functor::Length),
-                position: 0.into(),
-            },
-            canon_stream_with_functor.len().into(),
-        ))),
+        cannon_stream_name,
+        Single(Err(LexerError::is_not_alphanumeric(2.into()..2.into()))),
+    );
+    let cannon_stream_name = "#.length";
+    lexer_test(
+        cannon_stream_name,
+        Single(Err(LexerError::empty_canon_name(0.into()..0.into()))),
+    );
+    let cannon_stream_name = "#$.length";
+    lexer_test(
+        cannon_stream_name,
+        Single(Err(LexerError::empty_canon_name(1.into()..1.into()))),
     );
 }
 
