@@ -49,11 +49,11 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
-  rust-peer:
+  nox:
     needs:
       - cargo
 
-    uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
+    uses: fluencelabs/nox/.github/workflows/build.yml@master
     with:
       cargo-dependencies: |
         [
@@ -69,23 +69,23 @@ jobs:
           }
         ]
 
-  rust-peer-snapshot:
-    name: "rust-peer"
+  nox-snapshot:
+    name: "nox"
     needs:
-      - rust-peer
+      - nox
 
-    uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
+    uses: fluencelabs/nox/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
       flavour: "minimal"
-      rust-peer-sha: "${{ needs.rust-peer.outputs.rust-peer-sha }}"
+      nox-sha: "${{ needs.nox.outputs.rust-peer-sha }}"
 
-  rust-peer-tests:
-    name: "rust-peer"
+  nox-tests:
+    name: "nox"
     needs:
       - cargo
 
-    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
+    uses: fluencelabs/nox/.github/workflows/tests.yml@master
     with:
       cargo-dependencies: |
         [
@@ -105,12 +105,12 @@ jobs:
     name: "js-client"
     needs:
       - avm
-      - rust-peer-snapshot
+      - nox-snapshot
 
     uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
 
   js-client:
     needs:
@@ -120,41 +120,41 @@ jobs:
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
 
-  fluence-cli-snapshot:
-    name: "fluence-cli"
+  flox-snapshot:
+    name: "flox"
     needs:
       - js-client
 
-    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/flox/.github/workflows/snapshot.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
-  aqua-playground:
+  aqua:
     needs:
       - js-client
-      - rust-peer-snapshot
+      - nox-snapshot
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    uses: fluencelabs/aqua/.github/workflows/tests.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
 
   registry:
     needs:
-      - fluence-cli-snapshot
-      - rust-peer-snapshot
+      - flox-snapshot
+      - nox-snapshot
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
-      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
+      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
 
-  fluence-cli:
+  flox:
     needs:
-      - rust-peer-snapshot
+      - nox-snapshot
       - js-client
 
-    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    uses: fluencelabs/flox/.github/workflows/tests.yml@main
     with:
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
