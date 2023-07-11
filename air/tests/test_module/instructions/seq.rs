@@ -51,11 +51,13 @@ fn seq_local_remote() {
     let remote_peer_id = String::from("remote_peer_id");
     let mut vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{local_peer_id}" ("local_service_id" "local_fn_name") [] result_name)
                 (call "{remote_peer_id}" ("service_id" "fn_name") [] g)
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert_eq!(result.next_peer_pks, vec![remote_peer_id]);

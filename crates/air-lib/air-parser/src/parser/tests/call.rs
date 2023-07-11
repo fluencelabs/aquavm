@@ -20,8 +20,6 @@ use crate::ast::*;
 use crate::parser::ParserError;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
-use fstrings::f;
-use fstrings::format_args_f;
 use lalrpop_util::ParseError;
 
 use std::rc::Rc;
@@ -385,9 +383,11 @@ fn canon_stream_in_args() {
     let service_id = "service_id";
     let function_name = "function_name";
     let canon_stream = "#canon_stream";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
             (call %init_peer_id% ("{service_id}" "{function_name}") [{canon_stream}])
-        "#);
+        "#
+    );
 
     let instruction = parse(&source_code);
     let expected = call(
@@ -408,9 +408,11 @@ fn canon_stream_in_triplet() {
     let service_id = "service_id";
     let function_name = "function_name";
     let canon_stream = "#canon_stream";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
             (call {canon_stream} ("{service_id}" "{function_name}") [])
-        "#);
+        "#
+    );
 
     let lexer = crate::AIRLexer::new(&source_code);
 
@@ -434,9 +436,11 @@ fn canon_stream_with_lambda_in_triplet() {
     let function_name = "function_name";
     let canon_stream = "#canon_stream";
     let canon_stream_lambda = ".$.[0].path!";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
             (call {canon_stream}{canon_stream_lambda} ("{service_id}" "{function_name}") [])
-        "#);
+        "#
+    );
 
     let instruction = parse(&source_code);
     let expected = call(
@@ -461,14 +465,16 @@ fn canon_stream_with_lambda_in_triplet() {
 #[test]
 fn seq_par_call() {
     let peer_id = "some_peer_id";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (seq
             (par
                 (call "{peer_id}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "{peer_id}" ("service_id" "fn_name") [] g)
             )
             (call "{peer_id}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#);
+        )"#
+    );
 
     let instruction = parse(&source_code);
     let expected = seq(

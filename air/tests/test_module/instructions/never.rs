@@ -21,12 +21,14 @@ fn never_not_complete_subgraph() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (never)
             (call "{vm_peer_id}" ("" "") [])
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);

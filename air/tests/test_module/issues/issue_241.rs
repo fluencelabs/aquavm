@@ -34,7 +34,8 @@ fn issue_241() {
     let peers = json!([peer_1_id, peer_2_id]);
     let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_array_0_peer_id}" ("" "") [] array-0)
             (fold array-0 array-0-iterator
@@ -52,7 +53,8 @@ fn issue_241() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(set_array_0_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(peer_1_vm, <_>::default(), &script, "", result.data);

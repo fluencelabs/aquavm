@@ -26,7 +26,8 @@ fn issue_348() {
     let vm_peer_id_3 = "vm_peer_id_3";
     let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (ap 1 $inner)
@@ -43,7 +44,8 @@ fn issue_348() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result11 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
     let result21 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result11.data);

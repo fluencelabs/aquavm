@@ -37,7 +37,8 @@ fn issue_214() {
         client_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
          (seq
           (seq
@@ -57,7 +58,8 @@ fn issue_214() {
          )
          (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
         )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
     let result = checked_call_vm!(client, test_params, &script, "", "");

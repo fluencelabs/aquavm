@@ -18,17 +18,16 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn canon_with_literal_peer_id() {
     let peer_id = "peer_id";
     let stream = "$stream";
     let canon_stream = "#canon_stream";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (canon "{peer_id}" {stream} {canon_stream})
-    "#);
+    "#
+    );
 
     let actual = parse(&source_code);
     let expected = canon(
@@ -45,9 +44,11 @@ fn canon_with_variable_peer_id() {
     let peer_id = "peer_id";
     let stream = "$stream";
     let canon_stream = "#canon_stream";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (canon {peer_id} {stream} {canon_stream})
-    "#);
+    "#
+    );
 
     let actual = parse(&source_code);
     let expected = canon(
@@ -64,9 +65,11 @@ fn canon_with_stream_map() {
     let peer_id = "peer_id";
     let stream_map = "%stream_map";
     let scalar = "scalar";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (canon {peer_id} {stream_map} {scalar})
-    "#);
+    "#
+    );
 
     let actual = parse(&source_code);
     let expected = canon_stream_map_scalar(

@@ -26,11 +26,13 @@ fn canon_moves_execution_flow() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (par
                 (call "{peer_id_1}" ("" "") [] $stream)
                 (canon "{peer_id_2}" $stream #canon_stream)
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
@@ -103,7 +105,8 @@ fn canon_fixes_stream_correct() {
     let peer_id_4 = "peer_id_4";
     let mut vm_4 = create_avm(echo_call_service(), peer_id_4);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (par
                 (call "{peer_id_1}" ("" "") [1] $stream)
@@ -117,7 +120,8 @@ fn canon_fixes_stream_correct() {
                      (par
                          (call "{peer_id_3}" ("" "") [#canon_stream])
                          (call "{peer_id_1}" ("" "") [#canon_stream])))))
-            "#);
+            "#
+    );
 
     let vm_1_result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let vm_2_result = checked_call_vm!(vm_2, <_>::default(), &script, "", "");
@@ -191,7 +195,8 @@ fn canon_stream_can_be_created_from_aps() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (ap 0 $stream)
@@ -203,7 +208,8 @@ fn canon_stream_can_be_created_from_aps() {
                     (seq
                         (canon "{vm_2_peer_id}" $stream_2 #canon_stream_2)
                         (call "{vm_2_peer_id}" ("" "") [#canon_stream_2])))))
-        "#);
+        "#
+    );
 
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result_2 = checked_call_vm!(vm_2, <_>::default(), &script, "", result_1.data.clone());
@@ -231,7 +237,8 @@ fn canon_gates() {
     });
     let mut vm_3 = create_avm(vm_3_call_service, peer_id_3);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
           (seq
             (call "{peer_id_1}" ("" "") [] iterable)
@@ -251,7 +258,8 @@ fn canon_gates() {
                     (match x true
                       (call "{peer_id_3}" ("" "") [#t]))))
                 (next s)))))
-            "#);
+            "#
+    );
 
     let vm_1_result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let vm_2_result = checked_call_vm!(vm_2, <_>::default(), &script, "", vm_1_result.data);
@@ -274,12 +282,14 @@ fn canon_empty_stream() {
     let peer_id_2 = "peer_id_2";
     let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (new $stream
                 (seq
                     (canon "{peer_id_1}" $stream #canon_stream)
                     (call "{peer_id_1}" ("" "") [#canon_stream])))
-                    "#);
+                    "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -307,12 +317,14 @@ fn canon_empty_not_writable_stream() {
     let peer_id = "peer_id";
     let mut vm = create_avm(echo_call_service(), peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "unwkown_peer_id" ("" "") [] $stream)
             (canon "{peer_id}" $stream #canon_stream)
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -337,7 +349,8 @@ fn canon_over_later_defined_stream() {
     let vm_peer_id_3 = "vm_peer_id_3";
     let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{vm_peer_id_2}" ("" "") [1] $stream)
             (seq
@@ -345,7 +358,8 @@ fn canon_over_later_defined_stream() {
                 (call "{vm_peer_id_3}" ("" "") [#canon_stream])
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result.data);
@@ -368,7 +382,8 @@ fn canon_map_scalar() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -391,7 +406,8 @@ fn canon_map_scalar() {
                 (call "{vm_peer_id_1}" ("m1" "f1") [scalar] output)
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -457,7 +473,8 @@ fn canon_map_scalar_with_par() {
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
     let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (seq
                 (seq
@@ -480,7 +497,8 @@ fn canon_map_scalar_with_par() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);

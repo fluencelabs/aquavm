@@ -33,7 +33,8 @@ fn issue_216() {
     let mut client = create_avm(echo_call_service(), client_id);
 
     let error_message = "error message";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (seq
                 (call "{some_peer_id}" ("" "value") [] value)
@@ -41,7 +42,8 @@ fn issue_216() {
             )
             (call %init_peer_id% ("" "") ["{error_message}"]) ;; (2)
         )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(client_id);
     let result = checked_call_vm!(some_peer, test_params.clone(), &script, "", "");

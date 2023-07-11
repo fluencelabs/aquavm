@@ -23,11 +23,13 @@ fn fail_with_last_error() {
     let fallible_service_id = "service_id_1";
     let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (xor
                 (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_1)
                 (fail %last_error%)
-            )"#);
+            )"#
+    );
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
 
@@ -75,7 +77,8 @@ fn fail_with_last_error_tetraplets() {
     let mut vm = create_avm(host_closure, local_peer_id);
 
     let local_fn_name = "local_fn_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (xor
                 (call "{local_peer_id}" ("{fallible_service_id}" "{local_fn_name}") [] result_1)
@@ -83,7 +86,8 @@ fn fail_with_last_error_tetraplets() {
             )
             (call "{local_peer_id}" ("" "") [%last_error%])
         )
-          "#);
+          "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
     let _ = checked_call_vm!(vm, test_params, script, "", "");
@@ -99,14 +103,16 @@ fn fail_with_literals_tetraplets() {
     let (host_closure, tetraplet_anchor) = tetraplet_host_function(echo_call_service());
     let mut vm = create_avm(host_closure, local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (xor
                 (xor
                     (fail 1337 "error message")
                     (fail %last_error%)
                 )
                 (call "{local_peer_id}" ("" "") [%last_error%])
-            )"#);
+            )"#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
     let _ = checked_call_vm!(vm, test_params, script, "", "");
@@ -126,14 +132,16 @@ fn fail_with_canon_stream() {
         vm_peer_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{vm_peer_id}" ("" "") [] $stream)
                     (canon "{vm_peer_id}" $stream #canon_stream)
                 )
                 (fail #canon_stream.$.[0])
-            )"#);
+            )"#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let result = call_vm!(vm, test_params, script, "", "");

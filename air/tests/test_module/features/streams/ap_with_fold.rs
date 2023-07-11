@@ -33,7 +33,8 @@ fn ap_with_fold() {
     let local_vm_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_id}" ("" "") [] permutations)
             (seq
@@ -54,7 +55,8 @@ fn ap_with_fold() {
                     (seq
                         (canon "{local_vm_peer_id}" $inner #canon_stream)
                         (call "{local_vm_peer_id}" ("return" "") [#canon_stream])))))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     assert_eq!(result.next_peer_pks, vec![local_vm_peer_id.to_string()]);

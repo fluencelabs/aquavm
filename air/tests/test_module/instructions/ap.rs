@@ -29,7 +29,8 @@ fn ap_with_scalars() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
@@ -37,7 +38,8 @@ fn ap_with_scalars() {
             )
             (call "{vm_2_peer_id}" ("" "") [scalar_2])
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
@@ -62,13 +64,15 @@ fn ap_with_string_literal() {
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
     let some_string = "some_string";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap "{some_string}" $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -99,13 +103,15 @@ fn ap_with_bool_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap true $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -134,13 +140,15 @@ fn ap_with_number_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap 100 $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -169,13 +177,15 @@ fn ap_with_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %last_error% $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -204,12 +214,14 @@ fn ap_with_timestamp() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %timestamp% scalar)
             (call "{vm_1_peer_id}" ("" "") [scalar])
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_timestamp(1337);
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
@@ -229,12 +241,14 @@ fn ap_with_ttl() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %ttl% scalar)
             (call "{vm_1_peer_id}" ("" "") [scalar])
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_ttl(1337);
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
@@ -254,7 +268,8 @@ fn ap_with_dst_stream() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
@@ -262,7 +277,8 @@ fn ap_with_dst_stream() {
             (seq
                 (canon "{vm_2_peer_id}" $stream #canon_stream)
                 (call "{vm_2_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
@@ -305,7 +321,8 @@ fn ap_canon_stream_with_lambda() {
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") [0] $stream)
@@ -317,7 +334,8 @@ fn ap_canon_stream_with_lambda() {
                     (seq
                         (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
                         (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
 
@@ -398,7 +416,8 @@ fn ap_canon_stream() {
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") [0] $stream)
@@ -410,7 +429,8 @@ fn ap_canon_stream() {
                     (seq
                         (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
                         (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     print_trace(&result, "");
@@ -474,7 +494,8 @@ fn ap_stream_map() {
 
     let service_name1 = "serv1";
     let service_name2 = "serv2";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (ap ("{vm_1_peer_id}" "{service_name1}") %map)
@@ -487,7 +508,8 @@ fn ap_stream_map() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
