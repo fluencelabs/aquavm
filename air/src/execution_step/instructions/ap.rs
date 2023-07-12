@@ -20,7 +20,9 @@ pub(super) mod utils;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::Joinable;
 use crate::execution_step::ValueAggregate;
+use crate::joinable;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::JValue;
@@ -40,10 +42,12 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
         let should_touch_trace = should_touch_trace(self);
-        // this applying should be at the very beginning of this function,
-        // because it's necessary to check argument lambda, for more details see
-        // https://github.com/fluencelabs/aquavm/issues/216
-        let result = apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace)?;
+
+        let result = joinable!(
+            apply_to_arg(&self.argument, exec_ctx, trace_ctx, should_touch_trace),
+            exec_ctx,
+            ()
+        )?;
 
         let merger_ap_result = to_merger_ap_result(self, trace_ctx)?;
         let maybe_generation = populate_context(&self.result, &merger_ap_result, result, exec_ctx)?;
