@@ -22,16 +22,16 @@ fn issue_310() {
     let particle_id = "particle_id";
 
     let air_script = r#"
-       (xor
-         (seq
-          (par
-           (call %init_peer_id% ("" "") [0])
-           (call %init_peer_id% ("" "") [1] x)
-          )
-          (ap x $y)
-         )
-         (call %init_peer_id% ("" "") [2])
+      (xor
+       (seq
+        (par
+         (call %init_peer_id% ("" "") [0])
+         (call %init_peer_id% ("" "") [1] x)
         )
+        (ap x $y)
+       )
+       (call %init_peer_id% ("" "") [2])
+      )
     "#;
 
     let mut runner = DefaultAirRunner::new(&peer_id);
