@@ -25,14 +25,16 @@ fn seq_par_call() {
     let vm_peer_id = "some_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq 
             (par 
                 (call "{vm_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
             (call "{vm_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -65,14 +67,16 @@ fn par_par_call() {
     let remote_peer_id = "remote_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (par
                 (call "{vm_peer_id}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "{remote_peer_id}" ("service_id" "fn_name") [] g)
             )
             (call "{vm_peer_id}" ("local_service_id" "local_fn_name") [] result_2)
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);

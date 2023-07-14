@@ -29,7 +29,8 @@ fn issue_137() {
     let node_4_id = "node_4_id";
     let mut node_4 = create_avm(unit_call_service(), node_4_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{initiator_id}" ("" "") []) ;; initiator
             (par
@@ -52,7 +53,8 @@ fn issue_137() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let initiator_result = checked_call_vm!(initiator, <_>::default(), &script, "", "");
     let node_1_result = checked_call_vm!(node_1, <_>::default(), &script, "", initiator_result.data.clone());

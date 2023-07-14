@@ -25,7 +25,8 @@ fn mismatch_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -37,7 +38,8 @@ fn mismatch_equal() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -63,7 +65,8 @@ fn mismatch_not_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -75,7 +78,8 @@ fn mismatch_not_equal() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -101,7 +105,8 @@ fn mismatch_with_string() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
                 (xor
@@ -110,7 +115,8 @@ fn mismatch_with_string() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -136,7 +142,8 @@ fn mismatch_without_xor() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -145,7 +152,8 @@ fn mismatch_without_xor() {
                 (mismatch value_1 value_2
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                 )
-            )"#);
+            )"#
+    );
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = call_vm!(vm, <_>::default(), &script, "", result.data);
@@ -166,7 +174,8 @@ fn mismatch_with_two_xors() {
 
     let local_peer_id_2 = "local_peer_id_2";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (xor
                 (seq
                     (seq
@@ -182,7 +191,8 @@ fn mismatch_with_two_xors() {
                 )
                 (call "{local_peer_id}" ("errorHandlingSrv" "error") [%last_error%])
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 

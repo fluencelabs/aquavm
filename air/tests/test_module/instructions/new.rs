@@ -39,7 +39,8 @@ fn new_with_global_streams_seq() {
         set_variable_peer_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["1"] $stream)
@@ -59,7 +60,8 @@ fn new_with_global_streams_seq() {
                         (call "{local_vm_peer_id_2}" ("" "") [$stream])
                     )
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let vm_1_result = checked_call_vm!(local_vm_1, <_>::default(), &script, "", result.data);
@@ -106,7 +108,8 @@ fn several_restrictions() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (new $stream
                 (seq
                     (new $stream
@@ -117,7 +120,8 @@ fn several_restrictions() {
                         (call "{vm_peer_id}" ("" "") [#canon_stream])
                     )
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
@@ -140,7 +144,8 @@ fn check_influence_to_not_restricted() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (new $a
             (seq
@@ -177,7 +182,8 @@ fn check_influence_to_not_restricted() {
             )
         )
     )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
@@ -272,7 +278,8 @@ fn new_in_fold_with_ap() {
     let mut set_variable_vm = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), set_variable_peer_id);
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] iterable)
             (fold iterable x
@@ -290,7 +297,8 @@ fn new_in_fold_with_ap() {
                 )
             )
         )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -379,7 +387,8 @@ fn new_with_streams_with_errors() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{local_peer_id}" ("" "") [1] $global_stream) ;; this stream should precense in a data
                 (new $restricted_stream_1
@@ -393,7 +402,8 @@ fn new_with_streams_with_errors() {
                         (call "{local_peer_id}" ("" "") [2] restricted_stream_1) ;; should have generation 0 in a data
                     )
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let result = call_vm!(fallible_vm, <_>::default(), script, "", result.data);
@@ -451,7 +461,8 @@ fn new_with_scalars_with_errors() {
     let fallible_service_id = "fallible_service_id";
     let mut fallible_peer_vm = create_avm(fallible_call_service(fallible_service_id), fallible_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["global"] scalar)
@@ -469,7 +480,8 @@ fn new_with_scalars_with_errors() {
                     )
                 )
                 (call "{variable_receiver_peer_id}" ("" "") [scalar])
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(variable_receiver_vm, <_>::default(), &script, "", result.data);
@@ -504,7 +516,8 @@ fn new_with_global_scalars() {
     let variable_receiver_peer_id = "variable_receiver_peer_id";
     let mut variable_receiver = create_avm(echo_call_service(), variable_receiver_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["global"] scalar)
@@ -516,7 +529,8 @@ fn new_with_global_scalars() {
                     )
                 )
                 (call "{variable_receiver_peer_id}" ("" "") [scalar])
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(variable_receiver, <_>::default(), &script, "", result.data);
@@ -574,7 +588,8 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     let test_call_service = prepare_new_test_call_service();
     let mut test_vm = create_avm(test_call_service, test_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
         (fold iterable iterator
@@ -598,7 +613,8 @@ fn new_with_scalars_in_lfold_with_outside_next() {
             )
         )
     )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -631,7 +647,8 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     let test_call_service = prepare_new_test_call_service();
     let mut test_vm = create_avm(test_call_service, test_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
         (fold iterable iterator
@@ -655,7 +672,8 @@ fn new_with_scalars_in_rfold_with_outside_next() {
             )
         )
     )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -688,7 +706,8 @@ fn new_with_scalars_in_fold_with_inside_next() {
     let test_call_service = prepare_new_test_call_service();
     let mut test_vm = create_avm(test_call_service, test_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (call "{test_peer_id}" ("" "") ["{GET_ITERABLE_ACTION_NAME}"] iterable)
         (fold iterable iterator
@@ -715,7 +734,8 @@ fn new_with_scalars_in_fold_with_inside_next() {
             )
         )
     )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(test_vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);

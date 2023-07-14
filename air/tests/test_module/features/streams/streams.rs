@@ -38,7 +38,8 @@ fn empty_stream() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(arg_type_check_closure(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (par
                 (call "unknown_peer" ("" "") [] $stream) ; to make validator happy
@@ -48,7 +49,8 @@ fn empty_stream() {
                 )
             )
             (null)
-        )"#);
+        )"#
+    );
 
     let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }

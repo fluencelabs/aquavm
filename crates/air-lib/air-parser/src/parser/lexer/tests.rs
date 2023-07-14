@@ -25,8 +25,6 @@ use air_lambda_parser::LambdaAST;
 use air_lambda_parser::ValueAccessor;
 
 use air_lambda_ast::Functor;
-use fstrings::f;
-use fstrings::format_args_f;
 
 fn run_lexer(input: &str) -> Vec<Spanned<Token<'_>, AirPos, LexerError>> {
     let lexer = AIRLexer::new(input);
@@ -235,7 +233,7 @@ fn canon_stream() {
 #[test]
 fn canon_stream_with_functor() {
     let canon_stream_name = "#canon_stream";
-    let canon_stream_with_functor: String = f!("{canon_stream_name}.length");
+    let canon_stream_with_functor: String = format!("{canon_stream_name}.length");
 
     lexer_test(
         &canon_stream_with_functor,
@@ -254,7 +252,7 @@ fn canon_stream_with_functor() {
 #[test]
 fn scalar_with_functor() {
     let scalar_name = "scalar";
-    let scalar_with_functor: String = f!("{scalar_name}.length");
+    let scalar_with_functor: String = format!("{scalar_name}.length");
 
     lexer_test(
         &scalar_with_functor,
@@ -287,7 +285,7 @@ fn string_literal() {
 #[test]
 fn integer_numbers() {
     let test_integer = 123;
-    let number_with_plus_sign = f!("+{test_integer}");
+    let number_with_plus_sign = format!("+{test_integer}");
 
     lexer_test(
         &number_with_plus_sign,
@@ -298,7 +296,7 @@ fn integer_numbers() {
         ))),
     );
 
-    let number = f!("{test_integer}");
+    let number = format!("{test_integer}");
 
     lexer_test(
         &number,
@@ -309,7 +307,7 @@ fn integer_numbers() {
         ))),
     );
 
-    let number_with_minus_sign = f!("-{test_integer}");
+    let number_with_minus_sign = format!("-{test_integer}");
 
     lexer_test(
         &number_with_minus_sign,
@@ -324,7 +322,7 @@ fn integer_numbers() {
 #[test]
 fn float_number() {
     let test_float = 123.123;
-    let float_number_with_plus_sign = f!("+{test_float}");
+    let float_number_with_plus_sign = format!("+{test_float}");
 
     lexer_test(
         &float_number_with_plus_sign,
@@ -335,7 +333,7 @@ fn float_number() {
         ))),
     );
 
-    let float_number = f!("{test_float}");
+    let float_number = format!("{test_float}");
 
     lexer_test(
         &float_number,
@@ -346,7 +344,7 @@ fn float_number() {
         ))),
     );
 
-    let float_number_with_minus_sign = f!("-{test_float}");
+    let float_number_with_minus_sign = format!("-{test_float}");
 
     lexer_test(
         &float_number_with_minus_sign,

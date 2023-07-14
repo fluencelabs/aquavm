@@ -24,7 +24,8 @@ fn par_ap_behaviour() {
     let variable_setter_id = "variable_setter_id";
 
     // ap doesn't affect the subgraph_complete flag
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{variable_setter_id}" ("peer" "timeout") [] join_it) ; behaviour=unit
             (seq
@@ -38,7 +39,8 @@ fn par_ap_behaviour() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let engine =
         air_test_framework::AirScriptExecutor::from_annotated(TestRunParameters::new("client_id", 0, 1, ""), &script)

@@ -41,7 +41,8 @@ fn dont_wait_on_json_path() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(unit_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{set_variable_peer_id}" ("" "") ["msg"] msg)
@@ -55,7 +56,8 @@ fn dont_wait_on_json_path() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::default();
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
@@ -90,12 +92,14 @@ fn dont_wait_on_json_path_on_scalars() {
     let object_consumer_peer_id = "object_consumer_peer_id";
     let mut object_consumer = create_avm(unit_call_service(), object_consumer_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") ["array"] array)
             (call "{array_consumer_peer_id}" ("" "") [array.$.[5]!] auth_result)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let array_result = call_vm!(array_consumer, <_>::default(), &script, "", result.data);
@@ -104,12 +108,14 @@ fn dont_wait_on_json_path_on_scalars() {
         CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });
     assert!(check_error(&array_result, expected_error));
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") ["object"] object)
             (call "{object_consumer_peer_id}" ("" "") [object.$.non_exist_path])
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let object_result = call_vm!(object_consumer, <_>::default(), script, "", result.data);
@@ -129,7 +135,8 @@ fn ap_scalar_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -137,7 +144,8 @@ fn ap_scalar_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -151,7 +159,8 @@ fn ap_stream_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -159,7 +168,8 @@ fn ap_stream_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -173,7 +183,8 @@ fn match_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -183,7 +194,8 @@ fn match_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -197,7 +209,8 @@ fn mismatch_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -207,7 +220,8 @@ fn mismatch_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -221,7 +235,8 @@ fn fold_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -231,7 +246,8 @@ fn fold_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -244,9 +260,11 @@ fn canon_with_empty_behaviour() {
 
     let mut peer_2 = create_avm(unit_call_service(), peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (canon "{peer_id}" $stream #canon_stream)
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);

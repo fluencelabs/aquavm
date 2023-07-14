@@ -58,7 +58,8 @@ fn flattening_scalar_arrays() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] scalar_array)
             (fold scalar_array.$.iterable! v
@@ -68,7 +69,8 @@ fn flattening_scalar_arrays() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
     let result = call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -99,7 +101,8 @@ fn flattening_streams() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -115,7 +118,8 @@ fn flattening_streams() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
     let result = call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -146,7 +150,8 @@ fn test_handling_non_flattening_values() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -162,7 +167,8 @@ fn test_handling_non_flattening_values() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = call_vm!(local_vm, <_>::default(), &script, "", result.data);

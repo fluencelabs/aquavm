@@ -23,7 +23,8 @@ fn issue_180() {
     let peer_2_id = "peer_2_id";
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (seq
@@ -36,7 +37,8 @@ fn issue_180() {
                 (call "{peer_1_id}" ("" "") []) ;; this should be called only when join_var is set
             )
         )
-        "#);
+        "#
+    );
 
     let peer_1_result = checked_call_vm!(peer_1, <_>::default(), &script, "", "");
     let trace = trace_from_result(&peer_1_result);

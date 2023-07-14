@@ -570,7 +570,7 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
 
         let transformed1 = TransformedAirScript::new(
-            &f!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
+            &format!(r#"(call "{}" ("service" "function") []) ; ok = 42"#, peer),
             network.clone(),
         )
         .unwrap();
@@ -581,7 +581,7 @@ mod tests {
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(
-            &f!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
+            &format!(r#"(call "{}" ("service" "function") []) ; ok = 24"#, peer),
             network,
         )
         .unwrap();
@@ -635,7 +635,7 @@ mod tests {
         );
 
         let peer = "peer1";
-        let air_script = f!(r#"(call "{}" ("service" "function") [])"#, peer);
+        let air_script = format!(r#"(call "{}" ("service" "function") [])"#, peer);
         let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer),

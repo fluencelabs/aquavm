@@ -158,7 +158,6 @@ dependencies = [
  "avm-server",
  "ed25519-dalek",
  "fluence-keypair",
- "fstrings",
  "maplit",
  "marine-rs-sdk",
  "object-pool",
@@ -320,7 +319,6 @@ dependencies = [
  "env_logger 0.7.1",
  "fluence-app-service",
  "fluence-keypair",
- "fstrings",
  "log",
  "maplit",
  "marine-rs-sdk",
@@ -370,7 +368,6 @@ dependencies = [
  "codespan",
  "codespan-reporting",
  "criterion 0.4.0",
- "fstrings",
  "itertools",
  "lalrpop",
  "lalrpop-util",
@@ -1597,28 +1594,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fstrings"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7845a0f15da505ac36baad0486612dab57f8b8d34e19c5470a265bbcdd572ae6"
-dependencies = [
- "fstrings-proc-macro",
- "proc-macro-hack",
-]
-
-[[package]]
-name = "fstrings-proc-macro"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63b58c0e7581dc33478a32299182cbe5ae3b8c028be26728a47fb0a113c92d9d"
-dependencies = [
- "proc-macro-hack",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "fxhash"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2828,12 +2803,6 @@ dependencies = [
  "quote",
  "version_check",
 ]
-
-[[package]]
-name = "proc-macro-hack"
-version = "0.5.20+deprecated"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc375e1527247fe1a97d8b7156678dfe7c1af2fc075c9a4db3690ecd2a148068"
 
 [[package]]
 name = "proc-macro2"

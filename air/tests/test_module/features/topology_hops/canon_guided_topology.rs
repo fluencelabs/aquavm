@@ -25,9 +25,11 @@ fn canon_generates_hop() {
 
     let test_peer_id = "test_peer_id";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (canon "{test_peer_id}" $empty_stream #canon_stream)
-    "#);
+    "#
+    );
 
     let client_result = checked_call_vm!(client_vm, <_>::default(), script, "", "");
     assert_next_pks!(&client_result.next_peer_pks, &[test_peer_id]);
@@ -45,7 +47,8 @@ fn canon_with_join_behaviour() {
     let friend_relay_peer_id = "friend_relay";
     let mut friend_relay_vm = create_avm(unit_call_service(), friend_relay_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (xor
      (seq
       (seq
@@ -122,7 +125,8 @@ fn canon_with_join_behaviour() {
      )
      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
     )
-        "#);
+        "#
+    );
 
     let keypair = KeyPair::generate(KeyFormat::Ed25519);
     let run_parameters = TestRunParameters::new(client_peer_id.to_string(), 0, 0, "".to_string());

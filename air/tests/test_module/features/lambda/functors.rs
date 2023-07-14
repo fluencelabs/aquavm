@@ -47,12 +47,14 @@ fn length_functor_for_array_scalar() {
 #[test]
 fn length_functor_for_non_array_scalar() {
     let result_jvalue = "string_jvalue";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call %init_peer_id% ("" "") [] variable) ; ok = "{result_jvalue}"
             (call %init_peer_id% ("" "") [variable.length]) ; behaviour = echo
         )
-        "#);
+        "#
+    );
 
     let init_peer_id = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &script)
@@ -212,7 +214,8 @@ fn functor_dont_influence_tetraplet() {
     let (call_service, actual_tetraplet) = tetraplet_host_function(echo_call_service());
     let mut tetraplet_catcher_vm = create_avm(call_service, tetraplet_catcher_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] scalar)
             (seq
@@ -223,7 +226,8 @@ fn functor_dont_influence_tetraplet() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(tetraplet_catcher_vm, <_>::default(), &script, "", result.data);

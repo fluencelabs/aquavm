@@ -438,14 +438,16 @@ fn fold_waits_on_empty_stream() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (par
                 (call "" ("" "") [] $stream)
                 (fold $stream iterator
                     (seq
                         (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
                         (next iterator))))
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -459,7 +461,8 @@ fn fold_stream_seq_next_never_completes() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -468,7 +471,8 @@ fn fold_stream_seq_next_never_completes() {
                             (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
                             (next iterator)))
                     (call "{vm_peer_id}" ("" "") [])))
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -490,7 +494,8 @@ fn fold_stream_seq_next_never_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -504,7 +509,8 @@ fn fold_stream_seq_next_never_completes_with_never() {
                     (call "{vm_peer_id}" ("" "") [])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -526,7 +532,8 @@ fn fold_stream_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -540,7 +547,8 @@ fn fold_stream_seq_next_completes_with_null() {
                     (call "{vm_peer_id}" ("" "") [])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -564,7 +572,8 @@ fn fold_scalar_seq_next_completes_with_null() {
     let service_result = json!([1, 2]);
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] iterable)
                 (seq
@@ -581,7 +590,8 @@ fn fold_scalar_seq_next_completes_with_null() {
                     )
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -606,7 +616,8 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     let service_result = json!([1, 2]);
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] iterable)
                 (seq
@@ -623,7 +634,8 @@ fn fold_scalar_seq_next_not_completes_with_never() {
                     )
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -643,7 +655,8 @@ fn fold_stream_seq_next_saves_call_result() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (ap 1 $stream)
@@ -660,7 +673,8 @@ fn fold_stream_seq_next_saves_call_result() {
                     (call "{vm_peer_id}" ("" "") [0])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -694,7 +708,8 @@ fn fold_par_next_completes() {
     let vm_4_peer_id = "vm_4_peer_id";
     let mut vm_4 = create_avm(set_variable_call_service(json!(1)), vm_4_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (seq
@@ -709,7 +724,8 @@ fn fold_par_next_completes() {
                     (call "{vm_1_peer_id}" ("" "") []) ; this call should be executed if any of these three peers is reached
                 )
             )
-            "#);
+            "#
+    );
 
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
 
@@ -792,7 +808,8 @@ fn fold_stream_map() {
 
     let mut vm_1 = create_avm(set_variable_call_service, vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -817,7 +834,8 @@ fn fold_stream_map() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(vm_1_peer_id);
     let result = checked_call_vm!(vm_1, test_params, &script, "", "");
