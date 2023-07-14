@@ -97,7 +97,7 @@ class TraceRecord:
         )
 
 
-def _common_prefix(nested: dict) -> list[str]:
+def _common_prefix(nested: dict) -> List[str]:
     items = iter(nested.keys())
     prefix = next(items).split("::")[:-1]
     for fname in items:

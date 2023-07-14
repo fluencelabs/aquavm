@@ -51,7 +51,7 @@ def _prepare(args):
         ])
 
 
-def discover_tests(bench_dir: typing.Optional[str]) -> list[Bench]:
+def discover_tests(bench_dir: typing.Optional[str]) -> typing.List[Bench]:
     """Discover bench suite elements."""
     if bench_dir is None:
         bench_dir = DEFAULT_TEST_DIR
@@ -81,9 +81,6 @@ def run(args):
             memory_sizes = walker.get_memory_sizes(args.repeat)
             db.record(bench, combined_stats, total_time, memory_sizes)
 
-            with (
-                    intermediate_temp_file(
-                        args.report_path or DEFAULT_REPORT_PATH) as out
-            ):
+            with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
                 report = TextReporter(db.data)
                 report.save_text_report(out)
