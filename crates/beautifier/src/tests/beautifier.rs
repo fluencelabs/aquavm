@@ -241,6 +241,22 @@ fold var i:
 }
 
 #[test]
+fn fold_scalar_with_last_instruction() {
+    let script = r#"(seq (call "it" ("" "") [] var) (fold var i (null) (never)))"#;
+    let output = beautify_to_string(script).unwrap();
+
+    assert_eq!(
+        output,
+        r#"var <- call "it" ("", "") []
+fold var i:
+    null
+last:
+    never
+"#
+    );
+}
+
+#[test]
 fn fold_stream() {
     let script = r#"(seq (call "it" ("" "") [] $var) (fold $var i (null)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -249,6 +265,22 @@ fn fold_stream() {
         output,
         r#"$var <- call "it" ("", "") []
 fold $var i:
+    null
+"#
+    );
+}
+
+#[test]
+fn fold_stream_with_last_instruction() {
+    let script = r#"(seq (call "it" ("" "") [] $var) (fold $var i (never) (null)))"#;
+    let output = beautify_to_string(script).unwrap();
+
+    assert_eq!(
+        output,
+        r#"$var <- call "it" ("", "") []
+fold $var i:
+    never
+last:
     null
 "#
     );
