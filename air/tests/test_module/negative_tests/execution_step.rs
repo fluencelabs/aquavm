@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+use air::no_error_last_error_object;
 use air::unsupported_map_key_type;
 use air::CatchableError;
 use air::LambdaError;
 
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -586,4 +588,75 @@ fn unsupported_map_keytype() {
     let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::StreamMapError(unsupported_map_key_type(map_name));
     assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn undefined_last_error_functor() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+    (xor
+        (match 1 2
+            (null)
+        )
+        (call "local_peer_id" ("test" "error_code") [%last_error%.length] scalar)
+    )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_last_error_object());
+    assert!(check_error(&result.last().unwrap(), expected_error));
+}
+
+#[test]
+fn undefined_last_error_instruction() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+    (xor
+        (match 1 2
+            (null)
+        )
+        (call "local_peer_id" ("test" "instruction") [%last_error%.$.instruction] scalar)
+    )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
+        value: no_error_last_error_object(),
+        field_name: "instruction".to_string(),
+    });
+    assert!(check_error(&&result.last().unwrap(), expected_error));
+}
+
+#[test]
+fn undefined_last_error_peer_id() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+    (xor
+        (match 1 2
+            (null)
+        )
+        (call "local_peer_id" ("test" "peer_id") [%last_error%.$.peer_id] scalar)
+    )
+    "#
+    );
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
+        value: no_error_last_error_object(),
+        field_name: "peer_id".to_string(),
+    });
+    assert!(check_error(&&result.last().unwrap(), expected_error));
 }

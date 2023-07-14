@@ -19,11 +19,14 @@ mod last_error_definition;
 mod last_error_descriptor;
 
 pub use errors::LastErrorObjectError;
+pub use last_error_definition::no_error_last_error;
+pub use last_error_definition::no_error_last_error_object;
 pub use last_error_definition::LastError;
 pub use last_error_definition::ERROR_CODE_FIELD_NAME;
 pub use last_error_definition::INSTRUCTION_FIELD_NAME;
 pub use last_error_definition::MESSAGE_FIELD_NAME;
-pub use last_error_definition::PEER_ID_FIELD_NAME;
+pub use last_error_definition::NO_ERROR_ERROR_CODE;
+pub use last_error_definition::NO_ERROR_MESSAGE;
 
 pub(crate) use last_error_definition::check_error_object;
 pub(crate) use last_error_definition::error_from_raw_fields;

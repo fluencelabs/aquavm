@@ -15,6 +15,10 @@
  */
 
 use air::CatchableError;
+use air::ExecutionCidState;
+use air::NO_ERROR_ERROR_CODE;
+use air::NO_ERROR_MESSAGE;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -382,4 +386,66 @@ fn issue_165() {
             args = [1]
         )
     );
+}
+
+#[test]
+fn match_with_undefined_last_error_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (xor
+            (match 1 2 (null))
+            (call "local_peer_id" ("test" "error_code") [%last_error%.$.error_code] scalar) ; behaviour = echo
+        )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(NO_ERROR_ERROR_CODE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test..0",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn match_with_undefined_last_error_message() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (xor
+            (match 1 2 (null))
+            (call "local_peer_id" ("test" "message") [%last_error%.$.message] scalar) ; behaviour = echo
+        )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let message_lambda_output = json!(NO_ERROR_MESSAGE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        message_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test..0",
+        function = "message",
+        args = vec![message_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
 }
