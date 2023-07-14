@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
+use air::no_error_last_error_object;
 use air::CatchableError;
+use air::ExecutionCidState;
 use air::ExecutionError;
 use air::LambdaError;
 use air::LastErrorObjectError;
 use air::SecurityTetraplet;
+use air::NO_ERROR_ERROR_CODE;
+use air::NO_ERROR_MESSAGE;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -119,7 +124,7 @@ fn not_clear_last_error_in_match() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 }
 
 #[test]
@@ -154,7 +159,7 @@ fn not_clear_last_error_in_mismatch() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 }
 
 #[test]
@@ -236,7 +241,7 @@ fn non_initialized_last_error() {
     let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
     assert_eq!(
@@ -491,4 +496,60 @@ fn last_error_with_match() {
 
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
+}
+
+#[test]
+fn undefined_last_error_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (call "{local_peer_id}" ("test" "error_code") [%last_error%.$.error_code] scalar) ; behaviour = echo
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(NO_ERROR_ERROR_CODE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test..0",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn undefined_last_error_msg_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (call "{local_peer_id}" ("test" "message") [%last_error%.$.message] scalar1) ; behaviour = echo
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let message_lambda_output = json!(NO_ERROR_MESSAGE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        message_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test..0",
+        function = "message",
+        args = vec![message_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
 }
