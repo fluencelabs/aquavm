@@ -135,7 +135,8 @@ fn ap_scalar_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -143,7 +144,8 @@ fn ap_scalar_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
@@ -157,7 +159,8 @@ fn ap_stream_with_join_behaviour() {
 
     let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "{peer_2_id}" ("" "") [] join_var)
             (xor
@@ -165,7 +168,8 @@ fn ap_stream_with_join_behaviour() {
                 (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
     let trace = trace_from_result(&result);
