@@ -129,6 +129,50 @@ fn dont_wait_on_json_path_on_scalars() {
 }
 
 #[test]
+fn ap_scalar_with_join_behaviour() {
+    let peer_1_id = "peer_1_id";
+    let peer_2_id = "peer_2_id";
+
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+
+    let script = f!(r#"
+        (par
+            (call "{peer_2_id}" ("" "") [] join_var)
+            (xor
+                (ap join_var other_var)
+                (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
+}
+
+#[test]
+fn ap_stream_with_join_behaviour() {
+    let peer_1_id = "peer_1_id";
+    let peer_2_id = "peer_2_id";
+
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+
+    let script = f!(r#"
+        (par
+            (call "{peer_2_id}" ("" "") [] join_var)
+            (xor
+                (ap join_var $stream)
+                (call "{peer_1_id}" ("" "") []) ;; this call shouldn't be called
+            )
+        )
+    "#);
+
+    let result = checked_call_vm!(peer_1, <_>::default(), script, "", "");
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
+}
+
+#[test]
 fn match_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";

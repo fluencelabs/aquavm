@@ -59,53 +59,6 @@ fn local_service_error() {
 }
 
 #[test]
-fn variable_not_found_ap_scalar() {
-    let vm_2_peer_id = "vm_2_peer_id";
-    let var_name = "scalar_1".to_string();
-    let script = format!(
-        r#"
-        (par
-            (match 0 1
-                (call "vm_1_peer_id" ("m" "f") ["scalar_1_result"] {var_name})
-            )
-            (ap {var_name} scalar_2)
-        )
-        "#
-    );
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-    let result = vm_2
-        .call_single(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default(), "")
-        .unwrap();
-    let expected_error = CatchableError::VariableNotFound(var_name);
-    assert!(check_error(&result, expected_error));
-}
-
-#[test]
-fn variable_not_found_ap_canon_stream() {
-    let vm_2_peer_id = "vm_2_peer_id";
-    let var_name = "#canon".to_string();
-    let script = format!(
-        r#"
-        (par
-            (match 0 1
-                (seq
-                    (call "vm_1_peer_id" ("m" "f") ["scalar_1_result"] $stream)
-                    (canon "vm_1_peer_id" $stream {var_name})
-                )
-            )
-            (ap {var_name} scalar_2)
-        )
-        "#
-    );
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-    let result = vm_2
-        .call_single(&script, "", "", vm_2_peer_id, 0, 0, None, <_>::default(), "")
-        .unwrap();
-    let expected_error = CatchableError::VariableNotFound(var_name);
-    assert!(check_error(&result, expected_error));
-}
-
-#[test]
 fn fold_iterates_over_non_array_scalar_iterable() {
     let vm_2_peer_id = "vm_2_peer_id";
     let var_name = "outcome".to_string();
