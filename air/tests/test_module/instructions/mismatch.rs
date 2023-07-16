@@ -15,6 +15,7 @@
  */
 
 use air::CatchableError;
+use air::ToErrorCode;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -159,6 +160,7 @@ fn mismatch_without_xor() {
     let result = call_vm!(vm, <_>::default(), &script, "", result.data);
 
     let expected_error = CatchableError::MismatchValuesEqual;
+    assert_eq!(expected_error.to_error_code(), 10002);
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, <_>::default(), script, "", result.data);
