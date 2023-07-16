@@ -13,6 +13,25 @@
   * dev-dependencies
     * air-test-utils bumped from 0.5.0 to 0.6.0
 
+## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.3.0...air-testing-framework-v0.4.0) (2023-07-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** add error-code invariant check for match/mismatch ([#622](https://github.com/fluencelabs/aquavm/issues/622))
+
+### Features
+
+* **execution-engine:** add error-code invariant check for match/mismatch ([#622](https://github.com/fluencelabs/aquavm/issues/622)) ([33a9d9f](https://github.com/fluencelabs/aquavm/commit/33a9d9f32f84c5b31b59120f9da3c1624e1d5c27))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.7.0 to 0.7.1
+    * aquavm-air-parser bumped from 0.7.5 to 0.8.0
+
 ## [0.3.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.2.1...air-testing-framework-v0.3.0) (2023-06-23)
 
 

@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.42.0](https://github.com/fluencelabs/aquavm/compare/air-v0.41.0...air-v0.42.0) (2023-07-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** add error-code invariant check for match/mismatch ([#622](https://github.com/fluencelabs/aquavm/issues/622))
+* **execution-engine:** %last_eror%.$.message and $.error_code now return an empty string and 0 correspondingly [fixes VM-313]
+* **execution-engine:** unfefined %last_error% now returns an empty … ([#628](https://github.com/fluencelabs/aquavm/issues/628))
+* **aquavm-air:** `ap` join behavior ([#631](https://github.com/fluencelabs/aquavm/issues/631))
+* **execution-engine:** stream map to scalar conversion using canon instruction [fixes VM-294] ([#610](https://github.com/fluencelabs/aquavm/issues/610))
+
+### Features
+
+* **aquavm-air:** `ap` join behavior ([#631](https://github.com/fluencelabs/aquavm/issues/631)) ([75f5516](https://github.com/fluencelabs/aquavm/commit/75f5516c5803c256e329a7318632fbab13aea491)), closes [#632](https://github.com/fluencelabs/aquavm/issues/632)
+* **execution-engine:** %last_eror%.$.message and $.error_code now return an empty string and 0 correspondingly [fixes VM-313] ([d195152](https://github.com/fluencelabs/aquavm/commit/d19515232043462e809d9cd6964042f69a77f4cf))
+* **execution-engine:** add error-code invariant check for match/mismatch ([#622](https://github.com/fluencelabs/aquavm/issues/622)) ([33a9d9f](https://github.com/fluencelabs/aquavm/commit/33a9d9f32f84c5b31b59120f9da3c1624e1d5c27))
+* **execution-engine:** Stream Map to Scalar conversion using canon instruction [fixes VM-294] ([fcb4c9d](https://github.com/fluencelabs/aquavm/commit/fcb4c9dab43d82e87f1d6f8a83b72f6891d37bef))
+* **execution-engine:** stream map to scalar conversion using canon instruction [fixes VM-294] ([#610](https://github.com/fluencelabs/aquavm/issues/610)) ([fcb4c9d](https://github.com/fluencelabs/aquavm/commit/fcb4c9dab43d82e87f1d6f8a83b72f6891d37bef))
+* **execution-engine:** unfefined %last_error% now returns an empty … ([#628](https://github.com/fluencelabs/aquavm/issues/628)) ([d195152](https://github.com/fluencelabs/aquavm/commit/d19515232043462e809d9cd6964042f69a77f4cf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.7.5 to 0.8.0
+    * air-execution-info-collector bumped from 0.7.5 to 0.7.6
+    * air-interpreter-data bumped from 0.8.0 to 0.8.1
+    * air-trace-handler bumped from 0.2.1 to 0.2.2
+
 ## [0.41.0](https://github.com/fluencelabs/aquavm/compare/air-v0.40.0...air-v0.41.0) (2023-06-23)
 
 
