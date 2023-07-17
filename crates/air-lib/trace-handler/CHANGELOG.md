@@ -1,5 +1,10 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.8.0 to 0.8.1
+    * aquavm-air-parser bumped from 0.7.5 to 0.8.0
+
 ## [0.2.1](https://github.com/fluencelabs/aquavm/compare/air-trace-handler-v0.2.0...air-trace-handler-v0.2.1) (2023-06-22)
 
 
