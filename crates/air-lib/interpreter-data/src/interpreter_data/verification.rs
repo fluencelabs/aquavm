@@ -38,7 +38,7 @@ pub enum DataVerifierError {
 
     #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
     SignatureMismatch {
-        error: fluence_keypair::error::VerificationError,
+        error: Box<fluence_keypair::error::VerificationError>,
         cids: Vec<Box<str>>,
         peer_id: String,
     },
@@ -100,7 +100,7 @@ impl<'data> DataVerifier<'data> {
                 .public_key
                 .verify(&peer_info.cids, self.particle_id, peer_info.signature)
                 .map_err(|error| DataVerifierError::SignatureMismatch {
-                    error,
+                    error: error.into(),
                     cids: peer_info.cids.clone(),
                     peer_id: peer_info.public_key.to_peer_id().to_string(),
                 })?;
