@@ -52,7 +52,7 @@ class Db:
             host_id = get_host_id()
         self.host_id = host_id
 
-        self.features = canonicalize_features(features)
+        self.features = canonicalize_features(features) or ''
 
         try:
             with open(json_path, 'r', encoding="utf-8") as inp:
@@ -82,8 +82,7 @@ class Db:
         self.data[self.host_id]["benches"][bench_name] = bench_info
         self.data[self.host_id]["platform"] = platform.platform()
 
-        if self.features is not None:
-            self.data[self.host_id]["features"] = self.features
+        self.data[self.host_id]["features"] = self.features
 
         self.data[self.host_id]["datetime"] = str(
             datetime.datetime.now(datetime.timezone.utc)
