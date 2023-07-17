@@ -33,7 +33,7 @@ pub enum DataVerifierError {
     #[error(transparent)]
     MalformedSignature(fluence_keypair::error::DecodingError),
 
-    #[error("peer_id doens't match any public key: {0:?}")]
+    #[error("peer_id doens't match any available public key: {0:?}")]
     PeerIdNotFound(String),
 
     #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
@@ -44,16 +44,18 @@ pub enum DataVerifierError {
     },
 
     #[error(
-        "inconsistent CID multisets on merge for pk {public_key:?}, prev: {larger_cids:?}, current: {smaller_cids:?}"
+        "inconsistent CID multisets on merge for peer {peer_id:?}, prev: {larger_cids:?}, current: {smaller_cids:?}"
     )]
     MergeMismatch {
-        public_key: Box<PublicKey>,
+        peer_id: String,
         larger_cids: Vec<Box<str>>,
         smaller_cids: Vec<Box<str>>,
     },
 }
 
+/// An util for verificating particular data's signatures.
 pub struct DataVerifier<'data> {
+    // a map from peer_id to peer's info (public key, signature, CIDS)
     grouped_cids: HashMap<Box<str>, PeerInfo<'data>>,
     particle_id: &'data str,
 }
@@ -77,6 +79,7 @@ impl<'data> DataVerifier<'data> {
             })
             .collect();
 
+        // fill PeerInfo's `cids` field, checking for peer IDs without a key
         collect_peers_cids_from_trace(&data.trace, &data.cid_info, &mut grouped_cids)?;
 
         // sort cids for canonicalization
@@ -90,6 +93,7 @@ impl<'data> DataVerifier<'data> {
         })
     }
 
+    /// Verify each peers' signatures.
     pub fn verify(&self) -> Result<(), DataVerifierError> {
         for peer_info in self.grouped_cids.values() {
             peer_info
@@ -104,6 +108,17 @@ impl<'data> DataVerifier<'data> {
         Ok(())
     }
 
+    /// For each peer, merge previous and current CID multisets by determining the largest set.
+    ///
+    /// This code uses an invariant: peer's multiset of produced CIDs is always a superset of
+    /// previous invocation's multiset:
+    ///
+    /// A_0 ⊆ A_1 ⊆ ... ⊆ A_n.
+    ///
+    /// So, the largest multiset is selected as the result of merging, the invariant is checked,
+    /// and a error is returned if it is violated.
+    ///
+    /// If the multisets are of same size, they have to be equal.
     // TODO enforce merging only verified sets
     pub fn merge(mut self, other: Self) -> Result<SignatureStore, DataVerifierError> {
         use std::collections::hash_map::Entry::*;
@@ -122,10 +137,13 @@ impl<'data> DataVerifier<'data> {
                         // so, we get a largest set as merged one
                         std::mem::swap(our_info_ent.get_mut(), &mut other_info);
                     }
+                    // nb: if length are equal, sets should be equal, and any of them
+                    // should be used; if they are not equal, check_cid_multiset_consistency
+                    // will detect it.
 
                     let larger_info = our_info_ent.get();
                     let smaller_info = &other_info;
-                    check_cid_multiset_consistency(larger_info, smaller_info)?;
+                    check_cid_multiset_invariant(larger_info, smaller_info)?;
                 }
                 Vacant(ent) => {
                     ent.insert(other_info);
@@ -198,8 +216,9 @@ fn try_push_cid<T>(
     }
 }
 
-// safety check for malicious peer that returns inconsistent CID multiset
-fn check_cid_multiset_consistency(
+/// Safety check for malicious peer that returns inconsistent CID multisets,
+/// i.e. non-increasing multisets.
+fn check_cid_multiset_invariant(
     larger_pair: &PeerInfo<'_>,
     smaller_pair: &PeerInfo<'_>,
 ) -> Result<(), DataVerifierError> {
@@ -209,11 +228,12 @@ fn check_cid_multiset_consistency(
     let larger_count_map = to_count_map(larger_cids);
     let smaller_count_map = to_count_map(smaller_cids);
 
-    if check_count_maps_consistency(larger_count_map, smaller_count_map) {
+    if is_multisubset(larger_count_map, smaller_count_map) {
         Ok(())
     } else {
+        let peer_id = smaller_pair.public_key.to_peer_id().to_string();
         Err(DataVerifierError::MergeMismatch {
-            public_key: smaller_pair.public_key.clone().into(),
+            peer_id,
             larger_cids: larger_cids.clone(),
             smaller_cids: smaller_cids.clone(),
         })
@@ -223,17 +243,19 @@ fn check_cid_multiset_consistency(
 fn to_count_map(cids: &Vec<Box<str>>) -> HashMap<&str, usize> {
     let mut count_map = HashMap::<_, usize>::new();
     for cid in cids {
-        // the counter should never overflow
+        // the counter can't overflow, the memory will overflow first
         *count_map.entry(&**cid).or_default() += 1;
     }
     count_map
 }
 
-fn check_count_maps_consistency(
+fn is_multisubset(
     larger_count_set: HashMap<&str, usize>,
     smaller_count_set: HashMap<&str, usize>,
 ) -> bool {
     for (cid, &smaller_count) in &smaller_count_set {
+        debug_assert!(smaller_count > 0);
+
         let larger_count = larger_count_set.get(cid).cloned().unwrap_or_default();
         if larger_count < smaller_count {
             return false;
@@ -243,8 +265,11 @@ fn check_count_maps_consistency(
 }
 
 struct PeerInfo<'data> {
+    /// A peer's public key.
     public_key: &'data PublicKey,
+    /// A peer's signature.
     signature: &'data Signature,
+    /// Sorted vector of CIDs that belong to the peer.
     cids: Vec<Box<str>>,
 }
 
