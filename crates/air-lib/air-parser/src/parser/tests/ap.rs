@@ -19,8 +19,6 @@ use super::parse;
 use crate::ast::*;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
-use fstrings::f;
-use fstrings::format_args_f;
 
 #[test]
 fn ap_with_literal() {
@@ -151,9 +149,11 @@ fn ap_with_ttl() {
 fn ap_with_canon_stream() {
     let canon_stream = "#canon_stream";
     let scalar = "scalar";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (ap {canon_stream} {scalar})
-    "#);
+    "#
+    );
 
     let actual = parse(&source_code);
     let expected = ap(
@@ -168,9 +168,11 @@ fn ap_with_canon_stream() {
 fn ap_with_canon_stream_with_lambda() {
     let canon_stream = "#canon_stream";
     let scalar = "scalar";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (ap {canon_stream}.$.[0] {scalar})
-    "#);
+    "#
+    );
 
     let actual = parse(&source_code);
     let expected = ap(

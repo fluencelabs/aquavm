@@ -30,7 +30,8 @@ fn issue_302() {
     let peer_id_3 = "peer_id_3";
     let mut peer_vm_3 = create_avm(echo_call_service(), peer_id_3);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (new $stream
             (par
                 (call "{peer_id_1}" ("" "") [2] $stream)
@@ -46,7 +47,8 @@ fn issue_302() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", "");
     let result_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", result_1.data.clone());

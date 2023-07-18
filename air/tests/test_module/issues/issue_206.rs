@@ -23,7 +23,8 @@ fn issue_206() {
     let peer_1_id = "peer_1_id";
     let mut peer_1 = create_avm(echo_call_service(), peer_1_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (new $result
         (seq
             (xor
@@ -38,7 +39,8 @@ fn issue_206() {
             (call %init_peer_id% ("op" "identity") [$result] result-fix)
         )
     )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(peer_1_id);
     let result = checked_call_vm!(peer_1, test_params, &script, "", "");

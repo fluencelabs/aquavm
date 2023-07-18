@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+use air::no_error_last_error_object;
 use air::ExecutionCidState;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -29,7 +31,8 @@ fn ap_with_scalars() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
@@ -37,7 +40,8 @@ fn ap_with_scalars() {
             )
             (call "{vm_2_peer_id}" ("" "") [scalar_2])
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
@@ -62,13 +66,15 @@ fn ap_with_string_literal() {
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
     let some_string = "some_string";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap "{some_string}" $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -99,13 +105,15 @@ fn ap_with_bool_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap true $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -134,13 +142,15 @@ fn ap_with_number_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap 100 $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -169,13 +179,15 @@ fn ap_with_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %last_error% $stream)
             (seq
                 (canon "{vm_1_peer_id}" $stream #canon_stream)
                 (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
 
@@ -186,13 +198,17 @@ fn ap_with_last_error() {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
-                    "result": null,
+                    "result": no_error_last_error_object(),
                     "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
         })),
-        unused!(json!([null]), peer = vm_1_peer_id, args = [json!([null])]),
+        unused!(
+            json!([no_error_last_error_object()]),
+            peer = vm_1_peer_id,
+            args = [no_error_last_error_object()]
+        ),
     ];
 
     assert_eq!(actual_trace, expected_state);
@@ -204,12 +220,14 @@ fn ap_with_timestamp() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %timestamp% scalar)
             (call "{vm_1_peer_id}" ("" "") [scalar])
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_timestamp(1337);
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
@@ -229,12 +247,14 @@ fn ap_with_ttl() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap %ttl% scalar)
             (call "{vm_1_peer_id}" ("" "") [scalar])
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_ttl(1337);
     let result = checked_call_vm!(vm_1, test_params.clone(), script, "", "");
@@ -254,7 +274,8 @@ fn ap_with_dst_stream() {
     let vm_2_peer_id = "vm_2_peer_id";
     let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") ["scalar_1_result"] scalar_1)
@@ -262,7 +283,8 @@ fn ap_with_dst_stream() {
             (seq
                 (canon "{vm_2_peer_id}" $stream #canon_stream)
                 (call "{vm_2_peer_id}" ("" "") [#canon_stream])))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_2, <_>::default(), script, "", result.data);
@@ -305,7 +327,8 @@ fn ap_canon_stream_with_lambda() {
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") [0] $stream)
@@ -317,7 +340,8 @@ fn ap_canon_stream_with_lambda() {
                     (seq
                         (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
                         (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
 
@@ -398,7 +422,8 @@ fn ap_canon_stream() {
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_1_peer_id}" ("" "") [0] $stream)
@@ -410,7 +435,8 @@ fn ap_canon_stream() {
                     (seq
                         (canon "{vm_1_peer_id}" $stream_2 #canon_stream_2)
                         (call "{vm_1_peer_id}" ("" "") [#canon_stream_2])))))
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     print_trace(&result, "");
@@ -474,7 +500,8 @@ fn ap_stream_map() {
 
     let service_name1 = "serv1";
     let service_name2 = "serv2";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (ap ("{vm_1_peer_id}" "{service_name1}") %map)
@@ -487,7 +514,8 @@ fn ap_stream_map() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -529,4 +557,45 @@ fn ap_stream_map() {
         ),
     ]);
     assert_eq!(actual_trace, expected_state);
+}
+
+#[test]
+fn ap_stream_map_with_undefined_last_error() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (ap ("key" %last_error%) %map)
+            (fold %map i
+                (seq
+                    (call "{vm_1_peer_id}" ("m" "f") [i.$.value]) ; behaviour = echo
+                    (next i)
+                )
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let expected_state = vec![
+        executed_state::ap(0),
+        executed_state::fold(vec![subtrace_lore(
+            0,
+            SubTraceDesc::new(2.into(), 1),
+            SubTraceDesc::new(3.into(), 0),
+        )]),
+        unused!(
+            no_error_last_error_object(),
+            peer = vm_1_peer_id,
+            service = "m",
+            function = "f",
+            args = [no_error_last_error_object()]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_state,);
 }

@@ -48,9 +48,6 @@ pub mod prelude {
     pub use air::interpreter_data::*;
     pub use avm_server::*;
 
-    pub use fstrings::f;
-    pub use fstrings::format_args_f;
-
     pub use serde_json::json;
 }
 

@@ -26,12 +26,14 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let local_peer_id = "local_peer_id";
 
     let some_string = "some_string";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") ["{some_string}"] string_variable)
             (call "{local_peer_id}" ("" "") [string_variable.$.some_lambda])
         )
-        "#);
+        "#
+    );
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
 
@@ -57,7 +59,8 @@ fn lambda_with_string_scalar() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{set_variable_peer_id}" ("" "string_accessor") [] string_accessor)
@@ -65,7 +68,8 @@ fn lambda_with_string_scalar() {
             )
             (call "{local_peer_id}" ("" "") [value.$.[string_accessor]])
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -89,7 +93,8 @@ fn lambda_with_number_scalar() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{set_variable_peer_id}" ("" "number_accessor") [] number_accessor)
@@ -97,7 +102,8 @@ fn lambda_with_number_scalar() {
             )
             (call "{local_peer_id}" ("" "") [value.$.[number_accessor]])
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -121,7 +127,8 @@ fn lambda_with_number_stream() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{set_variable_peer_id}" ("" "number_accessor") [] number_accessor)
@@ -140,7 +147,8 @@ fn lambda_with_number_stream() {
                 (call "{local_peer_id}" ("" "") [#canon_stream.$.[number_accessor]])
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -169,7 +177,8 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -191,7 +200,8 @@ fn lambda_with_number_stream_and_followed_scalar() {
                 (call "{local_peer_id}" ("" "") [#canon_stream.$.[number_accessor].field_1]) ;; get the 2nd value and then access its field
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -218,7 +228,8 @@ fn lambda_with_scalar_join() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (par
                 (call "non_exist_peer_id" ("" "string_accessor") [] string_accessor)
@@ -226,7 +237,8 @@ fn lambda_with_scalar_join() {
             )
             (call "{local_peer_id}" ("" "") [value.$.[string_accessor]])
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -253,7 +265,8 @@ fn lambda_with_canon_stream_join() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (par
                 (call "non_exist_peer_id" ("" "number_accessor") [] number_accessor)
@@ -272,7 +285,8 @@ fn lambda_with_canon_stream_join() {
                 (call "{local_peer_id}" ("" "") [#stream.$.[number_accessor]])
             )
         )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);

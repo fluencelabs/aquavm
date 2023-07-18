@@ -23,7 +23,8 @@ fn issue_346() {
     let vm_peer_id = "peer_id_1";
     let mut peer_vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (par
             (call "unknown_peer" ("" "") [] $stream) ; to make validator happy
             (xor
@@ -31,7 +32,8 @@ fn issue_346() {
                 (call "{vm_peer_id}" ("" "") [""])
             )
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(peer_vm, <_>::default(), &script, "", "");
     assert_eq!(result.ret_code, INTERPRETER_SUCCESS);

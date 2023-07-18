@@ -41,7 +41,8 @@ fn join_chat_1() {
         Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(members.clone()) });
     let mut remote = create_avm(members_call_service, remote_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{relay_1_peer_id}" ("identity" "") [] $void1)
                 (seq
@@ -60,7 +61,8 @@ fn join_chat_1() {
                     )
                 )
             )
-        "#);
+        "#
+    );
 
     let client_1_result = checked_call_vm!(client_1, <_>::default(), &script, "", "");
 
@@ -307,7 +309,8 @@ fn join_chat_2() {
     let client_peer_id = "client_peer_id";
     let mut client_1 = create_avm(unit_call_service(), client_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{relay_1_peer_id}" ("identity" "") [] $void1)
                 (seq
@@ -323,7 +326,8 @@ fn join_chat_2() {
                     )
                 )
             )
-        "#);
+        "#
+    );
 
     let client_1_result = checked_call_vm!(client_1, <_>::default(), &script, "", "");
     let relay_1_result = checked_call_vm!(relay_1, <_>::default(), &script, client_1_result.data, "");
@@ -399,7 +403,8 @@ fn init_peer_id() {
         Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(members.clone()) });
     let mut remote = create_avm(members_call_service, remote_peer_id);
 
-    let script = f!(r#"(seq
+    let script = format!(
+        r#"(seq
                 (seq
                     (call "{relay_1_peer_id}" ("identity" "") [])
                     (seq
@@ -417,7 +422,8 @@ fn init_peer_id() {
                 )
                 (call %init_peer_id% ("identity" "") [])
             )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(initiator_peer_id);
     let initiator_1_result = checked_call_vm!(initiator, test_params.clone(), &script, "", "");
