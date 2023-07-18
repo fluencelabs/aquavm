@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::execution_context::ResolvedServiceInfo;
 use crate::execution_step::instructions::call::call_result_setter::populate_context_from_data;
 use crate::execution_step::CatchableError;
 use crate::execution_step::RcSecurityTetraplet;
@@ -53,7 +54,11 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
-            let (err_value, current_tetraplet, service_agg) = exec_ctx
+            let ResolvedServiceInfo {
+                value: err_value,
+                tetraplet: current_tetraplet,
+                service_result_aggregate,
+            } = exec_ctx
                 .cid_state
                 .resolve_service_info(failed_cid)
                 .map_err(UncatchableError::from)?;
@@ -61,7 +66,7 @@ pub(super) fn handle_prev_state<'i>(
             verifier::verify_call(
                 argument_hash.as_ref().unwrap(),
                 tetraplet,
-                &service_agg.argument_hash,
+                &service_result_aggregate.argument_hash,
                 &current_tetraplet,
             )?;
 

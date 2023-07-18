@@ -141,12 +141,22 @@ impl ExecutionCidState {
     pub(crate) fn resolve_service_info(
         &self,
         service_result_agg_cid: &CID<ServiceResultCidAggregate>,
-    ) -> Result<(Rc<JValue>, RcSecurityTetraplet, Rc<ServiceResultCidAggregate>), UncatchableError> {
+    ) -> Result<ResolvedServiceInfo, UncatchableError> {
         let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
-        let val = self.get_value_by_cid(&service_result_aggregate.value_cid)?;
+        let value = self.get_value_by_cid(&service_result_aggregate.value_cid)?;
         let tetraplet = self.get_tetraplet_by_cid(&service_result_aggregate.tetraplet_cid)?;
-        Ok((val, tetraplet, service_result_aggregate))
+        Ok(ResolvedServiceInfo {
+            value,
+            tetraplet,
+            service_result_aggregate,
+        })
     }
+}
+
+pub(crate) struct ResolvedServiceInfo {
+    pub(crate) value: Rc<JValue>,
+    pub(crate) tetraplet: RcSecurityTetraplet,
+    pub(crate) service_result_aggregate: Rc<ServiceResultCidAggregate>,
 }
 
 impl From<ExecutionCidState> for CidInfo {
