@@ -137,13 +137,68 @@ macro_rules! assert_next_pks {
 }
 
 pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
-    let trace = trace_from_result(result);
+    let data = data_from_result(result);
+    let trace = &data.trace;
 
     println!("trace {} (states_count: {}): [", trace_name, trace.len());
     for (id, state) in trace.iter().enumerate() {
-        println!("  {id}: {state}");
+        print!("  {id}: {state}");
+        match state {
+            ExecutedState::Call(call_result) => print_call_value(&data, call_result),
+            ExecutedState::Canon(CanonResult(canon_cid)) => print_canon_values(&data, canon_cid),
+            ExecutedState::Par(_) | ExecutedState::Fold(_) | ExecutedState::Ap(_) => {}
+        }
+        println!();
     }
     println!("]");
+}
+
+fn print_call_value(data: &InterpreterData, call_result: &CallResult) {
+    let service_result_cid = match call_result {
+        CallResult::Executed(ValueRef::Unused(_)) | CallResult::RequestSentBy(_) => return,
+        CallResult::Executed(ValueRef::Scalar(cid)) => cid,
+        CallResult::Executed(ValueRef::Stream { cid, .. }) => cid,
+        CallResult::Failed(cid) => cid,
+    };
+
+    let service_result = data
+        .cid_info
+        .service_result_store
+        .get(service_result_cid)
+        .unwrap_or_else(|| panic!("service result CID not found: {:?}", service_result_cid));
+    let value = data
+        .cid_info
+        .value_store
+        .get(&service_result.value_cid)
+        .unwrap_or_else(|| panic!("value CID not found: {:?}", service_result.value_cid));
+    print!(" => {:#?}", value);
+}
+
+fn print_canon_values(
+    data: &InterpreterData,
+    canon_result_cid: &std::rc::Rc<air_interpreter_cid::CID<CanonResultCidAggregate>>,
+) {
+    let canon_agg = data
+        .cid_info
+        .canon_result_store
+        .get(canon_result_cid)
+        .unwrap_or_else(|| panic!("canon result CID not found: {:?}", canon_result_cid));
+    let canon_vals: Vec<_> = canon_agg
+        .values
+        .iter()
+        .map(|elt_cid| {
+            let elt = data
+                .cid_info
+                .canon_element_store
+                .get(elt_cid)
+                .unwrap_or_else(|| panic!("canon element CID not found: {:?}", elt_cid));
+            data.cid_info
+                .value_store
+                .get(&elt.value)
+                .unwrap_or_else(|| panic!("value CID not found: {:?}", elt.value));
+        })
+        .collect();
+    print!(" => {:?}", canon_vals)
 }
 
 #[macro_export]
