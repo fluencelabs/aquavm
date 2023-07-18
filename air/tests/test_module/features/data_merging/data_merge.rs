@@ -38,7 +38,8 @@ fn merge_streams_in_two_fold() {
     let mut vm1 = create_avm(return_string_call_service(vm_1_peer_id), vm_1_peer_id);
     let mut vm2 = create_avm(return_string_call_service(vm_2_peer_id), vm_2_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("neighborhood" "") [] neighborhood)
             (seq
@@ -62,7 +63,8 @@ fn merge_streams_in_two_fold() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let result_0 = checked_call_vm!(set_variable, <_>::default(), &script, "", "");
     let result_1 = checked_call_vm!(vm1, <_>::default(), &script, "", result_0.data.clone());
@@ -240,7 +242,7 @@ fn fold_merge() {
     let mut local_vms = Vec::with_capacity(7);
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
-        let peer_id = f!("peer_{vm_id}");
+        let peer_id = format!("peer_{vm_id}");
         let mut vm = create_avm(echo_call_service(), peer_id);
         let result = checked_call_vm!(
             vm,

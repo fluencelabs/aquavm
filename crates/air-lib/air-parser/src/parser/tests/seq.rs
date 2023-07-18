@@ -97,7 +97,8 @@ fn parse_seq_seq() {
 }
 
 fn source_seq_with(name: &'static str) -> String {
-    f!(r#"
+    format!(
+        r#"
         (seq
             ({name}
                 (seq (null) (null))
@@ -105,7 +106,8 @@ fn source_seq_with(name: &'static str) -> String {
             )
             ({name}   (null) (seq (null) (null))   )
         )
-        "#)
+        "#
+    )
 }
 
 #[test]

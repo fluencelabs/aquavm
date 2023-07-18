@@ -31,7 +31,8 @@ fn recursive_stream_with_early_exit() {
         vm_peer_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (call "{vm_peer_id}" ("" "stream_value") [] $stream)
@@ -51,7 +52,8 @@ fn recursive_stream_with_early_exit() {
                     )
                 )
             )
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -94,7 +96,8 @@ fn recursive_stream_many_iterations() {
     let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
 
     let result_value = "result_value";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (seq
             (seq
@@ -117,7 +120,8 @@ fn recursive_stream_many_iterations() {
             )
         )
         (call "{vm_peer_id_2}" ("" "") ["{result_value}"])
-    )"#);
+    )"#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -191,7 +195,8 @@ fn recursive_stream_join() {
     let mut vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
 
     let result_value = "result_value";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (seq
             (par
@@ -214,7 +219,8 @@ fn recursive_stream_join() {
             )
         )
         (call "{vm_peer_id_2}" ("" "") ["{result_value}"])
-    )"#);
+    )"#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm_3, <_>::default(), &script, "", result.data);
@@ -269,7 +275,8 @@ fn recursive_stream_error_handling() {
 
     let result_value = "result_value";
     let vm_peer_id_2 = "vm_peer_id_2";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (xor
         (seq
             (seq
@@ -290,7 +297,8 @@ fn recursive_stream_error_handling() {
             )
          )
         (call "{vm_peer_id_2}" ("" "") ["{result_value}"]))
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -343,7 +351,8 @@ fn recursive_stream_inner_fold() {
     let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
 
     let result_value = "result_value";
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (seq
         (seq
             (seq
@@ -369,7 +378,8 @@ fn recursive_stream_inner_fold() {
                                                 (next iterator_2))))))
                             (next iterator_1))))))
         (call "{vm_peer_id_2}" ("" "") ["{result_value}"]))
-       "#);
+       "#
+    );
 
     loop {
         let result = call_vm!(vm_1, <_>::default(), &script, "", "");
@@ -409,7 +419,8 @@ fn recursive_stream_fold_with_n_service_call() {
 
     let mut vm = create_avm(give_n_results_and_then_stop, vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
     (xor
      (seq
       (seq
@@ -452,7 +463,8 @@ fn recursive_stream_fold_with_n_service_call() {
      )
      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
     )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(vm_peer_id);
     let result = checked_call_vm!(vm, test_params, &script, "", "");

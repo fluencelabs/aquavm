@@ -17,6 +17,7 @@
 use air_interpreter_data::Provenance;
 
 use super::last_error_definition::error_from_raw_fields;
+use super::no_error_last_error;
 use super::LastError;
 use crate::execution_step::LastErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
@@ -104,11 +105,7 @@ impl LastErrorDescriptor {
 
 impl Default for LastErrorDescriptor {
     fn default() -> Self {
-        let last_error = LastError {
-            error: Rc::new(JValue::Null),
-            tetraplet: None,
-            provenance: Provenance::literal(),
-        };
+        let last_error = no_error_last_error();
 
         Self {
             last_error,

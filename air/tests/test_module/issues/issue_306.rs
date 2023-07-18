@@ -23,13 +23,15 @@ fn issue_306() {
     let peer_id_1 = "peer_id_1";
     let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (new $stream
             (seq
                 (canon "{peer_id_1}" $stream #canon_stream)
                 (fold #canon_stream iterator
                     (ap iterator $stream))))
-    "#);
+    "#
+    );
 
     let result = call_vm!(peer_vm_1, <_>::default(), &script, "", "");
     assert_eq!(result.ret_code, INTERPRETER_SUCCESS)

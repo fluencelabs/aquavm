@@ -223,6 +223,18 @@ pub(super) fn canon<'i>(
     })
 }
 
+pub(super) fn canon_stream_map_scalar<'i>(
+    peer_pk: ResolvableToPeerIdVariable<'i>,
+    stream_map: StreamMap<'i>,
+    scalar: Scalar<'i>,
+) -> Instruction<'i> {
+    Instruction::CanonStreamMapScalar(CanonStreamMapScalar {
+        peer_id: peer_pk,
+        stream_map,
+        scalar,
+    })
+}
+
 pub(super) fn binary_instruction<'i, 'b>(
     name: &'i str,
 ) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {

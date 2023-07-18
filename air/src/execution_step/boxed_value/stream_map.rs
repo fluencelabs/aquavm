@@ -25,9 +25,10 @@ use crate::JValue;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
+use std::borrow::Cow;
 use std::rc::Rc;
 
-fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
+pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
     Rc::new(json!({ "key": key, "value": value }))
 }
 
@@ -58,6 +59,10 @@ impl StreamMap {
 
     pub(crate) fn get_mut_stream_ref(&mut self) -> &mut Stream {
         &mut self.stream
+    }
+
+    pub(crate) fn get_unique_map_keys_stream(&mut self) -> Cow<'_, Stream> {
+        self.stream.get_unique_map_keys_stream()
     }
 }
 

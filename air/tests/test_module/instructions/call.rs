@@ -26,9 +26,11 @@ fn current_peer_id_call() {
 
     let service_id = "local_service_id";
     let function_name = "local_fn_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
                (call %init_peer_id% ("{service_id}" "{function_name}") [] result_name)
-            "#);
+            "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(vm_peer_id);
     let result = checked_call_vm!(vm, test_params, script, "", "");
@@ -44,9 +46,11 @@ fn current_peer_id_call() {
     assert_eq!(actual_trace, expected_trace);
     assert!(result.next_peer_pks.is_empty());
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
                (call "{vm_peer_id}" ("{service_id}" "{function_name}") [] result_name)
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script.clone(), "", "");
 
@@ -80,7 +84,7 @@ fn call_with_ttl() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"(call "{vm_peer_id}" ("" "") [%ttl%] result_name)"#);
+    let script = format!(r#"(call "{vm_peer_id}" ("" "") [%ttl%] result_name)"#);
 
     let test_params = TestRunParameters::from_ttl(1337);
     let result = checked_call_vm!(vm, test_params.clone(), script, "", "");
@@ -98,7 +102,7 @@ fn remote_peer_id_call() {
     let mut vm = create_avm(echo_call_service(), &some_local_peer_id);
 
     let remote_peer_id = String::from("some_remote_peer_id");
-    let script = f!(r#"(call "{remote_peer_id}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#);
+    let script = format!(r#"(call "{remote_peer_id}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#);
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
@@ -136,12 +140,14 @@ fn duplicate_variables() {
     let mut vm = create_avm(unit_call_service(), peer_id);
 
     let variable_name = "modules";
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{peer_id}" ("some_service_id" "local_fn_name") [] {variable_name})
                 (call "{peer_id}" ("some_service_id" "local_fn_name") [] {variable_name})
             )
-        "#);
+        "#
+    );
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
 
@@ -164,12 +170,14 @@ fn string_parameters() {
 
     let service_id = "some_service_id";
     let function_name = "local_fn_name";
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] arg3)
                 (call "{vm_peer_id}" ("{service_id}" "{function_name}") ["arg1" "arg2" arg3] result)
             )
-        "#);
+        "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);

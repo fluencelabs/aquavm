@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,5 @@
  * limitations under the License.
  */
 
-use air_test_utils::prelude::*;
-
-#[test]
-fn never_not_complete_subgraph() {
-    let vm_peer_id = "test_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
-
-    let script = format!(
-        r#"
-        (seq
-            (never)
-            (call "{vm_peer_id}" ("" "") [])
-        )
-    "#
-    );
-
-    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
-    let actual_trace = trace_from_result(&result);
-    assert!(actual_trace.is_empty());
-}
+mod call_guided_topology;
+mod canon_guided_topology;

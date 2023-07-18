@@ -19,6 +19,7 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::CanonStreamWithProvenance;
+use crate::execution_step::instructions::resolve_peer_id_to_string;
 use crate::execution_step::Stream;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
@@ -29,10 +30,15 @@ use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CanonResult;
 use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast;
+use air_parser::ast::ResolvableToPeerIdVariable;
+use air_parser::AirPos;
 use air_trace_handler::merger::MergerCanonResult;
 
 use std::borrow::Cow;
 use std::rc::Rc;
+
+pub(super) type CanonEpilogClosure<'ctx> =
+    dyn for<'i> Fn(StreamWithSerializedView, &mut ExecutionCtx<'i>, &mut TraceHandler) -> ExecutionResult<()> + 'ctx;
 
 impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
@@ -40,17 +46,37 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
         log_instruction!(call, exec_ctx, trace_ctx);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
+        let epilog: &CanonEpilogClosure<'_> = &|stream_with_positions: StreamWithSerializedView,
+                                                exec_ctx: &mut ExecutionCtx<'_>,
+                                                trace_ctx: &mut TraceHandler|
+         -> ExecutionResult<()> {
+            let StreamWithSerializedView {
+                canon_stream,
+                canon_result_cid,
+            } = stream_with_positions;
+
+            let value = CanonStreamWithProvenance::new(canon_stream, canon_result_cid.clone());
+            exec_ctx.scalars.set_canon_value(self.canon_stream.name, value)?;
+
+            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            Ok(())
+        };
+
         match canon_result {
             MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(self, canon_result_cid, exec_ctx, trace_ctx)
+                handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
-            MergerCanonResult::Empty => handle_unseen_canon(self, exec_ctx, trace_ctx),
+            MergerCanonResult::Empty => {
+                let get_stream_or_default: Box<GetStreamClosure<'_>> =
+                    get_stream_or_default_function(self.stream.name, self.stream.position);
+                handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
+            }
         }
     }
 }
 
-fn handle_seen_canon(
-    ast_canon: &ast::Canon<'_>,
+pub(super) fn handle_seen_canon(
+    epilog: &CanonEpilogClosure<'_>,
     canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
@@ -74,15 +100,17 @@ fn handle_seen_canon(
         canon_result_cid,
     };
 
-    epilog(ast_canon.canon_stream.name, canon_stream_with_se, exec_ctx, trace_ctx)
+    epilog(canon_stream_with_se, exec_ctx, trace_ctx)
 }
 
-fn handle_unseen_canon(
-    ast_canon: &ast::Canon<'_>,
+pub(super) fn handle_unseen_canon(
+    epilog: &CanonEpilogClosure<'_>,
+    get_stream_or_default: &GetStreamClosure<'_>,
+    peer_id: &ResolvableToPeerIdVariable<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let peer_id = crate::execution_step::instructions::resolve_peer_id_to_string(&ast_canon.peer_id, exec_ctx)?;
+    let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
         exec_ctx.make_subgraph_incomplete();
@@ -96,41 +124,21 @@ fn handle_unseen_canon(
         return Ok(());
     }
 
-    let stream_with_positions = create_canon_stream_from_name(ast_canon, peer_id, exec_ctx)?;
-    epilog(ast_canon.canon_stream.name, stream_with_positions, exec_ctx, trace_ctx)
+    let stream_with_positions = create_canon_stream_from_name(get_stream_or_default, peer_id, exec_ctx)?;
+    epilog(stream_with_positions, exec_ctx, trace_ctx)
 }
 
-fn epilog(
-    canon_stream_name: &str,
-    stream_with_positions: StreamWithSerializedView,
-    exec_ctx: &mut ExecutionCtx<'_>,
-    trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<()> {
-    let StreamWithSerializedView {
-        canon_stream,
-        canon_result_cid,
-    } = stream_with_positions;
-
-    exec_ctx.scalars.set_canon_value(
-        canon_stream_name,
-        CanonStreamWithProvenance::new(canon_stream, canon_result_cid.clone()),
-    )?;
-
-    trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
-    Ok(())
-}
-
-struct StreamWithSerializedView {
-    canon_stream: CanonStream,
-    canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
+pub(super) struct StreamWithSerializedView {
+    pub(super) canon_stream: CanonStream,
+    pub(super) canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
 }
 
 fn create_canon_stream_from_name(
-    ast_canon: &ast::Canon<'_>,
+    get_stream_or_default: &GetStreamClosure<'_>,
     peer_id: String,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<StreamWithSerializedView> {
-    let stream = get_stream_or_default(ast_canon, exec_ctx);
+    let stream = get_stream_or_default(exec_ctx);
 
     let canon_stream = CanonStream::from_stream(stream.as_ref(), peer_id);
 
@@ -175,12 +183,20 @@ fn create_canon_stream_from_name(
     Ok(result)
 }
 
+pub(super) type GetStreamClosure<'obj> = dyn for<'ctx> Fn(&'ctx mut ExecutionCtx<'_>) -> Cow<'ctx, Stream> + 'obj;
+
 /// This function gets a stream from context or return a default empty stream,
 /// it's crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346
-fn get_stream_or_default<'ctx>(ast_canon: &ast::Canon<'_>, exec_ctx: &'ctx ExecutionCtx<'_>) -> Cow<'ctx, Stream> {
-    match exec_ctx.streams.get(ast_canon.stream.name, ast_canon.stream.position) {
-        Some(stream) => Cow::Borrowed(stream),
-        None => Cow::Owned(Stream::new()),
-    }
+fn get_stream_or_default_function<'obj, 'n: 'obj>(
+    stream_name: &'n str,
+    position: AirPos,
+) -> Box<GetStreamClosure<'obj>> {
+    Box::new(move |exec_ctx: &mut ExecutionCtx<'_>| -> Cow<'_, Stream> {
+        exec_ctx
+            .streams
+            .get(stream_name, position)
+            .map(Cow::Borrowed)
+            .unwrap_or_default()
+    })
 }

@@ -36,7 +36,8 @@ fn issue_173() {
         set_variable_peer_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["1"] $stream)
@@ -56,7 +57,8 @@ fn issue_173() {
                         (call "{local_vm_peer_id_2}" ("" "") [$stream])
                     )
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let vm_1_result = checked_call_vm!(local_vm_1, <_>::default(), &script, "", result.data);

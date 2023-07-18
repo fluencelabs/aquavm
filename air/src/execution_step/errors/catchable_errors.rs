@@ -39,6 +39,14 @@ pub enum CatchableError {
     #[error("Local service error, ret_code is {0}, error message is '{1}'")]
     LocalServiceError(i32, Rc<String>),
 
+    /// This error type is produced by a match to notify xor that compared values aren't equal.
+    #[error("match is used without corresponding xor")]
+    MatchValuesNotEqual,
+
+    /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
+    #[error("mismatch is used without corresponding xor")]
+    MismatchValuesEqual,
+
     /// Variable with such a name wasn't defined during AIR script execution.
     /// This error type is used in order to support the join behaviour and
     /// it's ok if some variable hasn't been defined yet, due to the par nature of AIR.
@@ -58,14 +66,6 @@ pub enum CatchableError {
     /// A fold instruction must iterate over array value.
     #[error("expression '{1}' returned non-array value '{0}' for fold iterable")]
     FoldIteratesOverNonArray(JValue, String),
-
-    /// This error type is produced by a match to notify xor that compared values aren't equal.
-    #[error("match is used without corresponding xor")]
-    MatchValuesNotEqual,
-
-    /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("mismatch is used without corresponding xor")]
-    MismatchValuesEqual,
 
     /// This error type is produced by a fail instruction.
     #[error("fail with '{error}' is used without corresponding xor")]

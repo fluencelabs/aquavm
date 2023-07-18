@@ -55,7 +55,7 @@ mod gen {
     use crate::SOURCE_CODE_GOOD;
 
     pub fn seq(left: &str, right: &str) -> String {
-        f!(r"(seq {left} {right})")
+        format!(r"(seq {left} {right})")
     }
 
     pub fn deep_seq(mut depth: usize) -> String {

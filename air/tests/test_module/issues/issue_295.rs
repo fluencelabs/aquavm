@@ -25,12 +25,14 @@ fn issue_295() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [] scalar)
             (ap scalar $stream)
         )
-    "#);
+    "#
+    );
 
     let mut cid_state = ExecutionCidState::new();
 

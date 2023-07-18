@@ -25,6 +25,7 @@ impl fmt::Display for Instruction<'_> {
         match self {
             Call(call) => write!(f, "{call}"),
             Canon(canon) => write!(f, "{canon}"),
+            CanonStreamMapScalar(canon_stream_map_scalar) => write!(f, "{canon_stream_map_scalar}"),
             Ap(ap) => write!(f, "{ap}"),
             ApMap(ap_map) => write!(f, "{ap_map}"),
             Seq(seq) => write!(f, "{seq}"),
@@ -60,6 +61,16 @@ impl fmt::Display for Canon<'_> {
             f,
             "canon {} {} {}",
             self.peer_id, self.stream, self.canon_stream
+        )
+    }
+}
+
+impl fmt::Display for CanonStreamMapScalar<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "canon {} {} {}",
+            self.peer_id, self.stream_map, self.scalar
         )
     }
 }
