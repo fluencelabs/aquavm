@@ -24,7 +24,8 @@ fn issue_222() {
     let other_1_id = "other_1";
     let other_2_id = "other_2";
 
-    let air_script = f!(r#"
+    let air_script = format!(
+        r#"
         (new $stream
             (par
                 (par
@@ -34,7 +35,8 @@ fn issue_222() {
                     (seq
                         (call "{other_id}" ("" "") [j])
                         (next j)))))
-    "#);
+    "#
+    );
 
     let mut other_id_vm = create_avm(echo_call_service(), "other_id");
     let mut other_1_vm = create_avm(set_variable_call_service(json!([1])), "other_1");

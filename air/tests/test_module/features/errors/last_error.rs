@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
+use air::no_error_last_error_object;
 use air::CatchableError;
+use air::ExecutionCidState;
 use air::ExecutionError;
 use air::LambdaError;
 use air::LastErrorObjectError;
 use air::SecurityTetraplet;
+use air::NO_ERROR_ERROR_CODE;
+use air::NO_ERROR_MESSAGE;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use std::cell::RefCell;
@@ -98,7 +103,8 @@ fn not_clear_last_error_in_match() {
     let tetraplets = Rc::new(RefCell::new(None));
     let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] relayVariableName)
             (xor
@@ -111,13 +117,14 @@ fn not_clear_last_error_in_match() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 }
 
 #[test]
@@ -131,7 +138,8 @@ fn not_clear_last_error_in_mismatch() {
     let tetraplets = Rc::new(RefCell::new(None));
     let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_peer_id}" ("" "") [] relayVariableName)
             (xor
@@ -144,13 +152,14 @@ fn not_clear_last_error_in_mismatch() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 }
 
 #[test]
@@ -164,12 +173,14 @@ fn track_current_peer_id() {
     let tetraplets = Rc::new(RefCell::new(None));
     let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
             (call "{local_peer_id}" ("" "") [%last_error%])
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
@@ -187,7 +198,8 @@ fn variable_names_shown_in_error() {
     let echo_vm_peer_id = "echo_vm_peer_id";
     let mut echo_vm = create_avm(echo_call_service(), echo_vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (seq
                 (call "{set_variable_vm_peer_id}" ("" "") [""] -relay-)
@@ -195,7 +207,8 @@ fn variable_names_shown_in_error() {
             )
             (call "{echo_vm_peer_id}" ("" "") [%last_error%.$.message])
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(echo_vm, <_>::default(), script, "", result.data);
@@ -215,18 +228,20 @@ fn non_initialized_last_error() {
         vm_peer_id,
     );
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [%last_error%])
             (null)
         )
-    "#);
+    "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, JValue::Null);
+    assert_eq!(actual_value, no_error_last_error_object(),);
 
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
     assert_eq!(
@@ -243,12 +258,14 @@ fn access_last_error_by_not_exists_field() {
     let local_peer_id = "local_peer_id";
 
     let non_exists_field_name = "non_exists_field";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
             (call "{local_peer_id}" ("" "") [%last_error%.$.{non_exists_field_name}])
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(fallible_vm, <_>::default(), &script, "", "");
 
@@ -276,7 +293,8 @@ fn last_error_with_par_one_subgraph_failed() {
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
     let mut vm = create_avm(create_check_service_closure(args.clone(), tetraplets), vm_peer_id);
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (par
                 (call "{fallible_peer_id}" ("{fallible_call_service_name}" "") [""])
@@ -284,7 +302,8 @@ fn last_error_with_par_one_subgraph_failed() {
             )
             (call "{vm_peer_id}" ("" "") [%last_error%])
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -304,7 +323,8 @@ fn fail_with_scalar_rebubble_error() {
     let fallible_peer_id = "fallible_peer_id";
     let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (call "{fallible_peer_id}" ("fallible_call_service" "") [""])
             (seq
@@ -312,7 +332,8 @@ fn fail_with_scalar_rebubble_error() {
                 (fail scalar)
             )
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(fallible_vm, <_>::default(), &script, "", "");
 
@@ -335,12 +356,14 @@ fn fail_with_scalar_from_call() {
     let service_result = json!({"error_code": error_code, "message": error_message});
     let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [""] scalar)
             (fail scalar)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
@@ -361,12 +384,14 @@ fn fail_with_scalar_with_lambda_from_call() {
     let service_result = json!({"error": {"error_code": error_code, "message": error_message}});
     let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [""] scalar)
             (fail scalar.$.error)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
@@ -386,12 +411,14 @@ fn fail_with_scalar_from_call_not_enough_fields() {
     let service_result = json!({ "error_code": error_code });
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [""] scalar)
             (fail scalar)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
@@ -408,12 +435,14 @@ fn fail_with_scalar_from_call_not_right_type() {
     let service_result = json!([]);
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [""] scalar)
             (fail scalar)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
@@ -428,12 +457,14 @@ fn fail_with_scalar_from_call_field_not_right_type() {
     let service_result = json!({"error_code": "error_code", "message": "error message"});
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{vm_peer_id}" ("" "") [""] scalar)
             (fail scalar)
         )
-    "#);
+    "#
+    );
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
@@ -450,17 +481,75 @@ fn last_error_with_match() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (xor
             (call "{vm_peer_id}" ("fallible_call_service" "") [""])
             (match %last_error%.$.error_code 10000
                 (call "{vm_peer_id}" ("" "") [%last_error%])
             )
         )
-    "#);
+    "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
 
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
+}
+
+#[test]
+fn undefined_last_error_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (call "{local_peer_id}" ("test" "error_code") [%last_error%.$.error_code] scalar) ; behaviour = echo
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(NO_ERROR_ERROR_CODE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer_name = local_peer_id,
+        service = "test..0",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn undefined_last_error_msg_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (call "{local_peer_id}" ("test" "message") [%last_error%.$.message] scalar1) ; behaviour = echo
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let message_lambda_output = json!(NO_ERROR_MESSAGE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        message_lambda_output.clone(),
+        cid_state,
+        peer_name = local_peer_id,
+        service = "test..0",
+        function = "message",
+        args = vec![message_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
 }

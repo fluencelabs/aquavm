@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air::PreparationError;
 use air::ToErrorCode;
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[test]
 fn lfold() {
@@ -435,14 +438,16 @@ fn fold_waits_on_empty_stream() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (par
                 (call "" ("" "") [] $stream)
                 (fold $stream iterator
                     (seq
                         (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
                         (next iterator))))
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -456,7 +461,8 @@ fn fold_stream_seq_next_never_completes() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -465,7 +471,8 @@ fn fold_stream_seq_next_never_completes() {
                             (call "{vm_peer_id}" ("" "") [iterator] $new_stream)
                             (next iterator)))
                     (call "{vm_peer_id}" ("" "") [])))
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -487,7 +494,8 @@ fn fold_stream_seq_next_never_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -501,7 +509,8 @@ fn fold_stream_seq_next_never_completes_with_never() {
                     (call "{vm_peer_id}" ("" "") [])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -523,7 +532,8 @@ fn fold_stream_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] $stream)
                 (seq
@@ -537,7 +547,8 @@ fn fold_stream_seq_next_completes_with_null() {
                     (call "{vm_peer_id}" ("" "") [])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -561,7 +572,8 @@ fn fold_scalar_seq_next_completes_with_null() {
     let service_result = json!([1, 2]);
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] iterable)
                 (seq
@@ -578,7 +590,8 @@ fn fold_scalar_seq_next_completes_with_null() {
                     )
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -603,7 +616,8 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     let service_result = json!([1, 2]);
     let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{vm_peer_id}" ("" "") [] iterable)
                 (seq
@@ -620,7 +634,8 @@ fn fold_scalar_seq_next_not_completes_with_never() {
                     )
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -640,7 +655,8 @@ fn fold_stream_seq_next_saves_call_result() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (ap 1 $stream)
@@ -657,7 +673,8 @@ fn fold_stream_seq_next_saves_call_result() {
                     (call "{vm_peer_id}" ("" "") [0])
                 )
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), &script, "", "");
     let actual_trace = trace_from_result(&result);
@@ -691,7 +708,8 @@ fn fold_par_next_completes() {
     let vm_4_peer_id = "vm_4_peer_id";
     let mut vm_4 = create_avm(set_variable_call_service(json!(1)), vm_4_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (seq
@@ -706,7 +724,8 @@ fn fold_par_next_completes() {
                     (call "{vm_1_peer_id}" ("" "") []) ; this call should be executed if any of these three peers is reached
                 )
             )
-            "#);
+            "#
+    );
 
     let result_1 = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
 
@@ -772,4 +791,144 @@ fn fold_par_next_completes() {
         executed_state::request_sent_by(vm_4_peer_id),
     ];
     assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn fold_stream_map() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let k1 = 42;
+    let k2 = "some";
+    let arg_tetraplets = Rc::new(RefCell::new(vec![]));
+    let arg_tetraplets_inner = arg_tetraplets.clone();
+
+    let set_variable_call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+        arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
+        CallServiceResult::ok(json!({"keyo": k1, "keyu": k2}))
+    });
+
+    let mut vm_1 = create_avm(set_variable_call_service, vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (seq
+                    (seq
+                        (call "{vm_1_peer_id}" ("m1" "f1") [1] scalar)
+                        (call "{vm_1_peer_id}" ("m2" "f2") [1] $stream)
+                    )
+                    (canon "{vm_1_peer_id}" $stream #canon)
+                )
+                (seq
+                    (ap (#canon.$.[0].keyo #canon.$.[0].keyo) %map)
+                    (ap (scalar.$.keyu scalar.$.keyu) %map)
+                )
+            )
+            (fold %map i
+                (seq
+                    (seq
+                        (call "{vm_1_peer_id}" ("m3" "f3") [i.$.key] u)
+                        (call "{vm_1_peer_id}" ("m4" "f4") [i.$.value] un)
+                    )
+                    (next i)
+                )
+            )
+        )
+        "#
+    );
+
+    let test_params = TestRunParameters::from_init_peer_id(vm_1_peer_id);
+    let result = checked_call_vm!(vm_1, test_params, &script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let generation_idx = 0;
+    let mut cid_tracker = ExecutionCidState::new();
+    let service_result = json!({"keyo": k1, "keyu": k2});
+
+    let stream_1 = stream_tracked!(
+        service_result.clone(),
+        0,
+        cid_tracker,
+        peer = vm_1_peer_id,
+        service = "m2",
+        function = "f2",
+        args = [1]
+    );
+    let cid_1 = extract_service_result_cid(&stream_1);
+
+    let expected_state = ExecutionTrace::from(vec![
+        scalar_tracked!(
+            service_result.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m1",
+            function = "f1",
+            args = [1]
+        ),
+        stream_1,
+        executed_state::canon_tracked(
+            json!({
+                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""},
+                "values": [{
+                    "result": service_result.clone(),
+                    "tetraplet": {"function_name": "f2", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": "m2"},
+                    "provenance": Provenance::service_result(cid_1),
+                }]
+            }),
+            &mut cid_tracker,
+        ),
+        executed_state::ap(generation_idx),
+        executed_state::ap(generation_idx),
+        executed_state::fold(vec![
+            subtrace_lore(3, SubTraceDesc::new(6.into(), 2), SubTraceDesc::new(10.into(), 0)),
+            subtrace_lore(4, SubTraceDesc::new(8.into(), 2), SubTraceDesc::new(10.into(), 0)),
+        ]),
+        scalar_tracked!(
+            service_result.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m3",
+            function = "f3",
+            args = [k1]
+        ),
+        scalar_tracked!(
+            service_result.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m4",
+            function = "f4",
+            args = [k1]
+        ),
+        scalar_tracked!(
+            service_result.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m3",
+            function = "f3",
+            args = [k2]
+        ),
+        scalar_tracked!(
+            service_result,
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m4",
+            function = "f4",
+            args = [k2]
+        ),
+    ]);
+    assert_eq!(actual_trace, expected_state);
+
+    let expected_tetraplets = vec![
+        vec![vec![SecurityTetraplet::new(vm_1_peer_id, "m2", "f2", ".$.key")]],
+        vec![vec![SecurityTetraplet::new(vm_1_peer_id, "m2", "f2", ".$.value")]],
+        vec![vec![SecurityTetraplet::new(vm_1_peer_id, "m1", "f1", ".$.keyu.$.key")]],
+        vec![vec![SecurityTetraplet::new(
+            vm_1_peer_id,
+            "m1",
+            "f1",
+            ".$.keyu.$.value",
+        )]],
+    ];
+    let tetraplates_len = arg_tetraplets.borrow().len();
+    assert_eq!(&arg_tetraplets.borrow()[tetraplates_len - 4..], &expected_tetraplets);
 }

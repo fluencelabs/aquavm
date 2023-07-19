@@ -56,7 +56,8 @@ fn fold_with_inner_call() {
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] IterableResultPeer1)
             (fold IterableResultPeer1 i
@@ -66,7 +67,8 @@ fn fold_with_inner_call() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), script.clone(), "", "");
@@ -205,7 +207,8 @@ fn fold_json_path() {
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
-    let script = f!(r#"
+    let script = format!(
+        r#"
        (seq
             (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] IterableResultPeer1)
             (fold IterableResultPeer1.$.args i
@@ -220,7 +223,8 @@ fn fold_json_path() {
                 )
             )
         )
-        "#);
+        "#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id("some_init_peer_id");
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), script.clone(), "", "");
@@ -260,14 +264,16 @@ fn check_tetraplet_works_correctly() {
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{set_variable_vm_peer_id}" ("{service_id}" "{function_name}") [] value)
             (seq
                 (call "{client_peer_id}" ("local_service_id" "local_fn_name") [value.$.args value.$.args.[0]])
                 (call "{client_peer_id}" ("local_service_id" "local_fn_name") [value.$.args value.$.args.[0]])
             )
-        )"#);
+        )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), script.clone(), "", "");
 
@@ -366,12 +372,14 @@ fn tetraplet_with_wasm_modules() {
     });
 
     let local_peer_id = "local_peer_id";
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{local_peer_id}" ("auth" "is_authorized") [] auth_result)
             (call "{local_peer_id}" ("log_storage" "delete") [auth_result.$.is_authorized "1"])
         )
-    "#);
+    "#
+    );
 
     let mut vm = create_avm(host_func, local_peer_id);
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.7.5...air-parser-v0.8.0) (2023-07-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** stream map to scalar conversion using canon instruction [fixes VM-294] ([#610](https://github.com/fluencelabs/aquavm/issues/610))
+
+### Features
+
+* **execution-engine:** Stream Map to Scalar conversion using canon instruction [fixes VM-294] ([fcb4c9d](https://github.com/fluencelabs/aquavm/commit/fcb4c9dab43d82e87f1d6f8a83b72f6891d37bef))
+* **execution-engine:** stream map to scalar conversion using canon instruction [fixes VM-294] ([#610](https://github.com/fluencelabs/aquavm/issues/610)) ([fcb4c9d](https://github.com/fluencelabs/aquavm/commit/fcb4c9dab43d82e87f1d6f8a83b72f6891d37bef))
+
 ## [0.7.5](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.7.4...air-parser-v0.7.5) (2023-06-22)
 
 

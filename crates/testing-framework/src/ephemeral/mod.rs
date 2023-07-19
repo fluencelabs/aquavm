@@ -22,6 +22,7 @@ use crate::{
     services::{services_to_call_service_closure, MarineServiceHandle, NetworkServices},
 };
 
+use air_interpreter_signatures::KeyPair;
 use air_test_utils::{
     key_utils::derive_dummy_keypair,
     test_runner::{
@@ -29,7 +30,6 @@ use air_test_utils::{
     },
     RawAVMOutcome,
 };
-use fluence_keypair::KeyPair;
 
 use std::{borrow::Borrow, cell::RefCell, collections::HashMap, hash::Hash, ops::Deref, rc::Rc};
 

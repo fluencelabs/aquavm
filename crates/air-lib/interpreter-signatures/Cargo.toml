@@ -17,4 +17,4 @@ fluence-keypair = "0.10.1"
 bs58 = "0.4.0"
 borsh = "0.10.3"
 borsh-derive = "0.10.3"
-serde = { version = "1.0.159", features = ["derive"] }
+serde = { version = "1.0.164", features = ["derive"] }

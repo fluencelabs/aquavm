@@ -32,7 +32,8 @@ fn issue_221() {
     let peer_1_value = "peer_1_value";
     let peer_2_value = "peer_2_value";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (seq
                 (seq
@@ -67,7 +68,8 @@ fn issue_221() {
             )
             (call "some_peer_name" ("" "") []) ;; (1)
         )
-    "#);
+    "#
+    );
 
     let executor = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id("set_variable_id"),

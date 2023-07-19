@@ -242,15 +242,17 @@ mod tests {
 
     #[test]
     fn test_call_result_error() {
+        let script = r#"
+        (seq
+            (call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
+            (call "peer2" ("service" "func") [arg]) ; ok = 43
+        )
+        "#;
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
             std::iter::empty(),
-            r#"(seq
-(call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
-(call "peer2" ("service" "func") [arg]) ; ok = 43
-)
-"#,
+            script,
         )
         .unwrap();
 
@@ -652,10 +654,7 @@ mod tests {
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(
-            &format!(
-                r#"(call "{}" ("service" "function") []) ; ok = 24"#,
-                peer_name
-            ),
+            &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 24"#,),
             network,
         )
         .unwrap();
@@ -709,7 +708,7 @@ mod tests {
         );
 
         let peer_name = "peer1";
-        let air_script = format!(r#"(call "{}" ("service" "function") [])"#, peer_name);
+        let air_script = format!(r#"(call "{peer_name}" ("service" "function") [])"#);
         let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),

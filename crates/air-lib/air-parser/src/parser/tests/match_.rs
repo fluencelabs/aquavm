@@ -19,8 +19,6 @@ use super::parse;
 use crate::ast::*;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
-use fstrings::f;
-use fstrings::format_args_f;
 
 #[test]
 fn parse_match() {
@@ -42,11 +40,13 @@ fn parse_match() {
 fn parse_match_with_canon_stream() {
     let canon_stream = "#canon_stream";
     let canon_stream_lambda = ".$.[0]";
-    let source_code = f!(r#"
+    let source_code = format!(
+        r#"
         (match {canon_stream}{canon_stream_lambda} v2
             (null)
         )
-        "#);
+        "#
+    );
 
     let instruction = parse(&source_code);
     let expected = match_(

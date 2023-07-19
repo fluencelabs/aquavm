@@ -31,7 +31,6 @@ macro_rules! multiline {
           }
           $crate::beautifier::Beautifier::beautify_walker($beautifier, $nest, $indent + indent_step)?;
         )+
-        Ok(())
     });
 }
 
@@ -127,6 +126,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
             ast::Instruction::ApMap(ap_map) => self.beautify_simple(ap_map, indent),
             ast::Instruction::Canon(canon) => self.beautify_simple(canon, indent),
+            ast::Instruction::CanonStreamMapScalar(canon) => self.beautify_simple(canon, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),
             ast::Instruction::Xor(xor) => self.beautify_xor(xor, indent),
@@ -182,7 +182,8 @@ impl<W: io::Write> Beautifier<W> {
             &par.0;
             "|";  // TODO: SHOULD BE UNINDENTED AS PER SPEC; OR WE MAY CHANGE THE SPEC
             &par.1
-        )
+        );
+        Ok(())
     }
 
     fn beautify_xor(&mut self, xor: &ast::Xor<'_>, indent: usize) -> io::Result<()> {
@@ -192,15 +193,18 @@ impl<W: io::Write> Beautifier<W> {
             &xor.0;
             "catch:";
             &xor.1
-        )
+        );
+        Ok(())
     }
 
     fn beautify_match(&mut self, match_: &ast::Match<'_>, indent: usize) -> io::Result<()> {
-        compound!(self, indent, match_)
+        compound!(self, indent, match_);
+        Ok(())
     }
 
     fn beautify_mismatch(&mut self, mismatch: &ast::MisMatch<'_>, indent: usize) -> io::Result<()> {
-        compound!(self, indent, mismatch)
+        compound!(self, indent, mismatch);
+        Ok(())
     }
 
     fn beautify_fold_scalar(
@@ -208,7 +212,14 @@ impl<W: io::Write> Beautifier<W> {
         fold: &ast::FoldScalar<'_>,
         indent: usize,
     ) -> io::Result<()> {
-        compound!(self, indent, fold)
+        compound!(self, indent, fold);
+        if let Some(last_instruction) = &fold.last_instruction {
+            multiline!(
+                self, indent;
+                "last:";
+                last_instruction);
+        }
+        Ok(())
     }
 
     fn beautify_fold_stream(
@@ -216,7 +227,15 @@ impl<W: io::Write> Beautifier<W> {
         fold: &ast::FoldStream<'_>,
         indent: usize,
     ) -> io::Result<()> {
-        compound!(self, indent, fold)
+        compound!(self, indent, fold);
+        if let Some(last_instruction) = &fold.last_instruction {
+            multiline!(
+                self, indent;
+                "last:";
+                last_instruction
+            );
+        }
+        Ok(())
     }
 
     fn beautify_fold_stream_map(
@@ -224,10 +243,19 @@ impl<W: io::Write> Beautifier<W> {
         fold: &ast::FoldStreamMap<'_>,
         indent: usize,
     ) -> io::Result<()> {
-        compound!(self, indent, fold)
+        compound!(self, indent, fold);
+        if let Some(last_instruction) = &fold.last_instruction {
+            multiline!(
+                self, indent;
+                "last:";
+                last_instruction
+            );
+        }
+        Ok(())
     }
 
     fn beautify_new(&mut self, new: &ast::New<'_>, indent: usize) -> io::Result<()> {
-        compound!(self, indent, new)
+        compound!(self, indent, new);
+        Ok(())
     }
 }

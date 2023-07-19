@@ -21,6 +21,7 @@ use crate::JValue;
 use air_interpreter_data::Provenance;
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::json;
 
 use std::rc::Rc;
 
@@ -28,6 +29,8 @@ pub const ERROR_CODE_FIELD_NAME: &str = "error_code";
 pub const MESSAGE_FIELD_NAME: &str = "message";
 pub const INSTRUCTION_FIELD_NAME: &str = "instruction";
 pub const PEER_ID_FIELD_NAME: &str = "peer_id";
+pub const NO_ERROR_MESSAGE: &str = "";
+pub const NO_ERROR_ERROR_CODE: i64 = 0;
 
 /// This struct is intended to track the last arisen error.
 /// LastError is essentially a scalar value with support of lambda expressions.
@@ -110,5 +113,20 @@ fn ensure_jvalue_is_string(
             field_name,
             expected_type: "string",
         }),
+    }
+}
+
+pub fn no_error_last_error_object() -> JValue {
+    json!({
+        ERROR_CODE_FIELD_NAME: NO_ERROR_ERROR_CODE,
+        MESSAGE_FIELD_NAME: NO_ERROR_MESSAGE,
+    })
+}
+
+pub fn no_error_last_error() -> LastError {
+    LastError {
+        error: Rc::new(no_error_last_error_object()),
+        tetraplet: None,
+        provenance: Provenance::literal(),
     }
 }

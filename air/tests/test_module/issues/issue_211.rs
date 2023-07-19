@@ -25,7 +25,8 @@ use pretty_assertions::assert_eq;
 fn issue_211() {
     let peer_1_name = "peer_1_id";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
      (xor
         (seq
           (seq
@@ -64,7 +65,8 @@ fn issue_211() {
         )
         (call %init_peer_id% ("errorhandlingsrv" "error") [%last_error% 2]) ; ok="error"
      )
-    "#);
+    "#
+    );
 
     let run_params = TestRunParameters::from_init_peer_id(peer_1_name);
 

@@ -15,6 +15,11 @@
  */
 
 use air::CatchableError;
+use air::ExecutionCidState;
+use air::ToErrorCode;
+use air::NO_ERROR_ERROR_CODE;
+use air::NO_ERROR_MESSAGE;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -25,7 +30,8 @@ fn match_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -37,7 +43,8 @@ fn match_equal() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -63,7 +70,8 @@ fn match_not_equal() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -75,7 +83,8 @@ fn match_not_equal() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -101,7 +110,8 @@ fn match_with_string() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
                 (xor
@@ -110,7 +120,8 @@ fn match_with_string() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
@@ -136,7 +147,8 @@ fn match_with_init_peer_id() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_peer_id}" ("" "") ["{local_peer_id}"] value_1)
                 (xor
@@ -145,7 +157,8 @@ fn match_with_init_peer_id() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
@@ -173,7 +186,8 @@ fn match_with_timestamp() {
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let timestamp = 1337;
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_peer_id}" ("" "") [{timestamp}] value_1)
                 (xor
@@ -182,7 +196,8 @@ fn match_with_timestamp() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let test_params = TestRunParameters::from_timestamp(timestamp);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
@@ -210,7 +225,8 @@ fn match_with_ttl() {
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
     let ttl = 1337;
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (call "{set_variable_peer_id}" ("" "") [{ttl}] value_1)
                 (xor
@@ -219,7 +235,8 @@ fn match_with_ttl() {
                     )
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_2"] result_2)
                 )
-            )"#);
+            )"#
+    );
 
     let test_params = TestRunParameters::from_ttl(ttl);
     let result = checked_call_vm!(set_variable_vm, test_params.clone(), &script, "", "");
@@ -264,7 +281,8 @@ fn match_without_xor() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (seq
                 (seq
                     (call "{set_variable_peer_id}" ("" "") ["value_1"] value_1)
@@ -273,12 +291,14 @@ fn match_without_xor() {
                 (match value_1 value_2
                     (call "{local_peer_id}" ("service_id_2" "local_fn_name") ["result_1"] result_1)
                 )
-            )"#);
+            )"#
+    );
 
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let result = call_vm!(vm, <_>::default(), &script, "", result.data);
 
     let expected_error = CatchableError::MatchValuesNotEqual;
+    assert_eq!(expected_error.to_error_code(), 10001);
     assert!(check_error(&result, expected_error));
 
     let result = call_vm!(vm, <_>::default(), script, "", result.data);
@@ -294,7 +314,8 @@ fn match_with_two_xors() {
 
     let local_peer_id_2 = "local_peer_id_2";
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
             (xor
                 (seq
                     (seq
@@ -310,7 +331,8 @@ fn match_with_two_xors() {
                 )
                 (call "{local_peer_id}" ("errorHandlingSrv" "error") [%last_error%])
             )
-            "#);
+            "#
+    );
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
@@ -332,7 +354,8 @@ fn issue_165() {
     let echo_peer_id = "echo_peer_id";
     let mut echo_peer = create_avm(echo_call_service(), echo_peer_id);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (seq
             (call "{result_setter_peer_id}" ("" "") ["set_result"] result)
             (seq
@@ -348,7 +371,8 @@ fn issue_165() {
                 )
             )
         )
-    "#);
+    "#
+    );
 
     let setter_result = checked_call_vm!(result_setter, <_>::default(), &script, "", "");
     let echo_result = checked_call_vm!(echo_peer, <_>::default(), &script, "", setter_result.data);
@@ -364,4 +388,66 @@ fn issue_165() {
             args = [1]
         )
     );
+}
+
+#[test]
+fn match_with_undefined_last_error_errcode() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (xor
+            (match 1 2 (null))
+            (call "local_peer_id" ("test" "error_code") [%last_error%.$.error_code] scalar) ; behaviour = echo
+        )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(NO_ERROR_ERROR_CODE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer_name = local_peer_id,
+        service = "test..0",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn match_with_undefined_last_error_message() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+        (xor
+            (match 1 2 (null))
+            (call "local_peer_id" ("test" "message") [%last_error%.$.message] scalar) ; behaviour = echo
+        )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+    let mut cid_state = ExecutionCidState::new();
+    let message_lambda_output = json!(NO_ERROR_MESSAGE);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        message_lambda_output.clone(),
+        cid_state,
+        peer_name = local_peer_id,
+        service = "test..0",
+        function = "message",
+        args = vec![message_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
 }

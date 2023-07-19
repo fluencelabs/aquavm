@@ -23,7 +23,8 @@ fn issue_331() {
     let peer_id_1 = "peer_id_1";
     let mut peer_vm_1 = create_avm(set_variable_call_service(json!("")), peer_id_1);
 
-    let script = f!(r#"
+    let script = format!(
+        r#"
         (new $array-inline
             (seq
                 (seq
@@ -47,7 +48,8 @@ fn issue_331() {
                 (canon %init_peer_id% $array-inline #array-inline-0)
            )
         )
-    "#);
+    "#
+    );
 
     let parameters = TestRunParameters::new(peer_id_1, 1, 1, "");
     let result = call_vm!(peer_vm_1, parameters, &script, "", "");
