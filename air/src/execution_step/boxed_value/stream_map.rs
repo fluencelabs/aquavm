@@ -83,7 +83,29 @@ impl StreamMap {
     }
 
     pub(crate) fn get_unique_map_keys_stream(&mut self) -> Cow<'_, Stream> {
-        self.stream.get_unique_map_keys_stream()
+        use std::collections::HashSet;
+
+        let mut distinct_keys = HashSet::new();
+
+        let new_values = self
+            .stream
+            .slice_iter(Generation::Nth(0.into()), Generation::Last)
+            .unwrap()
+            .map(|values| {
+                values
+                    .iter()
+                    .filter(|v| {
+                        StreamMapKey::from_kvpair(v)
+                            .map(|key| distinct_keys.insert(key))
+                            .unwrap_or(false)
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        let stream = Stream::new(new_values, self.stream.previous_gens_count());
+        Cow::Owned(stream)
     }
 }
 

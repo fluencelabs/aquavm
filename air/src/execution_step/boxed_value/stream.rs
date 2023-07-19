@@ -42,6 +42,13 @@ pub struct Stream {
 }
 
 impl Stream {
+    pub(crate) fn new(values: Vec<Vec<ValueAggregate>>, previous_gens_count: usize) -> Self {
+        Self {
+            values,
+            previous_gens_count,
+        }
+    }
+
     pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
         let last_generation_count = GenerationIdx::from(1);
         // TODO: bubble up an overflow error instead of expect
@@ -216,26 +223,8 @@ impl Stream {
         self.values.retain(|values| !values.is_empty());
     }
 
-    pub(crate) fn get_unique_map_keys_stream(&self) -> Cow<'_, Stream> {
-        let mut distinct_values = HashSet::new();
-        let mut new_values = vec![];
-
-        for values in self.values.iter() {
-            let distinct_values_vec = values
-                .iter()
-                .filter(|v| {
-                    StreamMapKey::from_kvpair(v)
-                        .map(|key| distinct_values.insert(key))
-                        .unwrap_or(false)
-                })
-                .cloned()
-                .collect::<_>();
-            new_values.push(distinct_values_vec);
-        }
-        Cow::Owned(Stream {
-            values: new_values,
-            previous_gens_count: self.previous_gens_count,
-        })
+    pub(crate) fn previous_gens_count(&self) -> usize {
+        self.previous_gens_count
     }
 }
 
@@ -303,6 +292,7 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
 }
 
 use std::fmt;
+use tracing::Value;
 
 impl fmt::Display for Stream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
