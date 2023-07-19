@@ -33,6 +33,8 @@ zeroize = "1.6.0"
 [features]
 default = ["wasm"]
 wasm = ["air-test-utils"]
+gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
 
 [[bin]]
 name = "air"
