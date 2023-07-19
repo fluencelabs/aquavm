@@ -18,7 +18,7 @@ use crate::execution_step::ExecutableInstruction;
 use crate::farewell_step as farewell;
 use crate::preparation_step::parse_data;
 use crate::preparation_step::prepare;
-use crate::preparation_step::ParsedDatas;
+use crate::preparation_step::ParsedDataPair;
 use crate::preparation_step::PreparationDescriptor;
 use crate::signing_step::sign_produced_cids;
 use crate::verification_step::verify;
@@ -59,7 +59,7 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
-    let ParsedDatas {
+    let ParsedDataPair {
         prev_data,
         current_data,
     } = match parse_data(&raw_prev_data, &raw_current_data) {

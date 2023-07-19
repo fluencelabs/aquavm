@@ -22,7 +22,7 @@ pub use errors::PreparationError;
 
 pub(crate) use preparation::parse_data;
 pub(crate) use preparation::prepare;
-pub(crate) use preparation::ParsedDatas;
+pub(crate) use preparation::ParsedDataPair;
 pub(crate) use preparation::PreparationDescriptor;
 
 use interpreter_versions::interpreter_version;

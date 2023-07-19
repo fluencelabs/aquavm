@@ -38,20 +38,20 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) keypair: KeyPair,
 }
 
-pub(crate) struct ParsedDatas {
+pub(crate) struct ParsedDataPair {
     pub(crate) prev_data: InterpreterData,
     pub(crate) current_data: InterpreterData,
 }
 
 /// Parse data and check its version.
 #[tracing::instrument(skip_all)]
-pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDatas> {
+pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDataPair> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
     check_version_compatibility(&current_data)?;
 
-    Ok(ParsedDatas {
+    Ok(ParsedDataPair {
         prev_data,
         current_data,
     })

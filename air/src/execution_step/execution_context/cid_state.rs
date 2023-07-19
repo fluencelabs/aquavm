@@ -145,6 +145,7 @@ impl ExecutionCidState {
         let service_result_aggregate = self.get_service_result_agg_by_cid(service_result_agg_cid)?;
         let value = self.get_value_by_cid(&service_result_aggregate.value_cid)?;
         let tetraplet = self.get_tetraplet_by_cid(&service_result_aggregate.tetraplet_cid)?;
+
         Ok(ResolvedServiceInfo {
             value,
             tetraplet,
