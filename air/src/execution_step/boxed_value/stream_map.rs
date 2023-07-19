@@ -25,7 +25,6 @@ use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
-use std::borrow::Cow;
 use std::rc::Rc;
 
 pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
@@ -82,8 +81,32 @@ impl StreamMap {
         &mut self.stream
     }
 
-    pub(crate) fn get_unique_map_keys_stream(&mut self) -> Cow<'_, Stream> {
-        self.stream.get_unique_map_keys_stream()
+    // TODO: change the implementation to mutate the underlying stream
+    // instead of creating a new one
+    pub(crate) fn create_unique_keys_stream(&self) -> Stream {
+        use std::collections::HashSet;
+
+        let mut met_keys = HashSet::new();
+
+        // unwrap is safe because slice_iter always returns Some if supplied generations are valid
+        let new_values = self
+            .stream
+            .slice_iter(Generation::Nth(0.into()), Generation::Last)
+            .unwrap()
+            .map(|values| {
+                values
+                    .iter()
+                    .filter(|v| {
+                        StreamMapKey::from_kvpair(v)
+                            .map(|key| met_keys.insert(key))
+                            .unwrap_or(false)
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        Stream::new(new_values, self.stream.previous_gens_count())
     }
 }
 
@@ -202,5 +225,83 @@ mod test {
         let examplar = from_key_value(key4, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         assert_eq!(internal_stream_iter.next(), None);
+    }
+
+    fn generate_key_values(count: usize) -> Vec<(String, ValueAggregate)> {
+        (0..count)
+            .map(|id| {
+                let key = id.to_string();
+                let value = json!(id);
+                let value = ValueAggregate::new(
+                    Rc::new(value),
+                    <_>::default(),
+                    0.into(),
+                    air_interpreter_data::Provenance::literal(),
+                );
+
+                (key, value)
+            })
+            .collect()
+    }
+
+    fn insert_into_map(
+        stream_map: &mut StreamMap,
+        key_value: &(String, ValueAggregate),
+        generation: Generation,
+        source: ValueSource,
+    ) {
+        stream_map
+            .insert(key_value.0.as_str().into(), &key_value.1, generation, source)
+            .unwrap();
+    }
+
+    #[test]
+    fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
+        const TEST_DATA_SIZE: usize = 3;
+        let key_values = generate_key_values(TEST_DATA_SIZE);
+        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+
+        for id in 0..3 {
+            insert_into_map(
+                &mut stream_map,
+                &key_values[id],
+                Generation::nth(id as u32),
+                ValueSource::CurrentData,
+            );
+        }
+
+        let unique_keys_only = stream_map.create_unique_keys_stream();
+        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn get_unique_map_keys_stream_removes_duplicates() {
+        use ValueSource::CurrentData;
+
+        const TEST_DATA_SIZE: usize = 5;
+        let key_values = generate_key_values(TEST_DATA_SIZE);
+
+        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(0), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(1), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(1), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(3), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(4), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
+
+        let unique_keys_only = stream_map.create_unique_keys_stream();
+        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
     }
 }
