@@ -410,147 +410,147 @@ Machine c1f3ea5950db0a10b44da931c25774d64ab25084f47d504f72f311e694550ff1:
             new: 38.00µs
 Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
   Platform: macOS-13.4.1-arm64-arm-64bit
-  Timestamp: 2023-07-05 14:43:24.881592+00:00
+  Timestamp: 2023-07-19 11:53:19.444706+00:00
   AquaVM version: 0.41.0
   Benches:
   Features: check_signatures,gen_signatures
-    big_values_data (9.38ms; 59.062 MiB, 59.062 MiB): Loading a trace with huge values
-      air::runner::execute_air: 9.38ms
-        preparation_step::preparation::parse_data: 4.92ms
-          from_slice: 4.88ms
-        preparation_step::preparation::prepare: 187.00µs
-          air::preparation_step::preparation::make_exec_ctx: 16.00µs
-          air_parser::parser::air_parser::parse: 34.00µs
-        runner::execute: 13.00µs
-        runner::farewell: 3.91ms
-          from_success_result: 3.89ms
-            populate_outcome_from_contexts: 3.85ms
+    big_values_data (9.25ms; 59.062 MiB, 59.062 MiB): Loading a trace with huge values
+      air::runner::execute_air: 9.25ms
+        preparation_step::preparation::parse_data: 4.81ms
+          from_slice: 4.77ms
+        preparation_step::preparation::prepare: 178.00µs
+          air::preparation_step::preparation::make_exec_ctx: 18.00µs
+          air_parser::parser::air_parser::parse: 29.00µs
+        runner::execute: 14.00µs
+        runner::farewell: 3.90ms
+          from_success_result: 3.88ms
+            populate_outcome_from_contexts: 3.84ms
               to_vec(call_results): 12.00µs
-              to_vec(data): 2.62ms
-        signing_step::sign_produced_cids: 107.00µs
-        verification_step::verify: 77.00µs
+              to_vec(data): 2.58ms
+        signing_step::sign_produced_cids: 106.00µs
+        verification_step::verify: 78.00µs
           verify: 10.00µs
-    dashboard (29.17ms; 52.750 MiB, 52.750 MiB): big dashboard test
-      air::runner::execute_air: 29.17ms
-        preparation_step::preparation::parse_data: 998.00µs
-          from_slice: 950.00µs
-        preparation_step::preparation::prepare: 327.00µs
-          air::preparation_step::preparation::make_exec_ctx: 35.00µs
-          air_parser::parser::air_parser::parse: 169.00µs
-        runner::execute: 24.08ms
-          execute: 19.44ms
-            execute: 5.73ms
-              prepare_request_params: 1.66ms
-                to_string(tetraplets): 527.00µs
-            new: 3.18ms
-        runner::farewell: 544.00µs
-          from_success_result: 523.00µs
-            populate_outcome_from_contexts: 478.00µs
-              to_vec(call_results): 22.00µs
-              to_vec(data): 239.00µs
-        signing_step::sign_produced_cids: 107.00µs
-        verification_step::verify: 2.95ms
-          verify: 205.00µs
-    long_data (3.92ms; 54.000 MiB, 54.000 MiB): Long data trace
-      air::runner::execute_air: 3.92ms
-        preparation_step::preparation::parse_data: 1.75ms
-          from_slice: 1.71ms
-        preparation_step::preparation::prepare: 185.00µs
-          air::preparation_step::preparation::make_exec_ctx: 16.00µs
-          air_parser::parser::air_parser::parse: 33.00µs
-        runner::execute: 13.00µs
-        runner::farewell: 1.12ms
-          from_success_result: 1.10ms
-            populate_outcome_from_contexts: 1.06ms
+    dashboard (28.74ms; 52.750 MiB, 52.750 MiB): big dashboard test
+      air::runner::execute_air: 28.74ms
+        preparation_step::preparation::parse_data: 982.00µs
+          from_slice: 928.00µs
+        preparation_step::preparation::prepare: 323.00µs
+          air::preparation_step::preparation::make_exec_ctx: 38.00µs
+          air_parser::parser::air_parser::parse: 160.00µs
+        runner::execute: 23.72ms
+          execute: 19.20ms
+            execute: 5.68ms
+              prepare_request_params: 1.64ms
+                to_string(tetraplets): 524.00µs
+            new: 3.15ms
+        runner::farewell: 536.00µs
+          from_success_result: 516.00µs
+            populate_outcome_from_contexts: 470.00µs
+              to_vec(call_results): 21.00µs
+              to_vec(data): 232.00µs
+        signing_step::sign_produced_cids: 102.00µs
+        verification_step::verify: 2.90ms
+          verify: 194.00µs
+    long_data (3.97ms; 54.000 MiB, 54.000 MiB): Long data trace
+      air::runner::execute_air: 3.97ms
+        preparation_step::preparation::parse_data: 1.77ms
+          from_slice: 1.72ms
+        preparation_step::preparation::prepare: 181.00µs
+          air::preparation_step::preparation::make_exec_ctx: 19.00µs
+          air_parser::parser::air_parser::parse: 29.00µs
+        runner::execute: 14.00µs
+        runner::farewell: 1.14ms
+          from_success_result: 1.11ms
+            populate_outcome_from_contexts: 1.08ms
               to_vec(call_results): 12.00µs
-              to_vec(data): 487.00µs
+              to_vec(data): 483.00µs
         signing_step::sign_produced_cids: 104.00µs
-        verification_step::verify: 597.00µs
+        verification_step::verify: 607.00µs
           verify: 10.00µs
-    multiple-cids10 (12.56ms; 52.625 MiB, 52.625 MiB): verifying multiple CIDs for single peer
-      air::runner::execute_air: 12.56ms
-        preparation_step::preparation::parse_data: 416.00µs
-          from_slice: 367.00µs
-        preparation_step::preparation::prepare: 221.00µs
-          air::preparation_step::preparation::make_exec_ctx: 30.00µs
-          air_parser::parser::air_parser::parse: 66.00µs
-        runner::execute: 10.30ms
-          execute: 7.99ms
-            execute: 1.81ms
-              prepare_request_params: 48.00µs
+    multiple-cids10 (12.64ms; 52.625 MiB, 52.625 MiB): verifying multiple CIDs for single peer
+      air::runner::execute_air: 12.64ms
+        preparation_step::preparation::parse_data: 427.00µs
+          from_slice: 372.00µs
+        preparation_step::preparation::prepare: 213.00µs
+          air::preparation_step::preparation::make_exec_ctx: 32.00µs
+          air_parser::parser::air_parser::parse: 58.00µs
+        runner::execute: 10.38ms
+          execute: 8.06ms
+            execute: 1.83ms
+              prepare_request_params: 44.00µs
                 to_string(tetraplets): 14.00µs
-            new: 1.35ms
-        runner::farewell: 405.00µs
-          from_success_result: 385.00µs
-            populate_outcome_from_contexts: 351.00µs
+            new: 1.37ms
+        runner::farewell: 402.00µs
+          from_success_result: 382.00µs
+            populate_outcome_from_contexts: 346.00µs
               to_vec(call_results): 12.00µs
-              to_vec(data): 146.00µs
-        signing_step::sign_produced_cids: 104.00µs
-        verification_step::verify: 953.00µs
-          verify: 237.00µs
-    multiple-cids50 (262.60ms; 59.375 MiB, 59.375 MiB): verifying multiple CIDs for single peer
-      air::runner::execute_air: 262.60ms
+              to_vec(data): 143.00µs
+        signing_step::sign_produced_cids: 101.00µs
+        verification_step::verify: 948.00µs
+          verify: 227.00µs
+    multiple-cids50 (263.10ms; 59.375 MiB, 59.625 MiB): verifying multiple CIDs for single peer
+      air::runner::execute_air: 263.10ms
         preparation_step::preparation::parse_data: 4.83ms
           from_slice: 4.78ms
-        preparation_step::preparation::prepare: 452.00µs
-          air::preparation_step::preparation::make_exec_ctx: 259.00µs
-          air_parser::parser::air_parser::parse: 66.00µs
-        runner::execute: 246.50ms
-          execute: 191.56ms
-            execute: 41.54ms
-              prepare_request_params: 52.00µs
+        preparation_step::preparation::prepare: 457.00µs
+          air::preparation_step::preparation::make_exec_ctx: 268.00µs
+          air_parser::parser::air_parser::parse: 59.00µs
+        runner::execute: 247.00ms
+          execute: 192.10ms
+            execute: 41.91ms
+              prepare_request_params: 45.00µs
                 to_string(tetraplets): 14.00µs
-            new: 32.83ms
-        runner::farewell: 3.57ms
-          from_success_result: 3.55ms
-            populate_outcome_from_contexts: 3.51ms
+            new: 32.69ms
+        runner::farewell: 3.56ms
+          from_success_result: 3.54ms
+            populate_outcome_from_contexts: 3.50ms
               to_vec(call_results): 12.00µs
-              to_vec(data): 2.36ms
-        signing_step::sign_produced_cids: 114.00µs
-        verification_step::verify: 6.98ms
-          verify: 4.81ms
-    multiple-peers14 (308.00ms; 59.562 MiB, 59.875 MiB): verifying many CIDs for many peers
-      air::runner::execute_air: 308.00ms
-        preparation_step::preparation::parse_data: 5.63ms
-          from_slice: 5.57ms
-        preparation_step::preparation::prepare: 473.00µs
+              to_vec(data): 2.33ms
+        signing_step::sign_produced_cids: 108.00µs
+        verification_step::verify: 6.83ms
+          verify: 4.65ms
+    multiple-peers14 (306.90ms; 59.562 MiB, 59.812 MiB): verifying many CIDs for many peers
+      air::runner::execute_air: 306.90ms
+        preparation_step::preparation::parse_data: 5.58ms
+          from_slice: 5.52ms
+        preparation_step::preparation::prepare: 464.00µs
           air::preparation_step::preparation::make_exec_ctx: 273.00µs
-          air_parser::parser::air_parser::parse: 72.00µs
-        runner::execute: 286.30ms
-          execute: 222.76ms
-            execute: 50.62ms
-              prepare_request_params: 54.00µs
+          air_parser::parser::air_parser::parse: 66.00µs
+        runner::execute: 285.40ms
+          execute: 222.46ms
+            execute: 50.60ms
+              prepare_request_params: 44.00µs
                 to_string(tetraplets): 14.00µs
-            new: 38.89ms
-        runner::farewell: 4.07ms
-          from_success_result: 4.05ms
-            populate_outcome_from_contexts: 4.01ms
+            new: 39.18ms
+        runner::farewell: 3.95ms
+          from_success_result: 3.93ms
+            populate_outcome_from_contexts: 3.89ms
               to_vec(call_results): 12.00µs
-              to_vec(data): 2.74ms
-        signing_step::sign_produced_cids: 114.00µs
-        verification_step::verify: 11.57ms
-          verify: 5.30ms
+              to_vec(data): 2.63ms
+        signing_step::sign_produced_cids: 110.00µs
+        verification_step::verify: 11.33ms
+          verify: 5.07ms
     multiple-peers25 (1.72s; 86.312 MiB, 86.562 MiB): verifying many CIDs for many peers
       air::runner::execute_air: 1.72s
-        preparation_step::preparation::parse_data: 29.77ms
-          from_slice: 29.70ms
-        preparation_step::preparation::prepare: 2.08ms
-          air::preparation_step::preparation::make_exec_ctx: 1.86ms
-          air_parser::parser::air_parser::parse: 81.00µs
+        preparation_step::preparation::parse_data: 29.59ms
+          from_slice: 29.51ms
+        preparation_step::preparation::prepare: 2.16ms
+          air::preparation_step::preparation::make_exec_ctx: 1.96ms
+          air_parser::parser::air_parser::parse: 69.00µs
         runner::execute: 1.62s
           execute: 1.26s
-            execute: 291.64ms
-              prepare_request_params: 54.00µs
+            execute: 291.49ms
+              prepare_request_params: 46.00µs
                 to_string(tetraplets): 14.00µs
-            new: 220.29ms
-        runner::farewell: 21.50ms
-          from_success_result: 21.49ms
-            populate_outcome_from_contexts: 21.46ms
+            new: 220.52ms
+        runner::farewell: 21.66ms
+          from_success_result: 21.61ms
+            populate_outcome_from_contexts: 21.58ms
               to_vec(call_results): 15.00µs
-              to_vec(data): 14.71ms
-        signing_step::sign_produced_cids: 113.00µs
-        verification_step::verify: 46.93ms
-          verify: 29.91ms
+              to_vec(data): 14.57ms
+        signing_step::sign_produced_cids: 109.00µs
+        verification_step::verify: 46.04ms
+          verify: 28.89ms
     multiple-peers5 (17.65ms; 52.625 MiB, 52.625 MiB): verifying many CIDs for many peers
       air::runner::execute_air: 17.65ms
         preparation_step::preparation::parse_data: 590.00µs
@@ -592,67 +592,67 @@ Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
         signing_step::sign_produced_cids: 155.00µs
         verification_step::verify: 1.02ms
           verify: 238.00µs
-    multiple-sigs200 (4.70s; 214.438 MiB, 214.438 MiB): signing multiple CIDs
-      air::runner::execute_air: 4.70s
-        preparation_step::preparation::parse_data: 166.00ms
-          from_slice: 165.73ms
-        preparation_step::preparation::prepare: 16.55ms
-          air::preparation_step::preparation::make_exec_ctx: 16.31ms
-          air_parser::parser::air_parser::parse: 83.00µs
-        runner::execute: 4.17s
-          call::execute: 3.08s
-            execute: 696.39ms
-            new: 523.02ms
-          canon::execute: 198.90ms
-        runner::farewell: 167.20ms
-          from_success_result: 167.20ms
-            populate_outcome_from_contexts: 155.00ms
-              to_vec(call_results): 13.00µs
-              to_vec(data): 93.22ms
-        signing_step::sign_produced_cids: 21.36ms
-        verification_step::verify: 153.70ms
-          verify: 84.25ms
-    multiple-sigs50 (288.90ms; 62.562 MiB, 62.562 MiB): signing multiple CIDs
-      air::runner::execute_air: 288.90ms
-        preparation_step::preparation::parse_data: 10.52ms
-          from_slice: 10.49ms
-        preparation_step::preparation::prepare: 628.00µs
-          air::preparation_step::preparation::make_exec_ctx: 432.00µs
-          air_parser::parser::air_parser::parse: 71.00µs
-        runner::execute: 260.50ms
-          call::execute: 192.68ms
-            execute: 42.40ms
-            new: 32.99ms
-          canon::execute: 11.47ms
-        runner::farewell: 7.11ms
-          from_success_result: 7.09ms
-            populate_outcome_from_contexts: 6.66ms
+    multiple-sigs200 (4.75s; 210.375 MiB, 210.375 MiB): signing multiple CIDs
+      air::runner::execute_air: 4.75s
+        preparation_step::preparation::parse_data: 165.40ms
+          from_slice: 165.31ms
+        preparation_step::preparation::prepare: 17.07ms
+          air::preparation_step::preparation::make_exec_ctx: 16.85ms
+          air_parser::parser::air_parser::parse: 73.00µs
+        runner::execute: 4.22s
+          call::execute: 3.12s
+            execute: 714.57ms
+            new: 536.08ms
+          canon::execute: 195.50ms
+        runner::farewell: 163.10ms
+          from_success_result: 163.10ms
+            populate_outcome_from_contexts: 153.60ms
+              to_vec(call_results): 14.00µs
+              to_vec(data): 93.02ms
+        signing_step::sign_produced_cids: 22.39ms
+        verification_step::verify: 151.80ms
+          verify: 81.98ms
+    multiple-sigs50 (297.80ms; 62.312 MiB, 62.312 MiB): signing multiple CIDs
+      air::runner::execute_air: 297.80ms
+        preparation_step::preparation::parse_data: 10.47ms
+          from_slice: 10.42ms
+        preparation_step::preparation::prepare: 611.00µs
+          air::preparation_step::preparation::make_exec_ctx: 420.00µs
+          air_parser::parser::air_parser::parse: 64.00µs
+        runner::execute: 269.70ms
+          call::execute: 200.82ms
+            execute: 44.45ms
+            new: 36.49ms
+          canon::execute: 11.41ms
+        runner::farewell: 7.08ms
+          from_success_result: 7.06ms
+            populate_outcome_from_contexts: 6.64ms
               to_vec(call_results): 12.00µs
-              to_vec(data): 4.24ms
-        signing_step::sign_produced_cids: 1.19ms
-        verification_step::verify: 8.76ms
-          verify: 4.81ms
+              to_vec(data): 4.23ms
+        signing_step::sign_produced_cids: 1.25ms
+        verification_step::verify: 8.55ms
+          verify: 4.59ms
     network-explore (5.17ms; 52.500 MiB, 52.500 MiB): 5 peers of network are discovered
       air::runner::execute_air: 5.17ms
-        preparation_step::preparation::parse_data: 480.00µs
-          from_slice: 430.00µs
-        preparation_step::preparation::prepare: 231.00µs
-          air::preparation_step::preparation::make_exec_ctx: 21.00µs
-          air_parser::parser::air_parser::parse: 84.00µs
-        runner::execute: 2.15ms
+        preparation_step::preparation::parse_data: 490.00µs
+          from_slice: 435.00µs
+        preparation_step::preparation::prepare: 227.00µs
+          air::preparation_step::preparation::make_exec_ctx: 23.00µs
+          air_parser::parser::air_parser::parse: 79.00µs
+        runner::execute: 2.14ms
           execute: 1.65ms
-            execute: 405.00µs
-              prepare_request_params: 52.00µs
-                to_string(tetraplets): 16.00µs
+            execute: 407.00µs
+              prepare_request_params: 45.00µs
+                to_string(tetraplets): 14.00µs
             new: 296.00µs
-        runner::farewell: 325.00µs
+        runner::farewell: 324.00µs
           from_success_result: 303.00µs
-            populate_outcome_from_contexts: 267.00µs
-              to_vec(call_results): 12.00µs
+            populate_outcome_from_contexts: 266.00µs
+              to_vec(call_results): 13.00µs
               to_vec(data): 96.00µs
-        signing_step::sign_produced_cids: 106.00µs
-        verification_step::verify: 1.71ms
-          verify: 76.00µs
+        signing_step::sign_produced_cids: 102.00µs
+        verification_step::verify: 1.73ms
+          verify: 74.00µs
     network_explore (5.23ms; 52.500 MiB, 52.500 MiB): 5 peers of network are discovered
       air::runner::execute_air: 5.23ms
         preparation_step::preparation::parse_data: 480.00µs
@@ -674,23 +674,38 @@ Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
         signing_step::sign_produced_cids: 112.00µs
         verification_step::verify: 1.73ms
           verify: 76.00µs
-    parser_10000_100 (22.73ms; 57.812 MiB, 57.812 MiB): Running very long AIR script with lot of variables and assignments
-      air::runner::execute_air: 22.73ms
+    null (812.00µs; 52.500 MiB, 52.500 MiB): Empty data and null script
+      air::runner::execute_air: 812.00µs
         preparation_step::preparation::parse_data: 19.00µs
-        preparation_step::preparation::prepare: 21.05ms
+        preparation_step::preparation::prepare: 197.00µs
+          air::preparation_step::preparation::make_exec_ctx: 21.00µs
+          air_parser::parser::air_parser::parse: 32.00µs
+        runner::execute: 14.00µs
+        runner::farewell: 256.00µs
+          from_success_result: 237.00µs
+            populate_outcome_from_contexts: 199.00µs
+              to_vec(call_results): 12.00µs
+              to_vec(data): 38.00µs
+        signing_step::sign_produced_cids: 110.00µs
+        verification_step::verify: 35.00µs
+          verify: 10.00µs
+    parser_10000_100 (22.81ms; 57.812 MiB, 57.812 MiB): Running very long AIR script with lot of variables and assignments
+      air::runner::execute_air: 22.81ms
+        preparation_step::preparation::parse_data: 19.00µs
+        preparation_step::preparation::prepare: 21.11ms
           air::preparation_step::preparation::make_exec_ctx: 24.00µs
-          air_parser::parser::air_parser::parse: 20.86ms
-        runner::execute: 165.00µs
-          execute: 120.00µs
-            execute: 42.00µs
-            new: 26.00µs
-        runner::farewell: 250.00µs
+          air_parser::parser::air_parser::parse: 20.92ms
+        runner::execute: 161.00µs
+          execute: 111.00µs
+            execute: 32.00µs
+            new: 25.00µs
+        runner::farewell: 251.00µs
           from_success_result: 231.00µs
             populate_outcome_from_contexts: 198.00µs
               to_vec(call_results): 12.00µs
-              to_vec(data): 44.00µs
-        signing_step::sign_produced_cids: 108.00µs
-        verification_step::verify: 35.00µs
+              to_vec(data): 41.00µs
+        signing_step::sign_produced_cids: 110.00µs
+        verification_step::verify: 39.00µs
           verify: 12.00µs
 Machine e536f8eaae8c978493a773ba566ae3393e2e6240d6ea8e05b5ca1b8f77e9c441:
   Platform: Linux-5.15.0-76-generic-x86_64-with-glibc2.29
