@@ -16,16 +16,12 @@
 
 use super::ExecutionResult;
 use super::ValueAggregate;
-use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::ExecutionError;
 use crate::UncatchableError;
 
 use air_interpreter_data::GenerationIdx;
 use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
-
-use std::borrow::Cow;
-use std::collections::HashSet;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have the same order
 /// of values on each peer.
@@ -292,7 +288,6 @@ impl<'slice> Iterator for StreamSliceIter<'slice> {
 }
 
 use std::fmt;
-use tracing::Value;
 
 impl fmt::Display for Stream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

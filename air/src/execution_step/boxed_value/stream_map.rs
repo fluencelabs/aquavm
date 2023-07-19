@@ -87,6 +87,7 @@ impl StreamMap {
 
         let mut distinct_keys = HashSet::new();
 
+        // unwrap is safe because slice_iter always returns Some iff generation slice is valid
         let new_values = self
             .stream
             .slice_iter(Generation::Nth(0.into()), Generation::Last)
