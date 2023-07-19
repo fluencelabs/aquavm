@@ -67,8 +67,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
                 handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => {
-                let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream.name, self.stream.position);
+                let get_stream_or_default = get_stream_or_default_closure(self.stream.name, self.stream.position);
                 handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -188,7 +187,7 @@ pub(super) type GetStreamClosure<'obj> = dyn for<'ctx> Fn(&'ctx mut ExecutionCtx
 /// This function gets a stream from context or return a default empty stream,
 /// it's crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346
-fn get_stream_or_default_function<'obj, 'n: 'obj>(
+fn get_stream_or_default_closure<'obj, 'n: 'obj>(
     stream_name: &'n str,
     position: AirPos,
 ) -> Box<GetStreamClosure<'obj>> {
