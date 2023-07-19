@@ -81,6 +81,8 @@ impl StreamMap {
         &mut self.stream
     }
 
+    // TODO: change the implementation to mutate the underlying stream
+    // instead of creating a new one
     pub(crate) fn create_unique_keys_stream(&self) -> Stream {
         use std::collections::HashSet;
 

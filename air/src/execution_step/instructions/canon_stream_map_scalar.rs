@@ -74,8 +74,8 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
                 handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => {
-                let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position);
+                let get_stream_or_default =
+                    get_stream_or_default_closure(self.stream_map.name, self.stream_map.position);
                 handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -86,7 +86,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
 /// or returns a default empty stream,
 /// it is crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346.
-fn get_stream_or_default_function<'obj, 'n: 'obj>(
+fn get_stream_or_default_closure<'obj, 'n: 'obj>(
     stream_map_name: &'n str,
     position: AirPos,
 ) -> Box<GetStreamClosure<'obj>> {
