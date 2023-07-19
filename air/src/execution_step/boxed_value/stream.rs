@@ -38,13 +38,6 @@ pub struct Stream {
 }
 
 impl Stream {
-    pub(crate) fn new(values: Vec<Vec<ValueAggregate>>, previous_gens_count: usize) -> Self {
-        Self {
-            values,
-            previous_gens_count,
-        }
-    }
-
     pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
         let last_generation_count = GenerationIdx::from(1);
         // TODO: bubble up an overflow error instead of expect
@@ -217,10 +210,6 @@ impl Stream {
     /// Removes empty generations from current values.
     fn remove_empty_generations(&mut self) {
         self.values.retain(|values| !values.is_empty());
-    }
-
-    pub(crate) fn previous_gens_count(&self) -> usize {
-        self.previous_gens_count
     }
 }
 

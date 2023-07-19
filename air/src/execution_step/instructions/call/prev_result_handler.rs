@@ -181,7 +181,7 @@ fn handle_service_error(
     let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
     let service_result_agg_cid = exec_ctx
         .cid_state
-        .insert_value(failed_value.into(), tetraplet, argument_hash)
+        .track_service_result(failed_value.into(), tetraplet, argument_hash)
         .map_err(UncatchableError::from)?;
 
     exec_ctx.record_call_cid(peer_id, &service_result_agg_cid);
@@ -209,7 +209,7 @@ fn try_to_service_result(
 
             let service_result_agg_cid = exec_ctx
                 .cid_state
-                .insert_value(failed_value.into(), tetraplet.clone(), argument_hash.clone())
+                .track_service_result(failed_value.into(), tetraplet.clone(), argument_hash.clone())
                 .map_err(UncatchableError::from)?;
             let error = CallResult::failed(service_result_agg_cid);
 

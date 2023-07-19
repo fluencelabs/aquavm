@@ -48,12 +48,12 @@ pub fn simple_value_aggregate_cid(
 ) -> Rc<CID<ServiceResultCidAggregate>> {
     let value_cid = cid_state
         .value_tracker
-        .record_value(Rc::new(result.into()))
+        .track_value(Rc::new(result.into()))
         .unwrap();
     let tetraplet = SecurityTetraplet::default();
     let tetraplet_cid = cid_state
         .tetraplet_tracker
-        .record_value(Rc::new(tetraplet))
+        .track_value(Rc::new(tetraplet))
         .unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
@@ -62,7 +62,7 @@ pub fn simple_value_aggregate_cid(
     };
     cid_state
         .service_result_agg_tracker
-        .record_value(Rc::new(service_result_agg))
+        .track_value(Rc::new(service_result_agg))
         .unwrap()
 }
 
@@ -74,11 +74,11 @@ pub fn value_aggregate_cid(
 ) -> Rc<CID<ServiceResultCidAggregate>> {
     let value_cid = cid_state
         .value_tracker
-        .record_value(Rc::new(result.into()))
+        .track_value(Rc::new(result.into()))
         .unwrap();
     let tetraplet_cid = cid_state
         .tetraplet_tracker
-        .record_value(Rc::new(tetraplet))
+        .track_value(Rc::new(tetraplet))
         .unwrap();
 
     let arguments = serde_json::Value::Array(args);
@@ -92,7 +92,7 @@ pub fn value_aggregate_cid(
 
     cid_state
         .service_result_agg_tracker
-        .record_value(Rc::new(service_result_agg))
+        .track_value(Rc::new(service_result_agg))
         .unwrap()
 }
 
@@ -169,7 +169,7 @@ pub fn canon_tracked(
         .expect("Malformed canon input");
     let tetraplet_cid = cid_state
         .tetraplet_tracker
-        .record_value(canon_input.tetraplet.clone())
+        .track_value(canon_input.tetraplet.clone())
         .unwrap_or_else(|e| {
             panic!(
                 "{:?}: failed to compute CID of {:?}",
@@ -180,13 +180,13 @@ pub fn canon_tracked(
         .values
         .iter()
         .map(|value| {
-            let value_cid = cid_state.value_tracker.record_value(value.result.clone())?;
+            let value_cid = cid_state.value_tracker.track_value(value.result.clone())?;
             let tetraplet_cid = cid_state
                 .tetraplet_tracker
-                .record_value(value.tetraplet.clone())?;
+                .track_value(value.tetraplet.clone())?;
             cid_state
                 .canon_element_tracker
-                .record_value(CanonCidAggregate {
+                .track_value(CanonCidAggregate {
                     value: value_cid,
                     tetraplet: tetraplet_cid,
                     provenance: value.provenance.clone().unwrap_or_else(Provenance::literal),
@@ -198,7 +198,7 @@ pub fn canon_tracked(
     let canon_result = CanonResultCidAggregate::new(tetraplet_cid, value_cids);
     let canon_result_cid = cid_state
         .canon_result_tracker
-        .record_value(canon_result.clone())
+        .track_value(canon_result.clone())
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_result));
     ExecutedState::Canon(CanonResult::new(canon_result_cid))
 }

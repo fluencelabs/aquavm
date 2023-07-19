@@ -19,7 +19,6 @@ use crate::execution_step::ValueAggregate;
 use crate::JValue;
 use crate::UncatchableError;
 
-use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::CanonResultCidAggregate;
@@ -45,24 +44,6 @@ impl ExecutionCidState {
         Self::default()
     }
 
-    pub fn insert_value(
-        &mut self,
-        value: Rc<JValue>,
-        tetraplet: RcSecurityTetraplet,
-        argument_hash: Rc<str>,
-    ) -> Result<Rc<CID<ServiceResultCidAggregate>>, CidCalculationError> {
-        let value_cid = self.value_tracker.record_value(value)?;
-        let tetraplet_cid = self.tetraplet_tracker.record_value(tetraplet)?;
-
-        let service_result_agg = ServiceResultCidAggregate {
-            value_cid,
-            argument_hash,
-            tetraplet_cid,
-        };
-
-        self.service_result_agg_tracker.record_value(service_result_agg)
-    }
-
     pub(crate) fn from_cid_info(prev_cid_info: CidInfo, current_cid_info: CidInfo) -> Self {
         let value_tracker = CidTracker::from_cid_stores(prev_cid_info.value_store, current_cid_info.value_store);
         let tetraplet_tracker =
@@ -83,6 +64,34 @@ impl ExecutionCidState {
             canon_result_tracker,
             service_result_agg_tracker,
         }
+    }
+
+    pub fn track_service_result(
+        &mut self,
+        value: Rc<JValue>,
+        tetraplet: RcSecurityTetraplet,
+        argument_hash: Rc<str>,
+    ) -> Result<Rc<CID<ServiceResultCidAggregate>>, UncatchableError> {
+        let value_cid = self.value_tracker.track_value(value)?;
+        let tetraplet_cid = self.tetraplet_tracker.track_value(tetraplet)?;
+        let service_result_agg = ServiceResultCidAggregate::new(value_cid, argument_hash, tetraplet_cid);
+
+        self.service_result_agg_tracker
+            .track_value(service_result_agg)
+            .map_err(UncatchableError::from)
+    }
+
+    pub(crate) fn track_canon_value(
+        &mut self,
+        canon_value: &ValueAggregate,
+    ) -> Result<Rc<CID<CanonCidAggregate>>, UncatchableError> {
+        let value_cid = self.value_tracker.track_value(canon_value.get_result().clone())?;
+        let tetraplet = self.tetraplet_tracker.track_value(canon_value.get_tetraplet())?;
+
+        let canon_value_aggregate = CanonCidAggregate::new(value_cid, tetraplet, canon_value.get_provenance());
+        self.canon_element_tracker
+            .track_value(canon_value_aggregate)
+            .map_err(UncatchableError::from)
     }
 
     pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<Rc<JValue>, UncatchableError> {

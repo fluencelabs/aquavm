@@ -41,7 +41,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
             let service_result_agg_cid = exec_ctx
                 .cid_state
-                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
+                .track_service_result(executed_result.result.clone(), tetraplet, argument_hash)
                 .map_err(UncatchableError::from)?;
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
@@ -53,7 +53,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
             let service_result_agg_cid = exec_ctx
                 .cid_state
-                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
+                .track_service_result(executed_result.result.clone(), tetraplet, argument_hash)
                 .map_err(UncatchableError::from)?;
 
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
