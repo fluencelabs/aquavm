@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_interpreter_signatures::{CidTracker, PeerCidTracker};
+use air_interpreter_signatures::PeerCidTracker;
 use air_test_framework::{ephemeral::PeerId, AirScriptExecutor};
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
@@ -36,7 +36,8 @@ fn test_signature_empty() {
     let res = exec.execute_one(init_peer_name).unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
 
-    let expected_signature: air_interpreter_signatures::Signature = keypair.sign(br#"[[],""]"#).unwrap().into();
+    let data = borsh::to_vec(&(vec![""; 0],"")).unwrap();
+    let expected_signature: air_interpreter_signatures::Signature = keypair.sign(&data).unwrap().into();
 
     let data = data_from_result(&res);
     let signature = data.signatures.get(&keypair.public().into());

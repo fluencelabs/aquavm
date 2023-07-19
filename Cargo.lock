@@ -319,6 +319,7 @@ dependencies = [
  "air-trace-handler",
  "air-utils",
  "aquavm-air-parser",
+ "borsh",
  "concat-idents",
  "criterion 0.3.6",
  "csv",
