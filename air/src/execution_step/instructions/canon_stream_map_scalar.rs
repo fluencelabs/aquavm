@@ -94,7 +94,7 @@ fn get_stream_or_default_function<'obj, 'n: 'obj>(
         exec_ctx
             .stream_maps
             .get_mut(stream_map_name, position)
-            .map(|stream_map| stream_map.get_unique_map_keys_stream())
+            .map(|stream_map| Cow::Owned(stream_map.create_unique_keys_stream()))
             .or_else(<_>::default)
             .unwrap()
     })
