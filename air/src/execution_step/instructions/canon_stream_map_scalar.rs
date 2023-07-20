@@ -51,8 +51,9 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
                 handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => {
-                let create_canon_stream = create_canon_stream_closure(self.stream_map.name, self.stream_map.position);
-                handle_unseen_canon(epilog, &create_canon_stream, &self.peer_id, exec_ctx, trace_ctx)
+                let create_canon_producer =
+                    create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
+                handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
     }
@@ -83,7 +84,7 @@ fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<Can
 /// The result closure creates canon stream based on the underlying stream or an empty stream
 /// if no stream created yet. The latter is crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346.
-fn create_canon_stream_closure<'closure, 'name: 'closure>(
+fn create_canon_stream_producer<'closure, 'name: 'closure>(
     stream_map_name: &'name str,
     position: AirPos,
 ) -> Box<CreateCanonStreamClosure<'closure>> {
