@@ -119,6 +119,34 @@ impl CanonResultCidAggregate {
     }
 }
 
+impl CanonCidAggregate {
+    pub fn new(
+        value: Rc<CID<serde_json::Value>>,
+        tetraplet: Rc<CID<SecurityTetraplet>>,
+        provenance: Provenance,
+    ) -> Self {
+        Self {
+            value,
+            tetraplet,
+            provenance,
+        }
+    }
+}
+
+impl ServiceResultCidAggregate {
+    pub fn new(
+        value_cid: Rc<CID<JValue>>,
+        argument_hash: Rc<str>,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    ) -> Self {
+        Self {
+            value_cid,
+            argument_hash,
+            tetraplet_cid,
+        }
+    }
+}
+
 impl Provenance {
     #[inline]
     pub fn literal() -> Self {

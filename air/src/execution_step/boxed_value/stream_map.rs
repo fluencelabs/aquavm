@@ -81,32 +81,18 @@ impl StreamMap {
         &mut self.stream
     }
 
-    // TODO: change the implementation to mutate the underlying stream
-    // instead of creating a new one
-    pub(crate) fn create_unique_keys_stream(&self) -> Stream {
+    /// Returns an iterator to values with unique keys.
+    pub(crate) fn iter_unique_key(&self) -> impl Iterator<Item = &ValueAggregate> {
         use std::collections::HashSet;
 
         let mut met_keys = HashSet::new();
 
-        // unwrap is safe because slice_iter always returns Some if supplied generations are valid
-        let new_values = self
-            .stream
-            .slice_iter(Generation::Nth(0.into()), Generation::Last)
-            .unwrap()
-            .map(|values| {
-                values
-                    .iter()
-                    .filter(|v| {
-                        StreamMapKey::from_kvpair(v)
-                            .map(|key| met_keys.insert(key))
-                            .unwrap_or(false)
-                    })
-                    .cloned()
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-
-        Stream::new(new_values, self.stream.previous_gens_count())
+        // it's always possible to go through all values
+        self.stream.iter(Generation::Last).unwrap().filter(move |value| {
+            StreamMapKey::from_kvpair(value)
+                .map(|key| met_keys.insert(key))
+                .unwrap_or(false)
+        })
     }
 }
 
@@ -270,8 +256,7 @@ mod test {
             );
         }
 
-        let unique_keys_only = stream_map.create_unique_keys_stream();
-        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+        let mut iter = stream_map.iter_unique_key();
 
         assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
         assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
@@ -295,8 +280,7 @@ mod test {
         insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
         insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
 
-        let unique_keys_only = stream_map.create_unique_keys_stream();
-        let mut iter = unique_keys_only.iter(Generation::Last).unwrap();
+        let mut iter = stream_map.iter_unique_key();
 
         assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
         assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
