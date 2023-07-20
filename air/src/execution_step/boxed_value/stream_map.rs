@@ -256,12 +256,12 @@ mod test {
             );
         }
 
-        let mut unique_keys_iter = stream_map.iter_unique_key();
+        let mut iter = stream_map.iter_unique_key();
 
-        assert_eq!(&json!(0), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(1), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(2), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(unique_keys_iter.next(), None);
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
@@ -280,12 +280,12 @@ mod test {
         insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
         insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
 
-        let mut unique_keys_iter = stream_map.iter_unique_key();
+        let mut iter = stream_map.iter_unique_key();
 
-        assert_eq!(&json!(0), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(2), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(3), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(1), unique_keys_iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(unique_keys_iter.next(), None);
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
     }
 }
