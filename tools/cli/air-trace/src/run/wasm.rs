@@ -33,7 +33,7 @@ impl AirRunner for WasmAvmRunner {
         tracing_params: String,
         tracing_output_mode: u8,
     ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
-        Ok(self.0.call_tracing(
+        let call_result = self.0.call_tracing(
             air,
             prev_data,
             data,
@@ -44,7 +44,12 @@ impl AirRunner for WasmAvmRunner {
             call_results,
             tracing_params,
             tracing_output_mode,
-        )?)
+        );
+
+        let memory_stats = self.0.memory_stats();
+        tracing::warn!(memory_size = memory_stats.memory_size);
+
+        Ok(call_result?)
     }
 }
 

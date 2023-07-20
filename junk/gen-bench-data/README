@@ -1,0 +1,8 @@
+Generate data for certain benchmarks.
+
++ signatures_multiple_cids
+  Lot of CIDs for single peer
++ signatures_multiple_sigs
+  Lot of peers with small number of CIDs
++ lot of own signatures
+  No, it doesn't seem to matter: all the sets are recreated.

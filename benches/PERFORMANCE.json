@@ -1,0 +1,37 @@
+{
+  "d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f": {
+    "benches": {
+      "multiple-sigs200": {
+        "comment": "signing multiple CIDs",
+        "memory_sizes": [
+          "147.688 MiB",
+          "147.688 MiB"
+        ],
+        "stats": {
+          "air::farewell_step::outcome::from_success_result": {
+            "common_prefix": "air::farewell_step::outcome",
+            "duration": "50.70ms",
+            "nested": {
+              "populate_outcome_from_contexts": "47.17ms"
+            }
+          },
+          "air::preparation_step::preparation::prepare": {
+            "common_prefix": "",
+            "duration": "62.72ms",
+            "nested": {
+              "air::preparation_step::preparation::make_exec_ctx": "14.00µs",
+              "air_interpreter_data::interpreter_data::serde_json::from_slice": "62.47ms",
+              "air_parser::parser::air_parser::parse": "64.00µs"
+            }
+          },
+          "air::runner::execute": "107.60ms"
+        },
+        "total_time": "221.02ms"
+      }
+    },
+    "datetime": "2023-07-20 10:48:41.929973+00:00",
+    "features": "",
+    "platform": "macOS-13.4.1-arm64-arm-64bit",
+    "version": "0.32.0"
+  }
+}

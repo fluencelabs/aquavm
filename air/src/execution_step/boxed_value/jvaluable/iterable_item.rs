@@ -87,7 +87,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         // these clones are needed because rust-sdk allows passing arguments only by value
         match self {
             RefRef((_, tetraplet, _)) => {
-                let tetraplet = tetraplet.deref().clone();
+                let tetraplet = (*tetraplet).clone();
                 vec![tetraplet]
             }
             RefValue((_, tetraplet, _)) => vec![tetraplet.clone()],
