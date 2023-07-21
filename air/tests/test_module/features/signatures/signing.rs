@@ -36,7 +36,7 @@ fn test_signature_empty() {
     let res = exec.execute_one(init_peer_name).unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
 
-    let data = borsh::to_vec(&(vec![""; 0],"")).unwrap();
+    let data = borsh::to_vec(&(vec![""; 0], "")).unwrap();
     let expected_signature: air_interpreter_signatures::Signature = keypair.sign(&data).unwrap().into();
 
     let data = data_from_result(&res);
