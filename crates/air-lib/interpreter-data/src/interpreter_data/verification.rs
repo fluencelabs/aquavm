@@ -15,10 +15,16 @@
  */
 
 pub use super::errors::DataVerifierError;
-use crate::{CanonResult, CidInfo, ExecutedState, ExecutionTrace, InterpreterData};
+use crate::CanonResult;
+use crate::CidInfo;
+use crate::ExecutedState;
+use crate::ExecutionTrace;
+use crate::InterpreterData;
 
 use air_interpreter_cid::CID;
-use air_interpreter_signatures::{PublicKey, Signature, SignatureStore};
+use air_interpreter_signatures::PublicKey;
+use air_interpreter_signatures::Signature;
+use air_interpreter_signatures::SignatureStore;
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -92,6 +98,8 @@ impl<'data> DataVerifier<'data> {
     ///
     /// If the multisets are of same size, they have to be equal.
     // TODO enforce merging only verified sets
+    // The result is same regardless argument order, so "prevous/current" terminology
+    // is not used deliberately.
     pub fn merge(mut self, other: Self) -> Result<SignatureStore, DataVerifierError> {
         use std::collections::hash_map::Entry::*;
 
@@ -102,7 +110,7 @@ impl<'data> DataVerifier<'data> {
                     debug_assert_eq!(other_info.public_key, our_info_ent.get().public_key);
 
                     if our_info_ent.get().cids.len() < other_info.cids.len() {
-                        // the merged map countains largest set for each peer_id
+                        // the merged map contains the largest set for each peer_id
                         //
                         // this code assumes that a peer only adds CIDs to its set, so CID multisets
                         //   are growing-only; but it is additionally checked below
