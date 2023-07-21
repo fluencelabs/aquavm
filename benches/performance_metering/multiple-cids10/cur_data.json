@@ -1,0 +1,1034 @@
+{
+"interpreter_version": "0.32.0",
+"lcid": 100,
+"r_streams": {},
+"streams": {
+"$stream": 100
+},
+"trace": [
+{
+"call": {
+"executed": {
+"scalar": [
+"val0",
+"val1",
+"val2",
+"val3",
+"val4",
+"val5",
+"val6",
+"val7",
+"val8",
+"val9"
+]
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 0,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 1,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 2,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 3,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 4,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 5,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 6,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 7,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 8,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 9,
+"value": "val0"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 10,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 11,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 12,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 13,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 14,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 15,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 16,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 17,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 18,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 19,
+"value": "val1"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 20,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 21,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 22,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 23,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 24,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 25,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 26,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 27,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 28,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 29,
+"value": "val2"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 30,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 31,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 32,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 33,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 34,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 35,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 36,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 37,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 38,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 39,
+"value": "val3"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 40,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 41,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 42,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 43,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 44,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 45,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 46,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 47,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 48,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 49,
+"value": "val4"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 50,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 51,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 52,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 53,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 54,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 55,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 56,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 57,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 58,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 59,
+"value": "val5"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 60,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 61,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 62,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 63,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 64,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 65,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 66,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 67,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 68,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 69,
+"value": "val6"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 70,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 71,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 72,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 73,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 74,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 75,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 76,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 77,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 78,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 79,
+"value": "val7"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 80,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 81,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 82,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 83,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 84,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 85,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 86,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 87,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 88,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 89,
+"value": "val8"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 90,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 91,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 92,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 93,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 94,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 95,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 96,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 97,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 98,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 99,
+"value": "val9"
+}
+}
+}
+},
+{
+"call": {
+"sent_by": "other_peer_id"
+}
+}
+],
+"version": "0.4.1"
+}

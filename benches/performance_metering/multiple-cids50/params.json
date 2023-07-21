@@ -1,0 +1,5 @@
+{
+  "init-peer-id": "init_peer_id",
+  "comment": "verifying multiple CIDs for single peer",
+  "current-peer-id": "init_peer_id"
+}

@@ -17,16 +17,14 @@
 use super::Data;
 
 use air_test_utils::prelude::*;
-use air_test_utils::key_utils::derive_dummy_keypair;
-use air_interpreter_signatures::KeyPair;
 use maplit::hashmap;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-fn create_peers() -> Vec<(KeyPair, String)> {
-    (0..7).map(|n| derive_dummy_keypair(&format!("n{n}"))).collect()
+fn create_peers() -> Vec<String> {
+    (0..7).map(|n| format!("n{n}")).collect()
 }
 
 fn into_hashset(peers: Vec<String>) -> HashSet<String> {
@@ -35,8 +33,8 @@ fn into_hashset(peers: Vec<String>) -> HashSet<String> {
 
 fn client_host_function(
     known_peers: Vec<String>,
-    client_id: String,
-    relay_id: String,
+    client_id: &str,
+    relay_id: &str,
 ) -> (CallServiceClosure, Rc<RefCell<String>>) {
     let all_info = Rc::new(RefCell::new(String::new()));
     let known_peers = JValue::Array(
@@ -46,8 +44,8 @@ fn client_host_function(
             .map(JValue::String)
             .collect::<Vec<_>>(),
     );
-    let client_id = JValue::String(client_id);
-    let relay_id = JValue::String(relay_id);
+    let client_id = json!(client_id);
+    let relay_id = json!(relay_id);
 
     let to_ret_value = Box::new(
         move |service_name: &str, function_name: &str, arguments: Vec<String>| -> JValue {
@@ -126,7 +124,7 @@ fn peer_host_function(
 }
 
 #[rustfmt::skip]
-fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure {
+fn create_peer_host_function(peer_id: impl std::fmt::Display, known_peer_ids: Vec<String>) -> CallServiceClosure {
     let relay_blueprints = (0..=2).map(|id| format!("{peer_id}_blueprint_{id}")).collect::<Vec<_>>();
     let relay_modules = (0..=2).map(|id| format!("{peer_id}_module_{id}")).collect::<Vec<_>>();
     let relay_interfaces = (0..=2).map(|id| format!("{peer_id}_interface_{id}")).collect::<Vec<_>>();
@@ -142,7 +140,7 @@ fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> Ca
 }
 
 struct AVMState {
-    vm: TestRunner<NativeAirRunner>,
+    vm: TestRunner,
     peer_id: String,
     prev_result: Vec<u8>,
 }
@@ -150,31 +148,27 @@ struct AVMState {
 pub(crate) fn dashboard() -> super::Data {
     let script = include_str!("dashboard/dashboard.air");
 
-    let known_peer_keys = create_peers();
-    let known_peer_ids: Vec<_> = known_peer_keys.iter().map(|(_, id)| id.clone()).collect();
+    let known_peer_ids = create_peers();
 
-    let client_name = "client_id";
-    let relay_name = "relay_id";
-
-    let (client_key, client_id) = derive_dummy_keypair(client_name);
-    let (relay_key, relay_id) = derive_dummy_keypair(relay_name);
+    let client_id = "client_id";
+    let relay_id = "relay_id";
 
     let (host_function, all_info) =
         client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
-    let mut client = create_avm_with_key::<NativeAirRunner>(client_key, host_function);
-    let mut relay = create_avm_with_key::<NativeAirRunner>(
-        relay_key.clone(),
+    let mut client = create_avm(host_function, client_id);
+    let mut relay = create_avm(
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
+        relay_id,
     );
 
-    let mut known_peers = known_peer_keys
+    let mut known_peers = known_peer_ids
         .iter()
         .cloned()
-        .map(|(peer_key, peer_id)| {
-            let vm = create_avm_with_key::<NativeAirRunner>(
-                peer_key,
+        .map(|peer_id| {
+            let vm = create_avm(
                 create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
+                peer_id.clone(),
             );
             AVMState {
                 vm,
@@ -184,13 +178,13 @@ pub(crate) fn dashboard() -> super::Data {
         })
         .collect::<Vec<_>>();
 
-    let test_params = TestRunParameters::from_init_peer_id(client_id.clone()).with_particle_id(super::PARTICLE_ID);
+    let test_params = TestRunParameters::from_init_peer_id(client_id.clone());
 
     // -> client 1
     let client_1_result = checked_call_vm!(client, test_params.clone(), script, "", "");
     let next_peer_pks = into_hashset(client_1_result.next_peer_pks);
     let mut all_peer_pks = into_hashset(known_peer_ids);
-    all_peer_pks.insert(relay_id.clone());
+    all_peer_pks.insert(relay_id.to_owned());
     assert_eq!(next_peer_pks, all_peer_pks);
 
     // client 1 -> relay 1
@@ -202,8 +196,8 @@ pub(crate) fn dashboard() -> super::Data {
         ""
     );
     let next_peer_pks = into_hashset(relay_1_result.next_peer_pks.clone());
-    all_peer_pks.remove(&relay_id);
-    all_peer_pks.insert(client_id.clone());
+    all_peer_pks.remove(relay_id);
+    all_peer_pks.insert(client_id.to_owned());
     assert_eq!(next_peer_pks, all_peer_pks);
 
     // relay 1 -> client 2
@@ -265,7 +259,7 @@ pub(crate) fn dashboard() -> super::Data {
         )
     }
 
-    all_peer_pks.remove(&client_id);
+    all_peer_pks.remove(client_id);
     all_peer_pks.insert(relay_id.to_string());
 
     let mut relay_3_result = relay_2_result;
@@ -373,11 +367,9 @@ pub(crate) fn dashboard() -> super::Data {
         cur_data: known_peers.first().unwrap().prev_result.clone(),
         params_json: hashmap! {
             "comment".to_owned() => "big dashboard test".to_owned(),
-            "particle-id".to_owned() => super::PARTICLE_ID.to_owned(),
-            "current-peer-id".to_owned() => relay_id,
-            "init-peer-id".to_owned() => client_id,
+            "current-peer-id".to_owned() => relay_id.to_owned(),
+            "init-peer-id".to_owned() => client_id.to_owned(),
         },
         call_results: None,
-        keypair: bs58::encode(relay_key.to_vec()).into_string(),
     }
 }

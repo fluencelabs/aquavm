@@ -1,0 +1,5 @@
+{
+  "comment": "big dashboard test",
+  "current-peer-id": "relay_id",
+  "init-peer-id": "client_id"
+}

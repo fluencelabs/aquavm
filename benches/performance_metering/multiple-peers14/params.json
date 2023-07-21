@@ -1,5 +1,5 @@
 {
-  "comment": "signing multiple CIDs",
   "current-peer-id": "init_peer_id",
+  "comment": "verifying many CIDs for many peers",
   "init-peer-id": "init_peer_id"
 }

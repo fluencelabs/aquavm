@@ -7,10 +7,8 @@ use maplit::hashmap;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-const PARTICLE_ID: &str = "0123456789ABCDEF";
-
-// mod dashboard;
-// mod network_explore;
+mod dashboard;
+mod network_explore;
 
 #[derive(Debug, Parser)]
 struct Cli {
@@ -23,32 +21,32 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Bench {
-    // MultipleCids10,
-    // MultipleCids50,
-    // MultiplePeers5,
-    // MultiplePeers14,
-    // MultiplePeers25,
-    // MultipleSigs10,
-    // MultipleSigs50,
+    MultipleCids10,
+    MultipleCids50,
+    MultiplePeers5,
+    MultiplePeers14,
+    MultiplePeers25,
+    MultipleSigs10,
+    MultipleSigs50,
     MultipleSigs200,
-    // Dashboard,
-    // NetworkExplore,
+    Dashboard,
+    NetworkExplore,
 }
 
 fn main() {
     let args = Cli::parse();
 
     let data = match args.bench {
-        // Bench::MultipleCids10 => multiple_cids(10),
-        // Bench::MultipleCids50 => multiple_cids(50),
-        // Bench::MultiplePeers5 => multiple_peers(5),
-        // Bench::MultiplePeers14 => multiple_peers(14),
-        // Bench::MultiplePeers25 => multiple_peers(25),
-        // Bench::MultipleSigs10 => multiple_sigs(10),
-        // Bench::MultipleSigs50 => multiple_sigs(50),
+        Bench::MultipleCids10 => multiple_cids(10),
+        Bench::MultipleCids50 => multiple_cids(50),
+        Bench::MultiplePeers5 => multiple_peers(5),
+        Bench::MultiplePeers14 => multiple_peers(14),
+        Bench::MultiplePeers25 => multiple_peers(25),
+        Bench::MultipleSigs10 => multiple_sigs(10),
+        Bench::MultipleSigs50 => multiple_sigs(50),
         Bench::MultipleSigs200 => multiple_sigs(200),
-        // Bench::Dashboard => dashboard::dashboard(),
-        // Bench::NetworkExplore => network_explore::network_explore(),
+        Bench::Dashboard => dashboard::dashboard(),
+        Bench::NetworkExplore => network_explore::network_explore(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -62,7 +60,11 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     save_file(dest_dir, "script.air", &data.air)?;
     save_file(dest_dir, "prev_data.json", &reformat_json(&data.prev_data))?;
     save_file(dest_dir, "cur_data.json", &reformat_json(&data.cur_data))?;
-    save_file(dest_dir, "params.json", &serde_json::to_vec_pretty(&data.params_json)?)?;
+    save_file(
+        dest_dir,
+        "params.json",
+        &serde_json::to_vec_pretty(&data.params_json)?,
+    )?;
 
     Ok(())
 }
@@ -79,7 +81,11 @@ fn reformat_json(data: &[u8]) -> Vec<u8> {
     out
 }
 
-fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> Result<(), Box<dyn std::error::Error>>{
+fn save_file(
+    dest_dir: &Path,
+    filename: &str,
+    data: impl AsRef<[u8]>,
+) -> Result<(), Box<dyn std::error::Error>> {
     use std::fs::*;
     use std::io::prelude::*;
 
@@ -110,7 +116,8 @@ fn multiple_cids(size: usize) -> Data {
         vec![],
         vec![],
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
     let cur_res = exec.execute_one("other_peer_id").unwrap();
@@ -125,7 +132,6 @@ fn multiple_cids(size: usize) -> Data {
         cur_data: cur_res.data,
         params_json: hashmap! {
             "comment".to_owned() => "verifying multiple CIDs for single peer".to_owned(),
-            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
         },
@@ -134,7 +140,7 @@ fn multiple_cids(size: usize) -> Data {
 }
 
 fn multiple_peers(size: usize) -> Data {
-    let data = (0..size).map(|n| format!(r#"@"p{}""#, n)).join(",");
+    let data = (0..size).map(|n| format!(r#""p{}""#, n)).join(",");
     let peers: Vec<_> = (0..size).map(|n| format!("p{}", n).into()).collect();
     let air_script = format!(include_str!("multiple_peers.air.tmpl"), data = data);
 
@@ -143,7 +149,8 @@ fn multiple_peers(size: usize) -> Data {
         vec![],
         peers.clone(),
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
 
@@ -161,7 +168,6 @@ fn multiple_peers(size: usize) -> Data {
         cur_data: cur_res.data,
         params_json: hashmap! {
             "comment".to_owned() => "verifying many CIDs for many peers".to_owned(),
-            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
         },
@@ -178,7 +184,8 @@ fn multiple_sigs(size: usize) -> Data {
         vec![],
         vec![],
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
     let cur_res = exec.execute_one("other_peer_id").unwrap();
@@ -193,7 +200,6 @@ fn multiple_sigs(size: usize) -> Data {
         cur_data: cur_res.data,
         params_json: hashmap! {
             "comment".to_owned() => "signing multiple CIDs".to_owned(),
-            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
         },

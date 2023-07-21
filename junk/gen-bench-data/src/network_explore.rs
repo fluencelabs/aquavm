@@ -16,23 +16,16 @@
 
 use super::Data;
 
-use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use maplit::hashmap;
 
 pub(crate) fn network_explore() -> Data {
-    let relay_name = "relay_id";
-    let client_name = "client_id";
+    let relay_id = "relay_id";
+    let client_id = "client_id";
 
-    let client_1_name = "client_1_id";
-    let client_2_name = "client_2_id";
-    let client_3_name = "client_3_id";
-
-    let (relay_key, relay_id) = derive_dummy_keypair(relay_name);
-    let (client_key, client_id) = derive_dummy_keypair(client_name);
-    let (client_1_key, client_1_id) = derive_dummy_keypair(client_1_name);
-    let (client_2_key, client_2_id) = derive_dummy_keypair(client_2_name);
-    let (client_3_key, client_3_id) = derive_dummy_keypair(client_3_name);
+    let client_1_id = "client_1_id";
+    let client_2_id = "client_2_id";
+    let client_3_id = "client_3_id";
 
     let set_variables_state = maplit::hashmap!(
         "relay".to_string() => json!(&relay_id),
@@ -41,39 +34,31 @@ pub(crate) fn network_explore() -> Data {
 
     let client_call_service =
         set_variables_call_service(set_variables_state, VariableOptionSource::Argument(0));
-    let mut client = create_avm_with_key::<NativeAirRunner>(client_key, client_call_service);
+    let mut client = create_avm(client_call_service, client_id);
 
     let relay_call_service =
         set_variable_call_service(json!([&client_1_id, &client_2_id, &client_3_id, &relay_id]));
-    let mut relay = create_avm_with_key::<NativeAirRunner>(relay_key.clone(), relay_call_service);
+    let mut relay = create_avm(relay_call_service, relay_id.clone());
 
     let client_1_call_service =
         set_variable_call_service(json!([&client_1_id, &client_3_id, &relay_id, &client_2_id]));
-    let mut client_1 = create_avm_with_key::<NativeAirRunner>(client_1_key, client_1_call_service);
+    let mut client_1 = create_avm(client_1_call_service, client_1_id);
 
     let client_2_call_service =
         set_variable_call_service(json!([&relay_id, &client_3_id, &client_1_id, &client_2_id]));
-    let mut client_2 = create_avm_with_key::<NativeAirRunner>(client_2_key, client_2_call_service);
+    let mut client_2 = create_avm(client_2_call_service, client_2_id);
 
     let client_3_call_service =
         set_variable_call_service(json!([&relay_id, &client_3_id, &client_1_id, &client_2_id]));
-    let mut client_3 = create_avm_with_key::<NativeAirRunner>(client_3_key, client_3_call_service);
+    let mut client_3 = create_avm(client_3_call_service, client_3_id);
 
     let raw_script = include_str!("network_explore.air");
 
     // kind of hack: transform peer id in calls
-    let script = {
-        let network = air_test_framework::Network::<NativeAirRunner>::new(
-            std::iter::empty::<air_test_framework::ephemeral::PeerId>(),
-            vec![],
-        );
-        let transformed_script =
-            air_test_framework::TransformedAirScript::new(raw_script, network).unwrap();
-        &(*transformed_script).to_string()
-    };
+    let script = raw_script;
 
     let client_result = checked_call_vm!(client, <_>::default(), script, "", "");
-    assert_next_pks!(&client_result.next_peer_pks, &[relay_id.as_str()]);
+    assert_next_pks!(&client_result.next_peer_pks, &[relay_id]);
 
     let relay_result = checked_call_vm!(
         relay,
@@ -82,7 +67,7 @@ pub(crate) fn network_explore() -> Data {
         "",
         client_result.data.clone()
     );
-    assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id.as_str()]);
+    assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id]);
 
     let client_1_result = checked_call_vm!(
         client_1,
@@ -91,7 +76,7 @@ pub(crate) fn network_explore() -> Data {
         "",
         relay_result.data.clone()
     );
-    assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id.as_str()]);
+    assert_next_pks!(&client_1_result.next_peer_pks, &[client_2_id]);
 
     let client_2_result = checked_call_vm!(
         client_2,
@@ -100,7 +85,7 @@ pub(crate) fn network_explore() -> Data {
         "",
         client_1_result.data.clone()
     );
-    assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id.as_str()]);
+    assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id]);
 
     let client_3_result = checked_call_vm!(
         client_3,
@@ -109,7 +94,7 @@ pub(crate) fn network_explore() -> Data {
         "",
         client_2_result.data.clone()
     );
-    assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id.as_str()]);
+    assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
     let relay_result = checked_call_vm!(
         relay,
@@ -118,7 +103,7 @@ pub(crate) fn network_explore() -> Data {
         relay_result.data,
         client_3_result.data.clone()
     );
-    // assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id.as_str()]);
+    // assert_next_pks!(&relay_result.next_peer_pks, &[client_1_id]);
 
     let client_1_result = checked_call_vm!(
         client_1,
@@ -127,7 +112,7 @@ pub(crate) fn network_explore() -> Data {
         client_1_result.data,
         relay_result.data.clone()
     );
-    // assert_next_pks!(&client_1_result.next_peer_pks, &[client_3_id.as_str()]);
+    // assert_next_pks!(&client_1_result.next_peer_pks, &[client_3_id]);
 
     let client_3_result = checked_call_vm!(
         client_3,
@@ -136,7 +121,7 @@ pub(crate) fn network_explore() -> Data {
         client_3_result.data,
         client_1_result.data
     );
-    // assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id.as_str()]);
+    // assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
     let relay_result = checked_call_vm!(
         relay,
@@ -145,7 +130,7 @@ pub(crate) fn network_explore() -> Data {
         relay_result.data,
         client_3_result.data.clone()
     );
-    assert_next_pks!(&relay_result.next_peer_pks, &[client_2_id.as_str()]);
+    assert_next_pks!(&relay_result.next_peer_pks, &[client_2_id]);
 
     let client_2_result = checked_call_vm!(
         client_2,
@@ -154,7 +139,7 @@ pub(crate) fn network_explore() -> Data {
         client_2_result.data,
         relay_result.data.clone()
     );
-    assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id.as_str()]);
+    assert_next_pks!(&client_2_result.next_peer_pks, &[client_3_id]);
 
     let client_3_result = checked_call_vm!(
         client_3,
@@ -163,7 +148,7 @@ pub(crate) fn network_explore() -> Data {
         client_3_result.data,
         client_2_result.data.clone()
     );
-    assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id.as_str()]);
+    assert_next_pks!(&client_3_result.next_peer_pks, &[relay_id]);
 
     Data {
         air: script.to_string(),
@@ -171,11 +156,9 @@ pub(crate) fn network_explore() -> Data {
         cur_data: client_3_result.data,
         params_json: hashmap! {
             "comment".to_owned() => "5 peers of network are discovered".to_owned(),
-            "particle-id".to_owned() => "".to_owned(),
-            "current-peer-id".to_owned() => relay_id,
+            "current-peer-id".to_owned() => relay_id.to_owned(),
             "init-peer-id".to_owned() => "".to_owned(),
         },
         call_results: None,
-        keypair: bs58::encode(relay_key.to_vec()).into_string(),
     }
 }

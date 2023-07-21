@@ -1,0 +1,296 @@
+{
+"interpreter_version": "0.32.0",
+"lcid": 5,
+"r_streams": {},
+"streams": {
+"$neighs_inner": 4,
+"$services": 4
+},
+"trace": [
+{
+"call": {
+"executed": {
+"scalar": "relay_id"
+}
+}
+},
+{
+"call": {
+"executed": {
+"scalar": "client_id"
+}
+}
+},
+{
+"call": {
+"executed": {
+"scalar": [
+"client_1_id",
+"client_2_id",
+"client_3_id",
+"relay_id"
+]
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 0,
+"value": [
+"client_1_id",
+"client_3_id",
+"relay_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 1,
+"value": [
+"relay_id",
+"client_3_id",
+"client_1_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 2,
+"value": [
+"relay_id",
+"client_3_id",
+"client_1_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 3,
+"value": [
+"client_1_id",
+"client_2_id",
+"client_3_id",
+"relay_id"
+]
+}
+}
+}
+},
+{
+"fold": {
+"lore": [
+{
+"desc": [
+{
+"len": 4,
+"pos": 8
+},
+{
+"len": 0,
+"pos": 12
+}
+],
+"pos": 3
+},
+{
+"desc": [
+{
+"len": 3,
+"pos": 12
+},
+{
+"len": 0,
+"pos": 15
+}
+],
+"pos": 4
+},
+{
+"desc": [
+{
+"len": 3,
+"pos": 15
+},
+{
+"len": 0,
+"pos": 18
+}
+],
+"pos": 5
+},
+{
+"desc": [
+{
+"len": 2,
+"pos": 18
+},
+{
+"len": 0,
+"pos": 20
+}
+],
+"pos": 6
+}
+]
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 1,
+"value": [
+"client_1_id",
+"client_3_id",
+"relay_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 2,
+"value": [
+"relay_id",
+"client_3_id",
+"client_1_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 3,
+"value": [
+"client_1_id",
+"client_2_id",
+"client_3_id",
+"relay_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"sent_by": "relay_id"
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 0,
+"value": [
+"client_1_id",
+"client_2_id",
+"client_3_id",
+"relay_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 2,
+"value": [
+"relay_id",
+"client_3_id",
+"client_1_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"sent_by": "client_3_id"
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 0,
+"value": [
+"client_1_id",
+"client_2_id",
+"client_3_id",
+"relay_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 2,
+"value": [
+"relay_id",
+"client_3_id",
+"client_1_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"sent_by": "client_3_id"
+}
+},
+{
+"call": {
+"executed": {
+"stream": {
+"generation": 1,
+"value": [
+"client_1_id",
+"client_3_id",
+"relay_id",
+"client_2_id"
+]
+}
+}
+}
+},
+{
+"call": {
+"sent_by": "client_1_id"
+}
+}
+],
+"version": "0.4.1"
+}
