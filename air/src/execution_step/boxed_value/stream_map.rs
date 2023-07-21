@@ -25,7 +25,6 @@ use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
-use std::borrow::Cow;
 use std::rc::Rc;
 
 pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
@@ -82,8 +81,18 @@ impl StreamMap {
         &mut self.stream
     }
 
-    pub(crate) fn get_unique_map_keys_stream(&mut self) -> Cow<'_, Stream> {
-        self.stream.get_unique_map_keys_stream()
+    /// Returns an iterator to values with unique keys.
+    pub(crate) fn iter_unique_key(&self) -> impl Iterator<Item = &ValueAggregate> {
+        use std::collections::HashSet;
+
+        let mut met_keys = HashSet::new();
+
+        // it's always possible to go through all values
+        self.stream.iter(Generation::Last).unwrap().filter(move |value| {
+            StreamMapKey::from_kvpair(value)
+                .map(|key| met_keys.insert(key))
+                .unwrap_or(false)
+        })
     }
 }
 
@@ -202,5 +211,81 @@ mod test {
         let examplar = from_key_value(key4, value.as_ref());
         assert_eq!(*v, *examplar.as_ref());
         assert_eq!(internal_stream_iter.next(), None);
+    }
+
+    fn generate_key_values(count: usize) -> Vec<(String, ValueAggregate)> {
+        (0..count)
+            .map(|id| {
+                let key = id.to_string();
+                let value = json!(id);
+                let value = ValueAggregate::new(
+                    Rc::new(value),
+                    <_>::default(),
+                    0.into(),
+                    air_interpreter_data::Provenance::literal(),
+                );
+
+                (key, value)
+            })
+            .collect()
+    }
+
+    fn insert_into_map(
+        stream_map: &mut StreamMap,
+        key_value: &(String, ValueAggregate),
+        generation: Generation,
+        source: ValueSource,
+    ) {
+        stream_map
+            .insert(key_value.0.as_str().into(), &key_value.1, generation, source)
+            .unwrap();
+    }
+
+    #[test]
+    fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
+        const TEST_DATA_SIZE: usize = 3;
+        let key_values = generate_key_values(TEST_DATA_SIZE);
+        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+
+        for id in 0..3 {
+            insert_into_map(
+                &mut stream_map,
+                &key_values[id],
+                Generation::nth(id as u32),
+                ValueSource::CurrentData,
+            );
+        }
+
+        let mut iter = stream_map.iter_unique_key();
+
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn get_unique_map_keys_stream_removes_duplicates() {
+        use ValueSource::CurrentData;
+
+        const TEST_DATA_SIZE: usize = 5;
+        let key_values = generate_key_values(TEST_DATA_SIZE);
+
+        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(0), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(1), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(1), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(3), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(4), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
+        insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
+
+        let mut iter = stream_map.iter_unique_key();
+
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        assert_eq!(iter.next(), None);
     }
 }

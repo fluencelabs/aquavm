@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-use super::canon::handle_seen_canon;
-use super::canon::handle_unseen_canon;
-use super::canon::GetStreamClosure;
+use super::canon_utils::handle_seen_canon;
+use super::canon_utils::handle_unseen_canon;
+use super::canon_utils::CanonEpilogClosure;
+use super::canon_utils::CreateCanonStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::instructions::canon::CanonEpilogClosure;
-use crate::execution_step::instructions::canon::StreamWithSerializedView;
 use crate::execution_step::CanonResultAggregate;
-use crate::execution_step::Stream;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 use crate::UncatchableError;
 
+use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResult;
+use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast;
 use air_parser::AirPos;
 use air_trace_handler::merger::MergerCanonResult;
@@ -42,60 +43,59 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(call, exec_ctx, trace_ctx);
+        let epilog = &epilog_closure(self.scalar.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
-
-        let epilog: &CanonEpilogClosure<'_> = &|stream_with_positions: StreamWithSerializedView,
-                                                exec_ctx: &mut ExecutionCtx<'_>,
-                                                trace_ctx: &mut TraceHandler|
-         -> ExecutionResult<()> {
-            let StreamWithSerializedView {
-                canon_stream,
-                canon_result_cid,
-            } = stream_with_positions;
-
-            let value = JValuable::as_jvalue(&&canon_stream).into_owned();
-            let tetraplet = canon_stream.tetraplet().clone();
-            let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-            let value = CanonResultAggregate::new(
-                Rc::new(value),
-                tetraplet.peer_pk.as_str().into(),
-                &tetraplet.json_path,
-                position,
-            );
-            let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
-
-            exec_ctx.scalars.set_scalar_value(self.scalar.name, result)?;
-            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
-            Ok(())
-        };
 
         match canon_result {
             MergerCanonResult::CanonResult(canon_result_cid) => {
                 handle_seen_canon(&self.peer_id, epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => {
-                let get_stream_or_default: Box<GetStreamClosure<'_>> =
-                    get_stream_or_default_function(self.stream_map.name, self.stream_map.position);
-                handle_unseen_canon(epilog, &get_stream_or_default, &self.peer_id, exec_ctx, trace_ctx)
+                let create_canon_producer =
+                    create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
+                handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
     }
 }
 
-/// The resulting closure gets underlying stream from a StreamMap in a context
-/// or returns a default empty stream,
-/// it is crucial for deterministic behaviour, for more info see
+fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<CanonEpilogClosure<'closure>> {
+    Box::new(
+        move |canon_stream: CanonStream,
+              canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
+              exec_ctx: &mut ExecutionCtx<'_>,
+              trace_ctx: &mut TraceHandler|
+              -> ExecutionResult<()> {
+            let value = JValuable::as_jvalue(&&canon_stream).into_owned();
+            let tetraplet = canon_stream.tetraplet();
+            let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+            let peer_pk = tetraplet.peer_pk.as_str().into();
+
+            let value = CanonResultAggregate::new(Rc::new(value), peer_pk, &tetraplet.json_path, position);
+            let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
+
+            exec_ctx.scalars.set_scalar_value(scalar_name, result)?;
+            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            Ok(())
+        },
+    )
+}
+
+/// The result closure creates canon stream based on the underlying stream or an empty stream
+/// if no stream created yet. The latter is crucial for deterministic behaviour, for more info see
 /// github.com/fluencelabs/aquavm/issues/346.
-fn get_stream_or_default_function<'obj, 'n: 'obj>(
-    stream_map_name: &'n str,
+fn create_canon_stream_producer<'closure, 'name: 'closure>(
+    stream_map_name: &'name str,
     position: AirPos,
-) -> Box<GetStreamClosure<'obj>> {
-    Box::new(move |exec_ctx: &mut ExecutionCtx<'_>| -> Cow<'_, Stream> {
-        exec_ctx
+) -> Box<CreateCanonStreamClosure<'closure>> {
+    Box::new(move |exec_ctx: &mut ExecutionCtx<'_>, peer_pk: String| -> CanonStream {
+        let stream_map = exec_ctx
             .stream_maps
             .get_mut(stream_map_name, position)
-            .map(|stream_map| stream_map.get_unique_map_keys_stream())
-            .or_else(<_>::default)
-            .unwrap()
+            .map(|stream_map| Cow::Borrowed(stream_map))
+            .unwrap_or_default();
+
+        let values = stream_map.iter_unique_key().cloned().collect::<Vec<_>>();
+        CanonStream::from_values(values, peer_pk)
     })
 }

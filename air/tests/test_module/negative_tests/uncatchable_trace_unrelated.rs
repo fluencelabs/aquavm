@@ -137,9 +137,9 @@ fn malformed_call_service_failed() {
 
     // Craft an artificial incorrect error result
     let value = json!("error");
-    let value_cid = cid_state.value_tracker.record_value(value.clone()).unwrap();
+    let value_cid = cid_state.value_tracker.track_value(value.clone()).unwrap();
     let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
-    let tetraplet_cid = cid_state.tetraplet_tracker.record_value(tetraplet).unwrap();
+    let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash: "bagaaieraj5j43immfovaya2uxnpzupwl4xwrfk2nryi3vbz4f4irmeqcxfcq".into(),
@@ -147,7 +147,7 @@ fn malformed_call_service_failed() {
     };
     let service_result_agg_cid = cid_state
         .service_result_agg_tracker
-        .record_value(service_result_agg)
+        .track_value(service_result_agg)
         .unwrap();
 
     let trace = ExecutionTrace::from(vec![ExecutedState::Call(CallResult::Failed(service_result_agg_cid))]);

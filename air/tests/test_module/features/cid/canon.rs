@@ -273,7 +273,7 @@ fn test_canon_root_tetraplet_not_found() {
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
-        .record_value(SecurityTetraplet::literal_tetraplet(other_peer_id))
+        .track_value(SecurityTetraplet::literal_tetraplet(other_peer_id))
         .unwrap();
 
     cid_state.tetraplet_tracker = fake_tetraplet_tracker;
@@ -330,7 +330,7 @@ fn test_canon_tetraplet_not_found() {
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
-        .record_value(SecurityTetraplet::literal_tetraplet(init_peer_id))
+        .track_value(SecurityTetraplet::literal_tetraplet(init_peer_id))
         .unwrap();
 
     cid_state.tetraplet_tracker = fake_tetraplet_tracker;

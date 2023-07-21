@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-pub mod verification;
 pub(crate) mod errors;
+pub mod verification;
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;

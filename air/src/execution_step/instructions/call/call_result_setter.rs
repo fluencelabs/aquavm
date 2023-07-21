@@ -39,10 +39,10 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
     match output {
         CallOutputValue::Scalar(scalar) => {
             let peer_id = tetraplet.peer_pk.clone();
-            let service_result_agg_cid = exec_ctx
-                .cid_state
-                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
-                .map_err(UncatchableError::from)?;
+            let service_result_agg_cid =
+                exec_ctx
+                    .cid_state
+                    .track_service_result(executed_result.result.clone(), tetraplet, argument_hash)?;
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
             exec_ctx.scalars.set_scalar_value(scalar.name, executed_result)?;
@@ -51,10 +51,10 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
         }
         CallOutputValue::Stream(stream) => {
             let peer_id = tetraplet.peer_pk.clone();
-            let service_result_agg_cid = exec_ctx
-                .cid_state
-                .insert_value(executed_result.result.clone(), tetraplet, argument_hash)
-                .map_err(UncatchableError::from)?;
+            let service_result_agg_cid =
+                exec_ctx
+                    .cid_state
+                    .track_service_result(executed_result.result.clone(), tetraplet, argument_hash)?;
 
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
