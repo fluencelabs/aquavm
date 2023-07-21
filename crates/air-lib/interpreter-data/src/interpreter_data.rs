@@ -15,6 +15,7 @@
  */
 
 pub mod verification;
+pub(crate) mod errors;
 
 use super::GlobalStreamGens;
 use super::RestrictedStreamGens;

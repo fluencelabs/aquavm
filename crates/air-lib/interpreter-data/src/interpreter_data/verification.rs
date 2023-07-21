@@ -14,44 +14,16 @@
  * limitations under the License.
  */
 
+pub use super::errors::DataVerifierError;
 use crate::{CanonResult, CidInfo, ExecutedState, ExecutionTrace, InterpreterData};
 
 use air_interpreter_cid::CID;
 use air_interpreter_signatures::{PublicKey, Signature, SignatureStore};
-use thiserror::Error as ThisError;
 
 use std::collections::HashMap;
 use std::rc::Rc;
 
 const CANNOT_HAPPEN_IN_VERIFIED_CID_STORE: &str = "cannot happen in a checked CID store";
-
-#[derive(Debug, ThisError)]
-pub enum DataVerifierError {
-    #[error(transparent)]
-    MalformedKey(fluence_keypair::error::DecodingError),
-
-    #[error(transparent)]
-    MalformedSignature(fluence_keypair::error::DecodingError),
-
-    #[error("peer_id doens't match any available public key: {0:?}")]
-    PeerIdNotFound(String),
-
-    #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
-    SignatureMismatch {
-        error: Box<fluence_keypair::error::VerificationError>,
-        cids: Vec<Box<str>>,
-        peer_id: String,
-    },
-
-    #[error(
-        "inconsistent CID multisets on merge for peer {peer_id:?}, prev: {larger_cids:?}, current: {smaller_cids:?}"
-    )]
-    MergeMismatch {
-        peer_id: String,
-        larger_cids: Vec<Box<str>>,
-        smaller_cids: Vec<Box<str>>,
-    },
-}
 
 /// An util for verificating particular data's signatures.
 pub struct DataVerifier<'data> {
