@@ -54,6 +54,9 @@ pub(crate) fn handle_seen_canon(
         .iter()
         .map(|canon_value_cid| exec_ctx.cid_state.get_canon_value_by_cid(canon_value_cid))
         .collect::<Result<Vec<_>, _>>()?;
+
+    populate_seen_cid_context(exec_ctx, &tetraplet.peer_pk, &canon_result_cid);
+
     let canon_stream = CanonStream::new(values, tetraplet);
 
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)
@@ -81,11 +84,19 @@ pub(crate) fn handle_unseen_canon(
     }
 
     let canon_stream = create_canon_stream(exec_ctx, peer_id);
-    let canon_result_cid = populate_cid_context(exec_ctx, &canon_stream)?;
+    let canon_result_cid = populate_unseen_cid_context(exec_ctx, &canon_stream)?;
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)
 }
 
-fn populate_cid_context(
+fn populate_seen_cid_context(
+    exec_ctx: &mut ExecutionCtx<'_>,
+    peer_id: &str,
+    canon_result_cid: &Rc<CID<CanonResultCidAggregate>>,
+) {
+    exec_ctx.record_canon_cid(peer_id, canon_result_cid)
+}
+
+fn populate_unseen_cid_context(
     exec_ctx: &mut ExecutionCtx<'_>,
     canon_stream: &CanonStream,
 ) -> ExecutionResult<Rc<CID<CanonResultCidAggregate>>> {
