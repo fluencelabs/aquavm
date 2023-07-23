@@ -41,7 +41,7 @@ def main():
         action='store_false',
         dest='prepare_binaries',
     )
-    run_subparser.add_argument("--tracing-params", type=str, default="trace")
+    run_subparser.add_argument("--tracing-params", type=str, default="info")
 
     args = parser.parse_args()
 
