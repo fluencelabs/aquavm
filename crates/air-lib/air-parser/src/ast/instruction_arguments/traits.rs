@@ -44,6 +44,7 @@ impl fmt::Display for ImmutableValue<'_> {
             EmptyArray => write!(f, "[]"),
             Variable(variable) => write!(f, "{variable}"),
             VariableWithLambda(variable) => write!(f, "{variable}"),
+            CanonStreamMapIndex(canon_stream_map_index) => write!(f, "{canon_stream_map_index}"),
         }
     }
 }

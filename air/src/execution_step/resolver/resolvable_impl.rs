@@ -53,6 +53,7 @@ impl Resolvable for ast::ImmutableValue<'_> {
             EmptyArray => resolve_const(json!([]), ctx),
             Variable(variable) => variable.resolve(ctx),
             VariableWithLambda(variable) => variable.resolve(ctx),
+            CanonStreamMapIndex(canon_stream_map_index) => canon_stream_map_index.resolve(ctx),
         }
     }
 }

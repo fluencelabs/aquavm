@@ -261,6 +261,7 @@ Value: ImmutableValue<'input> = {
     <scalar:ScalarWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::scalar(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => ImmutableValue::Variable(ImmutableVariable::canon_stream(canon_stream.0, canon_stream.1)),
     <canon_stream:CanonStreamWithLambda> => ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map_index:CanonStreamMapIndex> => ImmutableValue::CanonStreamMapIndex(canon_stream_map_index),
 }
 
 ApArgument: ApArgument<'input> = {
