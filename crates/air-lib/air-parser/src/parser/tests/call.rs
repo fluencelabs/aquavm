@@ -756,31 +756,29 @@ fn parse_function_from_canon_stream_map_index() {
     );
 }
 
-// #[test]
-// fn parse_args_from_canon_stream_map_index() {
-//     let source_code = r#"
-//         (call peer ("service_id" "function_name") [#%canon["arg"]])
-//         "#;
+#[test]
+fn parse_args_from_canon_stream_map_index() {
+    let source_code = r#"
+        (call peer ("service_id" "function_name") [#%canon["arg"]])
+        "#;
 
-//     let actual = parse(source_code);
+    let actual = parse(source_code);
 
-//     let canon_stream_map = CanonStreamMap::new("#%canon", 21.into());
-//     let index = StreamMapKeyClause::Literal("function_name");
-//     let expected = call(
-//         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer", 15.into())),
-//         ResolvableToStringVariable::Literal("service_id"),
-//         ResolvableToStringVariable::Literal("function_name"),
+    let canon_stream_map = CanonStreamMap::new("#%canon", 52.into());
+    let index = StreamMapKeyClause::Literal("arg");
+    let expected = call(
+        ResolvableToPeerIdVariable::Scalar(Scalar::new("peer", 15.into())),
+        ResolvableToStringVariable::Literal("service_id"),
+        ResolvableToStringVariable::Literal("function_name"),
+        Rc::new(vec![ImmutableValue::CanonStreamMapIndex(
+            CanonStreamMapIndex::new(canon_stream_map, index),
+        )]),
+        CallOutputValue::None,
+    );
 
-//         Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
-//             "arg",
-//             61.into(),
-//         ))]),
-//         CallOutputValue::None,
-//     );
-
-//     assert_eq!(
-//         actual, expected,
-//         "actual:\n{:#?}\n expected {:#?}",
-//         actual, expected
-//     );
-// }
+    assert_eq!(
+        actual, expected,
+        "actual:\n{:#?}\n expected {:#?}",
+        actual, expected
+    );
+}

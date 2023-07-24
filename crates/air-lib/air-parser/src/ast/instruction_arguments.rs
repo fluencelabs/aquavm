@@ -81,6 +81,7 @@ pub enum ImmutableValue<'i> {
     EmptyArray, // only empty arrays are allowed now
     Variable(ImmutableVariable<'i>),
     VariableWithLambda(ImmutableVariableWithLambda<'i>),
+    CanonStreamMapIndex(CanonStreamMapIndex<'i>),
 }
 
 #[derive(Serialize, Debug, PartialEq, Eq, Clone)]
