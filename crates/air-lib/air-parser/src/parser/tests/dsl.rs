@@ -200,7 +200,7 @@ pub(super) fn ap<'i>(argument: ApArgument<'i>, result: ApResult<'i>) -> Instruct
 }
 
 pub(super) fn ap_with_map<'i>(
-    key: ApMapKey<'i>,
+    key: StreamMapKeyClause<'i>,
     argument: ApArgument<'i>,
     result: StreamMap<'i>,
 ) -> Instruction<'i> {
@@ -232,6 +232,18 @@ pub(super) fn canon_stream_map_scalar<'i>(
         peer_id: peer_pk,
         stream_map,
         scalar,
+    })
+}
+
+pub(super) fn canon_stream_map_canon_map<'i>(
+    peer_pk: ResolvableToPeerIdVariable<'i>,
+    stream_map: StreamMap<'i>,
+    canon_stream_map: CanonStreamMap<'i>,
+) -> Instruction<'i> {
+    Instruction::CanonMap(CanonMap {
+        peer_id: peer_pk,
+        stream_map,
+        canon_stream_map,
     })
 }
 

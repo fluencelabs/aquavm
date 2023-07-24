@@ -37,6 +37,7 @@ enum MetTag {
     StreamMap,
     Canon,
     CanonStream,
+    CanonStreamMap,
 }
 
 #[derive(Debug)]
@@ -315,6 +316,10 @@ impl<'input> CallVariableParser<'input> {
                 name,
                 position: self.start_pos,
             },
+            MetTag::CanonStreamMap => Token::CanonStreamMap {
+                name,
+                position: self.start_pos,
+            },
             MetTag::StreamMap => Token::StreamMap {
                 name,
                 position: self.start_pos,
@@ -335,6 +340,11 @@ impl<'input> CallVariableParser<'input> {
                 position: self.start_pos,
             },
             MetTag::CanonStream | MetTag::Canon => Token::CanonStreamWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            },
+            MetTag::CanonStreamMap => Token::CanonStreamMapWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
@@ -423,6 +433,7 @@ impl MetTag {
     fn deduce_tag(&self, tag: char) -> Self {
         match tag {
             '$' if self.is_canon() => Self::CanonStream,
+            '%' => Self::CanonStreamMap,
             _ => self.to_owned(),
         }
     }
@@ -431,13 +442,9 @@ impl MetTag {
         matches!(self, Self::Canon)
     }
 
-    fn is_canon_stream(&self) -> bool {
-        matches!(self, Self::CanonStream)
+    fn is_canon_type(&self) -> bool {
+        matches!(self, Self::CanonStream | Self::CanonStreamMap)
     }
-
-    // fn is_canon_stream_map(&self) -> bool {
-    //     matches!(self, Self::CanonStreamMap)
-    // }
 
     fn is_tag(&self) -> bool {
         !matches!(self, Self::None)

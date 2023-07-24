@@ -42,6 +42,7 @@ pub enum ResolvableToPeerIdVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapIndex(CanonStreamMapIndex<'i>),
 }
 
 /// Contains all variable variants that could be resolved to a string type.
@@ -52,6 +53,7 @@ pub enum ResolvableToStringVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapIndex(CanonStreamMapIndex<'i>),
 }
 
 /// Triplet represents a location of the executable code in the network.
@@ -106,6 +108,7 @@ pub enum ApArgument<'i> {
     CanonStreamMap(CanonStreamMap<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
     CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
+    CanonStreamMapIndex(CanonStreamMapIndex<'i>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -116,13 +119,23 @@ pub enum ApResult<'i> {
     Stream(Stream<'i>),
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum ApMapKey<'i> {
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum StreamMapKeyClause<'i> {
     Literal(&'i str),
-    Number(Number),
+    Int(i64),
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+}
+
+/// StreamMapIndex is a pair of stream map and index
+/// that describes Stream Map index accessor.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct CanonStreamMapIndex<'i> {
+    #[serde(borrow)]
+    pub canon_stream_map: CanonStreamMap<'i>,
+    #[serde(borrow)]
+    pub index: StreamMapKeyClause<'i>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

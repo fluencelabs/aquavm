@@ -16,6 +16,7 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::CanonStreamMapError;
 use crate::StreamMapError;
 use crate::ToErrorCode;
 
@@ -102,6 +103,10 @@ pub enum UncatchableError {
     /// Stream map related errors.
     #[error(transparent)]
     StreamMapError(#[from] StreamMapError),
+
+    /// CanonStreamMap related errors.
+    #[error(transparent)]
+    CanonStreamMapError(#[from] CanonStreamMapError),
 }
 
 impl ToErrorCode for UncatchableError {

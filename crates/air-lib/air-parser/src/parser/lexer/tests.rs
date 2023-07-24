@@ -522,7 +522,17 @@ fn invalid_lambda_numbers() {
 
     lexer_test(
         LAMBDA,
-        Single(Err(LexerError::is_not_alphanumeric(6.into()..6.into()))),
+        All(vec![
+            Err(LexerError::is_not_alphanumeric(6.into()..6.into())),
+            Ok((7.into(), Token::OpenSquareBracket, 8.into())),
+            Err(LexerError::is_not_alphanumeric(9.into()..9.into())),
+            Ok((10.into(), Token::OpenSquareBracket, 11.into())),
+            Ok((11.into(), Token::CloseSquareBracket, 12.into())),
+            Ok((12.into(), Token::OpenRoundBracket, 13.into())),
+            Ok((13.into(), Token::CloseRoundBracket, 14.into())),
+            Err(LexerError::is_not_alphanumeric(14.into()..14.into())),
+            Ok((21.into(), Token::CloseSquareBracket, 22.into())),
+        ]),
     );
 }
 
@@ -655,5 +665,42 @@ fn match_with_empty_array__() {
                 Ok((15.into(), Token::CloseSquareBracket, 16.into())),
             ],
         ),
+    );
+}
+
+#[test]
+fn stream_map_index() {
+    lexer_test(
+        r#"#%canon["key"]"#,
+        All(vec![
+            Ok((
+                0.into(),
+                Token::CanonStreamMap {
+                    name: "#%canon",
+                    position: 0.into(),
+                },
+                7.into(),
+            )),
+            Ok((7.into(), Token::OpenSquareBracket, 8.into())),
+            Ok((8.into(), Token::StringLiteral("key"), 13.into())),
+            Ok((13.into(), Token::CloseSquareBracket, 14.into())),
+        ]),
+    );
+
+    lexer_test(
+        "#%canon[42]",
+        All(vec![
+            Ok((
+                0.into(),
+                Token::CanonStreamMap {
+                    name: "#%canon",
+                    position: 0.into(),
+                },
+                7.into(),
+            )),
+            Ok((7.into(), Token::OpenSquareBracket, 8.into())),
+            Ok((8.into(), Token::I64(42), 10.into())),
+            Ok((10.into(), Token::CloseSquareBracket, 11.into())),
+        ]),
     );
 }

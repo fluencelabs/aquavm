@@ -31,11 +31,7 @@ use std::ops::Deref;
 
 impl JValuable for &CanonStreamMap<'_> {
     fn apply_lambda(&self, _lambda: &LambdaAST<'_>, _exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        todo!()
-        // let iter = self.iter().map(|v| v.get_result().deref());
-        // let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
-
-        // Ok(select_result.result)
+        unimplemented!("apply_lambda for CanonStreamMap is not implemented") // WIP
     }
 
     fn apply_lambda_with_tetraplets(
@@ -80,7 +76,6 @@ impl JValuable for &CanonStreamMap<'_> {
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
-        todo!()
-        // self.iter().map(|r| r.get_tetraplet()).collect()
+        self.iter().map(|r| r.get_tetraplet()).collect()
     }
 }
