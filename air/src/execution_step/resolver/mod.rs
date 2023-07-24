@@ -16,6 +16,8 @@
 
 mod resolvable_impl;
 
+pub(crate) use resolvable_impl::index_to_value_aggregate;
+
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::RcSecurityTetraplets;

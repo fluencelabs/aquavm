@@ -15,22 +15,23 @@
  */
 
 // use super::Stream;
-use super::{CanonStream, ValueAggregate};
+use super::CanonStream;
+use super::ValueAggregate;
 // use crate::execution_step::Generation;
 // use crate::JValue;
 
 use crate::execution_step::ExecutionResult;
+use crate::JValue;
 use crate::StreamMapError::UnsupportedKVPairObjectOrMapKeyType;
 use crate::UncatchableError;
-use crate::JValue;
 // use air_interpreter_cid::CID;
 // use air_interpreter_data::CanonResultCidAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+use crate::CanonStreamMapError::IndexIsAbsentInTheMap;
+use crate::CanonStreamMapError::NonexistentMappingIdx;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResultCidAggregate;
 use polyplets::SecurityTetraplet;
-// use serde::Deserialize;
-// use serde::Serialize;
 
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -77,16 +78,6 @@ impl<'l> CanonStreamMap<'l> {
         })
     }
 
-    // pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
-    //     // it's always possible to iter over all generations of a stream
-    //     let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
-    //     let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
-    //     Self {
-    //         values,
-    //         tetraplet: Rc::new(tetraplet),
-    //     }
-    // }
-
     pub(crate) fn len(&self) -> usize {
         self.values.len()
     }
@@ -117,6 +108,18 @@ impl<'l> CanonStreamMap<'l> {
     pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
         &self.tetraplet
     }
+
+    pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<&ValueAggregate> {
+        let &value_array_idx = self
+            .map
+            .get(stream_map_key)
+            .ok_or(UncatchableError::CanonStreamMapError(IndexIsAbsentInTheMap))?; // WIP change the error
+        Ok(self
+            .values
+            .get(value_array_idx)
+            .ok_or(UncatchableError::CanonStreamMapError(NonexistentMappingIdx))?)
+        // WIP negative
+    }
 }
 
 use std::fmt;
@@ -133,7 +136,6 @@ impl fmt::Display for CanonStreamMap<'_> {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-// #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStreamMapWithProvenance<'a> {
     pub(crate) canon_stream_map: CanonStreamMap<'a>,
     pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
@@ -143,6 +145,10 @@ pub struct CanonStreamMapWithProvenance<'a> {
 impl<'a> CanonStreamMapWithProvenance<'a> {
     pub(crate) fn new(canon_stream_map: CanonStreamMap<'a>, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
         Self { canon_stream_map, cid }
+    }
+
+    pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<&ValueAggregate> {
+        self.canon_stream_map.index(stream_map_key)
     }
 }
 

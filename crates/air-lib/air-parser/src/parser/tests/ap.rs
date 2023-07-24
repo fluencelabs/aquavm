@@ -200,7 +200,7 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApMapKey::Literal(key_name),
+        StreamMapKeyClause::Literal(key_name),
         ApArgument::Literal(value),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
@@ -215,7 +215,7 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApMapKey::Scalar(Scalar::new(
+        StreamMapKeyClause::Scalar(Scalar::new(
             key_name,
             source_code.find(key_name).unwrap().into(),
         )),
@@ -231,7 +231,7 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApMapKey::Literal(key_name),
+        StreamMapKeyClause::Literal(key_name),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
@@ -246,7 +246,7 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApMapKey::Scalar(Scalar::new(
+        StreamMapKeyClause::Scalar(Scalar::new(
             key_name,
             source_code.find(key_name).unwrap().into(),
         )),
@@ -263,9 +263,119 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        ApMapKey::Number(Number::Int(key_name)),
+        StreamMapKeyClause::Int(key_name),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
+    );
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream_map_index_literal_key() {
+    let source_code = format!(
+        r#"
+        (ap #%canon["key"] scalar)
+    "#
+    );
+    let actual = parse(source_code.as_str());
+
+    let canon_stream_map = CanonStreamMap {
+        name: "#%canon",
+        position: 13.into(),
+    };
+    let index = StreamMapKeyClause::Literal("key");
+    let canon_map_index = CanonStreamMapIndex {
+        canon_stream_map,
+        index,
+    };
+    let expected = ap(
+        ApArgument::CanonStreamMapIndex(canon_map_index),
+        ApResult::Scalar(Scalar::new("scalar", 28.into())),
+    );
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream_map_index_scalar_key() {
+    let source_code = format!(
+        r#"
+        (ap #%canon[key_scalar] scalar)
+    "#
+    );
+    let actual = parse(source_code.as_str());
+
+    let canon_stream_map = CanonStreamMap {
+        name: "#%canon",
+        position: 13.into(),
+    };
+    let index = StreamMapKeyClause::Scalar(Scalar::new("key_scalar", 21.into()));
+    let canon_map_index = CanonStreamMapIndex {
+        canon_stream_map,
+        index,
+    };
+    let expected = ap(
+        ApArgument::CanonStreamMapIndex(canon_map_index),
+        ApResult::Scalar(Scalar::new("scalar", 33.into())),
+    );
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream_map_index_scalar_w_l_key() {
+    let source_code = format!(
+        r#"
+        (ap #%canon[key_scalar.$.key] scalar)
+    "#
+    );
+    let actual = parse(source_code.as_str());
+
+    let canon_stream_map = CanonStreamMap {
+        name: "#%canon",
+        position: 13.into(),
+    };
+    let lambda =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName { field_name: "key" }])
+            .unwrap();
+    let scalar_w_lambda = ScalarWithLambda::new("key_scalar", lambda, 21.into());
+    let index = StreamMapKeyClause::ScalarWithLambda(scalar_w_lambda);
+    let canon_map_index = CanonStreamMapIndex {
+        canon_stream_map,
+        index,
+    };
+
+    let expected = ap(
+        ApArgument::CanonStreamMapIndex(canon_map_index),
+        ApResult::Scalar(Scalar::new("scalar", 39.into())),
+    );
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn ap_with_canon_stream_map_index_canon_w_l_key() {
+    let source_code = format!(
+        r#"
+        (ap #%canon[#$canon_stream.$.key] scalar)
+    "#
+    );
+    let actual = parse(source_code.as_str());
+
+    let canon_stream_map = CanonStreamMap {
+        name: "#%canon",
+        position: 13.into(),
+    };
+    let lambda =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName { field_name: "key" }])
+            .unwrap();
+    let canon_w_lambda = CanonStreamWithLambda::new("#$canon_stream", lambda, 21.into());
+    let index = StreamMapKeyClause::CanonStreamWithLambda(canon_w_lambda);
+    let canon_map_index = CanonStreamMapIndex {
+        canon_stream_map,
+        index,
+    };
+
+    let expected = ap(
+        ApArgument::CanonStreamMapIndex(canon_map_index),
+        ApResult::Scalar(Scalar::new("scalar", 43.into())),
     );
     assert_eq!(actual, expected);
 }

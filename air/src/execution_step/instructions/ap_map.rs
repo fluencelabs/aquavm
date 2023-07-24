@@ -24,15 +24,12 @@ use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
-use crate::unsupported_map_key_type;
-use crate::CatchableError;
 use crate::ExecutionError;
 
 use air_interpreter_data::GenerationIdx;
 use air_parser::ast::ApMap;
-use air_parser::ast::ApMapKey;
-use air_parser::ast::Number;
 use air_parser::ast::StreamMap;
+use air_parser::ast::StreamMapKeyClause;
 use air_trace_handler::merger::MergerApResult;
 
 impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
@@ -70,19 +67,16 @@ fn populate_context<'ctx>(
 }
 
 fn resolve_if_needed<'ctx>(
-    key: &ApMapKey<'ctx>,
+    key: &StreamMapKeyClause<'ctx>,
     exec_ctx: &mut ExecutionCtx<'ctx>,
     map_name: &str,
 ) -> Result<StreamMapKey<'ctx>, ExecutionError> {
     match key {
-        &ApMapKey::Literal(s) => Ok(s.into()),
-        ApMapKey::Number(n) => match n {
-            &Number::Int(i) => Ok(i.into()),
-            Number::Float(_) => Err(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into()),
-        },
-        ApMapKey::Scalar(s) => resolve(s, exec_ctx, map_name),
-        ApMapKey::ScalarWithLambda(s) => resolve(s, exec_ctx, map_name),
-        ApMapKey::CanonStreamWithLambda(c) => resolve(c, exec_ctx, map_name),
+        &StreamMapKeyClause::Literal(s) => Ok(s.into()),
+        StreamMapKeyClause::Int(i) => Ok(i.to_owned().into()),
+        StreamMapKeyClause::Scalar(s) => resolve(s, exec_ctx, map_name),
+        StreamMapKeyClause::ScalarWithLambda(s) => resolve(s, exec_ctx, map_name),
+        StreamMapKeyClause::CanonStreamWithLambda(c) => resolve(c, exec_ctx, map_name),
     }
 }
 

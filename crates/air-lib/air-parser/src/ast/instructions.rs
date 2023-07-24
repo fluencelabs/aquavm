@@ -67,7 +67,7 @@ pub struct Ap<'i> {
 /// (ap key value %map)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct ApMap<'i> {
-    pub key: ApMapKey<'i>,
+    pub key: StreamMapKeyClause<'i>,
     pub value: ApArgument<'i>,
     pub map: StreamMap<'i>,
 }
