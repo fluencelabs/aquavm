@@ -231,15 +231,13 @@ fn match_with_canon_stream_map_index() {
 
     let left_canon_stream_map = CanonStreamMap::new("#%canon", 17.into());
     let left_index = StreamMapKeyClause::Literal("left_key");
-    let left_value = ImmutableValue::CanonStreamMapIndex(CanonStreamMapIndex::new(
-        left_canon_stream_map,
-        left_index,
+    let left_value = ImmutableValue::Variable(ImmutableVariable::CanonStreamMapIndex(
+        CanonStreamMapIndex::new(left_canon_stream_map, left_index),
     ));
     let right_canon_stream_map = CanonStreamMap::new("#%canon", 37.into());
     let right_index = StreamMapKeyClause::Literal("right_key");
-    let right_value = ImmutableValue::CanonStreamMapIndex(CanonStreamMapIndex::new(
-        right_canon_stream_map,
-        right_index,
+    let right_value = ImmutableValue::Variable(ImmutableVariable::CanonStreamMapIndex(
+        CanonStreamMapIndex::new(right_canon_stream_map, right_index),
     ));
     let instr = null();
     let expected = match_(left_value, right_value, instr);

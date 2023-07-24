@@ -770,8 +770,11 @@ fn parse_args_from_canon_stream_map_index() {
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer", 15.into())),
         ResolvableToStringVariable::Literal("service_id"),
         ResolvableToStringVariable::Literal("function_name"),
-        Rc::new(vec![ImmutableValue::CanonStreamMapIndex(
-            CanonStreamMapIndex::new(canon_stream_map, index),
+        Rc::new(vec![ImmutableValue::Variable(
+            ImmutableVariable::CanonStreamMapIndex(CanonStreamMapIndex::new(
+                canon_stream_map,
+                index,
+            )),
         )]),
         CallOutputValue::None,
     );

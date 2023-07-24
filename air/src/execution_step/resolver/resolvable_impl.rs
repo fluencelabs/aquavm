@@ -53,7 +53,6 @@ impl Resolvable for ast::ImmutableValue<'_> {
             EmptyArray => resolve_const(json!([]), ctx),
             Variable(variable) => variable.resolve(ctx),
             VariableWithLambda(variable) => variable.resolve(ctx),
-            CanonStreamMapIndex(canon_stream_map_index) => canon_stream_map_index.resolve(ctx),
         }
     }
 }
@@ -123,6 +122,7 @@ impl Resolvable for ast::ImmutableVariable<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
+            Self::CanonStreamMapIndex(canon_stream_map_index) => canon_stream_map_index.resolve(ctx),
         }
     }
 }

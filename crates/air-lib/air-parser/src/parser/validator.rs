@@ -267,9 +267,6 @@ impl<'i> VariableValidator<'i> {
             | EmptyArray => {}
             Variable(variable) => self.met_variable(variable, span),
             VariableWithLambda(variable) => self.met_variable_wl(variable, span),
-            CanonStreamMapIndex(canon_stream_map_index) => {
-                self.met_canon_stream_map_index(canon_stream_map_index, span)
-            }
         }
     }
 
@@ -375,9 +372,6 @@ impl<'i> VariableValidator<'i> {
             | ImmutableValue::EmptyArray => {}
             ImmutableValue::Variable(variable) => self.met_variable(variable, span),
             ImmutableValue::VariableWithLambda(variable) => self.met_variable_wl(variable, span),
-            ImmutableValue::CanonStreamMapIndex(canon_stream_map_index) => {
-                self.met_canon_stream_map_index(canon_stream_map_index, span)
-            }
         }
     }
 
