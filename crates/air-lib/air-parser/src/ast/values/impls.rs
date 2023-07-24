@@ -98,6 +98,9 @@ impl<'i> ImmutableVariable<'i> {
         match self {
             ImmutableVariable::Scalar(scalar) => scalar.name,
             ImmutableVariable::CanonStream(stream) => stream.name,
+            ImmutableVariable::CanonStreamMapIndex(canon_stream_map_index) => {
+                canon_stream_map_index.canon_stream_map.name
+            } // WIP
         }
     }
 }

@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 44bc6dc414a812d71bede799b0682ad3dc1ced5d9046b5731ccbe0e238d90d80
+// sha3: 22cd691d6709870fcd8eae6aa7202354ef5d9468599341bbe60fe0d2879afbad
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -6565,7 +6565,7 @@ fn __action77<
     (_, canon_stream_map_index, _): (AirPos, CanonStreamMapIndex<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
-    ImmutableValue::CanonStreamMapIndex(canon_stream_map_index)
+    ImmutableValue::Variable(ImmutableVariable::CanonStreamMapIndex(canon_stream_map_index))
 }
 
 #[allow(unused_variables)]
