@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::Stream;
 use super::RecursiveCursor;
+use super::Stream;
 use crate::execution_step::boxed_value::Iterable;
 use crate::execution_step::boxed_value::IterableItem;
 use crate::execution_step::boxed_value::IterableVecResolvedCall;
@@ -109,7 +109,7 @@ mod test {
     #[test]
     fn next_iteration_empty_if_no_values() {
         let mut stream = Stream::new();
-        let mut recursive_stream =  RecursiveStream::new();
+        let mut recursive_stream = RecursiveStream::new();
         let iterable_values = recursive_stream.next_iteration(&mut stream);
 
         assert!(iterable_values.is_empty())

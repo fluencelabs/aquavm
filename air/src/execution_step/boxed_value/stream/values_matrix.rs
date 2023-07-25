@@ -24,7 +24,7 @@ use typed_index_collections::TiVec;
 /// generation. And being placed by generations values could be considered as a matrix.
 ///
 /// This matrix is used for values in previous and current data.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub(crate) struct ValuesMatrix<T> {
     /// The first Vec represents generations, the second values in a generation. Generation is a set
     /// of values that interpreter obtained from one particle. It means that number of generation on
@@ -71,7 +71,7 @@ impl<T: Clone> ValuesMatrix<T> {
 }
 
 /// It's intended to handle new values from call results.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub(crate) struct NewValuesMatrix<T>(ValuesMatrix<T>);
 
 impl<T> NewValuesMatrix<T> {
@@ -128,6 +128,18 @@ impl<T: Clone> NewValuesMatrix<T> {
         let last_generation_idx = self.last_generation_idx();
         //println!("  add_to_last_generation {}", last_generation_idx);
         self.0.add_value_to_generation(value, last_generation_idx);
+    }
+}
+
+impl<T> Default for ValuesMatrix<T> {
+    fn default() -> Self {
+        Self { values: TiVec::new() }
+    }
+}
+
+impl<T> Default for NewValuesMatrix<T> {
+    fn default() -> Self {
+        Self(<_>::default())
     }
 }
 

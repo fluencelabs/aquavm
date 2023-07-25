@@ -31,7 +31,7 @@ pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue
     Rc::new(json!({ "key": key, "value": value }))
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct StreamMap {
     stream: Stream,
 }

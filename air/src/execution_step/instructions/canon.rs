@@ -23,7 +23,6 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::CanonStreamWithProvenance;
-use crate::execution_step::Generation;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 

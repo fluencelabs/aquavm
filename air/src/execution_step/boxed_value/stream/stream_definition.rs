@@ -24,7 +24,7 @@ use air_trace_handler::TraceHandler;
 
 /// Streams are CRDT-like append only data structures. They are guaranteed to have locally
 /// the same order of values on each peer.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct Stream<T> {
     /// Values from previous data.
     previous_values: ValuesMatrix<T>,
@@ -133,6 +133,16 @@ impl<'value, T: 'value + TracePosOperate + fmt::Display> Stream<T> {
         }
 
         Ok(())
+    }
+}
+
+impl<T> Default for Stream<T> {
+    fn default() -> Self {
+        Self {
+            previous_values: <_>::default(),
+            current_values: <_>::default(),
+            new_values: <_>::default(),
+        }
     }
 }
 
