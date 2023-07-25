@@ -43,6 +43,7 @@ impl fmt::Display for Instruction<'_> {
             New(new) => write!(f, "{new}"),
             Null(null) => write!(f, "{null}"),
             Error => write!(f, "error"),
+            FoldCanonStreamMap(fold) => write!(f, "{fold}"),
         }
     }
 }
@@ -128,6 +129,12 @@ impl fmt::Display for FoldStream<'_> {
 }
 
 impl fmt::Display for FoldStreamMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fold {} {}", self.iterable, self.iterator)
+    }
+}
+
+impl fmt::Display for FoldCanonStreamMap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "fold {} {}", self.iterable, self.iterator)
     }

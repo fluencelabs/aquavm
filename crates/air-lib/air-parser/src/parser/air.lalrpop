@@ -112,14 +112,21 @@ Instr: Box<Instruction<'input>> = {
     },
 
     <left: @L> "(" fold <stream_map:StreamMap> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
-        let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
+        let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
-
         validator.meet_fold_stream_map(&fold, span);
-
         Box::new(Instruction::FoldStreamMap(fold))
+    },
+
+    <left: @L> "(" fold <canon_stream_map:CanonStreamMap> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
+        let iterable = CanonStreamMap::new(canon_stream_map.0, canon_stream_map.1);
+        let iterator = Scalar::new(iterator.0, iterator.1);
+        let span = Span::new(left, right);
+        let fold = FoldCanonStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        validator.meet_canon_fold_stream_map(&fold, span);
+        Box::new(Instruction::FoldCanonStreamMap(fold))
     },
 
     <left: @L> "(" next <iterator:Scalar> ")" <right: @R> => {
