@@ -193,6 +193,24 @@ impl<'i> FoldStreamMap<'i> {
     }
 }
 
+impl<'i> FoldCanonStreamMap<'i> {
+    pub fn new(
+        iterable: CanonStreamMap<'i>,
+        iterator: Scalar<'i>,
+        instruction: Instruction<'i>,
+        last_instruction: Option<Instruction<'i>>,
+        span: Span,
+    ) -> Self {
+        Self {
+            iterable,
+            iterator,
+            instruction: Rc::new(instruction),
+            last_instruction: last_instruction.map(Rc::new),
+            span,
+        }
+    }
+}
+
 impl<'i> Next<'i> {
     pub fn new(iterator: Scalar<'i>) -> Self {
         Self { iterator }

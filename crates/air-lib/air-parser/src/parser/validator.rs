@@ -133,6 +133,11 @@ impl<'i> VariableValidator<'i> {
         self.met_iterator_definition(&fold.iterator, span);
     }
 
+    pub(super) fn meet_canon_fold_stream_map(&mut self, fold: &FoldCanonStreamMap<'i>, span: Span) {
+        self.met_variable_name(fold.iterable.name, span);
+        self.met_iterator_definition(&fold.iterator, span);
+    }
+
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
         self.not_iterators_candidates
             .push((new.argument.name(), span));

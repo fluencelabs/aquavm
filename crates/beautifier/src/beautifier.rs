@@ -143,6 +143,9 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::FoldStreamMap(fold_stream_map) => {
                 self.beautify_fold_stream_map(fold_stream_map, indent)
             }
+            ast::Instruction::FoldCanonStreamMap(fold_canon_stream_map) => {
+                self.beautify_fold_canon_stream_map(fold_canon_stream_map, indent)
+            }
             ast::Instruction::Never(never) => self.beautify_simple(never, indent),
             ast::Instruction::New(new) => self.beautify_new(new, indent),
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
@@ -242,6 +245,22 @@ impl<W: io::Write> Beautifier<W> {
     fn beautify_fold_stream_map(
         &mut self,
         fold: &ast::FoldStreamMap<'_>,
+        indent: usize,
+    ) -> io::Result<()> {
+        compound!(self, indent, fold);
+        if let Some(last_instruction) = &fold.last_instruction {
+            multiline!(
+                self, indent;
+                "last:";
+                last_instruction
+            );
+        }
+        Ok(())
+    }
+
+    fn beautify_fold_canon_stream_map(
+        &mut self,
+        fold: &ast::FoldCanonStreamMap<'_>,
         indent: usize,
     ) -> io::Result<()> {
         compound!(self, indent, fold);
