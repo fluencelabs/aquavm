@@ -16,12 +16,9 @@
 
 use super::ApResult;
 use super::CallOutputValue;
-use super::CanonStreamMapIndex;
 use super::NewArgument;
 use super::Scalar;
 use super::Stream;
-use super::StreamMapKeyClause;
-use crate::ast::CanonStreamMap;
 use crate::parser::lexer::AirPos;
 
 impl<'i> NewArgument<'i> {
@@ -59,11 +56,5 @@ impl<'i> CallOutputValue<'i> {
 
     pub fn stream(name: &'i str, position: AirPos) -> Self {
         Self::Stream(Stream { name, position })
-    }
-}
-
-impl<'i> CanonStreamMapIndex<'i> {
-    pub fn new(canon_stream_map: CanonStreamMap<'i>, index: StreamMapKeyClause<'i>) -> Self {
-        Self { canon_stream_map, index }
     }
 }

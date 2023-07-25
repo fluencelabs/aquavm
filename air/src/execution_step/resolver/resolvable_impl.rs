@@ -21,7 +21,7 @@ use super::RcSecurityTetraplets;
 use super::Resolvable;
 // use crate::execution_step::ValueAggregate;
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+// use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
 use crate::execution_step::ExecutionResult;
@@ -33,7 +33,7 @@ use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use serde_json::json;
-use std::ops::Deref;
+// use std::ops::Not;
 // use std::ops::Deref;
 use std::rc::Rc;
 
@@ -122,7 +122,6 @@ impl Resolvable for ast::ImmutableVariable<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
-            Self::CanonStreamMapIndex(canon_stream_map_index) => canon_stream_map_index.resolve(ctx),
         }
     }
 }
@@ -168,24 +167,19 @@ impl Resolvable for ast::StreamMapKeyClause<'_> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn index_to_value_aggregate<'a>(
-    canon_stream_map_index: &'a ast::CanonStreamMapIndex<'a>,
-    ctx: &'a ExecutionCtx<'a>,
+    // canon_stream_map_index: &'a ast::CanonStreamMapIndex<'a>,
+    _ctx: &'a ExecutionCtx<'a>,
 ) -> ExecutionResult<(JValue, Rc<SecurityTetraplet>, Provenance)> {
-    let canon_stream_map_name = canon_stream_map_index.canon_stream_map.name;
-    let canon_map = ctx.scalars.get_canon_map(canon_stream_map_name)?;
-    let (key, _, _) = canon_stream_map_index.index.resolve(ctx)?;
-    let key = StreamMapKey::from_value(key, canon_stream_map_name)?;
-    let value_aggregate = canon_map.index(&key)?;
-    let value = value_aggregate.get_result().deref().clone();
-    let provenance = value_aggregate.get_provenance();
-    let tetraplet = value_aggregate.get_tetraplet();
-    Ok((value, tetraplet, provenance))
-}
-
-impl Resolvable for ast::CanonStreamMapIndex<'_> {
-    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
-        let (value, tetraplet, provenance) = index_to_value_aggregate(self, ctx)?;
-        Ok((value, vec![tetraplet], provenance)) // WIP new provenance ?
-    }
+    unimplemented!()
+    // let canon_stream_map_name = canon_stream_map_index.canon_stream_map.name;
+    // let canon_map = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+    // let (key, _, _) = canon_stream_map_index.index.resolve(ctx)?;
+    // let key = StreamMapKey::from_value(key, canon_stream_map_name)?;
+    // let value_aggregate = canon_map.index(&key)?;
+    // let value = value_aggregate.get_result().deref().clone();
+    // let provenance = value_aggregate.get_provenance();
+    // let tetraplet = value_aggregate.get_tetraplet();
+    // Ok((value, tetraplet, provenance))
 }

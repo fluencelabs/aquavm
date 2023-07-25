@@ -16,7 +16,7 @@
 
 use super::*;
 use crate::execution_step::boxed_value::JValuable;
-use crate::execution_step::resolver::index_to_value_aggregate;
+// use crate::execution_step::resolver::index_to_value_aggregate;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::LiteralAggregate;
@@ -50,9 +50,6 @@ pub(crate) fn apply_to_arg(
         CanonStreamWithLambda(canon_stream) => apply_canon_stream_wl(canon_stream, exec_ctx, trace_ctx),
         CanonStreamMap(canon_stream_map) => apply_canon_stream_map(canon_stream_map, exec_ctx, trace_ctx),
         CanonStreamMapWithLambda(canon_stream_map) => apply_canon_stream_map_wl(canon_stream_map, exec_ctx, trace_ctx),
-        CanonStreamMapIndex(cannon_stream_map_index) => {
-            apply_canon_stream_map_index(cannon_stream_map_index, exec_ctx, trace_ctx)
-        }
     }?;
 
     Ok(result)
@@ -206,13 +203,13 @@ fn apply_canon_stream_map_wl(
     Ok(result)
 }
 
-fn apply_canon_stream_map_index(
-    cannon_stream_map_index: &ast::CanonStreamMapIndex<'_>,
-    exec_ctx: &ExecutionCtx<'_>,
-    trace_ctx: &TraceHandler,
-) -> ExecutionResult<ValueAggregate> {
-    let (index_value, tetraplet, provenance) = index_to_value_aggregate(cannon_stream_map_index, exec_ctx)?;
-    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let result = ValueAggregate::new(index_value.into(), tetraplet.into(), position, provenance);
-    Ok(result)
-}
+// fn apply_canon_stream_map_index(
+//     cannon_stream_map_index: &ast::CanonStreamMapIndex<'_>,
+//     exec_ctx: &ExecutionCtx<'_>,
+//     trace_ctx: &TraceHandler,
+// ) -> ExecutionResult<ValueAggregate> {
+//     let (index_value, tetraplet, provenance) = index_to_value_aggregate(cannon_stream_map_index, exec_ctx)?;
+//     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+//     let result = ValueAggregate::new(index_value.into(), tetraplet.into(), position, provenance);
+//     Ok(result)
+// }

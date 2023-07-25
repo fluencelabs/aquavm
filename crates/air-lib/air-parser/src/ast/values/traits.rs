@@ -66,7 +66,6 @@ impl fmt::Display for ImmutableVariable<'_> {
         match self {
             Scalar(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
-            CanonStreamMapIndex(canon_stream_map_index) => write!(f, "{canon_stream_map_index}"),
         }
     }
 }

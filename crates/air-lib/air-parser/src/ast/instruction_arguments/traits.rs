@@ -58,7 +58,6 @@ impl fmt::Display for ResolvableToPeerIdVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
-            CanonStreamMapIndex(canon_stream_map_index) => write!(f, "{canon_stream_map_index}"),
         }
     }
 }
@@ -72,7 +71,6 @@ impl fmt::Display for ResolvableToStringVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
-            CanonStreamMapIndex(canon_stream_map_index) => write!(f, "{canon_stream_map_index}"),
         }
     }
 }
@@ -108,7 +106,6 @@ impl fmt::Display for ApArgument<'_> {
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
             CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
             CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
-            CanonStreamMapIndex(canon_stream_map_index) => write!(f, "{canon_stream_map_index}"),
         }
     }
 }
@@ -124,12 +121,6 @@ impl fmt::Display for StreamMapKeyClause<'_> {
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
         }
-    }
-}
-
-impl fmt::Display for CanonStreamMapIndex<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}[{}]", self.canon_stream_map.name, self.index)
     }
 }
 

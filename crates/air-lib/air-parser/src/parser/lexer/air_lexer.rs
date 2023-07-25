@@ -125,7 +125,6 @@ impl<'input> AIRLexer<'input> {
         let mut end_pos = start_pos;
         let mut round_brackets_balance: i64 = 0;
         let mut square_brackets_balance = i64::from(square_met);
-        let mut dot_met: bool = false;
 
         while let Some((pos, ch)) = self.chars.peek() {
             end_pos = (*pos).into();
@@ -137,9 +136,7 @@ impl<'input> AIRLexer<'input> {
                 &mut square_brackets_balance,
             );
 
-            update_dot_met(ch, &mut dot_met);
-
-            if should_stop(ch, round_brackets_balance, square_brackets_balance, dot_met) {
+            if should_stop(ch, round_brackets_balance, square_brackets_balance) {
                 break;
             }
 
@@ -158,10 +155,6 @@ impl<'input> AIRLexer<'input> {
     }
 }
 
-fn update_dot_met(ch: char, dot_met: &mut bool) {
-    *dot_met = *dot_met || ch == '.';
-}
-
 fn update_brackets_count(
     ch: char,
     round_brackets_balance: &mut i64,
@@ -178,20 +171,8 @@ fn update_brackets_count(
     }
 }
 
-fn is_stream_map_index_start(ch: char, open_square_brackets_balance: i64, dot_met: bool) -> bool {
-    ch == '[' && open_square_brackets_balance == 1 && !dot_met
-}
-
-fn should_stop(
-    ch: char,
-    round_brackets_balance: i64,
-    open_square_brackets_balance: i64,
-    dot_met: bool,
-) -> bool {
-    ch.is_whitespace()
-        || round_brackets_balance < 0
-        || open_square_brackets_balance < 0
-        || is_stream_map_index_start(ch, open_square_brackets_balance, dot_met)
+fn should_stop(ch: char, round_brackets_balance: i64, open_square_brackets_balance: i64) -> bool {
+    ch.is_whitespace() || round_brackets_balance < 0 || open_square_brackets_balance < 0
 }
 
 fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
