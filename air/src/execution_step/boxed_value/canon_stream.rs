@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use super::Stream;
 use super::ValueAggregate;
 use crate::JValue;
 
@@ -41,9 +40,7 @@ impl CanonStream {
         Self { values, tetraplet }
     }
 
-    pub(crate) fn from_stream(stream: &Stream, peer_pk: String) -> Self {
-        // it's always possible to iter over all generations of a stream
-        let values = stream.iter().cloned().collect::<Vec<_>>();
+    pub(crate) fn from_values(values: Vec<ValueAggregate>, peer_pk: String) -> Self {
         let tetraplet = SecurityTetraplet::new(peer_pk, "", "", "");
         Self {
             values,

@@ -78,7 +78,7 @@ impl<Val> CidTracker<Val> {
 }
 
 impl<Val: Serialize> CidTracker<Val> {
-    pub fn record_value(
+    pub fn track_value(
         &mut self,
         value: impl Into<Rc<Val>>,
     ) -> Result<Rc<CID<Val>>, CidCalculationError> {
@@ -123,11 +123,11 @@ mod tests {
     #[test]
     fn test_iter() {
         let mut tracker = CidTracker::new();
-        tracker.record_value(json!("test")).unwrap();
-        tracker.record_value(json!(1)).unwrap();
-        tracker.record_value(json!([1, 2, 3])).unwrap();
+        tracker.track_value(json!("test")).unwrap();
+        tracker.track_value(json!(1)).unwrap();
+        tracker.track_value(json!([1, 2, 3])).unwrap();
         tracker
-            .record_value(json!({
+            .track_value(json!({
                 "key": 42,
             }))
             .unwrap();
@@ -165,11 +165,11 @@ mod tests {
     #[test]
     fn test_store() {
         let mut tracker = CidTracker::new();
-        tracker.record_value(json!("test")).unwrap();
-        tracker.record_value(json!(1)).unwrap();
-        tracker.record_value(json!([1, 2, 3])).unwrap();
+        tracker.track_value(json!("test")).unwrap();
+        tracker.track_value(json!(1)).unwrap();
+        tracker.track_value(json!([1, 2, 3])).unwrap();
         tracker
-            .record_value(json!({
+            .track_value(json!({
                 "key": 42,
             }))
             .unwrap();

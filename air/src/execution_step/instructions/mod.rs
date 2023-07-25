@@ -19,6 +19,7 @@ mod ap_map;
 mod call;
 mod canon;
 mod canon_stream_map_scalar;
+mod canon_utils;
 mod compare_matchable;
 mod fail;
 mod fold;

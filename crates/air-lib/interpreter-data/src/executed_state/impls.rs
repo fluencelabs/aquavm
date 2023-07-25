@@ -47,9 +47,7 @@ impl CallResult {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
-    pub fn executed_stream_stub(
-        cid: Rc<CID<ServiceResultCidAggregate>>,
-    ) -> CallResult {
+    pub fn executed_stream_stub(cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
         let generation = GenerationIdx::stub();
         let value = ValueRef::Stream { cid, generation };
         CallResult::Executed(value)
@@ -122,6 +120,34 @@ impl CanonResultCidAggregate {
         values: Vec<Rc<CID<CanonCidAggregate>>>,
     ) -> Self {
         Self { tetraplet, values }
+    }
+}
+
+impl CanonCidAggregate {
+    pub fn new(
+        value: Rc<CID<serde_json::Value>>,
+        tetraplet: Rc<CID<SecurityTetraplet>>,
+        provenance: Provenance,
+    ) -> Self {
+        Self {
+            value,
+            tetraplet,
+            provenance,
+        }
+    }
+}
+
+impl ServiceResultCidAggregate {
+    pub fn new(
+        value_cid: Rc<CID<JValue>>,
+        argument_hash: Rc<str>,
+        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    ) -> Self {
+        Self {
+            value_cid,
+            argument_hash,
+            tetraplet_cid,
+        }
     }
 }
 
