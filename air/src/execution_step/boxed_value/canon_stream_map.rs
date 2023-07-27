@@ -38,9 +38,7 @@ use std::ops::Deref;
 // use std::ops::Deref;
 use std::rc::Rc;
 
-/// Canon stream is a value type lies between a scalar and a stream, it has the same algebra as
-/// scalars, and represent a stream fixed at some execution point.
-#[allow(dead_code)]
+/// Canon stream map is a map type that is fixed at a certain node.
 #[derive(Debug, Clone)]
 pub struct CanonStreamMap<'a> {
     values: Vec<ValueAggregate>,
@@ -49,33 +47,27 @@ pub struct CanonStreamMap<'a> {
     tetraplet: Rc<SecurityTetraplet>,
 }
 
-fn from_obj_idx_pair<'a>(pair: (usize, &ValueAggregate)) -> ExecutionResult<(StreamMapKey<'a>, usize)> {
+fn from_obj_idx_pair(pair: (usize, &ValueAggregate)) -> ExecutionResult<(StreamMapKey<'_>, usize)> {
     let (idx, obj) = pair;
-    let opt_key = StreamMapKey::from_kvpair(obj);
-    if opt_key.is_none() {
-        return Err(UncatchableError::StreamMapError(UnsupportedKVPairObjectOrMapKeyType).into());
-    } else {
-        Ok((opt_key.unwrap(), idx))
-    }
+    StreamMapKey::from_kvpair(obj)
+        .map(|key| (key, idx))
+        .ok_or(UncatchableError::StreamMapError(UnsupportedKVPairObjectOrMapKeyType).into())
 }
 
 #[allow(dead_code)]
 impl<'l> CanonStreamMap<'l> {
-    pub(crate) fn new(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+    pub(crate) fn from_values(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
         let map = <_>::default();
         Self { values, map, tetraplet }
     }
 
-    pub(crate) fn from_canon_stream<'i>(canon_stream: &'i CanonStream) -> ExecutionResult<CanonStreamMap<'l>> {
+    pub(crate) fn from_canon_stream(canon_stream: &'l CanonStream) -> ExecutionResult<CanonStreamMap<'_>> {
         let values = canon_stream.values.clone();
         let tetraplet = canon_stream.tetraplet.clone();
         let map: ExecutionResult<HashMap<StreamMapKey<'_>, usize>> =
             canon_stream.iter().enumerate().map(from_obj_idx_pair).collect();
-        Ok(Self {
-            values,
-            map: map?,
-            tetraplet,
-        })
+        let map = map?;
+        Ok(Self { values, map, tetraplet })
     }
 
     pub(crate) fn len(&self) -> usize {
@@ -134,7 +126,6 @@ impl fmt::Display for CanonStreamMap<'_> {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct CanonStreamMapWithProvenance<'a> {
     pub(crate) canon_stream_map: CanonStreamMap<'a>,

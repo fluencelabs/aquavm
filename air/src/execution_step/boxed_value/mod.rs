@@ -34,7 +34,6 @@ pub(crate) use scalar::ServiceResultAggregate;
 pub(crate) use scalar::ValueAggregate;
 pub(crate) use stream::Generation;
 pub(crate) use stream::Stream;
-pub(crate) use stream::ConflictResolustionPolicy;
 pub(crate) use stream_map::StreamMap;
 pub(crate) use utils::populate_tetraplet_with_lambda;
 

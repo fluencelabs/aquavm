@@ -113,7 +113,7 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_canon_stream_value(
+    pub(crate) fn set_canon_value(
         &mut self,
         name: impl Into<String>,
         value: CanonStreamWithProvenance,

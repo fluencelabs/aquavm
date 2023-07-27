@@ -209,7 +209,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_canon(&mut self) -> LexerResult<bool> {
         let tag = self.state.met_tag.deduce_tag(self.current_char());
 
-        if self.current_offset() == 1 && tag.is_canon_stream() {
+        if self.current_offset() == 1 && tag.is_canon_type() {
             if self.string_to_parse.len() == 2 && tag.is_tag() {
                 let error_pos = self.pos_in_string_to_parse();
                 return Err(LexerError::empty_canon_name(error_pos..error_pos));
