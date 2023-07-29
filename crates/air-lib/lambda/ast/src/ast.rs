@@ -32,6 +32,8 @@ pub enum LambdaAST<'input> {
     ValuePath(NonEmpty<ValueAccessor<'input>>),
 }
 
+/// WIP rename the enum values to hightlight that they are also have
+/// a map-specific semantics.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum ValueAccessor<'input> {
     // (.)?[$idx]

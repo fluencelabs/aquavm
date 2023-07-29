@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use crate::execution_step::boxed_value::CanonStreamMap;
+use crate::execution_step::lambda_applier::select_by_lambda_from_canon_map;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
@@ -40,8 +40,7 @@ impl JValuable for &CanonStreamMap<'_> {
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
-        let iter = self.iter().map(|v| v.get_result().deref());
-        let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
+        let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
 
         let (tetraplet, provenance) = match select_result.tetraplet_idx {
             Some(idx) => {

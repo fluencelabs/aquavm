@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-// use super::Stream;
 use super::CanonStream;
+// use super::Stream;
 use super::ValueAggregate;
-// use crate::execution_step::Generation;
-// use crate::JValue;
 
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -35,8 +33,13 @@ use polyplets::SecurityTetraplet;
 
 use std::collections::HashMap;
 use std::ops::Deref;
-// use std::ops::Deref;
 use std::rc::Rc;
+
+#[derive(Clone)]
+pub struct ValueAggregateAndIndex<'a> {
+    pub(crate) value_aggregate: &'a ValueAggregate,
+    pub(crate) value_array_index: usize,
+}
 
 /// Canon stream map is a map type that is fixed at a certain node.
 #[derive(Debug, Clone)]
@@ -61,6 +64,14 @@ impl<'l> CanonStreamMap<'l> {
         Self { values, map, tetraplet }
     }
 
+    // pub(crate) fn from_values_ref(valuesa: &Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+    //     let values = valuesa.clone();
+    //     let map: ExecutionResult<HashMap<StreamMapKey<'_>, usize>> =
+    //         values.iter().enumerate().map(from_obj_idx_pair).collect();
+    //     let map = map.unwrap();
+    //     Self { values, map, tetraplet }
+    // }
+
     pub(crate) fn from_canon_stream(canon_stream: &'l CanonStream) -> ExecutionResult<CanonStreamMap<'_>> {
         let values = canon_stream.values.clone();
         let tetraplet = canon_stream.tetraplet.clone();
@@ -71,7 +82,7 @@ impl<'l> CanonStreamMap<'l> {
     }
 
     pub(crate) fn len(&self) -> usize {
-        self.values.len()
+        self.map.len()
     }
 
     pub(crate) fn is_empty(&self) -> bool {
@@ -101,15 +112,21 @@ impl<'l> CanonStreamMap<'l> {
         &self.tetraplet
     }
 
-    pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<&ValueAggregate> {
-        let &value_array_idx = self
+    pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<ValueAggregateAndIndex<'_>> {
+        println!("index() stream_map_key: {:#?}", stream_map_key);
+        println!("index() map: {:#?}", self.map);
+        let &value_array_index = self
             .map
             .get(stream_map_key)
             .ok_or(UncatchableError::CanonStreamMapError(IndexIsAbsentInTheMap))?; // WIP change the error
         Ok(self
             .values
-            .get(value_array_idx)
-            .ok_or(UncatchableError::CanonStreamMapError(NonexistentMappingIdx))?)
+            .get(value_array_index)
+            .ok_or(UncatchableError::CanonStreamMapError(NonexistentMappingIdx))
+            .map(|va| ValueAggregateAndIndex {
+                value_array_index,
+                value_aggregate: va,
+            })?)
         // WIP negative
     }
 }
@@ -138,9 +155,9 @@ impl<'a> CanonStreamMapWithProvenance<'a> {
         Self { canon_stream_map, cid }
     }
 
-    pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<&ValueAggregate> {
-        self.canon_stream_map.index(stream_map_key)
-    }
+    // pub(crate) fn index(&self, stream_map_key: &StreamMapKey<'_>) -> ExecutionResult<&ValueAggregate> {
+    //     self.canon_stream_map.index(stream_map_key)
+    // }
 }
 
 impl<'a> Deref for CanonStreamMapWithProvenance<'a> {

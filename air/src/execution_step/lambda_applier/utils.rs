@@ -16,6 +16,7 @@
 
 use super::LambdaError;
 use super::LambdaResult;
+use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ScalarRef;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
@@ -83,6 +84,18 @@ pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> 
                 .into_resolved_result();
             try_jvalue_as_idx(accessor.get_result())
         }
+    }
+}
+
+pub(super) fn try_scalar_ref_as_stream_map_key<'a>(scalar: ScalarRef<'a>) -> LambdaResult<StreamMapKey<'a>> {
+    match scalar {
+        ScalarRef::Value(map_accessor) => {
+            let map_accessor = map_accessor.get_result().as_ref();
+            StreamMapKey::from_value_ref(map_accessor).ok_or(LambdaError::CanonStreamMapAccessorHasInvalidType {
+                map_accessor: map_accessor.clone(),
+            })
+        }
+        ScalarRef::IterableValue(_map_accessor) => Err(LambdaError::CanonStreamMapAccessorMustNotBeIterable),
     }
 }
 

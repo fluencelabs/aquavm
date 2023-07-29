@@ -599,3 +599,47 @@ fn ap_stream_map_with_undefined_last_error() {
 
     assert_eq!(actual_trace, expected_state,);
 }
+
+#[test]
+fn testa() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("key" "value") %map)
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+            )
+            (seq
+                (ap #%canon_map.$.key scalar)
+                (call "{vm_1_peer_id}" ("" "") [scalar] scalar1) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    // let actual_trace = trace_from_result(&result.last().unwrap());
+
+    // let expected_state = vec![
+    //     executed_state::ap(0),
+    //     executed_state::fold(vec![subtrace_lore(
+    //         0,
+    //         SubTraceDesc::new(2.into(), 1),
+    //         SubTraceDesc::new(3.into(), 0),
+    //     )]),
+    //     unused!(
+    //         no_error_last_error_object(),
+    //         peer = vm_1_peer_id,
+    //         service = "m",
+    //         function = "f",
+    //         args = [no_error_last_error_object()]
+    //     ),
+    // ];
+
+    // assert_eq!(actual_trace, expected_state,);
+    println!("{:#?}", result);
+    assert!(false);
+}

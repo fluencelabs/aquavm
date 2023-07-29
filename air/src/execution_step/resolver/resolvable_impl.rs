@@ -167,19 +167,33 @@ impl Resolvable for ast::StreamMapKeyClause<'_> {
     }
 }
 
-#[allow(dead_code)]
-pub(crate) fn index_to_value_aggregate<'a>(
-    // canon_stream_map_index: &'a ast::CanonStreamMapIndex<'a>,
-    _ctx: &'a ExecutionCtx<'a>,
-) -> ExecutionResult<(JValue, Rc<SecurityTetraplet>, Provenance)> {
-    unimplemented!()
-    // let canon_stream_map_name = canon_stream_map_index.canon_stream_map.name;
-    // let canon_map = ctx.scalars.get_canon_map(canon_stream_map_name)?;
-    // let (key, _, _) = canon_stream_map_index.index.resolve(ctx)?;
-    // let key = StreamMapKey::from_value(key, canon_stream_map_name)?;
-    // let value_aggregate = canon_map.index(&key)?;
-    // let value = value_aggregate.get_result().deref().clone();
-    // let provenance = value_aggregate.get_provenance();
-    // let tetraplet = value_aggregate.get_tetraplet();
-    // Ok((value, tetraplet, provenance))
+// #[allow(dead_code)]
+// pub(crate) fn canon_map_lambda<'a>(
+//     canon_stream_map_w_lambda: &'a ast::CanonStreamMapWithLambda<'a>,
+//     ctx: &'a ExecutionCtx<'a>,
+// ) -> ExecutionResult<(JValue, Rc<SecurityTetraplet>, Provenance)> {
+//     let canon_stream_map_name = canon_stream_map_w_lambda.name;
+//     let canon_map = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+//     let (key, _, _) = canon_stream_map_index.index.resolve(ctx)?;
+//     let key = StreamMapKey::from_value(key, canon_stream_map_name)?;
+//     let value_aggregate = canon_map.index(&key)?;
+//     let value = value_aggregate.get_result().deref().clone();
+//     let provenance = value_aggregate.get_provenance();
+//     let tetraplet = value_aggregate.get_tetraplet();
+//     Ok((value, tetraplet, provenance))
+// }
+
+impl Resolvable for ast::CanonStreamMapWithLambda<'_> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon_stream_map_name = self.name;
+        let canon_stream_map_with_prov = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+        let canon_stream_map = &canon_stream_map_with_prov.canon_stream_map;
+        let root_provenance = Provenance::canon(canon_stream_map_with_prov.cid.clone());
+        let (value, tetraplet, provenance) =
+            canon_stream_map.apply_lambda_with_tetraplets(&self.lambda, ctx, &root_provenance)?;
+
+        let tetraplet = Rc::new(tetraplet);
+
+        Ok((value.into_owned(), vec![tetraplet], provenance))
+    }
 }

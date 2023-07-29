@@ -272,6 +272,7 @@ ApArgument: ApArgument<'input> = {
     <scalar:ScalarWithLambda> => ApArgument::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
     <canon_stream:CanonStream> => ApArgument::CanonStream(CanonStream::new(canon_stream.0, canon_stream.1)),
     <canon_stream:CanonStreamWithLambda> => ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
+    <canon_stream_map:CanonStreamMapWithLambda> => ApArgument::CanonStreamMapWithLambda(CanonStreamMapWithLambda::new(canon_stream_map.0, canon_stream_map.1, canon_stream_map.2)),
 }
 
 StreamArgument: Stream<'input> = {
@@ -307,6 +308,7 @@ extern {
         CanonStream => Token::CanonStream { name: <&'input str>, position: <AirPos> },
         CanonStreamMap => Token::CanonStreamMap { name: <&'input str>, position: <AirPos> },
         CanonStreamWithLambda => Token::CanonStreamWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
+        CanonStreamMapWithLambda => Token::CanonStreamMapWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 
         Literal => Token::StringLiteral(<&'input str>),
         I64 => Token::I64(<i64>),

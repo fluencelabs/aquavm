@@ -23,7 +23,6 @@ use air_lambda_parser::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 
-
 /// A scalar value without a lambda.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Scalar<'i> {

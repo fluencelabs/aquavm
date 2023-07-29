@@ -22,7 +22,7 @@ use thiserror::Error as ThisError;
 #[derive(Debug, Clone, ThisError)]
 pub enum LambdaError {
     #[error("lambda is applied to a stream that have only '{stream_size}' elements, but '{idx}' requested")]
-    CanonStreamNotHaveEnoughValues { stream_size: usize, idx: u32 },
+    CanonStreamNotHaveEnoughValues { stream_size: usize, idx: usize },
 
     /// An error occurred while trying to apply lambda to an empty stream.
     #[error("lambda is applied to an empty stream")]
@@ -51,4 +51,11 @@ pub enum LambdaError {
 
     #[error("stream accessor `{scalar_accessor}` should has number (u32) type")]
     StreamAccessorHasInvalidType { scalar_accessor: JValue },
+
+    #[error("canon stream map accessor `{map_accessor}` should be either string or number")]
+    CanonStreamMapAccessorHasInvalidType { map_accessor: JValue },
+
+    #[error("canon stream map accessor must not be iterable")]
+    CanonStreamMapAccessorMustNotBeIterable,
 }
+

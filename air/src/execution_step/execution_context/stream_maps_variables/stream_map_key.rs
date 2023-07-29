@@ -40,15 +40,19 @@ impl<'value> StreamMapKey<'value> {
         }
     }
 
-    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
-        let object = value.get_result().as_object()?;
-        let key = object.get("key")?;
-        match key {
+    pub(crate) fn from_value_ref(value: &'value JValue) -> Option<Self> {
+        match value {
             JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => None,
         }
+    }
+
+    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
+        let object = value.get_result().as_object()?;
+        let key = object.get("key")?; // make this a constant
+        StreamMapKey::from_value_ref(key)
     }
 }
 
@@ -61,6 +65,12 @@ impl From<i64> for StreamMapKey<'_> {
 impl From<u64> for StreamMapKey<'_> {
     fn from(value: u64) -> Self {
         StreamMapKey::U64(value)
+    }
+}
+
+impl From<u32> for StreamMapKey<'_> {
+    fn from(value: u32) -> Self {
+        StreamMapKey::U64(value.into())
     }
 }
 

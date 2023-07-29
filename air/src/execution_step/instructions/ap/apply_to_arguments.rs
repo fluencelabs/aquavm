@@ -189,8 +189,12 @@ fn apply_canon_stream_map_wl(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
+    println!("apply_canon_stream_map_wl {:#?}", ast_canon_stream_map);
     let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+
     let canon_stream_value = &canon_stream_map.canon_stream_map;
+    println!("apply_canon_stream_map_wl {:#?} ", canon_stream_value);
+
     let (result, tetraplet, provenance) = JValuable::apply_lambda_with_tetraplets(
         &canon_stream_value,
         &ast_canon_stream_map.lambda,
@@ -202,14 +206,3 @@ fn apply_canon_stream_map_wl(
     let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);
     Ok(result)
 }
-
-// fn apply_canon_stream_map_index(
-//     cannon_stream_map_index: &ast::CanonStreamMapIndex<'_>,
-//     exec_ctx: &ExecutionCtx<'_>,
-//     trace_ctx: &TraceHandler,
-// ) -> ExecutionResult<ValueAggregate> {
-//     let (index_value, tetraplet, provenance) = index_to_value_aggregate(cannon_stream_map_index, exec_ctx)?;
-//     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-//     let result = ValueAggregate::new(index_value.into(), tetraplet.into(), position, provenance);
-//     Ok(result)
-// }

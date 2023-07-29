@@ -21,7 +21,6 @@ use thiserror::Error as ThisError;
 pub enum StreamMapError {
     #[error("unsupported type for {variable_name} map's key")]
     UnsupportedMapKeyType { variable_name: String },
-
     #[error("unsupported kvpair object or map key type")]
     UnsupportedKVPairObjectOrMapKeyType,
 }
@@ -33,7 +32,7 @@ pub enum CanonStreamMapError {
     IndexIsAbsentInTheMap,
 
     #[error("there is an index with no corresponding value")]
-    NonexistentMappingIdx
+    NonexistentMappingIdx,
 }
 
 pub fn unsupported_map_key_type(variable_name: &str) -> StreamMapError {
