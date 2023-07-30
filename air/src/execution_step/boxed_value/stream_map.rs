@@ -17,6 +17,7 @@
 use super::stream::*;
 use super::ValueAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+use crate::execution_step::execution_context::stream_map_key::KEY_FIELD;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
@@ -27,8 +28,10 @@ use air_trace_handler::TraceHandler;
 use serde_json::json;
 use std::rc::Rc;
 
+static VALUE_FIELD: &str = "value";
+
 pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
-    Rc::new(json!({ "key": key, "value": value }))
+    Rc::new(json!({ KEY_FIELD: key, VALUE_FIELD: value }))
 }
 
 #[derive(Debug, Default, Clone)]
@@ -89,7 +92,7 @@ impl StreamMap {
 
         // it's always possible to go through all values
         self.stream.iter(Generation::Last).unwrap().filter(move |value| {
-            StreamMapKey::from_kvpair(value)
+            StreamMapKey::from_kvpair_ref(value)
                 .map(|key| met_keys.insert(key))
                 .unwrap_or(false)
         })

@@ -17,7 +17,7 @@
 use super::utils::*;
 use super::LambdaError;
 use crate::execution_step::boxed_value::CanonStreamMap;
-use crate::execution_step::boxed_value::ValueAggregateAndIndex;
+use crate::execution_step::boxed_value::ValueAndIndex;
 use crate::execution_step::CatchableError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
@@ -116,14 +116,14 @@ fn select_by_path_from_canon_map<'value>(
             let scalar = exec_ctx.scalars.get_value(scalar_name)?;
             lambda_to_execution_error!(try_scalar_ref_as_stream_map_key(scalar))?
         }
-        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
+        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."), // WIP
     };
-    let ValueAggregateAndIndex {
-        value_aggregate,
-        value_array_index,
+    let ValueAndIndex {
+        value,
+        value_aggregate_array_index,
     } = canon_map.index(&stream_map_key)?;
-    let result = select_by_path_from_scalar(&value_aggregate.get_result(), body.iter(), exec_ctx)?;
-    let select_result = LambdaResult::from_cow(result, value_array_index);
+    let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
+    let select_result = LambdaResult::from_cow(result, value_aggregate_array_index);
     Ok(select_result)
 }
 

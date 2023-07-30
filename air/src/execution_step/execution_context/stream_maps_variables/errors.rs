@@ -33,6 +33,12 @@ pub enum CanonStreamMapError {
 
     #[error("there is an index with no corresponding value")]
     NonexistentMappingIdx,
+
+    #[error("the value must be an object with key and value fields")]
+    NotAnObject,
+
+    #[error("the value must the value field")]
+    ValueFieldIsAbsent,
 }
 
 pub fn unsupported_map_key_type(variable_name: &str) -> StreamMapError {

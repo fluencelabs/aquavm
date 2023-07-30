@@ -189,11 +189,9 @@ fn apply_canon_stream_map_wl(
     exec_ctx: &ExecutionCtx<'_>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    println!("apply_canon_stream_map_wl {:#?}", ast_canon_stream_map);
     let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
 
     let canon_stream_value = &canon_stream_map.canon_stream_map;
-    println!("apply_canon_stream_map_wl {:#?} ", canon_stream_value);
 
     let (result, tetraplet, provenance) = JValuable::apply_lambda_with_tetraplets(
         &canon_stream_value,

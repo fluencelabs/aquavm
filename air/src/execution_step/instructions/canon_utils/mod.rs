@@ -75,7 +75,6 @@ pub(crate) fn handle_unseen_canon(
     }
 
     let canon_stream = create_canon_stream(exec_ctx, peer_id);
-    println!("canon_stream: {:#?}", canon_stream);
     let canon_result_cid = populate_cid_context(exec_ctx, &canon_stream)?;
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)
 }

@@ -622,6 +622,11 @@ fn testa() {
         .expect("invalid test AIR script");
     let result = executor.execute_all(vm_1_peer_id).unwrap();
     // let actual_trace = trace_from_result(&result.last().unwrap());
+    println!(
+        "{:}",
+        serde_json::to_string_pretty(&serde_json::from_slice::<InterpreterData>(&result.last().unwrap().data).unwrap())
+            .unwrap()
+    );
 
     // let expected_state = vec![
     //     executed_state::ap(0),
@@ -640,6 +645,5 @@ fn testa() {
     // ];
 
     // assert_eq!(actual_trace, expected_state,);
-    println!("{:#?}", result);
     assert!(false);
 }

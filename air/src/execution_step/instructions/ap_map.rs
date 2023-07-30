@@ -86,7 +86,7 @@ fn resolve<'ctx>(
     map_name: &str,
 ) -> Result<StreamMapKey<'ctx>, ExecutionError> {
     let (value, _, _) = resolvable.resolve(exec_ctx)?;
-    StreamMapKey::from_value(value, map_name)
+    StreamMapKey::from_value_with_map_name(value, map_name)
 }
 
 fn maybe_update_trace(generation: GenerationIdx, trace_ctx: &mut TraceHandler) {

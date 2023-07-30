@@ -64,13 +64,7 @@ fn epilog_closure<'closure, 'name: 'closure>(canon_stream_map_name: &'name str) 
               exec_ctx: &mut ExecutionCtx<'_>,
               trace_ctx: &mut TraceHandler|
               -> ExecutionResult<()> {
-            // let values = canon_stream.iter().cloned().collect::<Vec<_>>();
-
-            // let tetraplet = canon_stream.tetraplet().clone();
-
-            let canon_stream_map = CanonStreamMap::from_canon_stream(&canon_stream)?;
-
-            println!("epilog_closure: {:#?} {:#?}", canon_stream_map_name, canon_stream_map);
+            let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream)?;
 
             let canon_stream_map_with_provenance =
                 CanonStreamMapWithProvenance::new(canon_stream_map, canon_result_cid.clone());

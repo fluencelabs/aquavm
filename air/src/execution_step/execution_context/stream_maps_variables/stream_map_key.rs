@@ -23,6 +23,8 @@ use crate::JValue;
 use serde::Serialize;
 use std::borrow::Cow;
 
+pub(crate) static KEY_FIELD: &str = "key";
+
 #[derive(Clone, PartialEq, Debug, Eq, Hash)]
 pub(crate) enum StreamMapKey<'value> {
     Str(Cow<'value, str>),
@@ -31,7 +33,7 @@ pub(crate) enum StreamMapKey<'value> {
 }
 
 impl<'value> StreamMapKey<'value> {
-    pub(crate) fn from_value(value: JValue, map_name: &str) -> Result<Self, ExecutionError> {
+    pub(crate) fn from_value_with_map_name(value: JValue, map_name: &str) -> Result<Self, ExecutionError> {
         match value {
             JValue::String(s) => Ok(StreamMapKey::Str(Cow::Owned(s))),
             JValue::Number(n) if n.is_i64() => Ok(StreamMapKey::I64(n.as_i64().unwrap())),
@@ -40,7 +42,7 @@ impl<'value> StreamMapKey<'value> {
         }
     }
 
-    pub(crate) fn from_value_ref(value: &'value JValue) -> Option<Self> {
+    pub fn from_value_ref(value: &'value JValue) -> Option<Self> {
         match value {
             JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
@@ -49,9 +51,24 @@ impl<'value> StreamMapKey<'value> {
         }
     }
 
-    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
+    pub fn from_value(value: JValue) -> Option<Self> {
+        match value {
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
+            JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
+            JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn from_kvpair(value: ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
-        let key = object.get("key")?; // make this a constant
+        let key = (object.get(KEY_FIELD)?).clone();
+        StreamMapKey::from_value(key)
+    }
+
+    pub(crate) fn from_kvpair_ref(value: &'value ValueAggregate) -> Option<Self> {
+        let object = value.get_result().as_object()?;
+        let key = object.get(KEY_FIELD)?;
         StreamMapKey::from_value_ref(key)
     }
 }
