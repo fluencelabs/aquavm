@@ -19,14 +19,11 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::TestRunParameters;
 use air_test_utils::*;
 
-use fstrings::f;
-use fstrings::format_args_f;
-
 #[test]
 fn global_streams_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = f!(r#"
+    let script = format!(r#"
         (seq
             (ap 1 $stream)
             (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
@@ -57,7 +54,7 @@ fn global_streams_are_compactified() {
 fn global_stream_maps_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = f!(r#"
+    let script = format!(r#"
         (seq
             (ap 1 $stream)
             (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
@@ -88,7 +85,7 @@ fn global_stream_maps_are_compactified() {
 fn local_streams_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = f!(r#"
+    let script = format!(r#"
         (new $stream
             (seq
                 (ap 1 $stream)

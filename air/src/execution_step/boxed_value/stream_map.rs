@@ -255,25 +255,22 @@ mod test {
         stream_map: &mut StreamMap,
         key_value: &(String, ValueAggregate),
         generation: Generation,
-        source: ValueSource,
     ) {
         stream_map
-            .insert(key_value.0.as_str().into(), &key_value.1, generation, source)
-            .unwrap();
+            .insert(key_value.0.as_str().into(), &key_value.1, generation);
     }
 
     #[test]
     fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
         const TEST_DATA_SIZE: usize = 3;
         let key_values = generate_key_values(TEST_DATA_SIZE);
-        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+        let mut stream_map = StreamMap::new();
 
         for id in 0..3 {
             insert_into_map(
                 &mut stream_map,
                 &key_values[id],
-                Generation::nth(id as u32),
-                ValueSource::CurrentData,
+                Generation::current(id as u32)
             );
         }
 
@@ -287,19 +284,17 @@ mod test {
 
     #[test]
     fn get_unique_map_keys_stream_removes_duplicates() {
-        use ValueSource::CurrentData;
-
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
-        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
-        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(0), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(1), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(1), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(3), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(4), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
+        let mut stream_map = StreamMap::new();
+        insert_into_map(&mut stream_map, &key_values[0], Generation::current(0));
+        insert_into_map(&mut stream_map, &key_values[0], Generation::current(1));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(1));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(3));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(4));
+        insert_into_map(&mut stream_map, &key_values[1], Generation::current(4));
+        insert_into_map(&mut stream_map, &key_values[3], Generation::current(2));
 
         let mut iter = stream_map.iter_unique_key();
 
