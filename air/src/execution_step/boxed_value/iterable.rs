@@ -21,6 +21,7 @@ mod resolved_call;
 mod vec_resolved_call;
 
 pub(crate) use canon_stream::CanonStreamIterableIngredients;
+pub(crate) use canon_stream_map::CanonStreamMapIterableIngredients;
 pub(crate) use lambda_result::IterableLambdaResult;
 pub(crate) use resolved_call::IterableResolvedCall;
 pub(crate) use vec_resolved_call::IterableVecResolvedCall;

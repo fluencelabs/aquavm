@@ -18,6 +18,7 @@ use air::ExecutionCidState;
 use air::PreparationError;
 use air::ToErrorCode;
 use air_interpreter_data::ExecutionTrace;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -931,4 +932,68 @@ fn fold_stream_map() {
     ];
     let tetraplates_len = arg_tetraplets.borrow().len();
     assert_eq!(&arg_tetraplets.borrow()[tetraplates_len - 4..], &expected_tetraplets);
+}
+
+#[test]
+fn fold_canon_stream_map() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("key" "value1") %map)
+                (ap (-42 "value2") %map)
+            )
+            (seq
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (fold #%canon_map iter
+                    (seq
+                        (call "{vm_1_peer_id}" ("m" "f") [iter] scalar) ; behaviour = echo
+                        (next iter)
+                    )
+                )
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    println!(
+        "{:}",
+        serde_json::to_string_pretty(&serde_json::from_slice::<InterpreterData>(&result.last().unwrap().data).unwrap())
+            .unwrap()
+    );
+    // let actual_trace = trace_from_result(&result.last().unwrap());
+
+    // let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    // let map_value = json!({"key": "key", "value": "value1"});
+    // let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+
+    // let expected_trace: Vec<ExecutedState> = vec![
+    //     executed_state::ap(0),
+    //     canon_tracked(
+    //         json!({"tetraplet": tetraplet,
+    //         "values": [
+    //             {
+    //             "result": map_value,
+    //             "tetraplet": tetraplet,
+    //             "provenance": Provenance::Literal,
+    //         },
+    //         ]}),
+    //         &mut cid_tracker,
+    //     ),
+    //     scalar_tracked!(
+    //         "value1",
+    //         cid_tracker,
+    //         peer = vm_1_peer_id,
+    //         service = "m..0",
+    //         function = "f",
+    //         args = ["value1"]
+    //     ),
+    // ];
+
+    // assert_eq!(actual_trace, expected_trace,);
+    assert!(false);
 }

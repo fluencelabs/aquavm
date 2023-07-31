@@ -658,39 +658,59 @@ fn match_with_empty_array__() {
     );
 }
 
-// #[test]
-// fn stream_map_index() {
-//     lexer_test(
-//         r#"#%canon["key"]"#,
-//         All(vec![
-//             Ok((
-//                 0.into(),
-//                 Token::CanonStreamMap {
-//                     name: "#%canon",
-//                     position: 0.into(),
-//                 },
-//                 7.into(),
-//             )),
-//             Ok((7.into(), Token::OpenSquareBracket, 8.into())),
-//             Ok((8.into(), Token::StringLiteral("key"), 13.into())),
-//             Ok((13.into(), Token::CloseSquareBracket, 14.into())),
-//         ]),
-//     );
+#[test]
+fn stream_map_lambda_numeric_accessor() {
+    let token =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 42 }]).unwrap();
+    lexer_test(
+        r#"#%canon.$.[42]"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            14.into(),
+        ))]),
+    );
+}
 
-//     lexer_test(
-//         "#%canon[42]",
-//         All(vec![
-//             Ok((
-//                 0.into(),
-//                 Token::CanonStreamMap {
-//                     name: "#%canon",
-//                     position: 0.into(),
-//                 },
-//                 7.into(),
-//             )),
-//             Ok((7.into(), Token::OpenSquareBracket, 8.into())),
-//             Ok((8.into(), Token::I64(42), 10.into())),
-//             Ok((10.into(), Token::CloseSquareBracket, 11.into())),
-//         ]),
-//     );
-// }
+#[test]
+fn stream_map_lambda_string_accessor() {
+    let token =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName { field_name: "key" }])
+            .unwrap();
+    lexer_test(
+        r#"#%canon.$.key"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            13.into(),
+        ))]),
+    );
+}
+
+#[test]
+fn stream_map_lambda_scalar_accessor() {
+    let token = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByScalar {
+        scalar_name: "scalar",
+    }])
+    .unwrap();
+    lexer_test(
+        r#"#%canon.$.[scalar]"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            18.into(),
+        ))]),
+    );
+}

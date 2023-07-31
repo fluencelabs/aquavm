@@ -118,6 +118,7 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStream(canon_stream) => self.met_canon_stream(canon_stream, span),
+            CanonStreamMap(canon_stream_map) => self.met_canon_stream_map(canon_stream_map, span),
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
@@ -129,11 +130,6 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
-        self.met_variable_name(fold.iterable.name, span);
-        self.met_iterator_definition(&fold.iterator, span);
-    }
-
-    pub(super) fn meet_canon_fold_stream_map(&mut self, fold: &FoldCanonStreamMap<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
     }
@@ -171,7 +167,7 @@ impl<'i> VariableValidator<'i> {
                 self.met_canon_stream_wl(canon_stream, span)
             }
             ApArgument::CanonStreamMap(canon_stream_map) => {
-                self.met_canon_stream_map(canon_stream_map.name, span)
+                self.met_canon_stream_map(canon_stream_map, span)
             }
             ApArgument::CanonStreamMapWithLambda(canon_stream_map) => {
                 self.met_canon_stream_map_wl(canon_stream_map, span)
@@ -277,14 +273,18 @@ impl<'i> VariableValidator<'i> {
         self.met_variable_name(stream.name, span);
     }
 
+    fn met_canon_stream_map(&mut self, canon_stream_map: &CanonStreamMap<'i>, span: Span) {
+        self.met_variable_name(canon_stream_map.name, span);
+    }
+
     fn met_canon_stream_wl(&mut self, stream: &CanonStreamWithLambda<'i>, span: Span) {
         self.met_variable_name(stream.name, span);
         self.met_lambda(&stream.lambda, span);
     }
 
-    fn met_canon_stream_map(&mut self, stream_map_name: &'i str, span: Span) {
-        self.met_variable_name(stream_map_name, span);
-    }
+    // fn met_canon_stream_map(&mut self, stream_map_name: &'i str, span: Span) {
+    //     self.met_variable_name(stream_map_name, span);
+    // }
 
     fn met_canon_stream_map_wl(&mut self, stream_map: &CanonStreamMapWithLambda<'i>, span: Span) {
         self.met_variable_name(stream_map.name, span);

@@ -200,23 +200,27 @@ impl<'i> Scalars<'i> {
     pub(crate) fn meet_fold_start(&mut self) {
         self.non_iterable_variables.meet_fold_start();
         self.canon_streams.meet_fold_start();
+        self.canon_maps.meet_fold_start();
     }
 
     // meet next before recursion
     pub(crate) fn meet_next_before(&mut self) {
         self.non_iterable_variables.meet_next_before();
         self.canon_streams.meet_next_before();
+        self.canon_maps.meet_next_before();
     }
 
     // meet next after recursion
     pub(crate) fn meet_next_after(&mut self) {
         self.non_iterable_variables.meet_next_after();
         self.canon_streams.meet_next_after();
+        self.canon_maps.meet_next_after();
     }
 
     pub(crate) fn meet_fold_end(&mut self) {
         self.non_iterable_variables.meet_fold_end();
         self.canon_streams.meet_fold_end();
+        self.canon_maps.meet_fold_end();
     }
 
     pub(crate) fn meet_new_start_scalar(&mut self, scalar_name: String) {

@@ -18,27 +18,24 @@
 
 use super::Iterable;
 use super::IterableItem;
-use crate::execution_step::boxed_value::CanonStreamMap;
+use crate::execution_step::ValueAggregate;
 use crate::foldable_next;
 use crate::foldable_prev;
 
-const EXPECT_VALUE_IN_STREAM: &str = "value must exist, because length checked before creation and canonicalized stream can't be modified during iteration";
+const EXPECT_VALUE_IN_STREAM: &str = "value must exist, because length checked before creation and canonicalized stream map can not be modified during iteration";
 
-pub(crate) struct CanonStreamMapIterableIngredients<'a> {
-    canon_stream_map: CanonStreamMap<'a>,
+pub(crate) struct CanonStreamMapIterableIngredients {
+    values: Vec<ValueAggregate>,
     cursor: usize,
 }
 
-// impl<'a, 'b: 'a> CanonStreamMapIterableIngredients<'a> {
-//     pub(crate) fn init(canon_stream_map: CanonStreamMap<'b>) -> Self {
-//         Self {
-//             canon_stream_map,
-//             cursor: 0,
-//         }
-//     }
-// }
+impl CanonStreamMapIterableIngredients {
+    pub(crate) fn init(values: Vec<ValueAggregate>) -> Self {
+        Self { values, cursor: 0 }
+    }
+}
 
-impl<'ctx> Iterable<'ctx> for CanonStreamMapIterableIngredients<'_> {
+impl<'ctx> Iterable<'ctx> for CanonStreamMapIterableIngredients {
     type Item = IterableItem<'ctx>;
 
     fn next(&mut self) -> bool {
@@ -50,11 +47,11 @@ impl<'ctx> Iterable<'ctx> for CanonStreamMapIterableIngredients<'_> {
     }
 
     fn peek(&'ctx self) -> Option<Self::Item> {
-        if self.canon_stream_map.is_empty() {
+        if self.values.is_empty() {
             return None;
         }
 
-        let value = self.canon_stream_map.nth(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
+        let value = self.values.get(self.cursor).expect(EXPECT_VALUE_IN_STREAM);
         let result = IterableItem::RefValue((
             value.get_result(),
             value.get_tetraplet(),
@@ -65,6 +62,6 @@ impl<'ctx> Iterable<'ctx> for CanonStreamMapIterableIngredients<'_> {
     }
 
     fn len(&self) -> usize {
-        self.canon_stream_map.len()
+        self.values.len()
     }
 }

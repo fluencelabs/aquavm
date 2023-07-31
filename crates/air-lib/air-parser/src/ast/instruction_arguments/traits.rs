@@ -164,6 +164,7 @@ impl fmt::Display for FoldScalarIterable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
             EmptyArray => write!(f, "[]"),
         }
     }

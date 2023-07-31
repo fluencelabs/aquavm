@@ -42,7 +42,6 @@ pub enum Instruction<'i> {
     FoldScalar(FoldScalar<'i>),
     FoldStream(FoldStream<'i>),
     FoldStreamMap(FoldStreamMap<'i>),
-    FoldCanonStreamMap(FoldCanonStreamMap<'i>),
     Never(Never),
     New(New<'i>),
     Next(Next<'i>),
@@ -177,17 +176,17 @@ pub struct FoldStreamMap<'i> {
     pub span: Span,
 }
 
-/// (fold canon_stream_map_iterable iterator instruction)
-#[derive(Serialize, Debug, PartialEq)]
-pub struct FoldCanonStreamMap<'i> {
-    pub iterable: CanonStreamMap<'i>,
-    #[serde(borrow)]
-    pub iterator: Scalar<'i>,
-    pub instruction: Rc<Instruction<'i>>,
-    // option is needed to provide a graceful period of adoption
-    pub last_instruction: Option<Rc<Instruction<'i>>>,
-    pub span: Span,
-}
+// /// (fold canon_stream_map_iterable iterator instruction)
+// #[derive(Serialize, Debug, PartialEq)]
+// pub struct FoldCanonStreamMap<'i> {
+//     pub iterable: CanonStreamMap<'i>,
+//     #[serde(borrow)]
+//     pub iterator: Scalar<'i>,
+//     pub instruction: Rc<Instruction<'i>>,
+//     // option is needed to provide a graceful period of adoption
+//     pub last_instruction: Option<Rc<Instruction<'i>>>,
+//     pub span: Span,
+// }
 
 /// (fold stream_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq, Eq)]

@@ -140,6 +140,22 @@ pub(super) fn fold_scalar_canon_stream<'i>(
     })
 }
 
+pub(super) fn fold_scalar_canon_stream_map<'i>(
+    canon_stream_map: CanonStreamMap<'i>,
+    iterator: Scalar<'i>,
+    instruction: Instruction<'i>,
+    last_instruction: Option<Instruction<'i>>,
+    span: Span,
+) -> Instruction<'i> {
+    Instruction::FoldScalar(FoldScalar {
+        iterable: FoldScalarIterable::CanonStreamMap(canon_stream_map),
+        iterator,
+        instruction: Rc::new(instruction),
+        last_instruction: last_instruction.map(Rc::new),
+        span,
+    })
+}
+
 pub(super) fn fold_scalar_empty_array<'i>(
     iterator: Scalar<'i>,
     instruction: Instruction<'i>,

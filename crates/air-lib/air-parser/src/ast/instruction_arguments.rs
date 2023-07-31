@@ -140,6 +140,7 @@ pub enum FoldScalarIterable<'i> {
     // it's important not to have lambda here
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
+    CanonStreamMap(CanonStreamMap<'i>),
     EmptyArray,
 }
 
