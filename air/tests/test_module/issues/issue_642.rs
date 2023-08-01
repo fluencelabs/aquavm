@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
-#[ignore] // will be resolved in https://github.com/fluencelabs/aquavm/pull/621
+#[ignore] // will be resolved in github.com/fluencelabs/aquavm/pull/621
 fn issue_642() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
