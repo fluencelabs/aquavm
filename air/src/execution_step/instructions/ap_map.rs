@@ -37,7 +37,7 @@ use air_trace_handler::merger::MergerApResult;
 impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(call, exec_ctx, trace_ctx);
+        log_instruction!(ap, exec_ctx, trace_ctx);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see
         // https://github.com/fluencelabs/aquavm/issues/216

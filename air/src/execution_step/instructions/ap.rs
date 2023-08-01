@@ -39,7 +39,7 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(call, exec_ctx, trace_ctx);
+        log_instruction!(ap, exec_ctx, trace_ctx);
         let should_touch_trace = should_touch_trace(self);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see
