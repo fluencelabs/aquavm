@@ -36,7 +36,8 @@ pub(crate) use scalar::ValueAggregate;
 
 pub(crate) use stream::Generation;
 pub(crate) use stream::IterableValue;
-pub(crate) use stream::RecursiveStream;
+pub(crate) use stream::RecursiveCursorState;
+pub(crate) use stream::RecursiveStreamCursor;
 pub(crate) use stream_map::StreamMap;
 
 pub(crate) use utils::populate_tetraplet_with_lambda;

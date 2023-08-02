@@ -19,7 +19,8 @@ mod stream_definition;
 pub(self) mod values_matrix;
 
 pub(crate) use recursive_stream::IterableValue;
-pub(crate) use recursive_stream::RecursiveStream;
+pub(crate) use recursive_stream::RecursiveCursorState;
+pub(crate) use recursive_stream::RecursiveStreamCursor;
+pub(crate) use recursive_stream::StreamCursor;
 pub(crate) use stream_definition::Generation;
-pub(crate) use stream_definition::RecursiveCursor;
 pub(crate) use stream_definition::Stream;

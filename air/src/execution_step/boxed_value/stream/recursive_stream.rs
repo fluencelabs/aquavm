@@ -14,52 +14,78 @@
  * limitations under the License.
  */
 
-use super::RecursiveCursor;
 use super::Stream;
 use crate::execution_step::boxed_value::Iterable;
 use crate::execution_step::boxed_value::IterableItem;
 use crate::execution_step::boxed_value::IterableVecResolvedCall;
 use crate::execution_step::ValueAggregate;
 
+use air_interpreter_data::GenerationIdx;
+
 pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
-pub(crate) struct RecursiveStream {
-    cursor: RecursiveCursor,
+/// Tracks a state of a stream by storing last generation of every value type.
+#[derive(Debug, Clone, Copy)]
+pub struct StreamCursor {
+    pub previous_start_idx: GenerationIdx,
+    pub current_start_idx: GenerationIdx,
+    pub new_start_idx: GenerationIdx,
 }
 
-impl RecursiveStream {
+/// Intended to generate values for recursive stream handling.
+///
+/// It could be considered as a simple state machine which should be started with
+/// fold_started and then continued with next_iteration:
+///    met_fold_start  - met_iteration_end - ... met_iteration_end - Exhausted
+///          |                  |
+///      Exhausted          Exhausted
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct RecursiveStreamCursor {
+    cursor: StreamCursor,
+}
+
+pub(crate) enum RecursiveCursorState {
+    Continue(Vec<IterableValue>),
+    Exhausted,
+}
+
+impl RecursiveStreamCursor {
     pub fn new() -> Self {
         Self {
-            cursor: RecursiveCursor::empty(),
+            cursor: StreamCursor::empty(),
         }
     }
 
-    pub fn fold_started(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
-        let slice_iter = stream.slice_iter(self.cursor);
-        let iterable = Self::slice_iter_to_iterable(slice_iter);
+    pub fn met_fold_start(&mut self, stream: &mut Stream<ValueAggregate>) -> RecursiveCursorState {
+        let state = self.cursor_state(stream);
         self.cursor = stream.cursor();
-        if !iterable.is_empty() {
+
+        if state.should_continue() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
             stream.new_values().add_new_empty_generation();
         }
 
-        iterable
+        state
     }
 
-    pub fn next_iteration(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
-        let slice_iter = stream.slice_iter(self.cursor);
-        let next_iteration_values = Self::slice_iter_to_iterable(slice_iter);
-        if stream.new_values().last_generation_is_empty() {
-            stream.new_values().remove_last_generation();
-        }
+    pub fn met_iteration_end(&mut self, stream: &mut Stream<ValueAggregate>) -> RecursiveCursorState {
+        let state = self.cursor_state(stream);
 
+        // remove last generation if it empty to track cursor state
+        remove_last_generation_if_empty(stream);
         self.cursor = stream.cursor();
+        // add new last generation to store new values into this generation
+        stream.new_values().add_new_empty_generation();
 
-        if !stream.new_values().last_generation_is_empty() {
-            stream.new_values().add_new_empty_generation();
-        }
-        next_iteration_values
+        state
+    }
+
+    fn cursor_state(&self, stream: &Stream<ValueAggregate>) -> RecursiveCursorState {
+        let slice_iter = stream.slice_iter(self.cursor);
+        let iterable = Self::slice_iter_to_iterable(slice_iter);
+
+        RecursiveCursorState::from_iterable_values(iterable)
     }
 
     fn slice_iter_to_iterable<'value>(iter: impl Iterator<Item = &'value [ValueAggregate]>) -> Vec<IterableValue> {
@@ -72,9 +98,53 @@ impl RecursiveStream {
     }
 }
 
+fn remove_last_generation_if_empty(stream: &mut Stream<ValueAggregate>) {
+    if stream.new_values().last_generation_is_empty() {
+        stream.new_values().remove_last_generation();
+    }
+}
+
+impl StreamCursor {
+    pub(crate) fn empty() -> Self {
+        Self {
+            previous_start_idx: GenerationIdx::from(0),
+            current_start_idx: GenerationIdx::from(0),
+            new_start_idx: GenerationIdx::from(0),
+        }
+    }
+
+    pub(crate) fn new(
+        previous_start_idx: GenerationIdx,
+        current_start_idx: GenerationIdx,
+        new_start_idx: GenerationIdx,
+    ) -> Self {
+        Self {
+            previous_start_idx,
+            current_start_idx,
+            new_start_idx,
+        }
+    }
+}
+
+impl RecursiveCursorState {
+    pub(crate) fn from_iterable_values(values: Vec<IterableValue>) -> Self {
+        if values.is_empty() {
+            Self::Exhausted
+        } else {
+            Self::Continue(values)
+        }
+    }
+
+    pub(crate) fn should_continue(&self) -> bool {
+        matches!(self, Self::Continue(_))
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::RecursiveStream;
+    use super::IterableValue;
+    use super::RecursiveCursorState;
+    use super::RecursiveStreamCursor;
     use super::Stream;
     use super::ValueAggregate;
     use crate::execution_step::Generation;
@@ -93,57 +163,92 @@ mod test {
         )
     }
 
+    fn iterables_unwrap(cursor_state: RecursiveCursorState) -> Vec<IterableValue> {
+        match cursor_state {
+            RecursiveCursorState::Continue(iterables) => iterables,
+            RecursiveCursorState::Exhausted => panic!("cursor is exhausted"),
+        }
+    }
+
     #[test]
     fn fold_started_empty_if_no_values() {
         let mut stream = Stream::new();
-        let mut recursive_stream = RecursiveStream::new();
-        let iterable_values = recursive_stream.fold_started(&mut stream);
+        let mut recursive_stream = RecursiveStreamCursor::new();
+        let cursor_state = recursive_stream.met_fold_start(&mut stream);
 
-        assert!(iterable_values.is_empty())
+        assert!(!cursor_state.should_continue())
     }
 
     #[test]
     fn next_iteration_empty_if_no_values() {
         let mut stream = Stream::new();
-        let mut recursive_stream = RecursiveStream::new();
-        let iterable_values = recursive_stream.next_iteration(&mut stream);
+        let mut recursive_stream = RecursiveStreamCursor::new();
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
 
-        assert!(iterable_values.is_empty())
+        assert!(!cursor_state.should_continue())
     }
 
     #[test]
     fn next_iteration_empty_if_no_values_added() {
         let mut stream = Stream::new();
-        let mut recursive_stream = RecursiveStream::new();
+        let mut recursive_stream = RecursiveStreamCursor::new();
 
         let value = create_value(json!("1"));
         stream.add_value(value, Generation::Current(0.into()));
 
-        let iterable_values = recursive_stream.fold_started(&mut stream);
-        assert_eq!(iterable_values.len(), 1);
+        let cursor_state = recursive_stream.met_fold_start(&mut stream);
+        let iterables = iterables_unwrap(cursor_state);
+        assert_eq!(iterables.len(), 1);
 
-        let iterable_values = recursive_stream.next_iteration(&mut stream);
-        assert!(iterable_values.is_empty());
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        assert!(!cursor_state.should_continue());
     }
 
     #[test]
     fn one_recursive_iteration() {
         let mut stream = Stream::new();
-        let mut recursive_stream = RecursiveStream::new();
+        let mut recursive_stream = RecursiveStreamCursor::new();
 
         let value = create_value(json!("1"));
         stream.add_value(value.clone(), Generation::Current(0.into()));
 
-        let iterable_values = recursive_stream.fold_started(&mut stream);
-        assert_eq!(iterable_values.len(), 1);
+        let cursor_state = recursive_stream.met_fold_start(&mut stream);
+        let iterables = iterables_unwrap(cursor_state);
+        assert_eq!(iterables.len(), 1);
 
         stream.add_value(value.clone(), Generation::New);
         stream.add_value(value, Generation::New);
 
-        let iterable_values = recursive_stream.next_iteration(&mut stream);
-        assert_eq!(iterable_values.len(), 1);
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        let iterables = iterables_unwrap(cursor_state);
+        assert_eq!(iterables.len(), 1);
 
-        let iterable_values = recursive_stream.next_iteration(&mut stream);
-        assert!(iterable_values.is_empty());
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        assert!(!cursor_state.should_continue());
+    }
+
+    #[test]
+    fn add_value_into_prev_and_current() {
+        let mut stream = Stream::new();
+        let mut recursive_stream = RecursiveStreamCursor::new();
+
+        let value = create_value(json!("1"));
+        stream.add_value(value.clone(), Generation::Current(0.into()));
+
+        let cursor_state = recursive_stream.met_fold_start(&mut stream);
+        assert!(cursor_state.should_continue());
+
+        stream.add_value(value.clone(), Generation::Previous(0.into()));
+
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        assert!(cursor_state.should_continue());
+
+        stream.add_value(value, Generation::Current(1.into()));
+
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        assert!(cursor_state.should_continue());
+
+        let cursor_state = recursive_stream.met_iteration_end(&mut stream);
+        assert!(!cursor_state.should_continue());
     }
 }

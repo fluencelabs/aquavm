@@ -19,7 +19,8 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::IterableValue;
-use crate::execution_step::boxed_value::RecursiveStream;
+use crate::execution_step::boxed_value::RecursiveCursorState;
+use crate::execution_step::boxed_value::RecursiveStreamCursor;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::instructions::fold::IterableType;
 use crate::execution_step::instructions::fold_scalar::fold;
@@ -65,12 +66,12 @@ pub(crate) fn execute_with_stream<'i>(
 
     trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), fold_to_string)?;
 
-    let mut recursive_stream = RecursiveStream::new();
-    let mut iterables = recursive_stream.fold_started(get_mut_stream(exec_ctx));
+    let mut recursive_stream = RecursiveStreamCursor::new();
+    let mut cursor_state = recursive_stream.met_fold_start(get_mut_stream(exec_ctx));
     let mut observer = FoldGenerationObserver::new();
 
     // this cycle manages recursive streams
-    while !iterables.is_empty() {
+    while let RecursiveCursorState::Continue(iterables) = cursor_state {
         let ingredients =
             FoldStreamIngredients::new(iterable_name, instruction.clone(), last_instruction.clone(), fold_id);
         execute_iterations(
@@ -82,7 +83,7 @@ pub(crate) fn execute_with_stream<'i>(
             trace_ctx,
         )?;
 
-        iterables = recursive_stream.next_iteration(get_mut_stream(exec_ctx));
+        cursor_state = recursive_stream.met_iteration_end(get_mut_stream(exec_ctx));
     }
 
     observer.update_completeness(exec_ctx);

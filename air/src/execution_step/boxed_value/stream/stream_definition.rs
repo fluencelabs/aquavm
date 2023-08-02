@@ -16,6 +16,7 @@
 
 use super::values_matrix::NewValuesMatrix;
 use super::values_matrix::ValuesMatrix;
+use super::StreamCursor;
 use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 
@@ -36,13 +37,6 @@ pub struct Stream<T> {
     new_values: NewValuesMatrix<T>,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct RecursiveCursor {
-    previous_start_idx: GenerationIdx,
-    current_start_idx: GenerationIdx,
-    new_start_idx: GenerationIdx,
-}
-
 impl<'value, T: 'value> Stream<T> {
     pub(crate) fn new() -> Self {
         Self {
@@ -60,19 +54,19 @@ impl<'value, T: 'value> Stream<T> {
     }
 
     // Contract: all slices will be non-empty
-    pub(crate) fn slice_iter(&self, cursor: RecursiveCursor) -> impl Iterator<Item = &[T]> {
+    pub(crate) fn slice_iter(&self, cursor: StreamCursor) -> impl Iterator<Item = &[T]> {
         self.previous_values
             .slice_iter(cursor.previous_start_idx)
             .chain(self.current_values.slice_iter(cursor.current_start_idx))
             .chain(self.new_values.slice_iter(cursor.new_start_idx))
     }
 
-    pub(crate) fn cursor(&self) -> RecursiveCursor {
-        RecursiveCursor {
-            previous_start_idx: self.previous_values.len(),
-            current_start_idx: self.current_values.len(),
-            new_start_idx: self.new_values.len(),
-        }
+    pub(crate) fn cursor(&self) -> StreamCursor {
+        StreamCursor::new(
+            self.previous_values.len(),
+            self.current_values.len(),
+            self.new_values.len(),
+        )
     }
 
     pub(super) fn new_values(&mut self) -> &mut NewValuesMatrix<T> {
@@ -136,16 +130,6 @@ impl<T> Default for Stream<T> {
             previous_values: <_>::default(),
             current_values: <_>::default(),
             new_values: <_>::default(),
-        }
-    }
-}
-
-impl RecursiveCursor {
-    pub(crate) fn empty() -> Self {
-        Self {
-            previous_start_idx: GenerationIdx::from(0),
-            current_start_idx: GenerationIdx::from(0),
-            new_start_idx: GenerationIdx::from(0),
         }
     }
 }
@@ -218,7 +202,7 @@ impl fmt::Display for Generation {
 #[cfg(test)]
 mod test {
     use super::Generation;
-    use super::RecursiveCursor;
+    use super::StreamCursor;
     use super::TraceHandler;
     use crate::execution_step::ServiceResultAggregate;
     use crate::execution_step::ValueAggregate;
@@ -282,7 +266,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::previous(0));
         stream.add_value(value_4.clone(), Generation::previous(0));
 
-        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -303,7 +287,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::current(0));
         stream.add_value(value_4.clone(), Generation::current(0));
 
-        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -324,7 +308,7 @@ mod test {
         stream.add_value(value_3.clone(), Generation::New);
         stream.add_value(value_4.clone(), Generation::New);
 
-        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
             slice_iter.next(),
             Some(vec![value_1, value_2, value_3, value_4].as_slice())
@@ -344,7 +328,7 @@ mod test {
     fn test_slice_on_empty_stream() {
         let stream = Stream::new();
 
-        let mut slice = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice = stream.slice_iter(StreamCursor::empty());
         assert_eq!(slice.next(), None);
     }
 
@@ -392,7 +376,7 @@ mod test {
         stream.add_value(value_2.clone(), Generation::previous(1));
         stream.add_value(value_3.clone(), Generation::previous(3));
 
-        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));
@@ -410,7 +394,7 @@ mod test {
         stream.add_value(value_2.clone(), Generation::current(1));
         stream.add_value(value_3.clone(), Generation::current(3));
 
-        let mut slice_iter = stream.slice_iter(RecursiveCursor::empty());
+        let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_2].as_slice()));
         assert_eq!(slice_iter.next(), Some(vec![value_3].as_slice()));
