@@ -42,6 +42,7 @@ pub enum ResolvableToPeerIdVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 /// Contains all variable variants that could be resolved to a string type.
@@ -52,6 +53,7 @@ pub enum ResolvableToStringVariable<'i> {
     ScalarWithLambda(ScalarWithLambda<'i>),
     // canon without lambda can't be resolved to a string, since it represents an array of values
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
+    CanonStreamMapWithLambda(CanonStreamMapWithLambda<'i>),
 }
 
 /// Triplet represents a location of the executable code in the network.
@@ -154,4 +156,6 @@ pub enum NewArgument<'i> {
     StreamMap(StreamMap<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
+    #[serde(borrow)]
+    CanonStreamMap(CanonStreamMap<'i>),
 }

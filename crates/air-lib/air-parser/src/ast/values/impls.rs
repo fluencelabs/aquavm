@@ -94,10 +94,15 @@ impl<'i> ImmutableVariable<'i> {
         Self::CanonStream(CanonStream::new(name, position))
     }
 
+    pub fn canon_stream_map(name: &'i str, position: AirPos) -> Self {
+        Self::CanonStreamMap(CanonStreamMap::new(name, position))
+    }
+
     pub fn name(&self) -> &'i str {
         match self {
             ImmutableVariable::Scalar(scalar) => scalar.name,
             ImmutableVariable::CanonStream(stream) => stream.name,
+            ImmutableVariable::CanonStreamMap(canon_stream_map) => canon_stream_map.name,
         }
     }
 }
@@ -111,10 +116,15 @@ impl<'i> ImmutableVariableWithLambda<'i> {
         Self::CanonStream(CanonStreamWithLambda::new(name, lambda, position))
     }
 
+    pub fn canon_stream_map(name: &'i str, lambda: LambdaAST<'i>, position: AirPos) -> Self {
+        Self::CanonStreamMap(CanonStreamMapWithLambda::new(name, lambda, position))
+    }
+
     pub fn name(&self) -> &'i str {
         match self {
             ImmutableVariableWithLambda::Scalar(scalar) => scalar.name,
             ImmutableVariableWithLambda::CanonStream(canon_stream) => canon_stream.name,
+            ImmutableVariableWithLambda::CanonStreamMap(canon_stream_map) => canon_stream_map.name,
         }
     }
 
@@ -122,6 +132,9 @@ impl<'i> ImmutableVariableWithLambda<'i> {
         match self {
             ImmutableVariableWithLambda::Scalar(scalar) => &scalar.lambda,
             ImmutableVariableWithLambda::CanonStream(canon_stream) => &canon_stream.lambda,
+            ImmutableVariableWithLambda::CanonStreamMap(canon_stream_map) => {
+                &canon_stream_map.lambda
+            }
         }
     }
 

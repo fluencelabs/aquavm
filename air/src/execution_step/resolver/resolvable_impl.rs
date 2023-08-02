@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-// mod utils;
-
-// use self::utils::index_to_value_aggregate;
 use super::RcSecurityTetraplets;
 use super::Resolvable;
-// use crate::execution_step::ValueAggregate;
 use crate::execution_step::boxed_value::JValuable;
-// use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
 use crate::execution_step::ExecutionResult;
@@ -33,8 +28,6 @@ use air_interpreter_data::Provenance;
 use air_parser::ast;
 
 use serde_json::json;
-// use std::ops::Not;
-// use std::ops::Deref;
 use std::rc::Rc;
 
 /// Resolve value to called function arguments.
@@ -122,6 +115,7 @@ impl Resolvable for ast::ImmutableVariable<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
+            Self::CanonStreamMap(canon_stream_map) => canon_stream_map.resolve(ctx),
         }
     }
 }
@@ -151,6 +145,7 @@ impl Resolvable for ast::ImmutableVariableWithLambda<'_> {
         match self {
             Self::Scalar(scalar) => scalar.resolve(ctx),
             Self::CanonStream(canon_stream) => canon_stream.resolve(ctx),
+            Self::CanonStreamMap(canon_stream_map) => canon_stream_map.resolve(ctx),
         }
     }
 }
@@ -167,21 +162,18 @@ impl Resolvable for ast::StreamMapKeyClause<'_> {
     }
 }
 
-// #[allow(dead_code)]
-// pub(crate) fn canon_map_lambda<'a>(
-//     canon_stream_map_w_lambda: &'a ast::CanonStreamMapWithLambda<'a>,
-//     ctx: &'a ExecutionCtx<'a>,
-// ) -> ExecutionResult<(JValue, Rc<SecurityTetraplet>, Provenance)> {
-//     let canon_stream_map_name = canon_stream_map_w_lambda.name;
-//     let canon_map = ctx.scalars.get_canon_map(canon_stream_map_name)?;
-//     let (key, _, _) = canon_stream_map_index.index.resolve(ctx)?;
-//     let key = StreamMapKey::from_value(key, canon_stream_map_name)?;
-//     let value_aggregate = canon_map.index(&key)?;
-//     let value = value_aggregate.get_result().deref().clone();
-//     let provenance = value_aggregate.get_provenance();
-//     let tetraplet = value_aggregate.get_tetraplet();
-//     Ok((value, tetraplet, provenance))
-// }
+impl Resolvable for ast::CanonStreamMap<'_> {
+    fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
+        let canon_stream_map_name = self.name;
+        let canon_stream_map_with_prov = ctx.scalars.get_canon_map(canon_stream_map_name)?;
+        let canon_stream_map = &canon_stream_map_with_prov.canon_stream_map;
+        let value: &dyn JValuable = &canon_stream_map;
+        let tetraplets = value.as_tetraplets();
+        let provenance = Provenance::canon(canon_stream_map_with_prov.cid.clone());
+
+        Ok((value.as_jvalue().into_owned(), tetraplets, provenance))
+    }
+}
 
 impl Resolvable for ast::CanonStreamMapWithLambda<'_> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {

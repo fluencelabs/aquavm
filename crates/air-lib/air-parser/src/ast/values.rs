@@ -85,6 +85,8 @@ pub enum ImmutableVariable<'i> {
     Scalar(Scalar<'i>),
     #[serde(borrow)]
     CanonStream(CanonStream<'i>),
+    #[serde(borrow)]
+    CanonStreamMap(CanonStreamMap<'i>),
 }
 
 /// A variable that could be either scalar or stream with possible lambda expression.
@@ -94,6 +96,8 @@ pub enum ImmutableVariableWithLambda<'i> {
     Scalar(ScalarWithLambda<'i>),
     #[serde(borrow)]
     CanonStream(CanonStreamWithLambda<'i>),
+    #[serde(borrow)]
+    CanonStreamMap(CanonStreamMapWithLambda<'i>),
 }
 
 /// A map based on top of a stream.

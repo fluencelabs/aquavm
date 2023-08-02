@@ -222,6 +222,9 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+            CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
     }
 
@@ -237,6 +240,9 @@ impl<'i> VariableValidator<'i> {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             CanonStreamWithLambda(stream) => self.met_canon_stream_wl(stream, span),
+            CanonStreamMapWithLambda(canon_stream_map) => {
+                self.met_canon_stream_map_wl(canon_stream_map, span)
+            }
         }
     }
 

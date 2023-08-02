@@ -231,12 +231,20 @@ impl<'i> Scalars<'i> {
         self.canon_streams.meet_new_start(canon_stream_name);
     }
 
+    pub(crate) fn meet_new_start_canon_stream_map(&mut self, canon_stream_map_name: String) {
+        self.canon_maps.meet_new_start(canon_stream_map_name);
+    }
+
     pub(crate) fn meet_new_end_scalar(&mut self, scalar_name: &str) -> ExecutionResult<()> {
         self.non_iterable_variables.meet_new_end(scalar_name)
     }
 
     pub(crate) fn meet_new_end_canon_stream(&mut self, canon_name: &str) -> ExecutionResult<()> {
         self.canon_streams.meet_new_end(canon_name)
+    }
+
+    pub(crate) fn meet_new_end_canon_stream_map(&mut self, canon_stream_map_name: &str) -> ExecutionResult<()> {
+        self.canon_maps.meet_new_end(canon_stream_map_name)
     }
 }
 

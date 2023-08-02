@@ -965,35 +965,50 @@ fn fold_canon_stream_map() {
         serde_json::to_string_pretty(&serde_json::from_slice::<InterpreterData>(&result.last().unwrap().data).unwrap())
             .unwrap()
     );
-    // let actual_trace = trace_from_result(&result.last().unwrap());
+    let actual_trace = trace_from_result(&result.last().unwrap());
 
-    // let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
-    // let map_value = json!({"key": "key", "value": "value1"});
-    // let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
 
-    // let expected_trace: Vec<ExecutedState> = vec![
-    //     executed_state::ap(0),
-    //     canon_tracked(
-    //         json!({"tetraplet": tetraplet,
-    //         "values": [
-    //             {
-    //             "result": map_value,
-    //             "tetraplet": tetraplet,
-    //             "provenance": Provenance::Literal,
-    //         },
-    //         ]}),
-    //         &mut cid_tracker,
-    //     ),
-    //     scalar_tracked!(
-    //         "value1",
-    //         cid_tracker,
-    //         peer = vm_1_peer_id,
-    //         service = "m..0",
-    //         function = "f",
-    //         args = ["value1"]
-    //     ),
-    // ];
+    let map_value_1 = json!({"key": "key", "value": "value1"});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
 
-    // assert_eq!(actual_trace, expected_trace,);
-    assert!(false);
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+                {
+                "result": map_value_1,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value_1.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_1]
+        ),
+        scalar_tracked!(
+            map_value_2.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_2]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_trace,);
 }

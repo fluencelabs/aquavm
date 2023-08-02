@@ -107,10 +107,9 @@ pub(crate) fn create_canon_stream_map_iterable_value<'ctx>(
     }
 
     // TODO: this one is a relatively long operation and will be refactored in Boxed Value
-    // Can not create iterable from CanonStreamMap directly b/c CSM contains a map with a limited lifetime but
-    // the boxed value needs static lifetime.
+    // Can not create iterable from CanonStreamMap directly b/c CSM contains a map with
+    // a limited lifetime but the boxed value needs static lifetime.
     let values = canon_stream_map.iter().cloned().collect::<Vec<_>>();
-    println!("create_canon_stream_map_iterable_value values: {:#?}", values);
     let iterable_ingredients = CanonStreamMapIterableIngredients::init(values);
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))

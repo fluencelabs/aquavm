@@ -58,6 +58,7 @@ impl fmt::Display for ResolvableToPeerIdVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -71,6 +72,7 @@ impl fmt::Display for ResolvableToStringVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -141,6 +143,7 @@ impl fmt::Display for NewArgument<'_> {
             Self::Stream(stream) => write!(f, "{stream}"),
             Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             Self::StreamMap(stream_map) => write!(f, "{stream_map}"),
+            Self::CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
