@@ -32,7 +32,7 @@ pub struct Stream<T> {
     /// Values from current data.
     current_values: ValuesMatrix<T>,
 
-    /// Values from call results executed on a current peer.
+    /// Values from call results or aps executed on a current peer.
     new_values: NewValuesMatrix<T>,
 }
 
@@ -82,23 +82,17 @@ impl<'value, T: 'value> Stream<T> {
 
 impl<'value, T: 'value + Clone + fmt::Display> Stream<T> {
     pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
-        // println!("  add value {} to {}", value, generation);
-
         match generation {
             Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
             Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
             Generation::New => self.new_values.add_to_last_generation(value),
         }
-        // println!("  new values after adding {}", self.new_values);
     }
 }
 
 impl<'value, T: 'value + TracePosOperate + fmt::Display> Stream<T> {
     /// Removes empty generations updating data.
     pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        // println!("  prev {}", self.previous_values);
-        // println!("  current {}", self.current_values);
-        // println!("  new {}", self.new_values);
         self.previous_values.remove_empty_generations();
         self.current_values.remove_empty_generations();
         self.new_values.remove_empty_generations();

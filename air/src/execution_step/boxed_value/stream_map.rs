@@ -251,13 +251,8 @@ mod test {
             .collect()
     }
 
-    fn insert_into_map(
-        stream_map: &mut StreamMap,
-        key_value: &(String, ValueAggregate),
-        generation: Generation,
-    ) {
-        stream_map
-            .insert(key_value.0.as_str().into(), &key_value.1, generation);
+    fn insert_into_map(stream_map: &mut StreamMap, key_value: &(String, ValueAggregate), generation: Generation) {
+        stream_map.insert(key_value.0.as_str().into(), &key_value.1, generation);
     }
 
     #[test]
@@ -267,11 +262,7 @@ mod test {
         let mut stream_map = StreamMap::new();
 
         for id in 0..3 {
-            insert_into_map(
-                &mut stream_map,
-                &key_values[id],
-                Generation::current(id as u32)
-            );
+            insert_into_map(&mut stream_map, &key_values[id], Generation::current(id as u32));
         }
 
         let mut iter = stream_map.iter_unique_key();

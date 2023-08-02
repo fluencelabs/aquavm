@@ -69,7 +69,6 @@ pub(crate) fn execute_with_stream<'i>(
     let mut iterables = recursive_stream.fold_started(get_mut_stream(exec_ctx));
     let mut observer = FoldGenerationObserver::new();
 
-    // println!("  before a recursive cycle start {}", iterables.len());
     // this cycle manages recursive streams
     while !iterables.is_empty() {
         let ingredients =
@@ -84,8 +83,6 @@ pub(crate) fn execute_with_stream<'i>(
         )?;
 
         iterables = recursive_stream.next_iteration(get_mut_stream(exec_ctx));
-
-        // println!("  next iteration of a recursive cycle {}", iterables.len());
     }
 
     observer.update_completeness(exec_ctx);

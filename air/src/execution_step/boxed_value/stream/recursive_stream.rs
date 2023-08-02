@@ -41,7 +41,6 @@ impl RecursiveStream {
         if !iterable.is_empty() {
             // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
             // write operation to this stream to write to this new generation
-            //println!("  recursive stream: add new generation");
             stream.new_values().add_new_empty_generation();
         }
 
@@ -49,16 +48,13 @@ impl RecursiveStream {
     }
 
     pub fn next_iteration(&mut self, stream: &mut Stream<ValueAggregate>) -> Vec<IterableValue> {
-        //println!("  recursive stream: next iteration before {:?}", self.cursor);
         let slice_iter = stream.slice_iter(self.cursor);
         let next_iteration_values = Self::slice_iter_to_iterable(slice_iter);
         if stream.new_values().last_generation_is_empty() {
-            //println!("  recursive stream: remove the last generation");
             stream.new_values().remove_last_generation();
         }
 
         self.cursor = stream.cursor();
-        //println!("  recursive stream: next iteration after {:?}", self.cursor);
 
         if !stream.new_values().last_generation_is_empty() {
             stream.new_values().add_new_empty_generation();

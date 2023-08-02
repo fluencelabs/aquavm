@@ -23,12 +23,14 @@ use air_test_utils::*;
 fn global_streams_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = format!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap 1 $stream)
             (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
         )
-    "#);
+    "#
+    );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
     let result = executor.execute_all(peer_id).unwrap();
@@ -54,12 +56,14 @@ fn global_streams_are_compactified() {
 fn global_stream_maps_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = format!(r#"
+    let script = format!(
+        r#"
         (seq
             (ap 1 $stream)
             (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
         )
-    "#);
+    "#
+    );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
     let result = executor.execute_all(peer_id).unwrap();
@@ -85,14 +89,16 @@ fn global_stream_maps_are_compactified() {
 fn local_streams_are_compactified() {
     let peer_id = "peer_id";
     let service_result = "service_result";
-    let script = format!(r#"
+    let script = format!(
+        r#"
         (new $stream
             (seq
                 (ap 1 $stream)
                 (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
             )
         )
-    "#);
+    "#
+    );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
     let result = executor.execute_all(peer_id).unwrap();
