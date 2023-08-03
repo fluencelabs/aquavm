@@ -27,7 +27,7 @@ tracing-subscriber = { version = "0.3.17", default-features = false, features = 
 atty = "0.2.14"
 termcolor = "1.2.0"
 fluence-keypair = "0.10.1"
-bs58 = "0.4.0"
+bs58 = "0.5.0"
 zeroize = "1.6.0"
 
 [features]
