@@ -59,8 +59,11 @@ fn global_stream_maps_are_compactified() {
     let script = format!(
         r#"
         (seq
-            (ap 1 $stream)
-            (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+            (ap (1 1) %stream_map)
+            (seq
+                (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+                (ap (1 1) %stream_map)
+            )
         )
     "#
     );
@@ -74,12 +77,13 @@ fn global_stream_maps_are_compactified() {
         executed_state::ap(0),
         stream_tracked!(
             service_result,
-            1,
+            0,
             cid_state,
             peer = peer_id,
             service = "..0",
             function = ""
         ),
+        executed_state::ap(1),
     ];
 
     assert_eq!(&actual_trace, &expected_trace);
@@ -115,6 +119,45 @@ fn local_streams_are_compactified() {
             service = "..0",
             function = ""
         ),
+    ];
+
+    assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn local_stream_maps_are_compactified() {
+    let peer_id = "peer_id";
+    let service_result = "service_result";
+    let script = format!(
+        r#"
+        (new $stream
+            (seq
+                (ap (1 1) %stream_map)
+                (seq
+                    (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+                    (ap (1 1) %stream_map)
+                )
+            )
+        )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
+    let result = executor.execute_all(peer_id).unwrap();
+    let actual_trace = trace_from_result(result.last().unwrap());
+
+    let mut cid_state = ExecutionCidState::new();
+    let expected_trace = vec![
+        executed_state::ap(0),
+        stream_tracked!(
+            service_result,
+            0,
+            cid_state,
+            peer = peer_id,
+            service = "..0",
+            function = ""
+        ),
+        executed_state::ap(1),
     ];
 
     assert_eq!(actual_trace, expected_trace);

@@ -63,9 +63,9 @@ impl<'value, T: 'value> Stream<T> {
 
     pub(crate) fn cursor(&self) -> StreamCursor {
         StreamCursor::new(
-            self.previous_values.len(),
-            self.current_values.len(),
-            self.new_values.len(),
+            self.previous_values.generations_count(),
+            self.current_values.generations_count(),
+            self.new_values.generations_count(),
         )
     }
 
@@ -94,10 +94,10 @@ impl<'value, T: 'value + TracePosOperate + fmt::Display> Stream<T> {
         let start_idx = 0.into();
         Self::update_generations(self.previous_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
-        let start_idx = self.previous_values.len();
+        let start_idx = self.previous_values.generations_count();
         Self::update_generations(self.current_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
-        let start_idx = start_idx.checked_add(self.current_values.len()).unwrap();
+        let start_idx = start_idx.checked_add(self.current_values.generations_count()).unwrap();
         Self::update_generations(self.new_values.slice_iter(0.into()), start_idx, trace_ctx)?;
 
         Ok(())
@@ -112,6 +112,7 @@ impl<'value, T: 'value + TracePosOperate + fmt::Display> Stream<T> {
         use crate::execution_step::ExecutionError;
 
         for (position, values) in values.enumerate() {
+            // TODO: replace it with error
             let generation = start_idx.checked_add(position.into()).unwrap();
             for value in values.iter() {
                 trace_ctx

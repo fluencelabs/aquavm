@@ -106,8 +106,6 @@ impl<R: AirRunner> TestRunner<R> {
                 )
                 .map_err(|e| e.to_string())?;
 
-            // super::print_trace(&outcome, "");
-
             next_peer_pks.extend(outcome.next_peer_pks);
 
             if outcome.call_requests.is_empty() {

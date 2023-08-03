@@ -191,7 +191,7 @@ mod test {
         let value_aggregate = create_value_aggregate(value.clone());
         let mut stream_map = StreamMap::new();
 
-        stream_map.insert(key, &value_aggregate, Generation::current(0));
+        stream_map.insert(key, &value_aggregate, Generation::Current(0.into()));
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);

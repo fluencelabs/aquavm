@@ -41,7 +41,7 @@ impl<T> ValuesMatrix<T> {
         self.values.retain(|generation| !generation.is_empty())
     }
 
-    pub fn len(&self) -> GenerationIdx {
+    pub fn generations_count(&self) -> GenerationIdx {
         self.values.len().into()
     }
 
@@ -61,6 +61,7 @@ impl<T> ValuesMatrix<T> {
 impl<T: Clone> ValuesMatrix<T> {
     pub fn add_value_to_generation(&mut self, value: T, generation_idx: GenerationIdx) {
         if generation_idx >= self.values.len() {
+            // TODO: replace unwrap with error
             let new_size = generation_idx.checked_add(1.into()).unwrap();
             self.values.resize(new_size.into(), Vec::new());
         }
@@ -96,7 +97,7 @@ impl<T> NewValuesMatrix<T> {
             return true;
         }
 
-        self.0.values[self.last_generation_idx()].is_empty()
+        self.0.values[self.last_non_empty_generation_idx()].is_empty()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &T> {
@@ -107,11 +108,11 @@ impl<T> NewValuesMatrix<T> {
         self.0.slice_iter(skip)
     }
 
-    pub fn len(&self) -> GenerationIdx {
-        self.0.len()
+    pub fn generations_count(&self) -> GenerationIdx {
+        self.0.generations_count()
     }
 
-    pub fn last_generation_idx(&self) -> GenerationIdx {
+    pub fn last_non_empty_generation_idx(&self) -> GenerationIdx {
         let values_len = self.0.values.len();
         if values_len == 0 {
             return 0.into();
@@ -123,7 +124,7 @@ impl<T> NewValuesMatrix<T> {
 
 impl<T: Clone> NewValuesMatrix<T> {
     pub fn add_to_last_generation(&mut self, value: T) {
-        let last_generation_idx = self.last_generation_idx();
+        let last_generation_idx = self.last_non_empty_generation_idx();
         self.0.add_value_to_generation(value, last_generation_idx);
     }
 }
