@@ -52,6 +52,8 @@ pub use farewell_step::FarewellError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
 pub use preparation_step::PreparationError;
+pub use preparation_step::min_supported_version;
+pub use preparation_step::interpreter_version;
 pub use utils::ToErrorCode;
 
 pub use crate::runner::execute_air;

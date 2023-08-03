@@ -15,6 +15,7 @@
  */
 
 use air::PreparationError;
+use air::min_supported_version;
 use air_interpreter_interface::INTERPRETER_SUCCESS;
 use air_test_utils::prelude::*;
 
@@ -30,7 +31,7 @@ fn minimal_version_check() {
 
     let expected_error = PreparationError::UnsupportedInterpreterVersion {
         actual_version,
-        required_version: semver::Version::new(0, 40, 0),
+        required_version: min_supported_version().clone(),
     };
 
     assert!(check_error(&result, expected_error));
@@ -62,7 +63,7 @@ fn publish_unsupported_version_check() {
 
     let expected_error = PreparationError::UnsupportedInterpreterVersion {
         actual_version,
-        required_version: semver::Version::new(0, 40, 0),
+        required_version: min_supported_version().clone(),
     };
 
     assert!(check_error(&result, expected_error));
