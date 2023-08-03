@@ -38,6 +38,7 @@ pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use execution_step::execution_context::errors::unsupported_map_key_type;
 pub use execution_step::execution_context::errors::StreamMapError;
 pub use execution_step::execution_context::errors::CanonStreamMapError;
+pub use execution_step::execution_context::errors::StreamMapKeyError;
 pub use execution_step::execution_context::no_error_last_error;
 pub use execution_step::execution_context::no_error_last_error_object;
 pub use execution_step::execution_context::ExecutionCidState;

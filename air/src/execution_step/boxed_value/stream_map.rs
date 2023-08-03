@@ -28,7 +28,7 @@ use air_trace_handler::TraceHandler;
 use serde_json::json;
 use std::rc::Rc;
 
-static VALUE_FIELD: &str = "value";
+pub(super) static VALUE_FIELD: &str = "value";
 
 pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
     Rc::new(json!({ KEY_FIELD: key, VALUE_FIELD: value }))

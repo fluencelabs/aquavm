@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+use super::stream_map::VALUE_FIELD;
 use super::CanonStream;
 use super::ValueAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ExecutionResult;
 use crate::CanonStreamMapError::IndexIsAbsentInTheMap;
 use crate::CanonStreamMapError::NonexistentMappingIdx;
-use crate::CanonStreamMapError::NotAnObject;
-use crate::CanonStreamMapError::ValueFieldIsAbsent;
 use crate::JValue;
-use crate::StreamMapError::UnsupportedKVPairObjectOrMapKeyType;
+use crate::StreamMapKeyError::NotAnObject;
+use crate::StreamMapKeyError::UnsupportedKVPairObjectOrMapKeyType;
+use crate::StreamMapKeyError::ValueFieldIsAbsent;
 use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
@@ -40,7 +41,9 @@ pub struct ValueAndIndex<'a> {
     pub(crate) value_aggregate_array_index: usize,
 }
 
-/// Canon stream map is a map type that is fixed at a certain node.
+/// Canon stream map is a read-only map that mimics conventional map.
+/// The contents of a map is fixed at a certain node.
+/// The values vec contains a value per unique key.
 #[derive(Debug, Clone)]
 pub struct CanonStreamMap<'a> {
     values: Vec<ValueAggregate>,
@@ -143,15 +146,169 @@ fn from_obj_idx_pair(pair: (usize, &ValueAggregate)) -> ExecutionResult<(StreamM
     let (idx, obj) = pair;
     StreamMapKey::from_kvpair(obj.clone())
         .map(|key| (key, idx))
-        .ok_or(UncatchableError::StreamMapError(UnsupportedKVPairObjectOrMapKeyType).into())
+        .ok_or(UncatchableError::StreamMapKeyError(UnsupportedKVPairObjectOrMapKeyType).into())
 }
 
 fn from_kvpair(value_aggregate: &ValueAggregate) -> ExecutionResult<&JValue> {
     let object = value_aggregate
         .get_result()
         .as_object()
-        .ok_or(UncatchableError::CanonStreamMapError(NotAnObject))?;
+        .ok_or(UncatchableError::StreamMapKeyError(NotAnObject))?;
     object
-        .get("value")
-        .ok_or(UncatchableError::CanonStreamMapError(ValueFieldIsAbsent).into())
+        .get(VALUE_FIELD)
+        .ok_or(UncatchableError::StreamMapKeyError(ValueFieldIsAbsent).into())
+}
+
+#[cfg(test)]
+mod test {
+    use super::from_kvpair;
+    use super::from_obj_idx_pair;
+    use super::CanonStream;
+    use super::CanonStreamMap;
+    use super::ValueAndIndex;
+    use crate::execution_step::boxed_value::stream_map::from_key_value;
+    use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+    use crate::execution_step::ValueAggregate;
+    use crate::CanonStreamMapError::IndexIsAbsentInTheMap;
+    use crate::CanonStreamMapError::NonexistentMappingIdx;
+    use crate::ExecutionError;
+    use crate::JValue;
+    use crate::StreamMapKeyError::NotAnObject;
+    use crate::StreamMapKeyError::UnsupportedKVPairObjectOrMapKeyType;
+    use crate::StreamMapKeyError::ValueFieldIsAbsent;
+
+    use crate::UncatchableError;
+    use serde_json::json;
+    use std::borrow::Cow;
+    use std::rc::Rc;
+
+    fn create_value_aggregate(value: Rc<JValue>) -> ValueAggregate {
+        ValueAggregate::new(
+            value,
+            <_>::default(),
+            0.into(),
+            air_interpreter_data::Provenance::literal(),
+        )
+    }
+
+    #[test]
+    fn test_index_ok() {
+        let key_1 = StreamMapKey::Str(Cow::Borrowed("key_one"));
+        let value_1 = Rc::new(json!("first_value"));
+        let kvpair_1 = from_key_value(key_1.clone(), value_1.as_ref());
+
+        let key_2 = StreamMapKey::Str(Cow::Borrowed("key_two"));
+        let value_2 = Rc::new(json!("second_value"));
+        let kvpair_2 = from_key_value(key_2, value_2.as_ref());
+
+        let va_1 = create_value_aggregate(kvpair_1);
+        let va_2 = create_value_aggregate(kvpair_2);
+
+        let canon_stream = CanonStream::from_values(vec![va_1, va_2], "some_tetraplet".into());
+        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
+        let ValueAndIndex {
+            value,
+            value_aggregate_array_index: _index,
+        } = canon_stream_map
+            .index(&key_1)
+            .expect("There must be a value for this index.");
+        assert_eq!(value, value_1.as_ref());
+    }
+
+    #[test]
+    fn test_index_absent_key() {
+        let key_1 = StreamMapKey::Str(Cow::Borrowed("key_one"));
+        let value_1 = Rc::new(json!("first_value"));
+        let kvpair_1 = from_key_value(key_1.clone(), value_1.as_ref());
+
+        let key_2 = StreamMapKey::Str(Cow::Borrowed("key_two"));
+        let value_2 = Rc::new(json!("second_value"));
+        let kvpair_2 = from_key_value(key_2, value_2.as_ref());
+
+        let va_1 = create_value_aggregate(kvpair_1);
+        let va_2 = create_value_aggregate(kvpair_2);
+
+        let canon_stream = CanonStream::from_values(vec![va_1, va_2], "some_tetraplet".into());
+        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
+
+        let absent_key = StreamMapKey::Str(Cow::Borrowed("absent_key"));
+        let index_result = canon_stream_map.index(&absent_key);
+
+        assert!(matches!(
+            index_result,
+            Err(ExecutionError::Uncatchable(UncatchableError::CanonStreamMapError(
+                IndexIsAbsentInTheMap
+            ),))
+        ));
+    }
+
+    #[test]
+    fn test_index_absent_idx() {
+        let key_1 = StreamMapKey::Str(Cow::Borrowed("key_one"));
+        let value_1 = Rc::new(json!("first_value"));
+        let kvpair_1 = from_key_value(key_1.clone(), value_1.as_ref());
+
+        let key_2 = StreamMapKey::Str(Cow::Borrowed("key_two"));
+        let value_2 = Rc::new(json!("second_value"));
+        let kvpair_2 = from_key_value(key_2, value_2.as_ref());
+
+        let va_1 = create_value_aggregate(kvpair_1);
+        let va_2 = create_value_aggregate(kvpair_2);
+
+        let canon_stream = CanonStream::from_values(vec![va_1, va_2], "some_tetraplet".into());
+        let mut canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
+        canon_stream_map.values.clear();
+
+        let key_with_absent_idx = StreamMapKey::Str(Cow::Borrowed("key_two"));
+        let index_result = canon_stream_map.index(&key_with_absent_idx);
+
+        assert!(matches!(
+            index_result,
+            Err(ExecutionError::Uncatchable(UncatchableError::CanonStreamMapError(
+                NonexistentMappingIdx
+            ),))
+        ));
+    }
+
+    #[test]
+    fn test_from_obj_idx_pair_unsupported_object_format() {
+        let value_1 = Rc::new(json!("first_value"));
+        let va_1 = create_value_aggregate(value_1);
+        let result = from_obj_idx_pair((0, &va_1));
+
+        assert!(matches!(
+            result,
+            Err(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
+                UnsupportedKVPairObjectOrMapKeyType
+            ),))
+        ));
+    }
+
+    #[test]
+    fn test_from_kvpair_not_an_object() {
+        let value = Rc::new(json!("first_value"));
+        let va = create_value_aggregate(value);
+        let result = from_kvpair(&va);
+
+        assert!(matches!(
+            result,
+            Err(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
+                NotAnObject
+            ),))
+        ));
+    }
+
+    #[test]
+    fn test_from_kvpair_value_field_is_absent() {
+        let value = Rc::new(json!({"key": "first_value"}));
+        let va = create_value_aggregate(value);
+        let result = from_kvpair(&va);
+
+        assert!(matches!(
+            result,
+            Err(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
+                ValueFieldIsAbsent
+            ),))
+        ));
+    }
 }

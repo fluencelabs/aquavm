@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// use air_parser::ast::CanonStreamMap;
-
 use super::Iterable;
 use super::IterableItem;
 use crate::execution_step::ValueAggregate;

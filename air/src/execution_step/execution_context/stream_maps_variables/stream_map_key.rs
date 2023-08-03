@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-use crate::execution_step::execution_context::stream_maps_variables::errors::unsupported_map_key_type;
 use crate::execution_step::ValueAggregate;
-use crate::CatchableError;
-use crate::ExecutionError;
 use crate::JValue;
 
 use serde::Serialize;
@@ -33,27 +30,18 @@ pub(crate) enum StreamMapKey<'value> {
 }
 
 impl<'value> StreamMapKey<'value> {
-    pub(crate) fn from_value_with_map_name(value: JValue, map_name: &str) -> Result<Self, ExecutionError> {
+    pub fn from_value(value: JValue) -> Option<Self> {
         match value {
-            JValue::String(s) => Ok(StreamMapKey::Str(Cow::Owned(s))),
-            JValue::Number(n) if n.is_i64() => Ok(StreamMapKey::I64(n.as_i64().unwrap())),
-            JValue::Number(n) if n.is_u64() => Ok(StreamMapKey::U64(n.as_u64().unwrap())),
-            _ => Err(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into()),
-        }
-    }
-
-    pub fn from_value_ref(value: &'value JValue) -> Option<Self> {
-        match value {
-            JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => None,
         }
     }
 
-    pub fn from_value(value: JValue) -> Option<Self> {
+    pub fn from_value_ref(value: &'value JValue) -> Option<Self> {
         match value {
-            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => None,

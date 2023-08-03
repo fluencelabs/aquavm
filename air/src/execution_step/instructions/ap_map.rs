@@ -24,6 +24,8 @@ use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use crate::unsupported_map_key_type;
+use crate::CatchableError;
 use crate::ExecutionError;
 
 use air_interpreter_data::GenerationIdx;
@@ -86,7 +88,7 @@ fn resolve<'ctx>(
     map_name: &str,
 ) -> Result<StreamMapKey<'ctx>, ExecutionError> {
     let (value, _, _) = resolvable.resolve(exec_ctx)?;
-    StreamMapKey::from_value_with_map_name(value, map_name)
+    StreamMapKey::from_value(value).ok_or(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into())
 }
 
 fn maybe_update_trace(generation: GenerationIdx, trace_ctx: &mut TraceHandler) {
