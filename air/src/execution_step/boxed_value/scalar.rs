@@ -55,6 +55,7 @@ pub enum ValueAggregate {
         provenance_cid: Rc<CID<CanonResultCidAggregate>>,
     },
 }
+
 pub(crate) enum ScalarRef<'i> {
     Value(&'i ValueAggregate),
     IterableValue(&'i FoldState<'i>),
@@ -176,7 +177,29 @@ impl ValueAggregate {
         }
     }
 
-    pub fn get_trace_pos(&self) -> TracePos {
+    pub fn get_provenance(&self) -> Provenance {
+        match self {
+            ValueAggregate::Literal(_) => Provenance::Literal,
+            ValueAggregate::ServiceResult {
+                result: _,
+                provenance_cid: cid,
+            } => Provenance::ServiceResult { cid: cid.clone() },
+            ValueAggregate::Canon {
+                result: _,
+                provenance_cid: cid,
+            } => Provenance::Canon { cid: cid.clone() },
+        }
+    }
+}
+
+pub trait TracePosOperate {
+    fn get_trace_pos(&self) -> TracePos;
+
+    fn set_trace_pos(&mut self, pos: TracePos);
+}
+
+impl TracePosOperate for ValueAggregate {
+    fn get_trace_pos(&self) -> TracePos {
         match self {
             ValueAggregate::Literal(literal) => literal.trace_pos,
             ValueAggregate::ServiceResult {
@@ -190,7 +213,7 @@ impl ValueAggregate {
         }
     }
 
-    pub fn set_trace_pos(&mut self, trace_pos: TracePos) {
+    fn set_trace_pos(&mut self, trace_pos: TracePos) {
         let trace_pos_ref = match self {
             ValueAggregate::Literal(literal) => &mut literal.trace_pos,
             ValueAggregate::ServiceResult {
@@ -203,20 +226,6 @@ impl ValueAggregate {
             } => &mut canon_result.trace_pos,
         };
         *trace_pos_ref = trace_pos;
-    }
-
-    pub fn get_provenance(&self) -> Provenance {
-        match self {
-            ValueAggregate::Literal(_) => Provenance::Literal,
-            ValueAggregate::ServiceResult {
-                result: _,
-                provenance_cid: cid,
-            } => Provenance::ServiceResult { cid: cid.clone() },
-            ValueAggregate::Canon {
-                result: _,
-                provenance_cid: cid,
-            } => Provenance::Canon { cid: cid.clone() },
-        }
     }
 }
 

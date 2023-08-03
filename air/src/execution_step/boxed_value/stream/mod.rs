@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-mod ap_with_fold;
-mod compactification;
-mod merging;
-mod recursive_streams;
-mod streams;
-mod streams_early_exit;
+mod recursive_stream;
+mod stream_definition;
+pub(self) mod values_matrix;
+
+pub(crate) use recursive_stream::IterableValue;
+pub(crate) use recursive_stream::RecursiveCursorState;
+pub(crate) use recursive_stream::RecursiveStreamCursor;
+pub(crate) use recursive_stream::StreamCursor;
+pub(crate) use stream_definition::Generation;
+pub(crate) use stream_definition::Stream;

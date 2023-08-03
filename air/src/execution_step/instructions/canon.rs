@@ -23,7 +23,6 @@ use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::boxed_value::CanonStreamWithProvenance;
-use crate::execution_step::Generation;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -86,8 +85,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .map(Cow::Borrowed)
             .unwrap_or_default();
 
-        // it's always possible to iter over all generations of a stream
-        let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
+        let values = stream.iter().cloned().collect::<Vec<_>>();
         CanonStream::from_values(values, peer_pk)
     })
 }

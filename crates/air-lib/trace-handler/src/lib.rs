@@ -33,7 +33,7 @@ pub mod merger;
 mod state_automata;
 
 pub use data_keeper::KeeperError;
-pub use errors::GenerationCompatificationError;
+pub use errors::GenerationCompactificationError;
 pub use errors::IntConversionError;
 pub use errors::TraceHandlerError;
 pub use handler::TraceHandler;

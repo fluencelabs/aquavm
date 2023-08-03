@@ -15,13 +15,14 @@
  */
 
 use super::completeness_updater::FoldGenerationObserver;
-use super::stream_cursor::StreamCursor;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
+use crate::execution_step::boxed_value::IterableValue;
+use crate::execution_step::boxed_value::RecursiveCursorState;
+use crate::execution_step::boxed_value::RecursiveStreamCursor;
 use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::instructions::fold::IterableType;
-use crate::execution_step::instructions::fold::IterableValue;
 use crate::execution_step::instructions::fold_scalar::fold;
 use crate::trace_to_exec_err;
 
@@ -29,14 +30,14 @@ use air_parser::ast::Instruction;
 
 use std::rc::Rc;
 
-struct FoldStreamLikeIngredients<'i> {
+struct FoldStreamIngredients<'i> {
     iterable_name: &'i str,
     instruction: Rc<Instruction<'i>>,
     last_instruction: Option<Rc<Instruction<'i>>>,
     fold_id: u32,
 }
 
-impl<'i> FoldStreamLikeIngredients<'i> {
+impl<'i> FoldStreamIngredients<'i> {
     fn new(
         iterable_name: &'i str,
         instruction: Rc<Instruction<'i>>,
@@ -65,18 +66,16 @@ pub(crate) fn execute_with_stream<'i>(
 
     trace_to_exec_err!(trace_ctx.meet_fold_start(fold_id), fold_to_string)?;
 
-    let mut stream_cursor = StreamCursor::new();
-    let mut stream_iterable = stream_cursor.construct_iterables(get_mut_stream(exec_ctx));
+    let mut recursive_stream = RecursiveStreamCursor::new();
+    let mut cursor_state = recursive_stream.met_fold_start(get_mut_stream(exec_ctx));
     let mut observer = FoldGenerationObserver::new();
+
     // this cycle manages recursive streams
-    while !stream_iterable.is_empty() {
-        // add a new generation to made all consequence "new" (meaning that they are just executed on this peer)
-        // write operation to this stream to write to this new generation
-        add_new_generation_if_non_empty(get_mut_stream(exec_ctx));
+    while let RecursiveCursorState::Continue(iterables) = cursor_state {
         let ingredients =
-            FoldStreamLikeIngredients::new(iterable_name, instruction.clone(), last_instruction.clone(), fold_id);
+            FoldStreamIngredients::new(iterable_name, instruction.clone(), last_instruction.clone(), fold_id);
         execute_iterations(
-            stream_iterable,
+            iterables,
             fold_to_string,
             ingredients,
             &mut observer,
@@ -84,11 +83,7 @@ pub(crate) fn execute_with_stream<'i>(
             trace_ctx,
         )?;
 
-        // it's needed to get stream again, because RefCell allows only one mutable borrowing at time,
-        // and likely that stream could be mutably borrowed in execute_iterations
-        let stream = remove_new_generation_if_non_empty(get_mut_stream(exec_ctx));
-
-        stream_iterable = stream_cursor.construct_iterables(stream)
+        cursor_state = recursive_stream.met_iteration_end(get_mut_stream(exec_ctx));
     }
 
     observer.update_completeness(exec_ctx);
@@ -104,7 +99,7 @@ pub(crate) fn execute_with_stream<'i>(
 fn execute_iterations<'i>(
     iterables: Vec<IterableValue>,
     fold_to_string: &impl ToString,
-    ingredients: FoldStreamLikeIngredients<'i>,
+    ingredients: FoldStreamIngredients<'i>,
     generation_observer: &mut FoldGenerationObserver,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
@@ -137,17 +132,6 @@ fn execute_iterations<'i>(
     }
 
     Ok(())
-}
-
-/// Safety: this function should be called iff stream is present in context
-pub(super) fn add_new_generation_if_non_empty(stream: &mut Stream) {
-    stream.add_new_generation_if_non_empty();
-}
-
-/// Safety: this function should be called iff stream is present in context
-pub(super) fn remove_new_generation_if_non_empty(stream: &mut Stream) -> &Stream {
-    stream.remove_last_generation_if_empty();
-    stream
 }
 
 /// Fold over streams doesn't throw an error if it's a catchable one, because otherwise it would be

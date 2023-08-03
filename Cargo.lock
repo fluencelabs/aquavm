@@ -333,6 +333,7 @@ dependencies = [
  "strum_macros",
  "thiserror",
  "tracing",
+ "typed-index-collections",
 ]
 
 [[package]]
@@ -3638,6 +3639,12 @@ dependencies = [
  "tracing-core",
  "tracing-serde",
 ]
+
+[[package]]
+name = "typed-index-collections"
+version = "3.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "183496e014253d15abbe6235677b1392dba2d40524c88938991226baa38ac7c4"
 
 [[package]]
 name = "typenum"

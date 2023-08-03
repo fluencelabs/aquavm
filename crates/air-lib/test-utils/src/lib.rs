@@ -93,8 +93,6 @@ pub fn raw_data_from_trace(
 ) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
-        <_>::default(),
-        <_>::default(),
         cid_state.into(),
         <_>::default(),
         0,
@@ -109,8 +107,6 @@ pub fn raw_data_from_trace_with_canon(
 ) -> Vec<u8> {
     let data = InterpreterData::from_execution_result(
         trace.into(),
-        <_>::default(),
-        <_>::default(),
         CidInfo {
             value_store: cid_state.value_tracker.into(),
             tetraplet_store: cid_state.tetraplet_tracker.into(),

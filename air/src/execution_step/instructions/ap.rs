@@ -30,7 +30,6 @@ use crate::JValue;
 use apply_to_arguments::apply_to_arg;
 use utils::*;
 
-use air_interpreter_data::GenerationIdx;
 use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;
@@ -52,8 +51,8 @@ impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
         )?;
 
         let merger_ap_result = to_merger_ap_result(self, trace_ctx)?;
-        let maybe_generation = populate_context(&self.result, &merger_ap_result, result, exec_ctx)?;
-        maybe_update_trace(maybe_generation, trace_ctx);
+        populate_context(&self.result, &merger_ap_result, result, exec_ctx)?;
+        maybe_update_trace(should_touch_trace, trace_ctx);
 
         Ok(())
     }
@@ -80,21 +79,24 @@ fn populate_context<'ctx>(
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
-) -> ExecutionResult<Option<GenerationIdx>> {
+) -> ExecutionResult<()> {
     match ap_result {
-        ast::ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| None),
+        ast::ApResult::Scalar(scalar) => {
+            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
+        }
         ast::ApResult::Stream(stream) => {
             let value_descriptor = generate_value_descriptor(result, stream, merger_ap_result);
-            exec_ctx.streams.add_stream_value(value_descriptor).map(Some)
+            exec_ctx.streams.add_stream_value(value_descriptor);
         }
-    }
+    };
+
+    Ok(())
 }
 
-fn maybe_update_trace(maybe_generation: Option<GenerationIdx>, trace_ctx: &mut TraceHandler) {
+fn maybe_update_trace(should_touch_trace: bool, trace_ctx: &mut TraceHandler) {
     use air_interpreter_data::ApResult;
 
-    if let Some(generation) = maybe_generation {
-        let final_ap_result = ApResult::new(generation);
-        trace_ctx.meet_ap_end(final_ap_result);
+    if should_touch_trace {
+        trace_ctx.meet_ap_end(ApResult::stub());
     }
 }

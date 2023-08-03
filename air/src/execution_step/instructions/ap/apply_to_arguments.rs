@@ -15,8 +15,11 @@
  */
 
 use super::*;
+use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::resolver::Resolvable;
-use crate::execution_step::{CanonResultAggregate, LiteralAggregate, PEEK_ALLOWED_ON_NON_EMPTY};
+use crate::execution_step::CanonResultAggregate;
+use crate::execution_step::LiteralAggregate;
+use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
 use air_interpreter_data::Provenance;

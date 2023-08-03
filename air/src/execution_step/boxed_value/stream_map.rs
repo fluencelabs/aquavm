@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use super::stream::*;
+use super::Generation;
+use super::Stream;
 use super::ValueAggregate;
+use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
-use air_interpreter_data::GenerationIdx;
-use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use serde_json::json;
@@ -37,13 +37,11 @@ pub struct StreamMap {
 }
 
 impl StreamMap {
-    pub(crate) fn from_generations_count(previous_count: GenerationIdx, current_count: GenerationIdx) -> Self {
-        Self {
-            stream: Stream::from_generations_count(previous_count, current_count),
-        }
+    pub(crate) fn new() -> Self {
+        Self { stream: Stream::new() }
     }
 
-    pub(crate) fn from_value(key: StreamMapKey<'_>, value: &ValueAggregate) -> Self {
+    pub(crate) fn insert(&mut self, key: StreamMapKey<'_>, value: &ValueAggregate, generation: Generation) {
         let obj = from_key_value(key, value.get_result());
         let value = ValueAggregate::new(
             obj,
@@ -51,29 +49,10 @@ impl StreamMap {
             value.get_trace_pos(),
             value.get_provenance(),
         );
-        Self {
-            stream: Stream::from_value(value),
-        }
+        self.stream.add_value(value, generation)
     }
 
-    pub(crate) fn insert(
-        &mut self,
-        key: StreamMapKey<'_>,
-        value: &ValueAggregate,
-        generation: Generation,
-        source: ValueSource,
-    ) -> ExecutionResult<GenerationIdx> {
-        let obj = from_key_value(key, value.get_result());
-        let value = ValueAggregate::new(
-            obj,
-            value.get_tetraplet(),
-            value.get_trace_pos(),
-            value.get_provenance(),
-        );
-        self.stream.add_value(value, generation, source)
-    }
-
-    pub(crate) fn compactify(self, trace_ctx: &mut TraceHandler) -> ExecutionResult<GenerationIdx> {
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         self.stream.compactify(trace_ctx)
     }
 
@@ -87,8 +66,7 @@ impl StreamMap {
 
         let mut met_keys = HashSet::new();
 
-        // it's always possible to go through all values
-        self.stream.iter(Generation::Last).unwrap().filter(move |value| {
+        self.stream.iter().filter(move |value| {
             StreamMapKey::from_kvpair(value)
                 .map(|key| met_keys.insert(key))
                 .unwrap_or(false)
@@ -111,106 +89,149 @@ mod test {
     use crate::execution_step::boxed_value::stream_map::from_key_value;
     use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
     use crate::execution_step::ValueAggregate;
-    use air_trace_handler::merger::ValueSource;
+    use crate::ExecutionError;
+    use crate::JValue;
+    use crate::UncatchableError;
+
+    use air_interpreter_cid::CID;
+    use air_interpreter_data::ExecutionTrace;
+    use air_trace_handler::GenerationCompactificationError;
+    use air_trace_handler::TraceHandler;
     use serde_json::json;
+
     use std::borrow::Cow;
     use std::rc::Rc;
 
+    fn create_value_aggregate(value: Rc<JValue>) -> ValueAggregate {
+        ValueAggregate::new(
+            value,
+            <_>::default(),
+            0.into(),
+            air_interpreter_data::Provenance::literal(),
+        )
+    }
+
+    fn compare_stream_iter<'value>(
+        mut iter: impl Iterator<Item = &'value ValueAggregate>,
+        key: StreamMapKey<'_>,
+        value: &Rc<JValue>,
+    ) -> bool {
+        let actual_value = iter.next().map(|e| e.get_result()).unwrap();
+        let expected_value = from_key_value(key, value);
+
+        actual_value == &expected_value
+    }
+
     #[test]
-    fn test_from_value() {
-        let obj = json!([{"top_level": [{"first": 42},{"second": 43}]}]);
-        let key_str = "some_key";
-        let key = StreamMapKey::Str(Cow::Borrowed(key_str));
-        let value = Rc::new(obj.clone());
+    fn test_from_value_key_str() {
+        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
+        let value = Rc::new(json!("1"));
+        let value_aggregate = create_value_aggregate(value.clone());
 
-        let generation_idx = 0;
-        let generation = Generation::Nth(generation_idx.into());
-        let value_aggregate: ValueAggregate = ValueAggregate::new(
-            value.clone(),
-            <_>::default(),
-            0.into(),
-            air_interpreter_data::Provenance::literal(),
-        );
-        let stream_map = StreamMap::from_value(key.clone(), &value_aggregate);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
+        let mut iter = stream_map.stream.iter();
 
-        let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
-        let v = internal_stream_iter.next().map(|e| e.get_result()).unwrap();
-        let examplar = from_key_value(key, value.as_ref());
-        assert_eq!(*v, examplar);
-        assert_eq!(internal_stream_iter.next(), None);
+        assert!(compare_stream_iter(&mut iter, key, &value));
+        assert_eq!(iter.next(), None);
+    }
 
+    #[test]
+    fn test_from_value_key_int() {
         let key = StreamMapKey::I64(42.into());
-        let value_aggregate = ValueAggregate::new(
-            value.clone(),
-            <_>::default(),
-            0.into(),
-            air_interpreter_data::Provenance::literal(),
-        );
-        let stream_map = StreamMap::from_value(key.clone(), &value_aggregate);
+        let value = Rc::new(json!("1"));
+        let value_aggregate = create_value_aggregate(value.clone());
 
-        let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
-        let v = internal_stream_iter.next().map(|e| e.get_result().as_ref()).unwrap();
-        let examplar = from_key_value(key, value.as_ref());
-        assert_eq!(*v, *examplar.as_ref());
-        assert_eq!(internal_stream_iter.next(), None);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
+        let mut iter = stream_map.stream.iter();
+
+        assert!(compare_stream_iter(&mut iter, key, &value));
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn test_insert() {
-        let obj = json!([{"top_level": [{"first": 42},{"second": 43}]}]);
-        let key_str = "some_key";
-        let key12 = StreamMapKey::Str(Cow::Borrowed(key_str));
-        let value = Rc::new(obj.clone());
-        let generation_idx = 0;
-        let value_aggregate: ValueAggregate = ValueAggregate::new(
-            value.clone(),
-            <_>::default(),
-            0.into(),
-            air_interpreter_data::Provenance::literal(),
-        );
-        let mut stream_map = StreamMap::from_value(key12.clone(), &value_aggregate);
-        let generation = Generation::Nth(generation_idx.into());
-        let generation_idx_res = stream_map
-            .insert(key12.clone(), &value_aggregate, generation, ValueSource::CurrentData)
-            .unwrap();
-        assert_eq!(generation_idx_res, generation_idx);
+        let key_1_2 = StreamMapKey::Str(Cow::Borrowed("some_key"));
+        let value_1 = Rc::new(json!("1"));
+        let value_aggregate_1 = create_value_aggregate(value_1.clone());
 
-        let examplar = from_key_value(key12, value.as_ref());
-        let s = stream_map
-            .stream
-            .iter(generation)
-            .unwrap()
-            .all(|e| *e.get_result().as_ref() == *examplar.as_ref());
-        assert!(s);
+        let value_2 = Rc::new(json!("2"));
+        let value_aggregate_2 = create_value_aggregate(value_2.clone());
 
-        let key_str = "other_key";
-        let key3 = StreamMapKey::Str(Cow::Borrowed(key_str));
-        let generation_idx = stream_map
-            .insert(key3.clone(), &value_aggregate, generation, ValueSource::CurrentData)
-            .unwrap();
-        assert_eq!(generation_idx_res, generation_idx);
+        let mut stream_map = StreamMap::new();
+        stream_map.insert(key_1_2.clone(), &value_aggregate_1, Generation::New);
+        stream_map.insert(key_1_2.clone(), &value_aggregate_2, Generation::Current(0.into()));
 
-        let key4 = StreamMapKey::I64(42.into());
-        let generation_idx = stream_map
-            .insert(key4.clone(), &value_aggregate, generation, ValueSource::CurrentData)
-            .unwrap();
-        assert_eq!(generation_idx_res, generation_idx);
+        let key_3 = StreamMapKey::Str(Cow::Borrowed("other_key"));
+        let value_3 = Rc::new(json!("3"));
+        let value_aggregate_3 = create_value_aggregate(value_3.clone());
+        stream_map.insert(key_3.clone(), &value_aggregate_3, Generation::Current(0.into()));
 
-        let mut internal_stream_iter = stream_map.stream.iter(generation).unwrap();
-        let v = internal_stream_iter.next().map(|e| e.get_result().as_ref()).unwrap();
-        assert_eq!(*v, *examplar.as_ref());
+        let key_4 = StreamMapKey::I64(42.into());
+        let value_4 = Rc::new(json!("4"));
+        let value_aggregate_4 = create_value_aggregate(value_4.clone());
+        stream_map.insert(key_4.clone(), &value_aggregate_4, Generation::Current(0.into()));
 
-        let v = internal_stream_iter.next().map(|e| e.get_result().as_ref()).unwrap();
-        assert_eq!(*v, *examplar.as_ref());
+        let mut iter = stream_map.stream.iter();
 
-        let v = internal_stream_iter.next().map(|e| e.get_result().as_ref()).unwrap();
-        let examplar = from_key_value(key3, value.as_ref());
-        assert_eq!(*v, *examplar.as_ref());
+        assert!(compare_stream_iter(&mut iter, key_1_2.clone(), &value_2));
+        assert!(compare_stream_iter(&mut iter, key_3, &value_3));
+        assert!(compare_stream_iter(&mut iter, key_4, &value_4));
+        assert!(compare_stream_iter(&mut iter, key_1_2, &value_1));
+        assert_eq!(iter.next(), None);
+    }
 
-        let v = internal_stream_iter.next().map(|e| e.get_result().as_ref()).unwrap();
-        let examplar = from_key_value(key4, value.as_ref());
-        assert_eq!(*v, *examplar.as_ref());
-        assert_eq!(internal_stream_iter.next(), None);
+    #[test]
+    fn compactification_invalid_state_error() {
+        use air_interpreter_data::CanonResult;
+
+        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
+        let value = Rc::new(json!("1"));
+        let value_aggregate = create_value_aggregate(value.clone());
+        let mut stream_map = StreamMap::new();
+
+        stream_map.insert(key, &value_aggregate, Generation::Current(0.into()));
+
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+        let canon_result = CanonResult(Rc::new(CID::new("fake canon CID")));
+        trace_ctx.meet_canon_end(canon_result.clone());
+        trace_ctx.meet_canon_end(canon_result.clone());
+        trace_ctx.meet_canon_end(canon_result);
+
+        let compactification_result = stream_map.compactify(&mut trace_ctx);
+        assert!(matches!(
+            compactification_result,
+            Err(ExecutionError::Uncatchable(
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToInvalidState { .. }
+                )
+            ))
+        ));
+    }
+
+    #[test]
+    fn compactification_points_to_nowhere_error() {
+        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
+        let value = Rc::new(json!("1"));
+        let value_aggregate = create_value_aggregate(value.clone());
+        let mut stream_map = StreamMap::new();
+
+        stream_map.insert(key, &value_aggregate, Generation::current(0));
+
+        let trace = ExecutionTrace::from(vec![]);
+        let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
+
+        let compactification_result = stream_map.compactify(&mut trace_ctx);
+        assert!(matches!(
+            compactification_result,
+            Err(ExecutionError::Uncatchable(
+                UncatchableError::GenerationCompactificationError(
+                    GenerationCompactificationError::TracePosPointsToNowhere { .. }
+                )
+            ))
+        ));
     }
 
     fn generate_key_values(count: usize) -> Vec<(String, ValueAggregate)> {
@@ -230,30 +251,18 @@ mod test {
             .collect()
     }
 
-    fn insert_into_map(
-        stream_map: &mut StreamMap,
-        key_value: &(String, ValueAggregate),
-        generation: Generation,
-        source: ValueSource,
-    ) {
-        stream_map
-            .insert(key_value.0.as_str().into(), &key_value.1, generation, source)
-            .unwrap();
+    fn insert_into_map(stream_map: &mut StreamMap, key_value: &(String, ValueAggregate), generation: Generation) {
+        stream_map.insert(key_value.0.as_str().into(), &key_value.1, generation);
     }
 
     #[test]
     fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
         const TEST_DATA_SIZE: usize = 3;
         let key_values = generate_key_values(TEST_DATA_SIZE);
-        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
+        let mut stream_map = StreamMap::new();
 
         for id in 0..3 {
-            insert_into_map(
-                &mut stream_map,
-                &key_values[id],
-                Generation::nth(id as u32),
-                ValueSource::CurrentData,
-            );
+            insert_into_map(&mut stream_map, &key_values[id], Generation::current(id as u32));
         }
 
         let mut iter = stream_map.iter_unique_key();
@@ -266,19 +275,17 @@ mod test {
 
     #[test]
     fn get_unique_map_keys_stream_removes_duplicates() {
-        use ValueSource::CurrentData;
-
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
-        let mut stream_map = StreamMap::from_generations_count(0.into(), TEST_DATA_SIZE.into());
-        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(0), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[0], Generation::nth(1), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(1), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(3), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[2], Generation::nth(4), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[1], Generation::nth(4), CurrentData);
-        insert_into_map(&mut stream_map, &key_values[3], Generation::nth(2), CurrentData);
+        let mut stream_map = StreamMap::new();
+        insert_into_map(&mut stream_map, &key_values[0], Generation::current(0));
+        insert_into_map(&mut stream_map, &key_values[0], Generation::current(1));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(1));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(3));
+        insert_into_map(&mut stream_map, &key_values[2], Generation::current(4));
+        insert_into_map(&mut stream_map, &key_values[1], Generation::current(4));
+        insert_into_map(&mut stream_map, &key_values[3], Generation::current(2));
 
         let mut iter = stream_map.iter_unique_key();
 
