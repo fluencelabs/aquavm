@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.0...air-parser-v0.8.1) (2023-08-03)
+
+
+### Features
+
+* **air-parser:** canon stream syntax ([#618](https://github.com/fluencelabs/aquavm/issues/618)) ([8871465](https://github.com/fluencelabs/aquavm/commit/88714653247618e72f10391524c430a5c20d3b85))
+* **air-parser:** improved canon stream syntax support [fixes VM-293] ([8871465](https://github.com/fluencelabs/aquavm/commit/88714653247618e72f10391524c430a5c20d3b85))
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.7.5...air-parser-v0.8.0) (2023-07-16)
 
 

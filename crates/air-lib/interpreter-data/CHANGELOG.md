@@ -8,6 +8,25 @@
   * dependencies
     * aquavm-air-parser bumped from 0.7.5 to 0.8.0
 
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.8.1...air-interpreter-data-v0.9.0) (2023-08-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621))
+
+### Features
+
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621)) ([eca52b7](https://github.com/fluencelabs/aquavm/commit/eca52b7191ef1bc5c4573c62412dc735d830c023))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.0 to 0.8.1
+    * polyplets bumped from 0.3.2 to 0.3.3
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.7.0...air-interpreter-data-v0.8.0) (2023-06-22)
 
 

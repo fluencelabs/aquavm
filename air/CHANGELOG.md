@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.43.0](https://github.com/fluencelabs/aquavm/compare/air-v0.42.0...air-v0.43.0) (2023-08-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** update minimal interpreter version ([#649](https://github.com/fluencelabs/aquavm/issues/649))
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621))
+
+### Features
+
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621)) ([eca52b7](https://github.com/fluencelabs/aquavm/commit/eca52b7191ef1bc5c4573c62412dc735d830c023))
+* **execution-engine:** update minimal interpreter version ([#649](https://github.com/fluencelabs/aquavm/issues/649)) ([0655daa](https://github.com/fluencelabs/aquavm/commit/0655daa89d1105c6e786347f405d46d8e4d213ce))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.0 to 0.8.1
+    * air-execution-info-collector bumped from 0.7.6 to 0.7.7
+    * air-interpreter-data bumped from 0.8.1 to 0.9.0
+    * air-trace-handler bumped from 0.2.2 to 0.3.0
+    * polyplets bumped from 0.3.2 to 0.3.3
+
 ## [0.42.0](https://github.com/fluencelabs/aquavm/compare/air-v0.41.0...air-v0.42.0) (2023-07-16)
 
 

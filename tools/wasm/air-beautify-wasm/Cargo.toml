@@ -1,6 +1,6 @@
 [package]
 name = "air-beautify-wasm"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Fluence Labs"]
 edition = "2021"
 description = "WASM module for air-beautify"
@@ -14,4 +14,4 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 # 0.2.79: a function can return Result<..., JsError>.
 wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
-air-beautifier = { version = "0.2.0", path = "../../../crates/beautifier" }
+air-beautifier = { version = "0.2.1", path = "../../../crates/beautifier" }
