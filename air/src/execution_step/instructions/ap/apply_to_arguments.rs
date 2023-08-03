@@ -16,7 +16,6 @@
 
 use super::*;
 use crate::execution_step::boxed_value::JValuable;
-// use crate::execution_step::resolver::index_to_value_aggregate;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::LiteralAggregate;
