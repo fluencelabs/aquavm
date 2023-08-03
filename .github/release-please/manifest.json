@@ -21,5 +21,6 @@
   "crates/air-lib/lambda/parser": "0.1.0",
   "crates/air-lib/log-targets": "0.1.0",
   "crates/air-lib/interpreter-interface": "0.14.0",
-  "crates/air-lib/interpreter-signatures": "0.1.1"
+  "crates/air-lib/interpreter-signatures": "0.1.1",
+  "crates/air-lib/polyplets": "0.3.2"
 }
