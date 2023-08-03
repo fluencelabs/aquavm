@@ -653,7 +653,6 @@ fn ap_canon_stream_map_with_string_key_accessor_lambda() {
     assert_eq!(actual_trace, expected_trace,);
 }
 
-// WIP try > unit32 key value
 #[test]
 fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     let vm_1_peer_id = "vm_1_peer_id";
