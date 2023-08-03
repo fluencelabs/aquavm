@@ -221,33 +221,80 @@ fn mismatch_with_empty_array() {
     assert_eq!(expected, instruction);
 }
 
-// #[test]
-// fn match_with_canon_stream_map_index() {
-//     let source_code = r#"
-//          (match #%canon["left_key"] #%canon["right_key"]
-//             (null)
-//          )
-//         "#;
+#[test]
+fn match_with_canon_stream_wl() {
+    let source_code = r#"
+         (match #%canon.$.left_key #%canon.$.right_key
+            (null)
+         )
+        "#;
 
-//     let left_canon_stream_map = CanonStreamMap::new("#%canon", 17.into());
-//     let left_index = StreamMapKeyClause::Literal("left_key");
-//     let left_value = ImmutableValue::Variable(ImmutableVariable::CanonStreamMapIndex(
-//         CanonStreamMapIndex::new(left_canon_stream_map, left_index),
-//     ));
-//     let right_canon_stream_map = CanonStreamMap::new("#%canon", 37.into());
-//     let right_index = StreamMapKeyClause::Literal("right_key");
-//     let right_value = ImmutableValue::Variable(ImmutableVariable::CanonStreamMapIndex(
-//         CanonStreamMapIndex::new(right_canon_stream_map, right_index),
-//     ));
-//     let instr = null();
-//     let expected = match_(left_value, right_value, instr);
+    let left_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "left_key",
+    }])
+    .unwrap();
+    let left = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        left_lambda,
+        17.into(),
+    ));
 
-//     let instruction = parse(source_code);
-//     assert_eq!(
-//         instruction, expected,
-//         "actual:\n{:#?}\n expected {:#?}",
-//         instruction, expected
-//     );
-// }
+    let right_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "right_key",
+    }])
+    .unwrap();
+    let right = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        right_lambda,
+        36.into(),
+    ));
 
-// wip add mismatch
+    let instr = null();
+    let expected = match_(left, right, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(
+        instruction, expected,
+        "actual:\n{:#?}\n expected {:#?}",
+        instruction, expected
+    );
+}
+
+#[test]
+fn mismatch_with_canon_stream_wl() {
+    let source_code = r#"
+         (mismatch #%canon.$.left_key #%canon.$.right_key
+            (null)
+         )
+        "#;
+
+    let left_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "left_key",
+    }])
+    .unwrap();
+    let left = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        left_lambda,
+        20.into(),
+    ));
+
+    let right_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "right_key",
+    }])
+    .unwrap();
+    let right = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        right_lambda,
+        39.into(),
+    ));
+
+    let instr = null();
+    let expected = mismatch(left, right, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(
+        instruction, expected,
+        "actual:\n{:#?}\n expected {:#?}",
+        instruction, expected
+    );
+}

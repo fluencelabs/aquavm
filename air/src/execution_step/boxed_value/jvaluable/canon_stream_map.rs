@@ -30,8 +30,9 @@ use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for &CanonStreamMap<'_> {
-    fn apply_lambda(&self, _lambda: &LambdaAST<'_>, _exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        unimplemented!("apply_lambda for CanonStreamMap is not implemented") // WIP
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
+        let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
+        Ok(select_result.result)
     }
 
     fn apply_lambda_with_tetraplets(

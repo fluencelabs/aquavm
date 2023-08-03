@@ -34,7 +34,6 @@ use std::borrow::Cow;
 use std::rc::Rc;
 
 pub(crate) struct LambdaResult<'value> {
-    // WIP rename
     pub(crate) result: Cow<'value, JValue>,
     pub(crate) tetraplet_idx: Option<usize>,
 }
@@ -116,7 +115,7 @@ fn select_by_path_from_canon_map<'value>(
             let scalar = exec_ctx.scalars.get_value(scalar_name)?;
             lambda_to_execution_error!(try_scalar_ref_as_stream_map_key(scalar))?
         }
-        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."), // WIP
+        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
     let ValueAndIndex {
         value,

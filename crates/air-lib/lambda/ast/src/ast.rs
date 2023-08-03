@@ -21,7 +21,7 @@ use non_empty_vec::NonEmpty;
 use serde::Deserialize;
 use serde::Serialize;
 
-// TODO: rename lambda to smth more appropriate
+// TODO: rename lambda into lens
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum LambdaAST<'input> {
     /// Various functors that could applied to a value.
@@ -32,8 +32,6 @@ pub enum LambdaAST<'input> {
     ValuePath(NonEmpty<ValueAccessor<'input>>),
 }
 
-/// WIP rename the enum values to hightlight that they are also have
-/// a map-specific semantics.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum ValueAccessor<'input> {
     // (.)?[$idx]

@@ -85,7 +85,6 @@ impl From<u64> for StreamMapKey<'_> {
     }
 }
 
-// WIP typpes collision that forces to do a manual type cast
 // This conversion is used to cast from numeric lambda accessor that leverages u32
 // however larpop parser grammar uses i64 for numeric keys inserting into a stream map.
 impl From<u32> for StreamMapKey<'_> {

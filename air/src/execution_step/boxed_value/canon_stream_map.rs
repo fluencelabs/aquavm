@@ -67,7 +67,6 @@ impl<'l> CanonStreamMap<'l> {
         self.values.is_empty()
     }
 
-    // WIP move into a generic function?
     pub(crate) fn as_jvalue(&self) -> JValue {
         // TODO: this clone will be removed after boxed values
         let jvalue_array = self
@@ -94,7 +93,7 @@ impl<'l> CanonStreamMap<'l> {
         let &value_aggregate_array_index = self
             .map
             .get(stream_map_key)
-            .ok_or(UncatchableError::CanonStreamMapError(IndexIsAbsentInTheMap))?; // WIP change the error
+            .ok_or(UncatchableError::CanonStreamMapError(IndexIsAbsentInTheMap))?;
         let value = self
             .values
             .get(value_aggregate_array_index)
@@ -151,7 +150,7 @@ fn from_kvpair(value_aggregate: &ValueAggregate) -> ExecutionResult<&JValue> {
     let object = value_aggregate
         .get_result()
         .as_object()
-        .ok_or(UncatchableError::CanonStreamMapError(NotAnObject))?; // WIP change the error
+        .ok_or(UncatchableError::CanonStreamMapError(NotAnObject))?;
     object
         .get("value")
         .ok_or(UncatchableError::CanonStreamMapError(ValueFieldIsAbsent).into())
