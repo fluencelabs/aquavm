@@ -63,6 +63,9 @@ jobs:
           # to use less space and speed up CI
           save-if: false
 
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
+
       - name: Setup wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
 
