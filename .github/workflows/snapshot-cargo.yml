@@ -19,7 +19,7 @@ on:
 jobs:
   snapshots:
     name: "Publish crates"
-    runs-on: ubuntu-latest
+    runs-on: builder
     timeout-minutes: 60
 
     env:
