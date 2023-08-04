@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air-cli"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2021"
 description = "AIR execution and printing tool"
 authors = ["Fluence Labs"]
@@ -15,7 +15,7 @@ air-beautifier = { version = "0.2.1", path = "../../../crates/beautifier" }
 avm-data-store = { version = "0.6.3", path = "../../../crates/data-store" }
 avm-interface = { version = "0.28.5", path = "../../../avm/interface" }
 air-interpreter-interface = { version = "0.14.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
-air-test-utils = { version = "0.8.0",path = "../../../crates/air-lib/test-utils", optional = true }
+air-test-utils = { version = "0.8.1",path = "../../../crates/air-lib/test-utils", optional = true }
 
 anyhow = "1.0.70"
 clap = { version = "4.2.7", features = ["derive", "env"] }
