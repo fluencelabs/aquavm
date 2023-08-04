@@ -15,7 +15,7 @@ on:
 jobs:
   wasm:
     name: "Build air-interpreter-wasm"
-    runs-on: ubuntu-latest
+    runs-on: builder
     timeout-minutes: 60
 
     env:
