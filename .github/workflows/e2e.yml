@@ -7,12 +7,21 @@ on:
       - ".github/**"
       - "!.github/workflows/e2e.yml"
       - "!.github/workflows/e2e-label.yml"
-      - "!.github/workflows/snapshot.yml"
+      - "!.github/workflows/snapshot-*.yml"
     types:
       - "labeled"
       - "synchronize"
       - "opened"
       - "reopened"
+  push:
+    branches:
+      - "master"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/e2e-label.yml"
+      - "!.github/workflows/snapshot-*.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -21,7 +30,12 @@ concurrency:
 jobs:
   air-interpreter-wasm:
     name: "aquavm"
-    if: github.event.pull_request.head.repo.fork != true && contains(github.event.pull_request.labels.*.name, 'e2e')
+    if: >
+      github.event_name == 'push' ||
+      (
+        contains(github.event.pull_request.labels.*.name, 'e2e') &&
+        !github.event.pull_request.head.repo.fork
+      )
     uses: ./.github/workflows/snapshot-air-interpreter-wasm.yml
     with:
       ref: ${{ github.ref }}
