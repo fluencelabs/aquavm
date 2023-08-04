@@ -22,7 +22,7 @@ jobs:
     runs-on: builder
 
     env:
-      RUSTFLAGS: "-D warnings --cfg tokio_unstable -C link-arg=-B/usr/local/bin/mold"
+      RUSTFLAGS: "-D warnings"
       RUSTC_WRAPPER: "sccache"
 
     steps:
@@ -41,11 +41,6 @@ jobs:
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.3
-
-      - name: Setup mold linker
-        uses: rui314/setup-mold@v1
-        with:
-          make-default: false
 
       - name: Run cargo check
         run: cargo check
