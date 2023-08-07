@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://github.com/fluencelabs/aquavm/compare/air-v0.43.0...air-v0.43.1) (2023-08-07)
+
+
+### Features
+
+* **execution-engine:** rename boxed_values into value_types ([#664](https://github.com/fluencelabs/aquavm/issues/664)) ([20ae5ee](https://github.com/fluencelabs/aquavm/commit/20ae5eeeb9577f24bf27bcb74f17b92257d0e1a8))
+
 ## [0.43.0](https://github.com/fluencelabs/aquavm/compare/air-v0.42.0...air-v0.43.0) (2023-08-03)
 
 
