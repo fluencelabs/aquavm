@@ -16,7 +16,7 @@
 
 use super::RcSecurityTetraplets;
 use super::Resolvable;
-use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::value_types::JValuable;
 use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
 use crate::execution_step::ExecutionResult;

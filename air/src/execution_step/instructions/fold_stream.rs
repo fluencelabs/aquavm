@@ -21,7 +21,7 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::Stream;
+use crate::execution_step::value_types::Stream;
 use crate::execution_step::instructions::fold_stream::stream_execute_helpers::execute_with_stream;
 use crate::log_instruction;
 

@@ -18,7 +18,7 @@ pub(crate) mod errors;
 pub(crate) mod stream_map_key;
 
 use self::stream_map_key::StreamMapKey;
-use crate::execution_step::boxed_value::StreamMap;
+use crate::execution_step::value_types::StreamMap;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;

@@ -245,7 +245,7 @@ impl<'i> ResolvedCall<'i> {
 /// Check output type name for being already in execution context.
 // TODO: this check should be moved on a parsing stage
 fn check_output_name(output: &ast::CallOutputValue<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<()> {
-    use crate::execution_step::boxed_value::ScalarRef;
+    use crate::execution_step::value_types::ScalarRef;
 
     let scalar_name = match output {
         ast::CallOutputValue::Scalar(scalar) => scalar.name,

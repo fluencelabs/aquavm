@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use crate::execution_step::boxed_value::TracePosOperate;
+use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::LiteralAggregate;
@@ -126,7 +126,7 @@ fn apply_canon_stream(
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
-    use crate::execution_step::boxed_value::JValuable;
+    use crate::execution_step::value_types::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let value = JValuable::as_jvalue(&&canon_stream.canon_stream).into_owned();
@@ -148,7 +148,7 @@ fn apply_canon_stream_wl(
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
     // TODO: refactor this code after boxed value
-    use crate::execution_step::boxed_value::JValuable;
+    use crate::execution_step::value_types::JValuable;
 
     let canon_stream = exec_ctx.scalars.get_canon_stream(ast_stream.name)?;
     let canon_stream_value = &canon_stream.canon_stream;

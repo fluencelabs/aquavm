@@ -17,7 +17,7 @@
 use super::values_matrix::NewValuesMatrix;
 use super::values_matrix::ValuesMatrix;
 use super::StreamCursor;
-use crate::execution_step::boxed_value::TracePosOperate;
+use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 
 use air_interpreter_data::GenerationIdx;

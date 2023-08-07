@@ -15,9 +15,9 @@
  */
 
 use super::Stream;
-use crate::execution_step::boxed_value::Iterable;
-use crate::execution_step::boxed_value::IterableItem;
-use crate::execution_step::boxed_value::IterableVecResolvedCall;
+use crate::execution_step::value_types::Iterable;
+use crate::execution_step::value_types::IterableItem;
+use crate::execution_step::value_types::IterableVecResolvedCall;
 use crate::execution_step::ValueAggregate;
 
 use air_interpreter_data::GenerationIdx;
