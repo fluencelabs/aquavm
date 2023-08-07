@@ -18,12 +18,12 @@ use super::completeness_updater::FoldGenerationObserver;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::IterableValue;
-use crate::execution_step::boxed_value::RecursiveCursorState;
-use crate::execution_step::boxed_value::RecursiveStreamCursor;
-use crate::execution_step::boxed_value::Stream;
 use crate::execution_step::instructions::fold::IterableType;
 use crate::execution_step::instructions::fold_scalar::fold;
+use crate::execution_step::value_types::IterableValue;
+use crate::execution_step::value_types::RecursiveCursorState;
+use crate::execution_step::value_types::RecursiveStreamCursor;
+use crate::execution_step::value_types::Stream;
 use crate::trace_to_exec_err;
 
 use air_parser::ast::Instruction;

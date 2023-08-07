@@ -19,7 +19,7 @@ use super::ExecutionResult;
 use super::IterableItem;
 use super::JValuable;
 use super::LambdaAST;
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
+use crate::execution_step::value_types::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;

@@ -17,7 +17,7 @@
 use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
-use crate::execution_step::boxed_value::CanonStream;
+use crate::execution_step::value_types::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;

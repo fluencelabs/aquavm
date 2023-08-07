@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::errors::UncatchableError;
 use crate::execution_step::instructions::resolve_peer_id_to_string;
+use crate::execution_step::value_types::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::TraceHandler;

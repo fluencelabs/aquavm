@@ -18,7 +18,7 @@ use super::select_by_lambda_from_stream;
 use super::ExecutionResult;
 use super::JValuable;
 use super::ValueAggregate;
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
+use crate::execution_step::value_types::populate_tetraplet_with_lambda;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
