@@ -16,9 +16,9 @@
 
 mod values_sparse_matrix;
 
+use crate::execution_step::errors_prelude::*;
 use crate::execution_step::value_types::CanonStreamWithProvenance;
 use crate::execution_step::value_types::ScalarRef;
-use crate::execution_step::errors_prelude::*;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::FoldState;
 use crate::execution_step::ValueAggregate;

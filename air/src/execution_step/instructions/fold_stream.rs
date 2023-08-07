@@ -21,8 +21,8 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::value_types::Stream;
 use crate::execution_step::instructions::fold_stream::stream_execute_helpers::execute_with_stream;
+use crate::execution_step::value_types::Stream;
 use crate::log_instruction;
 
 use air_parser::ast::FoldStream;
