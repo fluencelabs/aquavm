@@ -30,7 +30,7 @@ pub(super) fn try_parse_call_variable(
     CallVariableParser::try_parse(string_to_parse, start_pos)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MetTag {
     None,
     Stream,
@@ -428,14 +428,14 @@ impl MetTag {
     }
 
     fn is_canon(&self) -> bool {
-        matches!(self, Self::Canon)
+        *self == Self::Canon
     }
 
     fn is_canon_stream(&self) -> bool {
-        matches!(self, Self::CanonStream)
+        *self == Self::CanonStream
     }
 
     fn is_tag(&self) -> bool {
-        !matches!(self, Self::None)
+        *self != Self::None
     }
 }

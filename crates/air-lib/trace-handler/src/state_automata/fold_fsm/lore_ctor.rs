@@ -60,7 +60,7 @@ impl SubTraceLoreCtor {
     }
 
     pub(super) fn maybe_before_end(&mut self, data_keeper: &DataKeeper) {
-        if !matches!(self.state, CtorState::BeforeStarted) {
+        if self.state != CtorState::BeforeStarted {
             return;
         }
 
