@@ -94,7 +94,7 @@ fn test_attack_replace_value() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "serde_json::value::Value",
-            cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".into(),
+            cid_repr: "bagaajiheaiqgiogcnewb3gblj5tqnn3rh4kn2stofrqoakdvu4comnldqs3upfq".into(),
         })
     );
 }
@@ -167,7 +167,7 @@ fn test_attack_replace_tetraplet() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "marine_call_parameters::SecurityTetraplet",
-            cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".into(),
+            cid_repr: "bagaajiheaiqb4dwqnr627ozpf7wb7dpumjba37xwdrdtsa5oi6ujqhpbhzec36i".into(),
         })
     );
 }
@@ -247,7 +247,7 @@ fn test_attack_replace_call_result() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
-            cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".into(),
+            cid_repr: "bagaajiheaiqffh7urmqvxwyl4d4ejchvo5ubr4lriepry5jt3wijd5pz2h7zgda".into(),
         })
     );
 }
@@ -334,7 +334,7 @@ fn test_attack_replace_canon_value() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
-            cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".into(),
+            cid_repr: "bagaajiheaiqazufzuaozg4zckg2esdgyghz64xjsd4zjgecsgwnkmcy2jbspqmq".into(),
         })
     );
 }
@@ -430,7 +430,7 @@ fn test_attack_replace_canon_result_values() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
+            cid_repr: "bagaajiheaiqpi4jb73m4auxzf4is5d567pwbriks7ds4gf6xrqqkajk3ye2l7pi".into(),
         })
     );
 }
@@ -530,7 +530,7 @@ fn test_attack_replace_canon_result_tetraplet() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
+            cid_repr: "bagaajiheaiqpi4jb73m4auxzf4is5d567pwbriks7ds4gf6xrqqkajk3ye2l7pi".into(),
         })
     );
 }

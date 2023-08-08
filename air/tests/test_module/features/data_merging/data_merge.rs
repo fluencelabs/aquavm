@@ -374,6 +374,8 @@ fn test_merge_scalar_mismatch() {
     let mut cid_state2 = ExecutionCidState::default();
     let trace1 = ExecutionTrace::from(vec![scalar_tracked!(42, cid_state1, peer = "peer")]);
     let trace2 = ExecutionTrace::from(vec![scalar_tracked!(43, cid_state2, peer = "peer")]);
+    let cid1 = extract_service_result_cid(&trace1[0.into()]);
+    let cid2 = extract_service_result_cid(&trace2[0.into()]);
     let data1 = raw_data_from_trace(trace1, cid_state1);
     let data2 = raw_data_from_trace(trace2, cid_state2);
 
@@ -381,11 +383,14 @@ fn test_merge_scalar_mismatch() {
     assert_eq!(result.ret_code, 20000);
     assert_eq!(
         result.error_message,
-        concat!(
-            r#"on instruction 'call "peer" ("" "") [] var' trace handler encountered an error:"#,
-            r#" values in call results are not equal:"#,
-            r#" Scalar(CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"))"#,
-            r#" != Scalar(CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"))"#
+        format!(
+            concat!(
+                r#"on instruction 'call "peer" ("" "") [] var' trace handler encountered an error:"#,
+                r#" values in call results are not equal:"#,
+                r#" Scalar({:?})"#,
+                r#" != Scalar({:?})"#
+            ),
+            cid1, cid2
         )
     );
 }
@@ -425,6 +430,8 @@ fn test_merge_stream_mismatch() {
     let mut cid_state2 = ExecutionCidState::default();
     let trace1 = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_state1, peer = "peer")]);
     let trace2 = ExecutionTrace::from(vec![stream_tracked!(43, 0, cid_state2, peer = "peer")]);
+    let cid1 = extract_service_result_cid(&trace1[0.into()]);
+    let cid2 = extract_service_result_cid(&trace2[0.into()]);
     let data1 = raw_data_from_trace(trace1, cid_state1);
     let data2 = raw_data_from_trace(trace2, cid_state2);
 
@@ -432,11 +439,14 @@ fn test_merge_stream_mismatch() {
     assert_eq!(result.ret_code, 20000);
     assert_eq!(
         result.error_message,
-        concat!(
-            r#"on instruction 'call "peer" ("" "") [] $var' trace handler encountered an error:"#,
-            r#" values in call results are not equal:"#,
-            r#" Stream { cid: CID("bagaaierautomsqybwfcilogqikd6sxzhaqkrout64cosdlpo7p6wvod4miza"), generation: 0 }"#,
-            r#" != Stream { cid: CID("bagaaieraywolxobx5koykfm7lnjtpci6wt4ccqqehbbhpebomznlzaszhgya"), generation: 0 }"#
+        format!(
+            concat!(
+                r#"on instruction 'call "peer" ("" "") [] $var' trace handler encountered an error:"#,
+                r#" values in call results are not equal:"#,
+                r#" Stream {{ cid: {:?}, generation: 0 }}"#,
+                r#" != Stream {{ cid: {:?}, generation: 0 }}"#
+            ),
+            cid1, cid2
         )
     );
 }
@@ -470,8 +480,8 @@ fn test_merge_unused_mismatch() {
         concat!(
             r#"on instruction 'call "peer" ("" "") [] ' trace handler encountered an error:"#,
             r#" values in call results are not equal:"#,
-            r#" Unused(CID("bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq"))"#,
-            r#" != Unused(CID("bagaaieraitfxgdccasakar33kbnoncxvbd5zb6lm6dwfjrvnc2kj3vbh6e5a"))"#
+            r#" Unused(CID("bagaajiheaiqm6aoj3hpiz4kdhuqsvw4xxzc6z7ap3bufth5ph3shigs6swouetq"))"#,
+            r#" != Unused(CID("bagaajiheaiqm4cf3ckjrcui3xl62gdl4drdcvxzm2nb6mospxz4ex3lzz66fzeq"))"#
         )
     );
 }

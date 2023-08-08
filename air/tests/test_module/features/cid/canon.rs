@@ -222,9 +222,13 @@ fn test_canon_value_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq";
+    let missing_cid = "bagaajiheaiqm6aoj3hpiz4kdhuqsvw4xxzc6z7ap3bufth5ph3shigs6swouetq";
     let value_store: CidStore<_> = cid_state.value_tracker.into();
-    assert!(value_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        value_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        value_store
+    );
 
     // Override with fake data.
     cid_state.value_tracker = CidTracker::<_>::new();
@@ -267,9 +271,13 @@ fn test_canon_root_tetraplet_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaiera2bwoxisr5k7qlbzhxi2jmdqlgqybqgxcfwt3v652nqdo5fyc665q";
+    let missing_cid = "bagaajiheaiqgpoeo2fka5wbuaetyvbcxu5g66csdtbjwovvws52n7ibqfrpwgwy";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        tetraplet_store
+    );
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -282,7 +290,7 @@ fn test_canon_root_tetraplet_not_found() {
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
-    assert!(check_error(&result, expected_error));
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]
@@ -323,10 +331,13 @@ fn test_canon_tetraplet_not_found() {
             &mut cid_state,
         ),
     ];
-
-    let missing_cid = "bagaaierawgvzxeomczgjfgaf7jhbap27kqihlzm4i4na42uoi36lgzfrzwdq";
+    let missing_cid = "bagaajiheaiqm7bayfza2unlkhedb2kt2axudfje6ipkx4prm4n4npnkmeoey3ui";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        tetraplet_store
+    );
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -338,7 +349,7 @@ fn test_canon_tetraplet_not_found() {
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
     let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
-    assert!(check_error(&result, expected_error), "{}", result.error_message);
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]
@@ -374,9 +385,13 @@ fn test_canon_agg_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaierar6b2hcv2ir66tmbwocj5h7yofseqlzxma2n67z5wybtto5ujrekq";
+    let missing_cid = "bagaajiheaiqcjff4ewtwhhj2crzio5rj7op24wi3hrw6g47whwyjjhm3434wati";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
-    assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        canon_element_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        canon_element_store
+    );
 
     // Fake data
     cid_state.canon_element_tracker = <_>::default();
