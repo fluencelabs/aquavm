@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-mod data;
+pub(crate) mod data;
 mod native;
 mod runner;
 #[cfg(feature = "wasm")]
@@ -79,7 +79,7 @@ enum Source {
 
 #[derive(clap::Args, Debug)]
 #[group(required = true, multiple = false)]
-struct Keys {
+pub(crate) struct Keys {
     #[arg(long)]
     random_key: bool,
     #[arg(long)]
@@ -87,7 +87,7 @@ struct Keys {
 }
 
 impl Keys {
-    fn get_keypair(&self) -> anyhow::Result<KeyPair> {
+    pub(crate) fn get_keypair(&self) -> anyhow::Result<KeyPair> {
         match (self.random_key, self.ed25519_key.as_ref()) {
             (true, None) => Ok(KeyPair::generate_ed25519()),
             (false, Some(path)) => load_keypair_ed25519(path),
@@ -191,7 +191,8 @@ pub fn init_tracing(tracing_params: String, trace_mode: u8) {
         builder.init();
     }
 }
-fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallResults> {
+
+pub(crate) fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallResults> {
     match call_results_path {
         None => Ok(CallResults::default()),
         Some(call_results_path) => {

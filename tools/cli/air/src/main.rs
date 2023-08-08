@@ -28,6 +28,7 @@
 
 mod beautify;
 mod trace;
+mod near;
 
 use clap::Parser;
 
@@ -41,18 +42,21 @@ struct Cli {
 #[allow(clippy::large_enum_variant)]
 enum Subcommand {
     #[clap(alias = "b")]
-    Beautify(self::beautify::Args),
+    Beautify(crate::beautify::Args),
+    #[clap(alias = "n")]
+    Near(crate::near::Args),
     #[clap(alias = "r")]
-    Run(self::trace::run::Args),
+    Run(crate::trace::run::Args),
     #[clap(alias = "s")]
-    Stats(self::trace::stats::Args),
+    Stats(crate::trace::stats::Args),
 }
 
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
     match args.subcommand {
-        Subcommand::Run(args) => self::trace::run::run(args),
-        Subcommand::Stats(args) => self::trace::stats::stats(args),
-        Subcommand::Beautify(args) => self::beautify::beautify(args),
+        Subcommand::Beautify(args) => crate::beautify::beautify(args),
+        Subcommand::Near(args) => crate::near::near(args),
+        Subcommand::Run(args) => crate::trace::run::run(args),
+        Subcommand::Stats(args) => crate::trace::stats::stats(args),
     }
 }
