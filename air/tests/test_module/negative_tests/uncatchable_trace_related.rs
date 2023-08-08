@@ -316,8 +316,6 @@ fn invalid_dst_generations() {
         <_>::default(),
         <_>::default(),
         <_>::default(),
-        <_>::default(),
-        <_>::default(),
         semver::Version::new(1, 1, 1),
     );
     let mut data_value = serde_json::to_value(&empty_data).unwrap();

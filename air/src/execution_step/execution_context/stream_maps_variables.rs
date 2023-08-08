@@ -18,17 +18,13 @@ pub(crate) mod errors;
 pub(crate) mod stream_map_key;
 
 use self::stream_map_key::StreamMapKey;
-use crate::execution_step::boxed_value::StreamMap;
+use crate::execution_step::value_types::StreamMap;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::Generation;
 use crate::execution_step::ValueAggregate;
 
-use air_interpreter_data::GenerationIdx;
-use air_interpreter_data::RestrictedStreamGens;
-use air_interpreter_data::RestrictedStreamMapGens;
 use air_parser::ast::Span;
 use air_parser::AirPos;
-use air_trace_handler::merger::ValueSource;
 use air_trace_handler::TraceHandler;
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
@@ -39,23 +35,15 @@ use std::fmt;
 pub(crate) struct StreamMapValueDescriptor<'stream_name> {
     pub value: ValueAggregate,
     pub name: &'stream_name str,
-    pub source: ValueSource,
     pub generation: Generation,
     pub position: AirPos,
 }
 
 impl<'stream_name> StreamMapValueDescriptor<'stream_name> {
-    pub fn new(
-        value: ValueAggregate,
-        name: &'stream_name str,
-        source: ValueSource,
-        generation: Generation,
-        position: AirPos,
-    ) -> Self {
+    pub fn new(value: ValueAggregate, name: &'stream_name str, generation: Generation, position: AirPos) -> Self {
         Self {
             value,
             name,
-            source,
             generation,
             position,
         }
@@ -113,18 +101,6 @@ pub(crate) struct StreamMaps {
     // that a script could have a lot of new.
     // TODO: use shared string (Rc<String>) to avoid copying.
     stream_maps: HashMap<String, Vec<StreamMapDescriptor>>,
-
-    /// Contains stream generations from previous data that a restricted stream
-    /// should have at the scope start.
-    previous_restricted_stream_maps_gens: RestrictedStreamMapGens,
-
-    /// Contains stream generations from current data that a restricted stream
-    /// should have at the scope start.
-    current_restricted_stream_maps_gens: RestrictedStreamMapGens,
-
-    /// Contains stream generations that each private stream had at the scope end.
-    /// Then it's placed into data
-    new_restricted_stream_maps_gens: RestrictedStreamMapGens,
 }
 
 impl StreamMaps {
@@ -144,17 +120,16 @@ impl StreamMaps {
         &mut self,
         key: StreamMapKey<'_>,
         value_descriptor: StreamMapValueDescriptor<'_>,
-    ) -> ExecutionResult<GenerationIdx> {
+    ) {
         let StreamMapValueDescriptor {
             value,
             name,
-            source,
             generation,
             position,
         } = value_descriptor;
 
         match self.get_mut(name, position) {
-            Some(stream_map) => stream_map.insert(key, &value, generation, source),
+            Some(stream_map) => stream_map.insert(key, &value, generation),
             None => {
                 // streams could be created in three ways:
                 //  - after met new instruction with stream name that isn't present in streams
@@ -163,20 +138,18 @@ impl StreamMaps {
                 //    for global streams
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
-                let stream_map = StreamMap::from_value(key, &value);
+                let mut stream_map = StreamMap::new();
+                stream_map.insert(key, &value, generation);
                 let descriptor = StreamMapDescriptor::global(stream_map);
                 self.stream_maps.insert(name.to_string(), vec![descriptor]);
-                let generation = 0;
-                Ok(generation.into())
             }
         }
     }
 
-    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span, iteration: usize) {
+    pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span) {
         let name = name.into();
-        let (prev_gens_count, current_gens_count) = self.stream_generation_from_data(&name, span.left, iteration);
 
-        let new_stream_map = StreamMap::from_generations_count(prev_gens_count, current_gens_count);
+        let new_stream_map = StreamMap::new();
         let new_descriptor = StreamMapDescriptor::restricted(new_stream_map, span);
         match self.stream_maps.entry(name) {
             Occupied(mut entry) => {
@@ -188,64 +161,27 @@ impl StreamMaps {
         }
     }
 
-    pub(crate) fn meet_scope_end(
-        &mut self,
-        name: String,
-        position: AirPos,
-        trace_ctx: &mut TraceHandler,
-    ) -> ExecutionResult<()> {
+    pub(crate) fn meet_scope_end(&mut self, name: String, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         // unwraps are safe here because met_scope_end must be called after met_scope_start
         let stream_map_descriptors = self.stream_maps.get_mut(&name).unwrap();
         // delete a stream after exit from a scope
-        let last_descriptor = stream_map_descriptors.pop().unwrap();
+        let mut last_descriptor = stream_map_descriptors.pop().unwrap();
         if stream_map_descriptors.is_empty() {
             // streams should contain only non-empty stream embodiments
             self.stream_maps.remove(&name);
         }
-        let gens_count = last_descriptor.stream_map.compactify(trace_ctx)?;
 
-        self.collect_stream_generation(name, position, gens_count);
-        Ok(())
+        last_descriptor.stream_map.compactify(trace_ctx)
     }
 
-    fn stream_generation_from_data(
-        &self,
-        name: &str,
-        position: AirPos,
-        iteration: usize,
-    ) -> (GenerationIdx, GenerationIdx) {
-        let previous_generation =
-            Self::restricted_stream_generation(&self.previous_restricted_stream_maps_gens, name, position, iteration)
-                .unwrap_or_default();
-        let current_generation =
-            Self::restricted_stream_generation(&self.current_restricted_stream_maps_gens, name, position, iteration)
-                .unwrap_or_default();
-
-        (previous_generation, current_generation)
-    }
-
-    fn restricted_stream_generation(
-        restricted_stream_maps_gens: &RestrictedStreamGens,
-        name: &str,
-        position: AirPos,
-        iteration: usize,
-    ) -> Option<GenerationIdx> {
-        restricted_stream_maps_gens
-            .get(name)
-            .and_then(|scopes| scopes.get(&position).and_then(|iterations| iterations.get(iteration)))
-            .copied()
-    }
-
-    fn collect_stream_generation(&mut self, name: String, position: AirPos, generation: GenerationIdx) {
-        match self.new_restricted_stream_maps_gens.entry(name) {
-            Occupied(mut streams) => streams.get_mut().entry(position).or_default().push(generation),
-            Vacant(entry) => {
-                let iterations = maplit::hashmap! {
-                    position => vec![generation],
-                };
-                entry.insert(iterations);
+    pub(crate) fn compactify(&mut self, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        for (_, descriptors) in self.stream_maps.iter_mut() {
+            for descriptor in descriptors.iter_mut() {
+                descriptor.stream_map.compactify(trace_ctx)?;
             }
         }
+
+        Ok(())
     }
 }
 

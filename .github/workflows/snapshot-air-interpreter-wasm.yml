@@ -15,8 +15,12 @@ on:
 jobs:
   wasm:
     name: "Build air-interpreter-wasm"
-    runs-on: ubuntu-latest
+    runs-on: builder
     timeout-minutes: 60
+
+    env:
+      RUSTFLAGS: "-D warnings"
+      RUSTC_WRAPPER: "sccache"
 
     steps:
       - name: Checkout AquaVM
@@ -26,7 +30,17 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ~/.cache/sccache
+          shared-key: aquavm
+          save-if: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Download marine artifact
         id: marine

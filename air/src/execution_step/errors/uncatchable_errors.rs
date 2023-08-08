@@ -20,7 +20,7 @@ use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_data::ValueRef;
-use air_trace_handler::GenerationCompatificationError;
+use air_trace_handler::GenerationCompactificationError;
 use air_trace_handler::IntConversionError;
 use air_trace_handler::TraceHandlerError;
 
@@ -46,7 +46,7 @@ pub enum UncatchableError {
 
     /// These errors are related to internal bug in the interpreter when result trace is corrupted.
     #[error(transparent)]
-    GenerationCompatificationError(#[from] GenerationCompatificationError),
+    GenerationCompactificationError(#[from] GenerationCompactificationError),
 
     /// Integer casts, e.g. usize(=u64) to u32, might trigger such errors.
     #[error(transparent)]

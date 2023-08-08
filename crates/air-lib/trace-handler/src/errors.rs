@@ -40,7 +40,7 @@ pub enum TraceHandlerError {
 
 #[derive(ThisError, Debug)]
 #[allow(clippy::enum_variant_names)]
-pub enum GenerationCompatificationError {
+pub enum GenerationCompactificationError {
     #[error("trying to change generation of an invalid trace position {0}")]
     TracePosPointsToNowhere(TracePos),
 
@@ -50,13 +50,13 @@ pub enum GenerationCompatificationError {
     TracePosPointsToInvalidState { position: TracePos, state: ExecutedState },
 }
 
-impl GenerationCompatificationError {
+impl GenerationCompactificationError {
     pub fn points_to_nowhere(position: TracePos) -> Self {
-        GenerationCompatificationError::TracePosPointsToNowhere(position)
+        GenerationCompactificationError::TracePosPointsToNowhere(position)
     }
 
     pub fn points_to_invalid_state(position: TracePos, state: ExecutedState) -> Self {
-        GenerationCompatificationError::TracePosPointsToInvalidState { position, state }
+        GenerationCompactificationError::TracePosPointsToInvalidState { position, state }
     }
 }
 

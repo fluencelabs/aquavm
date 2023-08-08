@@ -21,9 +21,8 @@ use super::canon_utils::CreateCanonStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::CanonStream;
-use crate::execution_step::boxed_value::CanonStreamWithProvenance;
-use crate::execution_step::Generation;
+use crate::execution_step::value_types::CanonStream;
+use crate::execution_step::value_types::CanonStreamWithProvenance;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
@@ -40,7 +39,7 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(call, exec_ctx, trace_ctx);
+        log_instruction!(canon, exec_ctx, trace_ctx);
         let epilog = &epilog_closure(self.canon_stream.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
@@ -86,8 +85,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .map(Cow::Borrowed)
             .unwrap_or_default();
 
-        // it's always possible to iter over all generations of a stream
-        let values = stream.iter(Generation::Last).unwrap().cloned().collect::<Vec<_>>();
+        let values = stream.iter().cloned().collect::<Vec<_>>();
         CanonStream::from_values(values, peer_pk)
     })
 }

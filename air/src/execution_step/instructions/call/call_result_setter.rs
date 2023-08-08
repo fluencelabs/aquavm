@@ -58,16 +58,11 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 
             let executed_result = ValueAggregate::from_service_result(executed_result, service_result_agg_cid.clone());
 
-            let value_descriptor = StreamValueDescriptor::new(
-                executed_result,
-                stream.name,
-                ValueSource::PreviousData,
-                Generation::Last,
-                stream.position,
-            );
-            let generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
+            let value_descriptor =
+                StreamValueDescriptor::new(executed_result, stream.name, Generation::New, stream.position);
+            exec_ctx.streams.add_stream_value(value_descriptor);
             exec_ctx.record_call_cid(&peer_id, &service_result_agg_cid);
-            Ok(CallResult::executed_stream(service_result_agg_cid, generation))
+            Ok(CallResult::executed_stream_stub(service_result_agg_cid))
         }
         CallOutputValue::None => {
             let value_cid = value_to_json_cid(&*executed_result.result)
@@ -87,7 +82,7 @@ pub(crate) fn populate_context_from_data<'i>(
     value_source: ValueSource,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
-) -> ExecutionResult<ValueRef> {
+) -> ExecutionResult<()> {
     match (output, value) {
         (CallOutputValue::Scalar(scalar), ValueRef::Scalar(cid)) => {
             let ResolvedServiceInfo {
@@ -104,9 +99,8 @@ pub(crate) fn populate_context_from_data<'i>(
             )?;
 
             let result = ServiceResultAggregate::new(value, tetraplet, trace_pos);
-            let result = ValueAggregate::from_service_result(result, cid.clone());
+            let result = ValueAggregate::from_service_result(result, cid);
             exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
-            Ok(ValueRef::Scalar(cid))
         }
         (CallOutputValue::Stream(stream), ValueRef::Stream { cid, generation }) => {
             let ResolvedServiceInfo {
@@ -123,27 +117,20 @@ pub(crate) fn populate_context_from_data<'i>(
             )?;
 
             let result = ServiceResultAggregate::new(value, tetraplet, trace_pos);
-            let result = ValueAggregate::from_service_result(result, cid.clone());
-            let value_descriptor = StreamValueDescriptor::new(
-                result,
-                stream.name,
-                value_source,
-                Generation::Nth(generation),
-                stream.position,
-            );
-            let resulted_generation = exec_ctx.streams.add_stream_value(value_descriptor)?;
-
-            let result = ValueRef::Stream {
-                cid,
-                generation: resulted_generation,
-            };
-            Ok(result)
+            let result = ValueAggregate::from_service_result(result, cid);
+            let generation = Generation::from_data(value_source, generation);
+            let value_descriptor = StreamValueDescriptor::new(result, stream.name, generation, stream.position);
+            exec_ctx.streams.add_stream_value(value_descriptor);
         }
-        (CallOutputValue::None, value @ ValueRef::Unused(_)) => Ok(value),
-        (_, value) => Err(ExecutionError::Uncatchable(
-            UncatchableError::CallResultNotCorrespondToInstr(value),
-        )),
+        (CallOutputValue::None, ValueRef::Unused(_)) => {}
+        (_, value) => {
+            return Err(ExecutionError::Uncatchable(
+                UncatchableError::CallResultNotCorrespondToInstr(value),
+            ))
+        }
     }
+
+    Ok(())
 }
 
 /// Writes an executed state of a particle being sent to remote node.

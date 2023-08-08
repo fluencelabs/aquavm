@@ -25,6 +25,7 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
 use air_utils::measure;
+use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
 
 use std::fmt::Debug;
@@ -90,26 +91,18 @@ fn populate_outcome_from_contexts(
     error_message: String,
     keypair: &KeyPair,
 ) -> InterpreterOutcome {
-    let maybe_gens = exec_ctx
-        .streams
-        .into_streams_data(&mut trace_handler)
-        .map_err(execution_error_into_outcome);
-    let (global_streams, restricted_streams) = match maybe_gens {
-        Ok(gens) => gens,
+    match compactify_streams(&mut exec_ctx, &mut trace_handler) {
+        Ok(()) => {}
         Err(outcome) => return outcome,
     };
 
-    let current_signature = exec_ctx
-        .peer_cid_tracker
-        .gen_signature(&exec_ctx.run_parameters.particle_id, keypair)
-        .expect("siging shouldn't fail");
-    let current_pubkey = keypair.public();
-    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
+    match sign_result(&mut exec_ctx, keypair) {
+        Ok(()) => {}
+        Err(outcome) => return outcome,
+    };
 
     let data = InterpreterData::from_execution_result(
         trace_handler.into_result_trace(),
-        global_streams,
-        restricted_streams,
         exec_ctx.cid_state.into(),
         exec_ctx.signature_store,
         exec_ctx.last_call_request_id,
@@ -120,19 +113,43 @@ fn populate_outcome_from_contexts(
         tracing::Level::TRACE,
         "serde_json::to_vec(data)"
     );
+
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = measure!(
         serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
         tracing::Level::TRACE,
         "serde_json::to_vec(call_results)",
     );
-
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
 }
 
-// this method is called only if there is an internal error in the interpreter and
+fn compactify_streams(exec_ctx: &mut ExecutionCtx<'_>, trace_ctx: &mut TraceHandler) -> Result<(), InterpreterOutcome> {
+    exec_ctx
+        .streams
+        .compactify(trace_ctx)
+        .and_then(|_| exec_ctx.stream_maps.compactify(trace_ctx))
+        .map_err(execution_error_into_outcome)
+}
+
+fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(), InterpreterOutcome> {
+    let current_signature = exec_ctx
+        .peer_cid_tracker
+        .gen_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
+        .map_err(signing_error_into_outcome)?;
+
+    let current_pubkey = keypair.public();
+    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
+
+    Ok(())
+}
+
+// these methods are called only if there is an internal error in the interpreter and
 // new execution trace was corrupted
 fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
+}
+
+fn signing_error_into_outcome(error: SigningError) -> InterpreterOutcome {
     InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
 }
 

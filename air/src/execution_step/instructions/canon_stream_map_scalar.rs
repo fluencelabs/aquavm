@@ -21,8 +21,8 @@ use super::canon_utils::CreateCanonStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::CanonStream;
-use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::value_types::CanonStream;
+use crate::execution_step::value_types::JValuable;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
@@ -42,7 +42,7 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(call, exec_ctx, trace_ctx);
+        log_instruction!(canon, exec_ctx, trace_ctx);
         let epilog = &epilog_closure(self.scalar.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 

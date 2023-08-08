@@ -53,6 +53,8 @@ pub use execution_step::UncatchableError;
 pub use farewell_step::FarewellError;
 pub use polyplets::ResolvedTriplet;
 pub use polyplets::SecurityTetraplet;
+pub use preparation_step::interpreter_version;
+pub use preparation_step::min_supported_version;
 pub use preparation_step::PreparationError;
 pub use utils::ToErrorCode;
 

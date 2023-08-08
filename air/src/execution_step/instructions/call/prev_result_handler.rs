@@ -114,8 +114,8 @@ pub(super) fn handle_prev_state<'i>(
         Executed(value) => {
             use air_interpreter_data::ValueRef;
 
-            let resulted_value = populate_context_from_data(
-                value,
+            populate_context_from_data(
+                value.clone(),
                 argument_hash.as_ref().unwrap(),
                 tetraplet.clone(),
                 met_result.trace_pos,
@@ -124,14 +124,14 @@ pub(super) fn handle_prev_state<'i>(
                 exec_ctx,
             )?;
 
-            match &resulted_value {
+            match &value {
                 ValueRef::Scalar(ref cid) | ValueRef::Stream { ref cid, .. } => {
                     exec_ctx.record_call_cid(&tetraplet.peer_pk, cid);
                 }
                 ValueRef::Unused(_) => {}
             }
 
-            let call_result = CallResult::Executed(resulted_value);
+            let call_result = CallResult::Executed(value);
             trace_ctx.meet_call_end(call_result);
 
             Ok(StateDescriptor::executed())

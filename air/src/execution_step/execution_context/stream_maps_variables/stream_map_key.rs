@@ -24,13 +24,13 @@ use serde::Serialize;
 use std::borrow::Cow;
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub(crate) enum StreamMapKey<'i> {
-    Str(Cow<'i, str>),
+pub(crate) enum StreamMapKey<'value> {
+    Str(Cow<'value, str>),
     U64(u64),
     I64(i64),
 }
 
-impl<'i> StreamMapKey<'i> {
+impl<'value> StreamMapKey<'value> {
     pub(crate) fn from_value(value: JValue, map_name: &str) -> Result<Self, ExecutionError> {
         match value {
             JValue::String(s) => Ok(StreamMapKey::Str(Cow::Owned(s))),
@@ -40,11 +40,11 @@ impl<'i> StreamMapKey<'i> {
         }
     }
 
-    pub(crate) fn from_kvpair(value: &ValueAggregate) -> Option<Self> {
+    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
-        let key = object.get("key")?.to_owned();
+        let key = object.get("key")?;
         match key {
-            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => None,
@@ -64,13 +64,13 @@ impl From<u64> for StreamMapKey<'_> {
     }
 }
 
-impl<'i> From<&'i str> for StreamMapKey<'i> {
-    fn from(value: &'i str) -> Self {
+impl<'value> From<&'value str> for StreamMapKey<'value> {
+    fn from(value: &'value str) -> Self {
         StreamMapKey::Str(Cow::Borrowed(value))
     }
 }
 
-impl<'i> Serialize for StreamMapKey<'i> {
+impl<'value> Serialize for StreamMapKey<'value> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,

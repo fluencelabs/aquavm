@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-data-store bumped from 0.6.2 to 0.6.3
+    * polyplets bumped from 0.3.2 to 0.3.3
+    * avm-interface bumped from 0.28.4 to 0.28.5
+
+## [0.32.2](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.32.1...avm-server-v0.32.2) (2023-08-04)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-runtime to 0.28.0 ([#657](https://github.com/fluencelabs/aquavm/issues/657)) ([ee3c807](https://github.com/fluencelabs/aquavm/commit/ee3c8076dbef8f29b53f1e3a6641c19e396ad105))
+
 ## [0.32.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.31.0...avm-server-v0.32.0) (2023-06-22)
 
 

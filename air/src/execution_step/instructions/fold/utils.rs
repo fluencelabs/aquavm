@@ -15,7 +15,8 @@
  */
 
 use super::*;
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
+use crate::execution_step::value_types::populate_tetraplet_with_lambda;
+use crate::execution_step::value_types::IterableValue;
 use crate::execution_step::CatchableError;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;
@@ -30,8 +31,6 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 // TODO: refactor this file after switching to boxed value
-
-pub(crate) type IterableValue = Box<dyn for<'ctx> Iterable<'ctx, Item = IterableItem<'ctx>>>;
 
 pub(crate) enum FoldIterableScalar {
     Empty,
@@ -93,28 +92,6 @@ pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     let iterable_ingredients = CanonStreamIterableIngredients::init((**canon_stream).clone());
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))
-}
-
-/// Constructs iterable value for given stream iterable.
-pub(crate) fn construct_stream_iterable_values(
-    stream: &Stream,
-    start: Generation,
-    end: Generation,
-) -> Vec<IterableValue> {
-    let stream_iter = match stream.slice_iter(start, end) {
-        Some(stream_iter) => stream_iter,
-        None => return vec![],
-    };
-
-    stream_iter
-        .filter(|iterable| !iterable.is_empty())
-        .map(|iterable| {
-            let call_results = iterable.to_vec();
-            let foldable = IterableVecResolvedCall::init(call_results);
-            let foldable: IterableValue = Box::new(foldable);
-            foldable
-        })
-        .collect::<Vec<_>>()
 }
 
 /// Constructs iterable value from resolved call result.

@@ -34,8 +34,11 @@ pub enum LexerError {
     #[error("only alphanumeric, '_', and '-' characters are allowed in this position")]
     IsNotAlphanumeric(Span),
 
-    #[error("a stream name should be non empty")]
-    EmptyStreamName(Span),
+    #[error("a tagged name should be non empty")]
+    EmptyTaggedName(Span),
+
+    #[error("a canon name should be non empty")]
+    EmptyCanonName(Span),
 
     #[error("this variable or constant shouldn't have empty name")]
     EmptyVariableOrConst(Span),
@@ -75,7 +78,8 @@ impl LexerError {
             Self::UnclosedQuote(span) => span,
             Self::EmptyString(span) => span,
             Self::IsNotAlphanumeric(span) => span,
-            Self::EmptyStreamName(span) => span,
+            Self::EmptyTaggedName(span) => span,
+            Self::EmptyCanonName(span) => span,
             Self::EmptyVariableOrConst(span) => span,
             Self::InvalidLambda(span) => span,
             Self::UnallowedCharInNumber(span) => span,
@@ -102,8 +106,12 @@ impl LexerError {
         Self::IsNotAlphanumeric(range.into())
     }
 
-    pub fn empty_stream_name(range: Range<AirPos>) -> Self {
-        Self::EmptyStreamName(range.into())
+    pub fn empty_tagged_name(range: Range<AirPos>) -> Self {
+        Self::EmptyTaggedName(range.into())
+    }
+
+    pub fn empty_canon_name(range: Range<AirPos>) -> Self {
+        Self::EmptyCanonName(range.into())
     }
 
     pub fn empty_variable_or_const(range: Range<AirPos>) -> Self {

@@ -23,7 +23,7 @@ use air_parser::ast::Never;
 
 impl<'i> super::ExecutableInstruction<'i> for Never {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(null, exec_ctx, trace_ctx);
+        log_instruction!(never, exec_ctx, trace_ctx);
         exec_ctx.make_subgraph_incomplete();
 
         Ok(())

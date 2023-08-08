@@ -59,7 +59,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install cargo-edit
-        uses: baptiste0928/cargo-install@v1.3.1
+        uses: baptiste0928/cargo-install@v2.1.0
         with:
           crate: cargo-edit
 
@@ -97,7 +97,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -133,7 +133,7 @@ jobs:
           tag_name: ${{ needs.release-please.outputs.air-interpreter-tag-name }}
 
       - name: Install cargo-workspaces
-        uses: baptiste0928/cargo-install@v1.3.1
+        uses: baptiste0928/cargo-install@v2.1.0
         with:
           crate: cargo-workspaces
 
@@ -171,7 +171,7 @@ jobs:
         working-directory: avm/client/dist
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -226,7 +226,7 @@ jobs:
           path: crates/interpreter-wasm/
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -267,7 +267,7 @@ jobs:
         run: wasm-pack build --release -m force --target nodejs
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -323,7 +323,7 @@ jobs:
           echo "found any?:" "${{ steps.status.outputs.found }}"
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github

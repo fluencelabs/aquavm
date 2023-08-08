@@ -30,11 +30,12 @@ pub(super) fn try_parse_call_variable(
     CallVariableParser::try_parse(string_to_parse, start_pos)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MetTag {
     None,
     Stream,
     StreamMap,
+    Canon,
     CanonStream,
 }
 
@@ -175,7 +176,10 @@ impl<'input> CallVariableParser<'input> {
     }
 
     fn try_parse_as_variable(&mut self) -> LexerResult<()> {
-        if self.try_parse_as_stream_start()? || self.try_parse_as_json_path_start()? {
+        if self.try_parse_as_canon()?
+            || self.try_parse_as_stream()?
+            || self.try_parse_as_json_path_start()?
+        {
             return Ok(());
         } else if self.is_json_path_started() {
             self.try_parse_as_json_path()?;
@@ -186,15 +190,31 @@ impl<'input> CallVariableParser<'input> {
         Ok(())
     }
 
-    fn try_parse_as_stream_start(&mut self) -> LexerResult<bool> {
-        let stream_tag = MetTag::from_tag(self.current_char());
-        if self.current_offset() == 0 && stream_tag.is_tag() {
+    fn try_parse_as_stream(&mut self) -> LexerResult<bool> {
+        let tag = MetTag::from_tag(self.current_char());
+        if self.current_offset() == 0 && tag.is_tag() {
             if self.string_to_parse.len() == 1 {
                 let error_pos = self.pos_in_string_to_parse();
-                return Err(LexerError::empty_stream_name(error_pos..error_pos));
+                return Err(LexerError::empty_tagged_name(error_pos..error_pos));
             }
 
-            self.state.met_tag = stream_tag;
+            self.state.met_tag = tag;
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    fn try_parse_as_canon(&mut self) -> LexerResult<bool> {
+        let tag = self.state.met_tag.deduce_tag(self.current_char());
+
+        if self.current_offset() == 1 && tag.is_canon_stream() {
+            if self.string_to_parse.len() == 2 && tag.is_tag() {
+                let error_pos = self.pos_in_string_to_parse();
+                return Err(LexerError::empty_canon_name(error_pos..error_pos));
+            }
+
+            self.state.met_tag = tag;
             return Ok(true);
         }
 
@@ -238,6 +258,9 @@ impl<'input> CallVariableParser<'input> {
                 return Err(LexerError::leading_dot(
                     self.start_pos..self.pos_in_string_to_parse(),
                 ));
+            } else if self.state.met_tag.is_tag() && self.current_offset() <= 2 {
+                let prev_pos = self.pos_in_string_to_parse() - 1;
+                return Err(LexerError::empty_canon_name(prev_pos..prev_pos));
             }
             self.state.first_dot_met_pos = Some(self.current_offset());
             return Ok(true);
@@ -288,7 +311,7 @@ impl<'input> CallVariableParser<'input> {
                 name,
                 position: self.start_pos,
             },
-            MetTag::CanonStream => Token::CanonStream {
+            MetTag::CanonStream | MetTag::Canon => Token::CanonStream {
                 name,
                 position: self.start_pos,
             },
@@ -311,7 +334,7 @@ impl<'input> CallVariableParser<'input> {
                 lambda,
                 position: self.start_pos,
             },
-            MetTag::CanonStream => Token::CanonStreamWithLambda {
+            MetTag::CanonStream | MetTag::Canon => Token::CanonStreamWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
@@ -383,17 +406,36 @@ impl<'input> CallVariableParser<'input> {
     }
 }
 
+/// There are two kinds of tags ATM, namely tag and canon tag.
+/// Tag defines the first level and comes first in a variable name, e.g. $stream.
+/// Canon tag is the only tag that ATM defines the second level.
+/// Canon tag comes second in a variable name, e.g. #$canon_stream.
 impl MetTag {
     fn from_tag(tag: char) -> Self {
         match tag {
             '$' => Self::Stream,
-            '#' => Self::CanonStream,
+            '#' => Self::Canon,
             '%' => Self::StreamMap,
             _ => Self::None,
         }
     }
 
+    fn deduce_tag(&self, tag: char) -> Self {
+        match tag {
+            '$' if self.is_canon() => Self::CanonStream,
+            _ => self.to_owned(),
+        }
+    }
+
+    fn is_canon(&self) -> bool {
+        *self == Self::Canon
+    }
+
+    fn is_canon_stream(&self) -> bool {
+        *self == Self::CanonStream
+    }
+
     fn is_tag(&self) -> bool {
-        !matches!(self, Self::None)
+        *self != Self::None
     }
 }

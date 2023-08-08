@@ -46,6 +46,11 @@ impl GenerationIdx {
         // TODO: check for overflow
         Self::from(self.0 as usize - 1)
     }
+
+    pub fn stub() -> Self {
+        const GENERATION_STUB: GenerationIdxType = 0xCAFEBABE;
+        Self(GENERATION_STUB)
+    }
 }
 
 impl PartialOrd<usize> for GenerationIdx {

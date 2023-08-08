@@ -17,8 +17,6 @@
 pub(crate) mod errors;
 pub mod verification;
 
-use super::GlobalStreamGens;
-use super::RestrictedStreamGens;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
@@ -40,18 +38,6 @@ pub struct InterpreterData {
 
     /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
-
-    /// Contains maximum generation for each global stream. This info will be used while merging
-    /// values in streams. This field is also needed for backward compatibility with
-    /// <= 0.2.1 versions.
-    #[serde(rename = "streams")] // for compatibility with versions <= 0.2.1
-    pub global_streams: GlobalStreamGens,
-
-    /// Contains maximum generation for each private stream. This info will be used while merging
-    /// values in streams.
-    #[serde(default)]
-    #[serde(rename = "r_streams")]
-    pub restricted_streams: RestrictedStreamGens,
 
     /// Last exposed to a peer call request id. All next call request ids will be bigger than this.
     #[serde(default)]
@@ -85,9 +71,7 @@ impl InterpreterData {
         Self {
             versions,
             trace: ExecutionTrace::default(),
-            global_streams: GlobalStreamGens::new(),
             last_call_request_id: 0,
-            restricted_streams: RestrictedStreamGens::new(),
             cid_info: <_>::default(),
             signatures: <_>::default(),
         }
@@ -96,8 +80,6 @@ impl InterpreterData {
     #[allow(clippy::too_many_arguments)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
-        streams: GlobalStreamGens,
-        restricted_streams: RestrictedStreamGens,
         cid_info: CidInfo,
         signatures: SignatureStore,
         last_call_request_id: u32,
@@ -108,9 +90,7 @@ impl InterpreterData {
         Self {
             versions,
             trace,
-            global_streams: streams,
             last_call_request_id,
-            restricted_streams,
             cid_info,
             signatures,
         }

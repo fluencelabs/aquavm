@@ -27,6 +27,36 @@
     * aquavm-air bumped from 0.41.0 to 0.42.0
     * air-interpreter-data bumped from 0.8.0 to 0.8.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-server bumped from 0.32.1 to 0.32.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.43.0 to 0.43.1
+
+## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.7.1...air-test-utils-v0.8.0) (2023-08-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621))
+
+### Features
+
+* **air-test-utils:** `print_trace` prints values ([#633](https://github.com/fluencelabs/aquavm/issues/633)) ([c530c93](https://github.com/fluencelabs/aquavm/commit/c530c93fcbffe187797d48d65bf8478dcafa8de5))
+* **execution-engine:** refactor streams [fixes VM-255] ([#621](https://github.com/fluencelabs/aquavm/issues/621)) ([eca52b7](https://github.com/fluencelabs/aquavm/commit/eca52b7191ef1bc5c4573c62412dc735d830c023))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.42.0 to 0.43.0
+    * air-interpreter-data bumped from 0.8.1 to 0.9.0
+    * avm-interface bumped from 0.28.4 to 0.28.5
+    * avm-server bumped from 0.32.0 to 0.32.1
+
 ## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.6.0...air-test-utils-v0.7.0) (2023-06-23)
 
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use air_parser::AirPos;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -92,13 +91,4 @@ fn issue_173() {
         scalar!(json!([1, 2])),
     ];
     assert_eq!(actual_trace, expected_trace);
-
-    let data = data_from_result(&vm_2_result);
-    let actual_restricted_streams = data.restricted_streams;
-    let expected_restricted_streams = maplit::hashmap! {
-        "$stream".to_string() => maplit::hashmap! {
-            AirPos::from(282) => vec![1.into(), 1.into()]
-        }
-    };
-    assert_eq!(actual_restricted_streams, expected_restricted_streams);
 }
