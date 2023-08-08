@@ -63,8 +63,6 @@ fn test_attack_injection_current_peer_scalar() {
 
     let alice_data = InterpreterData::from_execution_result(
         alice_trace.into(),
-        <_>::default(),
-        <_>::default(),
         alice_cid_state.into(),
         alice_signature_store,
         2,
@@ -73,8 +71,6 @@ fn test_attack_injection_current_peer_scalar() {
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         mallory_signature_store,
         2,
@@ -138,8 +134,6 @@ fn test_attack_injection_current_peer_stream() {
 
     let alice_data = InterpreterData::from_execution_result(
         alice_trace.into(),
-        <_>::default(),
-        <_>::default(),
         alice_cid_state.into(),
         alice_signature_store,
         2,
@@ -148,8 +142,6 @@ fn test_attack_injection_current_peer_stream() {
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         mallory_signature_store,
         2,
@@ -211,8 +203,6 @@ fn test_attack_injection_current_injection_unused() {
 
     let alice_data = InterpreterData::from_execution_result(
         alice_trace.into(),
-        <_>::default(),
-        <_>::default(),
         alice_cid_state.into(),
         alice_signature_store,
         2,
@@ -221,8 +211,6 @@ fn test_attack_injection_current_injection_unused() {
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         mallory_signature_store,
         2,
@@ -284,8 +272,6 @@ fn test_attack_injection_other_peer_scalar() {
     signature_store.put(mallory_pk, mallory_signature);
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         signature_store,
         2,
@@ -344,8 +330,6 @@ fn test_attack_injection_other_peer_stream() {
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         signature_store,
         2,
@@ -404,8 +388,6 @@ fn test_attack_injection_other_peer_unused() {
 
     let mallory_data = InterpreterData::from_execution_result(
         mallory_trace.into(),
-        <_>::default(),
-        <_>::default(),
         mallory_cid_state.into(),
         signature_store,
         2,
