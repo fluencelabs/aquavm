@@ -9,7 +9,7 @@ edition = "2021"
 aquavm-air = { path = "../../air", features = ["gen_signatures", "check_signatures"] }
 air-interpreter-signatures = { path = "../../crates/air-lib/interpreter-signatures" }
 air-test-utils = { path = "../../crates/air-lib/test-utils" }
-air-testing-framework = { version = "0.3.0", path = "../../crates/testing-framework" }
+air-testing-framework = { path = "../../crates/testing-framework" }
 bs58 = "0.5.0"
 clap = { version = "4.3.5", features = ["derive"] }
 fluence-keypair = "0.10.1"
