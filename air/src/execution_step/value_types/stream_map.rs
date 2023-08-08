@@ -17,8 +17,8 @@
 use super::Generation;
 use super::Stream;
 use super::ValueAggregate;
-use crate::execution_step::boxed_value::TracePosOperate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
@@ -86,8 +86,8 @@ impl fmt::Display for StreamMap {
 mod test {
     use super::Generation;
     use super::StreamMap;
-    use crate::execution_step::boxed_value::stream_map::from_key_value;
     use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
+    use crate::execution_step::value_types::stream_map::from_key_value;
     use crate::execution_step::ValueAggregate;
     use crate::ExecutionError;
     use crate::JValue;

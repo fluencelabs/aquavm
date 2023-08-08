@@ -39,7 +39,7 @@ mod xor;
 pub(crate) use call::triplet::resolve_peer_id_to_string;
 pub(crate) use fold::FoldState;
 
-use super::boxed_value::ScalarRef;
+use super::value_types::ScalarRef;
 use super::ExecutionCtx;
 use super::ExecutionError;
 use super::ExecutionResult;

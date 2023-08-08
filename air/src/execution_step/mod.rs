@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-mod boxed_value;
 mod errors;
 pub(crate) mod execution_context;
 mod instructions;
 mod lambda_applier;
 mod resolver;
+mod value_types;
 
 const PEEK_ALLOWED_ON_NON_EMPTY: &str = "peek always return elements inside fold,\
             this guaranteed by implementation of next and avoiding empty folds";
@@ -40,17 +40,17 @@ pub mod errors_prelude {
 
 pub(super) use self::instructions::ExecutableInstruction;
 pub(super) use self::instructions::FoldState;
-pub(super) use boxed_value::CanonResultAggregate;
-pub(super) use boxed_value::Generation;
-pub(super) use boxed_value::LiteralAggregate;
-pub(super) use boxed_value::ScalarRef;
-pub(super) use boxed_value::ServiceResultAggregate;
-pub(super) use boxed_value::Stream;
-pub(super) use boxed_value::ValueAggregate;
 pub(crate) use errors::Joinable;
 pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
 pub(crate) use execution_context::LastError;
+pub(super) use value_types::CanonResultAggregate;
+pub(super) use value_types::Generation;
+pub(super) use value_types::LiteralAggregate;
+pub(super) use value_types::ScalarRef;
+pub(super) use value_types::ServiceResultAggregate;
+pub(super) use value_types::Stream;
+pub(super) use value_types::ValueAggregate;
 
 pub(crate) use air_trace_handler::TraceHandler;
 

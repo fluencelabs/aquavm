@@ -21,8 +21,8 @@ use super::canon_utils::CreateCanonStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::CanonStream;
-use crate::execution_step::boxed_value::CanonStreamWithProvenance;
+use crate::execution_step::value_types::CanonStream;
+use crate::execution_step::value_types::CanonStreamWithProvenance;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
 
