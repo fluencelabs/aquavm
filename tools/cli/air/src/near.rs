@@ -17,6 +17,7 @@
 use air_interpreter_interface::RunParameters;
 use anyhow::Context;
 use clap::Parser;
+use serde_json::json;
 
 use std::path::PathBuf;
 
@@ -56,8 +57,8 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
         serde_json::to_string(&run_parameters).context("failed to serialize run parameters")?;
 
     let outcome = execute_on_near(
-        "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm"
-            .to_owned(),
+        // "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm",
+        "simple_contract.wasm",
         execution_data.air_script,
         execution_data.prev_data,
         execution_data.current_data,
@@ -70,7 +71,7 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
 }
 
 fn execute_on_near(
-    path: String,
+    path: &str,
     _air_script: String,
     _prev_data: String,
     _current_data: String,
@@ -86,16 +87,18 @@ fn execute_on_near(
             let wasm = std::fs::read(path).unwrap();
             let contract = worker.dev_deploy(&wasm).await.unwrap();
             let result = contract
-                .call("execute_script")
-                .gas(300_000_000_000_000)
-                .args_json(())
+                .call("set_status")
+                .args_json(json!({
+                    "message": "hello_world",
+                }))
                 .transact()
                 .await
-                .unwrap()
-                .json()
                 .unwrap();
+            eprintln!("gas: {}", result.outcome().gas_burnt as f64);
 
-            result
+            eprintln!("logs: {:?}", result.logs());
+
+            String::from_utf8(result.raw_bytes().unwrap()).unwrap()
         });
     // let aquavm = near_aquavm::Aqua::default();
     // let context = get_context(false);

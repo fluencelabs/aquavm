@@ -8,8 +8,8 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-aquavm-air = { path = "../../../air" }
-air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
+# aquavm-air = { path = "../../../air" }
+# air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
 near-sdk = "=4.0.0"
 # KLUDGE: the crate has no direct dependency to getrandom; near-sdk do
 getrandom = { version = "0.2.10", features = ["js"] }
