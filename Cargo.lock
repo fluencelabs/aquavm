@@ -57,7 +57,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.43.1"
+version = "0.44.0"
 dependencies = [
  "air-interpreter-interface",
  "air-log-targets",
@@ -83,7 +83,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -148,7 +148,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.8.2"
+version = "0.9.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -171,7 +171,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.4.3"
+version = "0.5.0"
 dependencies = [
  "air-test-utils",
  "aquavm-air-parser",
@@ -186,7 +186,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -298,7 +298,7 @@ checksum = "9c7d0618f0e0b7e8ff11427422b64564d5fb0be1940354bfe2e0529b18a9d9b8"
 
 [[package]]
 name = "aquavm-air"
-version = "0.43.1"
+version = "0.44.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -338,7 +338,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.3.5"
+version = "0.4.0"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
@@ -457,7 +457,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "avm-data-store"
-version = "0.6.3"
+version = "0.7.0"
 dependencies = [
  "avm-interface",
  "serde",
@@ -467,7 +467,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.28.5"
+version = "0.29.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -482,7 +482,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.32.2"
+version = "0.33.0"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -2735,7 +2735,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",

@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 air-interpreter-cid = { version = "0.2.0", path = "../../crates/air-lib/interpreter-cid" }
-air-interpreter-data = { version = "0.6.0", path = "../../crates/air-lib/interpreter-data" }
+air-interpreter-data = { version = "0.10.0", path = "../../crates/air-lib/interpreter-data" }
 aquavm-air = { path = "../../air" }
 air-test-utils = { path = "../../crates/air-lib/test-utils" }
 clap = { version = "4.1.13", features = ["derive"] }

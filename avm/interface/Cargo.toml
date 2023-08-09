@@ -1,7 +1,7 @@
 [package]
 name = "avm-interface"
 description = "Fluence AIR VM interfacing"
-version = "0.28.5"
+version = "0.29.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -17,7 +17,7 @@ path = "src/lib.rs"
 [dependencies]
 air-interpreter-interface = { version = "0.14.0", path = "../../crates/air-lib/interpreter-interface", default-features = false }
 air-utils = { version = "0.1.1", path = "../../crates/air-lib/utils" }
-polyplets = { version = "0.4.0", path = "../../crates/air-lib/polyplets" }
+polyplets = { version = "0.4.1", path = "../../crates/air-lib/polyplets" }
 
 thiserror = "1.0.40"
 maplit = "1.0.2"
