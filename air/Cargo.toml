@@ -27,7 +27,7 @@ air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }
 air-trace-handler = { version = "0.3.0", path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.1.1", path = "../crates/air-lib/utils" }
-polyplets = { version = "0.3.3", path = "../crates/air-lib/polyplets" }
+polyplets = { version = "0.4.0", path = "../crates/air-lib/polyplets" }
 fluence-keypair = { version = "0.10.1" }
 
 serde = { version = "1.0.164", features = [ "derive", "rc" ] }

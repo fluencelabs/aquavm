@@ -63,7 +63,7 @@ dependencies = [
  "air-log-targets",
  "aquavm-air",
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.8.0",
  "serde",
  "serde_json",
  "tracing",
@@ -92,7 +92,7 @@ dependencies = [
  "newtype_derive",
  "num-traits",
  "once_cell",
- "polyplets",
+ "polyplets 0.4.0",
  "semver 1.0.17",
  "serde",
  "serde_json",
@@ -104,7 +104,7 @@ name = "air-interpreter-interface"
 version = "0.14.0"
 dependencies = [
  "fluence-it-types",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.8.0",
  "serde",
  "serde_json",
 ]
@@ -159,7 +159,7 @@ dependencies = [
  "ed25519-dalek",
  "fluence-keypair",
  "maplit",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.8.0",
  "object-pool",
  "once_cell",
  "rand_chacha 0.2.2",
@@ -195,7 +195,7 @@ dependencies = [
  "bimap",
  "log",
  "num-traits",
- "polyplets",
+ "polyplets 0.4.0",
  "serde_json",
  "thiserror",
  "tracing",
@@ -321,10 +321,10 @@ dependencies = [
  "fluence-keypair",
  "log",
  "maplit",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.1",
  "non-empty-vec",
  "once_cell",
- "polyplets",
+ "polyplets 0.4.0",
  "pretty_assertions 0.6.1",
  "semver 1.0.17",
  "serde",
@@ -473,7 +473,7 @@ dependencies = [
  "air-utils",
  "log",
  "maplit",
- "polyplets",
+ "polyplets 0.4.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -494,7 +494,7 @@ dependencies = [
  "maplit",
  "marine-runtime",
  "parking_lot 0.12.1",
- "polyplets",
+ "polyplets 0.4.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -2284,8 +2284,21 @@ checksum = "1cfeeb7b8cd98e32276fabfe6ab095a6aae793f3f080e7eb1c3d36b1b762397c"
 dependencies = [
  "marine-macro 0.7.1",
  "marine-rs-sdk-main 0.7.1",
- "marine-timestamp-macro",
- "polyplets",
+ "marine-timestamp-macro 0.7.1",
+ "polyplets 0.3.3",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c990fa118455b2ac6d660d74872385c7f1324b3a37ec0521dca9bdeb9f29969"
+dependencies = [
+ "marine-macro 0.8.0",
+ "marine-rs-sdk-main 0.8.0",
+ "marine-timestamp-macro 0.8.0",
+ "polyplets 0.3.3",
  "serde",
 ]
 
@@ -2322,7 +2335,7 @@ dependencies = [
  "log",
  "marine-core",
  "marine-module-interface",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.1",
  "marine-rs-sdk-main 0.7.1",
  "marine-utils",
  "marine-wasm-backend-traits",
@@ -2343,6 +2356,16 @@ name = "marine-timestamp-macro"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ea4557a757e9f4d04a0b6afb047431a246963268a4cab56c62cb5355457cb2f"
+dependencies = [
+ "chrono",
+ "quote",
+]
+
+[[package]]
+name = "marine-timestamp-macro"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbf59214050e17b63dfa6252c4286e27c8d7766526901b1d1bb34b3ceb1990a4"
 dependencies = [
  "chrono",
  "quote",
@@ -2756,9 +2779,20 @@ dependencies = [
 [[package]]
 name = "polyplets"
 version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dad2a1ffbc0d66f92c861bb57fb60f113ea0736d16d4cd7ead1bb514d8d8b3d3"
 dependencies = [
  "marine-macro 0.8.0",
  "marine-rs-sdk-main 0.7.1",
+ "serde",
+]
+
+[[package]]
+name = "polyplets"
+version = "0.4.0"
+dependencies = [
+ "marine-macro 0.8.0",
+ "marine-rs-sdk-main 0.8.0",
  "serde",
 ]
 
