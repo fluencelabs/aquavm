@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-mod near_aquavm;
-
 use air_interpreter_interface::RunParameters;
 use anyhow::Context;
 use clap::Parser;
-use near_sdk::test_utils::VMContextBuilder;
-use near_sdk::{env, testing_env, RuntimeFeesConfig, VMConfig, VMContext};
 
 use std::path::PathBuf;
 
@@ -60,6 +56,8 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
         serde_json::to_string(&run_parameters).context("failed to serialize run parameters")?;
 
     let outcome = execute_on_near(
+        "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm"
+            .to_owned(),
         execution_data.air_script,
         execution_data.prev_data,
         execution_data.current_data,
@@ -72,31 +70,44 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
 }
 
 fn execute_on_near(
-    air_script: String,
-    prev_data: String,
-    current_data: String,
-    run_parameters: String,
-    call_results: String,
+    path: String,
+    _air_script: String,
+    _prev_data: String,
+    _current_data: String,
+    _run_parameters: String,
+    _call_results: String,
 ) -> String {
-    let aquavm = near_aquavm::Aqua::default();
-    let context = get_context(false);
-    testing_env!(context.clone(), VMConfig::test(), RuntimeFeesConfig::test());
-
-    let outcome = aquavm.execute_script(
-        air_script,
-        prev_data,
-        current_data,
-        run_parameters,
-        call_results,
-    );
-    eprintln!("Used gas: {}", env::used_gas().0,);
-    outcome
-}
-
-// this code is based on the near/sdk-rs-gas-benchmark repository
-fn get_context(is_view: bool) -> VMContext {
-    VMContextBuilder::new()
-        .signer_account_id("alice_fluence".parse().unwrap())
-        .is_view(is_view)
+    let outcome = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
         .build()
+        .unwrap()
+        .block_on(async move {
+            let worker = workspaces::sandbox().await.unwrap();
+            let wasm = std::fs::read(path).unwrap();
+            let contract = worker.dev_deploy(&wasm).await.unwrap();
+            let result = contract
+                .call("execute_script")
+                .gas(300_000_000_000_000)
+                .args_json(())
+                .transact()
+                .await
+                .unwrap()
+                .json()
+                .unwrap();
+
+            result
+        });
+    // let aquavm = near_aquavm::Aqua::default();
+    // let context = get_context(false);
+    // testing_env!(context.clone(), VMConfig::test(), RuntimeFeesConfig::test());
+
+    // let outcome = aquavm.execute_script(
+    //     air_script,
+    //     prev_data,
+    //     current_data,
+    //     run_parameters,
+    //     call_results,
+    // );
+    // eprintln!("Used gas: {}", env::used_gas().0,);
+    outcome
 }

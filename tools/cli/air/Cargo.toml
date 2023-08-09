@@ -30,6 +30,8 @@ fluence-keypair = "0.10.1"
 bs58 = "0.5.0"
 zeroize = "1.6.0"
 near-sdk = { version = "4.1.1" }
+workspaces = { version = "0.7.0", features = ["install"] }
+tokio = { version = "1.29.1", features = ["rt"] }
 
 [features]
 default = ["wasm"]

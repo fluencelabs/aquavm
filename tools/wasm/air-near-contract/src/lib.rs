@@ -19,17 +19,17 @@ impl Default for Aqua {
 impl Aqua {
     pub fn execute_script(
         &self,
-        air: String,
+        air_script: String,
         prev_data: String,
-        cur_data: String,
-        params: String,
+        current_data: String,
+        run_parameters: String,
         call_results: String,
     ) -> String {
         let outcome = Self::execute(
-            air,
+            air_script,
             prev_data.into(),
-            cur_data.into(),
-            params.into(),
+            current_data.into(),
+            run_parameters.into(),
             call_results.into(),
         );
         serde_json::to_string(&outcome).unwrap()
