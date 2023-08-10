@@ -16,8 +16,8 @@
 
 use super::ExecutionResult;
 use super::JValuable;
-use crate::execution_step::value_types::CanonStreamMap;
 use crate::execution_step::lambda_applier::select_by_lambda_from_canon_map;
+use crate::execution_step::value_types::CanonStreamMap;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::JValue;
@@ -27,12 +27,12 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::Provenance;
 
 use std::borrow::Cow;
-use std::ops::Deref;
 
 impl JValuable for &CanonStreamMap<'_> {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
         let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
         Ok(select_result.result)
+        // select_by_lambda_from_canon_map(self, lambda, exec_ctx)
     }
 
     fn apply_lambda_with_tetraplets(
@@ -42,28 +42,18 @@ impl JValuable for &CanonStreamMap<'_> {
         root_provenance: &Provenance,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
+        // let value = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
 
-        let (tetraplet, provenance) = match select_result.tetraplet_idx {
-            Some(idx) => {
-                let resolved_call = self.nth(idx).expect(crate::execution_step::TETRAPLET_IDX_CORRECT);
-                (
-                    resolved_call.get_tetraplet().deref().clone(),
-                    resolved_call.get_provenance(),
-                )
-            }
-            // TODO double check if this scope has test coverage
-            None => (
-                SecurityTetraplet::new(
-                    exec_ctx.run_parameters.current_peer_id.to_string(),
-                    lambda.to_string(),
-                    "",
-                    "",
-                ),
-                root_provenance.clone(),
-            ),
-        };
+        // Canon map result is a canon stream rendered on this node thus its tetraplet
+        // is also calculated and canon map provenance is borrowed.
+        let tetraplet = SecurityTetraplet::new(
+            exec_ctx.run_parameters.current_peer_id.to_string(),
+            lambda.to_string(),
+            "",
+            "",
+        );
 
-        Ok((select_result.result, tetraplet, provenance))
+        Ok((select_result.result, tetraplet, root_provenance.clone()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

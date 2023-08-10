@@ -48,6 +48,13 @@ impl CanonStream {
         }
     }
 
+    pub(crate) fn from_values_and_tetraplet(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
+        Self {
+            values,
+            tetraplet: tetraplet.clone(),
+        }
+    }
+
     pub(crate) fn len(&self) -> usize {
         self.values.len()
     }
@@ -76,6 +83,10 @@ impl CanonStream {
 
     pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
         &self.tetraplet
+    }
+
+    pub(crate) fn push(&mut self, value_aggregate: &ValueAggregate) {
+        self.values.push(value_aggregate.clone());
     }
 }
 
