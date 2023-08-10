@@ -17,12 +17,18 @@ impl Default for Aqua {
 
 #[near_bindgen]
 impl Aqua {
+    #[result_serializer(borsh)]
     pub fn execute_script(
         &self,
+        #[serializer(borsh)]
         air_script: String,
+        #[serializer(borsh)]
         prev_data: String,
+        #[serializer(borsh)]
         current_data: String,
+        #[serializer(borsh)]
         run_parameters: String,
+        #[serializer(borsh)]
         call_results: String,
     ) -> String {
         let outcome = Self::execute(

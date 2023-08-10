@@ -17,7 +17,6 @@
 use air_interpreter_interface::RunParameters;
 use anyhow::Context;
 use clap::Parser;
-use serde_json::json;
 
 use std::path::PathBuf;
 
@@ -88,13 +87,13 @@ fn execute_on_near(
             let result = contract
                 .call("execute_script")
                 .max_gas()
-                .args_json(json!({
-                    "air_script": air_script,
-                    "prev_data": prev_data,
-                    "current_data": current_data,
-                    "run_parameters": run_parameters,
-                    "call_results": call_results,
-                }))
+                .args_borsh((
+                     air_script,
+                     prev_data,
+                     current_data,
+                     run_parameters,
+                     call_results,
+                ))
                 .transact()
                 .await
                 .unwrap();
