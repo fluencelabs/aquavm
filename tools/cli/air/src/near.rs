@@ -57,8 +57,7 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
         serde_json::to_string(&run_parameters).context("failed to serialize run parameters")?;
 
     let outcome = execute_on_near(
-        // "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm",
-        "simple_contract.wasm",
+        "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm",
         execution_data.air_script,
         execution_data.prev_data,
         execution_data.current_data,

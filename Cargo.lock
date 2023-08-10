@@ -6589,3 +6589,8 @@ dependencies = [
  "libc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "fluence-keypair"
+version = "0.10.3"
+source = "git+https://github.com/fluencelabs/trust-graph.git?branch=lean-keypair#6630e40d8afd47e4b33c897c47eae1efdd48231f"

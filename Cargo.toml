@@ -41,3 +41,4 @@ panic = "unwind"
 
 [patch.crates-io]
 polyplets = { path = "crates/air-lib/polyplets" }
+fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair" }

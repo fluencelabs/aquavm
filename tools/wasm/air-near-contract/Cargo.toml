@@ -8,14 +8,12 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-# aquavm-air = { path = "../../../air" }
-# air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
+aquavm-air = { path = "../../../air" }
+air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
 near-sdk = "=4.0.0"
-# KLUDGE: the crate has no direct dependency to getrandom; near-sdk do
-getrandom = { version = "0.2.10", features = ["js"] }
-uint = { version = "0.9.3", default-features = false }
 serde = { version = "1.0.118", features = [ "derive", "rc" ] }
 serde_json = "1.0.61"
+hashbrown = { version = "0.14.0", default-features = false }
 
 [features]
 default = []
@@ -35,3 +33,7 @@ overflow-checks = true
 # TODO
 [workspace]
 members = []
+
+[patch.crates-io]
+fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair" }
+libp2p-identity = { git = "https://github.com/fluencelabs/rust-libp2p.git", branch = "rand-feature" }
