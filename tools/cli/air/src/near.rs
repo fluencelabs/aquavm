@@ -71,11 +71,11 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
 
 fn execute_on_near(
     path: &str,
-    _air_script: String,
-    _prev_data: String,
-    _current_data: String,
-    _run_parameters: String,
-    _call_results: String,
+    air_script: String,
+    prev_data: String,
+    current_data: String,
+    run_parameters: String,
+    call_results: String,
 ) -> String {
     let outcome = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -86,9 +86,14 @@ fn execute_on_near(
             let wasm = std::fs::read(path).unwrap();
             let contract = worker.dev_deploy(&wasm).await.unwrap();
             let result = contract
-                .call("set_status")
+                .call("execute_script")
+                .max_gas()
                 .args_json(json!({
-                    "message": "hello_world",
+                    "air_script": air_script,
+                    "prev_data": prev_data,
+                    "current_data": current_data,
+                    "run_parameters": run_parameters,
+                    "call_results": call_results,
                 }))
                 .transact()
                 .await
