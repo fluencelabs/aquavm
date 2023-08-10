@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 aquavm-air = { path = "../../../air" }
 air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
-near-sdk = "=4.0.0"
+near-sdk = "4.1.1"
 serde = { version = "1.0.118", features = [ "derive", "rc" ] }
 serde_json = "1.0.61"
 hashbrown = { version = "0.14.0", default-features = false }
@@ -30,7 +30,7 @@ panic = "abort"
 overflow-checks = true
 # nb: what is the stack size?  .cargo/config.toml sets it to 50mb for target.wasm32-wasi
 
-# TODO
+# it is required to be build in own workspace, as it has special profile
 [workspace]
 members = []
 
