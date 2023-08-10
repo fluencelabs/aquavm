@@ -98,7 +98,8 @@ fn execute_on_near(
                 .transact()
                 .await
                 .unwrap();
-            eprintln!("gas: {}", result.outcome().gas_burnt as f64);
+            eprintln!("total gas: {}", result.total_gas_burnt as f64);
+            eprintln!("transaction gas: {}", result.outcome().gas_burnt as f64);
 
             eprintln!("logs: {:?}", result.logs());
 
