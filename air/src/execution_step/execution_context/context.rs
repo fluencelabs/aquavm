@@ -27,13 +27,12 @@ use air_interpreter_data::CanonResultCidAggregate;
 use air_interpreter_data::CidInfo;
 use air_interpreter_data::ServiceResultCidAggregate;
 use air_interpreter_interface::*;
+use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
-use air_interpreter_signatures::SignatureTracker;
 
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
-#[derive(Default)]
 pub(crate) struct ExecutionCtx<'i> {
     /// Contains all scalars.
     pub(crate) scalars: Scalars<'i>,
@@ -82,11 +81,10 @@ pub(crate) struct ExecutionCtx<'i> {
     /// It contains peers' signatures for verification.
     pub(crate) signature_store: SignatureStore,
 
-    /// Local signatures tracker.
+    /// Current peer's CID tracker.
     ///
-    /// It gathers peers' CIDs (call results and canon results) stored in the trace either for signing (current peer's
-    /// CIDs) or sign verification (other peers).
-    pub(crate) signature_tracker: SignatureTracker,
+    /// It gathers current peer's CIDs (call results and canon results) for further signing.
+    pub(crate) peer_cid_tracker: PeerCidTracker,
 }
 
 impl<'i> ExecutionCtx<'i> {
@@ -94,15 +92,15 @@ impl<'i> ExecutionCtx<'i> {
         prev_ingredients: ExecCtxIngredients,
         current_ingredients: ExecCtxIngredients,
         call_results: CallResults,
+        signature_store: SignatureStore,
         run_parameters: &RunParameters,
     ) -> Self {
         let run_parameters = RcRunParameters::from_run_parameters(run_parameters);
         let streams = Streams::new();
 
         let cid_state = ExecutionCidState::from_cid_info(prev_ingredients.cid_info, current_ingredients.cid_info);
-        // TODO we might keep both stores and merge them only with signature info collected into SignatureTracker
-        let signature_store =
-            SignatureStore::merge(prev_ingredients.signature_store, current_ingredients.signature_store);
+
+        let peer_cid_tracker = PeerCidTracker::new(run_parameters.current_peer_id.clone());
 
         Self {
             run_parameters,
@@ -110,9 +108,15 @@ impl<'i> ExecutionCtx<'i> {
             last_call_request_id: prev_ingredients.last_call_request_id,
             call_results,
             streams,
+            stream_maps: <_>::default(),
             cid_state,
             signature_store,
-            ..<_>::default()
+            peer_cid_tracker,
+            scalars: <_>::default(),
+            next_peer_pks: <_>::default(),
+            last_error_descriptor: <_>::default(),
+            tracker: <_>::default(),
+            call_requests: <_>::default(),
         }
     }
 
@@ -125,12 +129,12 @@ impl<'i> ExecutionCtx<'i> {
         self.last_call_request_id
     }
 
-    pub(crate) fn record_call_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<ServiceResultCidAggregate>) {
-        self.signature_tracker.register(peer_id, cid);
+    pub(crate) fn record_call_cid(&mut self, peer_id: &str, cid: &CID<ServiceResultCidAggregate>) {
+        self.peer_cid_tracker.register(peer_id, cid);
     }
 
-    pub(crate) fn record_canon_cid(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<CanonResultCidAggregate>) {
-        self.signature_tracker.register(peer_id, cid);
+    pub(crate) fn record_canon_cid(&mut self, peer_id: &str, cid: &CID<CanonResultCidAggregate>) {
+        self.peer_cid_tracker.register(peer_id, cid);
     }
 }
 
@@ -157,7 +161,6 @@ impl ExecutionCtx<'_> {
 pub(crate) struct ExecCtxIngredients {
     pub(crate) last_call_request_id: u32,
     pub(crate) cid_info: CidInfo,
-    pub(crate) signature_store: SignatureStore,
 }
 
 use serde::Deserialize;
@@ -170,6 +173,7 @@ use std::fmt::Formatter;
 pub(crate) struct RcRunParameters {
     pub(crate) init_peer_id: Rc<str>,
     pub(crate) current_peer_id: Rc<String>,
+    pub(crate) particle_id: Rc<str>,
     pub(crate) timestamp: u64,
     pub(crate) ttl: u32,
 }
@@ -179,19 +183,9 @@ impl RcRunParameters {
         Self {
             init_peer_id: run_parameters.init_peer_id.as_str().into(),
             current_peer_id: Rc::new(run_parameters.current_peer_id.clone()),
+            particle_id: run_parameters.particle_id.as_str().into(),
             timestamp: run_parameters.timestamp,
             ttl: run_parameters.ttl,
-        }
-    }
-}
-
-impl Default for RcRunParameters {
-    fn default() -> Self {
-        Self {
-            init_peer_id: "".into(),
-            current_peer_id: Default::default(),
-            timestamp: Default::default(),
-            ttl: Default::default(),
         }
     }
 }

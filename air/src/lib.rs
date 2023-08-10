@@ -30,7 +30,9 @@ mod execution_step;
 mod farewell_step;
 mod preparation_step;
 mod runner;
+mod signing_step;
 mod utils;
+mod verification_step;
 
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::RunParameters;

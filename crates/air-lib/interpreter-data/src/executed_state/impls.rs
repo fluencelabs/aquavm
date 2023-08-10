@@ -61,15 +61,11 @@ impl CallResult {
         CallResult::Failed(service_result_agg_cid)
     }
 
-    pub fn get_cid(&self) -> Option<Rc<CID<ServiceResultCidAggregate>>> {
+    pub fn get_cid(&self) -> Option<&Rc<CID<ServiceResultCidAggregate>>> {
         match self {
             CallResult::RequestSentBy(_) => None,
-            CallResult::Executed(executed) => match executed {
-                ValueRef::Scalar(cid) => Some(cid.clone()),
-                ValueRef::Stream { cid, .. } => Some(cid.clone()),
-                ValueRef::Unused(_) => None,
-            },
-            CallResult::Failed(cid) => Some(cid.clone()),
+            CallResult::Executed(executed) => executed.get_cid(),
+            CallResult::Failed(cid) => Some(cid),
         }
     }
 }
@@ -206,6 +202,16 @@ impl std::fmt::Display for ExecutedState {
             Canon(_) => {
                 write!(f, "canon [<object>]")
             }
+        }
+    }
+}
+
+impl ValueRef {
+    pub(crate) fn get_cid(&self) -> Option<&Rc<CID<ServiceResultCidAggregate>>> {
+        match self {
+            ValueRef::Scalar(cid) => Some(cid),
+            ValueRef::Stream { cid, .. } => Some(cid),
+            ValueRef::Unused(_) => None,
         }
     }
 }

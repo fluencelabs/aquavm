@@ -14,7 +14,7 @@ categories = ["wasm"]
 air-interpreter-cid = { version = "0.3.0", path = "../interpreter-cid" }
 fluence-keypair = { version = "0.10.3", default-features = false }
 
-serde = { version = "1.0.164", features = ["derive"] }
-serde_json = "1.0.96"
-
 bs58 = "0.5.0"
+borsh = { version = "0.10.3", default-features = false }
+borsh-derive = "0.10.3"
+serde = { version = "1.0.164", features = ["derive"] }

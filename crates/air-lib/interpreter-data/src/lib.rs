@@ -26,6 +26,7 @@
     unreachable_patterns
 )]
 
+mod cid_info;
 mod cid_store;
 mod executed_state;
 mod generation_idx;
@@ -33,6 +34,7 @@ mod interpreter_data;
 mod trace;
 mod trace_pos;
 
+pub use cid_info::*;
 pub use cid_store::*;
 pub use executed_state::*;
 pub use generation_idx::*;

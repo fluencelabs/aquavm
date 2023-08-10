@@ -15,14 +15,14 @@
  */
 
 use air_test_framework::AirScriptExecutor;
-use air_test_utils::prelude::*;
+use air_test_utils::{key_utils::at, prelude::*};
 
 #[test]
 fn merging_fold_iterations_extensively() {
     let script = r#"
         (seq
             (seq
-                (call "client" ("get" "data") [] permutations) ; ok = [["p1",[[["p1",1],["p2",2],["p3",3]],[["p1",4],["p3",5],["p2",6]]]],["p2",[[["p2",7],["p1",8],["p3",9]],[["p2",10],["p3",11],["p1",12]]]],["p3",[[["p3",13],["p1",14],["p2",15]],[["p3",16],["p2",17],["p1",18]]]]]
+                (call "client" ("get" "data") [] permutations) ; ok = [[@"p1",[[[@"p1",1],[@"p2",2],[@"p3",3]],[[@"p1",4],[@"p3",5],[@"p2",6]]]],[@"p2",[[[@"p2",7],[@"p1",8],[@"p3",9]],[[@"p2",10],[@"p3",11],[@"p1",12]]]],[@"p3",[[[@"p3",13],[@"p1",14],[@"p2",15]],[[@"p3",16],[@"p2",17],[@"p1",18]]]]]
                 (seq
                     (fold permutations pair
                         (seq
@@ -103,7 +103,7 @@ fn merging_fold_iterations_extensively() {
                     queue.push_back(peer.clone());
                 }
 
-                if peer == "relay" {
+                if peer == at("relay") {
                     relay_outcomes.push(outcome);
                 }
             }
@@ -131,7 +131,7 @@ fn merging_fold_iterations_extensively_2() {
     let script = r#"
         (seq
             (seq
-                (call "client" ("get" "data") [] permutations) ; ok = [["p1",[[["p1",1],["p2",2],["p3",3]],[["p1",4],["p3",5],["p2",6]]]],["p2",[[["p2",7],["p1",8],["p3",9]],[["p2",10],["p3",11],["p1",12]]]],["p3",[[["p3",13],["p1",14],["p2",15]],[["p3",16],["p2",17],["p1",18]]]]]
+                (call "client" ("get" "data") [] permutations) ; ok = [[@"p1",[[[@"p1",1],[@"p2",2],[@"p3",3]],[[@"p1",4],[@"p3",5],[@"p2",6]]]],[@"p2",[[[@"p2",7],[@"p1",8],[@"p3",9]],[[@"p2",10],[@"p3",11],[@"p1",12]]]],[@"p3",[[[@"p3",13],[@"p1",14],[@"p2",15]],[[@"p3",16],[@"p2",17],[@"p1",18]]]]]
                 (seq
                     (seq
                         (fold permutations pair
@@ -243,7 +243,7 @@ fn merging_fold_iterations_extensively_2() {
                     }
                 }
 
-                if peer == "p1" {
+                if peer == at("p1") {
                     p1_outcomes.push(outcome);
                 }
             }

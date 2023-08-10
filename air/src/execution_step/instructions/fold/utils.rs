@@ -15,8 +15,8 @@
  */
 
 use super::*;
-use crate::execution_step::boxed_value::populate_tetraplet_with_lambda;
-use crate::execution_step::boxed_value::IterableValue;
+use crate::execution_step::value_types::populate_tetraplet_with_lambda;
+use crate::execution_step::value_types::IterableValue;
 use crate::execution_step::CatchableError;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::JValue;

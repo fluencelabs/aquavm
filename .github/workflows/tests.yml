@@ -97,6 +97,12 @@ jobs:
           for san in address leak; do
             RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
+      - name: Run signature tests with test_with_native_code
+        env:
+          RUST_TEST_THREADS: 1
+        run: |
+          # Temporary solution until signatures works: it depends on other PRs
+          cargo test --features test_with_native_code,gen_signatures,check_signatures --target x86_64-unknown-linux-gnu features::signatures
 
       - name: Check native aquavm-air-cli
         run: cargo check --package aquavm-air-cli --no-default-features

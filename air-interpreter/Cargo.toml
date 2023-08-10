@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter"
-version = "0.43.0"
+version = "0.43.1"
 description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -18,7 +18,7 @@ name = "air_interpreter_server"
 path = "src/marine.rs"
 
 [dependencies]
-aquavm-air = { version = "0.43.0", path = "../air" }
+aquavm-air = { version = "0.43.1", path = "../air" }
 air-interpreter-interface = { version = "0.14.0", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
@@ -37,3 +37,6 @@ tracing-subscriber = { version = "0.3.17", default-features = false, features = 
 # indicates that this library should be compiled for the marine target,
 # otherwise it will be compiled for the wasm bindgen target
 marine = []
+gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
+

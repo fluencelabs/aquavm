@@ -30,16 +30,16 @@ fn length_functor_for_array_scalar() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
-        scalar!(json!([1, 1, 1]), peer = init_peer_id, service = "..0"),
-        unused!(3, peer = init_peer_id, args = vec![3], service = "..1"),
+        scalar!(json!([1, 1, 1]), peer_name = init_peer_name, service = "..0"),
+        unused!(3, peer_name = init_peer_name, args = vec![3], service = "..1"),
     ];
     assert_eq!(actual_trace, expected_trace);
 }
@@ -56,11 +56,11 @@ fn length_functor_for_non_array_scalar() {
         "#
     );
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     check_error(
         &result,
         CatchableError::LengthFunctorAppliedToNotArray(json!(result_jvalue)),
@@ -81,27 +81,29 @@ fn length_functor_for_stream() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let actual_trace = trace_from_result(&result);
+
+    let init_peer_id = executor.resolve_name(init_peer_name).to_string();
 
     let expected_trace = vec![
         executed_state::ap(0),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
                     "trace_pos": 0,
                 },
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
                     "trace_pos": 1,
                 },
             ]
@@ -122,16 +124,18 @@ fn length_functor_for_empty_stream() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let actual_trace = trace_from_result(&result);
+
+    let init_peer_id = executor.resolve_name(init_peer_name).to_string();
 
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": []} ),
         ),
         unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
@@ -153,20 +157,22 @@ fn length_functor_for_canon_stream() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let actual_trace = trace_from_result(&result);
+
+    let init_peer_id = executor.resolve_name(init_peer_name).to_string();
 
     let expected_trace = vec![
         executed_state::ap(0),
         executed_state::ap(0),
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""},
-                "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 0},
-                           {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "trace_pos": 1}
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 0},
+                           {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 1}
                 ]} ),
         ),
         unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
@@ -185,16 +191,18 @@ fn length_functor_for_empty_canon_stream() {
         )
         "#;
 
-    let init_peer_id = "init_peer_id";
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+    let init_peer_name = "init_peer_id";
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let actual_trace = trace_from_result(&result);
+
+    let init_peer_id = executor.resolve_name(init_peer_name).to_string();
 
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "init_peer_id", "service_id": ""}, "values": []} ),
+            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "values": []} ),
         ),
         unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];

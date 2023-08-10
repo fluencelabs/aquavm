@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::execution_step::boxed_value::CanonStream;
 use crate::execution_step::errors::UncatchableError;
 use crate::execution_step::instructions::resolve_peer_id_to_string;
+use crate::execution_step::value_types::CanonStream;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
 use crate::execution_step::TraceHandler;
@@ -24,6 +24,7 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast::ResolvableToPeerIdVariable;
+use polyplets::SecurityTetraplet;
 
 use std::rc::Rc;
 
@@ -33,21 +34,29 @@ pub(crate) type CanonEpilogClosure<'closure> = dyn Fn(CanonStream, Rc<CID<CanonR
 pub(crate) type CreateCanonStreamClosure<'closure> = dyn Fn(&mut ExecutionCtx<'_>, String) -> CanonStream + 'closure;
 
 pub(crate) fn handle_seen_canon(
+    peer_id_var: &ResolvableToPeerIdVariable<'_>,
     epilog: &CanonEpilogClosure<'_>,
     canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let canon_result_agg = exec_ctx.cid_state.get_canon_result_by_cid(&canon_result_cid)?;
-    let tetraplet = exec_ctx.cid_state.get_tetraplet_by_cid(&canon_result_agg.tetraplet)?;
+    let peer_id = crate::execution_step::instructions::resolve_peer_id_to_string(peer_id_var, exec_ctx)?;
+    let expected_tetraplet = SecurityTetraplet::new(peer_id, "", "", "");
 
-    exec_ctx.record_canon_cid(&*tetraplet.peer_pk, &canon_result_cid);
+    let canon_result_agg = exec_ctx.cid_state.get_canon_result_by_cid(&canon_result_cid)?;
+    let tetraplet_cid = canon_result_agg.tetraplet.clone();
+    let tetraplet = exec_ctx.cid_state.get_tetraplet_by_cid(&tetraplet_cid)?;
+
+    verify_canon(&expected_tetraplet, &tetraplet)?;
 
     let value_cids = canon_result_agg.values.clone();
     let values = value_cids
         .iter()
         .map(|canon_value_cid| exec_ctx.cid_state.get_canon_value_by_cid(canon_value_cid))
         .collect::<Result<Vec<_>, _>>()?;
+
+    populate_seen_cid_context(exec_ctx, &tetraplet.peer_pk, &canon_result_cid);
+
     let canon_stream = CanonStream::new(values, tetraplet);
 
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)
@@ -75,11 +84,19 @@ pub(crate) fn handle_unseen_canon(
     }
 
     let canon_stream = create_canon_stream(exec_ctx, peer_id);
-    let canon_result_cid = populate_cid_context(exec_ctx, &canon_stream)?;
+    let canon_result_cid = populate_unseen_cid_context(exec_ctx, &canon_stream)?;
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)
 }
 
-fn populate_cid_context(
+fn populate_seen_cid_context(
+    exec_ctx: &mut ExecutionCtx<'_>,
+    peer_id: &str,
+    canon_result_cid: &Rc<CID<CanonResultCidAggregate>>,
+) {
+    exec_ctx.record_canon_cid(peer_id, canon_result_cid)
+}
+
+fn populate_unseen_cid_context(
     exec_ctx: &mut ExecutionCtx<'_>,
     canon_stream: &CanonStream,
 ) -> ExecutionResult<Rc<CID<CanonResultCidAggregate>>> {
@@ -102,6 +119,20 @@ fn populate_cid_context(
         .track_value(canon_result)
         .map_err(UncatchableError::from)?;
 
-    exec_ctx.record_canon_cid(&*tetraplet.peer_pk, &canon_result_cid);
+    exec_ctx.record_canon_cid(&tetraplet.peer_pk, &canon_result_cid);
     Ok(canon_result_cid)
+}
+
+pub(crate) fn verify_canon(
+    expected_tetraplet: &SecurityTetraplet,
+    stored_tetraplet: &SecurityTetraplet,
+) -> Result<(), UncatchableError> {
+    if expected_tetraplet != stored_tetraplet {
+        return Err(UncatchableError::InstructionParametersMismatch {
+            param: "canon tetraplet",
+            expected_value: format!("{expected_tetraplet:?}"),
+            stored_value: format!("{stored_tetraplet:?}"),
+        });
+    }
+    Ok(())
 }

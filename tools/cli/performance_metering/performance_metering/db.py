@@ -21,38 +21,38 @@ import logging
 import platform
 from typing import List, Optional
 
-from .helpers import get_host_id, get_aquavm_version, intermediate_temp_file
+from .helpers import (
+    canonicalize_features, get_host_id, get_aquavm_version,
+    intermediate_temp_file
+)
 
 DEFAULT_JSON_PATH = "benches/PERFORMANCE.json"
-DEFAULT_TEXT_PATH = "benches/PERFORMANCE.yaml"
 AQUAVM_TOML_PATH = "air/Cargo.toml"
 
 
 class Db:
     """Performance measurement database."""
 
-    path: str
+    json_path: str
     host_id: str
     data: hash
 
     def __init__(
-            self,
-            json_path: Optional[str],
-            text_path: Optional[str],
-            host_id=None
+        self,
+        json_path: Optional[str],
+        host_id=None,
+        features: Optional[str] = None
     ):
         """Load data from file, if it exits."""
         if json_path is None:
             json_path = DEFAULT_JSON_PATH
         self.json_path = json_path
 
-        if text_path is None:
-            text_path = DEFAULT_TEXT_PATH
-        self.text_path = text_path
-
         if host_id is None:
             host_id = get_host_id()
         self.host_id = host_id
+
+        self.features = canonicalize_features(features) or ''
 
         try:
             with open(json_path, 'r', encoding="utf-8") as inp:
@@ -81,6 +81,9 @@ class Db:
             bench_info["comment"] = comment
         self.data[self.host_id]["benches"][bench_name] = bench_info
         self.data[self.host_id]["platform"] = platform.platform()
+
+        self.data[self.host_id]["features"] = self.features
+
         self.data[self.host_id]["datetime"] = str(
             datetime.datetime.now(datetime.timezone.utc)
         )

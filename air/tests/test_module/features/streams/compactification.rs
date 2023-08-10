@@ -21,19 +21,19 @@ use air_test_utils::*;
 
 #[test]
 fn global_streams_are_compactified() {
-    let peer_id = "peer_id";
+    let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
         r#"
         (seq
             (ap 1 $stream)
-            (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+            (call "{peer_name}" ("" "") [] $stream) ; ok = "{service_result}"
         )
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
-    let result = executor.execute_all(peer_id).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
+    let result = executor.execute_all(peer_name).unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -43,7 +43,7 @@ fn global_streams_are_compactified() {
             service_result,
             1,
             cid_state,
-            peer = peer_id,
+            peer_name = peer_name,
             service = "..0",
             function = ""
         ),
@@ -54,22 +54,22 @@ fn global_streams_are_compactified() {
 
 #[test]
 fn global_stream_maps_are_compactified() {
-    let peer_id = "peer_id";
+    let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
         r#"
         (seq
             (ap (1 1) %stream_map)
             (seq
-                (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+                (call "{peer_name}" ("" "") [] $stream) ; ok = "{service_result}"
                 (ap (1 1) %stream_map)
             )
         )
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
-    let result = executor.execute_all(peer_id).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
+    let result = executor.execute_all(peer_name).unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -79,7 +79,7 @@ fn global_stream_maps_are_compactified() {
             service_result,
             0,
             cid_state,
-            peer = peer_id,
+            peer_name = peer_name,
             service = "..0",
             function = ""
         ),
@@ -91,21 +91,21 @@ fn global_stream_maps_are_compactified() {
 
 #[test]
 fn local_streams_are_compactified() {
-    let peer_id = "peer_id";
+    let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
         r#"
         (new $stream
             (seq
                 (ap 1 $stream)
-                (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+                (call "{peer_name}" ("" "") [] $stream) ; ok = "{service_result}"
             )
         )
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
-    let result = executor.execute_all(peer_id).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
+    let result = executor.execute_all(peer_name).unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -115,7 +115,7 @@ fn local_streams_are_compactified() {
             service_result,
             1,
             cid_state,
-            peer = peer_id,
+            peer_name = peer_name,
             service = "..0",
             function = ""
         ),
@@ -126,7 +126,7 @@ fn local_streams_are_compactified() {
 
 #[test]
 fn local_stream_maps_are_compactified() {
-    let peer_id = "peer_id";
+    let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
         r#"
@@ -134,7 +134,7 @@ fn local_stream_maps_are_compactified() {
             (seq
                 (ap (1 1) %stream_map)
                 (seq
-                    (call "{peer_id}" ("" "") [] $stream) ; ok = "{service_result}"
+                    (call "{peer_name}" ("" "") [] $stream) ; ok = "{service_result}"
                     (ap (1 1) %stream_map)
                 )
             )
@@ -142,8 +142,8 @@ fn local_stream_maps_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script).unwrap();
-    let result = executor.execute_all(peer_id).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
+    let result = executor.execute_all(peer_name).unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -153,7 +153,7 @@ fn local_stream_maps_are_compactified() {
             service_result,
             0,
             cid_state,
-            peer = peer_id,
+            peer_name = peer_name,
             service = "..0",
             function = ""
         ),

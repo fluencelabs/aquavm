@@ -200,7 +200,7 @@ fn print_canon_values(
 #[macro_export]
 macro_rules! rc {
     ($expr:expr) => {
-        std::rc::Rc::new($expr)
+        ::std::rc::Rc::new($expr)
     };
 }
 
@@ -213,4 +213,25 @@ pub fn is_interpreter_succeded(result: &RawAVMOutcome) -> bool {
 
 pub fn check_error(result: &RawAVMOutcome, error: impl ToErrorCode + ToString) -> bool {
     result.ret_code == error.to_error_code() && result.error_message == error.to_string()
+}
+
+#[macro_export]
+macro_rules! assert_error_eq {
+    ($result:expr, $error:expr $(,)?) => {{
+        let result: &::air_test_utils::RawAVMOutcome = $result;
+        let error = $error;
+        ::std::assert_eq!(
+            (result.ret_code, &result.error_message),
+            (::air::ToErrorCode::to_error_code(&error), &::std::string::ToString::to_string(&error))
+        );
+    }};
+    ($result:expr, $error:expr, $($arg:tt)+) => {{
+        let result: &::air_test_utils::RawAVMOutcome = $result;
+        let error = $error;
+        ::std::assert_eq!(
+            (result.ret_code, &result.error_message),
+            (::air::ToErrorCode::to_error_code(&error), &::std::string::ToString::to_string(&error)),
+            $($arg)+
+        );
+    }};
 }

@@ -21,8 +21,8 @@ use super::canon_utils::CreateCanonStreamClosure;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::CanonStream;
-use crate::execution_step::boxed_value::JValuable;
+use crate::execution_step::value_types::CanonStream;
+use crate::execution_step::value_types::JValuable;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
@@ -48,7 +48,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
 
         match canon_result {
             MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
+                handle_seen_canon(&self.peer_id, epilog, canon_result_cid, exec_ctx, trace_ctx)
             }
             MergerCanonResult::Empty => {
                 let create_canon_producer =

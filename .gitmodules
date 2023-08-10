@@ -1,0 +1,4 @@
+[submodule "benches/performance_metering"]
+	path = benches/performance_metering
+	url = git@github.com:fluencelabs/aquavm-benchmark-data.git
+	branch = feat/VM-221-signature-checking

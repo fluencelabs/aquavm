@@ -21,6 +21,7 @@ use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use fluence_keypair::KeyFormat;
 use fluence_keypair::KeyPair;
@@ -37,35 +38,54 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) keypair: KeyPair,
 }
 
-/// Parse and prepare supplied data and AIR script.
+pub(crate) struct ParsedDataPair {
+    pub(crate) prev_data: InterpreterData,
+    pub(crate) current_data: InterpreterData,
+}
+
+/// Parse data and check its version.
 #[tracing::instrument(skip_all)]
-pub(crate) fn prepare<'i>(
-    prev_data: &[u8],
-    current_data: &[u8],
-    raw_air: &'i str,
-    call_results: &[u8],
-    run_parameters: RunParameters,
-) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
+pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDataPair> {
     let prev_data = try_to_data(prev_data)?;
     let current_data = try_to_data(current_data)?;
 
     check_version_compatibility(&current_data)?;
 
+    Ok(ParsedDataPair {
+        prev_data,
+        current_data,
+    })
+}
+
+/// Parse and prepare supplied data and AIR script.
+#[tracing::instrument(skip_all)]
+pub(crate) fn prepare<'i>(
+    prev_data: InterpreterData,
+    current_data: InterpreterData,
+    raw_air: &'i str,
+    call_results: &[u8],
+    run_parameters: RunParameters,
+    signature_store: SignatureStore,
+) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
     let prev_ingredients = ExecCtxIngredients {
         last_call_request_id: prev_data.last_call_request_id,
         cid_info: prev_data.cid_info,
-        signature_store: prev_data.signatures,
     };
 
     let current_ingredients = ExecCtxIngredients {
         last_call_request_id: current_data.last_call_request_id,
         cid_info: current_data.cid_info,
-        signature_store: current_data.signatures,
     };
 
-    let exec_ctx = make_exec_ctx(prev_ingredients, current_ingredients, call_results, &run_parameters)?;
+    let exec_ctx = make_exec_ctx(
+        prev_ingredients,
+        current_ingredients,
+        call_results,
+        signature_store,
+        &run_parameters,
+    )?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
     let key_format = KeyFormat::try_from(run_parameters.key_format)?;
@@ -81,7 +101,7 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
     // treat empty slice as an empty data,
     // it allows abstracting from an internal format for an empty data
     if raw_data.is_empty() {
@@ -103,16 +123,23 @@ fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
     call_results: &[u8],
+    signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     let call_results = serde_json::from_slice(call_results)
         .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
 
-    let ctx = ExecutionCtx::new(prev_ingredients, current_ingredients, call_results, run_parameters);
+    let ctx = ExecutionCtx::new(
+        prev_ingredients,
+        current_ingredients,
+        call_results,
+        signature_store,
+        run_parameters,
+    );
     Ok(ctx)
 }
 
-fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
+pub(crate) fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
     if &data.versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
             actual_version: data.versions.interpreter_version.clone(),

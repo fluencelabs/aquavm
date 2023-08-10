@@ -21,4 +21,6 @@ mod queue;
 pub mod services;
 pub mod transform;
 
+pub use ephemeral::Network;
 pub use execution::AirScriptExecutor;
+pub use transform::walker::TransformedAirScript;

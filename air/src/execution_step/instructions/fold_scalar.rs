@@ -19,7 +19,7 @@ use super::ExecutableInstruction;
 use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
-use crate::execution_step::boxed_value::IterableValue;
+use crate::execution_step::value_types::IterableValue;
 use crate::execution_step::Joinable;
 use crate::joinable;
 use crate::log_instruction;

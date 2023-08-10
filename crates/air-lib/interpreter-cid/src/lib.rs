@@ -30,6 +30,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use std::fmt;
+use std::io::BufWriter;
 use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize)]
@@ -51,6 +52,7 @@ impl<T: ?Sized> Clone for CID<T> {
         Self(self.0.clone(), self.1)
     }
 }
+
 impl<T: ?Sized> fmt::Debug for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("CID").field(&self.0).finish()
@@ -121,7 +123,26 @@ impl std::error::Error for CidCalculationError {
 }
 
 /// Calculate a CID of JSON-serialized value.
-pub fn value_to_json_cid<Val: Serialize>(value: &Val) -> Result<CID<Val>, CidCalculationError> {
-    let data = serde_json::to_vec(value)?;
-    Ok(json_data_cid(&data))
+// TODO we might refactor this to `SerializationFormat` trait
+// that both transform data to binary/text form (be it JSON, CBOR or something else)
+// and produces CID too
+pub fn value_to_json_cid<Val: Serialize + ?Sized>(
+    value: &Val,
+) -> Result<CID<Val>, CidCalculationError> {
+    use cid::Cid;
+    use multihash::{Code, MultihashDigest};
+    use sha2::Digest;
+
+    let mut hasher = sha2::Sha256::new();
+    serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
+    let hash = hasher.finalize();
+
+    let digest = Code::Sha2_256
+        .wrap(&hash)
+        .expect("can't happend: incorrect hash length");
+    // seems to be better than RAW_CODEC = 0x55
+    const JSON_CODEC: u64 = 0x0200;
+
+    let cid = Cid::new_v1(JSON_CODEC, digest);
+    Ok(CID::new(cid.to_string()))
 }

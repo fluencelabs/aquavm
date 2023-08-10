@@ -27,14 +27,17 @@
 )]
 
 mod sede;
+mod stores;
+mod trackers;
 
-use air_interpreter_cid::CID;
-use fluence_keypair::error::SigningError;
-use fluence_keypair::KeyPair;
+pub use crate::stores::*;
+pub use crate::trackers::*;
+
+pub use fluence_keypair::KeyPair;
+
+use borsh::BorshSerialize;
 use serde::{Deserialize, Serialize};
 
-use std::borrow::Borrow;
-use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::Deref;
 
@@ -52,16 +55,15 @@ pub struct PublicKey(
 );
 
 impl PublicKey {
-    pub fn verify<T: Serialize + ?Sized>(
+    pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
+        particle_id: &str,
         signature: &fluence_keypair::Signature,
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value =
-            serde_json::to_vec(value).expect("default serialization shouldn't fail");
-
+        let serialized_value = SaltedData::new(&value, particle_id).serialize();
         pk.verify(&serialized_value, signature)
     }
 }
@@ -126,75 +128,18 @@ impl From<Signature> for fluence_keypair::Signature {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct SignatureTracker {
-    // from peer id to CID strings
-    peer_to_cids: HashMap<Box<str>, Vec<Box<str>>>,
-}
+#[derive(borsh_derive::BorshSerialize)]
+pub(crate) struct SaltedData<'ctx, Data: BorshSerialize>(&'ctx Data, &'ctx str);
 
-impl SignatureTracker {
-    pub fn new() -> Self {
-        Default::default()
+impl<'ctx, Data: BorshSerialize> SaltedData<'ctx, Data> {
+    pub(crate) fn new(data: &'ctx Data, particle_id: &'ctx str) -> Self {
+        Self(data, particle_id)
     }
 
-    pub fn register<T>(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<T>) {
-        self.peer_to_cids
-            .entry(peer_id.into())
-            .or_default()
-            .push(cid.clone().into_inner().into());
-    }
-
-    pub fn into_signature(
-        &mut self,
-        peer_id: &str,
-        signer: &KeyPair,
-    ) -> Result<Signature, SigningError> {
-        let mut cids = self.peer_to_cids.get(peer_id).cloned().unwrap_or_default();
-        cids.sort_unstable();
-
+    pub(crate) fn serialize(&self) -> Vec<u8> {
         // TODO make pluggable serialization
         // TODO it will be useful for CID too
         // TODO please note that using serde::Serializer is not enough
-        let serialized_cids =
-            serde_json::to_string(&cids).expect("default serialization shouldn't fail");
-
-        signer.sign(serialized_cids.as_bytes()).map(Signature::new)
-    }
-}
-
-/// A dictionary-like structure that stores peer public keys and their particle data signatures.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
-
-impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>
-    where
-        Key: Borrow<Q>,
-        Q: Hash + Eq + ?Sized,
-    {
-        self.0.get(peer_pk)
-    }
-
-    pub fn put(&mut self, peer_pk: Key, signature: Sign) {
-        self.0.insert(peer_pk, signature);
-    }
-
-    pub fn merge(prev: Self, _current: Self) -> Self {
-        // TODO STUB
-        prev
-    }
-}
-
-impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
-    fn default() -> Self {
-        Self(Default::default())
+        borsh::to_vec(&self).expect("borsh serializer shouldn't fail")
     }
 }

@@ -16,10 +16,10 @@ serde_json = "1.0.61"
 hashbrown = { version = "0.14.0", default-features = false }
 
 [features]
-default = []
+default = ["check_signatures"]
 # # available on signature checking branch
-# check_signatures = ["aquavm-air/check_signatures"]
-# gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
+gen_signatures = ["aquavm-air/gen_signatures"]
 
 [profile.release]
 codegen-units = 1
