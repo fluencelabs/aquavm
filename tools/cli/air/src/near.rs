@@ -17,15 +17,22 @@
 use air_interpreter_interface::RunParameters;
 use anyhow::Context;
 use clap::Parser;
+use tracing::warn;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
-#[clap(about = "Run a built-in NEAR version of AquaVM")]
-// TODO similar to run --plain
+#[clap(about = "Run a NEAR version of AquaVM")]
 pub(crate) struct Args {
     #[clap(long = "call-results")]
     call_results_path: Option<PathBuf>,
+
+    #[clap(
+        long = "contract",
+        env = "AIR_NEAR_CONTRACT_WASM_PATH",
+        default_value = "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm"
+    )]
+    contract_wasm_path: PathBuf,
 
     #[command(flatten)]
     keys: crate::trace::run::Keys,
@@ -56,7 +63,7 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
         serde_json::to_string(&run_parameters).context("failed to serialize run parameters")?;
 
     let outcome = execute_on_near(
-        "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm",
+        &args.contract_wasm_path,
         execution_data.air_script,
         execution_data.prev_data,
         execution_data.current_data,
@@ -69,7 +76,7 @@ pub(crate) fn near(args: Args) -> anyhow::Result<()> {
 }
 
 fn execute_on_near(
-    path: &str,
+    path: &Path,
     air_script: String,
     prev_data: String,
     current_data: String,
@@ -88,33 +95,21 @@ fn execute_on_near(
                 .call("execute_script")
                 .max_gas()
                 .args_borsh((
-                     air_script,
-                     prev_data,
-                     current_data,
-                     run_parameters,
-                     call_results,
+                    air_script,
+                    prev_data,
+                    current_data,
+                    run_parameters,
+                    call_results,
                 ))
                 .transact()
                 .await
                 .unwrap();
-            eprintln!("total gas: {}", result.total_gas_burnt as f64);
-            eprintln!("transaction gas: {}", result.outcome().gas_burnt as f64);
 
-            eprintln!("logs: {:?}", result.logs());
+            warn!("total gas: {:e}", result.total_gas_burnt);
+            warn!("transaction gas: {:e}", result.outcome().gas_burnt);
 
-            String::from_utf8(result.raw_bytes().unwrap()).unwrap()
+            result.borsh().unwrap()
         });
-    // let aquavm = near_aquavm::Aqua::default();
-    // let context = get_context(false);
-    // testing_env!(context.clone(), VMConfig::test(), RuntimeFeesConfig::test());
 
-    // let outcome = aquavm.execute_script(
-    //     air_script,
-    //     prev_data,
-    //     current_data,
-    //     run_parameters,
-    //     call_results,
-    // );
-    // eprintln!("Used gas: {}", env::used_gas().0,);
     outcome
 }

@@ -10,6 +10,7 @@ This subcommand reads an AIR script from standard input and prints it in human-r
 
 It outputs to standard output or a file.
 
+
 ## `air run`
 
 Alias: `air r`.
@@ -55,6 +56,16 @@ By default, both options are effective.
 The `--sort-stats-by-duration` flag sorts spans by time, not by name, in the report.
 
 Please, note that currently tracing outputs to stdout, and execution result is also printed to stdout.  You may suppress printing the result with `air run --repeat 1` option.
+
+## `air near`
+
+Alias: `air n`.
+
+Run AIR interpreter built as NEAR smart contract to measure its gas consumption.  The contract has to be built separately, see `tools/wasm/air-near-contract` directory.  Unless you use the default built contract location, you may use `--contract` option or `AIR_NEAR_CONRACT_WASM_PATH` variable.
+
+Other options are equivalent to `air run ... --plain ...` options, except tracing.
+
+The `workspaces` crate in sandbox mode is used for the most accurate NEAR gas measurement.  The `workspaces` build script installs NEAR Sandbox automatically, but on the other machines you have to install it manually and set the `NEAR_SANDBOX_BIN_PATH` variable.
 
 ## Known limitations
 
