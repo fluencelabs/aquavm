@@ -28,6 +28,7 @@
 
 mod beautify;
 mod trace;
+#[cfg(feature = "near")]
 mod near;
 
 use clap::Parser;
@@ -43,6 +44,7 @@ struct Cli {
 enum Subcommand {
     #[clap(alias = "b")]
     Beautify(crate::beautify::Args),
+    #[cfg(feature = "near")]
     #[clap(alias = "n")]
     Near(crate::near::Args),
     #[clap(alias = "r")]
@@ -55,6 +57,7 @@ fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
     match args.subcommand {
         Subcommand::Beautify(args) => crate::beautify::beautify(args),
+        #[cfg(feature = "near")]
         Subcommand::Near(args) => crate::near::near(args),
         Subcommand::Run(args) => crate::trace::run::run(args),
         Subcommand::Stats(args) => crate::trace::stats::stats(args),

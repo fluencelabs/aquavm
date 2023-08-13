@@ -29,15 +29,16 @@ termcolor = "1.2.0"
 fluence-keypair = "0.10.1"
 bs58 = "0.5.0"
 zeroize = "1.6.0"
-near-sdk = { version = "4.1.1" }
-workspaces = { version = "0.7.0", features = ["install"] }
-tokio = { version = "1.29.1", features = ["rt"] }
+near-sdk = { version = "4.1.1", optional = true }
+workspaces = { version = "0.7.0", features = ["install"], optional = true }
+tokio = { version = "1.29.1", features = ["rt"], optional = true }
 
 [features]
 default = ["wasm"]
-wasm = ["air-test-utils"]
+wasm = ["dep:air-test-utils"]
 gen_signatures = ["aquavm-air/gen_signatures"]
 check_signatures = ["aquavm-air/check_signatures"]
+near = ["dep:near-sdk", "dep:tokio", "dep:workspaces"]
 
 [[bin]]
 name = "air"

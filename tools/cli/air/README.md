@@ -59,7 +59,7 @@ Please, note that currently tracing outputs to stdout, and execution result is a
 
 ## `air near`
 
-Alias: `air n`.
+Alias: `air n`.  Feature flag: `near`.
 
 Run AIR interpreter built as NEAR smart contract to measure its gas consumption.  The contract has to be built separately, see `tools/wasm/air-near-contract` directory.  Unless you use the default built contract location, you may use `--contract` option or `AIR_NEAR_CONRACT_WASM_PATH` variable.
 
