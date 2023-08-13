@@ -6,14 +6,8 @@ use air::execute_air;
 use air::RunParameters;
 
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Default)]
 pub struct Aqua {}
-
-impl Default for Aqua {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 #[near_bindgen]
 impl Aqua {
