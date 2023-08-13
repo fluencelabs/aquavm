@@ -1,8 +1,13 @@
 [package]
-name = "aqua_vm"
-version = "1.0.0"
+name = "air-near-contract"
+version = "0.43.1"
+description = "AIR interpreter as a NEAR contract"
 authors = ["Fluence labs"]
 edition = "2021"
+edition = "2018"
+license = "Apache-2.0"
+keywords = ["fluence", "air", "webassembly", "programming-language", "near"]
+categories = ["wasm"]
 
 [lib]
 crate-type = ["cdylib"]
@@ -28,7 +33,6 @@ lto = true
 debug = false
 panic = "abort"
 overflow-checks = true
-# nb: what is the stack size?  .cargo/config.toml sets it to 50mb for target.wasm32-wasi
 
 # it is required to be build in own workspace, as it has special profile
 [workspace]
