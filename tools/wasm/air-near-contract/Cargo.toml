@@ -3,7 +3,6 @@ name = "air-near-contract"
 version = "0.43.1"
 description = "AIR interpreter as a NEAR contract"
 authors = ["Fluence labs"]
-edition = "2021"
 edition = "2018"
 license = "Apache-2.0"
 keywords = ["fluence", "air", "webassembly", "programming-language", "near"]
