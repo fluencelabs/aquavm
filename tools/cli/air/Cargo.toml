@@ -30,9 +30,15 @@ fluence-keypair = "0.10.1"
 bs58 = "0.5.0"
 zeroize = "1.6.0"
 
+# near
+near-sdk = { version = "4.1.1", optional = true }
+tokio = { version = "1", features = ["rt"], optional = true }
+workspaces = { version = "0.7.0", optional = true }
+
 [features]
 default = ["wasm"]
 wasm = ["air-test-utils"]
+near = [ "dep:near-sdk", "dep:tokio", "dep:workspaces" ]
 
 [[bin]]
 name = "air"
