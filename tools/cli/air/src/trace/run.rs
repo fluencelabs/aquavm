@@ -209,7 +209,7 @@ fn get_runner(
 
 #[cfg(not(feature = "wasm"))]
 fn get_runner(
-    _native: Option<Mode>,
+    mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
