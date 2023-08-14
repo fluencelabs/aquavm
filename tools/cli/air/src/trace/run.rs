@@ -109,15 +109,17 @@ struct ModeArgs {
     wasm: bool,
 }
 
-impl Into<Option<Mode>> for ModeArgs {
-    fn into(self) -> Option<Mode> {
-        if self.native {
+impl From<ModeArgs> for Option<Mode> {
+    fn from(value: ModeArgs) -> Self {
+        if value.native {
             return Some(Mode::Native);
         }
+
         #[cfg(feature = "wasm")]
-        if self.wasm {
+        if value.wasm {
             return Some(Mode::Wasm);
         }
+
         None
     }
 }
