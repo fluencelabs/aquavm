@@ -16,11 +16,11 @@
 
 mod data;
 mod native;
+#[cfg(feature = "near")]
+mod near;
 mod runner;
 #[cfg(feature = "wasm")]
 mod wasm;
-#[cfg(feature = "near")]
-mod near;
 
 use self::runner::AirRunner;
 use avm_interface::CallResults;
