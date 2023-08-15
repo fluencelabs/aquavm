@@ -38,7 +38,3 @@ debug = true
 overflow-checks = true
 debug-assertions = false
 panic = "unwind"
-
-[patch.crates-io]
-
-
