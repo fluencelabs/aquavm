@@ -30,12 +30,12 @@ pub struct ResolvedTriplet {
     pub function_name: String,
 }
 
-impl Into<SecurityTetraplet> for ResolvedTriplet {
-    fn into(self) -> SecurityTetraplet {
-        SecurityTetraplet {
-            peer_pk: self.peer_pk,
-            service_id: self.service_id,
-            function_name: self.function_name,
+impl From<ResolvedTriplet> for SecurityTetraplet {
+    fn from(triplet: ResolvedTriplet) -> Self {
+        Self {
+            peer_pk: triplet.peer_pk,
+            service_id: triplet.service_id,
+            function_name: triplet.function_name,
             json_path: String::new(),
         }
     }
