@@ -26,22 +26,7 @@
     unreachable_patterns
 )]
 
-mod tetraplet;
 mod triplet;
 
-pub use tetraplet::SecurityTetraplet;
 pub use triplet::ResolvedTriplet;
-
-// This is a temporary solution that allow using the marine macro by importing
-// just marine-macro crate instead of marine-rs-sdk.
-#[allow(unused_extern_crates)]
-extern crate self as marine_rs_sdk;
-
-#[allow(unused_imports)]
-mod internal {
-    pub(crate) use marine_rs_sdk_main::add_object_to_release;
-    pub(crate) use marine_rs_sdk_main::get_result_ptr;
-    pub(crate) use marine_rs_sdk_main::get_result_size;
-    pub(crate) use marine_rs_sdk_main::set_result_ptr;
-    pub(crate) use marine_rs_sdk_main::set_result_size;
-}
+pub use marine_rs_sdk::SecurityTetraplet;
