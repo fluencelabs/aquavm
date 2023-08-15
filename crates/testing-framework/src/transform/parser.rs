@@ -239,7 +239,7 @@ fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Box<Triplet>, P
             delimited(
                 delim_ws(tag("(")),
                 separated_pair(
-                    context("triplet service name", parse_sexp_string),
+                    context("triplet service name has to be a string", parse_sexp_string),
                     sexp_multispace0,
                     context("triplet function name", parse_sexp),
                 ),
