@@ -30,7 +30,7 @@ serde_json = "1.0.95"
 serde = { version = "1.0.164", features = ["derive"] }
 fluence-keypair = "0.10.1"
 
-ed25519-dalek = "1.0.1"
+ed25519-dalek = "2.0.0"
 rand_chacha = "0.2.2"
 sha2 = "0.10.6"
 
