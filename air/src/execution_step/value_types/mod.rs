@@ -38,6 +38,7 @@ pub(crate) use stream::Generation;
 pub(crate) use stream::IterableValue;
 pub(crate) use stream::RecursiveCursorState;
 pub(crate) use stream::RecursiveStreamCursor;
+pub(super) use stream::STREAM_MAX_SIZE;
 pub(crate) use stream_map::StreamMap;
 
 pub(crate) use utils::populate_tetraplet_with_lambda;

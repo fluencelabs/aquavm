@@ -81,16 +81,12 @@ fn populate_context<'ctx>(
     exec_ctx: &mut ExecutionCtx<'ctx>,
 ) -> ExecutionResult<()> {
     match ap_result {
-        ast::ApResult::Scalar(scalar) => {
-            exec_ctx.scalars.set_scalar_value(scalar.name, result)?;
-        }
+        ast::ApResult::Scalar(scalar) => exec_ctx.scalars.set_scalar_value(scalar.name, result).map(|_| ()),
         ast::ApResult::Stream(stream) => {
             let value_descriptor = generate_value_descriptor(result, stream, merger_ap_result);
-            exec_ctx.streams.add_stream_value(value_descriptor);
+            exec_ctx.streams.add_stream_value(value_descriptor)
         }
-    };
-
-    Ok(())
+    }
 }
 
 fn maybe_update_trace(should_touch_trace: bool, trace_ctx: &mut TraceHandler) {
