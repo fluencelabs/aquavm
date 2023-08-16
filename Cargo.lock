@@ -2194,7 +2194,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c99fa7013660d8e129b2bcd51138015136b91903f88529f1da0510f850c28ea"
 dependencies = [
  "marine-macro-impl 0.8.1",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.8.1",
 ]
 
 [[package]]
@@ -2241,7 +2241,7 @@ checksum = "e519714ac32b1ffe432f743e011c3695d0cb7a89a906775d81f84546b57b6f29"
 dependencies = [
  "anyhow",
  "chrono",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.8.1",
  "marine-wasm-backend-traits",
  "semver 1.0.17",
  "serde",
@@ -2273,7 +2273,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "11991d31bf4d53651e1c151637f260c759eb9f28ecf8c894eb260b50f46459cc"
 dependencies = [
  "marine-macro",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.8.1",
  "marine-timestamp-macro",
  "polyplets",
  "serde",
@@ -2284,6 +2284,16 @@ name = "marine-rs-sdk-main"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b01678ba2a94fcfeb8232e87281937b07927ab2a54205747b6ab45e3f5ad65fd"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk-main"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a69e17cc63a434d19ca9c312a29a1e06847758041f8429f333d3a91469f62594"
 dependencies = [
  "log",
  "serde",
@@ -2303,7 +2313,7 @@ dependencies = [
  "marine-core",
  "marine-module-interface",
  "marine-rs-sdk",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.8.1",
  "marine-utils",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -2738,7 +2748,7 @@ name = "polyplets"
 version = "0.4.1"
 dependencies = [
  "marine-macro",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.9.0",
  "serde",
 ]
 
