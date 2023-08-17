@@ -35,6 +35,24 @@
   * dependencies
     * aquavm-air bumped from 0.43.0 to 0.43.1
 
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.8.2...air-test-utils-v0.9.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.7.1...air-test-utils-v0.8.0) (2023-08-03)
 
 

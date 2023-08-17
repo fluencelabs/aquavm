@@ -26,6 +26,17 @@
   * dependencies
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.4.3...air-testing-framework-v0.5.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.3.0...air-testing-framework-v0.4.0) (2023-07-16)
 
 

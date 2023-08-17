@@ -19,7 +19,7 @@ path = "src/marine.rs"
 
 [dependencies]
 aquavm-air = { version = "0.44.0", path = "../air" }
-air-interpreter-interface = { version = "0.14.0", path = "../crates/air-lib/interpreter-interface" }
+air-interpreter-interface = { version = "0.15.0", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = { version = "0.8.1", features = ["logger"] }

@@ -54,6 +54,25 @@
     * aquavm-air bumped from 0.43.0 to 0.43.1
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+## [0.4.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.3.5...aquavm-air-cli-v0.4.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* **aquavm-air-cli:** `--near` execution mode [fixes VM-322] ([#672](https://github.com/fluencelabs/aquavm/issues/672)) ([0e80ee7](https://github.com/fluencelabs/aquavm/commit/0e80ee7908913fc896369ff7e00d65eeaf5d9f22))
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+
 ## [0.3.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.2.9...aquavm-air-cli-v0.3.0) (2023-06-22)
 
 

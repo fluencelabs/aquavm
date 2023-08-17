@@ -1,6 +1,6 @@
 [package]
 name = "polyplets"
-version = "0.4.1"
+version = "0.5.0"
 description = "Security primitives to verify origin of service calls in Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"

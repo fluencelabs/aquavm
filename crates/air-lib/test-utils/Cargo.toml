@@ -18,7 +18,7 @@ path = "src/lib.rs"
 aquavm-air = { version = "0.44.0", path = "../../../air" }
 air-interpreter-cid = { version = "0.3.0", path = "../interpreter-cid" }
 air-interpreter-data = { version = "0.10.0", path = "../interpreter-data" }
-air-interpreter-interface = { version = "0.14.0", path = "../interpreter-interface" }
+air-interpreter-interface = { version = "0.15.0", path = "../interpreter-interface" }
 avm-interface = { version = "0.29.0", path = "../../../avm/interface" }
 avm-server = { version = "0.33.0", path = "../../../avm/server" }
 marine-rs-sdk = "0.8.1"
