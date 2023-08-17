@@ -56,7 +56,7 @@
     },
     "tools/wasm/air-beautify-wasm": {
       "component": "air-beautify-wasm"
-    }
+    },
     "tools/wasm/air-near-contract": {
       "component": "air-near-contract"
     }
