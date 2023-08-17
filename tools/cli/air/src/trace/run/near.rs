@@ -86,21 +86,21 @@ fn execute_on_near(
 ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
     use avm_interface::into_raw_result;
 
-    let run_parameters = serde_json::to_string(&run_parameters).unwrap();
+    let run_parameters = serde_json::to_string(&run_parameters)?;
 
     // some inner parts transformations
     let raw_call_results = into_raw_result(call_results);
-    let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
+    let raw_call_results = serde_json::to_vec(&raw_call_results)?;
 
-    let outcome = tokio::runtime::Builder::new_multi_thread()
+    let wasm = std::fs::read(path)?;
+
+    let result = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .build()
-        .unwrap()
+        .build()?
         .block_on(async move {
-            let worker = workspaces::sandbox().await.unwrap();
-            let wasm = std::fs::read(path).unwrap();
-            let contract = worker.dev_deploy(&wasm).await.unwrap();
-            let result = contract
+            let worker = workspaces::sandbox().await?;
+            let contract = worker.dev_deploy(&wasm).await?;
+            contract
                 .call("execute_script")
                 .max_gas()
                 .args_borsh((
@@ -112,14 +112,11 @@ fn execute_on_near(
                 ))
                 .transact()
                 .await
-                .unwrap();
+        })?;
 
-            eprintln!("total gas: {:e}", result.total_gas_burnt);
-            eprintln!("transaction gas: {:e}", result.outcome().gas_burnt);
+    eprintln!("total gas: {:e}", result.total_gas_burnt);
+    eprintln!("transaction gas: {:e}", result.outcome().gas_burnt);
 
-            let data: anyhow::Result<String> = result.borsh().map_err(Into::into);
-            data.and_then(|data| serde_json::from_str(&data).map_err(Into::into))
-        });
-
-    Ok(outcome?)
+    let data: String = result.borsh()?;
+    serde_json::from_str(&data).map_err(Into::into)
 }

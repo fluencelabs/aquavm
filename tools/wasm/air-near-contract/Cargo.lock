@@ -112,7 +112,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.43.1"
+version = "0.1.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
