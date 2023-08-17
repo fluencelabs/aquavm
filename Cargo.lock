@@ -122,7 +122,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
@@ -4101,7 +4101,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b579a79a461ca50abb202eac61c76d8782fdf091a91775c9e181352e7cd30a8b"
 dependencies = [
@@ -4112,7 +4112,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "marine-rs-sdk",
  "serde",

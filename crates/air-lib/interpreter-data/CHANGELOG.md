@@ -8,6 +8,24 @@
   * dependencies
     * aquavm-air-parser bumped from 0.7.5 to 0.8.0
 
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.9.0...air-interpreter-data-v0.10.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * polyplets bumped from 0.4.1 to 0.5.0
+
 ## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.8.1...air-interpreter-data-v0.9.0) (2023-08-03)
 
 

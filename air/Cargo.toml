@@ -21,13 +21,13 @@ air-execution-info-collector = { version = "0.7.7", path = "../crates/air-lib/ex
 air-interpreter-cid = { version = "0.3.0", path = "../crates/air-lib/interpreter-cid" }
 air-interpreter-data = { version = "0.10.0", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-signatures = { version = "0.1.1", path = "../crates/air-lib/interpreter-signatures" }
-air-interpreter-interface = { version = "0.14.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
+air-interpreter-interface = { version = "0.15.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }
 air-trace-handler = { version = "0.4.0", path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.1.1", path = "../crates/air-lib/utils" }
-polyplets = { version = "0.4.1", path = "../crates/air-lib/polyplets" }
+polyplets = { version = "0.5.0", path = "../crates/air-lib/polyplets" }
 fluence-keypair = { version = "0.10.1", default-features = false }
 
 serde = { version = "1.0.164", features = [ "derive", "rc" ] }

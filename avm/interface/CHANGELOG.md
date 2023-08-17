@@ -17,6 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * polyplets bumped from 0.3.2 to 0.3.3
 
+## [0.29.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.28.5...avm-interface-v0.29.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+    * polyplets bumped from 0.4.1 to 0.5.0
+
 ## [0.28.2](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.28.1...avm-interface-v0.28.2) (2023-02-21)
 
 
