@@ -16,6 +16,8 @@
 
 mod data;
 mod native;
+#[cfg(feature = "near")]
+mod near;
 mod runner;
 #[cfg(feature = "wasm")]
 mod wasm;
@@ -55,6 +57,13 @@ pub(crate) struct Args {
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
     air_interpreter_path: PathBuf,
+
+    #[clap(
+        long = "near-contract",
+        env = "AIR_NEAR_CONTRACT_PATH",
+        default_value = "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm"
+    )]
+    air_near_contract_path: PathBuf,
 
     #[clap(long, help = "Execute several times; great for native profiling")]
     repeat: Option<u32>,
@@ -104,9 +113,14 @@ impl Keys {
 struct ModeArgs {
     #[arg(long)]
     native: bool,
+
     #[cfg(feature = "wasm")]
     #[arg(long)]
     wasm: bool,
+
+    #[cfg(feature = "near")]
+    #[arg(long)]
+    near: bool,
 }
 
 impl From<ModeArgs> for Option<Mode> {
@@ -120,14 +134,23 @@ impl From<ModeArgs> for Option<Mode> {
             return Some(Mode::Wasm);
         }
 
+        #[cfg(feature = "near")]
+        if value.near {
+            return Some(Mode::Near);
+        }
+
         None
     }
 }
 
 enum Mode {
     Native,
+
     #[cfg(feature = "wasm")]
     Wasm,
+
+    #[cfg(feature = "near")]
+    Near,
 }
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
@@ -146,6 +169,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let mut runner = get_runner(
         args.mode.into(),
         &args.air_interpreter_path,
+        &args.air_near_contract_path,
         args.max_heap_size,
     )?;
 
@@ -195,6 +219,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 fn get_runner(
     mode: Option<Mode>,
     air_interpreter_wasm_path: &Path,
+    _air_contract_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     let mode = mode.unwrap_or(Mode::Wasm);
@@ -204,6 +229,9 @@ fn get_runner(
         }
         Mode::Wasm => self::wasm::create_wasm_avm_runner(air_interpreter_wasm_path, max_heap_size)
             .context("Failed to instantiate WASM AVM"),
+        #[cfg(feature = "near")]
+        Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
+            .context("Failed to instantiate NEAR AVM"),
     }
 }
 
@@ -211,6 +239,7 @@ fn get_runner(
 fn get_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
+    _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
     let mode = mode.unwrap_or(Mode::Native);
@@ -218,6 +247,9 @@ fn get_runner(
         Mode::Native => {
             self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
         }
+        #[cfg(feature = "near")]
+        Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
+            .context("Failed to instantiate NEAR AVM"),
     }
 }
 
