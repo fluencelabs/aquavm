@@ -16,7 +16,9 @@
 
 use super::runner::AirRunner;
 
+use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
+use anyhow::Context;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 
@@ -112,11 +114,16 @@ fn execute_on_near(
                 ))
                 .transact()
                 .await
-        })?;
+        })
+        .context("failed to execute contract")?;
 
     eprintln!("total gas: {:e}", result.total_gas_burnt);
     eprintln!("transaction gas: {:e}", result.outcome().gas_burnt);
 
-    let data: String = result.borsh()?;
-    serde_json::from_str(&data).map_err(Into::into)
+    let data: String = result
+        .borsh()
+        .context("failed to deserialize contract result")?;
+    let outcome: InterpreterOutcome =
+        serde_json::from_str(&data).context("failed to parse JSON data")?;
+    Ok(RawAVMOutcome::from_interpreter_outcome(outcome)?)
 }

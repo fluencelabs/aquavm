@@ -61,7 +61,7 @@ pub(crate) struct Args {
     #[clap(
         long = "near-contract",
         env = "AIR_NEAR_CONTRACT_PATH",
-        default_value = "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/aqua_vm.wasm"
+        default_value = "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/air-near-contract.wasm"
     )]
     air_near_contract_path: PathBuf,
 
