@@ -113,7 +113,7 @@ dependencies = [
  "newtype_derive",
  "num-traits",
  "once_cell",
- "polyplets 0.4.1",
+ "polyplets 0.5.0",
  "semver 1.0.18",
  "serde",
  "serde_json",
@@ -216,7 +216,7 @@ dependencies = [
  "bimap",
  "log",
  "num-traits",
- "polyplets 0.4.1",
+ "polyplets 0.5.0",
  "serde_json",
  "thiserror",
  "tracing",
@@ -345,7 +345,7 @@ dependencies = [
  "marine-rs-sdk",
  "non-empty-vec",
  "once_cell",
- "polyplets 0.4.1",
+ "polyplets 0.5.0",
  "pretty_assertions 0.6.1",
  "semver 1.0.18",
  "serde",
@@ -573,7 +573,7 @@ dependencies = [
  "air-utils",
  "log",
  "maplit",
- "polyplets 0.4.1",
+ "polyplets 0.5.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -594,7 +594,7 @@ dependencies = [
  "maplit",
  "marine-runtime",
  "parking_lot 0.12.1",
- "polyplets 0.4.1",
+ "polyplets 0.5.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -4101,7 +4101,7 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.5.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b579a79a461ca50abb202eac61c76d8782fdf091a91775c9e181352e7cd30a8b"
 dependencies = [
