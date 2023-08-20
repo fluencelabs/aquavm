@@ -38,7 +38,7 @@ pub enum StreamMapKeyError {
     #[error("the value must be an object with key and value fields")]
     NotAnObject,
 
-    #[error("the value must the value field")]
+    #[error("there must be a \"value\" field in kvpair object")]
     ValueFieldIsAbsent,
 
     #[error("unsupported kvpair object or map key type")]
