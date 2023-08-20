@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::UncatchableError::StreamSizeLimit;
+use air::UncatchableError::StreamSizeLimitExceeded;
 use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -495,6 +495,6 @@ fn recursive_stream_size_limit() {
     let result = executor.execute_all(vm_peer_id_1).unwrap();
     let result = result.last().unwrap();
 
-    let expected_error = StreamSizeLimit;
+    let expected_error = StreamSizeLimitExceeded;
     assert!(check_error(&result, expected_error));
 }

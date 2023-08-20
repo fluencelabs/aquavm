@@ -30,7 +30,7 @@ pub(crate) struct ValuesMatrix<T> {
     /// of values that interpreter obtained from one particle. It means that number of generation on
     /// a peer is equal to number of the interpreter runs in context of one particle.
     values: TiVec<GenerationIdx, Vec<T>>,
-    /// This is a counter to track number of values in the matrix
+    /// This is a counter to track number of values in the matrix.
     size: usize,
 }
 

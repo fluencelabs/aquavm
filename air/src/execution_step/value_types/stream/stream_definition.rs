@@ -81,13 +81,13 @@ impl<'value, T: 'value> Stream<T> {
         use crate::execution_step::ExecutionError;
         use crate::UncatchableError;
 
-        let prev_size_estimate = self.previous_values.get_size();
-        let curr_size_estimate = self.current_values.get_size();
-        let new_size_estimate = self.new_values.get_size();
-        let cumulative_size = prev_size_estimate + curr_size_estimate + new_size_estimate;
+        let prev_size = self.previous_values.get_size();
+        let curr_size = self.current_values.get_size();
+        let new_size = self.new_values.get_size();
+        let cumulative_size = prev_size + curr_size + new_size;
 
         if cumulative_size >= STREAM_MAX_SIZE {
-            Err(ExecutionError::Uncatchable(UncatchableError::StreamSizeLimit))
+            Err(ExecutionError::Uncatchable(UncatchableError::StreamSizeLimitExceeded))
         } else {
             Ok(())
         }
@@ -598,8 +598,7 @@ mod test {
 
         let add_value_result = stream.add_value(value.clone(), Generation::new());
 
-        assert!(matches!(add_value_result, Err(ExecutionError::Uncatchable(_))));
         let Err(ExecutionError::Uncatchable(error)) = add_value_result else { panic!("there must be CatchableError")};
-        assert!(matches!(error, UncatchableError::StreamSizeLimit));
+        assert!(matches!(error, UncatchableError::StreamSizeLimitExceeded));
     }
 }

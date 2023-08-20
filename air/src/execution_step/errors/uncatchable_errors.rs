@@ -101,7 +101,7 @@ pub enum UncatchableError {
 
     /// Stream size estimate goes over a hardcoded limit.
     #[error("stream size goes over the allowed limit of {STREAM_MAX_SIZE}")]
-    StreamSizeLimit,
+    StreamSizeLimitExceeded,
 }
 
 impl ToErrorCode for UncatchableError {
