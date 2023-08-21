@@ -19,6 +19,8 @@ use crate::JValue;
 
 use serde::Serialize;
 use std::borrow::Cow;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
 pub(crate) static KEY_FIELD: &str = "key";
 
@@ -102,6 +104,18 @@ impl<'value> Serialize for StreamMapKey<'value> {
             StreamMapKey::Str(s) => serializer.serialize_str(s),
             StreamMapKey::U64(n) => serializer.serialize_u64(*n),
             StreamMapKey::I64(n) => serializer.serialize_i64(*n),
+        }
+    }
+}
+
+// This trait impl proposfully prints numbers the same way as strings
+// to use it in map-to-scalar cast.
+impl<'value> Display for StreamMapKey<'value> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StreamMapKey::Str(s) => write!(f, "{}", s),
+            StreamMapKey::U64(n) => write!(f, "{}", n),
+            StreamMapKey::I64(n) => write!(f, "{}", n),
         }
     }
 }

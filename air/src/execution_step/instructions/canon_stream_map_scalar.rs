@@ -100,6 +100,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .unwrap_or_default();
 
         let values = stream_map.iter_kvpair_as_in_json().collect::<Vec<_>>();
+
         CanonStream::from_values(values, peer_pk)
     })
 }

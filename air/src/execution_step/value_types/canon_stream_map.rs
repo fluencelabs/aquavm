@@ -20,7 +20,6 @@ use super::TracePosOperate;
 use super::ValueAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ExecutionResult;
-use crate::CanonStreamMapError::IndexIsAbsentInTheMap;
 use crate::ExecutionError;
 use crate::JValue;
 use crate::StreamMapKeyError::NotAnObject;
@@ -32,6 +31,7 @@ use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResultCidAggregate;
 use polyplets::SecurityTetraplet;
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -70,7 +70,7 @@ impl<'key> CanonStreamMap<'key> {
                     canon_stream.tetraplet().clone(),
                 ));
         }
-        let values = canon_stream.get_values().clone();
+        let values = canon_stream.get_values();
         Ok(Self { values, map, tetraplet })
     }
 
@@ -101,17 +101,19 @@ impl<'key> CanonStreamMap<'key> {
         &self.tetraplet
     }
 
-    pub(crate) fn index<'self_l>(
+    pub(crate) fn index<'self_l>(&'self_l self, stream_map_key: &StreamMapKey<'key>) -> Option<&'self_l CanonStream> {
+        self.map.get(stream_map_key)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn indexa<'self_l>(
         &'self_l self,
         stream_map_key: &StreamMapKey<'key>,
-    ) -> ExecutionResult<&'self_l CanonStream> {
-        println!("index map {:#?} ", self.map);
-        let canon_stream = self
-            .map
-            .get(stream_map_key)
-            .ok_or(UncatchableError::CanonStreamMapError(IndexIsAbsentInTheMap))?;
-        println!("index canon {:#?} ", canon_stream);
-
+    ) -> ExecutionResult<Cow<'self_l, CanonStream>> {
+        let canon_stream = self.map.get(stream_map_key).map_or(
+            Cow::Owned(CanonStream::new(vec![], self.tetraplet().clone())),
+            Cow::Borrowed,
+        );
         Ok(canon_stream)
     }
 }
@@ -173,10 +175,7 @@ mod test {
     use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
     use crate::execution_step::value_types::stream_map::from_key_value;
     use crate::execution_step::ValueAggregate;
-    use crate::CanonStreamMapError::IndexIsAbsentInTheMap;
-    use crate::ExecutionError;
     use crate::JValue;
-    use crate::UncatchableError;
 
     use serde_json::json;
     use std::borrow::Cow;
@@ -224,27 +223,23 @@ mod test {
         (va_vec, vec![canon_stream_one, canon_stream_two], keys)
     }
 
-    fn compare_canon_streams(left: &CanonStream, right: &CanonStream) -> bool {
-        left.get_values() == right.get_values()
-    }
-
     #[test]
     fn from_canon_stream() {
         let peer_pk = "some_tetraplet";
         let (va_vec, canon_streams, keys) = create_va_canon_and_keys_vecs(peer_pk);
         let canon_stream = CanonStream::from_values(va_vec, peer_pk.into());
-        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
+        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).expect("This ctor call must not fail");
 
-        let key_one = (*keys.first().unwrap()).into();
+        let key_one = (*keys.first().expect("There must be a key")).into();
         let key_two = (*keys[1]).into();
 
-        let canon_stream_map_key_one = canon_stream_map.map.get(&key_one).unwrap();
-        let canon_stream_map_key_two = canon_stream_map.map.get(&key_two).unwrap();
-        let canon_stream_one = canon_streams.first().unwrap();
-        let canon_stream_two = canon_streams.last().unwrap();
+        let canon_stream_map_key_one = canon_stream_map.map.get(&key_one).expect("There must be a key");
+        let canon_stream_map_key_two = canon_stream_map.map.get(&key_two).expect("There must be a key");
+        let canon_stream_one = canon_streams.first().expect("There must be a canon stream");
+        let canon_stream_two = canon_streams.last().expect("There must be a canon stream");
 
-        assert!(compare_canon_streams(canon_stream_map_key_one, canon_stream_one));
-        assert!(compare_canon_streams(canon_stream_map_key_two, canon_stream_two));
+        assert!(canon_stream_map_key_one.clone().get_values() == canon_stream_one.clone().get_values());
+        assert!(canon_stream_map_key_two.clone().get_values() == canon_stream_two.clone().get_values());
     }
 
     #[test]
@@ -252,23 +247,24 @@ mod test {
         let peer_pk = "some_tetraplet";
         let (va_vec, canon_streams, _) = create_va_canon_and_keys_vecs(peer_pk);
         let canon_stream = CanonStream::from_values(va_vec, peer_pk.into());
-        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream.clone()).unwrap();
+        let canon_stream_map =
+            CanonStreamMap::from_canon_stream(canon_stream.clone()).expect("This ctor call must not fail");
         let key_one = StreamMapKey::Str(Cow::Borrowed("key_one"));
 
         let result_canon_stream = canon_stream_map
-            .index(&key_one)
+            .indexa(&key_one)
             .expect("There must be a value for this index.");
         let canon_stream_one = canon_streams.first().unwrap();
 
-        assert!(compare_canon_streams(result_canon_stream, canon_stream_one));
+        assert!(result_canon_stream.into_owned().get_values() == canon_stream_one.clone().get_values());
 
         let key_two = StreamMapKey::Str(Cow::Borrowed("key_two"));
         let result_canon_stream = canon_stream_map
-            .index(&key_two)
+            .indexa(&key_two)
             .expect("There must be a value for this index.");
         let canon_stream_two = canon_streams.last().unwrap();
 
-        assert!(compare_canon_streams(result_canon_stream, canon_stream_two));
+        assert!(result_canon_stream.into_owned().get_values() == canon_stream_two.clone().get_values());
     }
 
     #[test]
@@ -279,13 +275,9 @@ mod test {
         let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
 
         let absent_key = StreamMapKey::Str(Cow::Borrowed("absent_key"));
-        let index_result = canon_stream_map.index(&absent_key);
+        let index_result = canon_stream_map.indexa(&absent_key).unwrap();
 
-        assert!(matches!(
-            index_result,
-            Err(ExecutionError::Uncatchable(UncatchableError::CanonStreamMapError(
-                IndexIsAbsentInTheMap
-            ),))
-        ));
+        let empty_canon = CanonStream::from_values(vec![], peer_pk.into());
+        assert_eq!(empty_canon.get_values(), index_result.into_owned().get_values());
     }
 }

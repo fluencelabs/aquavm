@@ -86,8 +86,8 @@ impl CanonStream {
         self.values.push(value_aggregate.clone());
     }
 
-    pub fn get_values(&self) -> &Vec<ValueAggregate> {
-        &self.values
+    pub fn get_values(self) -> Vec<ValueAggregate> {
+        self.values
     }
 }
 

@@ -110,13 +110,15 @@ fn select_by_path_from_canon_map<'value>(
     lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<Cow<'value, JValue>> {
+    use crate::execution_step::value_types::CanonStream;
+
     let (prefix, body) = lambda.split_first();
 
     // HashMap<'map>::get(key: &'key K) forces key's lifetime 'key to be as good as 'map.
     // This variance-derived requirement forces StreamMapKey<'static> here.
-    // See https://github.com/rust-lang/rust/issues/80389#issuecomment-752067798qwe
+    // See https://github.com/rust-lang/rust/issues/80389#issuecomment-752067798
     // for the details.
-    let stream_map_key: StreamMapKey<'static> = match prefix {
+    let stream_map_key: StreamMapKey<'_> = match prefix {
         ValueAccessor::ArrayAccess { idx } => (*idx).into(),
         ValueAccessor::FieldAccessByName { field_name } => (*field_name).to_owned().into(),
         ValueAccessor::FieldAccessByScalar { scalar_name } => {
@@ -125,11 +127,18 @@ fn select_by_path_from_canon_map<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
-    let canon_stream = canon_map.index(&stream_map_key)?;
-    let result = if body.is_empty() {
-        let value = canon_stream.as_jvalue();
+    let canon_stream = canon_map.index(&stream_map_key);
+    // There will be an empty canon stream if the lens leftover body is empty or the key is not found.
+    let result = if body.is_empty() || canon_stream.is_none() {
+        let value = canon_stream
+            .and_then(|value| Some(value.as_jvalue()))
+            .unwrap_or_else(|| {
+                let empty_canon_stream = CanonStream::from_values_and_tetraplet(vec![], canon_map.tetraplet().clone());
+                empty_canon_stream.as_jvalue()
+            });
         Cow::Owned(value)
     } else {
+        let canon_stream = canon_stream.unwrap();
         let canon_stream_va_iter = canon_stream.iter().map(|v| v.get_result().deref());
         let new_lambda = NonEmpty::try_from(body.to_vec()).unwrap();
         let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_va_iter, &new_lambda, exec_ctx)?;

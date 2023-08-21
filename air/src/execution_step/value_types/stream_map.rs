@@ -84,7 +84,6 @@ impl StreamMap {
     /// Returns an iterator to JSON objects {"key": value} where all keys are unique.
     pub(crate) fn iter_kvpair_as_in_json(&self) -> impl Iterator<Item = ValueAggregate> + '_ {
         use std::collections::HashSet;
-
         let mut met_keys = HashSet::new();
 
         // There are two issues with this implementation:
@@ -95,14 +94,23 @@ impl StreamMap {
             let (value, tetraplet, trace_pos) = value_aggregate.as_inner_parts();
 
             let obj = value.as_object();
+
+            // This monadic chain casts numeric and string keys to string so that string "42" and
+            // number 42 are considered equal.
             let key = obj
                 .and_then(|obj| obj.get(KEY_FIELD))
-                .and_then(|key| key.as_str())
-                .and_then(|key| if met_keys.insert(key) { Some(key) } else { None })?;
+                .and_then(|key| StreamMapKey::from_value_ref(key))
+                .and_then(|key| {
+                    if met_keys.insert(key.to_string()) {
+                        Some(key)
+                    } else {
+                        None
+                    }
+                })?;
 
             let value = obj.and_then(|obj| obj.get(VALUE_FIELD))?;
 
-            let result = Rc::new(json!({ key: value }));
+            let result = Rc::new(json!({ key.to_string(): value }));
             Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
         })
     }
@@ -307,6 +315,20 @@ mod test {
             .unwrap();
     }
 
+    fn bulk_insert_into_map(
+        stream_map: &mut StreamMap,
+        kvpairs: &Vec<(String, ValueAggregate)>,
+        kvpairs_ids: Vec<usize>,
+        generations_ids: Vec<u32>,
+    ) {
+        kvpairs_ids
+            .into_iter()
+            .zip(generations_ids.into_iter())
+            .for_each(|(kvpair_id, generation_id)| {
+                insert_into_map(stream_map, &kvpairs[kvpair_id], Generation::current(generation_id))
+            });
+    }
+
     #[test]
     fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
         const TEST_DATA_SIZE: usize = 3;
@@ -331,13 +353,12 @@ mod test {
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
         let mut stream_map = StreamMap::new();
-        insert_into_map(&mut stream_map, &key_values[0], Generation::current(0));
-        insert_into_map(&mut stream_map, &key_values[0], Generation::current(1));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(1));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(3));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(4));
-        insert_into_map(&mut stream_map, &key_values[1], Generation::current(4));
-        insert_into_map(&mut stream_map, &key_values[3], Generation::current(2));
+        bulk_insert_into_map(
+            &mut stream_map,
+            &key_values,
+            vec![0, 0, 2, 2, 2, 1, 3],
+            vec![0, 1, 1, 3, 4, 4, 2],
+        );
 
         let mut iter = stream_map.iter_unique_key();
 
@@ -349,25 +370,77 @@ mod test {
     }
 
     #[test]
-    fn get_unique_map_keys_stream_removes_duplicates() {
+    fn test_iter_kvpair_as_in_json() {
+        const TEST_DATA_SIZE: usize = 5;
+        let key_values = generate_key_values(TEST_DATA_SIZE);
+
+        let key: u32 = 2;
+        let value = json!(2);
+        let value = ValueAggregate::new(
+            Rc::new(value),
+            <_>::default(),
+            0.into(),
+            air_interpreter_data::Provenance::literal(),
+        );
+
+        let mut stream_map_json_kvpairs = StreamMap::new();
+        stream_map_json_kvpairs.insert(key.into(), &value, Generation::current(0));
+
+        bulk_insert_into_map(
+            &mut stream_map_json_kvpairs,
+            &key_values,
+            vec![0, 0, 2, 2, 2, 1, 3],
+            vec![0, 1, 1, 3, 4, 4, 2],
+        );
+        let mut iter = stream_map_json_kvpairs.iter_kvpair_as_in_json();
+
+        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("2").unwrap());
+        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("0").unwrap());
+        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("3").unwrap());
+        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("1").unwrap());
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_iter_types_have_the_items_order() {
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
         let mut stream_map = StreamMap::new();
-        insert_into_map(&mut stream_map, &key_values[0], Generation::current(0));
-        insert_into_map(&mut stream_map, &key_values[0], Generation::current(1));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(1));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(3));
-        insert_into_map(&mut stream_map, &key_values[2], Generation::current(4));
-        insert_into_map(&mut stream_map, &key_values[1], Generation::current(4));
-        insert_into_map(&mut stream_map, &key_values[3], Generation::current(2));
-
+        bulk_insert_into_map(
+            &mut stream_map,
+            &key_values,
+            vec![0, 0, 2, 2, 2, 1, 3],
+            vec![0, 1, 1, 3, 4, 4, 2],
+        );
         let mut iter = stream_map.iter_unique_key();
 
-        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
+        let mut stream_map_json_kvpairs = StreamMap::new();
+        bulk_insert_into_map(
+            &mut stream_map_json_kvpairs,
+            &key_values,
+            vec![0, 0, 2, 2, 2, 1, 3],
+            vec![0, 1, 1, 3, 4, 4, 2],
+        );
+
+        let mut iter_json_kvpairs = stream_map_json_kvpairs.iter_kvpair_as_in_json();
+
+        assert_eq!(
+            iter.next().unwrap().get_result().get("value").unwrap(),
+            iter_json_kvpairs.next().unwrap().get_result().get("0").unwrap()
+        );
+        assert_eq!(
+            iter.next().unwrap().get_result().get("value").unwrap(),
+            iter_json_kvpairs.next().unwrap().get_result().get("2").unwrap()
+        );
+        assert_eq!(
+            iter.next().unwrap().get_result().get("value").unwrap(),
+            iter_json_kvpairs.next().unwrap().get_result().get("3").unwrap()
+        );
+        assert_eq!(
+            iter.next().unwrap().get_result().get("value").unwrap(),
+            iter_json_kvpairs.next().unwrap().get_result().get("1").unwrap()
+        );
         assert_eq!(iter.next(), None);
     }
 }
