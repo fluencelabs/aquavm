@@ -99,7 +99,7 @@ impl StreamMap {
             // number 42 are considered equal.
             let key = obj
                 .and_then(|obj| obj.get(KEY_FIELD))
-                .and_then(|key| StreamMapKey::from_value_ref(key))
+                .and_then(StreamMapKey::from_value_ref)
                 .and_then(|key| {
                     if met_keys.insert(key.to_string()) {
                         Some(key)

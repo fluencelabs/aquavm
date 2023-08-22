@@ -48,10 +48,6 @@ impl CanonStream {
         }
     }
 
-    pub(crate) fn from_values_and_tetraplet(values: Vec<ValueAggregate>, tetraplet: Rc<SecurityTetraplet>) -> Self {
-        Self { values, tetraplet }
-    }
-
     pub(crate) fn len(&self) -> usize {
         self.values.len()
     }

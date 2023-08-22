@@ -22,9 +22,7 @@ use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::ExecutionResult;
 use crate::ExecutionError;
 use crate::JValue;
-use crate::StreamMapKeyError::NotAnObject;
 use crate::StreamMapKeyError::UnsupportedKVPairObjectOrMapKeyType;
-use crate::StreamMapKeyError::ValueFieldIsAbsent;
 use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
@@ -61,14 +59,10 @@ impl<'key> CanonStreamMap<'key> {
                 .ok_or(UncatchableError::StreamMapKeyError(UnsupportedKVPairObjectOrMapKeyType))?;
 
             let value = get_value_from_obj(kvpair_obj)?;
-            map.entry(key)
-                .and_modify(|canon_stream| {
-                    canon_stream.push(&value);
-                })
-                .or_insert(CanonStream::from_values_and_tetraplet(
-                    vec![value.clone()],
-                    canon_stream.tetraplet().clone(),
-                ));
+            let entry_canon_stream = map
+                .entry(key)
+                .or_insert(CanonStream::new(vec![], canon_stream.tetraplet().clone()));
+            entry_canon_stream.push(&value);
         }
         let values = canon_stream.get_values();
         Ok(Self { values, map, tetraplet })
@@ -151,6 +145,9 @@ impl<'a> Deref for CanonStreamMapWithProvenance<'a> {
 }
 
 fn get_value_from_obj(value_aggregate: &ValueAggregate) -> ExecutionResult<ValueAggregate> {
+    use crate::StreamMapKeyError::NotAnObject;
+    use crate::StreamMapKeyError::ValueFieldIsAbsent;
+
     let tetraplet = value_aggregate.get_tetraplet();
     let provenance = value_aggregate.get_provenance();
     let trace_pos = value_aggregate.get_trace_pos();

@@ -43,12 +43,7 @@ impl JValuable for &CanonStreamMap<'_> {
 
         // Canon map result is a canon stream rendered on this node thus its tetraplet
         // is also calculated and canon map provenance is borrowed.
-        let tetraplet = SecurityTetraplet::new(
-            exec_ctx.run_parameters.current_peer_id.to_string(),
-            lambda.to_string(),
-            "",
-            "",
-        );
+        let tetraplet = SecurityTetraplet::new(self.tetraplet().peer_pk.to_owned(), "", "", lambda.to_string());
 
         Ok((value, tetraplet, root_provenance.clone()))
     }

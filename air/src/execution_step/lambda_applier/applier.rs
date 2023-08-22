@@ -32,7 +32,6 @@ use non_empty_vec::NonEmpty;
 
 use std::borrow::Cow;
 use std::convert::TryFrom;
-// use std::convert::TryFrom;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -127,22 +126,26 @@ fn select_by_path_from_canon_map<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
-    let canon_stream = canon_map.index(&stream_map_key);
-    // There will be an empty canon stream if the lens leftover body is empty or the key is not found.
-    let result = if body.is_empty() || canon_stream.is_none() {
-        let value = canon_stream
-            .and_then(|value| Some(value.as_jvalue()))
-            .unwrap_or_else(|| {
-                let empty_canon_stream = CanonStream::from_values_and_tetraplet(vec![], canon_map.tetraplet().clone());
-                empty_canon_stream.as_jvalue()
-            });
-        Cow::Owned(value)
-    } else {
-        let canon_stream = canon_stream.unwrap();
-        let canon_stream_va_iter = canon_stream.iter().map(|v| v.get_result().deref());
-        let new_lambda = NonEmpty::try_from(body.to_vec()).unwrap();
-        let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_va_iter, &new_lambda, exec_ctx)?;
-        result
+    let canon_stream_opt = canon_map.index(&stream_map_key);
+    // There will be an empty canon stream if the key was not found.
+    let result = match canon_stream_opt {
+        Some(canon_stream) => {
+            if body.is_empty() {
+                let value = canon_stream.as_jvalue();
+                Cow::Owned(value)
+            } else {
+                let canon_stream_va_iter = canon_stream.iter().map(|v| v.get_result().deref());
+                let new_lambda = NonEmpty::try_from(body.to_vec()).unwrap();
+                let LambdaResult { result, .. } =
+                    select_by_path_from_stream(canon_stream_va_iter, &new_lambda, exec_ctx)?;
+                result
+            }
+        }
+        None => {
+            let empty_canon_stream = CanonStream::new(vec![], canon_map.tetraplet().clone());
+            let value = empty_canon_stream.as_jvalue();
+            Cow::Owned(value)
+        }
     };
     Ok(result)
 }
