@@ -24,6 +24,7 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
       RUSTC_WRAPPER: "sccache"
+      RISC0_SKIP_BUILD: "1"
 
     steps:
       - name: Checkout
@@ -31,6 +32,13 @@ jobs:
 
       - name: Setup Rust toolchain
         uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup risczero
+        uses: brndnmtthws/rust-action-cargo-binstall@v1
+        with:
+          packages: cargo-risczero
+
+      - run: cargo risczero install
 
       - name: Setup cache
         uses: Swatinem/rust-cache@v2
