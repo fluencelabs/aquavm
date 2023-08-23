@@ -1,7 +1,11 @@
 [package]
 name = "zk-aquavm"
 version = "0.1.0"
+description = "RISC-0 guest wrapper for AquaVM"
+authors = ["Fluence Labs"]
 edition = "2021"
+license = "Apache-2.0"
+publish = false
 
 [workspace]
 

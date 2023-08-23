@@ -9,6 +9,12 @@ risc0_zkvm::guest::entry!(main);
 pub fn main() {
     let parameters: AquaVMProvingParameters = env::read();
 
-    let result = execute_air(parameters.air, parameters.prev_data, parameters.current_data, parameters.run_params, parameters.call_results);
+    let result = execute_air(
+        parameters.air,
+        parameters.prev_data,
+        parameters.current_data,
+        parameters.run_params,
+        parameters.call_results,
+    );
     env::commit(&result);
 }
