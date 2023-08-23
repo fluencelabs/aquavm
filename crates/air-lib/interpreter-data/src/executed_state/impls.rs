@@ -109,8 +109,12 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn new(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
-        Self(cid)
+    pub fn executed(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+        CanonResult::Executed(cid)
+    }
+
+    pub fn send_request_by(peer_id: Rc<String>) -> Self {
+        CanonResult::RequestSentBy(peer_id)
     }
 }
 

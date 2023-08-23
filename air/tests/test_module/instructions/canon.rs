@@ -507,7 +507,7 @@ fn canon_map_scalar_with_par() {
     let value1 = json!([{"key": "k", "value": "v1"}, {"key": -42, "value": "v2"}]);
 
     let mut states_vec = vec![
-        executed_state::par(4, 2),
+        executed_state::par(4, 3),
         executed_state::ap(0),
         executed_state::ap(0),
         canon_tracked(
@@ -541,6 +541,7 @@ fn canon_map_scalar_with_par() {
         ),
         executed_state::ap(0),
         executed_state::ap(0),
+        canon_request(vm_peer_id_1),
     ];
 
     let expected_trace = ExecutionTrace::from(states_vec.clone());
@@ -551,6 +552,10 @@ fn canon_map_scalar_with_par() {
 
     let value2 = json!([{"key": "k", "value": "v1"}, {"key": -42, "value": "v2"},{"key": 42, "value": "v3"}, {"key": "42", "value": "v4"}]);
     states_vec[0] = executed_state::par(4, 4);
+    // remove last state to be replaced
+    let can_req = states_vec.pop();
+    assert_eq!(can_req, Some(canon_request(vm_peer_id_1)), "test invalid");
+
     states_vec.extend(vec![
         canon_tracked(
             json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_2", "service_id": ""},
