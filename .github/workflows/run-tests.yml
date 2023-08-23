@@ -51,7 +51,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Run cargo check
-        run: cargo check
+        run: cargo check --release
 
       - name: Run cargo clippy
         uses: giraffate/clippy-action@v1
