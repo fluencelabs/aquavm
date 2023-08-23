@@ -24,6 +24,7 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
       RUSTC_WRAPPER: "sccache"
+      RISC0_SKIP_BUILD: 1
 
     steps:
       - name: Checkout
