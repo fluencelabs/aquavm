@@ -1,0 +1,8 @@
+[package]
+name = "zk-aquavm-interface"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aquavm-air = { path = "../../../../../../../../air" }
+serde = "1.0"
