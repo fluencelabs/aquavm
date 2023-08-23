@@ -235,7 +235,12 @@ fn create_runner(
     _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    let mode = mode.unwrap_or(default_mode());
+    #[cfg(not(feature = "wasm"))]
+    let default_mode = Mode::Native;
+    #[cfg(feature = "wasm")]
+    let default_mode = Mode::Wasm;
+
+    let mode = mode.unwrap_or(default_mode);
     match mode {
         Mode::Native => {
             self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
@@ -251,16 +256,6 @@ fn create_runner(
         #[cfg(feature = "risc0")]
         Mode::Risc0 => Ok(Box::new(self::risc0::Risc0Runner::new())),
     }
-}
-
-#[cfg(not(feature = "wasm"))]
-fn default_mode() -> Mode {
-    Mode::Native
-}
-
-#[cfg(feature = "wasm")]
-fn default_mode() -> Mode {
-    Mode::Wasm
 }
 
 // TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.

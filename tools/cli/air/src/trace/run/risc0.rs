@@ -16,13 +16,15 @@
 
 use super::runner::AirRunner;
 
+use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use avm_interface::into_raw_result;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 use zk_aquavm_interface::AquaVMProvingParameters;
 
-use methods::{ZK_AQUAVM_ELF, ZK_AQUAVM_ID};
+use methods::ZK_AQUAVM_ELF;
+use methods::ZK_AQUAVM_ID;
 use risc0_zkvm::Executor;
 use risc0_zkvm::ExecutorEnv;
 
@@ -113,5 +115,6 @@ fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVM
         verification_duration
     );
 
-    from_slice(&receipt.journal).map_err(Into::into)
+    let outcome: InterpreterOutcome = from_slice(&receipt.journal)?;
+    Ok(RawAVMOutcome::from_interpreter_outcome(outcome)?)
 }
