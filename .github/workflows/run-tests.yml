@@ -39,12 +39,12 @@ jobs:
 
       - run: cargo risczero install
 
-      - name: Setup cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ~/.cache/sccache
-          shared-key: aquavm
-          save-if: false
+      # - name: Setup cache
+      #   uses: Swatinem/rust-cache@v2
+      #   with:
+      #     cache-directories: ~/.cache/sccache
+      #     shared-key: aquavm
+      #     save-if: false
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.3
