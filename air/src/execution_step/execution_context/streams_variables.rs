@@ -27,7 +27,8 @@ use air_parser::ast::Span;
 use air_parser::AirPos;
 use air_trace_handler::TraceHandler;
 
-use std::collections::hash_map::Entry::{Occupied, Vacant};
+use std::collections::hash_map::Entry::Occupied;
+use std::collections::hash_map::Entry::Vacant;
 use std::collections::HashMap;
 
 #[derive(Default)]
@@ -57,7 +58,7 @@ impl Streams {
             .and_then(|descriptors| find_closest_mut(descriptors.iter_mut(), position))
     }
 
-    pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) {
+    pub(crate) fn add_stream_value(&mut self, value_descriptor: StreamValueDescriptor<'_>) -> ExecutionResult<()> {
         let StreamValueDescriptor {
             value,
             name,
@@ -66,21 +67,18 @@ impl Streams {
         } = value_descriptor;
 
         match self.get_mut(name, position) {
-            Some(stream) => stream.add_value(value, generation),
+            Some(stream) => stream.add_value(value, generation)?,
             None => {
-                // streams could be created in three ways:
-                //  - after met new instruction with stream name that isn't present in streams
-                //    (it's the only way to create restricted streams)
-                //  - by calling add_global_stream with generation that come from data
-                //    for global streams
-                //  - and by this function, and if there is no such a streams in streams,
-                //    it means that a new global one should be created.
+                // streams are created:
+                //  - when meet_scope_start is called by `new` instruction to create a restricted stream
+                //  - when this f() is called and there is no global stream with the same name in ExecCtx.
                 let mut stream = Stream::new();
-                stream.add_value(value, generation);
+                stream.add_value(value, generation)?;
                 let descriptor = StreamDescriptor::global(stream);
                 self.streams.insert(name.to_string(), vec![descriptor]);
             }
         }
+        Ok(())
     }
 
     pub(crate) fn meet_scope_start(&mut self, name: impl Into<String>, span: Span) {

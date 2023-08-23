@@ -24,3 +24,4 @@ pub(crate) use recursive_stream::RecursiveStreamCursor;
 pub(crate) use recursive_stream::StreamCursor;
 pub(crate) use stream_definition::Generation;
 pub(crate) use stream_definition::Stream;
+pub(crate) use stream_definition::STREAM_MAX_SIZE;

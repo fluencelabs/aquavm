@@ -120,7 +120,7 @@ impl StreamMaps {
         &mut self,
         key: StreamMapKey<'_>,
         value_descriptor: StreamMapValueDescriptor<'_>,
-    ) {
+    ) -> ExecutionResult<()> {
         let StreamMapValueDescriptor {
             value,
             name,
@@ -139,9 +139,10 @@ impl StreamMaps {
                 //  - and by this function, and if there is no such a streams in streams,
                 //    it means that a new global one should be created.
                 let mut stream_map = StreamMap::new();
-                stream_map.insert(key, &value, generation);
+                stream_map.insert(key, &value, generation)?;
                 let descriptor = StreamMapDescriptor::global(stream_map);
                 self.stream_maps.insert(name.to_string(), vec![descriptor]);
+                Ok(())
             }
         }
     }

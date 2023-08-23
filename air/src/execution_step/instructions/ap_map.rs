@@ -45,7 +45,7 @@ impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
 
         let merger_ap_result = to_merger_ap_map_result(&self, trace_ctx)?;
         let key = resolve_if_needed(&self.key, exec_ctx, self.map.name)?;
-        populate_context(key, &self.map, &merger_ap_result, result, exec_ctx);
+        populate_context(key, &self.map, &merger_ap_result, result, exec_ctx)?;
         trace_ctx.meet_ap_end(ApResult::stub());
 
         Ok(())
@@ -63,9 +63,9 @@ fn populate_context<'ctx>(
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
     exec_ctx: &mut ExecutionCtx<'ctx>,
-) {
+) -> ExecutionResult<()> {
     let value_descriptor = generate_map_value_descriptor(result, ap_map_result, merger_ap_result);
-    exec_ctx.stream_maps.add_stream_map_value(key, value_descriptor);
+    exec_ctx.stream_maps.add_stream_map_value(key, value_descriptor)
 }
 
 fn resolve_if_needed<'ctx>(
