@@ -24,7 +24,6 @@ jobs:
     env:
       RUSTFLAGS: "-D warnings"
       RUSTC_WRAPPER: "sccache"
-      RISC0_SKIP_BUILD: "1"
 
     steps:
       - name: Checkout
@@ -51,7 +50,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Run cargo check
-        run: cargo check --release
+        run: cargo check
 
       - name: Run cargo clippy
         uses: giraffate/clippy-action@v1
