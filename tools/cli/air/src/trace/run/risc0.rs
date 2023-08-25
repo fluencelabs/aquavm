@@ -23,10 +23,10 @@ use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 use zk_aquavm_interface::AquaVMProvingParameters;
 
-use methods::ZK_AQUAVM_ELF;
-use methods::ZK_AQUAVM_ID;
 use risc0_zkvm::Executor;
 use risc0_zkvm::ExecutorEnv;
+use zk_aquavm_methods::ZK_AQUAVM_ELF;
+use zk_aquavm_methods::ZK_AQUAVM_ID;
 
 use std::time::Instant;
 

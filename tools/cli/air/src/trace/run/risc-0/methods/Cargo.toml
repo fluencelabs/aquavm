@@ -1,11 +1,11 @@
 [package]
-name = "methods"
+name = "zk-aquavm-methods"
 version = "0.1.0"
 description = "RISC-0 methods wrapper for AquaVM"
 authors = ["Fluence Labs"]
 edition = "2021"
 license = "Apache-2.0"
-publish = false
+publish = true
 
 [build-dependencies]
 risc0-build = { version = "0.17.0" }
