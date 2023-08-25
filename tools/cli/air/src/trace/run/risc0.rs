@@ -103,6 +103,7 @@ fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVM
     let proving_duration = proving_timer.elapsed();
 
     eprintln!("proving finished:");
+    eprintln!("  session segments {}", session.segments.len());
     eprintln!("  session recording elapsed time {:?}", session_duration);
     eprintln!("  proving elapsed time {:?}", proving_duration);
 
