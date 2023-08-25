@@ -98,14 +98,17 @@ fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVM
     let session = executor.run()?;
     let session_duration = session_timer.elapsed();
 
+    eprintln!("session capturing finished:");
+    eprintln!("  segments count {}", session.segments.len());
+    eprintln!("  elapsed time {:?}", session_duration);
+
     let proving_timer = Instant::now();
     let receipt = session.prove()?;
     let proving_duration = proving_timer.elapsed();
 
     eprintln!("proving finished:");
-    eprintln!("  session segments {}", session.segments.len());
-    eprintln!("  session recording elapsed time {:?}", session_duration);
-    eprintln!("  proving elapsed time {:?}", proving_duration);
+    eprintln!("  elapsed time {:?}", proving_duration);
+    eprintln!("  journal size {}", receipt.journal.len());
 
     let verification_timer = Instant::now();
     receipt.verify(ZK_AQUAVM_ID)?;
