@@ -22,9 +22,10 @@ use std::ops::Deref;
 
 #[test]
 fn canon_moves_execution_flow() {
-    let mut vm = create_avm(echo_call_service(), "A");
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
+    let init_peer_id = "A";
+    let mut vm = create_avm(echo_call_service(), init_peer_id);
 
     let script = format!(
         r#"
@@ -37,6 +38,15 @@ fn canon_moves_execution_flow() {
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
 
     assert_next_pks!(&result.next_peer_pks, &[peer_id_1, peer_id_2]);
+    let trace = trace_from_result(&result);
+    assert_eq!(
+        &*trace,
+        vec![
+            par(1, 1),
+            executed_state::request_sent_by(init_peer_id),
+            canon_request(init_peer_id),
+        ],
+    )
 }
 
 #[test]
@@ -606,4 +616,128 @@ fn canon_map_scalar_with_par() {
     let expected_trace = ExecutionTrace::from(states_vec.clone());
 
     assert_eq!(actual_trace, expected_trace);
+}
+
+#[test]
+fn test_extend_by_request_sent_by() {
+    let peer_id_1 = "peer_1";
+    let peer_id_2 = "peer_2";
+    let other_peer_id = "A";
+
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
+
+    let script = format!(
+        r#"
+        (seq
+           (par
+              (call "{peer_id_1}" ("" "") [1] $stream)
+              (call "{peer_id_2}" ("" "") [1] $stream))
+           (canon "{other_peer_id}" $stream #canon))
+        "#
+    );
+
+    let result_1_1 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
+    let result_2_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result_1_1.data);
+
+    let trace_2_1 = trace_from_result(&result_2_1);
+    assert_eq!(
+        &*trace_2_1,
+        vec![
+            par(1, 1),
+            stream!(1, 0, peer = peer_id_1, args = [1]),
+            stream!(1, 1, peer = peer_id_2, args = [1]),
+            canon_request(peer_id_1),
+        ],
+    )
+}
+
+#[test]
+fn test_merge_request_sent_by() {
+    let peer_id_1 = "peer_1";
+    let peer_id_2 = "peer_2";
+    let other_peer_id = "A";
+
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
+
+    let script = format!(
+        r#"
+        (seq
+           (par
+              (call "{peer_id_1}" ("" "") [1] $stream)
+              (call "{peer_id_2}" ("" "") [1] $stream))
+           (canon "{other_peer_id}" $stream #canon))
+        "#
+    );
+
+    let result_1_1 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
+    let result_2_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", "");
+    let result_1_2 = checked_call_vm!(peer_vm_1, <_>::default(), &script, result_1_1.data, result_2_1.data);
+
+    let trace_1_2 = trace_from_result(&result_1_2);
+    assert_eq!(
+        &*trace_1_2,
+        vec![
+            par(1, 1),
+            stream!(1, 0, peer = peer_id_1, args = [1]),
+            stream!(1, 1, peer = peer_id_2, args = [1]),
+            canon_request(peer_id_1),
+        ],
+    )
+}
+
+#[test]
+fn test_merge_executed() {
+    let peer_id_1 = "peer_1";
+    let peer_id_2 = "peer_2";
+    let other_peer_id = "A";
+
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut peer_other_id = create_avm(echo_call_service(), other_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+           (par
+              (call "{peer_id_1}" ("" "") [1] $stream)
+              (call "{peer_id_2}" ("" "") [1] $stream))
+           (canon "{other_peer_id}" $stream #canon))
+        "#
+    );
+
+    let result_1_1 = checked_call_vm!(peer_vm_1, <_>::default(), &script, "", "");
+    let result_other_1 = checked_call_vm!(peer_other_id, <_>::default(), &script, "", result_1_1.data.clone());
+    let result_2_1 = checked_call_vm!(peer_vm_2, <_>::default(), &script, "", result_1_1.data);
+    let result_2_3 = checked_call_vm!(
+        peer_other_id,
+        <_>::default(),
+        &script,
+        result_other_1.data,
+        result_2_1.data
+    );
+
+    let trace_2_3 = trace_from_result(&result_2_3);
+    let s1 = stream!(1, 0, peer = peer_id_1, args = [1]);
+    let cid1 = extract_service_result_cid(&s1);
+
+    assert_eq!(
+        &*trace_2_3,
+        vec![
+            par(1, 1),
+            s1,
+            stream!(1, 1, peer = peer_id_2, args = [1]),
+            executed_state::canon(
+                json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": other_peer_id, "service_id": ""},
+                "values": [{
+                    "result": 1,
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_id_1, "service_id": ""},
+                    "provenance": Provenance::service_result(cid1),
+                }]}),
+            ),
+        ],
+        "{:#?}",
+        data_from_result(&result_2_3),
+    );
 }
