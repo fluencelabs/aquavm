@@ -194,7 +194,7 @@ mod test {
         let mut recursive_stream = RecursiveStreamCursor::new();
 
         let value = create_value(json!("1"));
-        stream.add_value(value, Generation::Current(0.into()));
+        stream.add_value(value, Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);
         let iterables = iterables_unwrap(cursor_state);
@@ -210,14 +210,14 @@ mod test {
         let mut recursive_stream = RecursiveStreamCursor::new();
 
         let value = create_value(json!("1"));
-        stream.add_value(value.clone(), Generation::Current(0.into()));
+        stream.add_value(value.clone(), Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);
         let iterables = iterables_unwrap(cursor_state);
         assert_eq!(iterables.len(), 1);
 
-        stream.add_value(value.clone(), Generation::New);
-        stream.add_value(value, Generation::New);
+        stream.add_value(value.clone(), Generation::new()).unwrap();
+        stream.add_value(value, Generation::new()).unwrap();
 
         let cursor_state = recursive_stream.met_iteration_end(&mut stream);
         let iterables = iterables_unwrap(cursor_state);
@@ -233,17 +233,17 @@ mod test {
         let mut recursive_stream = RecursiveStreamCursor::new();
 
         let value = create_value(json!("1"));
-        stream.add_value(value.clone(), Generation::Current(0.into()));
+        stream.add_value(value.clone(), Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);
         assert!(cursor_state.should_continue());
 
-        stream.add_value(value.clone(), Generation::Previous(0.into()));
+        stream.add_value(value.clone(), Generation::previous(0)).unwrap();
 
         let cursor_state = recursive_stream.met_iteration_end(&mut stream);
         assert!(cursor_state.should_continue());
 
-        stream.add_value(value, Generation::Current(1.into()));
+        stream.add_value(value, Generation::current(1)).unwrap();
 
         let cursor_state = recursive_stream.met_iteration_end(&mut stream);
         assert!(cursor_state.should_continue());

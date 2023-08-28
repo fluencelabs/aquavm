@@ -41,7 +41,12 @@ impl StreamMap {
         Self { stream: Stream::new() }
     }
 
-    pub(crate) fn insert(&mut self, key: StreamMapKey<'_>, value: &ValueAggregate, generation: Generation) {
+    pub(crate) fn insert(
+        &mut self,
+        key: StreamMapKey<'_>,
+        value: &ValueAggregate,
+        generation: Generation,
+    ) -> ExecutionResult<()> {
         let obj = from_key_value(key, value.get_result());
         let value = ValueAggregate::new(
             obj,
@@ -129,7 +134,9 @@ mod test {
         let value_aggregate = create_value_aggregate(value.clone());
 
         let mut stream_map = StreamMap::new();
-        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
+        stream_map
+            .insert(key.clone(), &value_aggregate, Generation::New)
+            .unwrap();
         let mut iter = stream_map.stream.iter();
 
         assert!(compare_stream_iter(&mut iter, key, &value));
@@ -143,7 +150,9 @@ mod test {
         let value_aggregate = create_value_aggregate(value.clone());
 
         let mut stream_map = StreamMap::new();
-        stream_map.insert(key.clone(), &value_aggregate, Generation::New);
+        stream_map
+            .insert(key.clone(), &value_aggregate, Generation::New)
+            .unwrap();
         let mut iter = stream_map.stream.iter();
 
         assert!(compare_stream_iter(&mut iter, key, &value));
@@ -160,18 +169,26 @@ mod test {
         let value_aggregate_2 = create_value_aggregate(value_2.clone());
 
         let mut stream_map = StreamMap::new();
-        stream_map.insert(key_1_2.clone(), &value_aggregate_1, Generation::New);
-        stream_map.insert(key_1_2.clone(), &value_aggregate_2, Generation::Current(0.into()));
+        stream_map
+            .insert(key_1_2.clone(), &value_aggregate_1, Generation::new())
+            .unwrap();
+        stream_map
+            .insert(key_1_2.clone(), &value_aggregate_2, Generation::current(0))
+            .unwrap();
 
         let key_3 = StreamMapKey::Str(Cow::Borrowed("other_key"));
         let value_3 = Rc::new(json!("3"));
         let value_aggregate_3 = create_value_aggregate(value_3.clone());
-        stream_map.insert(key_3.clone(), &value_aggregate_3, Generation::Current(0.into()));
+        stream_map
+            .insert(key_3.clone(), &value_aggregate_3, Generation::current(0))
+            .unwrap();
 
         let key_4 = StreamMapKey::I64(42.into());
         let value_4 = Rc::new(json!("4"));
         let value_aggregate_4 = create_value_aggregate(value_4.clone());
-        stream_map.insert(key_4.clone(), &value_aggregate_4, Generation::Current(0.into()));
+        stream_map
+            .insert(key_4.clone(), &value_aggregate_4, Generation::current(0))
+            .unwrap();
 
         let mut iter = stream_map.stream.iter();
 
@@ -191,7 +208,9 @@ mod test {
         let value_aggregate = create_value_aggregate(value.clone());
         let mut stream_map = StreamMap::new();
 
-        stream_map.insert(key, &value_aggregate, Generation::Current(0.into()));
+        stream_map
+            .insert(key, &value_aggregate, Generation::current(0))
+            .unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -218,7 +237,9 @@ mod test {
         let value_aggregate = create_value_aggregate(value.clone());
         let mut stream_map = StreamMap::new();
 
-        stream_map.insert(key, &value_aggregate, Generation::current(0));
+        stream_map
+            .insert(key, &value_aggregate, Generation::current(0))
+            .unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -252,7 +273,9 @@ mod test {
     }
 
     fn insert_into_map(stream_map: &mut StreamMap, key_value: &(String, ValueAggregate), generation: Generation) {
-        stream_map.insert(key_value.0.as_str().into(), &key_value.1, generation);
+        stream_map
+            .insert(key_value.0.as_str().into(), &key_value.1, generation)
+            .unwrap();
     }
 
     #[test]

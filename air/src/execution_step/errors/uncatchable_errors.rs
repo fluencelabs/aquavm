@@ -16,6 +16,7 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::execution_step::STREAM_MAX_SIZE;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
@@ -97,6 +98,10 @@ pub enum UncatchableError {
 
     #[error("failed to deserialize to CallServiceFailed: {0}")]
     MalformedCallServiceFailed(serde_json::Error),
+
+    /// Stream size estimate goes over a hardcoded limit.
+    #[error("stream size goes over the allowed limit of {STREAM_MAX_SIZE}")]
+    StreamSizeLimitExceeded,
 }
 
 impl ToErrorCode for UncatchableError {
