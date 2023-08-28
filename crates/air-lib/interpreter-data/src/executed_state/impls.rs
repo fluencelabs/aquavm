@@ -113,7 +113,7 @@ impl CanonResult {
         CanonResult::Executed(cid)
     }
 
-    pub fn send_request_by(peer_id: Rc<String>) -> Self {
+    pub fn request_sent_by(peer_id: Rc<String>) -> Self {
         CanonResult::RequestSentBy(peer_id)
     }
 }

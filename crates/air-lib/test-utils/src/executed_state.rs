@@ -204,7 +204,7 @@ pub fn canon_tracked(
 }
 
 pub fn canon_request(peer_id: impl Into<String>) -> ExecutedState {
-    ExecutedState::Canon(CanonResult::send_request_by(peer_id.into().into()))
+    ExecutedState::Canon(CanonResult::request_sent_by(peer_id.into().into()))
 }
 
 #[macro_export]

@@ -103,7 +103,7 @@ pub(crate) fn handle_unseen_canon(
         exec_ctx.make_subgraph_incomplete();
         exec_ctx.next_peer_pks.push(peer_id);
 
-        trace_ctx.meet_canon_end(CanonResult::send_request_by(
+        trace_ctx.meet_canon_end(CanonResult::request_sent_by(
             exec_ctx.run_parameters.current_peer_id.clone(),
         ));
         Ok(())
