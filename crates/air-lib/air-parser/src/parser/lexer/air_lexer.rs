@@ -195,7 +195,10 @@ fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
         MISMATCH_INSTR => Ok(Token::MisMatch),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
-        _ if input.starts_with(LAST_ERROR) => parse_last_error(input, start_pos),
+        _ if input.starts_with(ERROR) => parse_error(input, start_pos, ERROR, Token::Error),
+        _ if input.starts_with(LAST_ERROR) => {
+            parse_error(input, start_pos, LAST_ERROR, Token::LastError)
+        }
         TIMESTAMP => Ok(Token::Timestamp),
         TTL => Ok(Token::TTL),
 
@@ -206,28 +209,37 @@ fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
     }
 }
 
-fn parse_last_error(input: &str, start_pos: AirPos) -> LexerResult<Token<'_>> {
-    let last_error_size = LAST_ERROR.len();
-    if input.len() == last_error_size {
-        return Ok(Token::LastError);
+fn parse_error<'input>(
+    input: &'input str,
+    start_pos: AirPos,
+    token_str: &str,
+    token_wo_lens: Token<'static>,
+) -> LexerResult<Token<'input>> {
+    let token_wo_lens_len = token_str.len();
+
+    if input.len() == token_wo_lens_len {
+        return Ok(token_wo_lens);
     }
 
-    if input.len() <= last_error_size {
+    if input.len() <= token_wo_lens_len {
         return Err(LexerError::lambda_parser_error(
-            start_pos + last_error_size..start_pos + input.len(),
+            start_pos + token_wo_lens_len..start_pos + input.len(),
             "lambda AST applied to last error has not enough size",
         ));
     }
 
-    let last_error_accessor = crate::parse_lambda(&input[last_error_size..]).map_err(|e| {
+    let last_error_accessor = crate::parse_lambda(&input[token_wo_lens_len..]).map_err(|e| {
         LexerError::lambda_parser_error(
-            start_pos + last_error_size..start_pos + input.len(),
+            start_pos + token_wo_lens_len..start_pos + input.len(),
             e.to_string(),
         )
     })?;
-    let last_error_token = Token::LastErrorWithLambda(last_error_accessor);
 
-    Ok(last_error_token)
+    match token_wo_lens {
+        Token::Error => Ok(Token::ErrorWithLambda(last_error_accessor)),
+        Token::LastError => Ok(Token::LastErrorWithLambda(last_error_accessor)),
+        _ => unreachable!(),
+    }
 }
 
 const CALL_INSTR: &str = "call";
@@ -246,7 +258,8 @@ const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
-const LAST_ERROR: &str = "%last_error%";
+pub (crate) const LAST_ERROR: &str = "%last_error%";
+pub (crate) const ERROR: &str = ":error:";
 const TIMESTAMP: &str = "%timestamp%";
 const TTL: &str = "%ttl%";
 

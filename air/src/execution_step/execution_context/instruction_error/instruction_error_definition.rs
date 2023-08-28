@@ -19,6 +19,7 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
 use air_interpreter_data::Provenance;
+use air_lambda_ast::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::json;
@@ -39,7 +40,7 @@ pub const NO_ERROR_ERROR_CODE: i64 = 0;
 ///  - if it's unset before the usage, JValue::Null will be used without join behaviour
 ///  - it's a global scalar, meaning that fold and new scopes doesn't apply for it
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LastError {
+pub struct InstructionError {
     /// Error object that represents the last occurred error.
     pub error: Rc<JValue>,
 
@@ -56,6 +57,14 @@ pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instru
         MESSAGE_FIELD_NAME: error_message,
         INSTRUCTION_FIELD_NAME: instruction,
         PEER_ID_FIELD_NAME: peer_id,
+    })
+}
+
+pub(crate) fn error_from_raw_fields_no_peerid(error_code: i64, error_message: &str, instruction: &str) -> JValue {
+    serde_json::json!({
+        ERROR_CODE_FIELD_NAME: error_code,
+        MESSAGE_FIELD_NAME: error_message,
+        INSTRUCTION_FIELD_NAME: instruction,
     })
 }
 
@@ -116,17 +125,22 @@ fn ensure_jvalue_is_string(
     }
 }
 
-pub fn no_error_last_error_object() -> JValue {
+pub fn no_error_object() -> JValue {
     json!({
         ERROR_CODE_FIELD_NAME: NO_ERROR_ERROR_CODE,
         MESSAGE_FIELD_NAME: NO_ERROR_MESSAGE,
     })
 }
 
-pub fn no_error_last_error() -> LastError {
-    LastError {
-        error: Rc::new(no_error_last_error_object()),
+pub fn no_error() -> InstructionError {
+    InstructionError {
+        error: Rc::new(no_error_object()),
         tetraplet: None,
         provenance: Provenance::literal(),
     }
+}
+
+pub enum InstructionErrors<'lens> {
+    LastError(&'lens Option<LambdaAST<'lens>>),
+    Error(&'lens Option<LambdaAST<'lens>>),
 }

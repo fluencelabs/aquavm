@@ -235,3 +235,34 @@ fn last_error_with_xor() {
 
     assert_eq!(actual_trace[1.into()], expected_state);
 }
+
+#[test]
+fn error_with_xor() {
+    let faillible_peer_id = "failible_peer_id";
+    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
+
+    let script = format!(
+        r#"
+            (xor
+                (call "{faillible_peer_id}" ("service_id_1" "local_fn_name") [] result)
+                (call "{local_peer_id}" ("service_id_2" "local_fn_name") [:error:.$.message] result)
+            )"#
+    );
+
+    let result = checked_call_vm!(faillible_vm, <_>::default(), script.clone(), "", "");
+    let result = checked_call_vm!(vm, <_>::default(), script, "", result.data);
+
+    let actual_trace = trace_from_result(&result);
+    let msg = r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#;
+    let expected_state = scalar!(
+        msg,
+        peer = local_peer_id,
+        service = "service_id_2",
+        function = "local_fn_name",
+        args = [msg]
+    );
+
+    assert_eq!(actual_trace[1.into()], expected_state);
+}

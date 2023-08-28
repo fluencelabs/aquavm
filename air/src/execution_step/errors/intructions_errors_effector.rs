@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-/// This trait is intended to figuring out whether a last error should be set or not.
-pub(crate) trait LastErrorAffectable {
+/// This trait controls whether to set %last_error% and :error: or not.
+pub(crate) trait InstructionErrorsEffector {
     /// Return true, if this error type affects last error
     /// (meaning that it should be set after occurring such an error).
     fn affects_last_error(&self) -> bool;
+    fn affects_error(&self) -> bool;
 }

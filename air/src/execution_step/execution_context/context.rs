@@ -15,11 +15,14 @@
  */
 
 use super::ExecutionCidState;
-use super::LastError;
-use super::LastErrorDescriptor;
+use super::InstructionError;
+use super::InstructionErrorDescriptor;
 use super::Scalars;
 use super::StreamMaps;
 use super::Streams;
+use crate::execution_step::InstructionErrorsEffector;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::ToErrorCode;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
@@ -52,7 +55,10 @@ pub(crate) struct ExecutionCtx<'i> {
 
     /// Last error produced by local service.
     /// None means that there weren't any error.
-    pub(crate) last_error_descriptor: LastErrorDescriptor,
+    pub(crate) last_error_descriptor: InstructionErrorDescriptor,
+
+    /// Last error produced by some instructions, e.g. call, match, fail.
+    pub(crate) error_descriptor: InstructionErrorDescriptor,
 
     /// Indicates that previous executed subgraph is complete.
     /// A subgraph treats as a complete if all subgraph elements satisfy the following rules:
@@ -116,8 +122,12 @@ impl<'i> ExecutionCtx<'i> {
         }
     }
 
-    pub(crate) fn last_error(&self) -> &LastError {
-        self.last_error_descriptor.last_error()
+    pub(crate) fn last_error(&self) -> &InstructionError {
+        self.last_error_descriptor.error()
+    }
+
+    pub(crate) fn error(&self) -> &InstructionError {
+        self.error_descriptor.error()
     }
 
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
@@ -149,6 +159,49 @@ impl ExecutionCtx<'_> {
 
     pub(crate) fn flush_subgraph_completeness(&mut self) {
         self.subgraph_completeness = true;
+    }
+
+    // Tetraplet option is an implicit source of error source peer_id information.
+    pub(crate) fn set_errors_w_peerid(
+        &mut self,
+        error: &(impl InstructionErrorsEffector + ToErrorCode + ToString),
+        instruction: &str,
+        tetraplet: Option<RcSecurityTetraplet>,
+    ) -> String {
+        let peer_id = match &tetraplet {
+            // use tetraplet if they set, because an error could be propagated from data
+            // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
+            // a peer where the error was occurred
+            Some(tetraplet) => tetraplet.peer_pk.clone(),
+            None => self.run_parameters.current_peer_id.to_string(),
+        };
+        self.last_error_descriptor.try_to_set_last_error_from_exec_error(
+            error,
+            instruction,
+            Some(&peer_id),
+            tetraplet.clone(),
+        );
+        self.error_descriptor
+            .try_to_set_error_from_exec_error(error, instruction, Some(&peer_id), tetraplet);
+        peer_id
+    }
+
+    // This routine sets %last_error%.$.peerid but does not set this field for :error:.
+    pub(crate) fn set_errors(
+        &mut self,
+        error: &(impl InstructionErrorsEffector + ToErrorCode + ToString),
+        instruction: &str,
+        tetraplet: Option<RcSecurityTetraplet>,
+    ) {
+        let peer_id = self.run_parameters.current_peer_id.as_ref();
+        self.last_error_descriptor.try_to_set_last_error_from_exec_error(
+            error,
+            instruction,
+            Some(peer_id),
+            tetraplet.clone(),
+        );
+        self.error_descriptor
+            .try_to_set_error_from_exec_error(error, instruction, None, tetraplet);
     }
 }
 

@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::InstructionErrors;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::CanonResultAggregate;
@@ -23,7 +24,6 @@ use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
 use air_interpreter_data::Provenance;
-use air_lambda_parser::LambdaAST;
 use air_parser::ast;
 
 pub(crate) fn apply_to_arg(
@@ -36,7 +36,8 @@ pub(crate) fn apply_to_arg(
 
     let result = match argument {
         InitPeerId => apply_const(exec_ctx.run_parameters.init_peer_id.as_ref(), exec_ctx, trace_ctx),
-        LastError(error_accessor) => apply_last_error(error_accessor, exec_ctx, trace_ctx),
+        Error(error_accessor) => apply_error(&InstructionErrors::Error(error_accessor), exec_ctx, trace_ctx),
+        LastError(error_accessor) => apply_error(&InstructionErrors::LastError(error_accessor), exec_ctx, trace_ctx),
         Literal(value) => apply_const(*value, exec_ctx, trace_ctx),
         Timestamp => apply_const(exec_ctx.run_parameters.timestamp, exec_ctx, trace_ctx),
         TTL => apply_const(exec_ctx.run_parameters.ttl, exec_ctx, trace_ctx),
@@ -68,12 +69,12 @@ fn apply_const(
     Ok(value)
 }
 
-fn apply_last_error<'i>(
-    error_accessor: &Option<LambdaAST<'i>>,
+fn apply_error<'i>(
+    instruction_error: &InstructionErrors<'i>,
     exec_ctx: &ExecutionCtx<'i>,
     trace_ctx: &TraceHandler,
 ) -> ExecutionResult<ValueAggregate> {
-    let (value, mut tetraplets, provenance) = error_accessor.resolve(exec_ctx)?;
+    let (value, mut tetraplets, provenance) = instruction_error.resolve(exec_ctx)?;
     let value = Rc::new(value);
     // removing is safe because prepare_last_error always returns a vec with one element.
     let tetraplet = tetraplets.remove(0);

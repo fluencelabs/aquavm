@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::unsupported_map_key_type;
 use air::CatchableError;
 use air::LambdaError;
@@ -608,7 +608,7 @@ fn undefined_last_error_functor() {
         .expect("invalid test AIR script");
     let result = executor.execute_all(local_peer_id).unwrap();
 
-    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_last_error_object());
+    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_object());
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
@@ -631,7 +631,7 @@ fn undefined_last_error_instruction() {
     let result = executor.execute_all(local_peer_id).unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
-        value: no_error_last_error_object(),
+        value: no_error_object(),
         field_name: "instruction".to_string(),
     });
     assert!(check_error(&&result.last().unwrap(), expected_error));
@@ -655,7 +655,7 @@ fn undefined_last_error_peer_id() {
     let result = executor.execute_all(local_peer_id).unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
-        value: no_error_last_error_object(),
+        value: no_error_object(),
         field_name: "peer_id".to_string(),
     });
     assert!(check_error(&&result.last().unwrap(), expected_error));

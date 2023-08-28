@@ -35,6 +35,7 @@ impl fmt::Display for ImmutableValue<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
+            Error(error_accessor) => display_error(f, error_accessor),
             LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(literal) => write!(f, r#""{literal}""#),
             Timestamp => write!(f, "%timestamp%"),
@@ -93,6 +94,7 @@ impl fmt::Display for ApArgument<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
+            Error(error_accessor) => display_error(f, error_accessor),
             LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(str) => write!(f, r#""{str}""#),
             Timestamp => write!(f, "%timestamp%"),
@@ -183,8 +185,19 @@ impl From<&Number> for serde_json::Value {
 }
 
 fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
+    use crate::parser::LAST_ERROR;
+
     match lambda_ast {
-        Some(lambda_ast) => write!(f, "%last_error%{lambda_ast}"),
-        None => write!(f, "%last_error%"),
+        Some(lambda_ast) => write!(f, "{LAST_ERROR}{lambda_ast}"),
+        None => write!(f, "{LAST_ERROR}"),
+    }
+}
+
+fn display_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
+    use crate::parser::ERROR;
+
+    match lambda_ast {
+        Some(lambda_ast) => write!(f, "{ERROR}{lambda_ast}"),
+        None => write!(f, "{ERROR}"),
     }
 }

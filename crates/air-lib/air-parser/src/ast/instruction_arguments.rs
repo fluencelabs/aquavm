@@ -68,6 +68,7 @@ pub struct Triplet<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ImmutableValue<'i> {
     InitPeerId,
+    Error(Option<LambdaAST<'i>>),
     LastError(Option<LambdaAST<'i>>),
     Timestamp,
     TTL,
@@ -93,6 +94,7 @@ pub enum ApArgument<'i> {
     InitPeerId,
     Timestamp,
     TTL,
+    Error(Option<LambdaAST<'i>>),
     LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),

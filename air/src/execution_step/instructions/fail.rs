@@ -20,7 +20,6 @@ use super::TraceHandler;
 use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
-use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::log_instruction;
 use crate::ExecutionError;
@@ -103,11 +102,13 @@ fn fail_with_canon_stream(
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    let LastError {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
         error,
         tetraplet,
         provenance,
-    } = exec_ctx.last_error_descriptor.last_error();
+    } = exec_ctx.last_error_descriptor.error();
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
     let error = error.clone();

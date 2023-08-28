@@ -20,8 +20,8 @@ use crate::execution_step::execution_context::ExecutionCtx;
 use crate::execution_step::lambda_applier::select_by_lambda_from_scalar;
 use crate::execution_step::value_types::JValuable;
 use crate::execution_step::ExecutionResult;
+use crate::InstructionErrors;
 use crate::JValue;
-use crate::LambdaAST;
 use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
@@ -37,7 +37,8 @@ impl Resolvable for ast::ImmutableValue<'_> {
 
         match self {
             InitPeerId => resolve_const(ctx.run_parameters.init_peer_id.as_ref(), ctx),
-            LastError(error_accessor) => error_accessor.resolve(ctx),
+            Error(error_accessor) => InstructionErrors::Error(error_accessor).resolve(ctx),
+            LastError(error_accessor) => InstructionErrors::LastError(error_accessor).resolve(ctx),
             Literal(value) => resolve_const(value.to_string(), ctx),
             Timestamp => resolve_const(ctx.run_parameters.timestamp, ctx),
             TTL => resolve_const(ctx.run_parameters.ttl, ctx),
@@ -61,17 +62,23 @@ pub(crate) fn resolve_const(
     Ok((jvalue, vec![tetraplet], Provenance::literal()))
 }
 
-impl Resolvable for Option<LambdaAST<'_>> {
+impl Resolvable for InstructionErrors<'_> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
-        use crate::LastError;
+        use crate::execution_step::InstructionError;
 
-        let LastError {
-            error,
-            tetraplet,
-            provenance,
-        } = ctx.last_error();
+        let (
+            InstructionError {
+                error,
+                tetraplet,
+                provenance,
+            },
+            error_accessor_lens,
+        ) = match self {
+            InstructionErrors::LastError(error_accessor) => (ctx.last_error(), error_accessor),
+            InstructionErrors::Error(error_accessor) => (ctx.error(), error_accessor),
+        };
 
-        let jvalue = match self {
+        let jvalue = match error_accessor_lens {
             Some(error_accessor) => select_by_lambda_from_scalar(error.as_ref(), error_accessor, ctx)?.into_owned(),
             None => error.as_ref().clone(),
         };
