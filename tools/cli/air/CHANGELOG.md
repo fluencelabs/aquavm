@@ -54,6 +54,21 @@
     * aquavm-air bumped from 0.43.0 to 0.43.1
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+## [0.4.1](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.0...aquavm-air-cli-v0.4.1) (2023-08-29)
+
+
+### Bug Fixes
+
+* **aquavm-air-cli:** NEAR mode fixes ([#679](https://github.com/fluencelabs/aquavm/issues/679)) ([6978603](https://github.com/fluencelabs/aquavm/commit/6978603c76a2a2576fc4196369d944f25da7a559))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.44.0 to 0.45.0
+    * air-test-utils bumped from 0.9.0 to 0.10.0
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.3.5...aquavm-air-cli-v0.4.0) (2023-08-17)
 
 
