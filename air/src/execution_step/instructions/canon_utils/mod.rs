@@ -65,7 +65,7 @@ pub(crate) fn handle_canon_request_sent_by(
         trace_ctx.meet_canon_end(canon_result);
         Ok(())
     } else {
-        instantiate_canon_stream(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
+        create_canon_stream_for_first_time(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
     }
 }
 
@@ -103,17 +103,15 @@ pub(crate) fn handle_unseen_canon(
         exec_ctx.make_subgraph_incomplete();
         exec_ctx.next_peer_pks.push(peer_id);
 
-        trace_ctx.meet_canon_end(CanonResult::request_sent_by(
-            exec_ctx.run_parameters.current_peer_id.clone(),
-        ));
+        let canon_result = CanonResult::request_sent_by(exec_ctx.run_parameters.current_peer_id.clone());
+        trace_ctx.meet_canon_end(canon_result);
         Ok(())
     } else {
-        instantiate_canon_stream(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
+        create_canon_stream_for_first_time(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
     }
 }
 
-// TODO rename
-fn instantiate_canon_stream(
+fn create_canon_stream_for_first_time(
     epilog: &CanonEpilogClosure<'_>,
     create_canon_stream: &CreateCanonStreamClosure<'_>,
     peer_id: String,

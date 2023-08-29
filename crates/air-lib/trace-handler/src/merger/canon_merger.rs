@@ -66,18 +66,17 @@ fn merge_canon_results(
     prev_canon_result: CanonResult,
     current_canon_result: CanonResult,
 ) -> Result<CanonResult, CanonResultError> {
+    use CanonResult::*;
+
     match (&prev_canon_result, &current_canon_result) {
-        (CanonResult::Executed(ref prev), CanonResult::Executed(ref cur)) => {
-            if prev == cur {
-                Ok(prev_canon_result)
-            } else {
-                Err(CanonResultError::incompatible_state(
-                    prev_canon_result,
-                    current_canon_result,
-                ))
-            }
+        (Executed(prev), Executed(cur)) if prev != cur => Err(CanonResultError::incompatible_state(
+            prev_canon_result,
+            current_canon_result,
+        )),
+        (RequestSentBy(_), Executed(_)) => Ok(current_canon_result),
+
+        (RequestSentBy(_), RequestSentBy(_)) | (Executed(_), RequestSentBy(_)) | (Executed(_), Executed(_)) => {
+            Ok(prev_canon_result)
         }
-        (CanonResult::RequestSentBy(_), CanonResult::Executed(_)) => Ok(current_canon_result),
-        _ => Ok(prev_canon_result),
     }
 }
