@@ -46,13 +46,17 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
         let epilog = &epilog_closure(self.scalar.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
+        let create_canon_producer = create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
         match canon_result {
-            MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
-            }
+            MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                epilog,
+                &create_canon_producer,
+                canon_result,
+                &self.peer_id,
+                exec_ctx,
+                trace_ctx,
+            ),
             MergerCanonResult::Empty => {
-                let create_canon_producer =
-                    create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
                 handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -75,7 +79,7 @@ fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<Can
             let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
 
             exec_ctx.scalars.set_scalar_value(scalar_name, result)?;
-            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            trace_ctx.meet_canon_end(CanonResult::executed(canon_result_cid));
             Ok(())
         },
     )

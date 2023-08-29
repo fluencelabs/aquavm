@@ -416,8 +416,8 @@ fn canon_result_error() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectCanonResult(
             CanonResultError::IncompatibleState {
-                prev_canon_result: air_interpreter_data::CanonResult::new(prev_cid),
-                current_canon_result: air_interpreter_data::CanonResult::new(curr_cid),
+                prev_canon_result: air_interpreter_data::CanonResult::executed(prev_cid),
+                current_canon_result: air_interpreter_data::CanonResult::executed(curr_cid),
             },
         )),
         instruction: String::from(r#"canon "vm_peer_id_1" $stream #canon"#),
