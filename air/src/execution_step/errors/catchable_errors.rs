@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use super::Joinable;
 use super::InstructionErrorsEffector;
+use super::Joinable;
 use crate::execution_step::execution_context::errors::StreamMapError;
 use crate::execution_step::execution_context::LastErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
@@ -130,7 +130,6 @@ impl InstructionErrorsEffector for CatchableError {
     fn affects_error(&self) -> bool {
         true
     }
-
 }
 
 macro_rules! log_join {

@@ -15,12 +15,12 @@
  */
 
 use super::*;
-use crate::InstructionErrors;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::CanonResultAggregate;
 use crate::execution_step::LiteralAggregate;
 use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
+use crate::InstructionErrors;
 use crate::UncatchableError;
 
 use air_interpreter_data::Provenance;

@@ -258,8 +258,8 @@ const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
-pub (crate) const LAST_ERROR: &str = "%last_error%";
-pub (crate) const ERROR: &str = ":error:";
+pub(crate) const LAST_ERROR: &str = "%last_error%";
+pub(crate) const ERROR: &str = ":error:";
 const TIMESTAMP: &str = "%timestamp%";
 const TTL: &str = "%ttl%";
 

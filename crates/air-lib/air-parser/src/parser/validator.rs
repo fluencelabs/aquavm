@@ -228,8 +228,8 @@ impl<'i> VariableValidator<'i> {
         use ImmutableValue::*;
 
         match instr_arg_value {
-            InitPeerId | Error(_) | LastError(_) | Timestamp | TTL | Literal(_) | Number(_) | Boolean(_)
-            | EmptyArray => {}
+            InitPeerId | Error(_) | LastError(_) | Timestamp | TTL | Literal(_) | Number(_)
+            | Boolean(_) | EmptyArray => {}
             Variable(variable) => self.met_variable(variable, span),
             VariableWithLambda(variable) => self.met_variable_wl(variable, span),
         }

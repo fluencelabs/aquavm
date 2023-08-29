@@ -15,8 +15,8 @@
  */
 
 use super::CatchableError;
-use super::Joinable;
 use super::InstructionErrorsEffector;
+use super::Joinable;
 use super::UncatchableError;
 use crate::ToErrorCode;
 
@@ -105,5 +105,4 @@ impl InstructionErrorsEffector for ExecutionError {
             ExecutionError::Uncatchable(_) => false,
         }
     }
-
 }
