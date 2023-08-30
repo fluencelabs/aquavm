@@ -66,7 +66,7 @@ impl InstructionErrorDescriptor {
             return;
         }
 
-        self.set_from_error(error, instruction, peer_id_option, tetraplet)
+        self.set_from_error(error, instruction, peer_id_option, tetraplet);
     }
 
     pub(crate) fn set_from_error(

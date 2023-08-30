@@ -47,7 +47,9 @@ use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
 
-/// Executes am instruction and updates both errors if needed.
+/// Executes an instruction and updates both %last_error% and :error: if necessary.
+/// The difference b/w the two following macroses is that the first additionaly stores
+/// peer_id in the errors whilst the second does not.
 macro_rules! execute_both_errors_w_peerid {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
@@ -60,6 +62,7 @@ macro_rules! execute_both_errors_w_peerid {
     }};
 }
 
+/// Executes an instruction and updates %last_error% and :error: if necessary.
 macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
