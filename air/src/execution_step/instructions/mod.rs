@@ -46,28 +46,18 @@ use super::ExecutionResult;
 use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
-
-/// Executes an instruction and updates both %last_error% and :error: if necessary.
-/// The difference b/w the two following macroses is that the first additionaly stores
-/// peer_id in the errors whilst the second does not.
-macro_rules! execute_both_errors_w_peerid {
-    ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
-        match $instr.execute($exec_ctx, $trace_ctx) {
-            Err(e) => {
-                $exec_ctx.set_errors_w_peerid(&e, &$instr.to_string(), None);
-                Err(e)
-            }
-            v => v,
-        }
-    }};
-}
+use air_parser::ast::PeerIDErrorLogable;
 
 /// Executes an instruction and updates %last_error% and :error: if necessary.
 macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                $exec_ctx.set_errors(&e, &$instr.to_string(), None);
+                if $instr.log_errors_with_peer_id() {
+                    $exec_ctx.set_errors_w_peerid(&e, &$instr.to_string(), None);
+                } else {
+                    $exec_ctx.set_errors(&e, &$instr.to_string(), None);
+                }
                 Err(e)
             }
             v => v,
@@ -84,11 +74,11 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
         match self {
             // call isn't wrapped by the execute macro because
             // it internally maps some Catchables into %last_error%/:error: using resolved triplet.
-            // Both canons and call set :error:.$.peerid whilst other instructions do not.
+            // Both canons and call set :error:.$.peer_id whilst other instructions do not.
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
-            Instruction::Canon(canon) => execute_both_errors_w_peerid!(self, canon, exec_ctx, trace_ctx),
-            Instruction::CanonStreamMapScalar(canon) => execute_both_errors_w_peerid!(self, canon, exec_ctx, trace_ctx),
 
+            Instruction::Canon(canon) => execute!(self, canon, exec_ctx, trace_ctx),
+            Instruction::CanonStreamMapScalar(canon) => execute!(self, canon, exec_ctx, trace_ctx),
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::ApMap(ap_map) => execute!(self, ap_map, exec_ctx, trace_ctx),
             Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),

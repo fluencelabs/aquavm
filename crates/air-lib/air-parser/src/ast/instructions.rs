@@ -188,3 +188,7 @@ pub struct New<'i> {
 /// (null)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Null;
+
+pub trait PeerIDErrorLogable {
+    fn log_errors_with_peer_id(&self) -> bool;
+}

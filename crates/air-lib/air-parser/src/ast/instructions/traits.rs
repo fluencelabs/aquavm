@@ -175,3 +175,47 @@ impl fmt::Display for New<'_> {
         write!(f, "new {}", self.argument)
     }
 }
+
+macro_rules! peer_id_error_logable {
+    ($($t:ty),+) => {
+        $(
+            impl PeerIDErrorLogable for $t {
+                fn log_errors_with_peer_id(&self) -> bool {
+                    true
+                }
+            }
+        )+
+    };
+}
+
+macro_rules! no_peer_id_error_logable {
+    ($($t:ty),+) => {
+        $(
+            impl PeerIDErrorLogable for $t {
+                fn log_errors_with_peer_id(&self) -> bool {
+                    false
+                }
+            }
+        )+
+    };
+}
+
+peer_id_error_logable!(Call<'_>, Canon<'_>, CanonStreamMapScalar<'_>);
+
+no_peer_id_error_logable!(
+    Ap<'_>,
+    ApMap<'_>,
+    Fail<'_>,
+    FoldScalar<'_>,
+    FoldStream<'_>,
+    FoldStreamMap<'_>,
+    Seq<'_>,
+    Par<'_>,
+    Xor<'_>,
+    Match<'_>,
+    MisMatch<'_>,
+    Never,
+    Next<'_>,
+    New<'_>,
+    Null
+);
