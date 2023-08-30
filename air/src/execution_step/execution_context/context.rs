@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+use super::ErrorDescriptor;
 use super::ExecutionCidState;
 use super::InstructionError;
-use super::InstructionErrorDescriptor;
+use super::LastErrorDescriptor;
 use super::Scalars;
 use super::StreamMaps;
 use super::Streams;
-use crate::execution_step::InstructionErrorsEffector;
+use crate::execution_step::ErrorEffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::ToErrorCode;
 
@@ -54,11 +55,11 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) run_parameters: RcRunParameters,
 
     /// Last error produced by local service.
-    /// None means that there weren't any error.
-    pub(crate) last_error_descriptor: InstructionErrorDescriptor,
+    /// There is the special not-an-error value means there was no error.
+    pub(crate) last_error_descriptor: LastErrorDescriptor,
 
-    /// Last error produced by some instructions, e.g. call, match, fail.
-    pub(crate) error_descriptor: InstructionErrorDescriptor,
+    /// Error produced by some instructions, e.g. call, match, fail.
+    pub(crate) error_descriptor: ErrorDescriptor,
 
     /// Indicates that previous executed subgraph is complete.
     /// A subgraph treats as a complete if all subgraph elements satisfy the following rules:
@@ -164,7 +165,7 @@ impl ExecutionCtx<'_> {
     // Tetraplet option is an implicit source of error source peer_id information.
     pub(crate) fn set_errors_w_peerid(
         &mut self,
-        error: &(impl InstructionErrorsEffector + ToErrorCode + ToString),
+        error: &(impl ErrorEffectable + ToErrorCode + ToString),
         instruction: &str,
         tetraplet: Option<RcSecurityTetraplet>,
     ) -> String {
@@ -189,7 +190,7 @@ impl ExecutionCtx<'_> {
     // This routine sets %last_error%.$.peerid but does not set this field for :error:.
     pub(crate) fn set_errors(
         &mut self,
-        error: &(impl InstructionErrorsEffector + ToErrorCode + ToString),
+        error: &(impl ErrorEffectable + ToErrorCode + ToString),
         instruction: &str,
         tetraplet: Option<RcSecurityTetraplet>,
     ) {

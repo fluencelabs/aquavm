@@ -74,7 +74,7 @@ fn fail_with_literals(
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
-    let error_object = crate::execution_step::execution_context::error_from_raw_fields(
+    let error_object = crate::execution_step::execution_context::error_from_raw_fields_w_peerid(
         error_code,
         error_message,
         &fail.to_string(),

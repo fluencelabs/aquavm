@@ -96,7 +96,6 @@ fn prepare_par_result(
     match (left_result, right_result) {
         (SubgraphResult::Succeeded, _) | (_, SubgraphResult::Succeeded) => {
             exec_ctx.last_error_descriptor.meet_par_successed_end();
-            exec_ctx.error_descriptor.meet_par_successed_end();
             Ok(())
         }
         (SubgraphResult::Failed(_), SubgraphResult::Failed(err)) => Err(err),

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+mod error_descriptor;
 mod errors;
+mod errors_utils;
 mod instruction_error_definition;
-mod instruction_error_descriptor;
+mod last_error_descriptor;
 
 pub use errors::LastErrorObjectError;
 pub use instruction_error_definition::no_error;
@@ -29,6 +31,8 @@ pub use instruction_error_definition::MESSAGE_FIELD_NAME;
 pub use instruction_error_definition::NO_ERROR_ERROR_CODE;
 pub use instruction_error_definition::NO_ERROR_MESSAGE;
 
+pub(crate) use error_descriptor::ErrorDescriptor;
+pub(super) use errors_utils::*;
 pub(crate) use instruction_error_definition::check_error_object;
-pub(crate) use instruction_error_definition::error_from_raw_fields;
-pub(crate) use instruction_error_descriptor::InstructionErrorDescriptor;
+pub(crate) use instruction_error_definition::error_from_raw_fields_w_peerid;
+pub(crate) use last_error_descriptor::LastErrorDescriptor;

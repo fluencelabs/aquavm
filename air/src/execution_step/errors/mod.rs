@@ -24,7 +24,7 @@ pub use catchable_errors::CatchableError;
 pub use execution_errors::ExecutionError;
 pub use uncatchable_errors::UncatchableError;
 
-pub(crate) use intructions_errors_effector::InstructionErrorsEffector;
+pub(crate) use intructions_errors_effector::ErrorEffectable;
 pub(crate) use joinable::Joinable;
 
 use super::Stream;

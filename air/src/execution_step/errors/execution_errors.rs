@@ -15,7 +15,7 @@
  */
 
 use super::CatchableError;
-use super::InstructionErrorsEffector;
+use super::ErrorEffectable;
 use super::Joinable;
 use super::UncatchableError;
 use crate::ToErrorCode;
@@ -91,7 +91,7 @@ impl Joinable for ExecutionError {
     }
 }
 
-impl InstructionErrorsEffector for ExecutionError {
+impl ErrorEffectable for ExecutionError {
     fn affects_last_error(&self) -> bool {
         match self {
             ExecutionError::Catchable(err) => err.affects_last_error(),
@@ -101,7 +101,7 @@ impl InstructionErrorsEffector for ExecutionError {
 
     fn affects_error(&self) -> bool {
         match self {
-            ExecutionError::Catchable(err) => err.affects_error(),
+            ExecutionError::Catchable(_) => true,
             ExecutionError::Uncatchable(_) => false,
         }
     }

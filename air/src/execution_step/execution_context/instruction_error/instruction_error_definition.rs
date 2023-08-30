@@ -33,12 +33,11 @@ pub const PEER_ID_FIELD_NAME: &str = "peer_id";
 pub const NO_ERROR_MESSAGE: &str = "";
 pub const NO_ERROR_ERROR_CODE: i64 = 0;
 
-/// This struct is intended to track the last arisen error.
-/// LastError is essentially a scalar value with support of lambda expressions.
-/// The only differences from a scalar are
-///  - it's accessed by %last_error% literal
-///  - if it's unset before the usage, JValue::Null will be used without join behaviour
-///  - it's a global scalar, meaning that fold and new scopes doesn't apply for it
+/// This struct tracks the last arisen error.
+/// :error: and %last_error% are special scalar values that support lenses.
+/// There are some differences b/w mentioned errors and an ordinary scalar:
+///  - they are set to not-an-error value by default
+///  - these are global scalars, meaning that fold and new scopes do not apply for it
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstructionError {
     /// Error object that represents the last occurred error.
@@ -51,7 +50,12 @@ pub struct InstructionError {
     pub provenance: Provenance,
 }
 
-pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str, peer_id: &str) -> JValue {
+pub(crate) fn error_from_raw_fields_w_peerid(
+    error_code: i64,
+    error_message: &str,
+    instruction: &str,
+    peer_id: &str,
+) -> JValue {
     serde_json::json!({
         ERROR_CODE_FIELD_NAME: error_code,
         MESSAGE_FIELD_NAME: error_message,
