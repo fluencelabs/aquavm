@@ -1,6 +1,7 @@
 {
   "air": "0.44.0",
   "air-interpreter": "0.44.0",
+  "tools/wasm/air-near-contract": "0.44.0",
   "avm/interface": "0.29.0",
   "avm/server": "0.33.0",
   "avm/client": "0.44.0",
