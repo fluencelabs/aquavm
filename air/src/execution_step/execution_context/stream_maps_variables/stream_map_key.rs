@@ -22,7 +22,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
-pub(crate) static KEY_FIELD: &str = "key";
+pub(crate) static KEY_FIELD_NAME: &str = "key";
 
 #[derive(Clone, PartialEq, Debug, Eq, Hash)]
 pub(crate) enum StreamMapKey<'value> {
@@ -52,13 +52,13 @@ impl<'value> StreamMapKey<'value> {
 
     pub(crate) fn from_kvpair(value: ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
-        let key = (object.get(KEY_FIELD)?).clone();
+        let key = object.get(KEY_FIELD_NAME)?.clone();
         StreamMapKey::from_value(key)
     }
 
     pub(crate) fn from_kvpair_ref(value: &'value ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
-        let key = object.get(KEY_FIELD)?;
+        let key = object.get(KEY_FIELD_NAME)?;
         StreamMapKey::from_value_ref(key)
     }
 }
@@ -75,6 +75,7 @@ impl From<u64> for StreamMapKey<'_> {
     }
 }
 
+// TODO unify all types.
 // This conversion is used to cast from numeric lambda accessor that leverages u32
 // however larpop parser grammar uses i64 for numeric keys inserting into a stream map.
 impl From<u32> for StreamMapKey<'_> {

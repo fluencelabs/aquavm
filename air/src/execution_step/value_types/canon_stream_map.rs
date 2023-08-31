@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::stream_map::VALUE_FIELD;
+use super::stream_map::VALUE_FIELD_NAME;
 use super::CanonStream;
 use super::TracePosOperate;
 use super::ValueAggregate;
@@ -38,12 +38,12 @@ use std::rc::Rc;
 /// The contents of a map are fixed at a certain node.
 #[derive(Debug, Clone)]
 pub struct CanonStreamMap<'key> {
-    // values vec contains all KVpair objects {"key": key, "value": value}.
-    // There might be multiple KVPars with the same key.
+    /// values vec contains all KVpair objects {"key": key, "value": value}.
+    /// There might be multiple KVPars with the same key.
     values: Vec<ValueAggregate>,
-    // Index access leverages the map that does key to CanonStream mapping.
+    /// Index access leverages the map that does key to CanonStream mapping.
     map: HashMap<StreamMapKey<'key>, CanonStream>,
-    // ap arg processing leverages this tetraplet
+    /// ap arg processing leverages this tetraplet
     tetraplet: Rc<SecurityTetraplet>,
 }
 
@@ -53,7 +53,8 @@ impl<'key> CanonStreamMap<'key> {
     // rendered by canon instruction.
     pub(crate) fn from_canon_stream(canon_stream: CanonStream) -> ExecutionResult<CanonStreamMap<'key>> {
         let mut map: HashMap<StreamMapKey<'_>, CanonStream> = HashMap::new();
-        let tetraplet = canon_stream.tetraplet.clone();
+        let tetraplet = canon_stream.tetraplet().clone();
+
         for kvpair_obj in canon_stream.iter() {
             let key = StreamMapKey::from_kvpair(kvpair_obj.clone())
                 .ok_or(UncatchableError::StreamMapKeyError(UnsupportedKVPairObjectOrMapKeyType))?;
@@ -62,15 +63,16 @@ impl<'key> CanonStreamMap<'key> {
             let entry_canon_stream = map
                 .entry(key)
                 .or_insert(CanonStream::new(vec![], canon_stream.tetraplet().clone()));
-            entry_canon_stream.push(&value);
+            entry_canon_stream.push(value);
         }
-        let values = canon_stream.get_values();
+
+        let values = canon_stream.into_values();
         Ok(Self { values, map, tetraplet })
     }
 
     // This returns a number of distinct keys in the canon map.
     pub(crate) fn len(&self) -> usize {
-        self.map.len()
+        self.values.len()
     }
 
     pub(crate) fn is_empty(&self) -> bool {
@@ -155,11 +157,12 @@ fn get_value_from_obj(value_aggregate: &ValueAggregate) -> ExecutionResult<Value
         .get_result()
         .as_object()
         .ok_or(UncatchableError::StreamMapKeyError(NotAnObject))?;
-    let value = object
-        .get(VALUE_FIELD)
-        .ok_or(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
-            ValueFieldIsAbsent,
-        )))?;
+    let value =
+        object
+            .get(VALUE_FIELD_NAME)
+            .ok_or(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
+                ValueFieldIsAbsent,
+            )))?;
     let result = Rc::new(value.clone());
     Ok(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
 }
@@ -235,8 +238,8 @@ mod test {
         let canon_stream_one = canon_streams.first().expect("There must be a canon stream");
         let canon_stream_two = canon_streams.last().expect("There must be a canon stream");
 
-        assert!(canon_stream_map_key_one.clone().get_values() == canon_stream_one.clone().get_values());
-        assert!(canon_stream_map_key_two.clone().get_values() == canon_stream_two.clone().get_values());
+        assert!(canon_stream_map_key_one.clone().into_values() == canon_stream_one.clone().into_values());
+        assert!(canon_stream_map_key_two.clone().into_values() == canon_stream_two.clone().into_values());
     }
 
     #[test]
@@ -253,7 +256,7 @@ mod test {
             .expect("There must be a value for this index.");
         let canon_stream_one = canon_streams.first().unwrap();
 
-        assert!(result_canon_stream.into_owned().get_values() == canon_stream_one.clone().get_values());
+        assert!(result_canon_stream.into_owned().into_values() == canon_stream_one.clone().into_values());
 
         let key_two = StreamMapKey::Str(Cow::Borrowed("key_two"));
         let result_canon_stream = canon_stream_map
@@ -261,7 +264,7 @@ mod test {
             .expect("There must be a value for this index.");
         let canon_stream_two = canon_streams.last().unwrap();
 
-        assert!(result_canon_stream.into_owned().get_values() == canon_stream_two.clone().get_values());
+        assert!(result_canon_stream.into_owned().into_values() == canon_stream_two.clone().into_values());
     }
 
     #[test]
@@ -275,6 +278,6 @@ mod test {
         let index_result = canon_stream_map.indexa(&absent_key).unwrap();
 
         let empty_canon = CanonStream::from_values(vec![], peer_pk.into());
-        assert_eq!(empty_canon.get_values(), index_result.into_owned().get_values());
+        assert_eq!(empty_canon.into_values(), index_result.into_owned().into_values());
     }
 }

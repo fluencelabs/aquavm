@@ -32,7 +32,7 @@ use std::rc::Rc;
 pub struct CanonStream {
     values: Vec<ValueAggregate>,
     // tetraplet is needed to handle adding canon streams as a whole to a stream
-    pub(super) tetraplet: Rc<SecurityTetraplet>,
+    tetraplet: Rc<SecurityTetraplet>,
 }
 
 impl CanonStream {
@@ -78,11 +78,11 @@ impl CanonStream {
         &self.tetraplet
     }
 
-    pub(crate) fn push(&mut self, value_aggregate: &ValueAggregate) {
+    pub(crate) fn push(&mut self, value_aggregate: ValueAggregate) {
         self.values.push(value_aggregate.clone());
     }
 
-    pub fn get_values(self) -> Vec<ValueAggregate> {
+    pub fn into_values(self) -> Vec<ValueAggregate> {
         self.values
     }
 }

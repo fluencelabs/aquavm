@@ -40,17 +40,21 @@ use std::rc::Rc;
 impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
-        log_instruction!(canon_map, exec_ctx, trace_ctx);
+        log_instruction!(canon, exec_ctx, trace_ctx);
         let epilog = &epilog_closure(self.canon_stream_map.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
+        let create_canon_producer = create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
         match canon_result {
-            MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
-            }
+            MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                epilog,
+                &create_canon_producer,
+                canon_result,
+                &self.peer_id,
+                exec_ctx,
+                trace_ctx,
+            ),
             MergerCanonResult::Empty => {
-                let create_canon_producer =
-                    create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
                 handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -72,7 +76,7 @@ fn epilog_closure<'closure, 'name: 'closure>(canon_stream_map_name: &'name str) 
                 .scalars
                 .set_canon_map_value(canon_stream_map_name, canon_stream_map_with_provenance)?;
 
-            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            trace_ctx.meet_canon_end(CanonResult::executed(canon_result_cid));
 
             Ok(())
         },

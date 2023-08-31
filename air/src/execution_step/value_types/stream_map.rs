@@ -18,7 +18,7 @@ use super::Generation;
 use super::Stream;
 use super::ValueAggregate;
 use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
-use crate::execution_step::execution_context::stream_map_key::KEY_FIELD;
+use crate::execution_step::execution_context::stream_map_key::KEY_FIELD_NAME;
 use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
@@ -28,10 +28,10 @@ use air_trace_handler::TraceHandler;
 use serde_json::json;
 use std::rc::Rc;
 
-pub(super) static VALUE_FIELD: &str = "value";
+pub(super) static VALUE_FIELD_NAME: &str = "value";
 
 pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
-    Rc::new(json!({ KEY_FIELD: key, VALUE_FIELD: value }))
+    Rc::new(json!({ KEY_FIELD_NAME: key, VALUE_FIELD_NAME: value }))
 }
 
 #[derive(Debug, Default, Clone)]
@@ -82,7 +82,7 @@ impl StreamMap {
     }
 
     /// Returns an iterator to JSON objects {"key": value} where all keys are unique.
-    pub(crate) fn iter_kvpair_as_in_json(&self) -> impl Iterator<Item = ValueAggregate> + '_ {
+    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = ValueAggregate> + '_ {
         use std::collections::HashSet;
         let mut met_keys = HashSet::new();
 
@@ -98,7 +98,7 @@ impl StreamMap {
             // This monadic chain casts numeric and string keys to string so that string "42" and
             // number 42 are considered equal.
             let key = obj
-                .and_then(|obj| obj.get(KEY_FIELD))
+                .and_then(|obj| obj.get(KEY_FIELD_NAME))
                 .and_then(StreamMapKey::from_value_ref)
                 .and_then(|key| {
                     if met_keys.insert(key.to_string()) {
@@ -108,7 +108,7 @@ impl StreamMap {
                     }
                 })?;
 
-            let value = obj.and_then(|obj| obj.get(VALUE_FIELD))?;
+            let value = obj.and_then(|obj| obj.get(VALUE_FIELD_NAME))?;
 
             let result = Rc::new(json!({ key.to_string(): value }));
             Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
@@ -370,7 +370,7 @@ mod test {
     }
 
     #[test]
-    fn test_iter_kvpair_as_in_json() {
+    fn test_iter_unique_key_object() {
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
@@ -384,7 +384,7 @@ mod test {
         );
 
         let mut stream_map_json_kvpairs = StreamMap::new();
-        stream_map_json_kvpairs.insert(key.into(), &value, Generation::current(0));
+        let _ = stream_map_json_kvpairs.insert(key.into(), &value, Generation::current(0));
 
         bulk_insert_into_map(
             &mut stream_map_json_kvpairs,
@@ -392,7 +392,7 @@ mod test {
             vec![0, 0, 2, 2, 2, 1, 3],
             vec![0, 1, 1, 3, 4, 4, 2],
         );
-        let mut iter = stream_map_json_kvpairs.iter_kvpair_as_in_json();
+        let mut iter = stream_map_json_kvpairs.iter_unique_key_object();
 
         assert_eq!(&json!(2), iter.next().unwrap().get_result().get("2").unwrap());
         assert_eq!(&json!(0), iter.next().unwrap().get_result().get("0").unwrap());
@@ -423,7 +423,7 @@ mod test {
             vec![0, 1, 1, 3, 4, 4, 2],
         );
 
-        let mut iter_json_kvpairs = stream_map_json_kvpairs.iter_kvpair_as_in_json();
+        let mut iter_json_kvpairs = stream_map_json_kvpairs.iter_unique_key_object();
 
         assert_eq!(
             iter.next().unwrap().get_result().get("value").unwrap(),

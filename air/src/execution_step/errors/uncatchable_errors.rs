@@ -16,10 +16,10 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::execution_step::STREAM_MAX_SIZE;
 use crate::CanonStreamMapError;
 use crate::StreamMapError;
 use crate::StreamMapKeyError;
-use crate::execution_step::STREAM_MAX_SIZE;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;

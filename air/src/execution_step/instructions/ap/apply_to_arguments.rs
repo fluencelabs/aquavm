@@ -192,7 +192,7 @@ fn apply_canon_stream_map(
 
     let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
     let value = JValuable::as_jvalue(&&canon_stream_map.canon_stream_map).into_owned();
-    let tetraplet = canon_stream_map.tetraplet().clone();
+    let tetraplet = canon_stream_map.tetraplet();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
     let value = CanonResultAggregate::new(
         Rc::new(value),
