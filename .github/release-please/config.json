@@ -15,7 +15,7 @@
         "air",
         "air-interpreter",
         "avm-client",
-        "avm-near-contract"
+        "air-near-contract"
       ]
     }
   ],
