@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.45.0](https://github.com/fluencelabs/aquavm/compare/air-v0.44.0...air-v0.45.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324]
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([#677](https://github.com/fluencelabs/aquavm/issues/677))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([f943dd0](https://github.com/fluencelabs/aquavm/commit/f943dd00cd8e06546252b5caf04117869abe5b8a))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([#677](https://github.com/fluencelabs/aquavm/issues/677)) ([f943dd0](https://github.com/fluencelabs/aquavm/commit/f943dd00cd8e06546252b5caf04117869abe5b8a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.10.0 to 0.11.0
+    * air-trace-handler bumped from 0.4.0 to 0.5.0
+
 ## [0.44.0](https://github.com/fluencelabs/aquavm/compare/air-v0.43.1...air-v0.44.0) (2023-08-17)
 
 
