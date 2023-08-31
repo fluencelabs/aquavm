@@ -19,7 +19,6 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
 use air_interpreter_data::Provenance;
-use air_lambda_ast::LambdaAST;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::json;
@@ -142,9 +141,4 @@ pub fn no_error() -> InstructionError {
         tetraplet: None,
         provenance: Provenance::literal(),
     }
-}
-
-pub enum InstructionErrors<'lens> {
-    LastError(&'lens Option<LambdaAST<'lens>>),
-    Error(&'lens Option<LambdaAST<'lens>>),
 }

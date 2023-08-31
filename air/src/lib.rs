@@ -41,7 +41,6 @@ pub use execution_step::execution_context::no_error;
 pub use execution_step::execution_context::no_error_object;
 pub use execution_step::execution_context::ExecutionCidState;
 pub use execution_step::execution_context::InstructionError;
-pub use execution_step::execution_context::InstructionErrors;
 pub use execution_step::execution_context::NO_ERROR_ERROR_CODE;
 pub use execution_step::execution_context::NO_ERROR_MESSAGE;
 pub use execution_step::CatchableError;

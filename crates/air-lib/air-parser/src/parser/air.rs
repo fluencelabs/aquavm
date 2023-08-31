@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: a42fd012277905c882e5eb4af3f2210fb940e235167fee6a3e3fdd1023b585ba
+// sha3: 43c234155bd84447b9c1a496043db3afb3097d1b81ca307bffb0cc5e5f235c22
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -6158,7 +6158,7 @@ fn __action63<
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
-    ImmutableValue::Error(None)
+    ImmutableValue::Error(InstructionErrorAST::new(None))
 }
 
 #[allow(unused_variables)]
@@ -6174,7 +6174,7 @@ fn __action64<
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
-    ImmutableValue::Error(Some(le))
+    ImmutableValue::Error(InstructionErrorAST::new(Some(le)))
 }
 
 #[allow(unused_variables)]
@@ -6399,7 +6399,7 @@ fn __action78<
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
-    ApArgument::Error(None)
+    ApArgument::Error(InstructionErrorAST::new(None))
 }
 
 #[allow(unused_variables)]
@@ -6415,7 +6415,7 @@ fn __action79<
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ApArgument<'input>
 {
-    ApArgument::LastError(Some(le))
+    ApArgument::Error(InstructionErrorAST::new(Some(le)))
 }
 
 #[allow(unused_variables)]

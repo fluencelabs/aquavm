@@ -24,7 +24,6 @@ pub use errors::LastErrorObjectError;
 pub use instruction_error_definition::no_error;
 pub use instruction_error_definition::no_error_object;
 pub use instruction_error_definition::InstructionError;
-pub use instruction_error_definition::InstructionErrors;
 pub use instruction_error_definition::ERROR_CODE_FIELD_NAME;
 pub use instruction_error_definition::INSTRUCTION_FIELD_NAME;
 pub use instruction_error_definition::MESSAGE_FIELD_NAME;

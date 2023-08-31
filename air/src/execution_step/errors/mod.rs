@@ -16,7 +16,7 @@
 
 mod catchable_errors;
 mod execution_errors;
-mod intructions_errors_effector;
+mod error_effectable;
 mod joinable;
 mod uncatchable_errors;
 
@@ -24,7 +24,7 @@ pub use catchable_errors::CatchableError;
 pub use execution_errors::ExecutionError;
 pub use uncatchable_errors::UncatchableError;
 
-pub(crate) use intructions_errors_effector::ErrorEffectable;
+pub(crate) use error_effectable::ErrorEffectable;
 pub(crate) use joinable::Joinable;
 
 use super::Stream;
