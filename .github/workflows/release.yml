@@ -73,10 +73,14 @@ jobs:
         run: cargo set-version ${{ steps.version.outputs.version }}
         working-directory: crates/interpreter-wasm
 
+      - name: Set air-near-contract version
+        run: cargo set-version ${{ steps.version.outputs.version }}
+        working-directory: tools/wasm/air-near-contract
+
       - name: Commit version bump
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "chore: Bump air-interpreter version to ${{ steps.version.outputs.version }}"
+          commit_message: "chore: Bump air-interpreter and air-near-contract version to ${{ steps.version.outputs.version }}"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           commit_user_name: fluencebot
           commit_user_email: devops@fluence.one
