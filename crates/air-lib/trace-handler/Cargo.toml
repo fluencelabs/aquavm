@@ -1,6 +1,6 @@
 [package]
 name = "air-trace-handler"
-version = "0.5.0"
+version = "0.4.0"
 description = "Implementation of AIR trace handler"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -14,7 +14,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-interpreter-cid = { version = "0.3.0", path = "../interpreter-cid" }
-air-interpreter-data = { version = "0.11.0", path = "../interpreter-data" }
+air-interpreter-data = { version = "0.10.0", path = "../interpreter-data" }
 air-log-targets = { version = "0.1.0", path = "../log-targets" }
 aquavm-air-parser = { version = "0.8.1", path = "../air-parser" }
 polyplets = { version = "0.5.0", path = "../polyplets" }
