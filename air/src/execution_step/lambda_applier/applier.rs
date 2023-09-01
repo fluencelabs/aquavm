@@ -110,6 +110,8 @@ fn select_by_path_from_canon_map<'value>(
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<Cow<'value, JValue>> {
     use crate::execution_step::value_types::CanonStream;
+    use crate::CanonStreamMapError::IndexAccessCanNotReturnCanonStream;
+    use crate::UncatchableError;
 
     let (prefix, body) = lambda.split_first();
 
@@ -126,27 +128,22 @@ fn select_by_path_from_canon_map<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
-    let canon_stream_opt = canon_map.index(&stream_map_key);
+
     // There will be an empty canon stream if the key was not found.
-    let result = match canon_stream_opt {
-        Some(canon_stream) => {
-            if body.is_empty() {
-                let value = canon_stream.as_jvalue();
-                Cow::Owned(value)
-            } else {
-                let canon_stream_va_iter = canon_stream.iter().map(|v| v.get_result().deref());
-                let new_lambda = NonEmpty::try_from(body.to_vec()).unwrap();
-                let LambdaResult { result, .. } =
-                    select_by_path_from_stream(canon_stream_va_iter, &new_lambda, exec_ctx)?;
-                result
-            }
-        }
-        None => {
-            let empty_canon_stream = CanonStream::new(vec![], canon_map.tetraplet().clone());
-            let value = empty_canon_stream.as_jvalue();
-            Cow::Owned(value)
-        }
+    let canon_stream = canon_map
+        .index(&stream_map_key)
+        .ok_or_else(|| CanonStream::new(vec![], canon_map.tetraplet().clone()))
+        .map_err(|_| UncatchableError::CanonStreamMapError(IndexAccessCanNotReturnCanonStream))?;
+    let result = if body.is_empty() {
+        let value = canon_stream.as_jvalue();
+        Cow::Owned(value)
+    } else {
+        let canon_stream_va_iter = canon_stream.iter().map(|v| v.get_result().deref());
+        let new_lambda = NonEmpty::try_from(body.to_vec()).unwrap();
+        let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_va_iter, &new_lambda, exec_ctx)?;
+        result
     };
+
     Ok(result)
 }
 

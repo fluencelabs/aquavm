@@ -29,7 +29,6 @@ use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResultCidAggregate;
 use polyplets::SecurityTetraplet;
 
-use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -99,18 +98,6 @@ impl<'key> CanonStreamMap<'key> {
 
     pub(crate) fn index<'self_l>(&'self_l self, stream_map_key: &StreamMapKey<'key>) -> Option<&'self_l CanonStream> {
         self.map.get(stream_map_key)
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn indexa<'self_l>(
-        &'self_l self,
-        stream_map_key: &StreamMapKey<'key>,
-    ) -> ExecutionResult<Cow<'self_l, CanonStream>> {
-        let canon_stream = self.map.get(stream_map_key).map_or(
-            Cow::Owned(CanonStream::new(vec![], self.tetraplet().clone())),
-            Cow::Borrowed,
-        );
-        Ok(canon_stream)
     }
 }
 
@@ -252,32 +239,18 @@ mod test {
         let key_one = StreamMapKey::Str(Cow::Borrowed("key_one"));
 
         let result_canon_stream = canon_stream_map
-            .indexa(&key_one)
+            .index(&key_one)
             .expect("There must be a value for this index.");
         let canon_stream_one = canon_streams.first().unwrap();
 
-        assert!(result_canon_stream.into_owned().into_values() == canon_stream_one.clone().into_values());
+        assert!(result_canon_stream.clone().into_values() == canon_stream_one.clone().into_values());
 
         let key_two = StreamMapKey::Str(Cow::Borrowed("key_two"));
         let result_canon_stream = canon_stream_map
-            .indexa(&key_two)
+            .index(&key_two)
             .expect("There must be a value for this index.");
         let canon_stream_two = canon_streams.last().unwrap();
 
-        assert!(result_canon_stream.into_owned().into_values() == canon_stream_two.clone().into_values());
-    }
-
-    #[test]
-    fn test_index_absent_key() {
-        let peer_pk = "some_tetraplet";
-        let (kvpair_vec, _, _) = create_va_canon_and_keys_vecs(peer_pk);
-        let canon_stream = CanonStream::from_values(kvpair_vec, peer_pk.into());
-        let canon_stream_map = CanonStreamMap::from_canon_stream(canon_stream).unwrap();
-
-        let absent_key = StreamMapKey::Str(Cow::Borrowed("absent_key"));
-        let index_result = canon_stream_map.indexa(&absent_key).unwrap();
-
-        let empty_canon = CanonStream::from_values(vec![], peer_pk.into());
-        assert_eq!(empty_canon.into_values(), index_result.into_owned().into_values());
+        assert!(result_canon_stream.clone().into_values() == canon_stream_two.clone().into_values());
     }
 }

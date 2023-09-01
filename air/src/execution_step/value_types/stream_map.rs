@@ -93,12 +93,12 @@ impl StreamMap {
             let provenance = value_aggregate.get_provenance();
             let (value, tetraplet, trace_pos) = value_aggregate.as_inner_parts();
 
-            let obj = value.as_object();
+            let object = value.as_object()?;
 
             // This monadic chain casts numeric and string keys to string so that string "42" and
             // number 42 are considered equal.
-            let key = obj
-                .and_then(|obj| obj.get(KEY_FIELD_NAME))
+            let key = object
+                .get(KEY_FIELD_NAME)
                 .and_then(StreamMapKey::from_value_ref)
                 .and_then(|key| {
                     if met_keys.insert(key.to_string()) {
@@ -108,7 +108,7 @@ impl StreamMap {
                     }
                 })?;
 
-            let value = obj.and_then(|obj| obj.get(VALUE_FIELD_NAME))?;
+            let value = object.get(VALUE_FIELD_NAME)?;
 
             let result = Rc::new(json!({ key.to_string(): value }));
             Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))

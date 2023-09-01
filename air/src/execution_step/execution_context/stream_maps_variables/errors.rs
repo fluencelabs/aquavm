@@ -31,6 +31,9 @@ pub enum CanonStreamMapError {
 
     #[error("there is an index with no corresponding value")]
     NonexistentMappingIdx,
+
+    #[error("can not find canon map in the execution context or produce an empty canon stream doing an index access")]
+    IndexAccessCanNotReturnCanonStream,
 }
 
 #[derive(Debug, Clone, ThisError)]
