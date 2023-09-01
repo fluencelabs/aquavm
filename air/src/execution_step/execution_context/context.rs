@@ -21,7 +21,7 @@ use super::LastErrorDescriptor;
 use super::Scalars;
 use super::StreamMaps;
 use super::Streams;
-use crate::execution_step::ErrorEffectable;
+use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::ToErrorCode;
 
@@ -165,7 +165,7 @@ impl ExecutionCtx<'_> {
     // Tetraplet option is an implicit source of error source peer_id information.
     pub(crate) fn set_errors_w_peerid(
         &mut self,
-        error: &(impl ErrorEffectable + ToErrorCode + ToString),
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         tetraplet: Option<RcSecurityTetraplet>,
     ) -> String {
@@ -190,7 +190,7 @@ impl ExecutionCtx<'_> {
     // This routine sets %last_error%.$.peerid but does not set this field for :error:.
     pub(crate) fn set_errors(
         &mut self,
-        error: &(impl ErrorEffectable + ToErrorCode + ToString),
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         tetraplet: Option<RcSecurityTetraplet>,
     ) {

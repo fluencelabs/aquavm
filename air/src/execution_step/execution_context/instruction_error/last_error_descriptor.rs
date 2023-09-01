@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ use air_interpreter_data::Provenance;
 
 use super::no_error;
 use super::InstructionError;
-use crate::execution_step::ErrorEffectable;
+use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -37,7 +37,7 @@ pub(crate) struct LastErrorDescriptor {
 impl LastErrorDescriptor {
     pub(crate) fn try_to_set_last_error_from_exec_error(
         &mut self,
-        error: &(impl ErrorEffectable + ToErrorCode + ToString),
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         peer_id_option: Option<&str>,
         tetraplet: Option<RcSecurityTetraplet>,

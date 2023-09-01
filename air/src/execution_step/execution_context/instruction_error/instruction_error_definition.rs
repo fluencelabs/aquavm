@@ -63,7 +63,7 @@ pub(crate) fn error_from_raw_fields_w_peerid(
     })
 }
 
-pub(crate) fn error_from_raw_fields_no_peerid(error_code: i64, error_message: &str, instruction: &str) -> JValue {
+pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str) -> JValue {
     serde_json::json!({
         ERROR_CODE_FIELD_NAME: error_code,
         MESSAGE_FIELD_NAME: error_message,

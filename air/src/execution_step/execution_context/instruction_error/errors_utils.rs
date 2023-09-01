@@ -16,10 +16,10 @@
 
 use air_interpreter_data::Provenance;
 
-use super::instruction_error_definition::error_from_raw_fields_no_peerid;
+use super::instruction_error_definition::error_from_raw_fields;
 use super::instruction_error_definition::error_from_raw_fields_w_peerid;
 use super::InstructionError;
-use crate::execution_step::ErrorEffectable;
+use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -27,7 +27,7 @@ use crate::ToErrorCode;
 use std::rc::Rc;
 
 pub(crate) fn get_instruction_error_from_exec_error(
-    error: &(impl ErrorEffectable + ToErrorCode + ToString),
+    error: &(impl ErrorAffectable + ToErrorCode + ToString),
     instruction: &str,
     peer_id_option: Option<&str>,
     tetraplet: Option<RcSecurityTetraplet>,
@@ -55,7 +55,7 @@ pub(crate) fn get_instruction_error_from_ingredients(
 ) -> InstructionError {
     let error_object = match peer_id_option {
         Some(peer_id) => error_from_raw_fields_w_peerid(error_code, error_message, instruction, peer_id),
-        None => error_from_raw_fields_no_peerid(error_code, error_message, instruction),
+        None => error_from_raw_fields(error_code, error_message, instruction),
     };
     get_instruction_error_from_error_object(Rc::new(error_object), tetraplet, provenance)
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::ErrorEffectable;
+use super::ErrorAffectable;
 use super::Joinable;
 use crate::execution_step::execution_context::errors::StreamMapError;
 use crate::execution_step::execution_context::LastErrorObjectError;
@@ -119,7 +119,7 @@ impl ToErrorCode for CatchableError {
     }
 }
 
-impl ErrorEffectable for CatchableError {
+impl ErrorAffectable for CatchableError {
     fn affects_last_error(&self) -> bool {
         !matches!(
             self,

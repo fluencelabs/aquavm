@@ -15,7 +15,7 @@
  */
 
 /// This trait controls whether to set %last_error% and :error: or not.
-pub(crate) trait ErrorEffectable {
+pub(crate) trait ErrorAffectable {
     /// Return true, if this error type affects last error
     /// (meaning that it should be set after occurring such an error).
     fn affects_last_error(&self) -> bool;

@@ -16,7 +16,7 @@
 
 use super::no_error;
 use super::InstructionError;
-use crate::execution_step::ErrorEffectable;
+use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::ToErrorCode;
 
@@ -27,15 +27,13 @@ pub(crate) struct ErrorDescriptor {
 impl ErrorDescriptor {
     pub(crate) fn try_to_set_error_from_exec_error(
         &mut self,
-        error: &(impl ErrorEffectable + ToErrorCode + ToString),
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         peer_id_option: Option<&str>,
         tetraplet: Option<RcSecurityTetraplet>,
     ) {
         use super::get_instruction_error_from_exec_error;
 
-        // This check is an optimization to prevent creation of an error object in case if error
-        // must not be set.
         if !error.affects_error() {
             return;
         }
@@ -47,7 +45,7 @@ impl ErrorDescriptor {
         &self.error
     }
 
-    pub(crate) fn set_error_to_no_error(&mut self) {
+    pub(crate) fn clear_error(&mut self) {
         self.error = no_error();
     }
 }

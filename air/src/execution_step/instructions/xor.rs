@@ -38,7 +38,7 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
                 // This sets :error: to a no-error state.
                 // Please note the right_subgraph_result might be an Error that bubbles up to an :error:
                 // above this execute().
-                exec_ctx.error_descriptor.set_error_to_no_error();
+                exec_ctx.error_descriptor.clear_error();
                 right_subgraph_result
             }
             res => res,
