@@ -162,7 +162,9 @@ impl ExecutionCtx<'_> {
         self.subgraph_completeness = true;
     }
 
-    // This routine sets %last_error%.$.peerid but does not set this field for :error:.
+    // This routine sets %last_error% and :error:.
+    // Most instructions, except Call, Canon, CanonMapScalar does not set :error:.$.peer_id b/c
+    // it would be a non-deterministic peer_id.
     pub(crate) fn set_errors(
         &mut self,
         error: &(impl ErrorAffectable + ToErrorCode + ToString),
