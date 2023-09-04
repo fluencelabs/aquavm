@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air"
-version = "0.45.0"
+version = "0.45.1"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -16,16 +16,16 @@ path = "src/lib.rs"
 doctest = false
 
 [dependencies]
-aquavm-air-parser = { version = "0.8.1", path = "../crates/air-lib/air-parser" }
-air-execution-info-collector = { version = "0.7.7", path = "../crates/air-lib/execution-info-collector" }
+aquavm-air-parser = { version = "0.8.2", path = "../crates/air-lib/air-parser" }
+air-execution-info-collector = { version = "0.7.8", path = "../crates/air-lib/execution-info-collector" }
 air-interpreter-cid = { version = "0.3.0", path = "../crates/air-lib/interpreter-cid" }
-air-interpreter-data = { version = "0.11.0", path = "../crates/air-lib/interpreter-data" }
+air-interpreter-data = { version = "0.11.1", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-signatures = { version = "0.1.1", path = "../crates/air-lib/interpreter-signatures" }
 air-interpreter-interface = { version = "0.15.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }
-air-trace-handler = { version = "0.5.0", path = "../crates/air-lib/trace-handler" }
+air-trace-handler = { version = "0.5.1", path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.1.1", path = "../crates/air-lib/utils" }
 polyplets = { version = "0.5.0", path = "../crates/air-lib/polyplets" }
 fluence-keypair = { version = "0.10.1", default-features = false }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.1...air-parser-v0.8.2) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
 ## [0.8.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.0...air-parser-v0.8.1) (2023-08-03)
 
 
