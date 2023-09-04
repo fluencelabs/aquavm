@@ -225,7 +225,11 @@ fn call_canon_stream_map_arg() {
 
     let map_value_1 = json!({"key": "key", "value": "value1"});
     let map_value_2 = json!({"key": -42, "value": "value2"});
-    let map_value = json!([map_value_1, map_value_2]);
+
+    let map_value = json!({
+        "-42": ["value2"],
+        "key": ["value1"],
+    });
 
     let expected_trace: Vec<ExecutedState> = vec![
         executed_state::ap(0),
@@ -292,7 +296,10 @@ fn call_peer_id_from_canon_stream_map() {
 
     let map_value_1 = json!({"key": "peerid", "value": vm_1_peer_id});
     let map_value_2 = json!({"key": -42, "value": "value2"});
-    let map_value = json!([map_value_1, map_value_2]);
+    let map_value = json!({
+        "-42": ["value2"],
+        "peerid": [vm_1_peer_id],
+    });
 
     let expected_trace: Vec<ExecutedState> = vec![
         executed_state::ap(0),
@@ -361,7 +368,10 @@ fn call_module_func_from_canon_stream_map() {
 
     let map_value_1 = json!({"key": "module", "value": "m"});
     let map_value_2 = json!({"key": "function", "value": "f"});
-    let map_value = json!([map_value_1, map_value_2]);
+    let map_value = json!({
+        "function": ["f"],
+        "module": ["m"],
+    });
 
     let expected_trace: Vec<ExecutedState> = vec![
         executed_state::ap(0),
@@ -391,7 +401,7 @@ fn call_module_func_from_canon_stream_map() {
             args = [map_value]
         ),
     ];
-    println!("{:#?}", cid_tracker);
+
     assert_eq!(
         actual_trace, expected_trace,
         "{:#?}\n {:#?}",

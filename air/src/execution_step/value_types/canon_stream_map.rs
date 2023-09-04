@@ -79,13 +79,9 @@ impl<'key> CanonStreamMap<'key> {
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
-        // TODO: this clone will be removed after boxed values
-        let jvalue_array = self
-            .values
-            .iter()
-            .map(|r| r.get_result().deref().clone())
-            .collect::<Vec<_>>();
-        JValue::Array(jvalue_array)
+        let json_map: serde_json::Map<String, JValue> =
+            self.map.iter().map(|(k, v)| (k.to_string(), v.as_jvalue())).collect();
+        json_map.into()
     }
 
     pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {

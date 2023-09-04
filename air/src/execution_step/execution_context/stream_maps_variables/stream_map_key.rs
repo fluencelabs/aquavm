@@ -61,6 +61,23 @@ impl<'value> StreamMapKey<'value> {
         let key = object.get(KEY_FIELD_NAME)?;
         StreamMapKey::from_value_ref(key)
     }
+
+    pub(crate) fn into_owned(self) -> StreamMapKey<'static> {
+        match self {
+            StreamMapKey::Str(s) => {
+                let s = s.to_string();
+                StreamMapKey::Str(Cow::Owned(s))
+            }
+            StreamMapKey::U64(n) => {
+                let n = n;
+                StreamMapKey::U64(n)
+            }
+            StreamMapKey::I64(n) => {
+                let n = n;
+                StreamMapKey::I64(n)
+            }
+        }
+    }
 }
 
 impl From<i64> for StreamMapKey<'_> {

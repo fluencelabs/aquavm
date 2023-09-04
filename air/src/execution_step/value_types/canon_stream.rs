@@ -79,7 +79,7 @@ impl CanonStream {
     }
 
     pub(crate) fn push(&mut self, value_aggregate: ValueAggregate) {
-        self.values.push(value_aggregate.clone());
+        self.values.push(value_aggregate);
     }
 
     pub fn into_values(self) -> Vec<ValueAggregate> {
