@@ -41,6 +41,7 @@ impl JValuable for &CanonStreamMap<'_> {
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
         let value = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
 
+        // TODO improve tetraplet granularity for a canon map with a lens. See VM-331 for the details.
         // Canon map result is a canon stream rendered on this node thus its tetraplet
         // is also calculated and canon map provenance is borrowed.
         let tetraplet = SecurityTetraplet::new(self.tetraplet().peer_pk.to_owned(), "", "", lambda.to_string());
