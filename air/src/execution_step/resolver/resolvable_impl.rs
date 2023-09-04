@@ -65,7 +65,7 @@ pub(crate) fn resolve_const(
 
 fn resolve_errors(
     instruction_error: &crate::InstructionError,
-    lens_option: &Option<LambdaAST<'_>>,
+    lens: &Option<LambdaAST<'_>>,
     ctx: &ExecutionCtx<'_>,
 ) -> Result<(serde_json::Value, Vec<Rc<SecurityTetraplet>>, Provenance), crate::ExecutionError> {
     use crate::execution_step::InstructionError;
@@ -76,7 +76,7 @@ fn resolve_errors(
         provenance,
     } = instruction_error;
 
-    let jvalue = match lens_option {
+    let jvalue = match lens {
         Some(error_accessor) => select_by_lambda_from_scalar(error.as_ref(), error_accessor, ctx)?.into_owned(),
         None => error.as_ref().clone(),
     };
@@ -96,7 +96,7 @@ fn resolve_errors(
 impl<'lens> Resolvable for InstructionErrorAST<'lens> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         let instruction_error = ctx.error();
-        resolve_errors(instruction_error, &self.lens_option, ctx)
+        resolve_errors(instruction_error, &self.lens, ctx)
     }
 }
 

@@ -91,5 +91,5 @@ pub struct StreamMap<'i> {
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct InstructionErrorAST<'lens> {
     #[serde(borrow)]
-    pub lens_option: Option<LambdaAST<'lens>>,
+    pub lens: Option<LambdaAST<'lens>>,
 }

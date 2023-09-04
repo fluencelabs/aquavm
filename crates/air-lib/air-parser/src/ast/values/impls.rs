@@ -127,7 +127,7 @@ impl<'i> StreamMap<'i> {
 }
 
 impl<'lens> InstructionErrorAST<'lens> {
-    pub fn new(lens_option: Option<LambdaAST<'lens>>) -> Self {
-        Self { lens_option }
+    pub fn new(lens: Option<LambdaAST<'lens>>) -> Self {
+        Self { lens }
     }
 }

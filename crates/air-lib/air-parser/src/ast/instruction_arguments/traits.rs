@@ -196,9 +196,9 @@ fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) ->
 fn display_error(f: &mut fmt::Formatter, error: &InstructionErrorAST) -> fmt::Result {
     use crate::parser::ERROR;
 
-    let InstructionErrorAST { lens_option } = error;
+    let InstructionErrorAST { lens } = error;
 
-    match lens_option {
+    match lens {
         Some(lens) => write!(f, "{ERROR}{lens}"),
         None => write!(f, "{ERROR}"),
     }
