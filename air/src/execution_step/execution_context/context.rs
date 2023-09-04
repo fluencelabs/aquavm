@@ -162,47 +162,37 @@ impl ExecutionCtx<'_> {
         self.subgraph_completeness = true;
     }
 
-    // Tetraplet option is an implicit source of error source peer_id information.
-    pub(crate) fn set_errors_w_peerid(
-        &mut self,
-        error: &(impl ErrorAffectable + ToErrorCode + ToString),
-        instruction: &str,
-        tetraplet: Option<RcSecurityTetraplet>,
-    ) -> String {
-        let peer_id = match &tetraplet {
-            // use tetraplet if they set, because an error could be propagated from data
-            // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
-            // a peer where the error was occurred
-            Some(tetraplet) => tetraplet.peer_pk.clone(),
-            None => self.run_parameters.current_peer_id.to_string(),
-        };
-        self.last_error_descriptor.try_to_set_last_error_from_exec_error(
-            error,
-            instruction,
-            Some(&peer_id),
-            tetraplet.clone(),
-        );
-        self.error_descriptor
-            .try_to_set_error_from_exec_error(error, instruction, Some(&peer_id), tetraplet);
-        peer_id
-    }
-
     // This routine sets %last_error%.$.peerid but does not set this field for :error:.
     pub(crate) fn set_errors(
         &mut self,
         error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
         tetraplet: Option<RcSecurityTetraplet>,
+        use_tetraplet_and_log_peer_id: bool,
     ) {
-        let peer_id = self.run_parameters.current_peer_id.as_ref();
+        let last_error_peer_id = match &tetraplet {
+            // use tetraplet if they set, because an error could be propagated from data
+            // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
+            // a peer where the error was occurred
+            Some(tetraplet) if use_tetraplet_and_log_peer_id => Some(tetraplet.peer_pk.as_str()),
+            _ => Some(self.run_parameters.current_peer_id.as_str()),
+        };
+
         self.last_error_descriptor.try_to_set_last_error_from_exec_error(
             error,
             instruction,
-            Some(peer_id),
+            last_error_peer_id,
             tetraplet.clone(),
         );
+
+        let peer_id = if use_tetraplet_and_log_peer_id {
+            last_error_peer_id
+        } else {
+            None
+        };
+
         self.error_descriptor
-            .try_to_set_error_from_exec_error(error, instruction, None, tetraplet);
+            .try_to_set_error_from_exec_error(error, instruction, peer_id, tetraplet.clone());
     }
 }
 

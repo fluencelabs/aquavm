@@ -55,18 +55,29 @@ fn set_errors<'i>(
     execution_error: ExecutionError,
     tetraplet: Option<RcSecurityTetraplet>,
 ) -> ExecutionError {
+    use air_parser::ast::PeerIDErrorLogable;
+
     let catchable_error = match execution_error {
         ExecutionError::Catchable(catchable) => catchable,
         ExecutionError::Uncatchable(_) => return execution_error,
     };
 
-    let current_peer_id = exec_ctx.set_errors_w_peerid(catchable_error.as_ref(), &call.to_string(), tetraplet);
-
-    log::debug!(
-        "call failed with an error `{}`, peerId `{}`",
-        catchable_error,
-        current_peer_id
+    exec_ctx.set_errors(
+        catchable_error.as_ref(),
+        &call.to_string(),
+        tetraplet.clone(),
+        call.log_errors_with_peer_id(),
     );
+
+    let peer_id = match &tetraplet {
+        // use tetraplet if it is set, because an error could be propagated from data
+        // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
+        // a peer where the error was occurred
+        Some(tetraplet) => tetraplet.peer_pk.as_str(),
+        None => exec_ctx.run_parameters.current_peer_id.as_str(),
+    };
+
+    log::debug!("call failed with an error `{}`, peerId `{}`", catchable_error, peer_id);
 
     ExecutionError::Catchable(catchable_error)
 }

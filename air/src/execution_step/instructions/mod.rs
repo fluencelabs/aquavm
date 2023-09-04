@@ -53,11 +53,7 @@ macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                if $instr.log_errors_with_peer_id() {
-                    $exec_ctx.set_errors_w_peerid(&e, &$instr.to_string(), None);
-                } else {
-                    $exec_ctx.set_errors(&e, &$instr.to_string(), None);
-                }
+                $exec_ctx.set_errors(&e, &$instr.to_string(), None, $instr.log_errors_with_peer_id());
                 Err(e)
             }
             v => v,

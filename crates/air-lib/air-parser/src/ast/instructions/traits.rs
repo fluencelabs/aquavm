@@ -180,6 +180,7 @@ macro_rules! peer_id_error_logable {
     ($($t:ty),+) => {
         $(
             impl PeerIDErrorLogable for $t {
+                #[inline]
                 fn log_errors_with_peer_id(&self) -> bool {
                     true
                 }
@@ -192,6 +193,7 @@ macro_rules! no_peer_id_error_logable {
     ($($t:ty),+) => {
         $(
             impl PeerIDErrorLogable for $t {
+                #[inline]
                 fn log_errors_with_peer_id(&self) -> bool {
                     false
                 }
