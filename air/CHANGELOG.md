@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.45.1](https://github.com/fluencelabs/aquavm/compare/air-v0.45.0...air-v0.45.1) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+    * air-execution-info-collector bumped from 0.7.7 to 0.7.8
+    * air-interpreter-data bumped from 0.11.0 to 0.11.1
+    * air-trace-handler bumped from 0.5.0 to 0.5.1
+
 ## [0.45.0](https://github.com/fluencelabs/aquavm/compare/air-v0.44.0...air-v0.45.0) (2023-08-31)
 
 
