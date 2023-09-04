@@ -86,3 +86,10 @@ pub struct StreamMap<'i> {
     pub name: &'i str,
     pub position: AirPos,
 }
+
+/// An error wrapper with an optional lens.
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct InstructionErrorAST<'lens> {
+    #[serde(borrow)]
+    pub lens: Option<LambdaAST<'lens>>,
+}

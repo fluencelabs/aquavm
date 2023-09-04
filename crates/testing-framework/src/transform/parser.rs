@@ -135,7 +135,10 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
 fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         recognize(pair(
-            many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
+            many1_count(alt((
+                value((), alphanumeric1),
+                value((), one_of("_-.:$#%")),
+            ))),
             opt(terminated(
                 delimited(tag("["), parse_sexp_symbol, tag("]")),
                 opt(tag("!")),

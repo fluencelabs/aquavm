@@ -40,10 +40,10 @@ pub mod errors_prelude {
 
 pub(super) use self::instructions::ExecutableInstruction;
 pub(super) use self::instructions::FoldState;
+pub(crate) use errors::ErrorAffectable;
 pub(crate) use errors::Joinable;
-pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
-pub(crate) use execution_context::LastError;
+pub(crate) use execution_context::InstructionError;
 pub(super) use value_types::CanonResultAggregate;
 pub(super) use value_types::Generation;
 pub(super) use value_types::LiteralAggregate;

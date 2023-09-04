@@ -21,6 +21,7 @@ use super::CanonStream;
 use super::CanonStreamWithLambda;
 use super::ImmutableVariable;
 use super::ImmutableVariableWithLambda;
+use super::InstructionErrorAST;
 use super::Scalar;
 use super::ScalarWithLambda;
 use super::Stream;
@@ -68,6 +69,7 @@ pub struct Triplet<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ImmutableValue<'i> {
     InitPeerId,
+    Error(InstructionErrorAST<'i>),
     LastError(Option<LambdaAST<'i>>),
     Timestamp,
     TTL,
@@ -93,6 +95,7 @@ pub enum ApArgument<'i> {
     InitPeerId,
     Timestamp,
     TTL,
+    Error(InstructionErrorAST<'i>),
     LastError(Option<LambdaAST<'i>>),
     Literal(&'i str),
     Number(Number),

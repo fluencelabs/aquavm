@@ -155,6 +155,7 @@ impl<'i> VariableValidator<'i> {
             | ApArgument::Literal(_)
             | ApArgument::EmptyArray
             | ApArgument::LastError(_) => {}
+            ApArgument::Error(_) => {}
             ApArgument::Scalar(scalar) => self.met_scalar(scalar, span),
             ApArgument::ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
             ApArgument::CanonStream(canon_stream) => self.met_canon_stream(canon_stream, span),
@@ -227,8 +228,8 @@ impl<'i> VariableValidator<'i> {
         use ImmutableValue::*;
 
         match instr_arg_value {
-            InitPeerId | LastError(_) | Timestamp | TTL | Literal(_) | Number(_) | Boolean(_)
-            | EmptyArray => {}
+            InitPeerId | Error(_) | LastError(_) | Timestamp | TTL | Literal(_) | Number(_)
+            | Boolean(_) | EmptyArray => {}
             Variable(variable) => self.met_variable(variable, span),
             VariableWithLambda(variable) => self.met_variable_wl(variable, span),
         }
@@ -323,6 +324,7 @@ impl<'i> VariableValidator<'i> {
             | ImmutableValue::Number(_)
             | ImmutableValue::Boolean(_)
             | ImmutableValue::Literal(_)
+            | ImmutableValue::Error(_)
             | ImmutableValue::LastError(_)
             | ImmutableValue::EmptyArray => {}
             ImmutableValue::Variable(variable) => self.met_variable(variable, span),

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use super::ErrorAffectable;
 use super::Joinable;
-use super::LastErrorAffectable;
 use crate::execution_step::execution_context::errors::StreamMapError;
 use crate::execution_step::execution_context::LastErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
@@ -40,11 +40,11 @@ pub enum CatchableError {
     LocalServiceError(i32, Rc<String>),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
-    #[error("match is used without corresponding xor")]
+    #[error("compared values do not match")]
     MatchValuesNotEqual,
 
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("mismatch is used without corresponding xor")]
+    #[error("compared values do not mismatch")]
     MismatchValuesEqual,
 
     /// Variable with such a name wasn't defined during AIR script execution.
@@ -119,12 +119,16 @@ impl ToErrorCode for CatchableError {
     }
 }
 
-impl LastErrorAffectable for CatchableError {
+impl ErrorAffectable for CatchableError {
     fn affects_last_error(&self) -> bool {
         !matches!(
             self,
             CatchableError::MatchValuesNotEqual | CatchableError::MismatchValuesEqual
         )
+    }
+
+    fn affects_error(&self) -> bool {
+        true
     }
 }
 

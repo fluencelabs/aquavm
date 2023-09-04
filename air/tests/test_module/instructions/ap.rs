@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -198,16 +198,57 @@ fn ap_with_last_error() {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
-                    "result": no_error_last_error_object(),
+                    "result": no_error_object(),
                     "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
         })),
         unused!(
-            json!([no_error_last_error_object()]),
+            json!([no_error_object()]),
             peer = vm_1_peer_id,
-            args = [no_error_last_error_object()]
+            args = [no_error_object()]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_state);
+    assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_with_error() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (ap :error: $stream)
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
+        "#
+    );
+
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::ap(0),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "values": [
+                {
+                    "result": no_error_object(),
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "trace_pos": 0
+                }
+            ]
+        })),
+        unused!(
+            json!([no_error_object()]),
+            peer = vm_1_peer_id,
+            args = [no_error_object()]
         ),
     ];
 
@@ -589,11 +630,11 @@ fn ap_stream_map_with_undefined_last_error() {
             SubTraceDesc::new(3.into(), 0),
         )]),
         unused!(
-            no_error_last_error_object(),
+            no_error_object(),
             peer = vm_1_peer_id,
             service = "m",
             function = "f",
-            args = [no_error_last_error_object()]
+            args = [no_error_object()]
         ),
     ];
 

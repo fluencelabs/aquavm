@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::unsupported_map_key_type;
 use air::CatchableError;
 use air::LambdaError;
@@ -608,7 +608,55 @@ fn undefined_last_error_functor() {
         .expect("invalid test AIR script");
     let result = executor.execute_all(local_peer_id).unwrap();
 
-    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_last_error_object());
+    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_object());
+    assert!(check_error(&result.last().unwrap(), expected_error));
+}
+
+#[test]
+fn undefined_error_functor() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+    (xor
+        (match 1 2
+            (null)
+        )
+        (call "local_peer_id" ("test" "error_code") [:error:.length] scalar)
+    )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let error_object = json!({"error_code":10001, "instruction":"match 1 2","message":"compared values do not match"});
+    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(error_object);
+    assert!(check_error(&result.last().unwrap(), expected_error));
+}
+
+#[test]
+fn undefined_error_peerid() {
+    let local_peer_id = "local_peer_id";
+    let script = format!(
+        r#"
+    (xor
+        (match 1 2
+            (null)
+        )
+        (call "local_peer_id" ("test" "error_code") [:error:.$.peerid] scalar)
+    )
+    "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(local_peer_id).unwrap();
+
+    let value = json!({"error_code":10001, "instruction":"match 1 2", "message":"compared values do not match"});
+    let field_name = "peerid".into();
+    let expected_error =
+        air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField { value, field_name });
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
@@ -631,7 +679,7 @@ fn undefined_last_error_instruction() {
     let result = executor.execute_all(local_peer_id).unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
-        value: no_error_last_error_object(),
+        value: no_error_object(),
         field_name: "instruction".to_string(),
     });
     assert!(check_error(&&result.last().unwrap(), expected_error));
@@ -655,7 +703,7 @@ fn undefined_last_error_peer_id() {
     let result = executor.execute_all(local_peer_id).unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
-        value: no_error_last_error_object(),
+        value: no_error_object(),
         field_name: "peer_id".to_string(),
     });
     assert!(check_error(&&result.last().unwrap(), expected_error));
