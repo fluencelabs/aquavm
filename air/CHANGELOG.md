@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.46.0](https://github.com/fluencelabs/aquavm/compare/air-v0.45.1...air-v0.46.0) (2023-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** bump minimal support version ([#691](https://github.com/fluencelabs/aquavm/issues/691))
+
+### Features
+
+* **data:** bump minimal support version ([#691](https://github.com/fluencelabs/aquavm/issues/691)) ([b13dd51](https://github.com/fluencelabs/aquavm/commit/b13dd515da3b88a8b65ed1ca60682055e227bad9))
+
 ## [0.45.1](https://github.com/fluencelabs/aquavm/compare/air-v0.45.0...air-v0.45.1) (2023-09-04)
 
 
