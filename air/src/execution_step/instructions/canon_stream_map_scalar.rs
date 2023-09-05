@@ -110,7 +110,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .unwrap_or_default();
 
         let value = stream_map
-            .iter_unique_key_object_()
+            .iter_unique_key_object()
             .collect::<serde_json::Map<String, JValue>>();
 
         let value = ValueAggregate::from_literal_result(LiteralAggregate::new(

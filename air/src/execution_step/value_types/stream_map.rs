@@ -81,9 +81,7 @@ impl StreamMap {
         })
     }
 
-    #[allow(dead_code)]
-    /// Returns an iterator to JSON objects {"key": value} where all keys are unique.
-    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = ValueAggregate> + '_ {
+    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
         use std::collections::HashSet;
         let mut met_keys = HashSet::new();
 
@@ -91,41 +89,7 @@ impl StreamMap {
         // 1. There might be key values overlap, given the key value is casted to String, e.g. 42 vs "42".
         // 2. The original kvpair key field has an unsupported type, e.g. float.
         self.stream.iter().filter_map(move |value_aggregate| {
-            let provenance = value_aggregate.get_provenance();
-            let (value, tetraplet, trace_pos) = value_aggregate.as_inner_parts();
-
-            let object = value.as_object()?;
-
-            // This monadic chain casts numeric and string keys to string so that string "42" and
-            // number 42 are considered equal.
-            let key = object
-                .get(KEY_FIELD_NAME)
-                .and_then(StreamMapKey::from_value_ref)
-                .and_then(|key| {
-                    if met_keys.insert(key.to_string()) {
-                        Some(key)
-                    } else {
-                        None
-                    }
-                })?;
-
-            let value = object.get(VALUE_FIELD_NAME)?;
-
-            let result = Rc::new(json!({ key.to_string(): value }));
-            Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
-        })
-    }
-
-    pub(crate) fn iter_unique_key_object_(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
-        use std::collections::HashSet;
-        let mut met_keys = HashSet::new();
-
-        // There are two issues with this implementation:
-        // 1. There might be key values overlap, given the key value is casted to String, e.g. 42 vs "42".
-        // 2. The original kvpair key field has an unsupported type, e.g. float.
-        self.stream.iter().filter_map(move |value_aggregate| {
-            let _provenance = value_aggregate.get_provenance();
-            let (value, _tetraplet, _trace_pos) = value_aggregate.as_inner_parts();
+            let (value, ..) = value_aggregate.as_inner_parts();
 
             let object = value.as_object()?;
 
@@ -145,7 +109,6 @@ impl StreamMap {
             let value = object.get(VALUE_FIELD_NAME)?.clone();
 
             Some((key.to_string(), value))
-            // Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
         })
     }
 }
@@ -428,10 +391,10 @@ mod test {
         );
         let mut iter = stream_map_json_kvpairs.iter_unique_key_object();
 
-        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("2").unwrap());
-        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("0").unwrap());
-        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("3").unwrap());
-        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("1").unwrap());
+        assert_eq!(("2".into(), json!(2)), iter.next().unwrap());
+        assert_eq!(("0".into(), json!(0)), iter.next().unwrap());
+        assert_eq!(("3".into(), json!(3)), iter.next().unwrap());
+        assert_eq!(("1".into(), json!(1)), iter.next().unwrap());
         assert_eq!(iter.next(), None);
     }
 
@@ -459,22 +422,13 @@ mod test {
 
         let mut iter_json_kvpairs = stream_map_json_kvpairs.iter_unique_key_object();
 
-        assert_eq!(
-            iter.next().unwrap().get_result().get("value").unwrap(),
-            iter_json_kvpairs.next().unwrap().get_result().get("0").unwrap()
-        );
-        assert_eq!(
-            iter.next().unwrap().get_result().get("value").unwrap(),
-            iter_json_kvpairs.next().unwrap().get_result().get("2").unwrap()
-        );
-        assert_eq!(
-            iter.next().unwrap().get_result().get("value").unwrap(),
-            iter_json_kvpairs.next().unwrap().get_result().get("3").unwrap()
-        );
-        assert_eq!(
-            iter.next().unwrap().get_result().get("value").unwrap(),
-            iter_json_kvpairs.next().unwrap().get_result().get("1").unwrap()
-        );
+        for _ in 0..4 {
+            assert_eq!(
+                *iter.next().unwrap().get_result().get("value").unwrap(),
+                iter_json_kvpairs.next().unwrap().1
+            );
+        }
+
         assert_eq!(iter.next(), None);
     }
 }
