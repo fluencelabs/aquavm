@@ -34,11 +34,11 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 /// Canon stream map is a read-only struct that mimics conventional map.
-/// The contents of a map are fixed at a certain node.
+/// The contents of a map are fixed at a specific peer.
 #[derive(Debug, Clone)]
 pub struct CanonStreamMap<'key> {
-    /// values vec contains all KVpair objects {"key": key, "value": value}.
-    /// There might be multiple KVPars with the same key.
+    /// Contains all key-value pair objects in this form {"key": key, "value": value}.
+    /// There might be multiple pairs with the same key.
     values: Vec<ValueAggregate>,
     /// Index access leverages the map that does key to CanonStream mapping.
     map: HashMap<StreamMapKey<'key>, CanonStream>,
@@ -55,7 +55,7 @@ impl<'key> CanonStreamMap<'key> {
         let tetraplet = canon_stream.tetraplet().clone();
 
         for kvpair_obj in canon_stream.iter() {
-            let key = StreamMapKey::from_kvpair(kvpair_obj.clone())
+            let key = StreamMapKey::from_kvpair_owned(kvpair_obj)
                 .ok_or(UncatchableError::StreamMapKeyError(UnsupportedKVPairObjectOrMapKeyType))?;
 
             let value = get_value_from_obj(kvpair_obj)?;
@@ -69,7 +69,7 @@ impl<'key> CanonStreamMap<'key> {
         Ok(Self { values, map, tetraplet })
     }
 
-    // This returns a number of distinct keys in the canon map.
+    // This returns a number of values in a canon map.
     pub(crate) fn len(&self) -> usize {
         self.values.len()
     }
@@ -103,7 +103,7 @@ impl fmt::Display for CanonStreamMap<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for (key, canon_stream) in self.map.iter() {
-            write!(f, "{key:?} : {canon_stream:?}, ")?;
+            write!(f, "{key} : {canon_stream}, ")?;
         }
         write!(f, "]")
     }

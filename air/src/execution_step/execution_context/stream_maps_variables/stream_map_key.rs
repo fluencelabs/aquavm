@@ -24,6 +24,8 @@ use std::fmt::Formatter;
 
 pub(crate) static KEY_FIELD_NAME: &str = "key";
 
+// TODO refactor the keys so that integer and string
+// value domains overlap would become impossible or less harmful.
 #[derive(Clone, PartialEq, Debug, Eq, Hash)]
 pub(crate) enum StreamMapKey<'value> {
     Str(Cow<'value, str>),
@@ -50,13 +52,13 @@ impl<'value> StreamMapKey<'value> {
         }
     }
 
-    pub(crate) fn from_kvpair(value: ValueAggregate) -> Option<Self> {
+    pub(crate) fn from_kvpair_owned(value: &ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
         let key = object.get(KEY_FIELD_NAME)?.clone();
         StreamMapKey::from_value(key)
     }
 
-    pub(crate) fn from_kvpair_ref(value: &'value ValueAggregate) -> Option<Self> {
+    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
         let object = value.get_result().as_object()?;
         let key = object.get(KEY_FIELD_NAME)?;
         StreamMapKey::from_value_ref(key)
@@ -68,14 +70,8 @@ impl<'value> StreamMapKey<'value> {
                 let s = s.to_string();
                 StreamMapKey::Str(Cow::Owned(s))
             }
-            StreamMapKey::U64(n) => {
-                let n = n;
-                StreamMapKey::U64(n)
-            }
-            StreamMapKey::I64(n) => {
-                let n = n;
-                StreamMapKey::I64(n)
-            }
+            StreamMapKey::U64(n) => StreamMapKey::U64(n),
+            StreamMapKey::I64(n) => StreamMapKey::I64(n),
         }
     }
 }
@@ -126,7 +122,7 @@ impl<'value> Serialize for StreamMapKey<'value> {
     }
 }
 
-// This trait impl proposfully prints numbers the same way as strings
+// This trait impl proposefully prints numbers the same way as strings
 // to use it in map-to-scalar cast.
 impl<'value> Display for StreamMapKey<'value> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

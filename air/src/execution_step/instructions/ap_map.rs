@@ -44,7 +44,7 @@ impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
         let result = apply_to_arg(&self.value, exec_ctx, trace_ctx, true)?;
 
         let merger_ap_result = to_merger_ap_map_result(&self, trace_ctx)?;
-        let key = recall_key_if_needed(&self.key, exec_ctx, self.map.name)?;
+        let key = resolve_key_if_needed(&self.key, exec_ctx, self.map.name)?;
         populate_context(key, &self.map, &merger_ap_result, result, exec_ctx)?;
         trace_ctx.meet_ap_end(ApResult::stub());
 
@@ -68,7 +68,7 @@ fn populate_context<'ctx>(
     exec_ctx.stream_maps.add_stream_map_value(key, value_descriptor)
 }
 
-fn recall_key_if_needed<'ctx>(
+fn resolve_key_if_needed<'ctx>(
     key: &StreamMapKeyClause<'ctx>,
     exec_ctx: &mut ExecutionCtx<'ctx>,
     map_name: &str,

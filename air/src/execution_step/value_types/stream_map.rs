@@ -75,7 +75,7 @@ impl StreamMap {
         let mut met_keys = HashSet::new();
 
         self.stream.iter().filter(move |value| {
-            StreamMapKey::from_kvpair_ref(value)
+            StreamMapKey::from_kvpair(value)
                 .map(|key| met_keys.insert(key))
                 .unwrap_or(false)
         })
@@ -88,7 +88,7 @@ impl StreamMap {
 
         // There are two issues with this implementation:
         // 1. There might be key values overlap, given the key value is casted to String, e.g. 42 vs "42".
-        // 2. If they original kvpair key field might has an unsupported type, e.g. float.
+        // 2. The original kvpair key field has an unsupported type, e.g. float.
         self.stream.iter().filter_map(move |value_aggregate| {
             let provenance = value_aggregate.get_provenance();
             let (value, tetraplet, trace_pos) = value_aggregate.as_inner_parts();

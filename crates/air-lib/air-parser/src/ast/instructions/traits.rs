@@ -213,7 +213,7 @@ macro_rules! no_peer_id_error_logable {
     };
 }
 
-peer_id_error_logable!(Call<'_>, Canon<'_>, CanonStreamMapScalar<'_>);
+peer_id_error_logable!(Call<'_>, Canon<'_>, CanonMap<'_>, CanonStreamMapScalar<'_>);
 
 no_peer_id_error_logable!(
     Ap<'_>,
