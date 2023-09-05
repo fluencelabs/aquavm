@@ -81,6 +81,7 @@ impl StreamMap {
         })
     }
 
+    #[allow(dead_code)]
     /// Returns an iterator to JSON objects {"key": value} where all keys are unique.
     pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = ValueAggregate> + '_ {
         use std::collections::HashSet;
@@ -112,6 +113,39 @@ impl StreamMap {
 
             let result = Rc::new(json!({ key.to_string(): value }));
             Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
+        })
+    }
+
+    pub(crate) fn iter_unique_key_object_(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
+        use std::collections::HashSet;
+        let mut met_keys = HashSet::new();
+
+        // There are two issues with this implementation:
+        // 1. There might be key values overlap, given the key value is casted to String, e.g. 42 vs "42".
+        // 2. The original kvpair key field has an unsupported type, e.g. float.
+        self.stream.iter().filter_map(move |value_aggregate| {
+            let _provenance = value_aggregate.get_provenance();
+            let (value, _tetraplet, _trace_pos) = value_aggregate.as_inner_parts();
+
+            let object = value.as_object()?;
+
+            // This monadic chain casts numeric and string keys to string so that string "42" and
+            // number 42 are considered equal.
+            let key = object
+                .get(KEY_FIELD_NAME)
+                .and_then(StreamMapKey::from_value_ref)
+                .and_then(|key| {
+                    if met_keys.insert(key.to_string()) {
+                        Some(key)
+                    } else {
+                        None
+                    }
+                })?;
+
+            let value = object.get(VALUE_FIELD_NAME)?.clone();
+
+            Some((key.to_string(), value))
+            // Some(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
         })
     }
 }

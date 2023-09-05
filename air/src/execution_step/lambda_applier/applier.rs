@@ -127,10 +127,20 @@ fn select_by_path_from_canon_map<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
+    let canon_stream = canon_map.index(&stream_map_key);
+
     // There will be an empty canon stream if the key was not found.
-    let canon_stream = canon_map
-        .index(&stream_map_key)
-        .ok_or_else(|| {
+    let result = match (NonEmpty::try_from(body.to_vec()), canon_stream) {
+        (Ok(body_part), Some(canon_stream)) => {
+            let canon_stream_iter = canon_stream.iter().map(|v| v.get_result().deref());
+            let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_iter, &body_part, exec_ctx)?;
+            result
+        }
+        (Err(..), Some(canon_stream)) => {
+            let value = canon_stream.as_jvalue();
+            Cow::Owned(value)
+        }
+        _ => {
             let SecurityTetraplet {
                 peer_pk,
                 service_id,
@@ -140,19 +150,10 @@ fn select_by_path_from_canon_map<'value>(
             let json_path = json_path.to_string() + &prefix.to_string();
 
             let tetraplet = SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into();
-            CanonStream::new(vec![], tetraplet)
-        })
-        .unwrap();
-
-    let result = if let Ok(body_part) = NonEmpty::try_from(body.to_vec()) {
-        let canon_stream_iter = canon_stream.iter().map(|v| v.get_result().deref());
-        let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_iter, &body_part, exec_ctx)?;
-        result
-    } else {
-        let value = canon_stream.as_jvalue();
-        Cow::Owned(value)
+            let value = CanonStream::new(vec![], tetraplet).as_jvalue();
+            Cow::Owned(value)
+        }
     };
-
     Ok(result)
 }
 

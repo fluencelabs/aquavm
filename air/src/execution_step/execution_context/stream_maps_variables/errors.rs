@@ -26,14 +26,8 @@ pub enum StreamMapError {
 /// CanonStreamMap related errors.
 #[derive(Debug, Clone, ThisError)]
 pub enum CanonStreamMapError {
-    #[error("there is no such index in the canon stream map")]
-    IndexIsAbsentInTheMap,
-
-    #[error("there is an index with no corresponding value")]
-    NonexistentMappingIdx,
-
-    #[error("can not find canon map in the execution context or produce an empty canon stream doing an index access")]
-    IndexAccessCanNotReturnCanonStream,
+    #[error("can not find JValue to produce scalar from")]
+    NoDataToProduceScalar,
 }
 
 #[derive(Debug, Clone, ThisError)]
