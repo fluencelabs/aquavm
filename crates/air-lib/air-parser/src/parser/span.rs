@@ -22,6 +22,8 @@ use serde::Serialize;
 use std::ops::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Span {
     pub left: AirPos,
     pub right: AirPos,

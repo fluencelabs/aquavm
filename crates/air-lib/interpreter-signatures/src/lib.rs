@@ -164,6 +164,7 @@ impl SignatureTracker {
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
 pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
 
 impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {

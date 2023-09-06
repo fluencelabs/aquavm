@@ -26,6 +26,8 @@ use std::rc::Rc;
 // TODO: sort instruction in alphanumeric order
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub enum Instruction<'i> {
     Call(Call<'i>),
     Ap(Ap<'i>),
@@ -50,6 +52,8 @@ pub enum Instruction<'i> {
 
 /// (call (peer part of a triplet: PeerPart) (function part of a triplet: FunctionPart) [arguments] output)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Call<'i> {
     pub triplet: Triplet<'i>,
     pub args: Rc<Vec<ImmutableValue<'i>>>,
@@ -58,6 +62,8 @@ pub struct Call<'i> {
 
 /// (ap argument result)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Ap<'i> {
     pub argument: ApArgument<'i>,
     pub result: ApResult<'i>,
@@ -65,6 +71,8 @@ pub struct Ap<'i> {
 
 /// (ap key value %map)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct ApMap<'i> {
     pub key: ApMapKey<'i>,
     pub value: ApArgument<'i>,
@@ -73,6 +81,8 @@ pub struct ApMap<'i> {
 
 /// (canon peer_id $stream #canon_stream)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Canon<'i> {
     pub peer_id: ResolvableToPeerIdVariable<'i>,
     pub stream: Stream<'i>,
@@ -81,6 +91,8 @@ pub struct Canon<'i> {
 
 /// (canon peer_id #stream_map scalar)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CanonStreamMapScalar<'i> {
     pub peer_id: ResolvableToPeerIdVariable<'i>,
     pub stream_map: StreamMap<'i>,
@@ -89,18 +101,25 @@ pub struct CanonStreamMapScalar<'i> {
 
 /// (seq instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 /// (par instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
 pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 /// (xor instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
 
 /// (match left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Match<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
@@ -109,6 +128,8 @@ pub struct Match<'i> {
 
 /// (mismatch left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct MisMatch<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
@@ -119,6 +140,8 @@ pub struct MisMatch<'i> {
 /// (fail %last_error%)
 /// (fail value)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub enum Fail<'i> {
     Scalar(Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
@@ -132,6 +155,8 @@ pub enum Fail<'i> {
 
 /// (fold scalar_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct FoldScalar<'i> {
     #[serde(borrow)]
     pub iterable: FoldScalarIterable<'i>,
@@ -145,6 +170,8 @@ pub struct FoldScalar<'i> {
 
 /// (fold stream_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct FoldStream<'i> {
     pub iterable: Stream<'i>,
     #[serde(borrow)]
@@ -157,6 +184,8 @@ pub struct FoldStream<'i> {
 
 /// (fold stream_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct FoldStreamMap<'i> {
     pub iterable: StreamMap<'i>,
     #[serde(borrow)]
@@ -169,16 +198,22 @@ pub struct FoldStreamMap<'i> {
 
 /// (fold stream_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Next<'i> {
     pub iterator: Scalar<'i>,
 }
 
 /// (never)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Never;
 
 /// (new variable instruction)
 #[derive(Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct New<'i> {
     pub argument: NewArgument<'i>,
     pub instruction: Box<Instruction<'i>>,
@@ -187,4 +222,6 @@ pub struct New<'i> {
 
 /// (null)
 #[derive(Serialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Null;

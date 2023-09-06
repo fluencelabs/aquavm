@@ -24,6 +24,8 @@ use std::fmt::Display;
 type GenerationIdxType = u32;
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(transparent)]
 #[repr(transparent)]
 pub struct GenerationIdx(GenerationIdxType);

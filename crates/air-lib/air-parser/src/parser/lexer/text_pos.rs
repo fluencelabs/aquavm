@@ -22,6 +22,8 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Clone, Copy, Debug, Default, Hash, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord,
 )]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(transparent)]
 #[repr(transparent)]
 pub struct AirPos(usize);

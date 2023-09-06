@@ -31,18 +31,24 @@ use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct ParResult {
     pub left_size: u32,
     pub right_size: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub enum Sender {
     PeerId(Rc<String>),
     PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
@@ -80,6 +86,8 @@ pub enum CallResult {
  * ```
  */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
     /// The call value is stored to a scalar variable.
@@ -94,6 +102,8 @@ pub enum ValueRef {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CallServiceFailed {
     pub ret_code: i32,
     /// This field contains a JSON-serialized value, not a plain error message.
@@ -111,6 +121,8 @@ impl CallServiceFailed {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
 pub struct ServiceResultCidAggregate {
@@ -139,6 +151,8 @@ pub struct ServiceResultCidAggregate {
 /// two intervals (left and right), each of these intervals has borders [begin, end).
 /// So, this struct describes position inside overall execution_step trace belongs to one fold iteration.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub struct FoldSubTraceLore {
     /// Position of current value in a trace.
@@ -154,6 +168,8 @@ pub struct FoldSubTraceLore {
 
 /// Descriptor of a subtrace inside execution trace.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub struct SubTraceDesc {
     /// Start position in a trace of this subtrace.
@@ -170,6 +186,8 @@ pub struct SubTraceDesc {
 pub type FoldLore = Vec<FoldSubTraceLore>;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub struct FoldResult {
     pub lore: FoldLore,
@@ -177,6 +195,8 @@ pub struct FoldResult {
 
 /// Describes result of applying functor `apply` to streams.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub struct ApResult {
     #[serde(rename = "gens")]
@@ -185,6 +205,8 @@ pub struct ApResult {
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub enum CanonResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
@@ -194,6 +216,8 @@ pub enum CanonResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResultCidAggregate {
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
@@ -202,6 +226,8 @@ pub struct CanonResultCidAggregate {
 
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CanonCidAggregate {
     pub value: Rc<CID<serde_json::Value>>,
     pub tetraplet: Rc<CID<SecurityTetraplet>>,
@@ -209,6 +235,8 @@ pub struct CanonCidAggregate {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Provenance {
     Literal,
@@ -223,6 +251,8 @@ pub enum Provenance {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutedState {
     #[serde(with = "par_serializer")]

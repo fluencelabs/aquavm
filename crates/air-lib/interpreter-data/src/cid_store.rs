@@ -27,6 +27,8 @@ use std::{collections::HashMap, rc::Rc};
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CidStore<Val>(HashMap<Rc<CID<Val>>, Rc<Val>>);
 
 impl<Val> CidStore<Val> {

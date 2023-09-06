@@ -33,8 +33,14 @@ use std::fmt;
 use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes, compare(PartialEq, PartialOrd)))]
+#[cfg_attr(feature = "rkyv", omit_bounds)]  // TODO look close, it can be misuse
 #[serde(transparent)]
-pub struct CID<T: ?Sized>(String, #[serde(skip)] PhantomData<*const T>);
+pub struct CID<T: ?Sized>(
+    String,
+    #[serde(skip)]
+    PhantomData<*const T>);
 
 impl<T: ?Sized> CID<T> {
     pub fn new(cid: impl Into<String>) -> Self {
@@ -75,6 +81,24 @@ impl<Val> std::hash::Hash for CID<Val> {
 impl<T: ?Sized> From<CID<T>> for String {
     fn from(value: CID<T>) -> Self {
         value.0
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<T: ?Sized> PartialEq for ArchivedCID<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<T: ?Sized> Eq for ArchivedCID<T> {}
+
+#[cfg(feature = "rkyv")]
+impl<Val> std::hash::Hash for ArchivedCID<Val> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+        self.1.hash(state);
     }
 }
 
