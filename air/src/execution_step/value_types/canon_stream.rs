@@ -85,10 +85,6 @@ impl CanonStream {
     pub fn into_values(self) -> Vec<ValueAggregate> {
         self.values
     }
-
-    pub fn get_values(&self) -> &Vec<ValueAggregate> {
-        &self.values
-    }
 }
 
 use std::fmt;

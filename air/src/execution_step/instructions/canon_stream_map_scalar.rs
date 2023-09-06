@@ -76,8 +76,10 @@ fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<Can
             let tetraplet = canon_stream.tetraplet().clone();
             let peer_pk = tetraplet.peer_pk.as_str().into();
 
+            // Here canon_stream is a transport that brings a single JValue rendered
+            // by the producer closure previously.
             let value = canon_stream
-                .get_values()
+                .into_values()
                 .first()
                 .ok_or(UncatchableError::CanonStreamMapError(NoDataToProduceScalar))?
                 .get_result()
@@ -119,6 +121,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             0.into(),
         ));
 
+        // This single value is a map of StreamMap unique keys to values.
         CanonStream::from_values(vec![value], peer_pk)
     })
 }
