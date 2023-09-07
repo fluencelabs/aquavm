@@ -377,7 +377,7 @@ fn fold_on_stream_with_last_null() {
 }
 
 #[test]
-fn fold_on_canon_stream() {
+fn fold_on_canon_stream_obsolete_syntax() {
     let canon_stream = "#canon_stream";
     let iterator = "iterator";
     let source_code = format!(
@@ -393,6 +393,27 @@ fn fold_on_canon_stream() {
         null(),
         None,
         Span::new(9.into(), 45.into()),
+    );
+    assert_eq!(instruction, expected);
+}
+
+#[test]
+fn fold_on_canon_stream() {
+    let canon_stream = "#$canon_stream";
+    let iterator = "iterator";
+    let source_code = format!(
+        r#"
+        (fold {canon_stream} {iterator} (null))
+    "#
+    );
+
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_canon_stream(
+        CanonStream::new(canon_stream, 15.into()),
+        Scalar::new(iterator, 30.into()),
+        null(),
+        None,
+        Span::new(9.into(), 46.into()),
     );
     assert_eq!(instruction, expected);
 }
@@ -446,4 +467,25 @@ fn parse_fold_with_xor_par_seq() {
         );
         assert_eq!(instruction, expected);
     }
+}
+
+#[test]
+fn fold_on_canon_stream_map() {
+    let canon_map = "#%canon_map";
+    let iterator = "iterator";
+    let source_code = format!(
+        r#"
+        (fold {canon_map} {iterator} (null))
+    "#
+    );
+
+    let instruction = parse(&source_code);
+    let expected = fold_scalar_canon_stream_map(
+        CanonStreamMap::new("#%canon_map", 15.into()),
+        Scalar::new(iterator, 27.into()),
+        null(),
+        None,
+        Span::new(9.into(), 43.into()),
+    );
+    assert_eq!(instruction, expected);
 }

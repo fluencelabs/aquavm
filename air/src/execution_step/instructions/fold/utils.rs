@@ -94,6 +94,47 @@ pub(crate) fn create_canon_stream_iterable_value<'ctx>(
     Ok(FoldIterableScalar::ScalarBased(iterable))
 }
 
+/// Creates iterable value for a canon stream map.
+pub(crate) fn create_canon_stream_map_iterable_value(
+    ast_canon_stream_map: &ast::CanonStreamMap<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<FoldIterableScalar> {
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+
+    if canon_stream_map.is_empty() {
+        return Ok(FoldIterableScalar::Empty);
+    }
+
+    // TODO: this one is a relatively long operation and will be refactored in Boxed Value
+    // Can not create iterable from existing CanonStreamMap b/c CSM contains a map with
+    // a limited lifetime but the boxed value needs static lifetime.
+    let values = canon_stream_map.iter().cloned().collect::<Vec<_>>();
+    let iterable_ingredients = CanonStreamMapIterableIngredients::init(values);
+    let iterable = Box::new(iterable_ingredients);
+    Ok(FoldIterableScalar::ScalarBased(iterable))
+}
+
+/// Creates iterable value for a canon stream map with a lens applied.
+pub(crate) fn create_canon_stream_map_wl_iterable_value(
+    ast_canon_stream_map: &ast::CanonStreamMapWithLambda<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<FoldIterableScalar> {
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+    // Source canon map provenance is used here to mimic the semantics used for scalar.
+    let provenance = Provenance::canon(canon_stream_map.cid.clone());
+    if canon_stream_map.is_empty() {
+        return Ok(FoldIterableScalar::Empty);
+    }
+
+    let canon_stream_map = &canon_stream_map.canon_stream_map;
+    let tetraplet = canon_stream_map.tetraplet().deref().clone();
+    let lambda = &ast_canon_stream_map.lambda;
+    // Source canon map tetraplet is used here similar with a scalar with lens processing path.
+    let jvalues = JValuable::apply_lambda(&canon_stream_map, lambda, exec_ctx)?;
+
+    from_jvalue(jvalues, tetraplet, provenance, lambda)
+}
+
 /// Constructs iterable value from resolved call result.
 fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
     let len = match call_result.get_result().deref() {

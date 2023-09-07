@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+use air::ExecutionCidState;
 use air::UncatchableError;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
@@ -193,4 +195,216 @@ fn string_parameters() {
 
     assert_eq!(actual_trace.len(), 2);
     assert_eq!(actual_trace[1.into()], expected_state);
+}
+
+#[test]
+fn call_canon_stream_map_arg() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("key" "value1") %map)
+                (ap (-42 "value2") %map)
+            )
+            (seq
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (call "{vm_1_peer_id}" ("m" "f") [#%canon_map] scalar) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+
+    let map_value_1 = json!({"key": "key", "value": "value1"});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
+
+    let map_value = json!({
+        "-42": ["value2"],
+        "key": ["value1"],
+    });
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+            {
+                "result": map_value_1,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value]
+        ),
+    ];
+
+    assert_eq!(
+        actual_trace, expected_trace,
+        "{:#?}\n {:#?}",
+        actual_trace, expected_trace
+    );
+}
+
+// WIP add negative
+#[test]
+fn call_peer_id_from_canon_stream_map() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("peerid" "{vm_1_peer_id}") %map)
+                (ap (-42 "value2") %map)
+            )
+            (seq
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (call #%canon_map.$.peerid.[0] ("m" "f") [#%canon_map] scalar) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+
+    let map_value_1 = json!({"key": "peerid", "value": vm_1_peer_id});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
+    let map_value = json!({
+        "-42": ["value2"],
+        "peerid": [vm_1_peer_id],
+    });
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+            {
+                "result": map_value_1,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value]
+        ),
+    ];
+
+    assert_eq!(
+        actual_trace, expected_trace,
+        "{:#?}\n {:#?}",
+        actual_trace, expected_trace
+    );
+}
+
+#[test]
+fn call_module_func_from_canon_stream_map() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    // There is a bug in testing framework that disallows lenses to be a source of a module name in
+    // a call triplet.
+    let mut vm = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("module" "m") %map)
+                (ap ("function" "f") %map)
+            )
+            (seq
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (call "{vm_1_peer_id}" (#%canon_map.$.module.[0] #%canon_map.$.function.[0]) [#%canon_map] scalar) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+    let actual_trace = trace_from_result(&result);
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+
+    let map_value_1 = json!({"key": "module", "value": "m"});
+    let map_value_2 = json!({"key": "function", "value": "f"});
+    let map_value = json!({
+        "function": ["f"],
+        "module": ["m"],
+    });
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+            {
+                "result": map_value_1,
+                "tetraplet": empty_tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": empty_tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m",
+            function = "f",
+            args = [map_value]
+        ),
+    ];
+
+    assert_eq!(
+        actual_trace, expected_trace,
+        "{:#?}\n {:#?}",
+        actual_trace, expected_trace
+    );
 }

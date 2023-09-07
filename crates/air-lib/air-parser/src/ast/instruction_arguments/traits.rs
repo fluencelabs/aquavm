@@ -59,6 +59,7 @@ impl fmt::Display for ResolvableToPeerIdVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -72,6 +73,7 @@ impl fmt::Display for ResolvableToStringVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -106,17 +108,19 @@ impl fmt::Display for ApArgument<'_> {
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
 
-impl fmt::Display for ApMapKey<'_> {
+impl fmt::Display for StreamMapKeyClause<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ApMapKey::*;
+        use StreamMapKeyClause::*;
 
         match self {
             Literal(str) => write!(f, r#""{str}""#),
-            Number(number) => write!(f, "{number}"),
+            Int(int) => write!(f, "{int}"),
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
@@ -141,6 +145,7 @@ impl fmt::Display for NewArgument<'_> {
             Self::Stream(stream) => write!(f, "{stream}"),
             Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             Self::StreamMap(stream_map) => write!(f, "{stream_map}"),
+            Self::CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -164,6 +169,8 @@ impl fmt::Display for FoldScalarIterable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
             EmptyArray => write!(f, "[]"),
         }
     }

@@ -25,6 +25,7 @@ impl fmt::Display for Instruction<'_> {
         match self {
             Call(call) => write!(f, "{call}"),
             Canon(canon) => write!(f, "{canon}"),
+            CanonMap(canon_map) => write!(f, "{canon_map}"),
             CanonStreamMapScalar(canon_stream_map_scalar) => write!(f, "{canon_stream_map_scalar}"),
             Ap(ap) => write!(f, "{ap}"),
             ApMap(ap_map) => write!(f, "{ap_map}"),
@@ -61,6 +62,16 @@ impl fmt::Display for Canon<'_> {
             f,
             "canon {} {} {}",
             self.peer_id, self.stream, self.canon_stream
+        )
+    }
+}
+
+impl fmt::Display for CanonMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "canon {} {} {}",
+            self.peer_id, self.stream_map, self.canon_stream_map
         )
     }
 }
@@ -202,7 +213,7 @@ macro_rules! no_peer_id_error_logable {
     };
 }
 
-peer_id_error_logable!(Call<'_>, Canon<'_>, CanonStreamMapScalar<'_>);
+peer_id_error_logable!(Call<'_>, Canon<'_>, CanonMap<'_>, CanonStreamMapScalar<'_>);
 
 no_peer_id_error_logable!(
     Ap<'_>,

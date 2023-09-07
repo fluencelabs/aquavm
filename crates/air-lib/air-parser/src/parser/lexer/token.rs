@@ -64,6 +64,15 @@ pub enum Token<'input> {
         name: &'input str,
         position: AirPos,
     },
+    CanonStreamMap {
+        name: &'input str,
+        position: AirPos,
+    },
+    CanonStreamMapWithLambda {
+        name: &'input str,
+        lambda: LambdaAST<'input>,
+        position: AirPos,
+    },
 
     StringLiteral(&'input str),
     I64(i64),
