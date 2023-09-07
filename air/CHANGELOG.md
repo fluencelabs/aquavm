@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.47.0](https://github.com/fluencelabs/aquavm/compare/air-v0.46.0...air-v0.47.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648))
+
+### Features
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648)) ([b4cbf8f](https://github.com/fluencelabs/aquavm/commit/b4cbf8f621b77ba2031900f021bf20d0f27e34b8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+    * air-execution-info-collector bumped from 0.7.8 to 0.7.9
+    * air-interpreter-data bumped from 0.11.1 to 0.11.2
+    * air-trace-handler bumped from 0.5.1 to 0.5.2
+
 ## [0.46.0](https://github.com/fluencelabs/aquavm/compare/air-v0.45.1...air-v0.46.0) (2023-09-04)
 
 
