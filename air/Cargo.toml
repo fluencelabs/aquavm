@@ -33,7 +33,7 @@ fluence-keypair = { version = "0.10.1", default-features = false }
 serde = { version = "1.0.164", features = [ "derive", "rc" ] }
 serde_json = "1.0.95"
 
-concat-idents = "1.1.4"
+concat-idents = "1.1.5"
 maplit = "1.0.2"
 non-empty-vec = "0.2.3"
 typed-index-collections = "3.1.0"
