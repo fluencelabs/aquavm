@@ -18,5 +18,5 @@ jobs:
         uses: pullreminders/label-when-approved-action@v1.0.7
         env:
           APPROVALS: "1"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
           ADD_LABEL: "e2e"

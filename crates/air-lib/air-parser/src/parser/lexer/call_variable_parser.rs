@@ -37,6 +37,7 @@ enum MetTag {
     StreamMap,
     Canon,
     CanonStream,
+    CanonStreamMap,
 }
 
 #[derive(Debug)]
@@ -208,7 +209,7 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_canon(&mut self) -> LexerResult<bool> {
         let tag = self.state.met_tag.deduce_tag(self.current_char());
 
-        if self.current_offset() == 1 && tag.is_canon_stream() {
+        if self.current_offset() == 1 && tag.is_canon_type() {
             if self.string_to_parse.len() == 2 && tag.is_tag() {
                 let error_pos = self.pos_in_string_to_parse();
                 return Err(LexerError::empty_canon_name(error_pos..error_pos));
@@ -315,6 +316,10 @@ impl<'input> CallVariableParser<'input> {
                 name,
                 position: self.start_pos,
             },
+            MetTag::CanonStreamMap => Token::CanonStreamMap {
+                name,
+                position: self.start_pos,
+            },
             MetTag::StreamMap => Token::StreamMap {
                 name,
                 position: self.start_pos,
@@ -335,6 +340,11 @@ impl<'input> CallVariableParser<'input> {
                 position: self.start_pos,
             },
             MetTag::CanonStream | MetTag::Canon => Token::CanonStreamWithLambda {
+                name,
+                lambda,
+                position: self.start_pos,
+            },
+            MetTag::CanonStreamMap => Token::CanonStreamMapWithLambda {
                 name,
                 lambda,
                 position: self.start_pos,
@@ -423,6 +433,7 @@ impl MetTag {
     fn deduce_tag(&self, tag: char) -> Self {
         match tag {
             '$' if self.is_canon() => Self::CanonStream,
+            '%' => Self::CanonStreamMap,
             _ => self.to_owned(),
         }
     }
@@ -431,8 +442,8 @@ impl MetTag {
         *self == Self::Canon
     }
 
-    fn is_canon_stream(&self) -> bool {
-        *self == Self::CanonStream
+    fn is_canon_type(&self) -> bool {
+        *self == Self::CanonStream || *self == Self::CanonStreamMap
     }
 
     fn is_tag(&self) -> bool {

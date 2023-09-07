@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.47.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.46.0...avm-client-v0.47.0) (2023-09-07)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.46.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.45.1...avm-client-v0.46.0) (2023-09-04)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.45.1](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.45.0...avm-client-v0.45.1) (2023-09-04)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.45.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.44.0...avm-client-v0.45.0) (2023-08-31)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.44.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.43.1...avm-client-v0.44.0) (2023-08-17)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
 ## [0.43.1](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.43.0...avm-client-v0.43.1) (2023-08-07)
 
 

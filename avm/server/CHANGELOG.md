@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * polyplets bumped from 0.3.2 to 0.3.3
     * avm-interface bumped from 0.28.4 to 0.28.5
 
+## [0.33.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.32.2...avm-server-v0.33.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* **aquavm-air-cli:** `--near` execution mode [fixes VM-322] ([#672](https://github.com/fluencelabs/aquavm/issues/672)) ([0e80ee7](https://github.com/fluencelabs/aquavm/commit/0e80ee7908913fc896369ff7e00d65eeaf5d9f22))
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+    * polyplets bumped from 0.4.1 to 0.5.0
+
 ## [0.32.2](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.32.1...avm-server-v0.32.2) (2023-08-04)
 
 

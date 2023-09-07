@@ -54,22 +54,21 @@ use std::cmp::Ordering;
 
 impl PartialOrd for Span {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let self_min = std::cmp::min(self.left, self.right);
-        let other_min = std::cmp::min(other.left, other.right);
-
-        if self_min < other_min {
-            Some(Ordering::Less)
-        } else if self == other {
-            Some(Ordering::Equal)
-        } else {
-            Some(Ordering::Greater)
-        }
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Span {
     fn cmp(&self, other: &Self) -> Ordering {
-        // it's safe since partial_cmp always returns Some
-        self.partial_cmp(other).unwrap()
+        let self_min = std::cmp::min(self.left, self.right);
+        let other_min = std::cmp::min(other.left, other.right);
+
+        if self_min < other_min {
+            Ordering::Less
+        } else if self == other {
+            Ordering::Equal
+        } else {
+            Ordering::Greater
+        }
     }
 }

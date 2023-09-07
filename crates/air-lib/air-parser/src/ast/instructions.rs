@@ -31,6 +31,7 @@ pub enum Instruction<'i> {
     Ap(Ap<'i>),
     ApMap(ApMap<'i>),
     Canon(Canon<'i>),
+    CanonMap(CanonMap<'i>),
     CanonStreamMapScalar(CanonStreamMapScalar<'i>),
     Seq(Seq<'i>),
     Par(Par<'i>),
@@ -66,7 +67,7 @@ pub struct Ap<'i> {
 /// (ap key value %map)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct ApMap<'i> {
-    pub key: ApMapKey<'i>,
+    pub key: StreamMapKeyClause<'i>,
     pub value: ApArgument<'i>,
     pub map: StreamMap<'i>,
 }
@@ -79,7 +80,15 @@ pub struct Canon<'i> {
     pub canon_stream: CanonStream<'i>,
 }
 
-/// (canon peer_id #stream_map scalar)
+/// (canon peer_id %stream_map #%canon_stream_map)
+#[derive(Serialize, Debug, PartialEq, Eq)]
+pub struct CanonMap<'i> {
+    pub peer_id: ResolvableToPeerIdVariable<'i>,
+    pub stream_map: StreamMap<'i>,
+    pub canon_stream_map: CanonStreamMap<'i>,
+}
+
+/// (canon peer_id %stream_map scalar)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct CanonStreamMapScalar<'i> {
     pub peer_id: ResolvableToPeerIdVariable<'i>,
@@ -155,7 +164,7 @@ pub struct FoldStream<'i> {
     pub span: Span,
 }
 
-/// (fold stream_iterable iterator instruction)
+/// (fold stream_map_iterable iterator instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct FoldStreamMap<'i> {
     pub iterable: StreamMap<'i>,
@@ -188,3 +197,7 @@ pub struct New<'i> {
 /// (null)
 #[derive(Serialize, Debug, PartialEq, Eq)]
 pub struct Null;
+
+pub trait PeerIDErrorLogable {
+    fn log_errors_with_peer_id(&self) -> bool;
+}

@@ -136,7 +136,10 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
 fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         recognize(pair(
-            many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
+            many1_count(alt((
+                value((), alphanumeric1),
+                value((), one_of("_-.:$#%")),
+            ))),
             opt(terminated(
                 delimited(tag("["), parse_sexp_symbol, tag("]")),
                 opt(tag("!")),
@@ -271,7 +274,10 @@ fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Triplet, ParseE
             delimited(
                 delim_ws(tag("(")),
                 separated_pair(
-                    context("triplet service name", parse_sexp_string),
+                    context(
+                        "triplet service name has to be a string literal",
+                        parse_sexp_string,
+                    ),
                     sexp_multispace0,
                     context("triplet function name", parse_sexp),
                 ),

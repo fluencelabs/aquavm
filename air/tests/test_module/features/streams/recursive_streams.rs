@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+use air::UncatchableError::StreamSizeLimitExceeded;
 use air_interpreter_data::ExecutionTrace;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -469,4 +471,30 @@ fn recursive_stream_fold_with_n_service_call() {
     let expected_fold_lores = stop_request_id + 1;
 
     assert_eq!(actual_fold_state.lore.len(), expected_fold_lores);
+}
+
+#[test]
+fn recursive_stream_size_limit() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+
+    let script = format!(
+        r#"
+        (seq
+            (ap 42 $stream)
+            (fold $stream i
+                (seq
+                    (ap i $stream)
+                    (next i)
+                )
+            )
+        )"#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_peer_id_1).unwrap();
+    let result = result.last().unwrap();
+
+    let expected_error = StreamSizeLimitExceeded;
+    assert!(check_error(&result, expected_error));
 }

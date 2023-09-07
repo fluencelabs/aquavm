@@ -43,12 +43,19 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
         let epilog = &epilog_closure(self.canon_stream.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
+        // TODO return some command instead to create producer or insert command or ...
+        let create_canon_producer = create_canon_stream_producer(self.stream.name, self.stream.position);
         match canon_result {
-            MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(&self.peer_id, epilog, canon_result_cid, exec_ctx, trace_ctx)
-            }
+            MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                &self.peer_id,
+                epilog,
+                &create_canon_producer,
+                canon_result,
+                &self.peer_id,
+                exec_ctx,
+                trace_ctx,
+            ),
             MergerCanonResult::Empty => {
-                let create_canon_producer = create_canon_stream_producer(self.stream.name, self.stream.position);
                 handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -65,7 +72,7 @@ fn epilog_closure(canon_stream_name: &str) -> Box<CanonEpilogClosure<'_>> {
             let value = CanonStreamWithProvenance::new(canon_stream, canon_result_cid.clone());
             exec_ctx.scalars.set_canon_value(canon_stream_name, value)?;
 
-            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            trace_ctx.meet_canon_end(CanonResult::executed(canon_result_cid));
             Ok(())
         },
     )

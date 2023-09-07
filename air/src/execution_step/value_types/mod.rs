@@ -15,6 +15,7 @@
  */
 
 mod canon_stream;
+mod canon_stream_map;
 mod iterable;
 mod jvaluable;
 mod scalar;
@@ -25,6 +26,7 @@ mod utils;
 pub type Stream = stream::Stream<ValueAggregate>;
 
 pub(crate) use canon_stream::*;
+pub(crate) use canon_stream_map::*;
 pub(crate) use iterable::*;
 pub(crate) use jvaluable::*;
 pub(crate) use scalar::CanonResultAggregate;
@@ -38,6 +40,7 @@ pub(crate) use stream::Generation;
 pub(crate) use stream::IterableValue;
 pub(crate) use stream::RecursiveCursorState;
 pub(crate) use stream::RecursiveStreamCursor;
+pub(super) use stream::STREAM_MAX_SIZE;
 pub(crate) use stream_map::StreamMap;
 
 pub(crate) use utils::populate_tetraplet_with_lambda;

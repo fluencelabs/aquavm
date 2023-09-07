@@ -19,6 +19,7 @@ use air::ExecutionCidState;
 use air::UncatchableError::*;
 use air_interpreter_cid::CID;
 use air_interpreter_data::ValueRef;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -159,4 +160,30 @@ fn malformed_call_service_failed() {
     let expected_serde_error = serde_json::from_value::<CallServiceFailed>(value).unwrap_err();
     let expected_error = MalformedCallServiceFailed(expected_serde_error);
     assert_error_eq!(&result, expected_error);
+}
+
+#[test]
+fn recursive_stream_size_limit() {
+    let vm_peer_id_1 = "vm_peer_id_1";
+
+    let script = format!(
+        r#"
+        (seq
+            (ap 42 $stream)
+            (fold $stream i
+                (seq
+                    (ap i $stream)
+                    (next i)
+                )
+            )
+        )"#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_peer_id_1).unwrap();
+    let result = result.last().unwrap();
+
+    let expected_error = StreamSizeLimitExceeded;
+    assert!(check_error(&result, expected_error));
 }

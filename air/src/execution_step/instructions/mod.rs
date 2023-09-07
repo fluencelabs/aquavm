@@ -18,6 +18,7 @@ mod ap;
 mod ap_map;
 mod call;
 mod canon;
+mod canon_map;
 mod canon_stream_map_scalar;
 mod canon_utils;
 mod compare_matchable;
@@ -46,21 +47,14 @@ use super::ExecutionResult;
 use crate::execution_step::TraceHandler;
 
 use air_parser::ast::Instruction;
+use air_parser::ast::PeerIDErrorLogable;
 
-// TODO: move all error set logic from macros into the execution context
-
-/// Executes instruction and updates last error if needed.
+/// Executes an instruction and updates %last_error% and :error: if necessary.
 macro_rules! execute {
     ($self:expr, $instr:expr, $exec_ctx:ident, $trace_ctx:ident) => {{
         match $instr.execute($exec_ctx, $trace_ctx) {
             Err(e) => {
-                $exec_ctx.last_error_descriptor.try_to_set_from_error(
-                    &e,
-                    // TODO: avoid excess copying here
-                    &$instr.to_string(),
-                    $exec_ctx.run_parameters.current_peer_id.as_ref(),
-                    None,
-                );
+                $exec_ctx.set_errors(&e, &$instr.to_string(), None, $instr.log_errors_with_peer_id());
                 Err(e)
             }
             v => v,
@@ -76,13 +70,15 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         match self {
             // call isn't wrapped by the execute macro because
-            // it internally sets last_error with resolved triplet
+            // it internally maps some Catchables into %last_error%/:error: using resolved triplet.
+            // Both canons and call set :error:.$.peer_id whilst other instructions do not.
             Instruction::Call(call) => call.execute(exec_ctx, trace_ctx),
 
+            Instruction::Canon(canon) => execute!(self, canon, exec_ctx, trace_ctx),
+            Instruction::CanonMap(canon_map) => execute!(self, canon_map, exec_ctx, trace_ctx),
+            Instruction::CanonStreamMapScalar(canon) => execute!(self, canon, exec_ctx, trace_ctx),
             Instruction::Ap(ap) => execute!(self, ap, exec_ctx, trace_ctx),
             Instruction::ApMap(ap_map) => execute!(self, ap_map, exec_ctx, trace_ctx),
-            Instruction::Canon(canon) => execute!(self, canon, exec_ctx, trace_ctx),
-            Instruction::CanonStreamMapScalar(canon) => execute!(self, canon, exec_ctx, trace_ctx),
             Instruction::Fail(fail) => execute!(self, fail, exec_ctx, trace_ctx),
             Instruction::FoldScalar(fold) => execute!(self, fold, exec_ctx, trace_ctx),
             Instruction::FoldStream(fold) => execute!(self, fold, exec_ctx, trace_ctx),

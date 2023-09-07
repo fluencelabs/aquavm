@@ -657,3 +657,60 @@ fn match_with_empty_array__() {
         ),
     );
 }
+
+#[test]
+fn stream_map_lambda_numeric_accessor() {
+    let token =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::ArrayAccess { idx: 42 }]).unwrap();
+    lexer_test(
+        r#"#%canon.$.[42]"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            14.into(),
+        ))]),
+    );
+}
+
+#[test]
+fn stream_map_lambda_string_accessor() {
+    let token =
+        LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName { field_name: "key" }])
+            .unwrap();
+    lexer_test(
+        r#"#%canon.$.key"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            13.into(),
+        ))]),
+    );
+}
+
+#[test]
+fn stream_map_lambda_scalar_accessor() {
+    let token = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByScalar {
+        scalar_name: "scalar",
+    }])
+    .unwrap();
+    lexer_test(
+        r#"#%canon.$.[scalar]"#,
+        All(vec![Ok((
+            0.into(),
+            Token::CanonStreamMapWithLambda {
+                name: "#%canon",
+                position: 0.into(),
+                lambda: token,
+            },
+            18.into(),
+        ))]),
+    );
+}

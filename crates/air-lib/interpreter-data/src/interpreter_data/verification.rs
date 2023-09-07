@@ -162,7 +162,7 @@ fn collect_peers_cids_from_trace<'data>(
                     try_push_cid(grouped_cids, peer_pk, cid)?;
                 }
             }
-            ExecutedState::Canon(CanonResult(ref cid)) => {
+            ExecutedState::Canon(CanonResult::Executed(ref cid)) => {
                 // TODO refactor
                 let canon_result = cid_info
                     .canon_result_store

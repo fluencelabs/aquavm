@@ -16,6 +16,10 @@
 
 use super::Stream;
 use crate::execution_step::Generation;
+use crate::execution_step::STREAM_MAX_SIZE;
+use crate::CanonStreamMapError;
+use crate::StreamMapError;
+use crate::StreamMapKeyError;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
@@ -98,7 +102,23 @@ pub enum UncatchableError {
     #[error("failed to deserialize to CallServiceFailed: {0}")]
     MalformedCallServiceFailed(serde_json::Error),
 
-    /// Argument hash or tetraplet mismatch in a call/canon merged from current_data with an evaluated value
+    /// Stream size estimate goes over a hardcoded limit.
+    #[error("stream size goes over the allowed limit of {STREAM_MAX_SIZE}")]
+    StreamSizeLimitExceeded,
+
+    /// CanonStreamMapKey related errors.
+    #[error(transparent)]
+    StreamMapKeyError(#[from] StreamMapKeyError),
+
+    /// Stream map related errors.
+    #[error(transparent)]
+    StreamMapError(#[from] StreamMapError),
+
+    /// CanonStreamMap related errors.
+    #[error(transparent)]
+    CanonStreamMapError(#[from] CanonStreamMapError),
+
+    /// Argument hash or tetraplet mismatch in a call/canon merged from current_data with an evaluated value.
     #[error("{param} doesn't match expected parameters: expected {expected_value}, got {stored_value} ")]
     InstructionParametersMismatch {
         param: &'static str,

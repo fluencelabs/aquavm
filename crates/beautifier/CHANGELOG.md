@@ -4,6 +4,28 @@
   * dependencies
     * aquavm-air-parser bumped from 0.8.0 to 0.8.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+
+## [0.3.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.2.2...air-beautifier-v0.3.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648))
+
+### Features
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648)) ([b4cbf8f](https://github.com/fluencelabs/aquavm/commit/b4cbf8f621b77ba2031900f021bf20d0f27e34b8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+
 ## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.1.4...air-beautifier-v0.2.0) (2023-07-16)
 
 

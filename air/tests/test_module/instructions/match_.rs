@@ -451,3 +451,35 @@ fn match_with_undefined_last_error_message() {
     )]);
     assert_eq!(actual_trace, expected_trace);
 }
+
+#[test]
+fn match_with_error() {
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
+
+    let script = format!(
+        r#"
+        (xor
+            (match 1 2 (null))
+            (call "local_peer_id" ("test" "error_code") [:error:.$.error_code] scalar)
+        )
+    "#
+    );
+
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(10001);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}

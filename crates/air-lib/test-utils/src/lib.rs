@@ -141,7 +141,7 @@ pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
         print!("  {id}: {state}");
         match state {
             ExecutedState::Call(call_result) => print_call_value(&data, call_result),
-            ExecutedState::Canon(CanonResult(canon_cid)) => print_canon_values(&data, canon_cid),
+            ExecutedState::Canon(canon_result) => print_canon_values(&data, canon_result),
             ExecutedState::Par(_) | ExecutedState::Fold(_) | ExecutedState::Ap(_) => {}
         }
         println!();
@@ -170,10 +170,11 @@ fn print_call_value(data: &InterpreterData, call_result: &CallResult) {
     print!(" => {:#?}", value);
 }
 
-fn print_canon_values(
-    data: &InterpreterData,
-    canon_result_cid: &std::rc::Rc<air_interpreter_cid::CID<CanonResultCidAggregate>>,
-) {
+fn print_canon_values(data: &InterpreterData, canon_result: &CanonResult) {
+    let canon_result_cid = match canon_result {
+        CanonResult::RequestSentBy(_) => return,
+        CanonResult::Executed(cid) => cid,
+    };
     let canon_agg = data
         .cid_info
         .canon_result_store

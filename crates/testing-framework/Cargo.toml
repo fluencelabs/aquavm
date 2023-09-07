@@ -1,6 +1,6 @@
 [package]
 name = "air-testing-framework"
-version = "0.4.3"
+version = "0.5.4"
 description = "AquaVM testing framework"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -14,8 +14,8 @@ name = "air_test_framework"
 path = "src/lib.rs"
 
 [dependencies]
-air-test-utils = { version = "0.8.2", path = "../air-lib/test-utils" }
-aquavm-air-parser = { version = "0.8.1", path = "../air-lib/air-parser" }
+air-test-utils = { version = "0.10.3", path = "../air-lib/test-utils" }
+aquavm-air-parser = { version = "0.9.0", path = "../air-lib/air-parser" }
 
 itertools = "0.10.5"
 strum = { version="0.24.1", features=["derive"] }

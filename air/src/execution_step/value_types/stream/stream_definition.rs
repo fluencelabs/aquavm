@@ -23,6 +23,10 @@ use crate::execution_step::ExecutionResult;
 use air_interpreter_data::GenerationIdx;
 use air_trace_handler::TraceHandler;
 
+/// This const limits the number of values in a Stream to mitigate
+/// endless recursive stream loop issue.
+pub(crate) const STREAM_MAX_SIZE: usize = 1024;
+
 /// Streams are CRDT-like append only data structures. They are guaranteed to have locally
 /// the same order of values on each peer.
 #[derive(Debug, Clone)]
@@ -72,15 +76,34 @@ impl<'value, T: 'value> Stream<T> {
     pub(super) fn new_values(&mut self) -> &mut NewValuesMatrix<T> {
         &mut self.new_values
     }
+
+    fn check_stream_size_limit(&self) -> ExecutionResult<()> {
+        use crate::execution_step::ExecutionError;
+        use crate::UncatchableError;
+
+        let prev_size = self.previous_values.get_size();
+        let curr_size = self.current_values.get_size();
+        let new_size = self.new_values.get_size();
+        let cumulative_size = prev_size + curr_size + new_size;
+
+        if cumulative_size >= STREAM_MAX_SIZE {
+            Err(ExecutionError::Uncatchable(UncatchableError::StreamSizeLimitExceeded))
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl<'value, T: 'value + Clone + fmt::Display> Stream<T> {
-    pub(crate) fn add_value(&mut self, value: T, generation: Generation) {
+    pub(crate) fn add_value(&mut self, value: T, generation: Generation) -> ExecutionResult<()> {
         match generation {
             Generation::Previous(previous_gen) => self.previous_values.add_value_to_generation(value, previous_gen),
             Generation::Current(current_gen) => self.current_values.add_value_to_generation(value, current_gen),
             Generation::New => self.new_values.add_to_last_generation(value),
         }
+        // This check limits the cumulative number of values in a stream to
+        // prevent neverending recursive stream use case.
+        self.check_stream_size_limit()
     }
 }
 
@@ -244,8 +267,8 @@ mod test {
         let value_2 = create_value(json!("value_2"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::previous(0));
-        stream.add_value(value_2.clone(), Generation::previous(1));
+        stream.add_value(value_1.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::previous(1)).unwrap();
 
         let mut iter = stream.iter();
         println!("  after getting iter");
@@ -262,10 +285,10 @@ mod test {
         let value_4 = create_value(json!("value_4"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::previous(0));
-        stream.add_value(value_2.clone(), Generation::previous(0));
-        stream.add_value(value_3.clone(), Generation::previous(0));
-        stream.add_value(value_4.clone(), Generation::previous(0));
+        stream.add_value(value_1.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_3.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_4.clone(), Generation::previous(0)).unwrap();
 
         let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
@@ -283,10 +306,10 @@ mod test {
         let value_4 = create_value(json!("value_4"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
-        stream.add_value(value_2.clone(), Generation::current(0));
-        stream.add_value(value_3.clone(), Generation::current(0));
-        stream.add_value(value_4.clone(), Generation::current(0));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_3.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_4.clone(), Generation::current(0)).unwrap();
 
         let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
@@ -304,10 +327,10 @@ mod test {
         let value_4 = create_value(json!("value_4"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::New);
-        stream.add_value(value_2.clone(), Generation::New);
-        stream.add_value(value_3.clone(), Generation::New);
-        stream.add_value(value_4.clone(), Generation::New);
+        stream.add_value(value_1.clone(), Generation::New).unwrap();
+        stream.add_value(value_2.clone(), Generation::New).unwrap();
+        stream.add_value(value_3.clone(), Generation::New).unwrap();
+        stream.add_value(value_4.clone(), Generation::New).unwrap();
 
         let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(
@@ -339,8 +362,8 @@ mod test {
         let value_2 = create_value(json!("value_2"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
-        stream.add_value(value_2.clone(), Generation::previous(0));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::previous(0)).unwrap();
 
         let mut iter = stream.iter();
         assert_eq!(iter.next(), Some(&value_2));
@@ -355,9 +378,9 @@ mod test {
         let value_3 = create_value(json!("value_3"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::New);
-        stream.add_value(value_2.clone(), Generation::current(0));
-        stream.add_value(value_3.clone(), Generation::previous(0));
+        stream.add_value(value_1.clone(), Generation::new()).unwrap();
+        stream.add_value(value_2.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_3.clone(), Generation::previous(0)).unwrap();
 
         let mut iter = stream.iter();
         assert_eq!(iter.next(), Some(&value_3));
@@ -373,9 +396,9 @@ mod test {
         let value_3 = create_value(json!("value_3"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::previous(0));
-        stream.add_value(value_2.clone(), Generation::previous(1));
-        stream.add_value(value_3.clone(), Generation::previous(3));
+        stream.add_value(value_1.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::previous(1)).unwrap();
+        stream.add_value(value_3.clone(), Generation::previous(3)).unwrap();
 
         let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
@@ -391,9 +414,9 @@ mod test {
         let value_3 = create_value(json!("value_3"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
-        stream.add_value(value_2.clone(), Generation::current(1));
-        stream.add_value(value_3.clone(), Generation::current(3));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::current(1)).unwrap();
+        stream.add_value(value_3.clone(), Generation::current(3)).unwrap();
 
         let mut slice_iter = stream.slice_iter(StreamCursor::empty());
         assert_eq!(slice_iter.next(), Some(vec![value_1].as_slice()));
@@ -408,8 +431,8 @@ mod test {
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::previous(0));
-        stream.add_value(value_2.clone(), Generation::New);
+        stream.add_value(value_1.clone(), Generation::previous(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::new()).unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -437,9 +460,9 @@ mod test {
         let value_3 = create_value_with_pos(json!("value_3"), 2.into());
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
-        stream.add_value(value_2.clone(), Generation::current(2));
-        stream.add_value(value_3.clone(), Generation::current(4));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_2.clone(), Generation::current(2)).unwrap();
+        stream.add_value(value_3.clone(), Generation::current(4)).unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -472,12 +495,12 @@ mod test {
         let value_6 = create_value_with_pos(json!("value_3"), 5.into());
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::New);
-        stream.add_value(value_2.clone(), Generation::current(4));
-        stream.add_value(value_3.clone(), Generation::current(0));
-        stream.add_value(value_4.clone(), Generation::previous(100));
-        stream.add_value(value_5.clone(), Generation::New);
-        stream.add_value(value_6.clone(), Generation::current(2));
+        stream.add_value(value_1.clone(), Generation::new()).unwrap();
+        stream.add_value(value_2.clone(), Generation::current(4)).unwrap();
+        stream.add_value(value_3.clone(), Generation::current(0)).unwrap();
+        stream.add_value(value_4.clone(), Generation::previous(100)).unwrap();
+        stream.add_value(value_5.clone(), Generation::new()).unwrap();
+        stream.add_value(value_6.clone(), Generation::current(2)).unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -511,11 +534,11 @@ mod test {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
-        let canon_result = CanonResult(Rc::new(CID::new("fake canon CID")));
+        let canon_result = CanonResult::executed(Rc::new(CID::new("fake canon CID")));
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);
@@ -536,7 +559,7 @@ mod test {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
 
-        stream.add_value(value_1.clone(), Generation::current(0));
+        stream.add_value(value_1.clone(), Generation::current(0)).unwrap();
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
@@ -550,5 +573,32 @@ mod test {
                 )
             ))
         ));
+    }
+
+    #[test]
+    fn stream_size_limit() {
+        use super::STREAM_MAX_SIZE;
+        use crate::UncatchableError;
+
+        let mut stream = Stream::new();
+
+        let value = create_value(json!("1"));
+
+        for _ in 0..STREAM_MAX_SIZE / 2 {
+            stream.add_value(value.clone(), Generation::current(0)).unwrap();
+        }
+
+        for _ in 0..STREAM_MAX_SIZE / 4 {
+            stream.add_value(value.clone(), Generation::previous(0)).unwrap();
+        }
+
+        for _ in 0..STREAM_MAX_SIZE / 4 - 1 {
+            stream.add_value(value.clone(), Generation::new()).unwrap();
+        }
+
+        let add_value_result = stream.add_value(value.clone(), Generation::new());
+
+        let Err(ExecutionError::Uncatchable(error)) = add_value_result else { panic!("there must be CatchableError")};
+        assert!(matches!(error, UncatchableError::StreamSizeLimitExceeded));
     }
 }

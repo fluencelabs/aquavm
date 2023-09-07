@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+use super::ErrorDescriptor;
 use super::ExecutionCidState;
-use super::LastError;
+use super::InstructionError;
 use super::LastErrorDescriptor;
 use super::Scalars;
 use super::StreamMaps;
 use super::Streams;
+use crate::execution_step::ErrorAffectable;
+use crate::execution_step::RcSecurityTetraplet;
+use crate::ToErrorCode;
 
 use air_execution_info_collector::InstructionTracker;
 use air_interpreter_cid::CID;
@@ -50,8 +54,11 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) run_parameters: RcRunParameters,
 
     /// Last error produced by local service.
-    /// None means that there weren't any error.
+    /// There is the special not-an-error value means there was no error.
     pub(crate) last_error_descriptor: LastErrorDescriptor,
+
+    /// Error produced by some instructions, e.g. call, match, fail.
+    pub(crate) error_descriptor: ErrorDescriptor,
 
     /// Indicates that previous executed subgraph is complete.
     /// A subgraph treats as a complete if all subgraph elements satisfy the following rules:
@@ -115,13 +122,18 @@ impl<'i> ExecutionCtx<'i> {
             scalars: <_>::default(),
             next_peer_pks: <_>::default(),
             last_error_descriptor: <_>::default(),
+            error_descriptor: <_>::default(),
             tracker: <_>::default(),
             call_requests: <_>::default(),
         }
     }
 
-    pub(crate) fn last_error(&self) -> &LastError {
-        self.last_error_descriptor.last_error()
+    pub(crate) fn last_error(&self) -> &InstructionError {
+        self.last_error_descriptor.error()
+    }
+
+    pub(crate) fn error(&self) -> &InstructionError {
+        self.error_descriptor.error()
     }
 
     pub(crate) fn next_call_request_id(&mut self) -> u32 {
@@ -153,6 +165,41 @@ impl ExecutionCtx<'_> {
 
     pub(crate) fn flush_subgraph_completeness(&mut self) {
         self.subgraph_completeness = true;
+    }
+
+    // This routine sets %last_error% and :error:.
+    // Most instructions, except Call, Canon, CanonMapScalar does not set :error:.$.peer_id b/c
+    // it would be a non-deterministic peer_id.
+    pub(crate) fn set_errors(
+        &mut self,
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
+        instruction: &str,
+        tetraplet: Option<RcSecurityTetraplet>,
+        use_tetraplet_and_log_peer_id: bool,
+    ) {
+        let last_error_peer_id = match &tetraplet {
+            // use tetraplet if they set, because an error could be propagated from data
+            // (from CallServiceFailed state) and exec_ctx.run_parameters.current_peer_id won't mean
+            // a peer where the error was occurred
+            Some(tetraplet) if use_tetraplet_and_log_peer_id => Some(tetraplet.peer_pk.as_str()),
+            _ => Some(self.run_parameters.current_peer_id.as_str()),
+        };
+
+        self.last_error_descriptor.try_to_set_last_error_from_exec_error(
+            error,
+            instruction,
+            last_error_peer_id,
+            tetraplet.clone(),
+        );
+
+        let peer_id = if use_tetraplet_and_log_peer_id {
+            last_error_peer_id
+        } else {
+            None
+        };
+
+        self.error_descriptor
+            .try_to_set_error_from_exec_error(error, instruction, peer_id, tetraplet.clone());
     }
 }
 

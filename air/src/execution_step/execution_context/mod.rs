@@ -16,12 +16,12 @@
 
 mod cid_state;
 mod context;
-mod last_error;
+mod instruction_error;
 mod scalar_variables;
 mod stream_maps_variables;
 mod streams_variables;
 
-pub use last_error::*;
+pub use instruction_error::*;
 
 pub use cid_state::ExecutionCidState;
 pub(crate) use cid_state::ResolvedServiceInfo;

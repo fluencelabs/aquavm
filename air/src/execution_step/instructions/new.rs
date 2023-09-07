@@ -55,6 +55,9 @@ fn prolog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>) {
         NewArgument::CanonStream(canon_stream) => exec_ctx
             .scalars
             .meet_new_start_canon_stream(canon_stream.name.to_string()),
+        NewArgument::CanonStreamMap(canon_stream_map) => exec_ctx
+            .scalars
+            .meet_new_start_canon_stream_map(canon_stream_map.name.to_string()),
     }
 
     exec_ctx.tracker.meet_new(position);
@@ -68,5 +71,8 @@ fn epilog<'i>(new: &New<'i>, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut Tr
             .meet_scope_end(stream_map.name.to_string(), trace_ctx),
         NewArgument::Scalar(scalar) => exec_ctx.scalars.meet_new_end_scalar(scalar.name),
         NewArgument::CanonStream(canon_stream) => exec_ctx.scalars.meet_new_end_canon_stream(canon_stream.name),
+        NewArgument::CanonStreamMap(canon_stream_map) => {
+            exec_ctx.scalars.meet_new_end_canon_stream_map(canon_stream_map.name)
+        }
     }
 }

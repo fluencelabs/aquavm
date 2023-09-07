@@ -60,7 +60,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
 
             let value_descriptor =
                 StreamValueDescriptor::new(executed_result, stream.name, Generation::New, stream.position);
-            exec_ctx.streams.add_stream_value(value_descriptor);
+            exec_ctx.streams.add_stream_value(value_descriptor)?;
             exec_ctx.record_call_cid(&peer_id, &service_result_agg_cid);
             Ok(CallResult::executed_stream_stub(service_result_agg_cid))
         }
@@ -120,7 +120,7 @@ pub(crate) fn populate_context_from_data<'i>(
             let result = ValueAggregate::from_service_result(result, cid);
             let generation = Generation::from_data(value_source, generation);
             let value_descriptor = StreamValueDescriptor::new(result, stream.name, generation, stream.position);
-            exec_ctx.streams.add_stream_value(value_descriptor);
+            exec_ctx.streams.add_stream_value(value_descriptor)?;
         }
         (CallOutputValue::None, ValueRef::Unused(_)) => {}
         (_, value) => {

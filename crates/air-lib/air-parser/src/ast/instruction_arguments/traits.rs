@@ -35,6 +35,7 @@ impl fmt::Display for ImmutableValue<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
+            Error(error_accessor) => display_error(f, error_accessor),
             LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(literal) => write!(f, r#""{literal}""#),
             Timestamp => write!(f, "%timestamp%"),
@@ -58,6 +59,7 @@ impl fmt::Display for ResolvableToPeerIdVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -71,6 +73,7 @@ impl fmt::Display for ResolvableToStringVariable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -93,6 +96,7 @@ impl fmt::Display for ApArgument<'_> {
 
         match self {
             InitPeerId => write!(f, "%init_peer_id%"),
+            Error(error_accessor) => display_error(f, error_accessor),
             LastError(error_accessor) => display_last_error(f, error_accessor),
             Literal(str) => write!(f, r#""{str}""#),
             Timestamp => write!(f, "%timestamp%"),
@@ -104,17 +108,19 @@ impl fmt::Display for ApArgument<'_> {
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
 
-impl fmt::Display for ApMapKey<'_> {
+impl fmt::Display for StreamMapKeyClause<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ApMapKey::*;
+        use StreamMapKeyClause::*;
 
         match self {
             Literal(str) => write!(f, r#""{str}""#),
-            Number(number) => write!(f, "{number}"),
+            Int(int) => write!(f, "{int}"),
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStreamWithLambda(canon_stream) => write!(f, "{canon_stream}"),
@@ -139,6 +145,7 @@ impl fmt::Display for NewArgument<'_> {
             Self::Stream(stream) => write!(f, "{stream}"),
             Self::CanonStream(canon_stream) => write!(f, "{canon_stream}"),
             Self::StreamMap(stream_map) => write!(f, "{stream_map}"),
+            Self::CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
         }
     }
 }
@@ -162,6 +169,8 @@ impl fmt::Display for FoldScalarIterable<'_> {
             Scalar(scalar) => write!(f, "{scalar}"),
             ScalarWithLambda(scalar) => write!(f, "{scalar}"),
             CanonStream(canon_stream) => write!(f, "{canon_stream}"),
+            CanonStreamMap(canon_stream_map) => write!(f, "{canon_stream_map}"),
+            CanonStreamMapWithLambda(canon_stream_map) => write!(f, "{canon_stream_map}"),
             EmptyArray => write!(f, "[]"),
         }
     }
@@ -183,8 +192,21 @@ impl From<&Number> for serde_json::Value {
 }
 
 fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
+    use crate::parser::LAST_ERROR;
+
     match lambda_ast {
-        Some(lambda_ast) => write!(f, "%last_error%{lambda_ast}"),
-        None => write!(f, "%last_error%"),
+        Some(lambda_ast) => write!(f, "{LAST_ERROR}{lambda_ast}"),
+        None => write!(f, "{LAST_ERROR}"),
+    }
+}
+
+fn display_error(f: &mut fmt::Formatter, error: &InstructionErrorAST) -> fmt::Result {
+    use crate::parser::ERROR;
+
+    let InstructionErrorAST { lens } = error;
+
+    match lens {
+        Some(lens) => write!(f, "{ERROR}{lens}"),
+        None => write!(f, "{ERROR}"),
     }
 }

@@ -1,5 +1,99 @@
 # Changelog
 
+## [0.47.0](https://github.com/fluencelabs/aquavm/compare/air-v0.46.0...air-v0.47.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648))
+
+### Features
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648)) ([b4cbf8f](https://github.com/fluencelabs/aquavm/commit/b4cbf8f621b77ba2031900f021bf20d0f27e34b8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+    * air-execution-info-collector bumped from 0.7.8 to 0.7.9
+    * air-interpreter-data bumped from 0.11.1 to 0.11.2
+    * air-trace-handler bumped from 0.5.1 to 0.5.2
+
+## [0.46.0](https://github.com/fluencelabs/aquavm/compare/air-v0.45.1...air-v0.46.0) (2023-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** bump minimal support version ([#691](https://github.com/fluencelabs/aquavm/issues/691))
+
+### Features
+
+* **data:** bump minimal support version ([#691](https://github.com/fluencelabs/aquavm/issues/691)) ([b13dd51](https://github.com/fluencelabs/aquavm/commit/b13dd515da3b88a8b65ed1ca60682055e227bad9))
+
+## [0.45.1](https://github.com/fluencelabs/aquavm/compare/air-v0.45.0...air-v0.45.1) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+    * air-execution-info-collector bumped from 0.7.7 to 0.7.8
+    * air-interpreter-data bumped from 0.11.0 to 0.11.1
+    * air-trace-handler bumped from 0.5.0 to 0.5.1
+
+## [0.45.0](https://github.com/fluencelabs/aquavm/compare/air-v0.44.0...air-v0.45.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324]
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([#677](https://github.com/fluencelabs/aquavm/issues/677))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([f943dd0](https://github.com/fluencelabs/aquavm/commit/f943dd00cd8e06546252b5caf04117869abe5b8a))
+* **execution-engine:** this introduces a hardcoded limit for a number of values in a stream [fixes VM-324] ([#677](https://github.com/fluencelabs/aquavm/issues/677)) ([f943dd0](https://github.com/fluencelabs/aquavm/commit/f943dd00cd8e06546252b5caf04117869abe5b8a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.10.0 to 0.11.0
+    * air-trace-handler bumped from 0.4.0 to 0.5.0
+
+## [0.44.0](https://github.com/fluencelabs/aquavm/compare/air-v0.43.1...air-v0.44.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **polyplets:** move SecurityTetraplets to marine-rs-sdk  ([#674](https://github.com/fluencelabs/aquavm/issues/674))
+* update marine-rs-sdk minor version
+
+### Features
+
+* **aquavm-air-cli:** `--near` execution mode [fixes VM-322] ([#672](https://github.com/fluencelabs/aquavm/issues/672)) ([0e80ee7](https://github.com/fluencelabs/aquavm/commit/0e80ee7908913fc896369ff7e00d65eeaf5d9f22))
+* **polyplets:** move SecurityTetraplets to marine-rs-sdk  ([#674](https://github.com/fluencelabs/aquavm/issues/674)) ([7a8a460](https://github.com/fluencelabs/aquavm/commit/7a8a46057297317e1b776b13d913b0d42ec0a9af))
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+    * polyplets bumped from 0.4.1 to 0.5.0
+
 ## [0.43.1](https://github.com/fluencelabs/aquavm/compare/air-v0.43.0...air-v0.43.1) (2023-08-07)
 
 

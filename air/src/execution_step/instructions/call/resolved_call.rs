@@ -73,7 +73,7 @@ impl<'i> ResolvedCall<'i> {
     #[tracing::instrument(level = "trace", skip_all)]
     pub(super) fn new(raw_call: &Call<'i>, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<Self> {
         let triplet = resolve(&raw_call.triplet, exec_ctx)?;
-        let tetraplet = SecurityTetraplet::from_triplet(triplet);
+        let tetraplet = triplet.into();
         let tetraplet = Rc::new(tetraplet);
 
         check_output_name(&raw_call.output, exec_ctx)?;

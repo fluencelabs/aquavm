@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use marine_rs_sdk::SecurityTetraplet;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -26,4 +28,15 @@ pub struct ResolvedTriplet {
     pub peer_pk: String,
     pub service_id: String,
     pub function_name: String,
+}
+
+impl From<ResolvedTriplet> for SecurityTetraplet {
+    fn from(triplet: ResolvedTriplet) -> Self {
+        Self {
+            peer_pk: triplet.peer_pk,
+            service_id: triplet.service_id,
+            function_name: triplet.function_name,
+            json_path: String::new(),
+        }
+    }
 }

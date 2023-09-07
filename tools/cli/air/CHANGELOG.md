@@ -54,6 +54,57 @@
     * aquavm-air bumped from 0.43.0 to 0.43.1
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.0 to 0.45.1
+    * air-beautifier bumped from 0.2.1 to 0.2.2
+    * air-test-utils bumped from 0.10.0 to 0.10.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.1 to 0.46.0
+    * air-test-utils bumped from 0.10.1 to 0.10.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.46.0 to 0.47.0
+    * air-beautifier bumped from 0.2.2 to 0.3.0
+    * air-test-utils bumped from 0.10.2 to 0.10.3
+
+## [0.4.1](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.0...aquavm-air-cli-v0.4.1) (2023-08-31)
+
+
+### Bug Fixes
+
+* **aquavm-air-cli:** NEAR mode fixes ([#679](https://github.com/fluencelabs/aquavm/issues/679)) ([6978603](https://github.com/fluencelabs/aquavm/commit/6978603c76a2a2576fc4196369d944f25da7a559))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.44.0 to 0.45.0
+    * air-test-utils bumped from 0.9.0 to 0.10.0
+
+## [0.4.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.3.5...aquavm-air-cli-v0.4.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* **aquavm-air-cli:** `--near` execution mode [fixes VM-322] ([#672](https://github.com/fluencelabs/aquavm/issues/672)) ([0e80ee7](https://github.com/fluencelabs/aquavm/commit/0e80ee7908913fc896369ff7e00d65eeaf5d9f22))
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+
 ## [0.3.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.2.9...aquavm-air-cli-v0.3.0) (2023-06-22)
 
 

@@ -35,6 +35,57 @@
   * dependencies
     * aquavm-air bumped from 0.43.0 to 0.43.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.0 to 0.45.1
+    * air-interpreter-data bumped from 0.11.0 to 0.11.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.1 to 0.46.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.46.0 to 0.47.0
+    * air-interpreter-data bumped from 0.11.1 to 0.11.2
+
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.9.0...air-test-utils-v0.10.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.44.0 to 0.45.0
+    * air-interpreter-data bumped from 0.10.0 to 0.11.0
+
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.8.2...air-test-utils-v0.9.0) (2023-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk minor version
+
+### Features
+
+* update marine-rs-sdk minor version ([4b4e3bd](https://github.com/fluencelabs/aquavm/commit/4b4e3bde839d1167ea559d49b183d1a76bc93439))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.14.0 to 0.15.0
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.7.1...air-test-utils-v0.8.0) (2023-08-03)
 
 

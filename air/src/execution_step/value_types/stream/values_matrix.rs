@@ -30,11 +30,16 @@ pub(crate) struct ValuesMatrix<T> {
     /// of values that interpreter obtained from one particle. It means that number of generation on
     /// a peer is equal to number of the interpreter runs in context of one particle.
     values: TiVec<GenerationIdx, Vec<T>>,
+    /// This is a counter to track number of values in the matrix.
+    size: usize,
 }
 
 impl<T> ValuesMatrix<T> {
     pub fn new() -> Self {
-        Self { values: TiVec::new() }
+        Self {
+            values: TiVec::new(),
+            size: 0,
+        }
     }
 
     pub fn remove_empty_generations(&mut self) {
@@ -56,6 +61,10 @@ impl<T> ValuesMatrix<T> {
             .skip(skip.into())
             .map(|generation| generation.as_ref())
     }
+
+    pub fn get_size(&self) -> usize {
+        self.size
+    }
 }
 
 impl<T: Clone> ValuesMatrix<T> {
@@ -67,6 +76,7 @@ impl<T: Clone> ValuesMatrix<T> {
         }
 
         self.values[generation_idx].push(value);
+        self.size += 1;
     }
 }
 
@@ -120,6 +130,10 @@ impl<T> NewValuesMatrix<T> {
 
         (values_len - 1).into()
     }
+
+    pub fn get_size(&self) -> usize {
+        self.0.size
+    }
 }
 
 impl<T: Clone> NewValuesMatrix<T> {
@@ -131,7 +145,10 @@ impl<T: Clone> NewValuesMatrix<T> {
 
 impl<T> Default for ValuesMatrix<T> {
     fn default() -> Self {
-        Self { values: TiVec::new() }
+        Self {
+            values: TiVec::new(),
+            size: 0,
+        }
     }
 }
 

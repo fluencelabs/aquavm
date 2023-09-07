@@ -16,6 +16,8 @@
 
 mod data;
 mod native;
+#[cfg(feature = "near")]
+mod near;
 mod runner;
 #[cfg(feature = "wasm")]
 mod wasm;
@@ -45,14 +47,24 @@ pub(crate) struct Args {
     tracing_params: String,
     #[clap(long, default_value = "warn")]
     runner_tracing_params: String,
-    #[clap(long)]
-    native: bool,
+
+    #[clap(flatten)]
+    mode: ModeArgs,
+
     #[clap(
         long = "interpreter",
         env = "AIR_INTERPRETER_WASM_PATH",
         default_value = "target/wasm32-wasi/release/air_interpreter_server.wasm"
     )]
     air_interpreter_path: PathBuf,
+
+    #[clap(
+        long = "near-contract",
+        env = "AIR_NEAR_CONTRACT_PATH",
+        default_value = "tools/wasm/air-near-contract/target/wasm32-unknown-unknown/release/air-near-contract.wasm"
+    )]
+    air_near_contract_path: PathBuf,
+
     #[clap(long, help = "Execute several times; great for native profiling")]
     repeat: Option<u32>,
     #[clap(long, help = "Output JSON tracing info")]
@@ -96,11 +108,56 @@ impl Keys {
     }
 }
 
+#[derive(clap::Args, Debug, Copy, Clone)]
+#[group(multiple = false)]
+struct ModeArgs {
+    #[arg(long)]
+    native: bool,
+
+    #[cfg(feature = "wasm")]
+    #[arg(long)]
+    wasm: bool,
+
+    #[cfg(feature = "near")]
+    #[arg(long)]
+    near: bool,
+}
+
+impl From<ModeArgs> for Option<Mode> {
+    fn from(value: ModeArgs) -> Self {
+        if value.native {
+            return Some(Mode::Native);
+        }
+
+        #[cfg(feature = "wasm")]
+        if value.wasm {
+            return Some(Mode::Wasm);
+        }
+
+        #[cfg(feature = "near")]
+        if value.near {
+            return Some(Mode::Near);
+        }
+
+        None
+    }
+}
+
+enum Mode {
+    Native,
+
+    #[cfg(feature = "wasm")]
+    Wasm,
+
+    #[cfg(feature = "near")]
+    Near,
+}
+
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let tracing_json = (!args.json) as u8;
     #[cfg(feature = "wasm")]
-    let global_tracing_params = if args.native {
-        // for native, there is single tracing configuration, and no runner
+    let global_tracing_params = if args.mode.wasm {
+        // for native and other, there is single tracing configuration, and no runner
         args.tracing_params.clone()
     } else {
         args.runner_tracing_params
@@ -109,7 +166,12 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
-    let mut runner = get_runner(args.native, &args.air_interpreter_path, args.max_heap_size)?;
+    let mut runner = get_runner(
+        args.mode.into(),
+        &args.air_interpreter_path,
+        &args.air_near_contract_path,
+        args.max_heap_size,
+    )?;
 
     let execution_data = match &args.source {
         Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
@@ -155,25 +217,40 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
 
 #[cfg(feature = "wasm")]
 fn get_runner(
-    native: bool,
+    mode: Option<Mode>,
     air_interpreter_wasm_path: &Path,
+    _air_contract_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    if native {
-        self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
-    } else {
-        self::wasm::create_wasm_avm_runner(air_interpreter_wasm_path, max_heap_size)
-            .context("Failed to instantiate WASM AVM")
+    let mode = mode.unwrap_or(Mode::Wasm);
+    match mode {
+        Mode::Native => {
+            self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
+        }
+        Mode::Wasm => self::wasm::create_wasm_avm_runner(air_interpreter_wasm_path, max_heap_size)
+            .context("Failed to instantiate WASM AVM"),
+        #[cfg(feature = "near")]
+        Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
+            .context("Failed to instantiate NEAR AVM"),
     }
 }
 
 #[cfg(not(feature = "wasm"))]
 fn get_runner(
-    _native: bool,
+    mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
+    _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
+    let mode = mode.unwrap_or(Mode::Native);
+    match mode {
+        Mode::Native => {
+            self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
+        }
+        #[cfg(feature = "near")]
+        Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
+            .context("Failed to instantiate NEAR AVM"),
+    }
 }
 
 // TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.
