@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautifier"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "aquavm-air-parser",
  "itertools",
@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautify-wasm"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "air-beautifier",
  "wasm-bindgen",
@@ -71,14 +71,14 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.8"
+version = "0.7.9"
 dependencies = [
  "aquavm-air-parser",
 ]
 
 [[package]]
 name = "air-interpreter"
-version = "0.46.0"
+version = "0.47.0"
 dependencies = [
  "air-interpreter-interface",
  "air-log-targets",
@@ -104,7 +104,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.11.1"
+version = "0.11.2"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -169,7 +169,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.10.2"
+version = "0.10.3"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -192,7 +192,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "air-test-utils",
  "aquavm-air-parser",
@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -319,7 +319,7 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 
 [[package]]
 name = "aquavm-air"
-version = "0.46.0"
+version = "0.47.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -359,7 +359,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
@@ -386,7 +386,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-parser"
-version = "0.8.2"
+version = "0.9.0"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",
