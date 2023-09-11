@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use polyplets::SecurityTetraplet;
 use air_test_utils::prelude::*;
+use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
