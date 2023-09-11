@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#![forbid(unsafe_code)]
+// #![forbid(unsafe_code)]
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -43,11 +43,15 @@ use std::ops::Deref;
 /// It can be a string or a binary, you shouldn't care about it unless you change serialization format.
 // surrent implementation serializes to string as it is used as a key in a JSON map
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
+#[cfg_attr(feature = "rkyv", archive_attr(derive(Debug, Hash, Eq, PartialEq)))]
 pub struct PublicKey(
     #[serde(
         deserialize_with = "sede::b58_to_public_key",
         serialize_with = "sede::public_key_to_b58"
     )]
+    #[cfg_attr(feature = "rkyv", with(sede::B58PublicKey))]
     fluence_keypair::PublicKey,
 );
 
@@ -92,11 +96,15 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
 // surrent implementation serializes string as more compact in JSON representation than number array
 #[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
+#[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct Signature(
     #[serde(
         deserialize_with = "sede::b58_to_signature",
         serialize_with = "sede::signature_to_b58"
     )]
+    #[cfg_attr(feature = "rkyv", with(sede::B58Signature))]
     fluence_keypair::Signature,
 );
 
@@ -164,7 +172,9 @@ impl SignatureTracker {
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
+// #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
 
 impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {

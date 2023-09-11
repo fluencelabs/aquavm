@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "rkyv")]
+use rkyv::Archive as _;
+
 pub(crate) fn public_key_to_b58<S: serde::Serializer>(
     key: &fluence_keypair::PublicKey,
     serializer: S,
@@ -83,5 +86,43 @@ impl serde::de::Visitor<'_> for SignatureVisitor {
             .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
         fluence_keypair::Signature::decode(sig_bytes)
             .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
+    }
+}
+
+#[cfg(feature = "rkyv")]
+pub struct B58PublicKey;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::with::ArchiveWith<fluence_keypair::PublicKey> for B58PublicKey {
+    type Archived = rkyv::Archived<String>;
+    type Resolver = rkyv::Resolver<String>;
+
+    unsafe fn resolve_with(
+        field: &fluence_keypair::PublicKey,
+        pos: usize,
+        resolver: rkyv::string::StringResolver,
+        out: *mut Self::Archived,
+    ) {
+        let serialize_value = bs58::encode(field.encode()).into_string();
+        serialize_value.resolve(pos, resolver, out);
+    }
+}
+
+#[cfg(feature = "rkyv")]
+pub struct B58Signature;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::with::ArchiveWith<fluence_keypair::Signature> for B58Signature {
+    type Archived = rkyv::Archived<String>;
+    type Resolver = rkyv::Resolver<String>;
+
+    unsafe fn resolve_with(
+        field: &fluence_keypair::Signature,
+        pos: usize,
+        resolver: rkyv::string::StringResolver,
+        out: *mut Self::Archived,
+    ) {
+        let serialize_value = bs58::encode(field.encode()).into_string();
+        serialize_value.resolve(pos, resolver, out);
     }
 }

@@ -33,7 +33,7 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct InterpreterData {
     /// Versions of data and an interpreter produced this data.
@@ -59,7 +59,7 @@ pub struct InterpreterData {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Versions {
     /// Version of this data format.
@@ -129,7 +129,7 @@ impl Versions {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CidInfo {
     /// Map CID to value.

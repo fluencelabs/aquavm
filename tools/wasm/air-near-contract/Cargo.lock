@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -112,7 +112,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.43.1"
+version = "0.45.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -160,7 +160,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.44.0"
+version = "0.45.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -299,10 +299,22 @@ version = "0.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7774144344a4faa177370406a7ff5f1da24303817368584c6206c8303eb07848"
 dependencies = [
- "funty",
- "radium",
+ "funty 1.1.0",
+ "radium 0.6.2",
  "tap",
- "wyz",
+ "wyz 0.2.0",
+]
+
+[[package]]
+name = "bitvec"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bc2832c24239b0141d5674bb9174f9d68a8b5b3f2753311927c172ca46f7e9c"
+dependencies = [
+ "funty 2.0.0",
+ "radium 0.7.0",
+ "tap",
+ "wyz 0.5.1",
 ]
 
 [[package]]
@@ -440,6 +452,28 @@ name = "byte-slice-cast"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
+
+[[package]]
+name = "bytecheck"
+version = "0.6.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b6372023ac861f6e6dc89c8344a8f398fb42aaba2b5dbc649ca0c0e9dbcb627"
+dependencies = [
+ "bytecheck_derive",
+ "ptr_meta",
+ "simdutf8",
+]
+
+[[package]]
+name = "bytecheck_derive"
+version = "0.6.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7ec4c6f261935ad534c0c22dbef2201b45918860eb1c574b972bd213a76af61"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "byteorder"
@@ -854,6 +888,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fed34cd105917e91daa4da6b3728c47b068749d6a62c59811f06ed2ac71d9da7"
 
 [[package]]
+name = "funty"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -899,6 +939,9 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+dependencies = [
+ "ahash",
+]
 
 [[package]]
 name = "hashbrown"
@@ -1124,13 +1167,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
+name = "marine-call-parameters"
+version = "0.9.0"
+dependencies = [
+ "marine-macro 0.9.0",
+ "marine-rs-sdk-main 0.9.0",
+ "rkyv",
+ "serde",
+]
+
+[[package]]
 name = "marine-macro"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c99fa7013660d8e129b2bcd51138015136b91903f88529f1da0510f850c28ea"
 dependencies = [
- "marine-macro-impl",
- "marine-rs-sdk-main",
+ "marine-macro-impl 0.8.1",
+ "marine-rs-sdk-main 0.8.1",
+]
+
+[[package]]
+name = "marine-macro"
+version = "0.9.0"
+dependencies = [
+ "marine-macro-impl 0.9.0",
+ "marine-rs-sdk-main 0.9.0",
 ]
 
 [[package]]
@@ -1147,13 +1208,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-macro-impl"
+version = "0.9.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "marine-rs-sdk"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "11991d31bf4d53651e1c151637f260c759eb9f28ecf8c894eb260b50f46459cc"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
+ "marine-macro 0.8.1",
+ "marine-rs-sdk-main 0.8.1",
  "marine-timestamp-macro",
  "polyplets 0.4.0",
  "serde",
@@ -1164,6 +1236,14 @@ name = "marine-rs-sdk-main"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b01678ba2a94fcfeb8232e87281937b07927ab2a54205747b6ab45e3f5ad65fd"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk-main"
+version = "0.9.0"
 dependencies = [
  "log",
  "serde",
@@ -1529,7 +1609,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "373b1a4c1338d9cd3d1fa53b3a11bdab5ab6bd80a20f7f7becd76953ae2be909"
 dependencies = [
  "arrayvec 0.7.4",
- "bitvec",
+ "bitvec 0.20.4",
  "byte-slice-cast",
  "impl-trait-for-tuples",
  "parity-scale-codec-derive",
@@ -1620,8 +1700,8 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b579a79a461ca50abb202eac61c76d8782fdf091a91775c9e181352e7cd30a8b"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
+ "marine-macro 0.8.1",
+ "marine-rs-sdk-main 0.8.1",
  "serde",
 ]
 
@@ -1629,7 +1709,7 @@ dependencies = [
 name = "polyplets"
 version = "0.5.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-call-parameters",
  "serde",
 ]
 
@@ -1709,6 +1789,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ptr_meta"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0738ccf7ea06b608c10564b31debd4f5bc5e197fc8bfe088f68ae5ce81e7a4f1"
+dependencies = [
+ "ptr_meta_derive",
+]
+
+[[package]]
+name = "ptr_meta_derive"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16b845dbfca988fa33db069c0e230574d15a3088f147a87b64c7589eb662c9ac"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "quick-protobuf"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1731,6 +1831,12 @@ name = "radium"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "643f8f41a8ebc4c5dc4515c82bb8abd397b527fc20fd681b7c011c2aee5d44fb"
+
+[[package]]
+name = "radium"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "rand"
@@ -1871,12 +1977,49 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
+name = "rend"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "581008d2099240d37fb08d77ad713bcaec2c4d89d50b5b21a8bb1996bbab68ab"
+dependencies = [
+ "bytecheck",
+]
+
+[[package]]
 name = "ripemd"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd124222d17ad93a644ed9d011a40f4fb64aa54275c08cc216524a9ea82fb09f"
 dependencies = [
  "digest 0.10.7",
+]
+
+[[package]]
+name = "rkyv"
+version = "0.7.42"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0200c8230b013893c0b2d6213d6ec64ed2b9be2e0e016682b7224ff82cff5c58"
+dependencies = [
+ "bitvec 1.0.1",
+ "bytecheck",
+ "hashbrown 0.12.3",
+ "ptr_meta",
+ "rend",
+ "rkyv_derive",
+ "seahash",
+ "tinyvec",
+ "uuid",
+]
+
+[[package]]
+name = "rkyv_derive"
+version = "0.7.42"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2e06b915b5c230a17d7a736d1e2e63ee753c256a8614ef3f5147b13a4f5541d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -1957,6 +2100,12 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "seahash"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c107b6f4780854c8b126e228ea8869f4d7b71260f962fefb57b996b8959ba6b"
 
 [[package]]
 name = "semver"
@@ -2063,6 +2212,12 @@ name = "signature"
 version = "1.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74233d3b3b2f6d4b006dc19dee745e73e2a6bfb6f93607cd3b02bd5b00797d7c"
+
+[[package]]
+name = "simdutf8"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
 name = "siphasher"
@@ -2345,6 +2500,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d86a8dc7f45e4c1b0d30e43038c38f274e77af056aa5f74b93c2cf9eb3c1c836"
 
 [[package]]
+name = "uuid"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
+
+[[package]]
 name = "variant_count"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2555,6 +2716,15 @@ name = "wyz"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
+
+[[package]]
+name = "wyz"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
+dependencies = [
+ "tap",
+]
 
 [[package]]
 name = "zeroize"
