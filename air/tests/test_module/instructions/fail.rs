@@ -45,6 +45,33 @@ fn fail_with_last_error() {
 }
 
 #[test]
+fn fail_with_error() {
+    let local_peer_id = "local_peer_id";
+    let fallible_service_id = "service_id_1";
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
+
+    let script = format!(
+        r#"
+            (xor
+                (call "{local_peer_id}" ("service_id_1" "local_fn_name") [] result_1)
+                (fail :error:)
+            )"#
+    );
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+
+    let expected_error = CatchableError::UserError {
+        error: rc!(json!({
+            "error_code": 10000i64,
+            "instruction": r#"call "local_peer_id" ("service_id_1" "local_fn_name") [] result_1"#,
+            "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
+            "peer_id": "local_peer_id",
+        })),
+    };
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
 fn fail_with_literals() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
@@ -83,6 +110,34 @@ fn fail_with_last_error_tetraplets() {
             (xor
                 (call "{local_peer_id}" ("{fallible_service_id}" "{local_fn_name}") [] result_1)
                 (fail %last_error%)
+            )
+            (call "{local_peer_id}" ("" "") [%last_error%])
+        )
+          "#
+    );
+
+    let test_params = TestRunParameters::from_init_peer_id(local_peer_id);
+    let _ = checked_call_vm!(vm, test_params, script, "", "");
+    assert_eq!(
+        tetraplet_anchor.borrow()[0][0],
+        SecurityTetraplet::new(local_peer_id, fallible_service_id, local_fn_name, "")
+    );
+}
+
+#[test]
+fn fail_with_error_tetraplets() {
+    let local_peer_id = "local_peer_id";
+    let fallible_service_id = "service_id_1";
+    let (host_closure, tetraplet_anchor) = tetraplet_host_function(fallible_call_service(fallible_service_id));
+    let mut vm = create_avm(host_closure, local_peer_id);
+
+    let local_fn_name = "local_fn_name";
+    let script = format!(
+        r#"
+        (xor
+            (xor
+                (call "{local_peer_id}" ("{fallible_service_id}" "{local_fn_name}") [] result_1)
+                (fail :error:)
             )
             (call "{local_peer_id}" ("" "") [%last_error%])
         )
