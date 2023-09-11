@@ -84,7 +84,7 @@ dependencies = [
  "air-log-targets",
  "aquavm-air",
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
  "serde",
  "serde_json",
  "tracing",
@@ -125,7 +125,7 @@ name = "air-interpreter-interface"
 version = "0.15.0"
 dependencies = [
  "fluence-it-types",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
  "serde",
  "serde_json",
 ]
@@ -180,7 +180,7 @@ dependencies = [
  "ed25519-dalek",
  "fluence-keypair",
  "maplit",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
  "object-pool",
  "once_cell",
  "rand_chacha 0.2.2",
@@ -342,7 +342,7 @@ dependencies = [
  "fluence-keypair",
  "log",
  "maplit",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
  "non-empty-vec",
  "once_cell",
  "polyplets",
@@ -2878,6 +2878,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
+name = "marine-call-parameters"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+dependencies = [
+ "marine-macro 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
+ "marine-rs-sdk-main 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
+ "serde",
+]
+
+[[package]]
 name = "marine-core"
 version = "0.30.1-feat-update-marine-rs-sdk-f34caa4-810-1.0"
 source = "registry+git://crates.fluence.dev/index"
@@ -2958,8 +2968,17 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd5d4c95570c141d4a92e8c08d6253788154315a66bb3c89d266f0825e9b49db"
 dependencies = [
- "marine-macro-impl 0.9.0",
- "marine-rs-sdk-main",
+ "marine-macro-impl 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk-main 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "marine-macro"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+dependencies = [
+ "marine-macro-impl 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
+ "marine-rs-sdk-main 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
 ]
 
 [[package]]
@@ -2989,6 +3008,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-macro-impl"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "marine-min-it-version"
 version = "0.30.1-feat-update-marine-rs-sdk-f34caa4-810-1.0"
 source = "registry+git://crates.fluence.dev/index"
@@ -3006,7 +3037,7 @@ checksum = "275d56afd2d049d2c1a51cb3741a8c2c884074bbd2abfc4194fd4a1bb0b6e7bc"
 dependencies = [
  "anyhow",
  "chrono",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-wasm-backend-traits",
  "semver 1.0.18",
  "serde",
@@ -3037,9 +3068,21 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "647206070db6f592f6a9783b1326c1b6a535c739d5238e478a9fa8529234ad70"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
- "marine-timestamp-macro",
+ "marine-macro 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk-main 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-timestamp-macro 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+dependencies = [
+ "marine-call-parameters",
+ "marine-macro 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
+ "marine-rs-sdk-main 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
+ "marine-timestamp-macro 0.9.0 (git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params)",
  "serde",
 ]
 
@@ -3048,6 +3091,15 @@ name = "marine-rs-sdk-main"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a69e17cc63a434d19ca9c312a29a1e06847758041f8429f333d3a91469f62594"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk-main"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "log",
  "serde",
@@ -3066,8 +3118,8 @@ dependencies = [
  "log",
  "marine-core",
  "marine-module-interface",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
+ "marine-rs-sdk 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk-main 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-utils",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -3087,6 +3139,15 @@ name = "marine-timestamp-macro"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c33b9d6dd721e2d55e3737a4ba5374887cef56caa80b0a49849a06b0f2e46a4e"
+dependencies = [
+ "chrono",
+ "quote",
+]
+
+[[package]]
+name = "marine-timestamp-macro"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "chrono",
  "quote",
@@ -4102,7 +4163,7 @@ dependencies = [
 name = "polyplets"
 version = "0.5.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-call-parameters",
  "serde",
 ]
 

@@ -15,6 +15,6 @@ name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk = "0.9.0"
+marine-call-parameters = {version = "0.9.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/decouple-call-params", default-features = false }
 
 serde = { version = "1.0.164", features = ["rc", "derive"] }

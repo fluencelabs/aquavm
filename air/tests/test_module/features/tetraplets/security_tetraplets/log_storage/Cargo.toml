@@ -10,6 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 aquavm-air = { path = "../../../../../../../air" }
-marine-rs-sdk = "0.9.0"
+marine-rs-sdk = {version = "0.9.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/decouple-call-params" }
 
 [workspace]

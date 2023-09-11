@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_rs_sdk::SecurityTetraplet;
+use marine_call_parameters::SecurityTetraplet;
 
 use serde::Deserialize;
 use serde::Serialize;
