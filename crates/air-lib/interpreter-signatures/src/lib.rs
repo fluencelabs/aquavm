@@ -36,57 +36,44 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::ops::Deref;
 
 /// An opaque serializable representation of a public key.
 ///
 /// It can be a string or a binary, you shouldn't care about it unless you change serialization format.
 // surrent implementation serializes to string as it is used as a key in a JSON map
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize, Hash)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug, Hash, Eq, PartialEq)))]
 pub struct PublicKey(
-    #[serde(
-        deserialize_with = "sede::b58_to_public_key",
-        serialize_with = "sede::public_key_to_b58"
-    )]
+    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
     #[cfg_attr(feature = "rkyv", with(sede::B58PublicKey))]
-    fluence_keypair::PublicKey,
+    Box<[u8]>,
 );
 
 impl PublicKey {
     pub fn verify<T: Serialize + ?Sized>(
         &self,
         value: &T,
-        signature: &fluence_keypair::Signature,
+        signature: &Signature,
     ) -> Result<(), fluence_keypair::error::VerificationError> {
-        let pk = &**self;
+        let pk = fluence_keypair::PublicKey::decode(&self.0).expect("TODO error variant");
+        let signature = fluence_keypair::Signature::decode(signature.0.clone().into())
+            .expect("TODO error variant");
 
         let serialized_value =
             serde_json::to_vec(value).expect("default serialization shouldn't fail");
 
-        pk.verify(&serialized_value, signature)
-    }
-}
-
-impl Deref for PublicKey {
-    type Target = fluence_keypair::PublicKey;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl Hash for PublicKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.to_vec().hash(state);
+        pk.verify(&serialized_value, &signature)
     }
 }
 
 impl From<fluence_keypair::PublicKey> for PublicKey {
     fn from(value: fluence_keypair::PublicKey) -> Self {
-        Self(value)
+        Self(value.encode().into())
     }
 }
 
@@ -96,41 +83,27 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
 // surrent implementation serializes string as more compact in JSON representation than number array
 #[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(transparent)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct Signature(
-    #[serde(
-        deserialize_with = "sede::b58_to_signature",
-        serialize_with = "sede::signature_to_b58"
-    )]
+    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
     #[cfg_attr(feature = "rkyv", with(sede::B58Signature))]
-    fluence_keypair::Signature,
+    Box<[u8]>,
 );
 
 impl Signature {
     fn new(signature: fluence_keypair::Signature) -> Self {
-        Self(signature)
-    }
-}
-
-impl Deref for Signature {
-    type Target = fluence_keypair::Signature;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+        Self(signature.encode().into())
     }
 }
 
 impl From<fluence_keypair::Signature> for Signature {
     fn from(value: fluence_keypair::Signature) -> Self {
-        Self(value)
-    }
-}
-
-impl From<Signature> for fluence_keypair::Signature {
-    fn from(value: Signature) -> Self {
-        value.0
+        Self::new(value)
     }
 }
 
@@ -172,7 +145,10 @@ impl SignatureTracker {
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 // #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);

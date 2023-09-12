@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-#[cfg(feature = "rkyv")]
-use rkyv::Archive as _;
-
-pub(crate) fn public_key_to_b58<S: serde::Serializer>(
-    key: &fluence_keypair::PublicKey,
+pub(crate) fn to_b58<S: serde::Serializer>(
+    key_data: &[u8],
     serializer: S,
 ) -> Result<S::Ok, S::Error> {
-    serializer.serialize_str(&bs58::encode(key.encode()).into_string())
+    serializer.serialize_str(&bs58::encode(key_data).into_string())
 }
 
-pub(crate) fn b58_to_public_key<'de, D: serde::Deserializer<'de>>(
+pub(crate) fn from_b58<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<fluence_keypair::PublicKey, D::Error> {
-    deserializer.deserialize_str(PublicKeyVisitor)
+) -> Result<Box<[u8]>, D::Error> {
+    deserializer.deserialize_str(B58Visitor)
 }
 
-/// Visitor who tries to decode base58-encoded string to a fluence_keypair::PublicKey.
-struct PublicKeyVisitor;
+/// Visitor who tries to decode base58-encoded string to Box<[u8]>.
+struct B58Visitor;
 
-impl serde::de::Visitor<'_> for PublicKeyVisitor {
-    type Value = fluence_keypair::PublicKey;
+impl serde::de::Visitor<'_> for B58Visitor {
+    type Value = Box<[u8]>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("expecting a base58-encoded public key string")
+        formatter.write_str("expecting a base58-encoded binary data")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -46,83 +43,10 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     {
         use serde::de;
 
-        let public_key = fluence_keypair::PublicKey::from_base58(v)
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        Ok(public_key)
-    }
-}
-
-pub(crate) fn signature_to_b58<S: serde::Serializer>(
-    signature: &fluence_keypair::Signature,
-    serializer: S,
-) -> Result<S::Ok, S::Error> {
-    serializer.serialize_str(&bs58::encode(signature.encode()).into_string())
-}
-
-pub(crate) fn b58_to_signature<'de, D: serde::Deserializer<'de>>(
-    deserializer: D,
-) -> Result<fluence_keypair::Signature, D::Error> {
-    deserializer.deserialize_str(SignatureVisitor)
-}
-
-/// Visitor who tries to decode base58-encoded string to a fluence_keypair::Signature.
-struct SignatureVisitor;
-
-impl serde::de::Visitor<'_> for SignatureVisitor {
-    type Value = fluence_keypair::Signature;
-
-    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("expecting a base58-encoded signature string")
-    }
-
-    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        use serde::de;
-
-        let sig_bytes = bs58::decode(v)
+        let key_data: Box<[u8]> = bs58::decode(v)
             .into_vec()
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        fluence_keypair::Signature::decode(sig_bytes)
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
-    }
-}
-
-#[cfg(feature = "rkyv")]
-pub struct B58PublicKey;
-
-#[cfg(feature = "rkyv")]
-impl rkyv::with::ArchiveWith<fluence_keypair::PublicKey> for B58PublicKey {
-    type Archived = rkyv::Archived<String>;
-    type Resolver = rkyv::Resolver<String>;
-
-    unsafe fn resolve_with(
-        field: &fluence_keypair::PublicKey,
-        pos: usize,
-        resolver: rkyv::string::StringResolver,
-        out: *mut Self::Archived,
-    ) {
-        let serialize_value = bs58::encode(field.encode()).into_string();
-        serialize_value.resolve(pos, resolver, out);
-    }
-}
-
-#[cfg(feature = "rkyv")]
-pub struct B58Signature;
-
-#[cfg(feature = "rkyv")]
-impl rkyv::with::ArchiveWith<fluence_keypair::Signature> for B58Signature {
-    type Archived = rkyv::Archived<String>;
-    type Resolver = rkyv::Resolver<String>;
-
-    unsafe fn resolve_with(
-        field: &fluence_keypair::Signature,
-        pos: usize,
-        resolver: rkyv::string::StringResolver,
-        out: *mut Self::Archived,
-    ) {
-        let serialize_value = bs58::encode(field.encode()).into_string();
-        serialize_value.resolve(pos, resolver, out);
+            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?
+            .into();
+        Ok(key_data)
     }
 }
