@@ -1075,8 +1075,7 @@ fn canon_join_behavoir() {
         .expect("invalid test AIR script");
     let result = executor.execute_one(init_peer_name).unwrap();
 
-    assert_eq!(result.error_message, "");
-    assert_eq!(result.ret_code, 0);
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
 #[test]
@@ -1099,8 +1098,7 @@ fn canon_map_join_behavoir() {
         .expect("invalid test AIR script");
     let result = executor.execute_one(init_peer_name).unwrap();
 
-    assert_eq!(result.error_message, "");
-    assert_eq!(result.ret_code, 0);
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
 #[test]
@@ -1123,6 +1121,5 @@ fn canon_map_var_join_behavoir() {
         .expect("invalid test AIR script");
     let result = executor.execute_one(init_peer_name).unwrap();
 
-    assert_eq!(result.error_message, "");
-    assert_eq!(result.ret_code, 0);
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
