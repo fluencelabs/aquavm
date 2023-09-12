@@ -1054,3 +1054,75 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
         actual_trace, expected_trace
     );
 }
+
+#[test]
+fn canon_join_behavoir() {
+    let init_peer_name = "init_peer_id";
+
+    let script = r#"
+    (seq
+       (par
+          (null)
+          (seq
+             (never)
+             (ap %init_peer_id% var)))
+       (seq
+          (ap 42 $stream)
+          (canon var $stream #canon)))
+    "#;
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_one(init_peer_name).unwrap();
+
+    assert_eq!(result.error_message, "");
+    assert_eq!(result.ret_code, 0);
+}
+
+#[test]
+fn canon_map_join_behavoir() {
+    let init_peer_name = "init_peer_id";
+
+    let script = r#"
+    (seq
+       (par
+          (null)
+          (seq
+             (never)
+             (ap %init_peer_id% var)))
+       (seq
+          (ap ("answer" 42) %map)
+          (canon var %map #%canon)))
+    "#;
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_one(init_peer_name).unwrap();
+
+    assert_eq!(result.error_message, "");
+    assert_eq!(result.ret_code, 0);
+}
+
+#[test]
+fn canon_map_var_join_behavoir() {
+    let init_peer_name = "init_peer_id";
+
+    let script = r#"
+    (seq
+       (par
+          (null)
+          (seq
+             (never)
+             (ap %init_peer_id% var)))
+       (seq
+          (ap ("answer" 42) %map)
+          (canon var %map value)))
+    "#;
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_one(init_peer_name).unwrap();
+
+    assert_eq!(result.error_message, "");
+    assert_eq!(result.ret_code, 0);
+}
