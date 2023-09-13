@@ -18,7 +18,7 @@ path = "src/lib.rs"
 air-interpreter-interface = { version = "0.15.0", path = "../../crates/air-lib/interpreter-interface" }
 air-utils = { version = "0.1.1", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.0", path = "../../crates/data-store" }
-marine-runtime = { version = "0.30.1-feat-update-marine-rs-sdk-86ceada-812-1.0", registry = "fluence" }
+marine-runtime = "0.30.0"
 polyplets = { version = "0.5.0", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.29.0", path = "../../avm/interface" }
 
