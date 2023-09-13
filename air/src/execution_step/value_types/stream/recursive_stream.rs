@@ -159,7 +159,7 @@ mod test {
     fn create_value(value: JValue) -> ValueAggregate {
         ValueAggregate::from_service_result(
             ServiceResultAggregate::new(Rc::new(value), <_>::default(), 0.into()),
-            CID::new("some fake cid").into(),
+            CID::new("some fake cid").unwrap().into(),
         )
     }
 

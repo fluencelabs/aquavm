@@ -82,7 +82,7 @@ pub fn value_aggregate_cid(
         .unwrap();
 
     let arguments = serde_json::Value::Array(args);
-    let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
+    let argument_hash = value_to_json_cid(&arguments).unwrap().to_string().into();
 
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,

@@ -97,7 +97,7 @@ impl ExecutionCidState {
     pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<Rc<JValue>, UncatchableError> {
         self.value_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("value", cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("value", cid.to_string()))
     }
 
     pub(crate) fn get_tetraplet_by_cid(
@@ -106,7 +106,7 @@ impl ExecutionCidState {
     ) -> Result<RcSecurityTetraplet, UncatchableError> {
         self.tetraplet_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("tetraplet", cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("tetraplet", cid.to_string()))
     }
 
     pub(crate) fn get_canon_value_by_cid(
@@ -116,7 +116,7 @@ impl ExecutionCidState {
         let canon_aggregate = self
             .canon_element_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.clone().into()))?;
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon aggregate", cid.to_string()))?;
         let result = self.get_value_by_cid(&canon_aggregate.value)?;
         let tetraplet = self.get_tetraplet_by_cid(&canon_aggregate.tetraplet)?;
 
@@ -135,7 +135,7 @@ impl ExecutionCidState {
     ) -> Result<Rc<CanonResultCidAggregate>, UncatchableError> {
         self.canon_result_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon result aggregate", cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("canon result aggregate", cid.to_string()))
     }
 
     pub(crate) fn get_service_result_agg_by_cid(
@@ -144,7 +144,7 @@ impl ExecutionCidState {
     ) -> Result<Rc<ServiceResultCidAggregate>, UncatchableError> {
         self.service_result_agg_tracker
             .get(cid)
-            .ok_or_else(|| UncatchableError::ValueForCidNotFound("service result aggregate", cid.clone().into()))
+            .ok_or_else(|| UncatchableError::ValueForCidNotFound("service result aggregate", cid.to_string()))
     }
 
     pub(crate) fn resolve_service_value(

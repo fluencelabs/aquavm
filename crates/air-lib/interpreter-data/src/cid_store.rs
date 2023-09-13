@@ -139,21 +139,25 @@ mod tests {
             HashMap::from_iter(vec![
                 (
                     CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
+                        .unwrap()
                         .into(),
                     json!("test").into()
                 ),
                 (
                     CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
+                        .unwrap()
                         .into(),
                     json!([1, 2, 3]).into(),
                 ),
                 (
                     CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                        .unwrap()
                         .into(),
                     json!(1).into(),
                 ),
                 (
                     CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
+                        .unwrap()
                         .into(),
                     json!({
                         "key": 42,
@@ -179,37 +183,44 @@ mod tests {
 
         assert_eq!(
             &*store
-                .get(&CID::new(
-                    "bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa"
-                ))
+                .get(
+                    &CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
+                        .unwrap()
+                )
                 .unwrap(),
             &json!("test"),
         );
         assert_eq!(
             &*store
-                .get(&CID::new(
-                    "bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a"
-                ))
+                .get(
+                    &CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
+                        .unwrap()
+                )
                 .unwrap(),
             &json!([1, 2, 3]),
         );
         assert_eq!(
             &*store
-                .get(&CID::new(
-                    "bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq"
-                ))
+                .get(
+                    &CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                        .unwrap()
+                )
                 .unwrap(),
             &json!(1),
         );
         assert_eq!(
             &*store
-                .get(&CID::new(
-                    "bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq"
-                ))
+                .get(
+                    &CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
+                        .unwrap()
+                )
                 .unwrap(),
             &json!({"key": 42}),
         );
 
-        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None,);
+        assert_eq!(
+            store.get(&CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyumavqw4kaq").unwrap()),
+            None,
+        );
     }
 }

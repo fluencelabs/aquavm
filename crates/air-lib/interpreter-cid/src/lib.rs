@@ -26,29 +26,57 @@
     unreachable_patterns
 )]
 
+mod sede;
+
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::convert::TryInto;
 use std::fmt;
 use std::marker::PhantomData;
+use std::str::FromStr;
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes, compare(PartialEq, PartialOrd)))]
-#[cfg_attr(feature = "rkyv", omit_bounds)]  // TODO look close, it can be misuse
+#[cfg_attr(feature = "rkyv", omit_bounds)] // TODO look close, it can be misuse
 #[serde(transparent)]
 pub struct CID<T: ?Sized>(
-    String,
-    #[serde(skip)]
-    PhantomData<*const T>);
+    #[serde(
+        deserialize_with = "sede::from_cid_string",
+        serialize_with = "sede::to_cid_string"
+    )]
+    Vec<u8>,
+    #[serde(skip)] PhantomData<*const T>,
+);
 
 impl<T: ?Sized> CID<T> {
-    pub fn new(cid: impl Into<String>) -> Self {
-        Self(cid.into(), PhantomData)
+    fn from_cid(cid: cid::Cid) -> Self {
+        Self(cid.to_bytes().into(), PhantomData)
     }
 
-    pub fn into_inner(self) -> String {
+    pub fn into_inner(self) -> Vec<u8> {
         self.0
+    }
+
+    pub fn new(cid_str: &str) -> Result<Self, cid::Error> {
+        use cid::Cid;
+
+        let cid = Cid::from_str(cid_str)?;
+        Ok(Self::from_cid(cid))
+    }
+}
+
+impl<T: ?Sized> TryInto<String> for &CID<T> {
+    type Error = cid::Error;
+
+    fn try_into(self) -> Result<String, Self::Error> {
+        use std::convert::TryFrom as _;
+
+        cid::Cid::try_from(self.0.as_slice()).map(|c| c.to_string())
     }
 }
 
@@ -60,6 +88,13 @@ impl<T: ?Sized> Clone for CID<T> {
 impl<T: ?Sized> fmt::Debug for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("CID").field(&self.0).finish()
+    }
+}
+
+impl<T: ?Sized> std::fmt::Display for CID<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let encoded = multibase::encode(multibase::Base::Base32Lower, self.0.as_slice());
+        write!(f, "{}", encoded)
     }
 }
 
@@ -78,9 +113,9 @@ impl<Val> std::hash::Hash for CID<Val> {
     }
 }
 
-impl<T: ?Sized> From<CID<T>> for String {
+impl<T: ?Sized> From<CID<T>> for Vec<u8> {
     fn from(value: CID<T>) -> Self {
-        value.0
+        value.0.into()
     }
 }
 
@@ -115,7 +150,7 @@ pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
     const JSON_CODEC: u64 = 0x0200;
 
     let cid = Cid::new_v1(JSON_CODEC, digest);
-    CID::new(cid.to_string())
+    CID::from_cid(cid)
 }
 
 pub struct CidCalculationError(serde_json::Error);

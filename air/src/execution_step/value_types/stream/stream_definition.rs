@@ -250,14 +250,14 @@ mod test {
     fn create_value(value: JValue) -> ValueAggregate {
         ValueAggregate::from_service_result(
             ServiceResultAggregate::new(Rc::new(value), <_>::default(), 1.into()),
-            CID::new("some fake cid").into(),
+            CID::new("some fake cid").unwrap().into(),
         )
     }
 
     fn create_value_with_pos(value: JValue, trace_pos: TracePos) -> ValueAggregate {
         ValueAggregate::from_service_result(
             ServiceResultAggregate::new(Rc::new(value), <_>::default(), trace_pos),
-            CID::new("some fake cid").into(),
+            CID::new("some fake cid").unwrap().into(),
         )
     }
 
@@ -538,7 +538,7 @@ mod test {
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
-        let canon_result = CanonResult::executed(Rc::new(CID::new("fake canon CID")));
+        let canon_result = CanonResult::executed(Rc::new(CID::new("fake canon CID").expect("FAILS until FIXED")));
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);

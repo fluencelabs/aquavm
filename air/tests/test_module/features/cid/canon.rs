@@ -218,7 +218,7 @@ fn test_canon_value_not_found() {
 
     let missing_cid = "bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq";
     let value_store: CidStore<_> = cid_state.value_tracker.into();
-    assert!(value_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(value_store.get(&CID::<_>::new(missing_cid).unwrap()).is_some());
 
     // Override with fake data.
     cid_state.value_tracker = CidTracker::<_>::new();
@@ -263,7 +263,7 @@ fn test_canon_root_tetraplet_not_found() {
 
     let missing_cid = "bagaaiera2bwoxisr5k7qlbzhxi2jmdqlgqybqgxcfwt3v652nqdo5fyc665q";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid).unwrap()).is_some());
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -320,7 +320,7 @@ fn test_canon_tetraplet_not_found() {
 
     let missing_cid = "bagaaieracu6twiik6az3cosyzlplrscon3ek6rnu3lkjnflibphqkw6kcdiq";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid).unwrap()).is_some());
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -370,7 +370,7 @@ fn test_canon_agg_not_found() {
 
     let missing_cid = "bagaaierar6b2hcv2ir66tmbwocj5h7yofseqlzxma2n67z5wybtto5ujrekq";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
-    assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(canon_element_store.get(&CID::<_>::new(missing_cid).unwrap()).is_some());
 
     // Fake data
     cid_state.canon_element_tracker = <_>::default();

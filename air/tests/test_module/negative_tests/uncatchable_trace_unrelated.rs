@@ -86,7 +86,7 @@ fn call_result_not_correspond_to_instr() {
     let data = raw_data_from_trace(wrong_trace, <_>::default());
 
     let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
-    let value_ref = ValueRef::Scalar(CID::new("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq").into());
+    let value_ref = ValueRef::Scalar(CID::new("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq").unwrap().into());
     let expected_error = CallResultNotCorrespondToInstr(value_ref);
     assert!(check_error(&result, expected_error), "{:?}", result);
 }

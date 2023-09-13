@@ -102,14 +102,18 @@ impl<'i> ResolvedCall<'i> {
             CheckArgsResult::Ok(args) => Some(args),
             CheckArgsResult::Joinable(_) => None,
         };
-        let argument_hash: Option<Rc<str>> = checked_args.map(|args| {
+        let argument_hash: Option<String> = checked_args.map(|args| {
             value_to_json_cid(&args)
                 .expect("JSON serializer shouldn't fail")
-                .into_inner()
-                .into()
+                .to_string()
         });
 
-        let state = self.prepare_current_executed_state(raw_call, argument_hash.as_ref(), exec_ctx, trace_ctx)?;
+        let state = self.prepare_current_executed_state(
+            raw_call,
+            argument_hash.as_ref().map(String::as_str),
+            exec_ctx,
+            trace_ctx,
+        )?;
 
         if !state.should_execute() {
             state.maybe_set_prev_state(trace_ctx);
@@ -185,7 +189,7 @@ impl<'i> ResolvedCall<'i> {
     fn prepare_current_executed_state(
         &self,
         raw_call: &Call<'i>,
-        argument_hash: Option<&Rc<str>>,
+        argument_hash: Option<&str>,
         exec_ctx: &mut ExecutionCtx<'i>,
         trace_ctx: &mut TraceHandler,
     ) -> ExecutionResult<StateDescriptor> {

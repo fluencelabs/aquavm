@@ -39,7 +39,7 @@ pub(crate) struct StateDescriptor {
 pub(super) fn handle_prev_state<'i>(
     met_result: MetCallResult,
     tetraplet: &RcSecurityTetraplet,
-    argument_hash: Option<&Rc<str>>,
+    argument_hash: Option<&str>,
     output: &CallOutputValue<'i>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
@@ -72,7 +72,7 @@ pub(super) fn handle_prev_state<'i>(
                 Some(call_result) => {
                     update_state_with_service_result(
                         tetraplet.clone(),
-                        argument_hash.expect("Result for joinable error").clone(),
+                        argument_hash.expect("Result for joinable error").into(),
                         output,
                         call_result,
                         exec_ctx,
