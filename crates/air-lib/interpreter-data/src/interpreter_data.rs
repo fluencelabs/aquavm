@@ -133,7 +133,7 @@ impl Versions {
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CidInfo {
     /// Map CID to value.
-    pub value_store: CidStore<JValue>,
+    pub value_store: CidStore<RawValueWrapper>,
 
     /// Map CID to a tetraplet.
     pub tetraplet_store: CidStore<SecurityTetraplet>,
@@ -147,3 +147,11 @@ pub struct CidInfo {
     /// Map CID to a service result aggregate.
     pub service_result_store: CidStore<ServiceResultCidAggregate>,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[repr(transparent)]
+#[serde(transparent)]
+pub struct RawValueWrapper(#[with(WithRawJson)] Box<serde_json::value::RawValue>);
+
+struct WithRawJson;

@@ -50,7 +50,6 @@ use std::hash::Hash;
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug, Hash, Eq, PartialEq)))]
 pub struct PublicKey(
     #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
-    #[cfg_attr(feature = "rkyv", with(sede::B58PublicKey))]
     Box<[u8]>,
 );
 
@@ -91,7 +90,6 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct Signature(
     #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
-    #[cfg_attr(feature = "rkyv", with(sede::B58Signature))]
     Box<[u8]>,
 );
 
@@ -110,7 +108,7 @@ impl From<fluence_keypair::Signature> for Signature {
 #[derive(Debug, Default)]
 pub struct SignatureTracker {
     // from peer id to CID strings
-    peer_to_cids: HashMap<Box<str>, Vec<Box<str>>>,
+    peer_to_cids: HashMap<Box<str>, Vec<Vec<u8>>>,
 }
 
 impl SignatureTracker {
@@ -122,7 +120,7 @@ impl SignatureTracker {
         self.peer_to_cids
             .entry(peer_id.into())
             .or_default()
-            .push(cid.clone().into_inner().into());
+            .push(cid.clone().into_inner());
     }
 
     pub fn into_signature(
