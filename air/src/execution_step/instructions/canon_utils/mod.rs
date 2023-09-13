@@ -58,7 +58,7 @@ pub(crate) fn handle_canon_request_sent_by(
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
     // we do not apply join behavior here because if state exists, the variable have been defined;
-    // it cannot become undefined
+    // it cannot become undefined due to INV-1
     let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
