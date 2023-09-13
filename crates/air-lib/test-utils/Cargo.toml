@@ -21,7 +21,7 @@ air-interpreter-data = { version = "0.10.0", path = "../interpreter-data" }
 air-interpreter-interface = { version = "0.15.0", path = "../interpreter-interface" }
 avm-interface = { version = "0.29.0", path = "../../../avm/interface" }
 avm-server = { version = "0.33.0", path = "../../../avm/server" }
-marine-rs-sdk = {version = "0.9.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/decouple-call-params" }
+marine-rs-sdk = "0.10.0"
 
 object-pool = "0.5.4"
 once_cell = "1.17.1"

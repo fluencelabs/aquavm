@@ -56,7 +56,7 @@ dependencies = [
  "newtype_derive",
  "num-traits",
  "once_cell",
- "polyplets 0.5.0",
+ "polyplets",
  "semver 1.0.18",
  "serde",
  "serde_json",
@@ -133,7 +133,7 @@ dependencies = [
  "bimap",
  "log",
  "num-traits",
- "polyplets 0.5.0",
+ "polyplets",
  "serde_json",
  "thiserror",
  "tracing",
@@ -179,7 +179,7 @@ dependencies = [
  "maplit",
  "non-empty-vec",
  "once_cell",
- "polyplets 0.5.0",
+ "polyplets",
  "semver 1.0.18",
  "serde",
  "serde_json",
@@ -259,6 +259,12 @@ name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
+
+[[package]]
+name = "base64ct"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bimap"
@@ -552,6 +558,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "const-oid"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28c122c3980598d243d63d9a704629a2d748d101f278052ff068be5a4423ab6f"
+
+[[package]]
 name = "constant_time_eq"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -633,6 +645,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "curve25519-dalek"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "622178105f911d937a42cdb140730ba4a3ed2becd8ae6ce39c7d28b5d75d4588"
+dependencies = [
+ "cfg-if 1.0.0",
+ "cpufeatures",
+ "curve25519-dalek-derive",
+ "digest 0.10.7",
+ "fiat-crypto",
+ "platforms",
+ "rustc_version 0.4.0",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
+name = "curve25519-dalek-derive"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83fdaf97f4804dcebfa5862639bc9ce4121e82140bec2a987ac5140294865b5b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.28",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -656,6 +696,16 @@ checksum = "8fdf3fce3ce863539ec1d7fd1b6dcc3c645663376b43ed376bbf887733e4f772"
 dependencies = [
  "data-encoding",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "der"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fffa369a668c8af7dbf8b5e56c9f744fbd399949ed171606040001947de40b1c"
+dependencies = [
+ "const-oid",
+ "zeroize",
 ]
 
 [[package]]
@@ -736,7 +786,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "91cff35c70bba8a626e3185d8cd48cc11b5437e1a5bcd15b9b5fa3c64b6dfee7"
 dependencies = [
  "serde",
- "signature",
+ "signature 1.6.4",
+]
+
+[[package]]
+name = "ed25519"
+version = "2.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60f6d271ca33075c88028be6f04d502853d63a5ece419d269c15315d4fc1cf1d"
+dependencies = [
+ "pkcs8",
+ "signature 2.1.0",
 ]
 
 [[package]]
@@ -745,12 +805,26 @@ version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c762bae6dcaf24c4c84667b8579785430908723d5c889f469d76a41d59cc7a9d"
 dependencies = [
- "curve25519-dalek",
- "ed25519",
+ "curve25519-dalek 3.2.0",
+ "ed25519 1.5.3",
  "rand 0.7.3",
  "serde",
  "serde_bytes",
  "sha2 0.9.9",
+ "zeroize",
+]
+
+[[package]]
+name = "ed25519-dalek"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7277392b266383ef8396db7fdeb1e77b6c52fed775f5df15bb24f35b72156980"
+dependencies = [
+ "curve25519-dalek 4.1.0",
+ "ed25519 2.2.2",
+ "rand_core 0.6.4",
+ "serde",
+ "sha2 0.10.7",
  "zeroize",
 ]
 
@@ -801,6 +875,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fiat-crypto"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0870c84016d4b481be5c9f323c24f65e31e901ae618f0e80f4308fb00de1d2d"
+
+[[package]]
 name = "fixed-hash"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,7 +915,7 @@ version = "0.10.3"
 source = "git+https://github.com/fluencelabs/trust-graph.git?branch=lean-keypair#ee63de8c7155a69065e998616389a3faf784638d"
 dependencies = [
  "bs58 0.5.0",
- "ed25519-dalek",
+ "ed25519-dalek 1.0.1",
  "eyre",
  "lazy_static",
  "libp2p-identity",
@@ -1082,11 +1162,11 @@ checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 
 [[package]]
 name = "libp2p-identity"
-version = "0.2.2"
-source = "git+https://github.com/fluencelabs/rust-libp2p.git?branch=rand-feature#ca5f61448ba5461c371783830b6f665ce5fd3ead"
+version = "0.2.3"
+source = "git+https://github.com/fluencelabs/rust-libp2p.git?branch=rand-feature#79b3bdd79f393a8be06b682190780d2bdd41a05e"
 dependencies = [
  "bs58 0.5.0",
- "ed25519-dalek",
+ "ed25519-dalek 2.0.0",
  "log",
  "multihash 0.19.0",
  "quick-protobuf",
@@ -1124,10 +1204,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
+name = "marine-call-parameters"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+dependencies = [
+ "marine-macro",
+ "marine-rs-sdk-main",
+ "serde",
+]
+
+[[package]]
 name = "marine-macro"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c99fa7013660d8e129b2bcd51138015136b91903f88529f1da0510f850c28ea"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -1135,9 +1224,8 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43b4761eec59a2914413d1ea14659305e6374bfed69998f33763daa586c44196"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1148,22 +1236,20 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11991d31bf4d53651e1c151637f260c759eb9f28ecf8c894eb260b50f46459cc"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
+ "marine-call-parameters",
  "marine-macro",
  "marine-rs-sdk-main",
  "marine-timestamp-macro",
- "polyplets 0.4.0",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b01678ba2a94fcfeb8232e87281937b07927ab2a54205747b6ab45e3f5ad65fd"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "log",
  "serde",
@@ -1171,9 +1257,8 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80d254ea11e35cdeccc62ffccf78775c066750c9e5bae4934eb0758187442282"
+version = "0.9.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
 dependencies = [
  "chrono",
  "quote",
@@ -1285,9 +1370,9 @@ dependencies = [
  "borsh",
  "bs58 0.4.0",
  "c2-chacha",
- "curve25519-dalek",
+ "curve25519-dalek 3.2.0",
  "derive_more",
- "ed25519-dalek",
+ "ed25519-dalek 1.0.1",
  "near-account-id",
  "once_cell",
  "parity-secp256k1",
@@ -1615,21 +1700,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12cc1b0bf1727a77a54b6654e7b5f1af8604923edc8b81885f8ec92f9e3f0a05"
 
 [[package]]
-name = "polyplets"
-version = "0.4.0"
+name = "pkcs8"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b579a79a461ca50abb202eac61c76d8782fdf091a91775c9e181352e7cd30a8b"
+checksum = "f950b2377845cebe5cf8b5165cb3cc1a5e0fa5cfa3e1f7f55707d8fd82e0a7b7"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
- "serde",
+ "der",
+ "spki",
 ]
+
+[[package]]
+name = "platforms"
+version = "3.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4503fa043bf02cee09a9582e9554b4c6403b2ef55e4612e96561d294419429f8"
 
 [[package]]
 name = "polyplets"
 version = "0.5.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-call-parameters",
  "serde",
 ]
 
@@ -2065,6 +2155,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74233d3b3b2f6d4b006dc19dee745e73e2a6bfb6f93607cd3b02bd5b00797d7c"
 
 [[package]]
+name = "signature"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e1788eed21689f9cf370582dfc467ef36ed9c707f073528ddafa8d83e3b8500"
+
+[[package]]
 name = "siphasher"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2092,6 +2188,16 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "spki"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d1e996ef02c474957d681f1b05213dfb0abab947b446a62d37770b23500184a"
+dependencies = [
+ "base64ct",
+ "der",
+]
 
 [[package]]
 name = "static_assertions"
