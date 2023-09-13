@@ -21,6 +21,7 @@ members = [
     "crates/data-store",
     "crates/testing-framework",
     "tools/cli/air",
+    "tools/cli/air-data-conv",
     "tools/wasm/air-beautify-wasm",
 ]
 

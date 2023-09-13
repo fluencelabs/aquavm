@@ -1,0 +1,14 @@
+[package]
+name = "air-data-conv"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+air-interpreter-data = { version = "0.11.0", path = "../../../crates/air-lib/interpreter-data", features = ["rkyv"] }
+air-interpreter-interface = { version = "0.15.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+
+clap = { version = "4.2.7", features = ["derive", "env"] }
+rkyv = { version = "0.7.42", features = ["archive_be", "bytecheck"] }
+serde_json = "1.0.106"
