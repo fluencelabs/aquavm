@@ -143,7 +143,7 @@ impl CanonCidAggregate {
 
 impl ServiceResultCidAggregate {
     pub fn new(
-        value_cid: Rc<CID<JValue>>,
+        value_cid: Rc<CID<RawValueWrapper>>,
         argument_hash: Rc<str>,
         tetraplet_cid: Rc<CID<SecurityTetraplet>>,
     ) -> Self {

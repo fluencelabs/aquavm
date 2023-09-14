@@ -21,6 +21,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::convert::TryInto;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use std::ops::Index;
 use std::ops::IndexMut;
 
@@ -62,6 +63,12 @@ impl Deref for ExecutionTrace {
 
     fn deref(&self) -> &[ExecutedState] {
         &self.0
+    }
+}
+
+impl DerefMut for ExecutionTrace {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 

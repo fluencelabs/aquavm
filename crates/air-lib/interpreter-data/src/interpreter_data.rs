@@ -18,7 +18,6 @@ use crate::cid_store::CidStore;
 use crate::CanonCidAggregate;
 use crate::CanonResultCidAggregate;
 use crate::ExecutionTrace;
-use crate::JValue;
 use crate::ServiceResultCidAggregate;
 
 use air_interpreter_signatures::SignatureStore;
@@ -33,7 +32,10 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct InterpreterData {
     /// Versions of data and an interpreter produced this data.
@@ -59,16 +61,19 @@ pub struct InterpreterData {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Versions {
     /// Version of this data format.
     #[serde(rename = "version")] // for compatibility with versions <= 0.6.0
-    // TODO rkyv With some type
+    #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
     pub data_version: semver::Version,
 
     /// Version of an interpreter produced this data.
-    // TODO rkyv With some type
+    #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
     pub interpreter_version: semver::Version,
 }
 
@@ -129,7 +134,10 @@ impl Versions {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CidInfo {
     /// Map CID to value.
@@ -148,10 +156,90 @@ pub struct CidInfo {
     pub service_result_store: CidStore<ServiceResultCidAggregate>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
+)]
 #[repr(transparent)]
 #[serde(transparent)]
+// So far, use boxes; then switch to unsized.
 pub struct RawValueWrapper(#[with(WithRawJson)] Box<serde_json::value::RawValue>);
 
-struct WithRawJson;
+impl PartialEq for RawValueWrapper {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.get() == other.0.get()
+    }
+}
+
+impl Eq for RawValueWrapper {}
+
+#[cfg(feature = "rkyv")]
+pub struct WithStringVersion;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::with::ArchiveWith<semver::Version> for WithStringVersion {
+    type Archived = rkyv::Archived<String>;
+
+    type Resolver = rkyv::string::StringResolver;
+
+    unsafe fn resolve_with(
+        field: &semver::Version,
+        pos: usize,
+        resolver: Self::Resolver,
+        out: *mut Self::Archived,
+    ) {
+        use rkyv::Archive as _;
+
+        let inner = field.to_string();
+        inner.resolve(pos, resolver, out);
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
+    rkyv::with::SerializeWith<semver::Version, S> for WithStringVersion
+{
+    fn serialize_with(
+        field: &semver::Version,
+        serializer: &mut S,
+    ) -> Result<Self::Resolver, S::Error> {
+        let inner = field.to_string();
+        rkyv::string::ArchivedString::serialize_from_str(&inner, serializer)
+    }
+}
+
+#[cfg(feature = "rkyv")]
+pub struct WithRawJson;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
+    type Archived = rkyv::Archived<String>;
+
+    type Resolver = rkyv::string::StringResolver;
+
+    unsafe fn resolve_with(
+        field: &Box<serde_json::value::RawValue>,
+        pos: usize,
+        resolver: Self::Resolver,
+        out: *mut Self::Archived,
+    ) {
+        use rkyv::Archive as _;
+
+        let inner = field.get().to_owned();
+        inner.resolve(pos, resolver, out);
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
+    rkyv::with::SerializeWith<Box<serde_json::value::RawValue>, S> for WithRawJson
+{
+    fn serialize_with(
+        field: &Box<serde_json::value::RawValue>,
+        serializer: &mut S,
+    ) -> Result<Self::Resolver, S::Error> {
+        let inner = field.get();
+        rkyv::string::ArchivedString::serialize_from_str(inner, serializer)
+    }
+}

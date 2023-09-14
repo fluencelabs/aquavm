@@ -27,7 +27,7 @@ use std::{collections::HashMap, rc::Rc};
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
-#[cfg_attr(feature = "rkyv", derive(rkyv::Archive))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CidStore<Val>(HashMap<Rc<CID<Val>>, Rc<Val>>);
 
@@ -40,12 +40,23 @@ impl<Val> CidStore<Val> {
         self.0.get(cid).cloned()
     }
 
+    /// Resolve a key if it exists.  Is useful for CID deduplication.
+    // TODO feature?
+    pub fn get_key(&self, cid: &CID<Val>) -> Option<&Rc<CID<Val>>> {
+        self.0.get_key_value(cid).map(|(key, _val)| key)
+    }
+
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    // TODO feature?
+    pub fn iter_mut(&mut self) -> std::collections::hash_map::IterMut<'_, Rc<CID<Val>>, Rc<Val>> {
+        self.0.iter_mut()
     }
 }
 
