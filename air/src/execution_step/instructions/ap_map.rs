@@ -70,7 +70,7 @@ fn populate_context<'ctx>(
 
 fn resolve_key_if_needed<'ctx>(
     key: &StreamMapKeyClause<'ctx>,
-    exec_ctx: &mut ExecutionCtx<'ctx>,
+    exec_ctx: &ExecutionCtx<'ctx>,
     map_name: &str,
 ) -> Result<StreamMapKey<'ctx>, ExecutionError> {
     match key {
@@ -84,7 +84,7 @@ fn resolve_key_if_needed<'ctx>(
 
 fn resolve<'ctx>(
     resolvable: &impl Resolvable,
-    exec_ctx: &mut ExecutionCtx<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
     map_name: &str,
 ) -> Result<StreamMapKey<'ctx>, ExecutionError> {
     let (value, _, _) = resolvable.resolve(exec_ctx)?;

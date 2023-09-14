@@ -42,14 +42,14 @@ enum MetTag {
 
 #[derive(Debug)]
 struct ParserState {
-    pub(self) first_dot_met_pos: Option<usize>,
-    pub(self) non_numeric_met: bool,
-    pub(self) digit_met: bool,
-    pub(self) flattening_met: bool,
-    pub(self) met_tag: MetTag,
-    pub(self) is_first_char: bool,
-    pub(self) current_char: char,
-    pub(self) current_offset: usize,
+    first_dot_met_pos: Option<usize>,
+    non_numeric_met: bool,
+    digit_met: bool,
+    flattening_met: bool,
+    met_tag: MetTag,
+    is_first_char: bool,
+    current_char: char,
+    current_offset: usize,
 }
 
 struct CallVariableParser<'input> {
@@ -88,10 +88,7 @@ impl<'input> CallVariableParser<'input> {
         Ok(parser)
     }
 
-    pub(self) fn try_parse(
-        string_to_parse: &'input str,
-        start_pos: AirPos,
-    ) -> LexerResult<Token<'input>> {
+    fn try_parse(string_to_parse: &'input str, start_pos: AirPos) -> LexerResult<Token<'input>> {
         let mut parser = Self::new(string_to_parse, start_pos)?;
 
         loop {

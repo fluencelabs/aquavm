@@ -25,7 +25,7 @@ pub use trace_slider::TraceSlider;
 
 pub(crate) use keeper::DataKeeper;
 
-pub(self) type KeeperResult<T> = std::result::Result<T, KeeperError>;
+type KeeperResult<T> = std::result::Result<T, KeeperError>;
 
 use super::ExecutedState;
 use super::ExecutionTrace;
