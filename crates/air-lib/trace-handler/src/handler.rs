@@ -170,7 +170,7 @@ impl TraceHandler {
 
     pub fn meet_iteration_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
-        fold_fsm.meet_iteration_end(&mut self.data_keeper);
+        fold_fsm.meet_iteration_end(&self.data_keeper);
 
         Ok(())
     }
@@ -184,7 +184,7 @@ impl TraceHandler {
 
     pub fn meet_generation_end(&mut self, fold_id: u32) -> TraceHandlerResult<()> {
         let fold_fsm = self.fsm_keeper.fold_mut(fold_id)?;
-        fold_fsm.meet_generation_end(&mut self.data_keeper);
+        fold_fsm.meet_generation_end(&self.data_keeper);
 
         Ok(())
     }

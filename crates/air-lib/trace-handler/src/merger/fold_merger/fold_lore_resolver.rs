@@ -176,12 +176,12 @@ impl ResolvedSubTraceDescs {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct LoresLen {
-    pub(self) before_len: u32,
-    pub(self) after_len: u32,
+    before_len: u32,
+    after_len: u32,
 }
 
 impl LoresLen {
-    pub(self) fn new(before_len: u32, after_len: u32) -> Self {
+    fn new(before_len: u32, after_len: u32) -> Self {
         Self { before_len, after_len }
     }
 }

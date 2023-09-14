@@ -164,8 +164,8 @@ fn executed_trace_par_par_call() {
 fn executed_trace_seq_seq() {
     let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
-    let mut vm1 = create_avm(unit_call_service(), peer_id_1.clone());
-    let mut vm2 = create_avm(unit_call_service(), peer_id_2.clone());
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1);
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2);
 
     let script = format!(
         r#"
