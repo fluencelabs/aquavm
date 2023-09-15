@@ -175,6 +175,25 @@ impl PartialEq for RawValueWrapper {
 impl Eq for RawValueWrapper {}
 
 #[cfg(feature = "rkyv")]
+impl<C: ?Sized + rkyv::validation::ArchiveContext> rkyv::CheckBytes<C> for ArchivedRawValueWrapper
+where
+    <C as rkyv::Fallible>::Error: std::error::Error,
+{
+    type Error = serde_json::Error;
+
+    unsafe fn check_bytes<'a>(
+        value: *const Self,
+        context: &mut C,
+    ) -> Result<&'a Self, Self::Error> {
+        let inner =
+            <rkyv::Archived<Box<str>> as rkyv::CheckBytes<C>>::check_bytes(value as _, context)
+                .expect("SOMETHING GOES WRONG");
+        serde_json::from_slice::<&serde_json::value::RawValue>(&inner.as_bytes())
+            .map(|_v| std::mem::transmute(inner))
+    }
+}
+
+#[cfg(feature = "rkyv")]
 pub struct WithStringVersion;
 
 #[cfg(feature = "rkyv")]
@@ -210,13 +229,26 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
 }
 
 #[cfg(feature = "rkyv")]
+impl<D: rkyv::Fallible<Error = semver::Error> + ?Sized>
+    rkyv::with::DeserializeWith<rkyv::string::ArchivedString, semver::Version, D>
+    for WithStringVersion
+{
+    fn deserialize_with(
+        field: &rkyv::string::ArchivedString,
+        _deserializer: &mut D,
+    ) -> Result<semver::Version, <D as rkyv::Fallible>::Error> {
+        semver::Version::parse(&field.as_str())
+    }
+}
+
+#[cfg(feature = "rkyv")]
 pub struct WithRawJson;
 
 #[cfg(feature = "rkyv")]
 impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
-    type Archived = rkyv::Archived<String>;
+    type Archived = rkyv::Archived<Box<str>>;
 
-    type Resolver = rkyv::string::StringResolver;
+    type Resolver = rkyv::Resolver<Box<str>>;
 
     unsafe fn resolve_with(
         field: &Box<serde_json::value::RawValue>,
@@ -226,8 +258,9 @@ impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
     ) {
         use rkyv::Archive as _;
 
-        let inner = field.get().to_owned();
-        inner.resolve(pos, resolver, out);
+        // Can be optimized with a cast
+        let inner: &Box<str> = std::mem::transmute(field);
+        inner.resolve(pos, resolver, out)
     }
 }
 
@@ -240,6 +273,19 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
         serializer: &mut S,
     ) -> Result<Self::Resolver, S::Error> {
         let inner = field.get();
-        rkyv::string::ArchivedString::serialize_from_str(inner, serializer)
+        rkyv::Archived::<Box<str>>::serialize_from_ref(inner, serializer)
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<D: rkyv::Fallible<Error = serde_json::Error> + ?Sized>
+    rkyv::with::DeserializeWith<rkyv::string::ArchivedString, Box<serde_json::value::RawValue>, D>
+    for WithRawJson
+{
+    fn deserialize_with(
+        field: &rkyv::string::ArchivedString,
+        _deserializer: &mut D,
+    ) -> Result<Box<serde_json::value::RawValue>, <D as rkyv::Fallible>::Error> {
+        serde_json::from_str(field.as_str())
     }
 }

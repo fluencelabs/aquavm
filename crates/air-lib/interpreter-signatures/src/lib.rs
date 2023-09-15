@@ -108,7 +108,7 @@ impl From<fluence_keypair::Signature> for Signature {
 #[derive(Debug, Default)]
 pub struct SignatureTracker {
     // from peer id to CID strings
-    peer_to_cids: HashMap<Box<str>, Vec<Vec<u8>>>,
+    peer_to_cids: HashMap<Box<str>, Vec<String>>,
 }
 
 impl SignatureTracker {

@@ -26,15 +26,11 @@
     unreachable_patterns
 )]
 
-mod sede;
-
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::convert::TryInto;
 use std::fmt;
 use std::marker::PhantomData;
-use std::str::FromStr;
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(
@@ -42,41 +38,24 @@ use std::str::FromStr;
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes, compare(PartialEq, PartialOrd)))]
-#[cfg_attr(feature = "rkyv", omit_bounds)] // TODO look close, it can be misuse
+#[cfg_attr(feature = "rkyv", omit_bounds)] // TODO look close, it can be a misuse
 #[serde(transparent)]
 pub struct CID<T: ?Sized>(
-    #[serde(
-        deserialize_with = "sede::from_cid_string",
-        serialize_with = "sede::to_cid_string"
-    )]
-    Vec<u8>,
+    String,
     #[serde(skip)] PhantomData<*const T>,
 );
 
 impl<T: ?Sized> CID<T> {
     fn from_cid(cid: cid::Cid) -> Self {
-        Self(cid.to_bytes().into(), PhantomData)
+        Self(cid.to_string(), PhantomData)
     }
 
-    pub fn into_inner(self) -> Vec<u8> {
+    pub fn into_inner(self) -> String {
         self.0
     }
 
-    pub fn new(cid_str: &str) -> Result<Self, cid::Error> {
-        use cid::Cid;
-
-        let cid = Cid::from_str(cid_str)?;
-        Ok(Self::from_cid(cid))
-    }
-}
-
-impl<T: ?Sized> TryInto<String> for &CID<T> {
-    type Error = cid::Error;
-
-    fn try_into(self) -> Result<String, Self::Error> {
-        use std::convert::TryFrom as _;
-
-        cid::Cid::try_from(self.0.as_slice()).map(|c| c.to_string())
+    pub fn new(cid_str: &str) -> Self {
+        Self(cid_str.to_owned(), PhantomData)
     }
 }
 
@@ -85,6 +64,7 @@ impl<T: ?Sized> Clone for CID<T> {
         Self(self.0.clone(), self.1)
     }
 }
+
 impl<T: ?Sized> fmt::Debug for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("CID").field(&self.0).finish()
@@ -93,8 +73,7 @@ impl<T: ?Sized> fmt::Debug for CID<T> {
 
 impl<T: ?Sized> std::fmt::Display for CID<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let encoded = multibase::encode(multibase::Base::Base32Lower, self.0.as_slice());
-        write!(f, "{}", encoded)
+        write!(f, "{}", self.0)
     }
 }
 

@@ -75,7 +75,7 @@ fn convert_to_bin<R: Read>(inp: R, output: &Path, dedup: bool) -> Result<(), std
     }
 
     let mut ser = rkyv::ser::serializers::AllocSerializer::<1024>::default();
-    rkyv::Serialize::serialize(&particle, &mut ser).unwrap();
+    rkyv::ser::Serializer::serialize_value(&mut ser, &particle).unwrap();
 
     let mut out = File::create(output)?;
     out.write_all(&ser.into_serializer().into_inner()[..])?;

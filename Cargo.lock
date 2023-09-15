@@ -74,7 +74,6 @@ name = "air-data-conv"
 version = "0.1.0"
 dependencies = [
  "air-interpreter-data",
- "air-interpreter-interface",
  "clap 4.4.3",
  "rkyv",
  "serde_json",

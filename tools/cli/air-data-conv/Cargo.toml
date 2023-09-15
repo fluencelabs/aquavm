@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 air-interpreter-data = { version = "0.11.0", path = "../../../crates/air-lib/interpreter-data", features = ["rkyv"] }
-air-interpreter-interface = { version = "0.15.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+# air-interpreter-interface = { version = "0.15.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
 
 clap = { version = "4.2.7", features = ["derive", "env"] }
-rkyv = { version = "0.7.42", features = ["archive_be", "bytecheck"] }
+rkyv = { version = "0.7.42", features = ["bytecheck", "size_32", "archive_be"], default-features = false }
 serde_json = "1.0.106"
