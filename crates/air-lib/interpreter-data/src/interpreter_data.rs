@@ -166,6 +166,12 @@ pub struct CidInfo {
 // So far, use boxes; then switch to unsized.
 pub struct RawValueWrapper(#[with(WithRawJson)] Box<serde_json::value::RawValue>);
 
+impl RawValueWrapper {
+    pub fn as_str(&self) -> &str {
+        self.0.get()
+    }
+}
+
 impl PartialEq for RawValueWrapper {
     fn eq(&self, other: &Self) -> bool {
         self.0.get() == other.0.get()

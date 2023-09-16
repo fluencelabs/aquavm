@@ -83,6 +83,18 @@ impl<Val> PartialEq for CID<Val> {
     }
 }
 
+impl<Val> Ord for CID<Val> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        Ord::cmp(&self.0, &other.0)
+    }
+}
+
+impl<Val> PartialOrd for CID<Val> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(Ord::cmp(self, other))
+    }
+}
+
 impl<Val> Eq for CID<Val> {}
 
 impl<Val> std::hash::Hash for CID<Val> {
@@ -101,7 +113,7 @@ impl<T: ?Sized> From<CID<T>> for Vec<u8> {
 #[cfg(feature = "rkyv")]
 impl<T: ?Sized> PartialEq for ArchivedCID<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
+        self.0.as_str() == other.0.as_str()
     }
 }
 
@@ -112,7 +124,21 @@ impl<T: ?Sized> Eq for ArchivedCID<T> {}
 impl<Val> std::hash::Hash for ArchivedCID<Val> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
-        self.1.hash(state);
+        // self.1.hash(state);
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<Val> Ord for ArchivedCID<Val> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        Ord::cmp(self.0.as_str(), other.0.as_str())
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<Val> PartialOrd for ArchivedCID<Val> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(Ord::cmp(self, other))
     }
 }
 
