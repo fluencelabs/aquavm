@@ -747,3 +747,52 @@ fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     ];
     assert_eq!(actual_trace, expected_trace,);
 }
+
+#[test]
+fn ap_map_key_join_behavior() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = r#"
+        (seq
+            (par
+               (null)
+               (seq
+                  (never)
+                  (ap "42" key)
+               )
+            )
+            (seq
+               (ap (key "value") %map)
+               (canon %init_peer_id% %map map)
+            )
+         )
+    "#;
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_one(vm_1_peer_id).unwrap();
+
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+}
+
+#[test]
+fn ap_map_value_join_behavior() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = r#"
+        (seq
+            (par
+               (null)
+               (seq
+                  (never)
+                  (ap "42" value)
+               )
+            )
+            (ap ("key" value) %map)
+         )
+    "#;
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_one(vm_1_peer_id).unwrap();
+
+    assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
+}

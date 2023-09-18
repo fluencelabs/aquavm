@@ -37,14 +37,17 @@ use air_trace_handler::merger::MergerApResult;
 impl<'i> super::ExecutableInstruction<'i> for ApMap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
+        use crate::execution_step::Joinable;
+        use crate::joinable;
+
         log_instruction!(ap, exec_ctx, trace_ctx);
         // this applying should be at the very beginning of this function,
         // because it's necessary to check argument lambda, for more details see
         // https://github.com/fluencelabs/aquavm/issues/216
-        let result = apply_to_arg(&self.value, exec_ctx, trace_ctx, true)?;
+        let result = joinable!(apply_to_arg(&self.value, exec_ctx, trace_ctx, true), exec_ctx, ())?;
 
         let merger_ap_result = to_merger_ap_map_result(&self, trace_ctx)?;
-        let key = resolve_key_if_needed(&self.key, exec_ctx, self.map.name)?;
+        let key = joinable!(resolve_key_if_needed(&self.key, exec_ctx, self.map.name), exec_ctx, ())?;
         populate_context(key, &self.map, &merger_ap_result, result, exec_ctx)?;
         trace_ctx.meet_ap_end(ApResult::stub());
 
