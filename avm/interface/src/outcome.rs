@@ -50,7 +50,7 @@ pub struct ErrorAVMOutcome {
 }
 
 impl AVMOutcome {
-    pub(self) fn new(
+    fn new(
         data: Vec<u8>,
         call_requests: CallRequests,
         next_peer_pks: Vec<String>,
@@ -99,7 +99,7 @@ impl AVMOutcome {
 }
 
 impl ErrorAVMOutcome {
-    pub(self) fn new(error_code: i64, error_message: String, outcome: AVMOutcome) -> Self {
+    fn new(error_code: i64, error_message: String, outcome: AVMOutcome) -> Self {
         Self {
             error_code,
             error_message,

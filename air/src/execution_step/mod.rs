@@ -51,7 +51,7 @@ pub(super) use value_types::ScalarRef;
 pub(super) use value_types::ServiceResultAggregate;
 pub(super) use value_types::Stream;
 pub(super) use value_types::ValueAggregate;
-pub(self) use value_types::STREAM_MAX_SIZE;
+use value_types::STREAM_MAX_SIZE;
 
 pub(crate) use air_trace_handler::TraceHandler;
 

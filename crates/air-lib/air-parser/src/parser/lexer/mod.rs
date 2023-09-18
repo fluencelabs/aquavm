@@ -33,5 +33,5 @@ pub use token::Token;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 
-pub(self) use utils::is_air_alphanumeric;
-pub(self) use utils::is_json_path_allowed_char;
+use utils::is_air_alphanumeric;
+use utils::is_json_path_allowed_char;

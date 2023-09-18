@@ -90,7 +90,7 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_iteration_end(&mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn meet_iteration_end(&mut self, data_keeper: &DataKeeper) {
         self.ctor_queue.current().ctor.before_end(data_keeper);
     }
 
@@ -125,7 +125,7 @@ impl FoldFSM {
         Ok(())
     }
 
-    pub(crate) fn meet_generation_end(&mut self, data_keeper: &mut DataKeeper) {
+    pub(crate) fn meet_generation_end(&mut self, data_keeper: &DataKeeper) {
         self.ctor_queue.finish(data_keeper);
         self.ctor_queue.end_back_traverse();
 
@@ -143,7 +143,7 @@ impl FoldFSM {
 }
 
 #[derive(Clone, Copy)]
-pub(self) enum ByNextPosition {
+enum ByNextPosition {
     /// Represents executed states before next.
     Before,
 

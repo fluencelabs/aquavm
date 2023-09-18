@@ -26,4 +26,4 @@ pub use errors::LexerError;
 pub use lambda_ast_lexer::LambdaASTLexer;
 pub use token::Token;
 
-pub(self) use utils::is_air_alphanumeric;
+use utils::is_air_alphanumeric;

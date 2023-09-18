@@ -217,14 +217,14 @@ fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> Execution
 }
 
 impl<'value> LambdaResult<'value> {
-    pub(self) fn from_cow(result: Cow<'value, JValue>, tetraplet_idx: usize) -> Self {
+    fn from_cow(result: Cow<'value, JValue>, tetraplet_idx: usize) -> Self {
         Self {
             result,
             tetraplet_idx: Some(tetraplet_idx),
         }
     }
 
-    pub(self) fn from_value(result: JValue) -> Self {
+    fn from_value(result: JValue) -> Self {
         Self {
             result: Cow::Owned(result),
             tetraplet_idx: None,
