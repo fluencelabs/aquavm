@@ -137,6 +137,7 @@ pub enum Fail<'i> {
     },
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
     LastError,
+    Error,
 }
 
 /// (fold scalar_iterable iterator instruction)

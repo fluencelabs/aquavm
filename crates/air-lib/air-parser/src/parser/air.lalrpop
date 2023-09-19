@@ -190,6 +190,9 @@ FailBody: Fail<'input> = {
     <canon_stream:CanonStreamWithLambda> => Fail::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
     <left: @L> <l:LastError> <right: @R> => {
         Fail::LastError
+    },
+    <left: @L> <l:Error> <right: @R> => {
+        Fail::Error
     }
 }
 
