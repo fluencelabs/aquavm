@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use air::SecurityTetraplet;
 use air_test_utils::prelude::*;
+use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
@@ -360,7 +360,11 @@ fn tetraplet_with_wasm_modules() {
         let service = service.get_mut(params.service_id.as_str()).unwrap();
 
         let result = service
-            .call(params.function_name, JValue::Array(params.arguments), call_parameters)
+            .call(
+                params.function_name,
+                JValue::Array(params.arguments),
+                to_app_service_call_parameters(call_parameters),
+            )
             .unwrap();
 
         CallServiceResult::ok(result)
@@ -384,4 +388,36 @@ fn tetraplet_with_wasm_modules() {
     let expected_state = scalar!("Ok");
 
     assert_eq!(actual_trace[1.into()], expected_state)
+}
+
+fn to_app_service_call_parameters(
+    call_parameters: marine_rs_sdk::CallParameters,
+) -> fluence_app_service::CallParameters {
+    fluence_app_service::CallParameters {
+        init_peer_id: call_parameters.init_peer_id,
+        service_id: call_parameters.service_id,
+        service_creator_peer_id: call_parameters.service_creator_peer_id,
+        host_id: call_parameters.host_id,
+        particle_id: call_parameters.particle_id,
+        tetraplets: call_parameters
+            .tetraplets
+            .into_iter()
+            .map(to_app_service_tetraplets)
+            .collect(),
+    }
+}
+
+fn to_app_service_tetraplets(
+    tetraplets: Vec<marine_rs_sdk::SecurityTetraplet>,
+) -> Vec<fluence_app_service::SecurityTetraplet> {
+    tetraplets.into_iter().map(to_app_service_tetraplet).collect()
+}
+
+fn to_app_service_tetraplet(tetraplet: marine_rs_sdk::SecurityTetraplet) -> fluence_app_service::SecurityTetraplet {
+    fluence_app_service::SecurityTetraplet {
+        peer_pk: tetraplet.peer_pk,
+        service_id: tetraplet.service_id,
+        function_name: tetraplet.function_name,
+        json_path: tetraplet.json_path,
+    }
 }

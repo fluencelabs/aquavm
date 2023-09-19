@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "aho-corasick"
-version = "1.0.5"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c378d78423fdad8089616f827526ee33c19f2fddbd5de1629152c9593ba4783"
+checksum = "6748e8def348ed4d14996fa801f4122cd763fff530258cdc03f64b25f89d3a5a"
 dependencies = [
  "memchr",
 ]
@@ -39,7 +39,7 @@ dependencies = [
  "newtype_derive",
  "num-traits",
  "once_cell",
- "polyplets 0.5.0",
+ "polyplets",
  "semver 1.0.17",
  "serde",
  "serde_json",
@@ -102,7 +102,7 @@ dependencies = [
  "bimap",
  "log",
  "num-traits",
- "polyplets 0.5.0",
+ "polyplets",
  "serde_json",
  "thiserror",
  "tracing",
@@ -148,7 +148,7 @@ dependencies = [
  "maplit",
  "non-empty-vec",
  "once_cell",
- "polyplets 0.5.0",
+ "polyplets",
  "semver 1.0.17",
  "serde",
  "serde_json",
@@ -277,24 +277,24 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "blake2b_simd"
-version = "1.0.2"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23285ad32269793932e830392f2fe2f83e26488fd3ec778883a93c8323735780"
+checksum = "3c2f0dc9a68c6317d884f97cc36cf5a3d20ba14ce404227df55e1af708ab04bc"
 dependencies = [
  "arrayref",
  "arrayvec",
- "constant_time_eq",
+ "constant_time_eq 0.2.6",
 ]
 
 [[package]]
 name = "blake2s_simd"
-version = "1.0.2"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94230421e395b9920d23df13ea5d77a20e1725331f90fbbf6df6040b33f756ae"
+checksum = "6637f448b9e61dfadbdcbae9a885fadee1f3eaffb1f8d3c1965d3ade8bdfd44f"
 dependencies = [
  "arrayref",
  "arrayvec",
- "constant_time_eq",
+ "constant_time_eq 0.2.6",
 ]
 
 [[package]]
@@ -307,7 +307,7 @@ dependencies = [
  "arrayvec",
  "cc",
  "cfg-if",
- "constant_time_eq",
+ "constant_time_eq 0.3.0",
 ]
 
 [[package]]
@@ -363,16 +363,17 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.30"
+version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "defd4e7873dbddba6c7c91e199c7fcb946abc4a6a4ac3195400bcfb01b5de877"
+checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "time",
  "wasm-bindgen",
- "windows-targets 0.48.0",
+ "winapi",
 ]
 
 [[package]]
@@ -422,6 +423,12 @@ name = "const-oid"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28c122c3980598d243d63d9a704629a2d748d101f278052ff068be5a4423ab6f"
+
+[[package]]
+name = "constant_time_eq"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21a53c0a4d288377e7415b53dcfc3c04da5cdc2cc95c8d5ac178b58f0b861ad6"
 
 [[package]]
 name = "constant_time_eq"
@@ -494,9 +501,9 @@ dependencies = [
 
 [[package]]
 name = "curve25519-dalek"
-version = "4.1.0"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "622178105f911d937a42cdb140730ba4a3ed2becd8ae6ce39c7d28b5d75d4588"
+checksum = "f711ade317dd348950a9910f81c5947e3d8907ebd2b83f76203ff1807e6a2bc2"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -643,7 +650,7 @@ version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7277392b266383ef8396db7fdeb1e77b6c52fed775f5df15bb24f35b72156980"
 dependencies = [
- "curve25519-dalek 4.1.0",
+ "curve25519-dalek 4.0.0",
  "ed25519 2.2.2",
  "rand_core 0.6.4",
  "serde",
@@ -699,9 +706,9 @@ dependencies = [
 
 [[package]]
 name = "fiat-crypto"
-version = "0.2.1"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0870c84016d4b481be5c9f323c24f65e31e901ae618f0e80f4308fb00de1d2d"
+checksum = "e825f6987101665dea6ec934c09ec6d721de7bc1bf92248e1d5810c8cd636b77"
 
 [[package]]
 name = "fixedbitset"
@@ -953,7 +960,7 @@ dependencies = [
  "ed25519-dalek 2.0.0",
  "libsecp256k1",
  "log",
- "multihash 0.19.1",
+ "multihash 0.19.0",
  "quick-protobuf",
  "rand 0.8.5",
  "ring",
@@ -1040,10 +1047,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
-name = "marine-macro"
-version = "0.8.1"
+name = "marine-call-parameters"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c99fa7013660d8e129b2bcd51138015136b91903f88529f1da0510f850c28ea"
+checksum = "f9ca0439e5b2a812d8bc5c3b7d71e3691fb260a1f0384a7e842eec1b59f13069"
+dependencies = [
+ "marine-macro",
+ "marine-rs-sdk-main",
+ "serde",
+]
+
+[[package]]
+name = "marine-macro"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0088fc9cb6a970dc17a510c3cb28fe459c368d566e8cb7f8354e06ef3395c883"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -1051,9 +1069,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.8.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43b4761eec59a2914413d1ea14659305e6374bfed69998f33763daa586c44196"
+checksum = "e457b58c826679139896f04e6cfa38c5d23870a88e957e8e0a6f646e7c3f0ac4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1064,22 +1082,22 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.8.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11991d31bf4d53651e1c151637f260c759eb9f28ecf8c894eb260b50f46459cc"
+checksum = "c6ecd45528096514b4db8d23523eadaf9e5d5a7d3fce637e4bb684afccc0e9a3"
 dependencies = [
+ "marine-call-parameters",
  "marine-macro",
  "marine-rs-sdk-main",
  "marine-timestamp-macro",
- "polyplets 0.4.0",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.8.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b01678ba2a94fcfeb8232e87281937b07927ab2a54205747b6ab45e3f5ad65fd"
+checksum = "11eabbc74c69ad11874fb6cf686604833d084633293324524a40ec581663f978"
 dependencies = [
  "log",
  "serde",
@@ -1087,9 +1105,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.8.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80d254ea11e35cdeccc62ffccf78775c066750c9e5bae4934eb0758187442282"
+checksum = "acf956d174fdbf940b474089d5388aa35b4fc73fedbfade2a92dc198084b9afa"
 dependencies = [
  "chrono",
  "quote",
@@ -1097,9 +1115,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.6.3"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f232d6ef707e1956a43342693d2a31e72989554d58299d7a88738cc95b0d35c"
+checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "multibase"
@@ -1131,9 +1149,9 @@ dependencies = [
 
 [[package]]
 name = "multihash"
-version = "0.19.1"
+version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "076d548d76a0e2a0d4ab471d0b1c36c577786dfc4471242035d97a12a735c492"
+checksum = "2fd59dcc2bbe70baabeac52cd22ae52c55eefe6c38ff11a9439f16a350a939f2"
 dependencies = [
  "core2",
  "unsigned-varint",
@@ -1250,26 +1268,15 @@ dependencies = [
 
 [[package]]
 name = "platforms"
-version = "3.1.2"
+version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4503fa043bf02cee09a9582e9554b4c6403b2ef55e4612e96561d294419429f8"
-
-[[package]]
-name = "polyplets"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b579a79a461ca50abb202eac61c76d8782fdf091a91775c9e181352e7cd30a8b"
-dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
- "serde",
-]
+checksum = "e3d7ddaed09e0eb771a79ab0fd64609ba0afb0a8366421957936ad14cbd13630"
 
 [[package]]
 name = "polyplets"
 version = "0.5.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-call-parameters",
  "serde",
 ]
 
@@ -1438,9 +1445,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.9.5"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "697061221ea1b4a94a624f67d0ae2bfe4e22b8a17b6a192afb11046542cc8c47"
+checksum = "81bc1d4caf89fac26a70747fe603c130093b53c773888797a6329091246d651a"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1450,9 +1457,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.3.8"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2f401f4955220693b56f8ec66ee9c78abffd8d1c4f23dc41a23839eb88f0795"
+checksum = "fed1ceff11a1dddaee50c9dc8e4938bd106e9d89ae372f192311e7da498e3b69"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1461,9 +1468,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.7.5"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
+checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "ring"
@@ -1756,6 +1763,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.16",
+]
+
+[[package]]
+name = "time"
+version = "0.1.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6db9e6914ab8b1ae1c260a4ae7a49b6c5611b40328a735b21862567685e73255"
+dependencies = [
+ "libc",
+ "wasi 0.10.0+wasi-snapshot-preview1",
+ "winapi",
 ]
 
 [[package]]
