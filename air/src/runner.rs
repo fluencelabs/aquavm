@@ -68,8 +68,10 @@ fn execute_air_impl(
         Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
     };
 
-    let particle_id = params.particle_id.clone();
-    let signature_store = match verify(&prev_data, &current_data, &particle_id) {
+    // TODO currently we use particle ID, but it should be changed to signature,
+    // as partical ID can be equally replayed
+    let salt = params.particle_id.clone();
+    let signature_store = match verify(&prev_data, &current_data, &salt) {
         Ok(signature_store) => signature_store,
         // return the prev data in case of errors
         Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
@@ -104,7 +106,7 @@ fn execute_air_impl(
     match sign_produced_cids(
         &mut exec_ctx.peer_cid_tracker,
         &mut exec_ctx.signature_store,
-        &particle_id,
+        &salt,
         &keypair,
     ) {
         Ok(()) => {}

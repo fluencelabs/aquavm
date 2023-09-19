@@ -35,16 +35,13 @@ const CANNOT_HAPPEN_IN_VERIFIED_CID_STORE: &str = "cannot happen in a checked CI
 pub struct DataVerifier<'data> {
     // a map from peer_id to peer's info (public key, signature, CIDS)
     grouped_cids: HashMap<Box<str>, PeerInfo<'data>>,
-    particle_id: &'data str,
+    salt: &'data str,
 }
 
 impl<'data> DataVerifier<'data> {
     // it can be further optimized if only required parts are passed
     // SignatureStore is not used elsewhere
-    pub fn new(
-        data: &'data InterpreterData,
-        particle_id: &'data str,
-    ) -> Result<Self, DataVerifierError> {
+    pub fn new(data: &'data InterpreterData, salt: &'data str) -> Result<Self, DataVerifierError> {
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error
         let mut grouped_cids: HashMap<Box<str>, PeerInfo<'data>> = data
             .signatures
@@ -65,10 +62,7 @@ impl<'data> DataVerifier<'data> {
             peer_info.cids.sort_unstable();
         }
 
-        Ok(Self {
-            grouped_cids,
-            particle_id,
-        })
+        Ok(Self { grouped_cids, salt })
     }
 
     /// Verify each peers' signatures.
@@ -76,7 +70,7 @@ impl<'data> DataVerifier<'data> {
         for peer_info in self.grouped_cids.values() {
             peer_info
                 .public_key
-                .verify(&peer_info.cids, self.particle_id, peer_info.signature)
+                .verify(&peer_info.cids, self.salt, peer_info.signature)
                 .map_err(|error| DataVerifierError::SignatureMismatch {
                     error: error.into(),
                     cids: peer_info.cids.clone(),

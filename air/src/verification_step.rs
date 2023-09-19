@@ -25,14 +25,14 @@ use crate::PreparationError;
 pub(crate) fn verify(
     prev_data: &InterpreterData,
     current_data: &InterpreterData,
-    particle_id: &str,
+    salt: &str,
 ) -> Result<SignatureStore, PreparationError> {
     use air_interpreter_data::verification;
 
     current_data.cid_info.verify()?;
 
-    let prev_data_verifier = verification::DataVerifier::new(prev_data, particle_id)?;
-    let current_data_verifier = verification::DataVerifier::new(current_data, particle_id)?;
+    let prev_data_verifier = verification::DataVerifier::new(prev_data, salt)?;
+    let current_data_verifier = verification::DataVerifier::new(current_data, salt)?;
     // prev_data is always correct, check only current_data
     current_data_verifier.verify()?;
 
@@ -45,7 +45,7 @@ pub(crate) fn verify(
 pub(crate) fn verify(
     _prev_data: &InterpreterData,
     _current_data: &InterpreterData,
-    _particle_id: &str,
+    _salt: &str,
 ) -> Result<SignatureStore, PreparationError> {
     Ok(<_>::default())
 }

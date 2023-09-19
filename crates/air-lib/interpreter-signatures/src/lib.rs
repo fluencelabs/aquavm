@@ -58,12 +58,12 @@ impl PublicKey {
     pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
-        particle_id: &str,
+        salt: &str,
         signature: &fluence_keypair::Signature,
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value = SaltedData::new(&value, particle_id).serialize();
+        let serialized_value = SaltedData::new(&value, salt).serialize();
         pk.verify(&serialized_value, signature)
     }
 }
@@ -132,8 +132,8 @@ impl From<Signature> for fluence_keypair::Signature {
 pub(crate) struct SaltedData<'ctx, Data: BorshSerialize>(&'ctx Data, &'ctx str);
 
 impl<'ctx, Data: BorshSerialize> SaltedData<'ctx, Data> {
-    pub(crate) fn new(data: &'ctx Data, particle_id: &'ctx str) -> Self {
-        Self(data, particle_id)
+    pub(crate) fn new(data: &'ctx Data, salt: &'ctx str) -> Self {
+        Self(data, salt)
     }
 
     pub(crate) fn serialize(&self) -> Vec<u8> {

@@ -45,20 +45,20 @@ impl PeerCidTracker {
 
     pub fn gen_signature(
         &self,
-        particle_id: &str,
+        salt: &str,
         keypair: &KeyPair,
     ) -> Result<crate::Signature, SigningError> {
-        sign_cids(self.cids.clone(), particle_id, keypair)
+        sign_cids(self.cids.clone(), salt, keypair)
     }
 }
 
 fn sign_cids(
     mut cids: Vec<Box<str>>,
-    particle_id: &str,
+    salt: &str,
     keypair: &KeyPair,
 ) -> Result<crate::Signature, SigningError> {
     cids.sort_unstable();
 
-    let serialized_cids = SaltedData::new(&cids, particle_id).serialize();
+    let serialized_cids = SaltedData::new(&cids, salt).serialize();
     keypair.sign(&serialized_cids).map(crate::Signature::new)
 }
