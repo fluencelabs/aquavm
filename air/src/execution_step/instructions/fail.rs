@@ -46,6 +46,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
             Fail::CanonStreamWithLambda(canon_stream) => fail_with_canon_stream(canon_stream, exec_ctx),
             // bubble last error up
             Fail::LastError => fail_with_last_error(exec_ctx),
+            Fail::Error => fail_with_error(exec_ctx),
         }
     }
 }
@@ -115,6 +116,18 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
     let tetraplet = tetraplet.clone();
 
     fail_with_error_object(exec_ctx, error, tetraplet, provenance.clone())
+}
+
+fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
+        error,
+        tetraplet,
+        provenance,
+    } = exec_ctx.error_descriptor.error();
+
+    fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone())
 }
 
 fn fail_with_error_object(

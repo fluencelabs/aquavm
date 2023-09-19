@@ -111,6 +111,7 @@ impl fmt::Display for Fail<'_> {
                 write!(f, "fail {stream}")
             }
             Fail::LastError => write!(f, "fail %last_error%"),
+            Fail::Error => write!(f, "fail :error:"),
         }
     }
 }
