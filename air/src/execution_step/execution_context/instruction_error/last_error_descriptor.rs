@@ -16,10 +16,9 @@
 
 use air_interpreter_data::Provenance;
 
-use super::last_error_definition::error_from_raw_fields;
-use super::no_error_last_error;
-use super::LastError;
-use crate::execution_step::LastErrorAffectable;
+use super::no_error;
+use super::InstructionError;
+use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -27,7 +26,7 @@ use crate::ToErrorCode;
 use std::rc::Rc;
 
 pub(crate) struct LastErrorDescriptor {
-    last_error: LastError,
+    error: InstructionError,
 
     /// True, if last error could be set. This flag is used to distinguish
     /// whether an error is being bubbled up from the bottom or just encountered.
@@ -36,44 +35,23 @@ pub(crate) struct LastErrorDescriptor {
 }
 
 impl LastErrorDescriptor {
-    pub(crate) fn try_to_set_from_error(
+    pub(crate) fn try_to_set_last_error_from_exec_error(
         &mut self,
-        error: &(impl LastErrorAffectable + ToErrorCode + ToString),
+        error: &(impl ErrorAffectable + ToErrorCode + ToString),
         instruction: &str,
-        peer_id: &str,
+        peer_id_option: Option<&str>,
         tetraplet: Option<RcSecurityTetraplet>,
-    ) -> bool {
-        // this check is optimization to prevent creation of an error object in case if error
-        // couldn't be set
+    ) {
+        use super::get_instruction_error_from_exec_error;
+
+        // This check is an optimization to prevent creation of an error object in case if error
+        // must not be set.
         if !self.error_can_be_set || !error.affects_last_error() {
-            return false;
+            return;
         }
 
-        // it is not a call result, but generated from a limited set of unjoinable errors
-        let provenance = Provenance::literal();
-
-        self.set_from_ingredients(
-            error.to_error_code(),
-            &error.to_string(),
-            instruction,
-            peer_id,
-            tetraplet,
-            provenance,
-        )
-    }
-
-    pub(crate) fn set_from_ingredients(
-        &mut self,
-        error_code: i64,
-        error_message: &str,
-        instruction: &str,
-        peer_id: &str,
-        tetraplet: Option<RcSecurityTetraplet>,
-        provenance: Provenance,
-    ) -> bool {
-        let error_object = error_from_raw_fields(error_code, error_message, instruction, peer_id);
-        self.set_from_error_object(Rc::new(error_object), tetraplet, provenance);
-        true
+        self.error = get_instruction_error_from_exec_error(error, instruction, peer_id_option, tetraplet);
+        self.error_can_be_set = false;
     }
 
     pub(crate) fn set_from_error_object(
@@ -82,16 +60,14 @@ impl LastErrorDescriptor {
         tetraplet: Option<RcSecurityTetraplet>,
         provenance: Provenance,
     ) {
-        self.last_error = LastError {
-            error,
-            tetraplet,
-            provenance,
-        };
+        use super::get_instruction_error_from_error_object;
+
+        self.error = get_instruction_error_from_error_object(error, tetraplet, provenance);
         self.error_can_be_set = false;
     }
 
-    pub(crate) fn last_error(&self) -> &LastError {
-        &self.last_error
+    pub(crate) fn error(&self) -> &InstructionError {
+        &self.error
     }
 
     pub(crate) fn meet_xor_right_branch(&mut self) {
@@ -105,10 +81,10 @@ impl LastErrorDescriptor {
 
 impl Default for LastErrorDescriptor {
     fn default() -> Self {
-        let last_error = no_error_last_error();
+        let error = no_error();
 
         Self {
-            last_error,
+            error,
             error_can_be_set: true,
         }
     }

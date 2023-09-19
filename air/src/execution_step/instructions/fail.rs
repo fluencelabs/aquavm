@@ -20,7 +20,6 @@ use super::TraceHandler;
 use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
-use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::log_instruction;
 use crate::ExecutionError;
@@ -47,6 +46,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
             Fail::CanonStreamWithLambda(canon_stream) => fail_with_canon_stream(canon_stream, exec_ctx),
             // bubble last error up
             Fail::LastError => fail_with_last_error(exec_ctx),
+            Fail::Error => fail_with_error(exec_ctx),
         }
     }
 }
@@ -75,7 +75,7 @@ fn fail_with_literals(
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
-    let error_object = crate::execution_step::execution_context::error_from_raw_fields(
+    let error_object = crate::execution_step::execution_context::error_from_raw_fields_w_peerid(
         error_code,
         error_message,
         &fail.to_string(),
@@ -103,17 +103,31 @@ fn fail_with_canon_stream(
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    let LastError {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
         error,
         tetraplet,
         provenance,
-    } = exec_ctx.last_error_descriptor.last_error();
+    } = exec_ctx.last_error_descriptor.error();
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
     let error = error.clone();
     let tetraplet = tetraplet.clone();
 
     fail_with_error_object(exec_ctx, error, tetraplet, provenance.clone())
+}
+
+fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
+        error,
+        tetraplet,
+        provenance,
+    } = exec_ctx.error_descriptor.error();
+
+    fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone())
 }
 
 fn fail_with_error_object(

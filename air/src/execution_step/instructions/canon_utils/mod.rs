@@ -22,6 +22,7 @@ use crate::execution_step::ExecutionResult;
 use crate::execution_step::TraceHandler;
 
 use air_interpreter_cid::CID;
+use air_interpreter_data::CanonResult;
 use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast::ResolvableToPeerIdVariable;
 
@@ -33,6 +34,44 @@ pub(crate) type CanonEpilogClosure<'closure> = dyn Fn(CanonStream, Rc<CID<CanonR
 pub(crate) type CreateCanonStreamClosure<'closure> = dyn Fn(&mut ExecutionCtx<'_>, String) -> CanonStream + 'closure;
 
 pub(crate) fn handle_seen_canon(
+    epilog: &CanonEpilogClosure<'_>,
+    create_canon_stream: &CreateCanonStreamClosure<'_>,
+    canon_result: CanonResult,
+    peer_id: &ResolvableToPeerIdVariable<'_>,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    match canon_result {
+        CanonResult::RequestSentBy(..) => {
+            handle_canon_request_sent_by(epilog, create_canon_stream, peer_id, canon_result, exec_ctx, trace_ctx)
+        }
+        CanonResult::Executed(canon_result_cid) => handle_canon_executed(epilog, canon_result_cid, exec_ctx, trace_ctx),
+    }
+}
+
+pub(crate) fn handle_canon_request_sent_by(
+    epilog: &CanonEpilogClosure<'_>,
+    create_canon_stream: &CreateCanonStreamClosure<'_>,
+    peer_id: &ResolvableToPeerIdVariable<'_>,
+    canon_result: CanonResult,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
+    // we do not apply join behavior here because if state exists, the variable have been defined;
+    // it cannot become undefined due to INV-1
+    let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
+
+    if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
+        // nothing to execute yet; just leave the canon_result as is
+        exec_ctx.make_subgraph_incomplete();
+        trace_ctx.meet_canon_end(canon_result);
+        Ok(())
+    } else {
+        create_canon_stream_for_first_time(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
+    }
+}
+
+pub(crate) fn handle_canon_executed(
     epilog: &CanonEpilogClosure<'_>,
     canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
     exec_ctx: &mut ExecutionCtx<'_>,
@@ -60,20 +99,30 @@ pub(crate) fn handle_unseen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
+    use crate::execution_step::Joinable;
+    use crate::joinable;
+
+    let peer_id = joinable!(resolve_peer_id_to_string(peer_id, exec_ctx), exec_ctx, ())?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
         exec_ctx.make_subgraph_incomplete();
         exec_ctx.next_peer_pks.push(peer_id);
-        //this branch is executed only when
-        //  this canon instruction executes for the first time
-        //  a peer is different from one set in peer_id of a this canon instruction
-        //
-        // the former means that there was no canon associated state in data, and the latter means
-        // that it can't be obtained on this peer, so it's intended not to call meet_canon_end here.
-        return Ok(());
-    }
 
+        let canon_result = CanonResult::request_sent_by(exec_ctx.run_parameters.current_peer_id.clone());
+        trace_ctx.meet_canon_end(canon_result);
+        Ok(())
+    } else {
+        create_canon_stream_for_first_time(epilog, create_canon_stream, peer_id, exec_ctx, trace_ctx)
+    }
+}
+
+fn create_canon_stream_for_first_time(
+    epilog: &CanonEpilogClosure<'_>,
+    create_canon_stream: &CreateCanonStreamClosure<'_>,
+    peer_id: String,
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+) -> ExecutionResult<()> {
     let canon_stream = create_canon_stream(exec_ctx, peer_id);
     let canon_result_cid = populate_cid_context(exec_ctx, &canon_stream)?;
     epilog(canon_stream, canon_result_cid, exec_ctx, trace_ctx)

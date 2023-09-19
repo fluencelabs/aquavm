@@ -33,6 +33,8 @@ pub mod tests;
 pub use self::air_parser::parse;
 pub use air::AIRParser;
 pub use lexer::AIRLexer;
+pub(crate) use lexer::ERROR;
+pub(crate) use lexer::LAST_ERROR;
 pub use span::Span;
 pub use validator::VariableValidator;
 

@@ -25,6 +25,7 @@ impl fmt::Display for Instruction<'_> {
         match self {
             Call(call) => write!(f, "{call}"),
             Canon(canon) => write!(f, "{canon}"),
+            CanonMap(canon_map) => write!(f, "{canon_map}"),
             CanonStreamMapScalar(canon_stream_map_scalar) => write!(f, "{canon_stream_map_scalar}"),
             Ap(ap) => write!(f, "{ap}"),
             ApMap(ap_map) => write!(f, "{ap_map}"),
@@ -65,6 +66,16 @@ impl fmt::Display for Canon<'_> {
     }
 }
 
+impl fmt::Display for CanonMap<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "canon {} {} {}",
+            self.peer_id, self.stream_map, self.canon_stream_map
+        )
+    }
+}
+
 impl fmt::Display for CanonStreamMapScalar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -100,6 +111,7 @@ impl fmt::Display for Fail<'_> {
                 write!(f, "fail {stream}")
             }
             Fail::LastError => write!(f, "fail %last_error%"),
+            Fail::Error => write!(f, "fail :error:"),
         }
     }
 }
@@ -175,3 +187,49 @@ impl fmt::Display for New<'_> {
         write!(f, "new {}", self.argument)
     }
 }
+
+macro_rules! peer_id_error_logable {
+    ($($t:ty),+) => {
+        $(
+            impl PeerIDErrorLogable for $t {
+                #[inline]
+                fn log_errors_with_peer_id(&self) -> bool {
+                    true
+                }
+            }
+        )+
+    };
+}
+
+macro_rules! no_peer_id_error_logable {
+    ($($t:ty),+) => {
+        $(
+            impl PeerIDErrorLogable for $t {
+                #[inline]
+                fn log_errors_with_peer_id(&self) -> bool {
+                    false
+                }
+            }
+        )+
+    };
+}
+
+peer_id_error_logable!(Call<'_>, Canon<'_>, CanonMap<'_>, CanonStreamMapScalar<'_>);
+
+no_peer_id_error_logable!(
+    Ap<'_>,
+    ApMap<'_>,
+    Fail<'_>,
+    FoldScalar<'_>,
+    FoldStream<'_>,
+    FoldStreamMap<'_>,
+    Seq<'_>,
+    Par<'_>,
+    Xor<'_>,
+    Match<'_>,
+    MisMatch<'_>,
+    Never,
+    Next<'_>,
+    New<'_>,
+    Null
+);

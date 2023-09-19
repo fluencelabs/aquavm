@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.2...air-parser-v0.9.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648))
+
+### Features
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648)) ([b4cbf8f](https://github.com/fluencelabs/aquavm/commit/b4cbf8f621b77ba2031900f021bf20d0f27e34b8))
+
+## [0.8.2](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.1...air-parser-v0.8.2) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
 ## [0.8.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.0...air-parser-v0.8.1) (2023-08-03)
 
 

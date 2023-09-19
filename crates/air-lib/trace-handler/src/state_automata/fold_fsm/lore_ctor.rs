@@ -28,8 +28,8 @@ pub(super) struct SubTraceLoreCtor {
 
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 struct PositionsTracker {
-    pub(self) start_pos: TracePos,
-    pub(self) end_pos: TracePos,
+    start_pos: TracePos,
+    end_pos: TracePos,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -119,7 +119,7 @@ impl SubTraceLoreCtor {
 }
 
 impl PositionsTracker {
-    pub(self) fn len(&self) -> usize {
+    fn len(&self) -> usize {
         (self.end_pos - self.start_pos).into()
     }
 }
@@ -131,7 +131,7 @@ impl Default for CtorState {
 }
 
 impl CtorState {
-    pub(self) fn next(&mut self) {
+    fn next(&mut self) {
         use CtorState::*;
 
         let next_state = match self {

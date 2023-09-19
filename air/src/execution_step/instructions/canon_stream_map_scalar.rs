@@ -22,11 +22,12 @@ use super::ExecutionCtx;
 use super::ExecutionResult;
 use super::TraceHandler;
 use crate::execution_step::value_types::CanonStream;
-use crate::execution_step::value_types::JValuable;
 use crate::execution_step::CanonResultAggregate;
+use crate::execution_step::LiteralAggregate;
 use crate::execution_step::ValueAggregate;
 use crate::log_instruction;
 use crate::trace_to_exec_err;
+use crate::JValue;
 use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
@@ -46,13 +47,17 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
         let epilog = &epilog_closure(self.scalar.name);
         let canon_result = trace_to_exec_err!(trace_ctx.meet_canon_start(), self)?;
 
+        let create_canon_producer = create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
         match canon_result {
-            MergerCanonResult::CanonResult(canon_result_cid) => {
-                handle_seen_canon(epilog, canon_result_cid, exec_ctx, trace_ctx)
-            }
+            MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                epilog,
+                &create_canon_producer,
+                canon_result,
+                &self.peer_id,
+                exec_ctx,
+                trace_ctx,
+            ),
             MergerCanonResult::Empty => {
-                let create_canon_producer =
-                    create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
                 handle_unseen_canon(epilog, &create_canon_producer, &self.peer_id, exec_ctx, trace_ctx)
             }
         }
@@ -66,16 +71,27 @@ fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<Can
               exec_ctx: &mut ExecutionCtx<'_>,
               trace_ctx: &mut TraceHandler|
               -> ExecutionResult<()> {
-            let value = JValuable::as_jvalue(&&canon_stream).into_owned();
-            let tetraplet = canon_stream.tetraplet();
-            let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+            use crate::CanonStreamMapError::NoDataToProduceScalar;
+
+            let tetraplet = canon_stream.tetraplet().clone();
             let peer_pk = tetraplet.peer_pk.as_str().into();
 
-            let value = CanonResultAggregate::new(Rc::new(value), peer_pk, &tetraplet.json_path, position);
+            // Here canon_stream is a transport that brings a single JValue rendered
+            // by the producer closure previously.
+            let value = canon_stream
+                .into_values()
+                .first()
+                .ok_or(UncatchableError::CanonStreamMapError(NoDataToProduceScalar))?
+                .get_result()
+                .clone();
+
+            let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+
+            let value = CanonResultAggregate::new(value, peer_pk, &tetraplet.json_path, position);
             let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
 
             exec_ctx.scalars.set_scalar_value(scalar_name, result)?;
-            trace_ctx.meet_canon_end(CanonResult::new(canon_result_cid));
+            trace_ctx.meet_canon_end(CanonResult::executed(canon_result_cid));
             Ok(())
         },
     )
@@ -95,7 +111,17 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .map(|stream_map| Cow::Borrowed(stream_map))
             .unwrap_or_default();
 
-        let values = stream_map.iter_unique_key().cloned().collect::<Vec<_>>();
-        CanonStream::from_values(values, peer_pk)
+        let value = stream_map
+            .iter_unique_key_object()
+            .collect::<serde_json::Map<String, JValue>>();
+
+        let value = ValueAggregate::from_literal_result(LiteralAggregate::new(
+            Rc::new(value.into()),
+            peer_pk.as_str().into(),
+            0.into(),
+        ));
+
+        // This single value is a map of StreamMap unique keys to values.
+        CanonStream::from_values(vec![value], peer_pk)
     })
 }

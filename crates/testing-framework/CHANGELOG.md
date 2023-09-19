@@ -26,6 +26,34 @@
   * dependencies
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.9.0 to 0.10.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.10.1 to 0.10.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.10.2 to 0.10.3
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+
+## [0.5.2](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.5.1...air-testing-framework-v0.5.2) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.10.0 to 0.10.1
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.4.3...air-testing-framework-v0.5.0) (2023-08-17)
 
 

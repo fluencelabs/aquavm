@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-use crate::execution_step::execution_context::stream_maps_variables::errors::unsupported_map_key_type;
 use crate::execution_step::ValueAggregate;
-use crate::CatchableError;
-use crate::ExecutionError;
 use crate::JValue;
 
 use serde::Serialize;
 use std::borrow::Cow;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+pub(crate) static KEY_FIELD_NAME: &str = "key";
+
+// TODO refactor the keys so that integer and string
+// value domains overlap would become impossible or less harmful.
+#[derive(Clone, PartialEq, Debug, Eq, Hash)]
 pub(crate) enum StreamMapKey<'value> {
     Str(Cow<'value, str>),
     U64(u64),
@@ -31,23 +34,44 @@ pub(crate) enum StreamMapKey<'value> {
 }
 
 impl<'value> StreamMapKey<'value> {
-    pub(crate) fn from_value(value: JValue, map_name: &str) -> Result<Self, ExecutionError> {
+    pub fn from_value(value: JValue) -> Option<Self> {
         match value {
-            JValue::String(s) => Ok(StreamMapKey::Str(Cow::Owned(s))),
-            JValue::Number(n) if n.is_i64() => Ok(StreamMapKey::I64(n.as_i64().unwrap())),
-            JValue::Number(n) if n.is_u64() => Ok(StreamMapKey::U64(n.as_u64().unwrap())),
-            _ => Err(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into()),
+            JValue::String(s) => Some(StreamMapKey::Str(Cow::Owned(s))),
+            JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
+            JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
+            _ => None,
         }
     }
 
-    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
-        let object = value.get_result().as_object()?;
-        let key = object.get("key")?;
-        match key {
+    pub fn from_value_ref(value: &'value JValue) -> Option<Self> {
+        match value {
             JValue::String(s) => Some(StreamMapKey::Str(Cow::Borrowed(s.as_str()))),
             JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
             JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
             _ => None,
+        }
+    }
+
+    pub(crate) fn from_kvpair_owned(value: &ValueAggregate) -> Option<Self> {
+        let object = value.get_result().as_object()?;
+        let key = object.get(KEY_FIELD_NAME)?.clone();
+        StreamMapKey::from_value(key)
+    }
+
+    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
+        let object = value.get_result().as_object()?;
+        let key = object.get(KEY_FIELD_NAME)?;
+        StreamMapKey::from_value_ref(key)
+    }
+
+    pub(crate) fn into_owned(self) -> StreamMapKey<'static> {
+        match self {
+            StreamMapKey::Str(s) => {
+                let s = s.to_string();
+                StreamMapKey::Str(Cow::Owned(s))
+            }
+            StreamMapKey::U64(n) => StreamMapKey::U64(n),
+            StreamMapKey::I64(n) => StreamMapKey::I64(n),
         }
     }
 }
@@ -64,9 +88,24 @@ impl From<u64> for StreamMapKey<'_> {
     }
 }
 
+// TODO unify all types.
+// This conversion is used to cast from numeric lambda accessor that leverages u32
+// however larpop parser grammar uses i64 for numeric keys inserting into a stream map.
+impl From<u32> for StreamMapKey<'_> {
+    fn from(value: u32) -> Self {
+        StreamMapKey::I64(value.into())
+    }
+}
+
 impl<'value> From<&'value str> for StreamMapKey<'value> {
     fn from(value: &'value str) -> Self {
         StreamMapKey::Str(Cow::Borrowed(value))
+    }
+}
+
+impl From<String> for StreamMapKey<'static> {
+    fn from(value: String) -> Self {
+        StreamMapKey::Str(Cow::Owned(value))
     }
 }
 
@@ -79,6 +118,18 @@ impl<'value> Serialize for StreamMapKey<'value> {
             StreamMapKey::Str(s) => serializer.serialize_str(s),
             StreamMapKey::U64(n) => serializer.serialize_u64(*n),
             StreamMapKey::I64(n) => serializer.serialize_i64(*n),
+        }
+    }
+}
+
+// This trait impl proposefully prints numbers the same way as strings
+// to use it in map-to-scalar cast.
+impl<'value> Display for StreamMapKey<'value> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StreamMapKey::Str(s) => write!(f, "{}", s),
+            StreamMapKey::U64(n) => write!(f, "{}", n),
+            StreamMapKey::I64(n) => write!(f, "{}", n),
         }
     }
 }

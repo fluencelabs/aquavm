@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -198,16 +198,57 @@ fn ap_with_last_error() {
             "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
-                    "result": no_error_last_error_object(),
+                    "result": no_error_object(),
                     "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
         })),
         unused!(
-            json!([no_error_last_error_object()]),
+            json!([no_error_object()]),
             peer = vm_1_peer_id,
-            args = [no_error_last_error_object()]
+            args = [no_error_object()]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_state);
+    assert!(result.next_peer_pks.is_empty());
+}
+
+#[test]
+fn ap_with_error() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+
+    let script = format!(
+        r#"
+        (seq
+            (ap :error: $stream)
+            (seq
+                (canon "{vm_1_peer_id}" $stream #canon_stream)
+                (call "{vm_1_peer_id}" ("" "") [#canon_stream])))
+        "#
+    );
+
+    let result = checked_call_vm!(vm_1, <_>::default(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+    let expected_state = vec![
+        executed_state::ap(0),
+        executed_state::canon(json!({
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "values": [
+                {
+                    "result": no_error_object(),
+                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "trace_pos": 0
+                }
+            ]
+        })),
+        unused!(
+            json!([no_error_object()]),
+            peer = vm_1_peer_id,
+            args = [no_error_object()]
         ),
     ];
 
@@ -589,13 +630,120 @@ fn ap_stream_map_with_undefined_last_error() {
             SubTraceDesc::new(3.into(), 0),
         )]),
         unused!(
-            no_error_last_error_object(),
+            no_error_object(),
             peer = vm_1_peer_id,
             service = "m",
             function = "f",
-            args = [no_error_last_error_object()]
+            args = [no_error_object()]
         ),
     ];
 
     assert_eq!(actual_trace, expected_state,);
+}
+
+#[test]
+fn ap_canon_stream_map_with_string_key_accessor_lambda() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("key" "value1") %map)
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+            )
+            (seq
+                (ap #%canon_map.$.key scalar)
+                (call "{vm_1_peer_id}" ("m" "f") [scalar] scalar1) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let map_value = json!({"key": "key", "value": "value1"});
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let call_arg = json!(["value1"]);
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+                {
+                "result": map_value,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            call_arg.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [call_arg]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_trace,);
+}
+
+#[test]
+fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
+    let vm_1_peer_id = "vm_1_peer_id";
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap (42 "value1") %map)
+                (canon "{vm_1_peer_id}" %map #%canon_map)
+            )
+            (seq
+                (ap #%canon_map.$.[42] scalar)
+                (call "{vm_1_peer_id}" ("m" "f") [scalar] scalar1) ; behaviour = echo
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let map_value = json!({"key": 42, "value": "value1"});
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let call_arg = json!(["value1"]);
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+                {
+                "result": map_value,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            call_arg.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [call_arg]
+        ),
+    ];
+    assert_eq!(actual_trace, expected_trace,);
 }

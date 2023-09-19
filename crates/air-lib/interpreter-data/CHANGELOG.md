@@ -8,6 +8,25 @@
   * dependencies
     * aquavm-air-parser bumped from 0.7.5 to 0.8.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.10.0...air-interpreter-data-v0.11.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.9.0...air-interpreter-data-v0.10.0) (2023-08-17)
 
 

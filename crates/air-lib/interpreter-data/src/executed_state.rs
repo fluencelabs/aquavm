@@ -185,8 +185,13 @@ pub struct ApResult {
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct CanonResult(pub Rc<CID<CanonResultCidAggregate>>);
+#[serde(rename_all = "snake_case")]
+pub enum CanonResult {
+    /// Request was sent to a target node by node with such public key and it shouldn't be called again.
+    #[serde(rename = "sent_by")]
+    RequestSentBy(Rc<String>),
+    Executed(Rc<CID<CanonResultCidAggregate>>),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

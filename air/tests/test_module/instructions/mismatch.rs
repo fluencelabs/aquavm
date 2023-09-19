@@ -203,3 +203,37 @@ fn mismatch_with_two_xors() {
 
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }
+
+#[test]
+fn mismatch_with_error() {
+    use air::ExecutionCidState;
+
+    let local_peer_id = "local_peer_id";
+    let mut vm = create_avm(echo_call_service(), local_peer_id);
+
+    let script = format!(
+        r#"
+        (xor
+            (mismatch 42 42 (null))
+            (call "local_peer_id" ("test" "error_code") [:error:.$.error_code] scalar)
+        )
+    "#
+    );
+
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
+
+    let actual_trace = trace_from_result(&result);
+
+    let mut cid_state = ExecutionCidState::new();
+    let errcode_lambda_output = json!(10002);
+
+    let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
+        errcode_lambda_output.clone(),
+        cid_state,
+        peer = local_peer_id,
+        service = "test",
+        function = "error_code",
+        args = vec![errcode_lambda_output]
+    )]);
+    assert_eq!(actual_trace, expected_trace);
+}

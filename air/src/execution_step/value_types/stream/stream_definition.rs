@@ -538,7 +538,7 @@ mod test {
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
-        let canon_result = CanonResult(Rc::new(CID::new("fake canon CID")));
+        let canon_result = CanonResult::executed(Rc::new(CID::new("fake canon CID")));
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);
@@ -598,7 +598,9 @@ mod test {
 
         let add_value_result = stream.add_value(value.clone(), Generation::new());
 
-        let Err(ExecutionError::Uncatchable(error)) = add_value_result else { panic!("there must be CatchableError")};
+        let Err(ExecutionError::Uncatchable(error)) = add_value_result else {
+            panic!("there must be CatchableError")
+        };
         assert!(matches!(error, UncatchableError::StreamSizeLimitExceeded));
     }
 }

@@ -23,8 +23,9 @@ use crate::execution_step::PEEK_ALLOWED_ON_NON_EMPTY;
 use crate::UncatchableError;
 
 use air_interpreter_data::Provenance;
-use air_lambda_parser::LambdaAST;
+use air_lambda_ast::LambdaAST;
 use air_parser::ast;
+use air_parser::ast::InstructionErrorAST;
 
 pub(crate) fn apply_to_arg(
     argument: &ast::ApArgument<'_>,
@@ -36,6 +37,7 @@ pub(crate) fn apply_to_arg(
 
     let result = match argument {
         InitPeerId => apply_const(exec_ctx.run_parameters.init_peer_id.as_ref(), exec_ctx, trace_ctx),
+        Error(instruction_error) => apply_error(instruction_error, exec_ctx, trace_ctx),
         LastError(error_accessor) => apply_last_error(error_accessor, exec_ctx, trace_ctx),
         Literal(value) => apply_const(*value, exec_ctx, trace_ctx),
         Timestamp => apply_const(exec_ctx.run_parameters.timestamp, exec_ctx, trace_ctx),
@@ -47,6 +49,8 @@ pub(crate) fn apply_to_arg(
         ScalarWithLambda(scalar) => apply_scalar_wl(scalar, exec_ctx, trace_ctx),
         CanonStream(canon_stream) => apply_canon_stream(canon_stream, exec_ctx, trace_ctx),
         CanonStreamWithLambda(canon_stream) => apply_canon_stream_wl(canon_stream, exec_ctx, trace_ctx),
+        CanonStreamMap(canon_stream_map) => apply_canon_stream_map(canon_stream_map, exec_ctx, trace_ctx),
+        CanonStreamMapWithLambda(canon_stream_map) => apply_canon_stream_map_wl(canon_stream_map, exec_ctx, trace_ctx),
     }?;
 
     Ok(result)
@@ -66,6 +70,21 @@ fn apply_const(
         position,
     ));
     Ok(value)
+}
+
+fn apply_error<'ctx>(
+    instruction_error: &InstructionErrorAST<'ctx>,
+    exec_ctx: &ExecutionCtx<'ctx>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ValueAggregate> {
+    let (value, mut tetraplets, provenance) = instruction_error.resolve(exec_ctx)?;
+    let value = Rc::new(value);
+    // removing is safe because prepare_last_error always returns a vec with one element.
+    let tetraplet = tetraplets.remove(0);
+    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+
+    let result = ValueAggregate::new(value, tetraplet, position, provenance);
+    Ok(result)
 }
 
 fn apply_last_error<'i>(
@@ -158,6 +177,47 @@ fn apply_canon_stream_wl(
         exec_ctx,
         &Provenance::canon(canon_stream.cid.clone()),
     )?;
+    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+
+    let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);
+    Ok(result)
+}
+
+fn apply_canon_stream_map(
+    ast_canon_stream_map: &ast::CanonStreamMap<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ValueAggregate> {
+    use crate::execution_step::value_types::JValuable;
+
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+    let value = JValuable::as_jvalue(&&canon_stream_map.canon_stream_map).into_owned();
+    let tetraplet = canon_stream_map.tetraplet();
+    let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
+    let value = CanonResultAggregate::new(
+        Rc::new(value),
+        tetraplet.peer_pk.as_str().into(),
+        &tetraplet.json_path,
+        position,
+    );
+    let result = ValueAggregate::from_canon_result(value, canon_stream_map.cid.clone());
+    Ok(result)
+}
+
+fn apply_canon_stream_map_wl(
+    ast_canon_stream_map: &ast::CanonStreamMapWithLambda<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    trace_ctx: &TraceHandler,
+) -> ExecutionResult<ValueAggregate> {
+    use crate::execution_step::value_types::JValuable;
+
+    let canon_stream_map = exec_ctx.scalars.get_canon_map(ast_canon_stream_map.name)?;
+    let cid = canon_stream_map.cid.clone();
+    let lambda = &ast_canon_stream_map.lambda;
+    let canon_stream_map = &canon_stream_map.canon_stream_map;
+
+    let (result, tetraplet, provenance) =
+        JValuable::apply_lambda_with_tetraplets(&canon_stream_map, lambda, exec_ctx, &Provenance::canon(cid))?;
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
     let result = ValueAggregate::new(result.into_owned().into(), tetraplet.into(), position, provenance);

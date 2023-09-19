@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::CatchableError;
 use air::ExecutionCidState;
 use air::ExecutionError;
@@ -124,7 +124,7 @@ fn not_clear_last_error_in_match() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 }
 
 #[test]
@@ -159,7 +159,7 @@ fn not_clear_last_error_in_mismatch() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 }
 
 #[test]
@@ -241,7 +241,7 @@ fn non_initialized_last_error() {
     let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
     assert_eq!(

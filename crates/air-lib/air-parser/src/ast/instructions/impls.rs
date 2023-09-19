@@ -23,7 +23,7 @@ impl<'i> Ap<'i> {
 }
 
 impl<'i> ApMap<'i> {
-    pub fn new(key: ApMapKey<'i>, value: ApArgument<'i>, map: StreamMap<'i>) -> Self {
+    pub fn new(key: StreamMapKeyClause<'i>, value: ApArgument<'i>, map: StreamMap<'i>) -> Self {
         Self { key, value, map }
     }
 }
@@ -52,6 +52,20 @@ impl<'i> Canon<'i> {
             peer_id,
             stream,
             canon_stream,
+        }
+    }
+}
+
+impl<'i> CanonMap<'i> {
+    pub fn new(
+        peer_id: ResolvableToPeerIdVariable<'i>,
+        stream_map: StreamMap<'i>,
+        canon_stream_map: CanonStreamMap<'i>,
+    ) -> Self {
+        Self {
+            peer_id,
+            stream_map,
+            canon_stream_map,
         }
     }
 }

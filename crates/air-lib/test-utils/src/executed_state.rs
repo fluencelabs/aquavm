@@ -200,7 +200,11 @@ pub fn canon_tracked(
         .canon_result_tracker
         .track_value(canon_result.clone())
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_result));
-    ExecutedState::Canon(CanonResult::new(canon_result_cid))
+    ExecutedState::Canon(CanonResult::executed(canon_result_cid))
+}
+
+pub fn canon_request(peer_id: impl Into<String>) -> ExecutedState {
+    ExecutedState::Canon(CanonResult::request_sent_by(peer_id.into().into()))
 }
 
 #[macro_export]
@@ -389,8 +393,8 @@ pub fn extract_service_result_cid(
 
 pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> Rc<CID<CanonResultCidAggregate>> {
     match canon_state {
-        ExecutedState::Canon(CanonResult(cid)) => cid.clone(),
-        _ => panic!("the function is intended for canon only"),
+        ExecutedState::Canon(CanonResult::Executed(cid)) => cid.clone(),
+        _ => panic!("the function is intended for executed canon only"),
     }
 }
 

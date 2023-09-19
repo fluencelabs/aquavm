@@ -57,6 +57,7 @@ pub(crate) fn resolve_peer_id_to_string<'i>(
         Scalar(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
         ScalarWithLambda(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
         CanonStreamWithLambda(canon_stream) => (canon_stream.resolve(exec_ctx)?, canon_stream.name),
+        CanonStreamMapWithLambda(canon_stream_map) => (canon_stream_map.resolve(exec_ctx)?, canon_stream_map.name),
     };
 
     try_jvalue_to_string(jvalue, name)
@@ -76,6 +77,7 @@ pub(crate) fn resolve_to_string<'i>(
         Scalar(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
         ScalarWithLambda(scalar) => (scalar.resolve(exec_ctx)?, scalar.name),
         CanonStreamWithLambda(canon_stream) => (canon_stream.resolve(exec_ctx)?, canon_stream.name),
+        CanonStreamMapWithLambda(canon_stream_map) => (canon_stream_map.resolve(exec_ctx)?, canon_stream_map.name),
     };
 
     try_jvalue_to_string(jvalue, name)
