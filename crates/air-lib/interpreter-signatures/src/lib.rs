@@ -49,8 +49,7 @@ use std::hash::Hash;
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug, Hash, Eq, PartialEq)))]
 pub struct PublicKey(
-    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
-    Box<[u8]>,
+    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")] Box<[u8]>,
 );
 
 impl PublicKey {
@@ -89,8 +88,7 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
 pub struct Signature(
-    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")]
-    Box<[u8]>,
+    #[serde(deserialize_with = "sede::from_b58", serialize_with = "sede::to_b58")] Box<[u8]>,
 );
 
 impl Signature {
@@ -149,7 +147,9 @@ impl SignatureTracker {
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 // #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
+pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(
+    #[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Key, Sign>,
+);
 
 impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     pub fn new() -> Self {

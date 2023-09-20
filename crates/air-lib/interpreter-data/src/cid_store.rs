@@ -22,7 +22,7 @@ use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// Stores CID to Value corresponance.
@@ -33,7 +33,9 @@ use std::rc::Rc;
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
-pub struct CidStore<Val>(BTreeMap<Rc<CID<Val>>, Rc<Val>>);
+pub struct CidStore<Val>(
+    #[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Rc<CID<Val>>, Rc<Val>>,
+);
 
 impl<Val> CidStore<Val> {
     pub fn new() -> Self {
@@ -59,12 +61,12 @@ impl<Val> CidStore<Val> {
     }
 
     // TODO feature?
-    pub fn iter(&self) -> std::collections::btree_map::Iter<'_, Rc<CID<Val>>, Rc<Val>> {
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, Rc<CID<Val>>, Rc<Val>> {
         self.0.iter()
     }
 
     // TODO feature?
-    pub fn iter_mut(&mut self) -> std::collections::btree_map::IterMut<'_, Rc<CID<Val>>, Rc<Val>> {
+    pub fn iter_mut(&mut self) -> std::collections::hash_map::IterMut<'_, Rc<CID<Val>>, Rc<Val>> {
         self.0.iter_mut()
     }
 }
@@ -77,7 +79,7 @@ impl<Val> Default for CidStore<Val> {
 
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
-    cids: BTreeMap<Rc<CID<Val>>, Rc<Val>>,
+    cids: HashMap<Rc<CID<Val>>, Rc<Val>>,
 }
 
 impl<Val> CidTracker<Val> {
@@ -128,7 +130,7 @@ impl<Val> From<CidTracker<Val>> for CidStore<Val> {
 impl<Val> IntoIterator for CidStore<Val> {
     type Item = (Rc<CID<Val>>, Rc<Val>);
 
-    type IntoIter = std::collections::btree_map::IntoIter<Rc<CID<Val>>, Rc<Val>>;
+    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID<Val>>, Rc<Val>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()

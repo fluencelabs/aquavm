@@ -116,7 +116,6 @@ fn serialize_rkyv_asis(bencher: &mut Bencher) {
 fn serialize_rkyv_dedup(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
     let data = dedup(data);
-
     bencher.iter(|| {
         let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
         rkyv::Serialize::serialize(black_box(&data), &mut ser).unwrap();
