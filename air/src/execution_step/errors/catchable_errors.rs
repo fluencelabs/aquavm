@@ -17,7 +17,7 @@
 use super::ErrorAffectable;
 use super::Joinable;
 use crate::execution_step::execution_context::errors::StreamMapError;
-use crate::execution_step::execution_context::LastErrorObjectError;
+use crate::execution_step::execution_context::ErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -77,7 +77,7 @@ pub enum CatchableError {
 
     /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
     #[error(transparent)]
-    InvalidLastErrorObjectError(#[from] LastErrorObjectError),
+    InvalidErrorObjectError(#[from] ErrorObjectError),
 
     /// A new with this variable name was met and right after that it was accessed
     /// that is prohibited.

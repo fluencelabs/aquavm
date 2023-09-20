@@ -68,3 +68,47 @@ fn parse_fail_scalar_with_lambda() {
     ));
     assert_eq!(instruction, expected)
 }
+
+#[test]
+fn parse_fail_scalar_with_error() {
+    let source_code = r#"
+           (fail :error:)
+        "#;
+    let instruction = parse(source_code);
+    let expected = fail_error();
+    assert_eq!(instruction, expected)
+}
+
+#[test]
+fn parse_fail_literal_0() {
+    use crate::parser::errors::ParserError;
+    use lalrpop_util::ParseError;
+
+    let source_code = r#"
+           (fail 0 "some error")
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::UnsupportedLiteralErrCodes { .. }
+    ));
+}

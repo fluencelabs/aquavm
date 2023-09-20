@@ -29,7 +29,7 @@ const TETRAPLET_IDX_CORRECT: &str = "selects always return a correct index insid
 pub use errors::CatchableError;
 pub use errors::ExecutionError;
 pub use errors::UncatchableError;
-pub use execution_context::LastErrorObjectError;
+pub use execution_context::ErrorObjectError;
 pub use lambda_applier::LambdaError;
 
 pub mod errors_prelude {

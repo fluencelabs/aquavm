@@ -15,6 +15,9 @@
  */
 
 use air::CatchableError;
+use air::ErrorObjectError;
+use air::ExecutionError;
+use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 #[test]
@@ -208,4 +211,61 @@ fn fail_with_canon_stream() {
         })),
     };
     assert!(check_error(&result, expected_error));
+}
+
+fn fail_to_fail_with_unsupported_errorcode(script: &str) {
+    let local_peer_id = "local_peer_id";
+    let script = script.to_string();
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .expect("invalid test AIR script");
+    let results = executor.execute_all(local_peer_id).unwrap();
+
+    let expected_error = ExecutionError::Catchable(rc!(CatchableError::InvalidErrorObjectError(
+        ErrorObjectError::ErrorCodeMustBeNonZero()
+    )));
+    assert!(check_error(&results.last().unwrap(), expected_error));
+}
+
+#[test]
+fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
+    let script = r#"
+        (seq
+            (call "local_peer_id" ("m" "f1") [] scalar) ; ok = {"error_code": 0, "message": "some message"}
+            (fail scalar)
+        )
+    "#;
+    fail_to_fail_with_unsupported_errorcode(script);
+}
+
+#[test]
+fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
+    let script = r#"
+        (seq
+            (call "local_peer_id" ("m" "f1") [] scalar) ; ok = {"key": {"error_code": 0, "message": "some message"} }
+            (fail scalar.$.key)
+
+        )
+    "#;
+    fail_to_fail_with_unsupported_errorcode(script);
+}
+
+#[test]
+fn fail_to_fail_with_unsupported_errorcode_in_canon() {
+    let script = r#"
+        (seq
+            (call "local_peer_id" ("m" "f1") [] scalar) ; ok = [{"error_code": 0, "message": "some message"}]
+            (fail scalar.$.[0])
+
+        )
+    "#;
+    fail_to_fail_with_unsupported_errorcode(script);
+}
+
+#[test]
+fn fail_to_fail_with_unsupported_errorcode_in_error() {
+    let script = r#"
+        (fail :error:)
+    "#;
+    fail_to_fail_with_unsupported_errorcode(script);
 }

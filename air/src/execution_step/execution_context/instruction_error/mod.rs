@@ -20,7 +20,7 @@ mod errors_utils;
 mod instruction_error_definition;
 mod last_error_descriptor;
 
-pub use errors::LastErrorObjectError;
+pub use errors::ErrorObjectError;
 pub use instruction_error_definition::no_error;
 pub use instruction_error_definition::no_error_object;
 pub use instruction_error_definition::InstructionError;
