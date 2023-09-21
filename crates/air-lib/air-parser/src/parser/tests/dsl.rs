@@ -92,6 +92,10 @@ pub(super) fn fail_last_error() -> Instruction<'static> {
     Instruction::Fail(Fail::LastError)
 }
 
+pub(super) fn fail_error() -> Instruction<'static> {
+    Instruction::Fail(Fail::Error)
+}
+
 pub(super) fn fold_scalar_variable<'i>(
     scalar: Scalar<'i>,
     iterator: Scalar<'i>,

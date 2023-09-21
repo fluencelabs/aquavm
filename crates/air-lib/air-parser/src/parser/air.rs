@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 3de27a381638e04321636ca4601f04f7d1012f0258441b007aa950e1851ecdd5
+// sha3: 3f2a00b4e0b0922c986743c02f1829a8610259b5697c6508b93c823c487de1de
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -3516,11 +3516,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // FailBody = LastError => ActionFn(134);
+        // FailBody = LastError => ActionFn(135);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action134::<>(input, errors, validator, __sym0);
+        let __nt = super::__action135::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3537,11 +3537,11 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // FailBody = Error => ActionFn(135);
+        // FailBody = Error => ActionFn(136);
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action135::<>(input, errors, validator, __sym0);
+        let __nt = super::__action136::<>(input, errors, validator, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3707,7 +3707,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, Triplet, Args, CallOutput, ")" => ActionFn(149);
+        // Instr = "(", call, Triplet, Args, CallOutput, ")" => ActionFn(151);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant16(__symbols);
@@ -3717,7 +3717,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action149::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action151::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3734,7 +3734,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", call, Triplet, Args, ")" => ActionFn(150);
+        // Instr = "(", call, Triplet, Args, ")" => ActionFn(152);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant15(__symbols);
@@ -3743,7 +3743,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action150::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action152::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3760,7 +3760,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamArgument, CanonStreamArgument, ")" => ActionFn(137);
+        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamArgument, CanonStreamArgument, ")" => ActionFn(138);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant18(__symbols);
@@ -3770,7 +3770,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action137::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action138::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3787,7 +3787,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamMapArgument, CanonStreamMapArgument, ")" => ActionFn(138);
+        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamMapArgument, CanonStreamMapArgument, ")" => ActionFn(139);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant19(__symbols);
@@ -3797,7 +3797,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action138::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action139::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3814,7 +3814,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamMapArgument, Scalar, ")" => ActionFn(139);
+        // Instr = "(", canon, ResolvableToPeerIdVariable, StreamMapArgument, Scalar, ")" => ActionFn(140);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant2(__symbols);
@@ -3824,7 +3824,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action139::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action140::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3841,7 +3841,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", ap, ApArgument, ApResult, ")" => ActionFn(140);
+        // Instr = "(", ap, ApArgument, ApResult, ")" => ActionFn(141);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant14(__symbols);
@@ -3850,7 +3850,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action140::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action141::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3867,7 +3867,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", ap, "(", StreamMapKeyClause, ApArgument, ")", StreamMap, ")" => ActionFn(141);
+        // Instr = "(", ap, "(", StreamMapKeyClause, ApArgument, ")", StreamMap, ")" => ActionFn(142);
         assert!(__symbols.len() >= 8);
         let __sym7 = __pop_Variant0(__symbols);
         let __sym6 = __pop_Variant2(__symbols);
@@ -3879,7 +3879,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym7.2;
-        let __nt = super::__action141::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6, __sym7);
+        let __nt = super::__action142::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6, __sym7);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (8, 17)
     }
@@ -3996,7 +3996,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", new, NewArgument, Instr, ")" => ActionFn(142);
+        // Instr = "(", new, NewArgument, Instr, ")" => ActionFn(143);
         assert!(__symbols.len() >= 5);
         let __sym4 = __pop_Variant0(__symbols);
         let __sym3 = __pop_Variant12(__symbols);
@@ -4005,7 +4005,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action142::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action143::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -4022,7 +4022,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fail, FailBody, ")" => ActionFn(13);
+        // Instr = "(", fail, FailBody, ")" => ActionFn(144);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant20(__symbols);
@@ -4030,7 +4030,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym3.2;
-        let __nt = super::__action13::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action144::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
@@ -4047,7 +4047,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, FoldScalarIterable, Scalar, Instr, Instr, ")" => ActionFn(151);
+        // Instr = "(", fold, FoldScalarIterable, Scalar, Instr, Instr, ")" => ActionFn(153);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
         let __sym5 = __pop_Variant12(__symbols);
@@ -4058,7 +4058,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action151::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action153::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4075,7 +4075,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, FoldScalarIterable, Scalar, Instr, ")" => ActionFn(152);
+        // Instr = "(", fold, FoldScalarIterable, Scalar, Instr, ")" => ActionFn(154);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
@@ -4085,7 +4085,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action152::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action154::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4102,7 +4102,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, Stream, Scalar, Instr, Instr, ")" => ActionFn(153);
+        // Instr = "(", fold, Stream, Scalar, Instr, Instr, ")" => ActionFn(155);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
         let __sym5 = __pop_Variant12(__symbols);
@@ -4113,7 +4113,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action153::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action155::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4130,7 +4130,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, Stream, Scalar, Instr, ")" => ActionFn(154);
+        // Instr = "(", fold, Stream, Scalar, Instr, ")" => ActionFn(156);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
@@ -4140,7 +4140,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action154::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action156::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4157,7 +4157,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, StreamMap, Scalar, Instr, Instr, ")" => ActionFn(155);
+        // Instr = "(", fold, StreamMap, Scalar, Instr, Instr, ")" => ActionFn(157);
         assert!(__symbols.len() >= 7);
         let __sym6 = __pop_Variant0(__symbols);
         let __sym5 = __pop_Variant12(__symbols);
@@ -4168,7 +4168,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action155::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action157::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4185,7 +4185,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", fold, StreamMap, Scalar, Instr, ")" => ActionFn(156);
+        // Instr = "(", fold, StreamMap, Scalar, Instr, ")" => ActionFn(158);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
@@ -4195,7 +4195,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action156::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action158::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4212,7 +4212,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", next, Scalar, ")" => ActionFn(146);
+        // Instr = "(", next, Scalar, ")" => ActionFn(148);
         assert!(__symbols.len() >= 4);
         let __sym3 = __pop_Variant0(__symbols);
         let __sym2 = __pop_Variant2(__symbols);
@@ -4220,7 +4220,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym3.2;
-        let __nt = super::__action146::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action148::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
@@ -4263,7 +4263,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", match_, Value, Value, Instr, ")" => ActionFn(147);
+        // Instr = "(", match_, Value, Value, Instr, ")" => ActionFn(149);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
@@ -4273,7 +4273,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action147::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action149::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4290,7 +4290,7 @@ mod __parse__AIR {
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     ) -> (usize, usize)
     {
-        // Instr = "(", mismatch, Value, Value, Instr, ")" => ActionFn(148);
+        // Instr = "(", mismatch, Value, Value, Instr, ")" => ActionFn(150);
         assert!(__symbols.len() >= 6);
         let __sym5 = __pop_Variant0(__symbols);
         let __sym4 = __pop_Variant12(__symbols);
@@ -4300,7 +4300,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action148::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action150::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -5653,13 +5653,18 @@ fn __action13<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, fail_body, _): (AirPos, Fail<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
+    (_, right, _): (AirPos, AirPos, AirPos),
 ) -> Box<Instruction<'input>>
 {
     {
+        let span = Span::new(left, right);
+        validator.met_fail_literal(&fail_body, span);
+
         Box::new(Instruction::Fail(fail_body))
     }
 }
@@ -7917,6 +7922,46 @@ fn __action128<
     validator: &'v mut VariableValidator<'input>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Fail<'input>, AirPos),
+    __3: (AirPos, Token<'input>, AirPos),
+    __4: (AirPos, AirPos, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __0.0;
+    let __end0 = __0.0;
+    let __temp0 = __action112(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action13(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action129<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
     __4: (AirPos, Box<Instruction<'input>>, AirPos),
@@ -7936,52 +7981,6 @@ fn __action128<
     );
     let __temp0 = (__start0, __temp0, __end0);
     __action14(
-        input,
-        errors,
-        validator,
-        __temp0,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __5,
-        __6,
-        __7,
-    )
-}
-
-#[allow(unused_variables)]
-#[allow(clippy::too_many_arguments)]
-fn __action129<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (AirPos, Token<'input>, AirPos),
-    __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, (&'input str, AirPos), AirPos),
-    __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
-    __6: (AirPos, Token<'input>, AirPos),
-    __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __0.0;
-    let __end0 = __0.0;
-    let __temp0 = __action112(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action15(
         input,
         errors,
         validator,
@@ -8027,7 +8026,7 @@ fn __action130<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action16(
+    __action15(
         input,
         errors,
         validator,
@@ -8046,6 +8045,52 @@ fn __action130<
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
 fn __action131<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __6: (AirPos, Token<'input>, AirPos),
+    __7: (AirPos, AirPos, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __0.0;
+    let __end0 = __0.0;
+    let __temp0 = __action112(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action16(
+        input,
+        errors,
+        validator,
+        __temp0,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+        __7,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action132<
     'err,
     'input,
     'v,
@@ -8085,7 +8130,7 @@ fn __action131<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action132<
+fn __action133<
     'err,
     'input,
     'v,
@@ -8129,7 +8174,7 @@ fn __action132<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action133<
+fn __action134<
     'err,
     'input,
     'v,
@@ -8173,7 +8218,7 @@ fn __action133<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action134<
+fn __action135<
     'err,
     'input,
     'v,
@@ -8205,7 +8250,7 @@ fn __action134<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action135<
+fn __action136<
     'err,
     'input,
     'v,
@@ -8237,7 +8282,7 @@ fn __action135<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action136<
+fn __action137<
     'err,
     'input,
     'v,
@@ -8279,7 +8324,7 @@ fn __action136<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action137<
+fn __action138<
     'err,
     'input,
     'v,
@@ -8321,7 +8366,7 @@ fn __action137<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action138<
+fn __action139<
     'err,
     'input,
     'v,
@@ -8363,7 +8408,7 @@ fn __action138<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action139<
+fn __action140<
     'err,
     'input,
     'v,
@@ -8405,7 +8450,7 @@ fn __action139<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action140<
+fn __action141<
     'err,
     'input,
     'v,
@@ -8445,7 +8490,7 @@ fn __action140<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action141<
+fn __action142<
     'err,
     'input,
     'v,
@@ -8491,7 +8536,7 @@ fn __action141<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action142<
+fn __action143<
     'err,
     'input,
     'v,
@@ -8531,7 +8576,7 @@ fn __action142<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action143<
+fn __action144<
     'err,
     'input,
     'v,
@@ -8541,15 +8586,12 @@ fn __action143<
     validator: &'v mut VariableValidator<'input>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
-    __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
-    __6: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, Fail<'input>, AirPos),
+    __3: (AirPos, Token<'input>, AirPos),
 ) -> Box<Instruction<'input>>
 {
-    let __start0 = __6.2;
-    let __end0 = __6.2;
+    let __start0 = __3.2;
+    let __end0 = __3.2;
     let __temp0 = __action109(
         input,
         errors,
@@ -8566,16 +8608,13 @@ fn __action143<
         __1,
         __2,
         __3,
-        __4,
-        __5,
-        __6,
         __temp0,
     )
 }
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action144<
+fn __action145<
     'err,
     'input,
     'v,
@@ -8585,7 +8624,7 @@ fn __action144<
     validator: &'v mut VariableValidator<'input>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
     __4: (AirPos, Box<Instruction<'input>>, AirPos),
     __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
@@ -8619,7 +8658,7 @@ fn __action144<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action145<
+fn __action146<
     'err,
     'input,
     'v,
@@ -8663,7 +8702,51 @@ fn __action145<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action146<
+fn __action147<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __6: (AirPos, Token<'input>, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __6.2;
+    let __end0 = __6.2;
+    let __temp0 = __action109(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action131(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __6,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action148<
     'err,
     'input,
     'v,
@@ -8687,46 +8770,6 @@ fn __action146<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action131(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __temp0,
-    )
-}
-
-#[allow(unused_variables)]
-#[allow(clippy::too_many_arguments)]
-fn __action147<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (AirPos, Token<'input>, AirPos),
-    __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, ImmutableValue<'input>, AirPos),
-    __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __5.2;
-    let __end0 = __5.2;
-    let __temp0 = __action109(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
     __action132(
         input,
         errors,
@@ -8735,15 +8778,13 @@ fn __action147<
         __1,
         __2,
         __3,
-        __4,
-        __5,
         __temp0,
     )
 }
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action148<
+fn __action149<
     'err,
     'input,
     'v,
@@ -8785,7 +8826,49 @@ fn __action148<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action149<
+fn __action150<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, ImmutableValue<'input>, AirPos),
+    __3: (AirPos, ImmutableValue<'input>, AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __5.2;
+    let __end0 = __5.2;
+    let __temp0 = __action109(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action134(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __5,
+        __temp0,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action151<
     'err,
     'input,
     'v,
@@ -8810,7 +8893,7 @@ fn __action149<
         __4,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action136(
+    __action137(
         input,
         errors,
         validator,
@@ -8825,7 +8908,7 @@ fn __action149<
 
 #[allow(unused_variables)]
 #[allow(clippy::too_many_arguments)]
-fn __action150<
+fn __action152<
     'err,
     'input,
     'v,
@@ -8850,7 +8933,7 @@ fn __action150<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action136(
+    __action137(
         input,
         errors,
         validator,
@@ -8860,90 +8943,6 @@ fn __action150<
         __3,
         __temp0,
         __4,
-    )
-}
-
-#[allow(unused_variables)]
-#[allow(clippy::too_many_arguments)]
-fn __action151<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (AirPos, Token<'input>, AirPos),
-    __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
-    __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
-    __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __5.0;
-    let __end0 = __5.2;
-    let __temp0 = __action107(
-        input,
-        errors,
-        validator,
-        __5,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action143(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __temp0,
-        __6,
-    )
-}
-
-#[allow(unused_variables)]
-#[allow(clippy::too_many_arguments)]
-fn __action152<
-    'err,
-    'input,
-    'v,
->(
-    input: &'input str,
-    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
-    validator: &'v mut VariableValidator<'input>,
-    __0: (AirPos, Token<'input>, AirPos),
-    __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
-    __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
-{
-    let __start0 = __4.2;
-    let __end0 = __5.0;
-    let __temp0 = __action108(
-        input,
-        errors,
-        validator,
-        &__start0,
-        &__end0,
-    );
-    let __temp0 = (__start0, __temp0, __end0);
-    __action143(
-        input,
-        errors,
-        validator,
-        __0,
-        __1,
-        __2,
-        __3,
-        __4,
-        __temp0,
-        __5,
     )
 }
 
@@ -8959,7 +8958,7 @@ fn __action153<
     validator: &'v mut VariableValidator<'input>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
     __4: (AirPos, Box<Instruction<'input>>, AirPos),
     __5: (AirPos, Box<Instruction<'input>>, AirPos),
@@ -8975,7 +8974,7 @@ fn __action153<
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action144(
+    __action145(
         input,
         errors,
         validator,
@@ -9001,7 +9000,7 @@ fn __action154<
     validator: &'v mut VariableValidator<'input>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
-    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
     __4: (AirPos, Box<Instruction<'input>>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
@@ -9017,7 +9016,7 @@ fn __action154<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action144(
+    __action145(
         input,
         errors,
         validator,
@@ -9059,7 +9058,7 @@ fn __action155<
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action145(
+    __action146(
         input,
         errors,
         validator,
@@ -9101,7 +9100,91 @@ fn __action156<
         &__end0,
     );
     let __temp0 = (__start0, __temp0, __end0);
-    __action145(
+    __action146(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __temp0,
+        __5,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action157<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __6: (AirPos, Token<'input>, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __5.0;
+    let __end0 = __5.2;
+    let __temp0 = __action107(
+        input,
+        errors,
+        validator,
+        __5,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action147(
+        input,
+        errors,
+        validator,
+        __0,
+        __1,
+        __2,
+        __3,
+        __4,
+        __temp0,
+        __6,
+    )
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::too_many_arguments)]
+fn __action158<
+    'err,
+    'input,
+    'v,
+>(
+    input: &'input str,
+    errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
+    validator: &'v mut VariableValidator<'input>,
+    __0: (AirPos, Token<'input>, AirPos),
+    __1: (AirPos, Token<'input>, AirPos),
+    __2: (AirPos, (&'input str, AirPos), AirPos),
+    __3: (AirPos, (&'input str, AirPos), AirPos),
+    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __5: (AirPos, Token<'input>, AirPos),
+) -> Box<Instruction<'input>>
+{
+    let __start0 = __4.2;
+    let __end0 = __5.0;
+    let __temp0 = __action108(
+        input,
+        errors,
+        validator,
+        &__start0,
+        &__end0,
+    );
+    let __temp0 = (__start0, __temp0, __end0);
+    __action147(
         input,
         errors,
         validator,
