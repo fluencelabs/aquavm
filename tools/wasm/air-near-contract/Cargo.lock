@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.7"
+version = "0.7.10"
 dependencies = [
  "aquavm-air-parser",
 ]
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.10.0"
+version = "0.11.3"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.15.0"
+version = "0.15.1"
 dependencies = [
  "fluence-it-types",
  "marine-rs-sdk",
@@ -112,7 +112,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.43.1"
+version = "0.48.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.4.0"
+version = "0.5.3"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -160,7 +160,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.44.0"
+version = "0.48.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -192,7 +192,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-parser"
-version = "0.8.1"
+version = "0.10.0"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",
@@ -1205,8 +1205,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-call-parameters"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9ca0439e5b2a812d8bc5c3b7d71e3691fb260a1f0384a7e842eec1b59f13069"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -1215,8 +1216,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0088fc9cb6a970dc17a510c3cb28fe459c368d566e8cb7f8354e06ef3395c883"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -1224,8 +1226,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e457b58c826679139896f04e6cfa38c5d23870a88e957e8e0a6f646e7c3f0ac4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1236,8 +1239,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6ecd45528096514b4db8d23523eadaf9e5d5a7d3fce637e4bb684afccc0e9a3"
 dependencies = [
  "marine-call-parameters",
  "marine-macro",
@@ -1248,8 +1252,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11eabbc74c69ad11874fb6cf686604833d084633293324524a40ec581663f978"
 dependencies = [
  "log",
  "serde",
@@ -1257,8 +1262,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.9.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/decouple-call-params#de7d55e422fc8a0594d9c32debdd4613e2d478bf"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acf956d174fdbf940b474089d5388aa35b4fc73fedbfade2a92dc198084b9afa"
 dependencies = [
  "chrono",
  "quote",
@@ -1717,7 +1723,7 @@ checksum = "4503fa043bf02cee09a9582e9554b4c6403b2ef55e4612e96561d294419429f8"
 
 [[package]]
 name = "polyplets"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "marine-call-parameters",
  "serde",
