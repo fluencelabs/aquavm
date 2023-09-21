@@ -98,14 +98,6 @@ pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), ErrorObjectError
     Ok(())
 }
 
-fn ensure_error_code_is_error(number: i64) -> Result<(), ErrorObjectError> {
-    if number == 0 {
-        Err(ErrorObjectError::ErrorCodeMustBeNonZero)
-    } else {
-        Ok(())
-    }
-}
-
 fn ensure_error_code_correct(
     scalar: &JValue,
     value: &JValue,
@@ -120,6 +112,14 @@ fn ensure_error_code_correct(
             field_name,
             expected_type: "integer",
         }),
+    }
+}
+
+fn ensure_error_code_is_error(number: i64) -> Result<(), ErrorObjectError> {
+    if number == NO_ERROR_ERROR_CODE {
+        Err(ErrorObjectError::ErrorCodeMustBeNonZero)
+    } else {
+        Ok(())
     }
 }
 
