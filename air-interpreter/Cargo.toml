@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter"
-version = "0.47.0"
+version = "0.48.0"
 description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -18,8 +18,8 @@ name = "air_interpreter_server"
 path = "src/marine.rs"
 
 [dependencies]
-aquavm-air = { version = "0.47.0", path = "../air" }
-air-interpreter-interface = { version = "0.15.0", path = "../crates/air-lib/interpreter-interface" }
+aquavm-air = { version = "0.48.0", path = "../air" }
+air-interpreter-interface = { version = "0.15.1", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
 marine-rs-sdk = {version = "0.10.0", features = ["logger"] }

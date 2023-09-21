@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.9.0...air-parser-v0.10.0) (2023-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702))
+
+### Features
+
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702)) ([45035cc](https://github.com/fluencelabs/aquavm/commit/45035ccff515344ee8c2dc63f172f00637226778))
+* **parser,execution-engine:** allow :error: in fail ([#696](https://github.com/fluencelabs/aquavm/issues/696)) ([bd80a12](https://github.com/fluencelabs/aquavm/commit/bd80a127eaab39f1ba02740e3e67d69cb36a699c))
+
 ## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.2...air-parser-v0.9.0) (2023-09-07)
 
 

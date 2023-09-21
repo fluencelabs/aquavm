@@ -10,6 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * polyplets bumped from 0.3.2 to 0.3.3
     * avm-interface bumped from 0.28.4 to 0.28.5
 
+## [0.33.1](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.0...avm-server-v0.33.1) (2023-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.0 ([#640](https://github.com/fluencelabs/aquavm/issues/640)) ([b713e44](https://github.com/fluencelabs/aquavm/commit/b713e447fca38e0877a6c0e56bf91880f02bf9e4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.15.0 to 0.15.1
+    * avm-data-store bumped from 0.7.0 to 0.7.1
+    * polyplets bumped from 0.5.0 to 0.5.1
+    * avm-interface bumped from 0.29.0 to 0.29.1
+
 ## [0.33.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.32.2...avm-server-v0.33.0) (2023-08-17)
 
 

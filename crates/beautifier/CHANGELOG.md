@@ -8,6 +8,20 @@
   * dependencies
     * aquavm-air-parser bumped from 0.8.1 to 0.8.2
 
+## [0.3.1](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.3.0...air-beautifier-v0.3.1) (2023-09-21)
+
+
+### Features
+
+* **parser,execution-engine:** allow :error: in fail ([#696](https://github.com/fluencelabs/aquavm/issues/696)) ([bd80a12](https://github.com/fluencelabs/aquavm/commit/bd80a127eaab39f1ba02740e3e67d69cb36a699c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.9.0 to 0.10.0
+
 ## [0.3.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.2.2...air-beautifier-v0.3.0) (2023-09-07)
 
 

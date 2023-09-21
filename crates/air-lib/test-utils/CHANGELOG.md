@@ -49,6 +49,24 @@
     * aquavm-air bumped from 0.46.0 to 0.47.0
     * air-interpreter-data bumped from 0.11.1 to 0.11.2
 
+## [0.10.4](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.10.3...air-test-utils-v0.10.4) (2023-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.0 ([#640](https://github.com/fluencelabs/aquavm/issues/640)) ([b713e44](https://github.com/fluencelabs/aquavm/commit/b713e447fca38e0877a6c0e56bf91880f02bf9e4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.47.0 to 0.48.0
+    * air-interpreter-data bumped from 0.11.2 to 0.11.3
+    * air-interpreter-interface bumped from 0.15.0 to 0.15.1
+    * avm-interface bumped from 0.29.0 to 0.29.1
+    * avm-server bumped from 0.33.0 to 0.33.1
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.9.0...air-test-utils-v0.10.0) (2023-08-31)
 
 
