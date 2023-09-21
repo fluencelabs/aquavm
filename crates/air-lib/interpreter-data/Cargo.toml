@@ -29,6 +29,7 @@ tracing = "0.1.37"
 newtype_derive = "0.1.6"
 num-traits = "0.2.15"
 rkyv = { version = "0.7.42", features = ["validation", "std"], optional = true, default-features = false }
+thiserror = { version = "1.0.48", optional = true }
 
 [features]
-rkyv = [ "dep:rkyv", "air-interpreter-cid/rkyv", "air-interpreter-signatures/rkyv" ]
+rkyv = [ "dep:rkyv", "dep:thiserror", "air-interpreter-cid/rkyv", "air-interpreter-signatures/rkyv" ]

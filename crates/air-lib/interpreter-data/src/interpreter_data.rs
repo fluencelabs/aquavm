@@ -230,20 +230,20 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
         serializer: &mut S,
     ) -> Result<Self::Resolver, S::Error> {
         let inner = field.to_string();
-        rkyv::string::ArchivedString::serialize_from_str(&inner, serializer)
+        rkyv::Archived::<String>::serialize_from_str(&inner, serializer)
     }
 }
 
 #[cfg(feature = "rkyv")]
-impl<D: rkyv::Fallible<Error = semver::Error> + ?Sized>
-    rkyv::with::DeserializeWith<rkyv::string::ArchivedString, semver::Version, D>
+impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
+    rkyv::with::DeserializeWith<rkyv::Archived<String>, semver::Version, D>
     for WithStringVersion
 {
     fn deserialize_with(
         field: &rkyv::string::ArchivedString,
         _deserializer: &mut D,
     ) -> Result<semver::Version, <D as rkyv::Fallible>::Error> {
-        semver::Version::parse(&field.as_str())
+        Ok(semver::Version::parse(&field.as_str())?)
     }
 }
 
@@ -284,14 +284,52 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
 }
 
 #[cfg(feature = "rkyv")]
-impl<D: rkyv::Fallible<Error = serde_json::Error> + ?Sized>
-    rkyv::with::DeserializeWith<rkyv::string::ArchivedString, Box<serde_json::value::RawValue>, D>
+impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
+    rkyv::with::DeserializeWith<rkyv::boxed::ArchivedBox<str>, Box<serde_json::value::RawValue>, D>
     for WithRawJson
 {
     fn deserialize_with(
-        field: &rkyv::string::ArchivedString,
+        field: &rkyv::boxed::ArchivedBox<str>,
         _deserializer: &mut D,
     ) -> Result<Box<serde_json::value::RawValue>, <D as rkyv::Fallible>::Error> {
-        serde_json::from_str(field.as_str())
+        Ok(serde_json::from_str(field.as_ref())?)
+    }
+}
+
+#[cfg(feature = "rkyv")]
+#[derive(Debug, thiserror::Error)]
+pub enum InterpreterDataDeserializerError {
+    #[error(transparent)]
+    SharedMap(#[from] ::rkyv::de::deserializers::SharedDeserializeMapError),
+    #[error(transparent)]
+    Json(#[from] serde_json::Error),
+    #[error(transparent)]
+    Version(#[from] semver::Error),
+}
+
+#[cfg(feature = "rkyv")]
+#[derive(Debug, Default)]
+/// Deserializer that has common error type for different types.
+pub struct InterpreterDataDeserializer {
+    shared: ::rkyv::de::deserializers::SharedDeserializeMap,
+}
+
+#[cfg(feature = "rkyv")]
+impl ::rkyv::Fallible for InterpreterDataDeserializer {
+    type Error = InterpreterDataDeserializerError;
+}
+
+#[cfg(feature = "rkyv")]
+impl ::rkyv::de::SharedDeserializeRegistry for InterpreterDataDeserializer {
+    fn get_shared_ptr(&mut self, ptr: *const u8) -> Option<&dyn rkyv::de::SharedPointer> {
+        self.shared.get_shared_ptr(ptr)
+    }
+
+    fn add_shared_ptr(
+        &mut self,
+        ptr: *const u8,
+        shared: Box<dyn rkyv::de::SharedPointer>,
+    ) -> Result<(), Self::Error> {
+        Ok(self.shared.add_shared_ptr(ptr, shared)?)
     }
 }

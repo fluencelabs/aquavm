@@ -57,7 +57,7 @@ fn deserialize_rkyv_dedup_validate_only(bencher: &mut Bencher) {
     ser.serialize_value(&data).unwrap();
 
     let buf = ser.into_serializer().into_inner();
-    let root = rkyv::check_archived_root::<InterpreterData>(&buf).expect("something broken");
+    let _root = rkyv::check_archived_root::<InterpreterData>(&buf).expect("precheck broken");
 
     bencher.iter(|| {
         let buf = black_box(&buf);
@@ -66,23 +66,24 @@ fn deserialize_rkyv_dedup_validate_only(bencher: &mut Bencher) {
     });
 }
 
-// fn deserialize_rkyv_dedup(bencher: &mut Bencher) {
-//     use std::rc::Rc;
+fn deserialize_rkyv_dedup(bencher: &mut Bencher) {
+    use air_interpreter_data::InterpreterDataDeserializer;
+    use rkyv::ser::Serializer;
 
-//     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
-//     let data = dedup(data);
-//     let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
-//     rkyv::Serialize::serialize(&data, &mut ser).unwrap();
-//     let buf = ser.into_serializer().into_inner();
+    let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    let data = dedup(data);
+    let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
+    ser.serialize_value(&data).unwrap();
+    let buf = ser.into_serializer().into_inner();
 
-//     bencher.iter(|| {
-//         let buf = black_box(&buf);
-//         let root = rkyv::check_archived_root::<InterpreterData>(buf).unwrap();
+    bencher.iter(|| {
+        let buf = black_box(&buf);
+        let root = rkyv::check_archived_root::<InterpreterData>(buf).unwrap();
 
-//         let mut des = rkyv::de::deserializers::SharedDeserializeMap::new();
-//         rkyv::Deserialize::<InterpreterData, _>::deserialize(root, &mut des).unwrap()
-//     });
-// }
+        let mut des = InterpreterDataDeserializer::default();
+        rkyv::Deserialize::<InterpreterData, _>::deserialize(root, &mut des).unwrap()
+    });
+}
 
 fn serialize_serde_json(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
@@ -187,6 +188,7 @@ benchmark_group!(
     // deserialize_ciborium,
 
     deserialize_rkyv_dedup_validate_only,
+    deserialize_rkyv_dedup,
 
     serialize_serde_json,
     serialize_simd_json,
