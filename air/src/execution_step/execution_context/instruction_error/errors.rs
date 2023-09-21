@@ -35,5 +35,5 @@ pub enum ErrorObjectError {
     },
 
     #[error("error code must be non-zero, but it is zero")]
-    ErrorCodeMustBeNonZero(),
+    ErrorCodeMustBeNonZero,
 }

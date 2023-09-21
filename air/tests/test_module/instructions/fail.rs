@@ -222,7 +222,7 @@ fn fail_to_fail_with_unsupported_errorcode(script: &str) {
     let results = executor.execute_all(local_peer_id).unwrap();
 
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::InvalidErrorObjectError(
-        ErrorObjectError::ErrorCodeMustBeNonZero()
+        ErrorObjectError::ErrorCodeMustBeNonZero
     )));
     assert!(check_error(&results.last().unwrap(), expected_error));
 }
@@ -244,7 +244,6 @@ fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
         (seq
             (call "local_peer_id" ("m" "f1") [] scalar) ; ok = {"key": {"error_code": 0, "message": "some message"} }
             (fail scalar.$.key)
-
         )
     "#;
     fail_to_fail_with_unsupported_errorcode(script);
@@ -256,7 +255,6 @@ fn fail_to_fail_with_unsupported_errorcode_in_canon() {
         (seq
             (call "local_peer_id" ("m" "f1") [] scalar) ; ok = [{"error_code": 0, "message": "some message"}]
             (fail scalar.$.[0])
-
         )
     "#;
     fail_to_fail_with_unsupported_errorcode(script);

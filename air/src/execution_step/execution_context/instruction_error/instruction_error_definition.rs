@@ -72,7 +72,7 @@ pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instru
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
-///  - error_code
+///  - error_code != 0
 ///  - message
 pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), ErrorObjectError> {
     let fields = match scalar {
@@ -90,7 +90,7 @@ pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), ErrorObjectError
     };
 
     let error_code = check_field(ERROR_CODE_FIELD_NAME)?;
-    ensure_jvalue_is_integer_and_not_0(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
+    ensure_error_code_correct(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
 
     let message = check_field(MESSAGE_FIELD_NAME)?;
     ensure_jvalue_is_string(scalar, message, MESSAGE_FIELD_NAME)?;
@@ -98,21 +98,21 @@ pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), ErrorObjectError
     Ok(())
 }
 
-fn ensure_number_is_not_0(number: i64) -> Result<(), ErrorObjectError> {
+fn ensure_error_code_is_error(number: i64) -> Result<(), ErrorObjectError> {
     if number == 0 {
-        Err(ErrorObjectError::ErrorCodeMustBeNonZero())
+        Err(ErrorObjectError::ErrorCodeMustBeNonZero)
     } else {
         Ok(())
     }
 }
 
-fn ensure_jvalue_is_integer_and_not_0(
+fn ensure_error_code_correct(
     scalar: &JValue,
     value: &JValue,
     field_name: &'static str,
 ) -> Result<(), ErrorObjectError> {
     match value {
-        JValue::Number(number) if number.is_i64() | number.is_u64() => ensure_number_is_not_0(number.as_i64().unwrap()),
+        JValue::Number(number) if number.is_i64() | number.is_u64() => ensure_error_code_is_error(number.as_i64().unwrap()),
         _ => Err(ErrorObjectError::ScalarFieldIsWrongType {
             scalar: scalar.clone(),
             field_name,
