@@ -55,7 +55,7 @@ fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i
     let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
@@ -64,7 +64,7 @@ fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut Ex
     let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
@@ -97,7 +97,7 @@ fn fail_with_canon_stream(
     let (value, mut tetraplets, provenance) = ast_canon.resolve(exec_ctx)?;
 
     // tetraplets always have one element here and it'll be refactored after boxed value
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)), provenance)
 }
@@ -110,6 +110,8 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
         tetraplet,
         provenance,
     } = exec_ctx.last_error_descriptor.error();
+
+    check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
     let error = error.clone();
@@ -126,6 +128,8 @@ fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
         tetraplet,
         provenance,
     } = exec_ctx.error_descriptor.error();
+
+    check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone())
 }

@@ -86,7 +86,10 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::New(new))
     },
 
-    "(" fail <fail_body: FailBody> ")" => {
+    <left: @L> "(" fail <fail_body: FailBody> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_fail_literal(&fail_body, span);
+
         Box::new(Instruction::Fail(fail_body))
     },
 
