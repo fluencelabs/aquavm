@@ -32,6 +32,7 @@ use std::fmt::Formatter;
 use std::rc::Rc;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct ParResult {
@@ -40,6 +41,7 @@ pub struct ParResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub enum Sender {
@@ -48,6 +50,7 @@ pub enum Sender {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -87,6 +90,7 @@ pub enum CallResult {
  * ```
  */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -103,6 +107,7 @@ pub enum ValueRef {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CallServiceFailed {
@@ -122,6 +127,7 @@ impl CallServiceFailed {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -152,6 +158,7 @@ pub struct ServiceResultCidAggregate {
 /// two intervals (left and right), each of these intervals has borders [begin, end).
 /// So, this struct describes position inside overall execution_step trace belongs to one fold iteration.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -169,6 +176,7 @@ pub struct FoldSubTraceLore {
 
 /// Descriptor of a subtrace inside execution trace.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -187,6 +195,7 @@ pub struct SubTraceDesc {
 pub type FoldLore = Vec<FoldSubTraceLore>;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -196,6 +205,7 @@ pub struct FoldResult {
 
 /// Describes result of applying functor `apply` to streams.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -206,6 +216,7 @@ pub struct ApResult {
 
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -217,6 +228,7 @@ pub enum CanonResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]
@@ -227,6 +239,7 @@ pub struct CanonResultCidAggregate {
 
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct CanonCidAggregate {
@@ -236,6 +249,7 @@ pub struct CanonCidAggregate {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case", tag = "type")]
@@ -252,6 +266,7 @@ pub enum Provenance {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(rename_all = "snake_case")]

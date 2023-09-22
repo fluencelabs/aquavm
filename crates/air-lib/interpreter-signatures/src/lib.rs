@@ -41,7 +41,19 @@ use std::hash::Hash;
 ///
 /// It can be a string or a binary, you shouldn't care about it unless you change serialization format.
 // surrent implementation serializes to string as it is used as a key in a JSON map
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize, Hash)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Deserialize,
+    Serialize,
+    Hash,
+    PartialOrd,
+    Ord,
+    ::borsh::BorshSerialize,
+    ::borsh::BorshDeserialize,
+)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -81,6 +93,7 @@ impl From<fluence_keypair::PublicKey> for PublicKey {
 // surrent implementation serializes string as more compact in JSON representation than number array
 #[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(transparent)]
+#[derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -140,18 +153,25 @@ impl SignatureTracker {
 }
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(
+    Clone, Debug, Serialize, Deserialize, ::borsh::BorshSerialize, ::borsh::BorshDeserialize,
+)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 // #[cfg_attr(feature = "rkyv", archive_attr(derive(Debug)))]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(
-    #[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Key, Sign>,
-);
+pub struct SignatureStore<
+    Key: Hash + Eq + PartialOrd + ::borsh::BorshSerialize + ::borsh::BorshDeserialize = PublicKey,
+    Sign: ::borsh::BorshSerialize + ::borsh::BorshDeserialize = Signature,
+>(#[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Key, Sign>);
 
-impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
+impl<
+        Key: Hash + Eq + PartialOrd + ::borsh::BorshSerialize + ::borsh::BorshDeserialize,
+        Sign: ::borsh::BorshSerialize + ::borsh::BorshDeserialize,
+    > SignatureStore<Key, Sign>
+{
     pub fn new() -> Self {
         Default::default()
     }
@@ -178,7 +198,11 @@ impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     }
 }
 
-impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
+impl<
+        Key: Hash + Eq + PartialOrd + ::borsh::BorshSerialize + ::borsh::BorshDeserialize,
+        Sign: ::borsh::BorshSerialize + ::borsh::BorshDeserialize,
+    > Default for SignatureStore<Key, Sign>
+{
     fn default() -> Self {
         Self(Default::default())
     }

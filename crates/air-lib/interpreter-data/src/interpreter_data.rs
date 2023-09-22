@@ -32,6 +32,7 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -61,6 +62,7 @@ pub struct InterpreterData {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -70,10 +72,12 @@ pub struct Versions {
     /// Version of this data format.
     #[serde(rename = "version")] // for compatibility with versions <= 0.6.0
     #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
+    #[cfg_attr(feature = "borsh", borsh_skip)]
     pub data_version: semver::Version,
 
     /// Version of an interpreter produced this data.
     #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
+    #[cfg_attr(feature = "borsh", borsh_skip)]
     pub interpreter_version: semver::Version,
 }
 
@@ -134,6 +138,7 @@ impl Versions {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -165,6 +170,14 @@ pub struct CidInfo {
 #[serde(transparent)]
 // So far, use boxes; then switch to unsized.
 pub struct RawValueWrapper(#[with(WithRawJson)] Box<serde_json::value::RawValue>);
+
+#[cfg(feature = "borsh")]
+impl ::borsh::BorshSerialize for RawValueWrapper {
+    #[inline]
+    fn serialize<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        ::borsh::BorshSerialize::serialize(self.0.get().as_bytes(), writer)
+    }
+}
 
 impl RawValueWrapper {
     pub fn as_str(&self) -> &str {
@@ -236,8 +249,7 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
 
 #[cfg(feature = "rkyv")]
 impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
-    rkyv::with::DeserializeWith<rkyv::Archived<String>, semver::Version, D>
-    for WithStringVersion
+    rkyv::with::DeserializeWith<rkyv::Archived<String>, semver::Version, D> for WithStringVersion
 {
     fn deserialize_with(
         field: &rkyv::string::ArchivedString,

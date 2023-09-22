@@ -15,7 +15,7 @@ name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-marine-call-parameters = { path = "../../../../marine-rs-sdk--call-parameters/crates/call-parameters", features = ["rkyv"], default-features = false }
+marine-call-parameters = { path = "../../../../marine-rs-sdk--call-parameters/crates/call-parameters", features = ["rkyv", "borsh"], default-features = false }
 serde = { version = "1.0.164", features = ["rc", "derive"] }
 
 [features]

@@ -24,6 +24,7 @@ use std::fmt::Display;
 type GenerationIdxType = u32;
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 #[serde(transparent)]

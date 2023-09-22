@@ -15,9 +15,16 @@ use std::hint::black_box;
  *    b. simd-json
  *    c. rkyv
  *
- * Use two types of data.
+ *
+ * DATA SIZE:
+ * | rkyv    |   717,696
+ * | borsh   | 1,045,375
+ * | json    | 1,267,245
+ * | cborium | 1,277,966
+ *
  */
 
+// 1267245
 const DATA_STR: &str =
     include_str!("../../../benches/performance_metering/multiple-cids50/cur_data.json");
 
@@ -28,13 +35,14 @@ fn deserialize_serde_json(bencher: &mut Bencher) {
 fn deserialize_serde_json2(bencher: &mut Bencher) {
     bencher.iter(|| {
         let data = black_box(DATA_STR).to_owned();
-        serde_json::from_str::<InterpreterData>(&data)
+        serde_json::from_str::<InterpreterData>(&data).unwrap()
     });
 }
 
-fn deserialize_simd_json(bencher: &mut Bencher) {
+fn deserialize_simd_json_invalid(bencher: &mut Bencher) {
     bencher.iter(|| {
         let mut data = black_box(DATA_STR).as_bytes().to_owned();
+        // TODO INVALID!!!
         simd_json::serde::from_slice::<InterpreterData>(&mut data)
     });
 }
@@ -97,12 +105,28 @@ fn serialize_simd_json(bencher: &mut Bencher) {
 
 fn serialize_ciborium(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    // 1277966
+    // {
+    //     let mut buf = vec![];
+    //     ciborium::ser::into_writer(black_box(&data), &mut buf).unwrap();
+    //     eprintln!("cborium size: {}", buf.len());
+    // }
     bencher.iter(|| {
         let mut buf = vec![];
         ciborium::ser::into_writer(black_box(&data), &mut buf).unwrap();
         buf
     });
 }
+
+fn serialize_borshium(bencher: &mut Bencher) {
+    let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    // // 1045375
+    // eprintln!("borsh size: {}", borsh::to_vec(&data).unwrap().len());
+    bencher.iter(|| {
+        borsh::to_vec(&data).unwrap()
+    });
+}
+
 
 fn serialize_rkyv_asis(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
@@ -117,6 +141,15 @@ fn serialize_rkyv_asis(bencher: &mut Bencher) {
 fn serialize_rkyv_dedup(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
     let data = dedup(data);
+
+    // // 717696
+    // {
+    //     let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
+    //     rkyv::Serialize::serialize(black_box(&data), &mut ser).unwrap();
+
+    //     let size = ser.into_serializer().into_inner().len();
+    //     eprintln!("rkyv_dedup size: {}", size);
+    // }
     bencher.iter(|| {
         let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
         rkyv::Serialize::serialize(black_box(&data), &mut ser).unwrap();
@@ -183,7 +216,7 @@ benchmark_group!(
     benches,
     deserialize_serde_json,
     deserialize_serde_json2,
-    deserialize_simd_json,
+    deserialize_simd_json_invalid,
     // fails because of serde_json::..::RawValue
     // deserialize_ciborium,
 
@@ -193,6 +226,7 @@ benchmark_group!(
     serialize_serde_json,
     serialize_simd_json,
     serialize_ciborium,
+    serialize_borshium,
     serialize_rkyv_asis,
     serialize_rkyv_dedup,
 );

@@ -29,6 +29,7 @@ pub type TraceLen = u32;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct ExecutionTrace(Vec<ExecutedState>);

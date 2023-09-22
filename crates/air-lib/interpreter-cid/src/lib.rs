@@ -34,6 +34,10 @@ use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(
+    feature = "borsh",
+    derive(::borsh::BorshSerialize, ::borsh::BorshDeserialize)
+)]
+#[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
@@ -42,7 +46,9 @@ use std::marker::PhantomData;
 #[serde(transparent)]
 pub struct CID<T: ?Sized>(
     String,
-    #[serde(skip)] PhantomData<*const T>,
+    #[serde(skip)]
+    #[cfg_attr(feature = "borsh", borsh_skip)]
+    PhantomData<*const T>,
 );
 
 impl<T: ?Sized> CID<T> {
