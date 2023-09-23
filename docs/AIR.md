@@ -23,7 +23,7 @@ Example:
 (seq <left_instruction> <right_instruction>)
 ```
 
-- executes instructions sequentially: `right_instruction` will be executed if  `left_instruction` finished successfully
+- executes instructions sequentially: `right_instruction` will be executed iff  `left_instruction` finished successfully
 
 ### par
 
@@ -87,7 +87,7 @@ Examples:
 (mismatch <variable> <variable> <instruction>)
 ```
 
-- executes the instruction if variables are equal/notequal
+- executes the instruction iff variables are equal/notequal
 
 Example:
 ```wasm
