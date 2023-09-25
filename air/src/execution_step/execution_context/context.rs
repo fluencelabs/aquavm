@@ -250,6 +250,9 @@ impl<'i> Display for ExecutionCtx<'i> {
         writeln!(f, "streams:")?;
         writeln!(f, "  {}", self.streams)?;
 
+        writeln!(f, "stream_maps:")?;
+        writeln!(f, "  {}", self.stream_maps)?;
+
         writeln!(f, "current peer id: {}", self.run_parameters.current_peer_id)?;
         writeln!(f, "init peer id: {}", self.run_parameters.init_peer_id)?;
         writeln!(f, "timestamp: {}", self.run_parameters.timestamp)?;
