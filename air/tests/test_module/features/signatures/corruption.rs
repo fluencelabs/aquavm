@@ -166,7 +166,7 @@ fn test_attack_replace_tetraplet() {
     assert_error_eq!(
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "polyplets::tetraplet::SecurityTetraplet",
+            type_name: "marine_call_parameters::SecurityTetraplet",
             cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".to_owned(),
         })
     );
