@@ -30,7 +30,8 @@ use std::borrow::Cow;
 
 impl JValuable for &CanonStreamMap<'_> {
     fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        select_by_lambda_from_canon_map(self, lambda, exec_ctx)
+        let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
+        Ok(select_result.result)
     }
 
     fn apply_lambda_with_tetraplets(
@@ -39,14 +40,14 @@ impl JValuable for &CanonStreamMap<'_> {
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
-        let value = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
+        // WIP deconstruct the result
+        let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
+        let tetraplet = select_result.tetraplet.as_ref().clone();
 
-        // TODO improve tetraplet granularity for a canon map with a lens. See VM-331 for the details.
-        // Canon map result is a canon stream rendered on this node thus its tetraplet
-        // is also calculated and canon map provenance is borrowed.
-        let tetraplet = SecurityTetraplet::new(self.tetraplet().peer_pk.to_owned(), "", "", lambda.to_string());
+        // Provenance is borrowed from the map.
+        let provenance = root_provenance.clone();
 
-        Ok((value, tetraplet, root_provenance.clone()))
+        Ok((select_result.result, tetraplet, provenance))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {
