@@ -59,9 +59,12 @@ pub struct VariableValidator<'i> {
     /// Contains all names that should be checked that they are not iterators.
     not_iterators_candidates: Vec<(&'i str, Span)>,
 
-    // This contains info about unssuported map key arguments used with ap instruction,
-    // namely (key map ApArgument)
+    /// This contains info about unssuported map key arguments used with ap instruction,
+    /// namely (key map ApArgument).
     unsupported_map_keys: Vec<(String, &'i str, Span)>,
+
+    /// This vector contains all literal error codes used with fail.
+    unsupported_literal_errcodes: Vec<(i64, Span)>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -197,6 +200,15 @@ impl<'i> VariableValidator<'i> {
         }
     }
 
+    pub(super) fn met_fail_literal(&mut self, fail: &Fail<'i>, span: Span) {
+        match fail {
+            Fail::Literal { ret_code, .. } if *ret_code == 0 => {
+                self.unsupported_literal_errcodes.push((*ret_code, span))
+            }
+            _ => {}
+        }
+    }
+
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {
         ValidatorErrorBuilder::new(self)
             .check_undefined_variables()
@@ -205,6 +217,7 @@ impl<'i> VariableValidator<'i> {
             .check_new_on_iterators()
             .check_iterator_for_multiple_definitions()
             .check_for_unsupported_map_keys()
+            .check_for_unsupported_literal_errcodes()
             .build()
     }
 
@@ -491,6 +504,14 @@ impl<'i> ValidatorErrorBuilder<'i> {
                 arg_key_type.to_string(),
                 *ap_result_name,
             );
+            add_to_errors(&mut self.errors, *span, Token::New, error);
+        }
+        self
+    }
+
+    fn check_for_unsupported_literal_errcodes(mut self) -> Self {
+        for (_, span) in self.validator.unsupported_literal_errcodes.iter_mut() {
+            let error = ParserError::unsupported_literal_errcodes(*span);
             add_to_errors(&mut self.errors, *span, Token::New, error);
         }
         self

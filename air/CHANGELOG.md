@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.48.0](https://github.com/fluencelabs/aquavm/compare/air-v0.47.0...air-v0.48.0) (2023-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** this adds a join behavior for key and value pair used by ap inserting into a map [fixes VM-337] ([#701](https://github.com/fluencelabs/aquavm/issues/701))
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702))
+
+### Features
+
+* **execution-engine:** join behavior for canon ([#697](https://github.com/fluencelabs/aquavm/issues/697)) ([4e72abe](https://github.com/fluencelabs/aquavm/commit/4e72abe9a72cd6bfd6a9b09579d5aa627ed25212))
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702)) ([45035cc](https://github.com/fluencelabs/aquavm/commit/45035ccff515344ee8c2dc63f172f00637226778))
+* **parser,execution-engine:** allow :error: in fail ([#696](https://github.com/fluencelabs/aquavm/issues/696)) ([bd80a12](https://github.com/fluencelabs/aquavm/commit/bd80a127eaab39f1ba02740e3e67d69cb36a699c))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.0 ([#640](https://github.com/fluencelabs/aquavm/issues/640)) ([b713e44](https://github.com/fluencelabs/aquavm/commit/b713e447fca38e0877a6c0e56bf91880f02bf9e4))
+* **execution-engine:** this adds a join behavior for key and value pair used by ap inserting into a map [fixes VM-337] ([#701](https://github.com/fluencelabs/aquavm/issues/701)) ([3a9beed](https://github.com/fluencelabs/aquavm/commit/3a9beed3c5572eefc4aee194d58144d7b424627e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.9.0 to 0.10.0
+    * air-execution-info-collector bumped from 0.7.9 to 0.7.10
+    * air-interpreter-data bumped from 0.11.2 to 0.11.3
+    * air-interpreter-interface bumped from 0.15.0 to 0.15.1
+    * air-trace-handler bumped from 0.5.2 to 0.5.3
+    * polyplets bumped from 0.5.0 to 0.5.1
+
 ## [0.47.0](https://github.com/fluencelabs/aquavm/compare/air-v0.46.0...air-v0.47.0) (2023-09-07)
 
 

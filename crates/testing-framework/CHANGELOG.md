@@ -39,6 +39,11 @@
     * air-test-utils bumped from 0.10.2 to 0.10.3
     * aquavm-air-parser bumped from 0.8.2 to 0.9.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.10.3 to 0.10.4
+    * aquavm-air-parser bumped from 0.9.0 to 0.10.0
+
 ## [0.5.2](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.5.1...air-testing-framework-v0.5.2) (2023-09-04)
 
 

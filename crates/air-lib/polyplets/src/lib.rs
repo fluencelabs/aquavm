@@ -28,5 +28,5 @@
 
 mod triplet;
 
-pub use marine_rs_sdk::SecurityTetraplet;
+pub use marine_call_parameters::SecurityTetraplet;
 pub use triplet::ResolvedTriplet;

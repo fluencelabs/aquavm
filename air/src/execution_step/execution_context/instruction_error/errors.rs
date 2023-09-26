@@ -20,7 +20,7 @@ use thiserror::Error as ThisError;
 
 /// Describes errors related to converting a scalar into error object.
 #[derive(Debug, Clone, ThisError)]
-pub enum LastErrorObjectError {
+pub enum ErrorObjectError {
     #[error("scalar should have an object type to be converted into error object, but '{0}' doesn't have")]
     ScalarMustBeObject(JValue),
 
@@ -33,4 +33,7 @@ pub enum LastErrorObjectError {
         field_name: &'static str,
         expected_type: &'static str,
     },
+
+    #[error("error code must be non-zero, but it is zero")]
+    ErrorCodeMustBeNonZero,
 }

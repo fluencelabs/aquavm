@@ -49,11 +49,7 @@ pub(crate) fn try_merge_next_state_as_fold(data_keeper: &mut DataKeeper) -> Merg
 }
 
 impl MergerFoldResult {
-    pub(self) fn from_fold_result(
-        fold: &FoldResult,
-        ctx_type: MergeCtxType,
-        data_keeper: &DataKeeper,
-    ) -> MergeResult<Self> {
+    fn from_fold_result(fold: &FoldResult, ctx_type: MergeCtxType, data_keeper: &DataKeeper) -> MergeResult<Self> {
         let (prev_fold_lore, current_fold_lore) = match ctx_type {
             MergeCtxType::Previous => {
                 let fold_lore = resolve_fold_lore(fold, &data_keeper.prev_ctx)?;
@@ -73,7 +69,7 @@ impl MergerFoldResult {
         Ok(merge_result)
     }
 
-    pub(self) fn from_fold_results(
+    fn from_fold_results(
         prev_fold: &FoldResult,
         current_fold: &FoldResult,
         data_keeper: &DataKeeper,

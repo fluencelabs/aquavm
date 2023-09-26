@@ -16,10 +16,10 @@
 
 use air::no_error_object;
 use air::CatchableError;
+use air::ErrorObjectError;
 use air::ExecutionCidState;
 use air::ExecutionError;
 use air::LambdaError;
-use air::LastErrorObjectError;
 use air::SecurityTetraplet;
 use air::NO_ERROR_ERROR_CODE;
 use air::NO_ERROR_MESSAGE;
@@ -422,7 +422,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustContainField {
         scalar: service_result,
         field_name: "message",
     });
@@ -446,8 +446,7 @@ fn fail_with_scalar_from_call_not_right_type() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error =
-        CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustBeObject(service_result));
     assert!(check_error(&result, expected_error));
 }
 
@@ -468,7 +467,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarFieldIsWrongType {
         scalar: service_result,
         field_name: "error_code",
         expected_type: "integer",

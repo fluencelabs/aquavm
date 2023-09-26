@@ -86,7 +86,10 @@ Instr: Box<Instruction<'input>> = {
         Box::new(Instruction::New(new))
     },
 
-    "(" fail <fail_body: FailBody> ")" => {
+    <left: @L> "(" fail <fail_body: FailBody> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_fail_literal(&fail_body, span);
+
         Box::new(Instruction::Fail(fail_body))
     },
 
@@ -190,6 +193,9 @@ FailBody: Fail<'input> = {
     <canon_stream:CanonStreamWithLambda> => Fail::CanonStreamWithLambda(CanonStreamWithLambda::new(canon_stream.0, canon_stream.1, canon_stream.2)),
     <left: @L> <l:LastError> <right: @R> => {
         Fail::LastError
+    },
+    <left: @L> <l:Error> <right: @R> => {
+        Fail::Error
     }
 }
 

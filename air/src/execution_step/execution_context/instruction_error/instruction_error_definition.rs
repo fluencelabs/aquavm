@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::LastErrorObjectError;
+use super::ErrorObjectError;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 
@@ -72,25 +72,25 @@ pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instru
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
-///  - error_code
+///  - error_code != 0
 ///  - message
-pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), LastErrorObjectError> {
+pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), ErrorObjectError> {
     let fields = match scalar {
         JValue::Object(fields) => fields,
-        _ => return Err(LastErrorObjectError::ScalarMustBeObject(scalar.clone())),
+        _ => return Err(ErrorObjectError::ScalarMustBeObject(scalar.clone())),
     };
 
     let check_field = |field_name| {
         fields
             .get(field_name)
-            .ok_or_else(|| LastErrorObjectError::ScalarMustContainField {
+            .ok_or_else(|| ErrorObjectError::ScalarMustContainField {
                 scalar: scalar.clone(),
                 field_name,
             })
     };
 
     let error_code = check_field(ERROR_CODE_FIELD_NAME)?;
-    ensure_jvalue_is_integer(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
+    ensure_error_code_correct(scalar, error_code, ERROR_CODE_FIELD_NAME)?;
 
     let message = check_field(MESSAGE_FIELD_NAME)?;
     ensure_jvalue_is_string(scalar, message, MESSAGE_FIELD_NAME)?;
@@ -98,14 +98,16 @@ pub(crate) fn check_error_object(scalar: &JValue) -> Result<(), LastErrorObjectE
     Ok(())
 }
 
-fn ensure_jvalue_is_integer(
+fn ensure_error_code_correct(
     scalar: &JValue,
     value: &JValue,
     field_name: &'static str,
-) -> Result<(), LastErrorObjectError> {
+) -> Result<(), ErrorObjectError> {
     match value {
-        JValue::Number(number) if number.is_i64() || number.is_u64() => Ok(()),
-        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+        JValue::Number(number) if number.is_i64() | number.is_u64() => {
+            ensure_error_code_is_error(number.as_i64().unwrap())
+        }
+        _ => Err(ErrorObjectError::ScalarFieldIsWrongType {
             scalar: scalar.clone(),
             field_name,
             expected_type: "integer",
@@ -113,14 +115,18 @@ fn ensure_jvalue_is_integer(
     }
 }
 
-fn ensure_jvalue_is_string(
-    scalar: &JValue,
-    value: &JValue,
-    field_name: &'static str,
-) -> Result<(), LastErrorObjectError> {
+fn ensure_error_code_is_error(number: i64) -> Result<(), ErrorObjectError> {
+    if number == NO_ERROR_ERROR_CODE {
+        Err(ErrorObjectError::ErrorCodeMustBeNonZero)
+    } else {
+        Ok(())
+    }
+}
+
+fn ensure_jvalue_is_string(scalar: &JValue, value: &JValue, field_name: &'static str) -> Result<(), ErrorObjectError> {
     match value {
         JValue::String(_) => Ok(()),
-        _ => Err(LastErrorObjectError::ScalarFieldIsWrongType {
+        _ => Err(ErrorObjectError::ScalarFieldIsWrongType {
             scalar: scalar.clone(),
             field_name,
             expected_type: "string",

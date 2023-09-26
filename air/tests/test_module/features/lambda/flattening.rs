@@ -23,10 +23,10 @@ type ClosureSettableVar<T> = Rc<RefCell<T>>;
 
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
 struct ClosureCallArgs {
-    pub(self) service_id_var: Rc<RefCell<String>>,
-    pub(self) function_name_var: ClosureSettableVar<String>,
-    pub(self) args_var: ClosureSettableVar<Vec<i32>>,
-    pub(self) tetraplets: ClosureSettableVar<Vec<Vec<String>>>,
+    service_id_var: Rc<RefCell<String>>,
+    function_name_var: ClosureSettableVar<String>,
+    args_var: ClosureSettableVar<Vec<i32>>,
+    tetraplets: ClosureSettableVar<Vec<Vec<String>>>,
 }
 
 fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure {

@@ -36,7 +36,7 @@ handle the future response, see Figure&nbsp;2.
 **Figure 2: AquaVM Interpreter Execution Model**
 
 In summary, the AquaVM execution model handles the topological hops for simple
-and advanced composition patters, such as (async) parallel service execution on
+and advanced composition patterns, such as (async) parallel service execution on
 one or multiple peers.
 
 ## Aquamarine Intermediate Representation (AIR): IR for P2P Systems

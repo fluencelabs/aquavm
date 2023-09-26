@@ -381,3 +381,10 @@ fn deeply_nested() {
     let expected = include_str!("deeply_nested_expected.txt");
     assert_eq!(output, expected);
 }
+
+#[test]
+fn fail_error() {
+    let script = r#"(fail :error:)"#;
+    let output = beautify_to_string(script).unwrap();
+    assert_eq!(output, "fail :error:\n");
+}

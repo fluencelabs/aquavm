@@ -65,11 +65,7 @@ pub(super) struct CtxStateHandler {
 
 impl CtxStateHandler {
     /// Prepare new states that sliders will have after finishing executing of each subgraph.
-    pub(super) fn prepare(
-        prev_par: ParResult,
-        current_par: ParResult,
-        data_keeper: &mut DataKeeper,
-    ) -> FSMResult<Self> {
+    pub(super) fn prepare(prev_par: ParResult, current_par: ParResult, data_keeper: &DataKeeper) -> FSMResult<Self> {
         let left_pair = compute_new_states(data_keeper, prev_par, current_par, SubgraphType::Left)?;
         let right_pair = compute_new_states(data_keeper, prev_par, current_par, SubgraphType::Right)?;
 

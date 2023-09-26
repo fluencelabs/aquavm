@@ -61,6 +61,8 @@ pub(crate) fn handle_canon_request_sent_by(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
+    // we do not apply join behavior here because if state exists, the variable have been defined;
+    // it cannot become undefined due to INV-1
     let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
@@ -109,7 +111,10 @@ pub(crate) fn handle_unseen_canon(
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let peer_id = resolve_peer_id_to_string(peer_id, exec_ctx)?;
+    use crate::execution_step::Joinable;
+    use crate::joinable;
+
+    let peer_id = joinable!(resolve_peer_id_to_string(peer_id, exec_ctx), exec_ctx, ())?;
 
     if exec_ctx.run_parameters.current_peer_id.as_str() != peer_id {
         exec_ctx.make_subgraph_incomplete();

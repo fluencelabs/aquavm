@@ -10,7 +10,7 @@
 - the peer is expected to host Wasm service with the specified `service name`
 - the `service function` is expected to contain the specified function
 - the `arguments list` is given to the function and may be empty
-- the result of the function execution is saved and returned by it's `output name`
+- the result of the function execution is saved and returned by its `output name`
 
 Example:
 ```wasm
@@ -208,10 +208,10 @@ Example
 ### Canonicalized streams and stream-based maps
 
 - contains an array of elements that was in a stream or a map at the moment of canonicalization
-- canonicalized streams or maps are imutable and fully consistent as scalars
+- canonicalized streams or maps are immutable and fully consistent as scalars
 - has the same algebra as a stream for `match`/`mismatch` and `call` argument
 - has the same algebra as a scalar for `new`
 - has mixed behaviour for with other instructions
 - can be a target for a lens(previously known as lambda paths)
 - maps has an additional index access operation that returns a canon stream.
-- maps index access syntax leverages lens syntax, .e.g `#%canon_map.$.key_name`
+- maps index access syntax leverages lens syntax, e.g. `#%canon_map.$.key_name`

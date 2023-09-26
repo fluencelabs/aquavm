@@ -598,7 +598,9 @@ mod test {
 
         let add_value_result = stream.add_value(value.clone(), Generation::new());
 
-        let Err(ExecutionError::Uncatchable(error)) = add_value_result else { panic!("there must be CatchableError")};
+        let Err(ExecutionError::Uncatchable(error)) = add_value_result else {
+            panic!("there must be CatchableError")
+        };
         assert!(matches!(error, UncatchableError::StreamSizeLimitExceeded));
     }
 }

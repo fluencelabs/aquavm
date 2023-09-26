@@ -31,4 +31,4 @@ This variable represents the current version of an interpreter data format, it a
 
 ## AVM updating policy
 
-Both `AVM client` and `AVM server` versions should be updated simultaniously in case of breaking change in `AquaVM core` interface, e.g., when arguments are changes. Often they must be updated if `Interpreter interface` crate was changed, but they not need to be updated if `Interpreter data` or `AquaVM core` itself was changed.
+Both `AVM client` and `AVM server` versions should be updated simultaneously in case of breaking change in `AquaVM core` interface, e.g., when arguments are changes. Often they must be updated if `Interpreter interface` crate was changed, but they don't need to be updated if `Interpreter data` or `AquaVM core` itself was changed.
