@@ -17,6 +17,7 @@
 use super::ExecutionResult;
 use super::JValuable;
 use crate::execution_step::lambda_applier::select_by_lambda_from_canon_map;
+use crate::execution_step::lambda_applier::MapLensResult;
 use crate::execution_step::value_types::CanonStreamMap;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::RcSecurityTetraplets;
@@ -40,14 +41,10 @@ impl JValuable for &CanonStreamMap<'_> {
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
     ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
-        // WIP deconstruct the result
-        let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
-        let tetraplet = select_result.tetraplet.as_ref().clone();
+        let MapLensResult { result, tetraplet } = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
 
         // Provenance is borrowed from the map.
-        let provenance = root_provenance.clone();
-
-        Ok((select_result.result, tetraplet, provenance))
+        Ok((result, tetraplet.as_ref().clone(), root_provenance.clone()))
     }
 
     fn as_jvalue(&self) -> Cow<'_, JValue> {

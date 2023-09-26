@@ -80,11 +80,14 @@ pub(crate) fn select_by_lambda_from_scalar<'value>(
     }
 }
 
-fn select_by_path_from_stream<'value>(
-    stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
-    lambda: &NonEmpty<ValueAccessor<'_>>,
+fn exctract_idx<'lambda>(
+    lambda: &'lambda NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<LambdaResult<'value>> {
+) -> ExecutionResult<(
+    usize,
+    &'lambda ValueAccessor<'lambda>,
+    &'lambda [ValueAccessor<'lambda>],
+)> {
     let (prefix, body) = lambda.split_first();
     let idx = match prefix {
         ValueAccessor::ArrayAccess { idx } => *idx,
@@ -99,8 +102,17 @@ fn select_by_path_from_stream<'value>(
         }
         ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
     };
-    let idx = idx as usize;
+    Ok((idx as usize, prefix, body))
+}
+
+fn select_by_path_from_stream<'value>(
+    stream: impl ExactSizeIterator<Item = &'value JValue> + 'value,
+    lambda: &NonEmpty<ValueAccessor<'_>>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<LambdaResult<'value>> {
     let stream_size = stream.len();
+    let (idx, _, body) = exctract_idx(lambda, exec_ctx)?;
+
     let value = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx)
@@ -111,34 +123,19 @@ fn select_by_path_from_stream<'value>(
     Ok(select_result)
 }
 
-fn select_by_path_from_stream_<'value>(
+fn select_by_path_from_canon_map_stream<'value>(
     stream: impl ExactSizeIterator<Item = (&'value JValue, RcSecurityTetraplet)> + 'value,
     lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<MapLensResult<'value>> {
-    let (prefix, body) = lambda.split_first();
-    let idx = match prefix {
-        ValueAccessor::ArrayAccess { idx } => *idx,
-        ValueAccessor::FieldAccessByName { field_name } => {
-            return lambda_to_execution_error!(Err(LambdaError::FieldAccessorAppliedToStream {
-                field_name: field_name.to_string(),
-            }));
-        }
-        ValueAccessor::FieldAccessByScalar { scalar_name } => {
-            let scalar = exec_ctx.scalars.get_value(scalar_name)?;
-            lambda_to_execution_error!(try_scalar_ref_as_idx(scalar))?
-        }
-        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
-    };
-    let idx = idx as usize;
     let stream_size = stream.len();
+    let (idx, prefix, body) = exctract_idx(lambda, exec_ctx)?;
 
     let (value, tetraplet) = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx)
         .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
 
-    // 3d case take tetraplet from this VA and apply the full lens into it.
     let select_result = if body.is_empty() {
         let result = Cow::Borrowed(value);
         MapLensResult::from_cow(result, tetraplet)
@@ -189,7 +186,7 @@ fn select_by_path_from_canon_map<'value>(
     let result = match (NonEmpty::try_from(body.to_vec()), canon_stream) {
         (Ok(body_part), Some(canon_stream)) => {
             let canon_stream_iter = canon_stream.iter().map(|v| (v.get_result().deref(), v.get_tetraplet()));
-            select_by_path_from_stream_(canon_stream_iter, &body_part, exec_ctx)?
+            select_by_path_from_canon_map_stream(canon_stream_iter, &body_part, exec_ctx)?
         }
         (Err(..), Some(canon_stream)) => {
             let value = Cow::Owned(canon_stream.as_jvalue());
@@ -202,10 +199,14 @@ fn select_by_path_from_canon_map<'value>(
                 function_name,
                 json_path,
             } = canon_map.tetraplet().as_ref();
+
+            println!("prefix: {}, json_path {}", prefix.to_string(), json_path);
+
             let json_path = json_path.to_string() + &prefix.to_string();
 
             let tetraplet: RcSecurityTetraplet =
                 SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into();
+
             let value = CanonStream::new(vec![], tetraplet.clone()).as_jvalue();
             let value = Cow::Owned(value);
             MapLensResult::from_cow(value, tetraplet)
