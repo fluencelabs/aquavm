@@ -94,7 +94,7 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .map(|stream_map| Cow::Borrowed(stream_map))
             .unwrap_or_default();
 
-        let values = stream_map.iter_unique_key().cloned().collect::<Vec<_>>();
+        let values = stream_map.iter().cloned().collect::<Vec<_>>();
         CanonStream::from_values(values, peer_pk)
     })
 }
