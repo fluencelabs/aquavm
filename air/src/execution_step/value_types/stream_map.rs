@@ -72,6 +72,11 @@ impl StreamMap {
         self.stream.iter()
     }
 
+    /// Returns an iterator to values with unique keys.
+    pub(crate) fn itera(&self) -> impl Iterator<Item = &ValueAggregate> {
+        self.stream.iter()
+    }
+
     pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
         use std::collections::HashSet;
         let mut met_keys = HashSet::new();
