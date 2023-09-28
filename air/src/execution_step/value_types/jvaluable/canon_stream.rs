@@ -58,9 +58,9 @@ impl JValuable for &CanonStream {
             None => (
                 SecurityTetraplet::new(
                     exec_ctx.run_parameters.current_peer_id.to_string(),
-                    lambda.to_string(), // is this correct ?
+                    lambda.to_string(),
                     "",
-                    "", // is this correct ?
+                    "",
                 ),
                 root_provenance.clone(),
             ),

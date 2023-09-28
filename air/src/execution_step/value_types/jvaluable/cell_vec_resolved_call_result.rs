@@ -51,7 +51,7 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
                 let tetraplet = self[idx].get_tetraplet();
                 populate_tetraplet_with_lambda(tetraplet.as_ref().clone(), lambda)
             }
-            None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""), // why there is no lens path here
+            None => SecurityTetraplet::new(exec_ctx.run_parameters.current_peer_id.to_string(), "", "", ""),
         };
 
         Ok((select_result.result, tetraplet, root_provenance.clone()))

@@ -34,6 +34,7 @@ use non_empty_vec::NonEmpty;
 
 use std::borrow::Cow;
 use std::convert::TryFrom;
+use std::fmt::Display;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -119,15 +120,9 @@ fn select_by_path_from_canon_map_stream<'value>(
         // csm.$.key.[0].attribute case
         let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
 
-        let SecurityTetraplet {
-            peer_pk,
-            service_id,
-            function_name,
-            json_path,
-        } = tetraplet.as_ref();
         let json_path_suffix = body.iter().fold("".to_string(), |acc, va| acc + "." + &va.to_string());
-        let json_path = json_path.to_string() + &json_path_suffix;
-        let tetraplet = SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into();
+        let prefix_with_path = true;
+        let tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
 
         MapLensResult::from_cow(result, tetraplet)
     };
@@ -169,14 +164,16 @@ fn select_by_path_from_canon_map<'value>(
         }
         (Err(..), Some(canon_stream)) => {
             // csm.$.key case
-            let tetraplet = update_tetraplet_with_path(canon_map, original_lambda);
+            let prefix_with_path = false;
+            let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
             let value = Cow::Owned(canon_stream.as_jvalue());
 
             MapLensResult::from_cow(value, tetraplet)
         }
         _ => {
             // csm.$.non_existing_key case
-            let tetraplet = update_tetraplet_with_path(canon_map, original_lambda);
+            let prefix_with_path = false;
+            let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
             let value = CanonStream::new(vec![], tetraplet.clone()).as_jvalue();
             let value = Cow::Owned(value);
 
@@ -207,15 +204,23 @@ fn exctract_idx<'lambda>(
     Ok((idx as usize, body))
 }
 
-fn update_tetraplet_with_path(canon_map: &CanonStreamMap<'_>, original_lambda: &LambdaAST<'_>) -> RcSecurityTetraplet {
+fn update_tetraplet_with_path(
+    original_tetraplet: &RcSecurityTetraplet,
+    original_path: &impl Display,
+    prefix_with_path: bool,
+) -> RcSecurityTetraplet {
     let SecurityTetraplet {
         peer_pk,
         service_id,
         function_name,
-        ..
-    } = canon_map.tetraplet().as_ref();
+        json_path,
+    } = original_tetraplet.as_ref();
 
-    let json_path = original_lambda.to_string();
+    let json_path = if prefix_with_path {
+        json_path.to_string() + &original_path.to_string()
+    } else {
+        original_path.to_string()
+    };
 
     SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into()
 }
