@@ -58,12 +58,6 @@ impl<'value> StreamMapKey<'value> {
         StreamMapKey::from_value(key)
     }
 
-    pub(crate) fn from_kvpair(value: &'value ValueAggregate) -> Option<Self> {
-        let object = value.get_result().as_object()?;
-        let key = object.get(KEY_FIELD_NAME)?;
-        StreamMapKey::from_value_ref(key)
-    }
-
     pub(crate) fn into_owned(self) -> StreamMapKey<'static> {
         match self {
             StreamMapKey::Str(s) => {

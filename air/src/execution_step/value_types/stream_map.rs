@@ -68,17 +68,8 @@ impl StreamMap {
         &mut self.stream
     }
 
-    /// Returns an iterator to values with unique keys.
-    pub(crate) fn iter_unique_key(&self) -> impl Iterator<Item = &ValueAggregate> {
-        use std::collections::HashSet;
-
-        let mut met_keys = HashSet::new();
-
-        self.stream.iter().filter(move |value| {
-            StreamMapKey::from_kvpair(value)
-                .map(|key| met_keys.insert(key))
-                .unwrap_or(false)
-        })
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &ValueAggregate> {
+        self.stream.iter()
     }
 
     pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
@@ -327,46 +318,6 @@ mod test {
     }
 
     #[test]
-    fn get_unique_map_keys_stream_behaves_correct_with_no_duplicates() {
-        const TEST_DATA_SIZE: usize = 3;
-        let key_values = generate_key_values(TEST_DATA_SIZE);
-        let mut stream_map = StreamMap::new();
-
-        for id in 0..3 {
-            insert_into_map(&mut stream_map, &key_values[id], Generation::current(id as u32));
-        }
-
-        let mut iter = stream_map.iter_unique_key();
-
-        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn get_unique_map_keys_stream_removes_duplicates() {
-        const TEST_DATA_SIZE: usize = 5;
-        let key_values = generate_key_values(TEST_DATA_SIZE);
-
-        let mut stream_map = StreamMap::new();
-        bulk_insert_into_map(
-            &mut stream_map,
-            &key_values,
-            vec![0, 0, 2, 2, 2, 1, 3],
-            vec![0, 1, 1, 3, 4, 4, 2],
-        );
-
-        let mut iter = stream_map.iter_unique_key();
-
-        assert_eq!(&json!(0), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(2), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(3), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(&json!(1), iter.next().unwrap().get_result().get("value").unwrap());
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
     fn test_iter_unique_key_object() {
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
@@ -395,40 +346,6 @@ mod test {
         assert_eq!(("0".into(), json!(0)), iter.next().unwrap());
         assert_eq!(("3".into(), json!(3)), iter.next().unwrap());
         assert_eq!(("1".into(), json!(1)), iter.next().unwrap());
-        assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn test_iter_types_have_the_items_order() {
-        const TEST_DATA_SIZE: usize = 5;
-        let key_values = generate_key_values(TEST_DATA_SIZE);
-
-        let mut stream_map = StreamMap::new();
-        bulk_insert_into_map(
-            &mut stream_map,
-            &key_values,
-            vec![0, 0, 2, 2, 2, 1, 3],
-            vec![0, 1, 1, 3, 4, 4, 2],
-        );
-        let mut iter = stream_map.iter_unique_key();
-
-        let mut stream_map_json_kvpairs = StreamMap::new();
-        bulk_insert_into_map(
-            &mut stream_map_json_kvpairs,
-            &key_values,
-            vec![0, 0, 2, 2, 2, 1, 3],
-            vec![0, 1, 1, 3, 4, 4, 2],
-        );
-
-        let mut iter_json_kvpairs = stream_map_json_kvpairs.iter_unique_key_object();
-
-        for _ in 0..4 {
-            assert_eq!(
-                *iter.next().unwrap().get_result().get("value").unwrap(),
-                iter_json_kvpairs.next().unwrap().1
-            );
-        }
-
         assert_eq!(iter.next(), None);
     }
 }
