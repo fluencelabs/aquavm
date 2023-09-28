@@ -8,9 +8,13 @@ edition = "2021"
 [dependencies]
 air-interpreter-data = { version = "0.11.0", path = "../../crates/air-lib/interpreter-data", features = ["rkyv", "borsh"] }
 bencher = "0.1.5"
+bincode = "1.3.3"
 borsh = { version = "0.10.3", features = ["rc"] }
 ciborium = "0.2.1"
 rkyv = { version = "0.7.42", features = ["archive_be", "size_32", "validation", "std"], default-features = false }
 
 serde_json = { version = "1.0.107", features = ["raw_value"] }
 simd-json = { version = "0.10.7", features = ["allow-non-simd" ] }
+
+[patch.crates-io]
+rkyv = { path = "../../../misc/rkyv/rkyv" }

@@ -169,7 +169,18 @@ pub struct CidInfo {
 #[repr(transparent)]
 #[serde(transparent)]
 // So far, use boxes; then switch to unsized.
-pub struct RawValueWrapper(#[with(WithRawJson)] Box<serde_json::value::RawValue>);
+pub struct RawValueWrapper(
+    #[with(WithRawJson)]
+    #[serde(serialize_with = "raw_value_as_str")]
+    Box<serde_json::value::RawValue>,
+);
+
+fn raw_value_as_str<S: serde::ser::Serializer>(
+    val: &Box<serde_json::value::RawValue>,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    s.serialize_str(val.get())
+}
 
 #[cfg(feature = "borsh")]
 impl ::borsh::BorshSerialize for RawValueWrapper {
@@ -324,6 +335,20 @@ pub enum InterpreterDataDeserializerError {
 /// Deserializer that has common error type for different types.
 pub struct InterpreterDataDeserializer {
     shared: ::rkyv::de::deserializers::SharedDeserializeMap,
+}
+
+impl InterpreterDataDeserializer {
+    pub fn new() -> Self {
+        Self {
+            shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(1024),
+        }
+    }
+    
+    pub fn with_capacity(cap: usize) -> Self {
+        Self {
+            shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(cap),
+        }
+    }
 }
 
 #[cfg(feature = "rkyv")]

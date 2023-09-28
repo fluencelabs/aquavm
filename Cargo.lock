@@ -416,7 +416,6 @@ dependencies = [
  "multimap 0.9.0",
  "non-empty-vec",
  "regex",
- "rkyv",
  "serde",
  "serde_json",
  "thiserror",

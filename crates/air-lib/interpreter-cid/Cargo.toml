@@ -14,7 +14,7 @@ categories = ["wasm"]
 cid = { version = "0.10.1", default-features = false, features = ["std"] }
 multihash = { version = "0.18.1", default-features = false, features = ["multihash-impl", "std", "sha2"] }
 multibase = { version = "0.9.1" }
-rkyv = { version = "0.7.42", features = ["validation"], optional = true, default-features = false }
+rkyv = { version = "0.7.42", features = ["validation", "std"], optional = true, default-features = false }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.95"
 borsh = { version = "0.10.3", optional = true }

@@ -2,7 +2,6 @@ use air_interpreter_data::InterpreterData;
 use bencher::*;
 use std::hint::black_box;
 
-
 /*
  * TODO:
  *
@@ -22,6 +21,8 @@ use std::hint::black_box;
  * | json    | 1,267,245
  * | cborium | 1,277,966
  *
+ * + bincode does not support #[serde(flatten)]!
+ * +
  */
 
 // 1267245
@@ -43,7 +44,7 @@ fn deserialize_simd_json_invalid(bencher: &mut Bencher) {
     bencher.iter(|| {
         let mut data = black_box(DATA_STR).as_bytes().to_owned();
         // TODO INVALID!!!
-        simd_json::serde::from_slice::<InterpreterData>(&mut data)
+        simd_json::serde::from_slice::<InterpreterData>(&mut data) // .unwrap()
     });
 }
 
@@ -55,6 +56,8 @@ fn deserialize_ciborium(bencher: &mut Bencher) {
         ciborium::de::from_reader::<InterpreterData, _>(black_box(buf.as_slice())).unwrap()
     });
 }
+
+const RKYV_VALIDATOR_SIZE: usize = 8 * 1024;
 
 fn deserialize_rkyv_dedup_validate_only(bencher: &mut Bencher) {
     use rkyv::ser::Serializer;
@@ -69,7 +72,10 @@ fn deserialize_rkyv_dedup_validate_only(bencher: &mut Bencher) {
 
     bencher.iter(|| {
         let buf = black_box(&buf);
-        let root = rkyv::check_archived_root::<InterpreterData>(buf).unwrap();
+        let mut valid =
+            rkyv::validation::validators::DefaultValidator::with_capacity(buf, RKYV_VALIDATOR_SIZE);
+        let root =
+            rkyv::check_archived_root_with_context::<InterpreterData, _>(buf, &mut valid).unwrap();
         root
     });
 }
@@ -86,9 +92,12 @@ fn deserialize_rkyv_dedup(bencher: &mut Bencher) {
 
     bencher.iter(|| {
         let buf = black_box(&buf);
-        let root = rkyv::check_archived_root::<InterpreterData>(buf).unwrap();
+        let mut valid =
+            rkyv::validation::validators::DefaultValidator::with_capacity(buf, RKYV_VALIDATOR_SIZE);
+        let root =
+            rkyv::check_archived_root_with_context::<InterpreterData, _>(buf, &mut valid).unwrap();
 
-        let mut des = InterpreterDataDeserializer::default();
+        let mut des = InterpreterDataDeserializer::with_capacity(RKYV_VALIDATOR_SIZE);
         rkyv::Deserialize::<InterpreterData, _>::deserialize(root, &mut des).unwrap()
     });
 }
@@ -118,15 +127,21 @@ fn serialize_ciborium(bencher: &mut Bencher) {
     });
 }
 
+fn serialize_bincodium(bencher: &mut Bencher) {
+    let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    {
+        let buf = bincode::serialize(&data).unwrap();
+        eprintln!("bincode size: {}", buf.len());
+    }
+    bencher.iter(|| bincode::serialize(&data).unwrap());
+}
+
 fn serialize_borshium(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
     // // 1045375
     // eprintln!("borsh size: {}", borsh::to_vec(&data).unwrap().len());
-    bencher.iter(|| {
-        borsh::to_vec(&data).unwrap()
-    });
+    bencher.iter(|| borsh::to_vec(&data).unwrap());
 }
-
 
 fn serialize_rkyv_asis(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
@@ -151,7 +166,11 @@ fn serialize_rkyv_dedup(bencher: &mut Bencher) {
     //     eprintln!("rkyv_dedup size: {}", size);
     // }
     bencher.iter(|| {
-        let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::default();
+        let mut ser = rkyv::ser::serializers::AllocSerializer::<4096>::new(
+            <_>::default(),
+            <_>::default(),
+            ::rkyv::ser::serializers::SharedSerializeMap::with_capacity(RKYV_VALIDATOR_SIZE),
+        );
         rkyv::Serialize::serialize(black_box(&data), &mut ser).unwrap();
 
         ser.into_serializer().into_inner()
@@ -219,14 +238,13 @@ benchmark_group!(
     deserialize_simd_json_invalid,
     // fails because of serde_json::..::RawValue
     // deserialize_ciborium,
-
     deserialize_rkyv_dedup_validate_only,
     deserialize_rkyv_dedup,
-
     serialize_serde_json,
     serialize_simd_json,
     serialize_ciborium,
     serialize_borshium,
+    // serialize_bincodium,
     serialize_rkyv_asis,
     serialize_rkyv_dedup,
 );
