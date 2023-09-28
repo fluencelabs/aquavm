@@ -200,8 +200,6 @@ fn select_by_path_from_canon_map<'value>(
                 json_path,
             } = canon_map.tetraplet().as_ref();
 
-            println!("prefix: {}, json_path {}", prefix.to_string(), json_path);
-
             let json_path = json_path.to_string() + &prefix.to_string();
 
             let tetraplet: RcSecurityTetraplet =
