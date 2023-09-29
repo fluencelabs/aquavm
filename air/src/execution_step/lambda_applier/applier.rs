@@ -34,7 +34,6 @@ use non_empty_vec::NonEmpty;
 
 use std::borrow::Cow;
 use std::convert::TryFrom;
-use std::fmt::Display;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -87,7 +86,7 @@ fn select_by_path_from_stream<'value>(
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<LambdaResult<'value>> {
     let stream_size = stream.len();
-    let (idx, body) = exctract_idx(lambda, exec_ctx)?;
+    let (idx, body) = extract_idx(lambda, exec_ctx)?;
 
     let value = lambda_to_execution_error!(stream
         .peekable()
@@ -105,26 +104,27 @@ fn select_by_path_from_canon_map_stream<'value>(
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<MapLensResult<'value>> {
     let stream_size = stream.len();
-    let (idx, body) = exctract_idx(lambda, exec_ctx)?;
+    let (idx, body) = extract_idx(lambda, exec_ctx)?;
 
     let (value, tetraplet) = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx)
         .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
 
-    // csm.$.key.[0] case
     let select_result = if body.is_empty() {
+        // csm.$.key.[0] case
         let result = Cow::Borrowed(value);
         MapLensResult::from_cow(result, tetraplet)
     } else {
         // csm.$.key.[0].attribute case
         let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
 
-        let json_path_suffix = body.iter().fold("".to_string(), |acc, va| acc + "." + &va.to_string());
+        let joined = body.iter().map(ToString::to_string).collect::<Vec<_>>().join(".");
+        let json_path_suffix = format!(".{}", joined);
         let prefix_with_path = true;
-        let tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
+        let updated_tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
 
-        MapLensResult::from_cow(result, tetraplet)
+        MapLensResult::from_cow(result, updated_tetraplet)
     };
     Ok(select_result)
 }
@@ -183,7 +183,7 @@ fn select_by_path_from_canon_map<'value>(
     Ok(result)
 }
 
-fn exctract_idx<'lambda>(
+fn extract_idx<'lambda>(
     lambda: &'lambda NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<(usize, &'lambda [ValueAccessor<'lambda>])> {
@@ -204,25 +204,23 @@ fn exctract_idx<'lambda>(
     Ok((idx as usize, body))
 }
 
+// TODO put this functionality into SecurityTetraplet method.
 fn update_tetraplet_with_path(
-    original_tetraplet: &RcSecurityTetraplet,
-    original_path: &impl Display,
+    original_tetraplet: &SecurityTetraplet,
+    original_path: &impl ToString,
     prefix_with_path: bool,
 ) -> RcSecurityTetraplet {
-    let SecurityTetraplet {
-        peer_pk,
-        service_id,
-        function_name,
-        json_path,
-    } = original_tetraplet.as_ref();
-
-    let json_path = if prefix_with_path {
-        json_path.to_string() + &original_path.to_string()
+    let json_path_updated = if prefix_with_path {
+        original_tetraplet.json_path.to_string() + &original_path.to_string()
     } else {
         original_path.to_string()
     };
 
-    SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into()
+    SecurityTetraplet {
+        json_path: json_path_updated,
+        ..original_tetraplet.clone()
+    }
+    .into()
 }
 
 fn select_by_functor_from_stream<'value>(
