@@ -32,7 +32,10 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(
+    feature = "borsh",
+    derive(::borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -77,7 +80,10 @@ impl From<InterpreterData<RawValueWrapper>> for InterpreterData<String> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(
+    feature = "borsh",
+    derive(::borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -161,7 +167,10 @@ impl Versions {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(
+    feature = "borsh",
+    derive(::borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -253,12 +262,14 @@ impl ::borsh::BorshDeserialize for RawValueWrapper {
 }
 
 impl RawValueWrapper {
+    #[inline]
     pub fn as_str(&self) -> &str {
         self.0.get()
     }
 }
 
 impl PartialEq for RawValueWrapper {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.0.get() == other.0.get()
     }
@@ -267,6 +278,7 @@ impl PartialEq for RawValueWrapper {
 impl Eq for RawValueWrapper {}
 
 impl From<RawValueWrapper> for String {
+    #[inline]
     fn from(val: RawValueWrapper) -> Self {
         let v: Box<str> = val.0.into();
         v.into()
@@ -280,6 +292,7 @@ where
 {
     type Error = serde_json::Error;
 
+    #[inline]
     unsafe fn check_bytes<'a>(
         value: *const Self,
         context: &mut C,
@@ -301,6 +314,7 @@ impl rkyv::with::ArchiveWith<Option<semver::Version>> for WithStringVersion {
 
     type Resolver = rkyv::string::StringResolver;
 
+    #[inline]
     unsafe fn resolve_with(
         field: &Option<semver::Version>,
         pos: usize,
@@ -318,6 +332,7 @@ impl rkyv::with::ArchiveWith<Option<semver::Version>> for WithStringVersion {
 impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
     rkyv::with::SerializeWith<Option<semver::Version>, S> for WithStringVersion
 {
+    #[inline]
     fn serialize_with(
         field: &Option<semver::Version>,
         serializer: &mut S,
@@ -329,8 +344,10 @@ impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
 
 #[cfg(feature = "rkyv")]
 impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
-    rkyv::with::DeserializeWith<rkyv::Archived<String>, Option<semver::Version>, D> for WithStringVersion
+    rkyv::with::DeserializeWith<rkyv::Archived<String>, Option<semver::Version>, D>
+    for WithStringVersion
 {
+    #[inline]
     fn deserialize_with(
         field: &rkyv::string::ArchivedString,
         _deserializer: &mut D,
@@ -348,6 +365,7 @@ impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
 
     type Resolver = rkyv::Resolver<Box<str>>;
 
+    #[inline]
     unsafe fn resolve_with(
         field: &Box<serde_json::value::RawValue>,
         pos: usize,
@@ -356,7 +374,6 @@ impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
     ) {
         use rkyv::Archive as _;
 
-        // Can be optimized with a cast
         let inner: &Box<str> = std::mem::transmute(field);
         inner.resolve(pos, resolver, out)
     }
@@ -366,6 +383,7 @@ impl rkyv::with::ArchiveWith<Box<serde_json::value::RawValue>> for WithRawJson {
 impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
     rkyv::with::SerializeWith<Box<serde_json::value::RawValue>, S> for WithRawJson
 {
+    #[inline]
     fn serialize_with(
         field: &Box<serde_json::value::RawValue>,
         serializer: &mut S,
@@ -380,6 +398,7 @@ impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
     rkyv::with::DeserializeWith<rkyv::boxed::ArchivedBox<str>, Box<serde_json::value::RawValue>, D>
     for WithRawJson
 {
+    #[inline]
     fn deserialize_with(
         field: &rkyv::boxed::ArchivedBox<str>,
         _deserializer: &mut D,
@@ -407,12 +426,14 @@ pub struct InterpreterDataDeserializer {
 }
 
 impl InterpreterDataDeserializer {
+    #[inline]
     pub fn new() -> Self {
         Self {
             shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(1024),
         }
     }
 
+    #[inline]
     pub fn with_capacity(cap: usize) -> Self {
         Self {
             shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(cap),
@@ -427,10 +448,12 @@ impl ::rkyv::Fallible for InterpreterDataDeserializer {
 
 #[cfg(feature = "rkyv")]
 impl ::rkyv::de::SharedDeserializeRegistry for InterpreterDataDeserializer {
+    #[inline]
     fn get_shared_ptr(&mut self, ptr: *const u8) -> Option<&dyn rkyv::de::SharedPointer> {
         self.shared.get_shared_ptr(ptr)
     }
 
+    #[inline]
     fn add_shared_ptr(
         &mut self,
         ptr: *const u8,
