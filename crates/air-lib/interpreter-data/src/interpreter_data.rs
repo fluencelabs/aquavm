@@ -404,7 +404,7 @@ impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
         _deserializer: &mut D,
     ) -> Result<Box<serde_json::value::RawValue>, <D as rkyv::Fallible>::Error> {
         // Ok(serde_json::from_str(field.as_ref())?)
-        let value: &str = field.as_ref();
+        let value: Box<str> = field.as_ref().into();
         // safe because JSON was validated on archive validation; otherwise, WithRawJson is not a safe API,
         // but for an example, is OK
         Ok(unsafe { std::mem::transmute(value) })
