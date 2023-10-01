@@ -15,6 +15,7 @@
  */
 
 use crate::JValue;
+use crate::RawValueWrapper;
 
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CidCalculationError;
@@ -30,20 +31,20 @@ use std::rc::Rc;
 #[serde(transparent)]
 #[cfg_attr(
     feature = "borsh",
-    derive(::borsh::BorshSerialize)
+    derive(::borsh::BorshSerialize, borsh::BorshDeserialize)
 )]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
-pub struct CidStore<Val: ::borsh::BorshSerialize + Clone>(
+pub struct CidStore<Val: borsh::BorshSerialize + borsh::BorshDeserialize + Clone>(
     #[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Rc<CID<Val>>, Rc<Val>>,
 );
 
 impl<Val> CidStore<Val>
 where
-    Val: ::borsh::BorshSerialize + Clone,
+    Val: borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
 {
     pub fn new() -> Self {
         Self::default()
@@ -80,10 +81,16 @@ where
 
 impl<Val> Default for CidStore<Val>
 where
-    Val: ::borsh::BorshSerialize + Clone,
+    Val: borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
 {
     fn default() -> Self {
         Self(Default::default())
+    }
+}
+
+impl From<CidStore<RawValueWrapper>> for CidStore<String> {
+    fn from(val: CidStore<RawValueWrapper>) -> Self {
+        Self(val.0.into_iter().map(|(k, v)| (Rc::new(CID::new(k.as_str())), Rc::new((&*v).clone().into()))).collect())
     }
 }
 
@@ -93,7 +100,8 @@ pub struct CidTracker<Val = JValue> {
 }
 
 impl<Val> CidTracker<Val>
-where Val: ::borsh::BorshSerialize + Clone
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
 {
     pub fn new() -> Self {
         Self::default()
@@ -134,7 +142,8 @@ impl<Val> Default for CidTracker<Val> {
 }
 
 impl<Val> From<CidTracker<Val>> for CidStore<Val>
-where Val: ::borsh::BorshSerialize + Clone
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
 {
     fn from(value: CidTracker<Val>) -> Self {
         Self(value.cids)
@@ -142,7 +151,8 @@ where Val: ::borsh::BorshSerialize + Clone
 }
 
 impl<Val> IntoIterator for CidStore<Val>
-where Val: ::borsh::BorshSerialize + Clone
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
 {
     type Item = (Rc<CID<Val>>, Rc<Val>);
 

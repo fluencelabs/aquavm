@@ -33,6 +33,7 @@ fn deserialize_serde_json(bencher: &mut Bencher) {
     bencher.iter(|| serde_json::from_str::<InterpreterData>(black_box(DATA_STR)));
 }
 
+// json with intermediate copying just to compare how copying affects other tests (TODO if any)
 fn deserialize_serde_json2(bencher: &mut Bencher) {
     bencher.iter(|| {
         let data = black_box(DATA_STR).to_owned();
@@ -50,10 +51,19 @@ fn deserialize_simd_json_invalid(bencher: &mut Bencher) {
 
 fn deserialize_ciborium(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    let data: InterpreterData<String> = data.into();
     let mut buf = vec![];
     ciborium::ser::into_writer(black_box(&data), &mut buf).unwrap();
     bencher.iter(|| {
-        ciborium::de::from_reader::<InterpreterData, _>(black_box(buf.as_slice())).unwrap()
+        ciborium::de::from_reader::<InterpreterData<String>, _>(black_box(buf.as_slice())).unwrap()
+    });
+}
+
+fn deserialize_borshium(bencher: &mut Bencher) {
+    let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
+    let buf = borsh::to_vec(&data).unwrap();
+    bencher.iter(|| {
+       <InterpreterData as borsh::BorshDeserialize>::deserialize_reader(&mut black_box(buf.as_slice())).unwrap()
     });
 }
 
@@ -127,6 +137,7 @@ fn serialize_ciborium(bencher: &mut Bencher) {
     });
 }
 
+// Bincode fails to deserialize a serde flatten.
 fn serialize_bincodium(bencher: &mut Bencher) {
     let data: InterpreterData = serde_json::from_str(DATA_STR).unwrap();
     {
@@ -236,14 +247,15 @@ benchmark_group!(
     deserialize_serde_json,
     deserialize_serde_json2,
     deserialize_simd_json_invalid,
-    // fails because of serde_json::..::RawValue
-    // deserialize_ciborium,
+    deserialize_ciborium,
+    deserialize_borshium,
     deserialize_rkyv_dedup_validate_only,
     deserialize_rkyv_dedup,
     serialize_serde_json,
     serialize_simd_json,
     serialize_ciborium,
     serialize_borshium,
+    // doesn't support serde flatten
     // serialize_bincodium,
     serialize_rkyv_asis,
     serialize_rkyv_dedup,

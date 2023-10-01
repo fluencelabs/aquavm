@@ -14,7 +14,8 @@ ciborium = "0.2.1"
 rkyv = { version = "0.7.42", features = ["archive_be", "size_32", "validation", "std"], default-features = false }
 
 serde_json = { version = "1.0.107", features = ["raw_value"] }
-simd-json = { version = "0.10.7", features = ["allow-non-simd" ] }
+simd-json = { version = "0.10.7", features = ["allow-non-simd", "serde_impl" ] }
 
 [patch.crates-io]
 rkyv = { path = "../../../misc/rkyv/rkyv" }
+# ciborium = { path = "../../../misc/ciborium/ciborium" }

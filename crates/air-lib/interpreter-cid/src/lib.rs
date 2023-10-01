@@ -63,6 +63,10 @@ impl<T: ?Sized> CID<T> {
     pub fn new(cid_str: &str) -> Self {
         Self(cid_str.to_owned(), PhantomData)
     }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
 }
 
 impl<T: ?Sized> Clone for CID<T> {

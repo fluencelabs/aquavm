@@ -35,3 +35,5 @@ borsh = { version = "0.10.3", features = ["rc"], optional = true }
 [features]
 rkyv = [ "dep:rkyv", "dep:thiserror", "air-interpreter-cid/rkyv", "air-interpreter-signatures/rkyv" ]
 borsh = [ "dep:borsh", "air-interpreter-cid/borsh" ]
+# KLUDGE
+default = ["borsh"]

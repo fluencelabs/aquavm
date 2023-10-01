@@ -32,13 +32,16 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
-pub struct InterpreterData {
+pub struct InterpreterData<Val = RawValueWrapper>
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
+{
     /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
@@ -52,7 +55,7 @@ pub struct InterpreterData {
     pub last_call_request_id: u32,
 
     /// CID-to-somethings mappings.
-    pub cid_info: CidInfo,
+    pub cid_info: CidInfo<Val>,
 
     /// Signature store.
     ///
@@ -61,8 +64,20 @@ pub struct InterpreterData {
     pub signatures: SignatureStore,
 }
 
+impl From<InterpreterData<RawValueWrapper>> for InterpreterData<String> {
+    fn from(val: InterpreterData<RawValueWrapper>) -> Self {
+        InterpreterData::<String> {
+            versions: val.versions,
+            trace: val.trace,
+            last_call_request_id: val.last_call_request_id,
+            cid_info: val.cid_info.into(),
+            signatures: val.signatures,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
@@ -73,15 +88,18 @@ pub struct Versions {
     #[serde(rename = "version")] // for compatibility with versions <= 0.6.0
     #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
     #[cfg_attr(feature = "borsh", borsh_skip)]
-    pub data_version: semver::Version,
+    pub data_version: Option<semver::Version>,
 
     /// Version of an interpreter produced this data.
     #[cfg_attr(feature = "rkyv", with(WithStringVersion))]
     #[cfg_attr(feature = "borsh", borsh_skip)]
-    pub interpreter_version: semver::Version,
+    pub interpreter_version: Option<semver::Version>,
 }
 
-impl InterpreterData {
+impl<Val> InterpreterData<Val>
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
+{
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
@@ -97,7 +115,7 @@ impl InterpreterData {
     #[allow(clippy::too_many_arguments)]
     pub fn from_execution_result(
         trace: ExecutionTrace,
-        cid_info: CidInfo,
+        cid_info: CidInfo<Val>,
         signatures: SignatureStore,
         last_call_request_id: u32,
         interpreter_version: semver::Version,
@@ -112,7 +130,12 @@ impl InterpreterData {
             signatures,
         }
     }
+}
 
+impl<Val> InterpreterData<Val>
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone + serde::de::DeserializeOwned,
+{
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
         measure!(
@@ -131,22 +154,25 @@ impl InterpreterData {
 impl Versions {
     pub fn new(interpreter_version: semver::Version) -> Self {
         Self {
-            data_version: crate::data_version().clone(),
-            interpreter_version,
+            data_version: Some(crate::data_version().clone()),
+            interpreter_version: Some(interpreter_version),
         }
     }
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize))]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(feature = "borsh", derive(::borsh::BorshSerialize, borsh::BorshDeserialize))]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
 #[cfg_attr(feature = "rkyv", archive(check_bytes))]
-pub struct CidInfo {
+pub struct CidInfo<Val>
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
+{
     /// Map CID to value.
-    pub value_store: CidStore<RawValueWrapper>,
+    pub value_store: CidStore<Val>,
 
     /// Map CID to a tetraplet.
     pub tetraplet_store: CidStore<SecurityTetraplet>,
@@ -159,6 +185,33 @@ pub struct CidInfo {
 
     /// Map CID to a service result aggregate.
     pub service_result_store: CidStore<ServiceResultCidAggregate>,
+}
+
+impl<Val> Default for CidInfo<Val>
+where
+    Val: ::borsh::BorshSerialize + borsh::BorshDeserialize + Clone,
+{
+    fn default() -> Self {
+        Self {
+            value_store: Default::default(),
+            tetraplet_store: Default::default(),
+            canon_element_store: Default::default(),
+            canon_result_store: Default::default(),
+            service_result_store: Default::default(),
+        }
+    }
+}
+
+impl From<CidInfo<RawValueWrapper>> for CidInfo<String> {
+    fn from(source: CidInfo<RawValueWrapper>) -> Self {
+        Self {
+            value_store: source.value_store.into(),
+            tetraplet_store: source.tetraplet_store,
+            canon_element_store: source.canon_element_store,
+            canon_result_store: source.canon_result_store,
+            service_result_store: source.service_result_store,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -190,6 +243,15 @@ impl ::borsh::BorshSerialize for RawValueWrapper {
     }
 }
 
+#[cfg(feature = "borsh")]
+impl ::borsh::BorshDeserialize for RawValueWrapper {
+    #[inline]
+    fn deserialize_reader<R: std::io::Read>(reader: &mut R) -> std::io::Result<Self> {
+        let data: Vec<u8> = borsh::BorshDeserialize::deserialize_reader(reader)?;
+        Ok(Self(serde_json::from_slice(&data).unwrap()))
+    }
+}
+
 impl RawValueWrapper {
     pub fn as_str(&self) -> &str {
         self.0.get()
@@ -203,6 +265,13 @@ impl PartialEq for RawValueWrapper {
 }
 
 impl Eq for RawValueWrapper {}
+
+impl From<RawValueWrapper> for String {
+    fn from(val: RawValueWrapper) -> Self {
+        let v: Box<str> = val.0.into();
+        v.into()
+    }
+}
 
 #[cfg(feature = "rkyv")]
 impl<C: ?Sized + rkyv::validation::ArchiveContext> rkyv::CheckBytes<C> for ArchivedRawValueWrapper
@@ -227,46 +296,46 @@ where
 pub struct WithStringVersion;
 
 #[cfg(feature = "rkyv")]
-impl rkyv::with::ArchiveWith<semver::Version> for WithStringVersion {
+impl rkyv::with::ArchiveWith<Option<semver::Version>> for WithStringVersion {
     type Archived = rkyv::Archived<String>;
 
     type Resolver = rkyv::string::StringResolver;
 
     unsafe fn resolve_with(
-        field: &semver::Version,
+        field: &Option<semver::Version>,
         pos: usize,
         resolver: Self::Resolver,
         out: *mut Self::Archived,
     ) {
         use rkyv::Archive as _;
 
-        let inner = field.to_string();
+        let inner = field.as_ref().unwrap().to_string();
         inner.resolve(pos, resolver, out);
     }
 }
 
 #[cfg(feature = "rkyv")]
 impl<S: rkyv::Fallible + rkyv::ser::Serializer + ?Sized>
-    rkyv::with::SerializeWith<semver::Version, S> for WithStringVersion
+    rkyv::with::SerializeWith<Option<semver::Version>, S> for WithStringVersion
 {
     fn serialize_with(
-        field: &semver::Version,
+        field: &Option<semver::Version>,
         serializer: &mut S,
     ) -> Result<Self::Resolver, S::Error> {
-        let inner = field.to_string();
+        let inner = field.as_ref().unwrap().to_string();
         rkyv::Archived::<String>::serialize_from_str(&inner, serializer)
     }
 }
 
 #[cfg(feature = "rkyv")]
 impl<D: rkyv::Fallible<Error = InterpreterDataDeserializerError> + ?Sized>
-    rkyv::with::DeserializeWith<rkyv::Archived<String>, semver::Version, D> for WithStringVersion
+    rkyv::with::DeserializeWith<rkyv::Archived<String>, Option<semver::Version>, D> for WithStringVersion
 {
     fn deserialize_with(
         field: &rkyv::string::ArchivedString,
         _deserializer: &mut D,
-    ) -> Result<semver::Version, <D as rkyv::Fallible>::Error> {
-        Ok(semver::Version::parse(&field.as_str())?)
+    ) -> Result<Option<semver::Version>, <D as rkyv::Fallible>::Error> {
+        Ok(Some(semver::Version::parse(&field.as_str())?))
     }
 }
 
@@ -343,7 +412,7 @@ impl InterpreterDataDeserializer {
             shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(1024),
         }
     }
-    
+
     pub fn with_capacity(cap: usize) -> Self {
         Self {
             shared: ::rkyv::de::deserializers::SharedDeserializeMap::with_capacity(cap),
