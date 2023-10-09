@@ -114,7 +114,7 @@ dependencies = [
  "num-traits",
  "once_cell",
  "polyplets",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "serde_json",
  "tracing",
@@ -184,7 +184,7 @@ dependencies = [
  "object-pool",
  "once_cell",
  "rand_chacha 0.2.2",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "serde_json",
  "sha2 0.10.7",
@@ -346,7 +346,7 @@ dependencies = [
  "once_cell",
  "polyplets",
  "pretty_assertions 0.6.1",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "serde_json",
  "strum",
@@ -2920,7 +2920,7 @@ dependencies = [
  "multimap 0.8.3",
  "once_cell",
  "paste",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "thiserror",
  "wasmer-interface-types-fl",
@@ -2965,7 +2965,7 @@ dependencies = [
  "marine-module-interface",
  "marine-wasm-backend-traits",
  "nom",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "thiserror",
  "walrus 0.20.1",
@@ -3015,7 +3015,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a501fd122de0e7ffd4b97ed0431a7ff55c09aaab0ac72486d09cdd0b9555b32"
 dependencies = [
  "once_cell",
- "semver 1.0.18",
+ "semver 1.0.19",
 ]
 
 [[package]]
@@ -3029,7 +3029,7 @@ dependencies = [
  "derivative",
  "marine-rs-sdk-main",
  "marine-wasm-backend-traits",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "thiserror",
  "walrus 0.20.1",
@@ -3045,7 +3045,7 @@ dependencies = [
  "itertools",
  "marine-it-interfaces",
  "nom",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "thiserror",
  "walrus 0.19.0",
@@ -3334,7 +3334,7 @@ checksum = "885db39b08518fa700b73fa2214e8adbbfba316ba82dd510f50519173eadaf73"
 dependencies = [
  "borsh",
  "schemars",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
 ]
 
@@ -4577,7 +4577,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
- "semver 1.0.18",
+ "semver 1.0.19",
 ]
 
 [[package]]
@@ -4739,9 +4739,9 @@ checksum = "d4f410fedcf71af0345d7607d246e7ad15faaadd49d240ee3b24e5dc21a820ac"
 
 [[package]]
 name = "semver"
-version = "1.0.18"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0293b4b29daaf487284529cc2f5675b8e57c61f70167ba415a463651fd6a918"
+checksum = "ad977052201c6de01a8ef2aa3378c4bd23217a056337d1d6da40468d267a4fb0"
 dependencies = [
  "serde",
 ]
@@ -5796,7 +5796,7 @@ dependencies = [
  "log",
  "nom",
  "safe-transmute",
- "semver 1.0.18",
+ "semver 1.0.19",
  "serde",
  "serde_json",
  "thiserror",
