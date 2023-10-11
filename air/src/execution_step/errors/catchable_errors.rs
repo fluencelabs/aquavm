@@ -32,7 +32,7 @@ use std::rc::Rc;
 /// Catchable errors arisen during AIR script execution. Catchable here means that these errors
 /// could be handled by a xor instruction and their error_code could be used in a match
 /// instruction.
-#[derive(ThisError, EnumDiscriminants, Debug)]
+#[derive(ThisError, EnumDiscriminants, Debug, Clone)]
 #[strum_discriminants(derive(EnumIter))]
 pub enum CatchableError {
     /// An error is occurred while calling local service via call_service.

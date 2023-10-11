@@ -193,8 +193,14 @@ impl ExecutionCtx<'_> {
             None
         };
 
+        let original_error_object = self.error_descriptor.original_error_object().clone();
+
         self.error_descriptor
             .try_to_set_error_from_exec_error(error, instruction, peer_id, tetraplet.clone());
+
+        if let Some(error_object) = original_error_object {
+            self.error_descriptor.set_both_error_objects(&error_object);
+        }
     }
 }
 

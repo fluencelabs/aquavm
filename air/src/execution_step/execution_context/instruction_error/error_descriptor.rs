@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+use std::rc::Rc;
+
 use super::no_error;
 use super::InstructionError;
 use crate::execution_step::ErrorAffectable;
 use crate::execution_step::RcSecurityTetraplet;
+use crate::ExecutionError;
+use crate::JValue;
 use crate::ToErrorCode;
 
 pub(crate) struct ErrorDescriptor {
@@ -45,8 +49,30 @@ impl ErrorDescriptor {
         &self.error
     }
 
-    pub(crate) fn clear_error(&mut self) {
+    pub(crate) fn clear_error_object(&mut self) {
+        let orig_error_object = self.error.orig_error_object.clone();
         self.error = no_error();
+        self.error.orig_error_object = orig_error_object;
+    }
+
+    pub(crate) fn set_original_execution_error(&mut self, e: &ExecutionError) {
+        self.error.orig_catchable = match e {
+            ExecutionError::Catchable(err) => Some(err.as_ref().clone()),
+            _ => None,
+        };
+    }
+
+    pub(crate) fn clear_original_error_object(&mut self) {
+        self.error.orig_error_object = None;
+    }
+
+    pub(crate) fn original_error_object(&self) -> &Option<Rc<JValue>> {
+        &self.error.orig_error_object
+    }
+
+    pub(crate) fn set_both_error_objects(&mut self, error_object: &Rc<JValue>) {
+        self.error.error = error_object.clone();
+        self.error.orig_error_object = Some(error_object.clone());
     }
 }
 

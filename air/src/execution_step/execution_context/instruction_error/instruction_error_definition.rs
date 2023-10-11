@@ -16,11 +16,10 @@
 
 use super::ErrorObjectError;
 use crate::execution_step::RcSecurityTetraplet;
+use crate::CatchableError;
 use crate::JValue;
 
 use air_interpreter_data::Provenance;
-use serde::Deserialize;
-use serde::Serialize;
 use serde_json::json;
 
 use std::rc::Rc;
@@ -37,7 +36,7 @@ pub const NO_ERROR_ERROR_CODE: i64 = 0;
 /// There are some differences b/w mentioned errors and an ordinary scalar:
 ///  - they are set to not-an-error value by default
 ///  - these are global scalars, meaning that fold and new scopes do not apply for it
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct InstructionError {
     /// Error object that represents the last occurred error.
     pub error: Rc<JValue>,
@@ -45,8 +44,16 @@ pub struct InstructionError {
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
 
-    /// Value provenance
+    /// Value provenance.
     pub provenance: Provenance,
+
+    /// This is an original Catchable that is used to bubble an original error up,
+    /// when `fail :error:` is called in the right branch of `xor`.
+    pub orig_catchable: Option<CatchableError>,
+
+    /// This is an original error object that is used to bubble an original error up.
+    /// It is set in ExecCtx::set_errors and reset in execute! macro.
+    pub orig_error_object: Option<Rc<JValue>>,
 }
 
 pub(crate) fn error_from_raw_fields_w_peerid(
@@ -146,5 +153,7 @@ pub fn no_error() -> InstructionError {
         error: Rc::new(no_error_object()),
         tetraplet: None,
         provenance: Provenance::literal(),
+        orig_catchable: None,
+        orig_error_object: None,
     }
 }

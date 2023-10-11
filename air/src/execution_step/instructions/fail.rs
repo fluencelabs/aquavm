@@ -109,6 +109,7 @@ fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> 
         error,
         tetraplet,
         provenance,
+        ..
     } = exec_ctx.last_error_descriptor.error();
 
     check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
@@ -127,11 +128,27 @@ fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
         error,
         tetraplet,
         provenance,
+        orig_catchable,
+        orig_error_object,
     } = exec_ctx.error_descriptor.error();
 
-    check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
+    // This bubbles up an original error object if it exists.
+    // See InstructionError for details on orig_error_object lifecycle.
+    let error_object = match orig_error_object {
+        Some(orig_error) => orig_error,
+        None => error,
+    };
 
-    fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone())
+    check_error_object(error_object).map_err(CatchableError::InvalidErrorObjectError)?;
+
+    match orig_catchable {
+        Some(orig_catchable) => {
+            let catchable_to_return = orig_catchable.clone();
+            let _ = fail_with_error_object(exec_ctx, error_object.clone(), tetraplet.clone(), provenance.clone());
+            Err(ExecutionError::Catchable(catchable_to_return.into()))
+        }
+        None => fail_with_error_object(exec_ctx, error_object.clone(), tetraplet.clone(), provenance.clone()),
+    }
 }
 
 fn fail_with_error_object(

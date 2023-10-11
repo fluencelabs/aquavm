@@ -44,9 +44,9 @@ fn fail_with_rebubble_error() {
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
     let expected_error_json = {
         json!({
-          "error_code": 10006,
-          "instruction": "xor",
-          "message": "fail with '{\"error_code\":10001,\"instruction\":\"match 1 2\",\"message\":\"compared values do not match\"}' is used without corresponding xor"
+          "error_code": 10001,
+          "instruction": "match 1 2",
+          "message": "compared values do not match"
         })
     };
 
