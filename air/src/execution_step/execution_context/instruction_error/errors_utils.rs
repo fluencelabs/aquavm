@@ -65,9 +65,11 @@ pub(crate) fn get_instruction_error_from_error_object(
     tetraplet: Option<RcSecurityTetraplet>,
     provenance: Provenance,
 ) -> InstructionError {
+    let orig_catchable = None;
     InstructionError {
         error,
         tetraplet,
         provenance,
+        orig_catchable,
     }
 }

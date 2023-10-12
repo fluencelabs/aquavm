@@ -34,11 +34,14 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
                 exec_ctx.flush_subgraph_completeness();
                 exec_ctx.last_error_descriptor.meet_xor_right_branch();
 
+                exec_ctx.error_descriptor.set_original_execution_error(&e);
+                exec_ctx.error_descriptor.enable_error_setting();
+
                 let right_subgraph_result = self.1.execute(exec_ctx, trace_ctx);
                 // This sets :error: to a no-error state.
                 // Please note the right_subgraph_result might be an Error that bubbles up to an :error:
                 // above this execute().
-                exec_ctx.error_descriptor.clear_error();
+                exec_ctx.error_descriptor.clear_error_object_if_needed();
                 right_subgraph_result
             }
             res => res,
