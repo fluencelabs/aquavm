@@ -21,10 +21,12 @@ use crate::execution_step::value_types::CanonStreamMap;
 use crate::execution_step::CatchableError;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::ExecutionResult;
+use crate::execution_step::RcSecurityTetraplet;
 use crate::lambda_to_execution_error;
 use crate::ExecutionError;
 use crate::JValue;
 use crate::LambdaAST;
+use crate::SecurityTetraplet;
 
 use air_lambda_ast::Functor;
 use air_lambda_parser::ValueAccessor;
@@ -38,6 +40,11 @@ use std::rc::Rc;
 pub(crate) struct LambdaResult<'value> {
     pub(crate) result: Cow<'value, JValue>,
     pub(crate) tetraplet_idx: Option<usize>,
+}
+
+pub(crate) struct MapLensResult<'value> {
+    pub(crate) result: Cow<'value, JValue>,
+    pub(crate) tetraplet: RcSecurityTetraplet,
 }
 
 pub(crate) fn select_by_lambda_from_stream<'value>(
@@ -55,10 +62,10 @@ pub(crate) fn select_by_lambda_from_canon_map<'value>(
     canon_map: &'value CanonStreamMap<'_>,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<Cow<'value, JValue>> {
+) -> ExecutionResult<MapLensResult<'value>> {
     match lambda {
-        LambdaAST::ValuePath(value_path) => select_by_path_from_canon_map(canon_map, value_path, exec_ctx),
-        LambdaAST::Functor(functor) => Ok(select_by_functor_from_canon_map(canon_map, functor)),
+        LambdaAST::ValuePath(value_path) => select_by_path_from_canon_map(canon_map, value_path, lambda, exec_ctx),
+        LambdaAST::Functor(functor) => Ok(select_by_functor_from_canon_map(canon_map, exec_ctx, functor)),
     }
 }
 
@@ -78,22 +85,9 @@ fn select_by_path_from_stream<'value>(
     lambda: &NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<LambdaResult<'value>> {
-    let (prefix, body) = lambda.split_first();
-    let idx = match prefix {
-        ValueAccessor::ArrayAccess { idx } => *idx,
-        ValueAccessor::FieldAccessByName { field_name } => {
-            return lambda_to_execution_error!(Err(LambdaError::FieldAccessorAppliedToStream {
-                field_name: field_name.to_string(),
-            }));
-        }
-        ValueAccessor::FieldAccessByScalar { scalar_name } => {
-            let scalar = exec_ctx.scalars.get_value(scalar_name)?;
-            lambda_to_execution_error!(try_scalar_ref_as_idx(scalar))?
-        }
-        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
-    };
-    let idx = idx as usize;
     let stream_size = stream.len();
+    let (idx, body) = split_to_idx(lambda, exec_ctx)?;
+
     let value = lambda_to_execution_error!(stream
         .peekable()
         .nth(idx)
@@ -104,13 +98,44 @@ fn select_by_path_from_stream<'value>(
     Ok(select_result)
 }
 
+fn select_by_path_from_canon_map_stream<'value>(
+    stream: impl ExactSizeIterator<Item = (&'value JValue, RcSecurityTetraplet)> + 'value,
+    lambda: &NonEmpty<ValueAccessor<'_>>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<MapLensResult<'value>> {
+    let stream_size = stream.len();
+    let (idx, body) = split_to_idx(lambda, exec_ctx)?;
+
+    let (value, tetraplet) = lambda_to_execution_error!(stream
+        .peekable()
+        .nth(idx)
+        .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
+
+    let select_result = if body.is_empty() {
+        // csm.$.key.[0] case
+        let result = Cow::Borrowed(value);
+        MapLensResult::from_cow(result, tetraplet)
+    } else {
+        // csm.$.key.[0].attribute case
+        let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
+
+        let joined = body.iter().map(ToString::to_string).collect::<Vec<_>>().join(".");
+        let json_path_suffix = format!(".{}", joined);
+        let prefix_with_path = true;
+        let updated_tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
+
+        MapLensResult::from_cow(result, updated_tetraplet)
+    };
+    Ok(select_result)
+}
+
 fn select_by_path_from_canon_map<'value>(
     canon_map: &'value CanonStreamMap<'_>,
     lambda: &NonEmpty<ValueAccessor<'_>>,
+    original_lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
-) -> ExecutionResult<Cow<'value, JValue>> {
+) -> ExecutionResult<MapLensResult<'value>> {
     use crate::execution_step::value_types::CanonStream;
-    use crate::SecurityTetraplet;
 
     let (prefix, body) = lambda.split_first();
 
@@ -132,29 +157,70 @@ fn select_by_path_from_canon_map<'value>(
     // There will be an empty canon stream if the key was not found.
     let result = match (NonEmpty::try_from(body.to_vec()), canon_stream) {
         (Ok(body_part), Some(canon_stream)) => {
-            let canon_stream_iter = canon_stream.iter().map(|v| v.get_result().deref());
-            let LambdaResult { result, .. } = select_by_path_from_stream(canon_stream_iter, &body_part, exec_ctx)?;
-            result
+            // csm.$.key... case
+
+            let canon_stream_iter = canon_stream.iter().map(|v| (v.get_result().deref(), v.get_tetraplet()));
+            select_by_path_from_canon_map_stream(canon_stream_iter, &body_part, exec_ctx)?
         }
         (Err(..), Some(canon_stream)) => {
-            let value = canon_stream.as_jvalue();
-            Cow::Owned(value)
+            // csm.$.key case
+            let prefix_with_path = false;
+            let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
+            let value = Cow::Owned(canon_stream.as_jvalue());
+
+            MapLensResult::from_cow(value, tetraplet)
         }
         _ => {
-            let SecurityTetraplet {
-                peer_pk,
-                service_id,
-                function_name,
-                json_path,
-            } = canon_map.tetraplet().as_ref();
-            let json_path = json_path.to_string() + &prefix.to_string();
+            // csm.$.non_existing_key case
+            let prefix_with_path = false;
+            let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
+            let value = CanonStream::new(vec![], tetraplet.clone()).as_jvalue();
+            let value = Cow::Owned(value);
 
-            let tetraplet = SecurityTetraplet::new(peer_pk, service_id, function_name, json_path).into();
-            let value = CanonStream::new(vec![], tetraplet).as_jvalue();
-            Cow::Owned(value)
+            MapLensResult::from_cow(value, tetraplet)
         }
     };
     Ok(result)
+}
+
+fn split_to_idx<'lambda>(
+    lambda: &'lambda NonEmpty<ValueAccessor<'_>>,
+    exec_ctx: &ExecutionCtx<'_>,
+) -> ExecutionResult<(usize, &'lambda [ValueAccessor<'lambda>])> {
+    let (prefix, body) = lambda.split_first();
+    let idx = match prefix {
+        ValueAccessor::ArrayAccess { idx } => *idx,
+        ValueAccessor::FieldAccessByName { field_name } => {
+            return lambda_to_execution_error!(Err(LambdaError::FieldAccessorAppliedToStream {
+                field_name: field_name.to_string(),
+            }));
+        }
+        ValueAccessor::FieldAccessByScalar { scalar_name } => {
+            let scalar = exec_ctx.scalars.get_value(scalar_name)?;
+            lambda_to_execution_error!(try_scalar_ref_as_idx(scalar))?
+        }
+        ValueAccessor::Error => unreachable!("should not execute if parsing succeeded. QED."),
+    };
+    Ok((idx as usize, body))
+}
+
+// TODO put this functionality into SecurityTetraplet method.
+fn update_tetraplet_with_path(
+    original_tetraplet: &SecurityTetraplet,
+    original_path: &impl ToString,
+    prefix_with_path: bool,
+) -> RcSecurityTetraplet {
+    let json_path_updated = if prefix_with_path {
+        original_tetraplet.json_path.to_string() + &original_path.to_string()
+    } else {
+        original_path.to_string()
+    };
+
+    SecurityTetraplet {
+        json_path: json_path_updated,
+        ..original_tetraplet.clone()
+    }
+    .into()
 }
 
 fn select_by_functor_from_stream<'value>(
@@ -169,11 +235,15 @@ fn select_by_functor_from_stream<'value>(
     }
 }
 
-fn select_by_functor_from_canon_map<'value>(canon_map: &CanonStreamMap<'_>, functor: &Functor) -> Cow<'value, JValue> {
+fn select_by_functor_from_canon_map<'value>(
+    canon_map: &CanonStreamMap<'_>,
+    exec_ctx: &ExecutionCtx<'_>,
+    functor: &Functor,
+) -> MapLensResult<'value> {
     match functor {
         Functor::Length => {
             let result = serde_json::json!(canon_map.len());
-            Cow::Owned(result)
+            MapLensResult::from_value(result, exec_ctx, functor)
         }
     }
 }
@@ -228,6 +298,25 @@ impl<'value> LambdaResult<'value> {
         Self {
             result: Cow::Owned(result),
             tetraplet_idx: None,
+        }
+    }
+}
+
+impl<'value> MapLensResult<'value> {
+    fn from_cow(result: Cow<'value, JValue>, tetraplet: RcSecurityTetraplet) -> Self {
+        Self { result, tetraplet }
+    }
+
+    fn from_value(result: JValue, exec_ctx: &ExecutionCtx<'_>, functor: &Functor) -> Self {
+        let tetraplet = Rc::new(SecurityTetraplet::new(
+            exec_ctx.run_parameters.current_peer_id.to_string(),
+            "",
+            "",
+            functor.to_string(),
+        ));
+        Self {
+            result: Cow::Owned(result),
+            tetraplet,
         }
     }
 }
