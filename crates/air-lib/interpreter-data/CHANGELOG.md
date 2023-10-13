@@ -21,6 +21,25 @@
     * aquavm-air-parser bumped from 0.9.0 to 0.10.0
     * polyplets bumped from 0.5.0 to 0.5.1
 
+## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.11.3...air-interpreter-data-v0.12.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607))
+
+### Features
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607)) ([8a07613](https://github.com/fluencelabs/aquavm/commit/8a076130274c0500025e5c2ea74ec57e4c455971))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.3.0 to 0.4.0
+    * air-interpreter-signatures bumped from 0.1.1 to 0.1.2
+
 ## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.10.0...air-interpreter-data-v0.11.0) (2023-08-31)
 
 
