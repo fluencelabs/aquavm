@@ -36,12 +36,8 @@ impl ErrorDescriptor {
     ) {
         use super::get_instruction_error_from_exec_error;
 
-        // Returns early if there is an error to bubble up.
-        if !self.error_can_be_set {
-            return;
-        }
-
-        if !error.affects_error() {
+        // returns early if there is an error to bubble up or the error is Uncatchable.
+        if !self.error_can_be_set || !error.affects_error() {
             return;
         }
 
