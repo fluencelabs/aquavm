@@ -57,10 +57,7 @@ macro_rules! execute {
                 $exec_ctx.set_errors(&e, &$instr.to_string(), None, $instr.log_errors_with_peer_id());
                 Err(e)
             }
-            v => {
-                $exec_ctx.error_descriptor.enable_error_setting();
-                v
-            }
+            v => v,
         }
     }};
 }

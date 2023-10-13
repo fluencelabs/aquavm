@@ -42,6 +42,11 @@ impl<'i> super::ExecutableInstruction<'i> for Xor<'i> {
                 // Please note the right_subgraph_result might be an Error that bubbles up to an :error:
                 // above this execute().
                 exec_ctx.error_descriptor.clear_error_object_if_needed();
+
+                if right_subgraph_result.is_ok() {
+                    exec_ctx.error_descriptor.enable_error_setting();
+                }
+
                 right_subgraph_result
             }
             res => res,
