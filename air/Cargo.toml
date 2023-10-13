@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air"
-version = "0.48.0"
+version = "0.49.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2018"

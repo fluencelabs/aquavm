@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.49.0](https://github.com/fluencelabs/aquavm/compare/air-v0.48.0...air-v0.49.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** fail :error: now bubbles the original error up [fixes VM-342] ([#714](https://github.com/fluencelabs/aquavm/issues/714))
+* **execution-engine:** canon map lens access now returns a correct number of kvpairs in a canon stream ([#708](https://github.com/fluencelabs/aquavm/issues/708))
+
+### Features
+
+* **execution-engine:** fail :error: now bubbles the original error up [fixes VM-342] ([#714](https://github.com/fluencelabs/aquavm/issues/714)) ([98870c2](https://github.com/fluencelabs/aquavm/commit/98870c2ff9215914270186db8b8e2015bd54a9d5))
+
+
+### Bug Fixes
+
+* **execution-engine:** canon map lens access now returns a correct number of kvpairs in a canon stream ([#708](https://github.com/fluencelabs/aquavm/issues/708)) ([f4caa53](https://github.com/fluencelabs/aquavm/commit/f4caa538e46d8c9fab564c4f3b9296e0ae2bd1d3))
+* **execution-engine:** ExecutionCtx fmt now prints stream maps out ([#705](https://github.com/fluencelabs/aquavm/issues/705)) ([c52a36c](https://github.com/fluencelabs/aquavm/commit/c52a36c7840d9c6a50223f9313b9a49d4b702924))
+
 ## [0.48.0](https://github.com/fluencelabs/aquavm/compare/air-v0.47.0...air-v0.48.0) (2023-09-21)
 
 
