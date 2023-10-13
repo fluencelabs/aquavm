@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.50.0](https://github.com/fluencelabs/aquavm/compare/air-v0.49.0...air-v0.50.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** map with a lens now returns an appropriate tetraplet [fixes VM-331] ([#706](https://github.com/fluencelabs/aquavm/issues/706))
+
+### Bug Fixes
+
+* **execution-engine:** map with a lens now returns an appropriate tetraplet [fixes VM-331] ([#706](https://github.com/fluencelabs/aquavm/issues/706)) ([ea80f11](https://github.com/fluencelabs/aquavm/commit/ea80f117a0aaba600a1c278c10cc658d392cc7c5))
+
 ## [0.49.0](https://github.com/fluencelabs/aquavm/compare/air-v0.48.0...air-v0.49.0) (2023-10-13)
 
 
