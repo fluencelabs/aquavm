@@ -53,6 +53,10 @@
   * dependencies
     * aquavm-air bumped from 0.48.0 to 0.49.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.49.0 to 0.50.0
+
 ## [0.10.4](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.10.3...air-test-utils-v0.10.4) (2023-09-21)
 
 
