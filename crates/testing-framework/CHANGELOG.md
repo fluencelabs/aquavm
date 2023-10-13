@@ -48,6 +48,25 @@
   * dependencies
     * air-test-utils bumped from 0.10.5 to 0.10.6
 
+## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.6.1...air-testing-framework-v0.7.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607))
+
+### Features
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607)) ([8a07613](https://github.com/fluencelabs/aquavm/commit/8a076130274c0500025e5c2ea74ec57e4c455971))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.10.6 to 0.11.0
+    * air-interpreter-signatures bumped from 0.1.1 to 0.1.2
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.5.5...air-testing-framework-v0.6.0) (2023-10-13)
 
 
