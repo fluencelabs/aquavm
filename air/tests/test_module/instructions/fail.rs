@@ -62,15 +62,9 @@ fn fail_with_error() {
     );
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
+    let err_message = r#""failed result from fallible_call_service""#.to_string();
+    let expected_error = CatchableError::LocalServiceError(1i32, err_message.into());
 
-    let expected_error = CatchableError::UserError {
-        error: rc!(json!({
-            "error_code": 10000i64,
-            "instruction": r#"call "local_peer_id" ("service_id_1" "local_fn_name") [] result_1"#,
-            "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
-            "peer_id": "local_peer_id",
-        })),
-    };
     assert!(check_error(&result, expected_error));
 }
 

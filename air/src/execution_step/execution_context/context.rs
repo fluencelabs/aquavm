@@ -200,6 +200,8 @@ impl ExecutionCtx<'_> {
 
         self.error_descriptor
             .try_to_set_error_from_exec_error(error, instruction, peer_id, tetraplet.clone());
+
+        self.error_descriptor.disable_error_setting();
     }
 }
 
@@ -245,6 +247,9 @@ impl<'i> Display for ExecutionCtx<'i> {
 
         writeln!(f, "streams:")?;
         writeln!(f, "  {}", self.streams)?;
+
+        writeln!(f, "stream_maps:")?;
+        writeln!(f, "  {}", self.stream_maps)?;
 
         writeln!(f, "current peer id: {}", self.run_parameters.current_peer_id)?;
         writeln!(f, "init peer id: {}", self.run_parameters.init_peer_id)?;

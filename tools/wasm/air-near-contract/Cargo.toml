@@ -1,6 +1,6 @@
 [package]
 name = "air-near-contract"
-version = "0.48.0"
+version = "0.50.0"
 description = "AIR interpreter as a NEAR contract"
 authors = ["Fluence labs"]
 edition = "2018"

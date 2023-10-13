@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.48.0"
+version = "0.50.0"
 dependencies = [
  "air-interpreter-interface",
  "air-log-targets",
@@ -173,7 +173,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.10.4"
+version = "0.10.6"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -196,7 +196,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.5.5"
+version = "0.6.1"
 dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
@@ -270,16 +270,15 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.3.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca84f3628370c59db74ee214b3263d58f9aadd9b4fe7e711fd87dc452b7f163"
+checksum = "b1f58811cfac344940f1a400b6e6231ce35171f614f26439e80f8c1465c5cc0c"
 dependencies = [
  "anstyle",
  "anstyle-parse",
  "anstyle-query",
  "anstyle-wincon",
  "colorchoice",
- "is-terminal",
  "utf8parse",
 ]
 
@@ -309,9 +308,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle-wincon"
-version = "1.0.2"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c677ab05e09154296dd37acecd46420c17b9713e8366facafa8fc0885167cf4c"
+checksum = "58f54d10c6dfa51283a066ceab3ec1ab78d13fae00aa49243a45e4571fb79dfd"
 dependencies = [
  "anstyle",
  "windows-sys 0.48.0",
@@ -325,7 +324,7 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 
 [[package]]
 name = "aquavm-air"
-version = "0.48.0"
+version = "0.50.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -367,7 +366,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.4.5"
+version = "0.4.7"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
@@ -378,7 +377,7 @@ dependencies = [
  "avm-data-store",
  "avm-interface",
  "bs58 0.5.0",
- "clap 4.3.21",
+ "clap 4.4.5",
  "fluence-keypair",
  "itertools",
  "near-sdk",
@@ -1165,20 +1164,19 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.21"
+version = "4.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c27cdf28c0f604ba3f512b0c9a409f8de8513e4816705deb0498b627e7c3a3fd"
+checksum = "824956d0dca8334758a5b7f7e50518d66ea319330cbceedcf76905c2f6ab30e3"
 dependencies = [
  "clap_builder",
  "clap_derive",
- "once_cell",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.3.21"
+version = "4.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08a9f1ab5e9f01a9b81f202e8562eb9a10de70abf9eaeac1be465c28b75aa4aa"
+checksum = "122ec64120a49b4563ccaedcbea7818d069ed8e9aa6d829b82d8a4128936b2ab"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1188,9 +1186,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.3.12"
+version = "4.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54a9bb5758fc5dfe728d1019941681eccaf0cf8a4189b692a0ee2f2ecf90a050"
+checksum = "0862016ff20d69b84ef8247369fabf5c008a7417002411897d40ee1f4532b873"
 dependencies = [
  "heck 0.4.1",
  "proc-macro2",
