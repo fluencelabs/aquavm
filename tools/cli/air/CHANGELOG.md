@@ -80,6 +80,11 @@
     * air-interpreter-interface bumped from 0.15.0 to 0.15.1
     * air-test-utils bumped from 0.10.3 to 0.10.4
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.48.0 to 0.49.0
+    * air-test-utils bumped from 0.10.4 to 0.10.5
+
 ## [0.4.1](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.0...aquavm-air-cli-v0.4.1) (2023-08-31)
 
 
