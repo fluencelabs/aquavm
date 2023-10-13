@@ -16,17 +16,18 @@
 
 use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
 #[test]
 // test for github.com/fluencelabs/aquavm/issues/221
 fn issue_221() {
-    let peer_1_id = "peer_1_id";
-    let peer_2_id = "peer_2_id";
-    let join_1_id = "join_1_id";
-    let join_2_id = "join_2_id";
-    let set_variable_id = "set_variable_id";
+    let peer_1_name = "peer_1_id";
+    let peer_2_name = "peer_2_id";
+    let join_1_name = "join_1_id";
+    let join_2_name = "join_2_id";
+    let set_variable_name = "set_variable_id";
 
     let peer_1_value = "peer_1_value";
     let peer_2_value = "peer_2_value";
@@ -37,11 +38,11 @@ fn issue_221() {
             (seq
                 (seq
                     ;; let's peers be an array of two values [peer_1_id, peer_2_id]
-                    (call "{set_variable_id}" ("" "") [] peers) ; ok = ["{peer_1_id}", "{peer_2_id}"]
+                    (call "{set_variable_name}" ("" "") [] peers) ; ok = [@"{peer_1_name}", @"{peer_2_name}"]
                     (fold peers peer
                         (par
                             (seq
-                                (call peer ("" "") [peer] value) ; map = {{"{peer_1_id}": "{peer_1_value}", "{peer_2_id}": "{peer_2_value}"}}
+                                (call peer ("" "") [peer] value) ; map = {{@"{peer_1_name}": "{peer_1_value}", @"{peer_2_name}": "{peer_2_value}"}}
                                 ;; it's crucial to reproduce this bug to add value to stream
                                 ;; with help of ap instruction
                                 (ap value $stream)
@@ -58,14 +59,14 @@ fn issue_221() {
                     ;; appropriate way and state for (1) is returned
                     (par
                         (par
-                            (call "{join_1_id}" ("" "") [iterator]) ; behaviour = echo
-                            (call "{join_2_id}" ("" "") [iterator]) ; behaviour = echo
+                            (call "{join_1_name}" ("" "") [iterator]) ; behaviour = echo
+                            (call "{join_2_name}" ("" "") [iterator]) ; behaviour = echo
                         )
                         (next iterator)
                     )
                 )
             )
-            (call "some_peer_id" ("" "") []) ;; (1)
+            (call "some_peer_name" ("" "") []) ;; (1)
         )
     "#
     );
@@ -73,25 +74,43 @@ fn issue_221() {
     let executor = <AirScriptExecutor>::new(
         TestRunParameters::from_init_peer_id("set_variable_id"),
         vec![],
-        vec![peer_1_id, peer_2_id].into_iter().map(Into::into),
+        vec![peer_1_name, peer_2_name].into_iter().map(Into::into),
         &script,
     )
     .expect("Invalid annotated AIR script");
 
-    let _result = executor.execute_one(set_variable_id).unwrap();
-    let _peer_1_result = executor.execute_one(peer_1_id).unwrap();
-    let _peer_2_result = executor.execute_one(peer_2_id).unwrap();
+    let peer_1_id = at(peer_1_name);
+    let peer_2_id = at(peer_2_name);
+    let join_1_id = at(join_1_name);
 
-    let _join_1_result = executor.execute_one(join_1_id).unwrap();
-    let join_1_result = executor.execute_one(join_1_id).unwrap(); // before 0.20.9 it fails here
+    let _result = executor.execute_one(set_variable_name).unwrap();
+    let _peer_1_result = executor.execute_one(peer_1_name).unwrap();
+    let _peer_2_result = executor.execute_one(peer_2_name).unwrap();
+
+    let _join_1_result = executor.execute_one(join_1_name).unwrap();
+    let join_1_result = executor.execute_one(join_1_name).unwrap(); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = ExecutionTrace::from(vec![
-        scalar!(json!([peer_1_id, peer_2_id]), peer = set_variable_id, service = "..0"),
+        scalar!(
+            json!([peer_1_id, peer_2_id]),
+            peer_name = set_variable_name,
+            service = "..0"
+        ),
         executed_state::par(2, 3),
-        scalar!(peer_1_value, peer = peer_1_id, service = "..1", args = vec![peer_1_id]),
+        scalar!(
+            peer_1_value,
+            peer_name = peer_1_name,
+            service = "..1",
+            args = vec![peer_1_id.as_str()]
+        ),
         executed_state::ap(0),
         executed_state::par(2, 0),
-        scalar!(peer_2_value, peer = peer_2_id, service = "..1", args = vec![peer_2_id]),
+        scalar!(
+            peer_2_value,
+            peer_name = peer_2_name,
+            service = "..1",
+            args = vec![peer_2_id.as_str()]
+        ),
         executed_state::ap(1),
         executed_state::fold(vec![
             executed_state::subtrace_lore(3, SubTraceDesc::new(8.into(), 4), SubTraceDesc::new(12.into(), 0)),
@@ -101,7 +120,7 @@ fn issue_221() {
         executed_state::par(1, 1),
         unused!(
             peer_1_value,
-            peer = join_1_id,
+            peer_name = join_1_name,
             service = "..2",
             args = vec![peer_1_value]
         ),
@@ -110,7 +129,7 @@ fn issue_221() {
         executed_state::par(1, 1),
         unused!(
             peer_2_value,
-            peer = join_1_id,
+            peer_name = join_1_name,
             service = "..2",
             args = vec![peer_2_value]
         ),

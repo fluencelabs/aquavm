@@ -38,6 +38,8 @@ workspaces = { version = "0.7.0", optional = true }
 [features]
 default = ["wasm"]
 wasm = ["air-test-utils"]
+gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
 near = [ "dep:near-sdk", "dep:tokio", "dep:workspaces" ]
 
 [[bin]]

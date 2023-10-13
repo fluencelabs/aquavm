@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
@@ -98,7 +99,7 @@ fn fold_with_inner_call() {
 
 #[test]
 fn fold_stream_with_inner_call() {
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
          (seq
@@ -112,20 +113,22 @@ fn fold_stream_with_inner_call() {
                (next i))))
     "#;
     let executor = air_test_framework::AirScriptExecutor::from_annotated(
-        TestRunParameters::from_init_peer_id(init_peer_id),
+        TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
     .unwrap();
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_trace = vec![
         stream!(
             json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
             0,
-            peer = init_peer_id,
+            peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
@@ -142,7 +145,7 @@ fn fold_stream_with_inner_call() {
 
 #[test]
 fn fold_canon_with_inner_call() {
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
          (seq
@@ -158,20 +161,22 @@ fn fold_canon_with_inner_call() {
                 (next x)))))
     "#;
     let executor = air_test_framework::AirScriptExecutor::from_annotated(
-        TestRunParameters::from_init_peer_id(init_peer_id),
+        TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
     .unwrap();
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_trace = vec![
         stream!(
             json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
             0,
-            peer = init_peer_id,
+            peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),

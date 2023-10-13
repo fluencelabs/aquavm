@@ -16,6 +16,7 @@
 
 use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
@@ -695,29 +696,31 @@ fn test_merge_executed() {
 
 #[test]
 fn canon_stream_map() {
-    let vm_peer_id_1 = "vm_peer_id_1";
+    let vm_peer_id_1_name = "vm_peer_id_1";
+    let vm_peer_id_1_id = at(vm_peer_id_1_name);
+
     let script = format!(
         r#"
     (seq
         (ap (42 "value2") %map)
         (seq
             (ap ("key" "value1") %map)
-            (canon "{vm_peer_id_1}" %map #%canon_map)
+            (canon "{vm_peer_id_1_name}" %map #%canon_map)
         )
     )
         "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1), &script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1_name), &script)
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_peer_id_1).unwrap();
+    let result = executor.execute_all(vm_peer_id_1_name).unwrap();
 
-    let actual_trace = trace_from_result(&result.last().unwrap());
+    let actual_data = data_from_result(&result.last().unwrap());
 
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let map_value1 = json!({"key": 42, "value": "value2"});
     let map_value2 = json!({"key": "key", "value": "value1"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1_id, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -741,11 +744,7 @@ fn canon_stream_map() {
 
     let expected_trace = ExecutionTrace::from(states_vec.clone());
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "left {:#?} \n right {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
 #[test]
@@ -1126,11 +1125,7 @@ fn canon_map_non_existing_index_tetraplet_check() {
     let expected_trace = ExecutionTrace::from(states_vec.clone());
     let expected_tetraplet = RefCell::new(vec![vec![SecurityTetraplet::new(vm_peer_id_1, "", "", ".$.key")]]);
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "left {:#?} \n right {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(actual_trace, expected_trace,);
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
@@ -1221,11 +1216,7 @@ fn canon_map_non_existing_index_and_element_tetraplet_check() {
         ".$.[43].[2].some",
     )]]);
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "left {:#?} \n right {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(actual_trace, expected_trace,);
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
@@ -1264,13 +1255,13 @@ fn canon_map_2_scalar_tetraplet_check() {
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
 
-    let actual_trace = trace_from_result(&result);
+    let actual_data = data_from_result(&result);
 
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = map_value1.clone();
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1302,11 +1293,7 @@ fn canon_map_2_scalar_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "left {:#?} \n right {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
 #[test]
@@ -1343,13 +1330,13 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
     );
 
     let result = checked_call_vm!(vm_1, <_>::default(), &script, "", "");
-    let actual_trace = trace_from_result(&result);
+    let actual_data = data_from_result(&result);
 
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = json!("value1");
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1381,11 +1368,7 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "left {:#?} \n right {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
 #[test]

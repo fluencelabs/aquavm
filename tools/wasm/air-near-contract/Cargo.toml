@@ -32,6 +32,10 @@ overflow-checks = true
 [workspace]
 members = []
 
+[features]
+gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
+
 [patch.crates-io]
 fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair" }
 libp2p-identity = { git = "https://github.com/fluencelabs/rust-libp2p.git", branch = "rand-feature" }

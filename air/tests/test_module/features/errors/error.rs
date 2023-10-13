@@ -54,7 +54,7 @@ fn fail_with_rebubble_error() {
         scalar_tracked!(
             expected_error_json.clone(),
             cid_tracker,
-            peer = peer_id,
+            peer_name = peer_id,
             service = "m..0",
             function = "f1",
             args = [expected_error_json]
@@ -62,7 +62,7 @@ fn fail_with_rebubble_error() {
         scalar_tracked!(
             no_error_object(),
             cid_tracker,
-            peer = peer_id,
+            peer_name = peer_id,
             service = "m..1",
             function = "f2",
             args = [no_error_object()]
@@ -120,7 +120,7 @@ fn rebubble_error_from_xor_right_branch() {
         scalar_tracked!(
             inner_expected_error_json.clone(),
             cid_tracker,
-            peer = peer_id,
+            peer_name = peer_id,
             service = "m..0",
             function = "f1",
             args = [inner_expected_error_json]
@@ -128,7 +128,7 @@ fn rebubble_error_from_xor_right_branch() {
         scalar_tracked!(
             outer_expected_error_json.clone(),
             cid_tracker,
-            peer = peer_id,
+            peer_name = peer_id,
             service = "m..1",
             function = "f2",
             args = [outer_expected_error_json]
@@ -136,12 +136,14 @@ fn rebubble_error_from_xor_right_branch() {
         scalar_tracked!(
             no_error_object(),
             cid_tracker,
-            peer = peer_id,
+            peer_name = peer_id,
             service = "m..2",
             function = "f3",
             args = [no_error_object()]
         ),
     ];
 
-    assert_eq!(actual_trace, expected_trace,);
+    print_trace(&result.last().unwrap(), "");
+
+    assert_eq!(actual_trace, expected_trace);
 }

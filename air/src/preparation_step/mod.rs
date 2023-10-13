@@ -22,5 +22,7 @@ pub use errors::PreparationError;
 pub use interpreter_versions::interpreter_version;
 pub use interpreter_versions::min_supported_version;
 
+pub(crate) use preparation::parse_data;
 pub(crate) use preparation::prepare;
+pub(crate) use preparation::ParsedDataPair;
 pub(crate) use preparation::PreparationDescriptor;

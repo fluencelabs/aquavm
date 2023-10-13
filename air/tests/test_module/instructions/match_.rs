@@ -413,7 +413,7 @@ fn match_with_undefined_last_error_errcode() {
     let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
         errcode_lambda_output.clone(),
         cid_state,
-        peer = local_peer_id,
+        peer_name = local_peer_id,
         service = "test..0",
         function = "error_code",
         args = vec![errcode_lambda_output]
@@ -444,7 +444,7 @@ fn match_with_undefined_last_error_message() {
     let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
         message_lambda_output.clone(),
         cid_state,
-        peer = local_peer_id,
+        peer_name = local_peer_id,
         service = "test..0",
         function = "message",
         args = vec![message_lambda_output]

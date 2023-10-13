@@ -50,6 +50,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
         let create_canon_producer = create_canon_stream_producer(self.stream_map.name, self.stream_map.position);
         match canon_result {
             MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                &self.peer_id,
                 epilog,
                 &create_canon_producer,
                 canon_result,

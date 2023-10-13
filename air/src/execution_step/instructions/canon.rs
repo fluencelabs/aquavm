@@ -47,6 +47,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::Canon<'i> {
         let create_canon_producer = create_canon_stream_producer(self.stream.name, self.stream.position);
         match canon_result {
             MergerCanonResult::CanonResult(canon_result) => handle_seen_canon(
+                &self.peer_id,
                 epilog,
                 &create_canon_producer,
                 canon_result,

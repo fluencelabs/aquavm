@@ -17,7 +17,9 @@
 use air::ExecutionCidState;
 use air::UncatchableError;
 use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
+use pretty_assertions::assert_eq;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
@@ -199,7 +201,9 @@ fn string_parameters() {
 
 #[test]
 fn call_canon_stream_map_arg() {
-    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
+
     let script = format!(
         r#"
         (seq
@@ -208,16 +212,16 @@ fn call_canon_stream_map_arg() {
                 (ap (-42 "value2") %map)
             )
             (seq
-                (canon "{vm_1_peer_id}" %map #%canon_map)
-                (call "{vm_1_peer_id}" ("m" "f") [#%canon_map] scalar) ; behaviour = echo
+                (canon "{vm_1_peer_name}" %map #%canon_map)
+                (call "{vm_1_peer_name}" ("m" "f") [#%canon_map] scalar) ; behaviour = echo
             )
         )
         "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -260,35 +264,32 @@ fn call_canon_stream_map_arg() {
         ),
     ];
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "{:#?}\n {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(&*actual_trace, expected_trace,);
 }
 
 // WIP add negative
 #[test]
 fn call_peer_id_from_canon_stream_map() {
-    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
     let script = format!(
         r#"
         (seq
             (seq
-                (ap ("peerid" "{vm_1_peer_id}") %map)
+                (ap ("peerid" @"{vm_1_peer_name}") %map)
                 (ap (-42 "value2") %map)
             )
             (seq
-                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (canon "{vm_1_peer_name}" %map #%canon_map)
                 (call #%canon_map.$.peerid.[0] ("m" "f") [#%canon_map] scalar) ; behaviour = echo
             )
         )
         "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -330,11 +331,7 @@ fn call_peer_id_from_canon_stream_map() {
         ),
     ];
 
-    assert_eq!(
-        actual_trace, expected_trace,
-        "{:#?}\n {:#?}",
-        actual_trace, expected_trace
-    );
+    assert_eq!(&*actual_trace, expected_trace,);
 }
 
 #[test]

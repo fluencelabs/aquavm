@@ -117,6 +117,17 @@ pub enum UncatchableError {
     /// CanonStreamMap related errors.
     #[error(transparent)]
     CanonStreamMapError(#[from] CanonStreamMapError),
+
+    /// Argument hash or tetraplet mismatch in a call/canon merged from current_data with an evaluated value.
+    #[error("{param} doesn't match expected parameters: expected {expected_value}, got {stored_value} ")]
+    InstructionParametersMismatch {
+        param: &'static str,
+        expected_value: String,
+        stored_value: String,
+    },
+
+    #[error("failed to sign data: {0}")]
+    SigningError(#[from] fluence_keypair::error::SigningError),
 }
 
 impl ToErrorCode for UncatchableError {

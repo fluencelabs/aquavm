@@ -19,6 +19,7 @@ use air::PreparationError;
 use air::ToErrorCode;
 use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -936,7 +937,9 @@ fn fold_stream_map() {
 
 #[test]
 fn fold_canon_stream_map() {
-    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
+
     let script = format!(
         r#"
         (seq
@@ -945,10 +948,10 @@ fn fold_canon_stream_map() {
                 (ap (-42 "value2") %map)
             )
             (seq
-                (canon "{vm_1_peer_id}" %map #%canon_map)
+                (canon "{vm_1_peer_name}" %map #%canon_map)
                 (fold #%canon_map iter
                     (seq
-                        (call "{vm_1_peer_id}" ("m" "f") [iter] scalar) ; behaviour = echo
+                        (call "{vm_1_peer_name}" ("m" "f") [iter] scalar) ; behaviour = echo
                         (next iter)
                     )
                 )
@@ -957,9 +960,9 @@ fn fold_canon_stream_map() {
         "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
 
@@ -991,7 +994,7 @@ fn fold_canon_stream_map() {
         scalar_tracked!(
             map_value_1.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
             args = [map_value_1]
@@ -1006,7 +1009,7 @@ fn fold_canon_stream_map() {
         ),
     ];
 
-    assert_eq!(actual_trace, expected_trace,);
+    assert_eq!(&*actual_trace, expected_trace,);
 }
 
 /// This test checks that fold over map and fold over canon map both produce
@@ -1015,7 +1018,8 @@ fn fold_canon_stream_map() {
 /// increments service name index for each call used.
 #[test]
 fn fold_map_and_canon_map_orders_are_same() {
-    let vm_1_peer_id = "vm_1_peer_id";
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
 
     let script = format!(
         r#"
@@ -1032,17 +1036,17 @@ fn fold_map_and_canon_map_orders_are_same() {
             )
             (seq
                 (seq
-                    (canon "{vm_1_peer_id}" %map #%canon_map)
+                    (canon "{vm_1_peer_name}" %map #%canon_map)
                     (fold #%canon_map iter
                         (seq
-                            (call "{vm_1_peer_id}" ("m" "f") [iter] scalar) ; behaviour = echo
+                            (call "{vm_1_peer_name}" ("m" "f") [iter] scalar) ; behaviour = echo
                             (next iter)
                         )
                     )
                 )
                 (fold %map iter
                     (seq
-                        (call "{vm_1_peer_id}" ("m" "f") [iter] scalar1) ; behaviour = echo
+                        (call "{vm_1_peer_name}" ("m" "f") [iter] scalar1) ; behaviour = echo
                         (next iter)
                     )
                 )
@@ -1051,9 +1055,9 @@ fn fold_map_and_canon_map_orders_are_same() {
         "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
 
@@ -1099,7 +1103,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_1.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
             args = [map_value_1.clone()]
@@ -1107,7 +1111,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_2.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
             args = [map_value_2.clone()]
@@ -1115,7 +1119,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_3.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
             args = [map_value_3.clone()]
@@ -1123,7 +1127,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_4.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
             args = [map_value_4.clone()]
@@ -1137,7 +1141,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_1.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..1",
             function = "f",
             args = [map_value_1]
@@ -1145,7 +1149,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_2.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..1",
             function = "f",
             args = [map_value_2]
@@ -1153,7 +1157,7 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_3.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..1",
             function = "f",
             args = [map_value_3]
@@ -1161,12 +1165,12 @@ fn fold_map_and_canon_map_orders_are_same() {
         scalar_tracked!(
             map_value_4.clone(),
             cid_tracker,
-            peer = vm_1_peer_id,
+            peer = &vm_1_peer_id,
             service = "m..1",
             function = "f",
             args = [map_value_4]
         ),
     ];
 
-    assert_eq!(actual_trace, expected_trace,);
+    assert_eq!(&*actual_trace, expected_trace);
 }

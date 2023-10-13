@@ -73,4 +73,8 @@ impl AirRunner for NativeAirRunner {
 
         Ok(outcome)
     }
+
+    fn get_current_peer_id(&self) -> &str {
+        &self.current_peer_id
+    }
 }

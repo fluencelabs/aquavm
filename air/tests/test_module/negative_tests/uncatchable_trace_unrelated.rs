@@ -143,7 +143,7 @@ fn malformed_call_service_failed() {
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
-        argument_hash: "0000000000000".into(),
+        argument_hash: "bagaaieraj5j43immfovaya2uxnpzupwl4xwrfk2nryi3vbz4f4irmeqcxfcq".into(),
         tetraplet_cid,
     };
     let service_result_agg_cid = cid_state
@@ -159,7 +159,7 @@ fn malformed_call_service_failed() {
     let result = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
     let expected_serde_error = serde_json::from_value::<CallServiceFailed>(value).unwrap_err();
     let expected_error = MalformedCallServiceFailed(expected_serde_error);
-    assert!(check_error(&result, expected_error));
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]

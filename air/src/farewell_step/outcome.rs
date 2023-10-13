@@ -133,8 +133,8 @@ fn compactify_streams(exec_ctx: &mut ExecutionCtx<'_>, trace_ctx: &mut TraceHand
 
 fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(), InterpreterOutcome> {
     let current_signature = exec_ctx
-        .signature_tracker
-        .into_signature(&exec_ctx.run_parameters.current_peer_id, keypair)
+        .peer_cid_tracker
+        .gen_signature(&exec_ctx.run_parameters.salt, keypair)
         .map_err(signing_error_into_outcome)?;
 
     let current_pubkey = keypair.public();

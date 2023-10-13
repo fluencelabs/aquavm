@@ -24,6 +24,7 @@ mod streams_variables;
 pub use instruction_error::*;
 
 pub use cid_state::ExecutionCidState;
+pub(crate) use cid_state::ResolvedServiceInfo;
 pub(crate) use context::*;
 pub(crate) use scalar_variables::*;
 pub(crate) use stream_maps_variables::*;
