@@ -86,7 +86,7 @@ fn select_by_path_from_stream<'value>(
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<LambdaResult<'value>> {
     let stream_size = stream.len();
-    let (idx, body) = extract_idx(lambda, exec_ctx)?;
+    let (idx, body) = split_to_idx(lambda, exec_ctx)?;
 
     let value = lambda_to_execution_error!(stream
         .peekable()
@@ -104,7 +104,7 @@ fn select_by_path_from_canon_map_stream<'value>(
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<MapLensResult<'value>> {
     let stream_size = stream.len();
-    let (idx, body) = extract_idx(lambda, exec_ctx)?;
+    let (idx, body) = split_to_idx(lambda, exec_ctx)?;
 
     let (value, tetraplet) = lambda_to_execution_error!(stream
         .peekable()
@@ -183,7 +183,7 @@ fn select_by_path_from_canon_map<'value>(
     Ok(result)
 }
 
-fn extract_idx<'lambda>(
+fn split_to_idx<'lambda>(
     lambda: &'lambda NonEmpty<ValueAccessor<'_>>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<(usize, &'lambda [ValueAccessor<'lambda>])> {
