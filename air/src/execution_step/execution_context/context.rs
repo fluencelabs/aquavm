@@ -195,6 +195,8 @@ impl ExecutionCtx<'_> {
 
         self.error_descriptor
             .try_to_set_error_from_exec_error(error, instruction, peer_id, tetraplet.clone());
+
+        self.error_descriptor.disable_error_setting();
     }
 }
 

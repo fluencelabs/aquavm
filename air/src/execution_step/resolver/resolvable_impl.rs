@@ -74,6 +74,7 @@ fn resolve_errors(
         error,
         tetraplet,
         provenance,
+        ..
     } = instruction_error;
 
     let jvalue = match lens {

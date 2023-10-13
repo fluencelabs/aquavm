@@ -44,9 +44,9 @@ fn fail_with_rebubble_error() {
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
     let expected_error_json = {
         json!({
-          "error_code": 10006,
-          "instruction": "xor",
-          "message": "fail with '{\"error_code\":10001,\"instruction\":\"match 1 2\",\"message\":\"compared values do not match\"}' is used without corresponding xor"
+          "error_code": 10001,
+          "instruction": "match 1 2",
+          "message": "compared values do not match"
         })
     };
 
@@ -65,6 +65,80 @@ fn fail_with_rebubble_error() {
             peer = peer_id,
             service = "m..1",
             function = "f2",
+            args = [no_error_object()]
+        ),
+    ];
+
+    assert_eq!(actual_trace, expected_trace,);
+}
+
+#[test]
+fn rebubble_error_from_xor_right_branch() {
+    let peer_id = "peer_id";
+    let script = r#"
+    (seq
+        (xor
+            (xor
+                (xor
+                    (match 1 2 (null) )
+                    (fail :error:)
+                )
+                (seq
+                    (call "peer_id" ("m" "f1") [:error:] scalar1) ; behaviour = echo
+                    (match 3 2 (null) )
+                )
+            )
+            (call "peer_id" ("m" "f2") [:error:] scalar2) ; behaviour = echo
+        )
+        (call "peer_id" ("m" "f3") [:error:] scalar3) ; behaviour = echo
+    )
+    "#
+    .to_string();
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(peer_id).unwrap();
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let inner_expected_error_json = {
+        json!({
+          "error_code": 10001,
+          "instruction": "match 1 2",
+          "message": "compared values do not match"
+        })
+    };
+    let outer_expected_error_json = {
+        json!({
+          "error_code": 10001,
+          "instruction": "match 3 2",
+          "message": "compared values do not match"
+        })
+    };
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        scalar_tracked!(
+            inner_expected_error_json.clone(),
+            cid_tracker,
+            peer = peer_id,
+            service = "m..0",
+            function = "f1",
+            args = [inner_expected_error_json]
+        ),
+        scalar_tracked!(
+            outer_expected_error_json.clone(),
+            cid_tracker,
+            peer = peer_id,
+            service = "m..1",
+            function = "f2",
+            args = [outer_expected_error_json]
+        ),
+        scalar_tracked!(
+            no_error_object(),
+            cid_tracker,
+            peer = peer_id,
+            service = "m..2",
+            function = "f3",
             args = [no_error_object()]
         ),
     ];
