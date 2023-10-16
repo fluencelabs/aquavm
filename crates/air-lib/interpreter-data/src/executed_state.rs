@@ -55,7 +55,7 @@ pub enum CallResult {
     /// The call returned a service error.
     ///
     /// The `JValue` has to be a two element array `[i32, String]`.
-    Failed(Rc<CID<ServiceResultCidAggregate>>),
+    Failed(CID<ServiceResultCidAggregate>),
 }
 
 /*
@@ -76,21 +76,21 @@ pub enum CallResult {
  * is not stored into the `value_store`:
  *
  * ```
- * Unused(Rc<CID<JValue>>) ---> X
+ * Unused(CID<JValue>) ---> X
  * ```
  */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ValueRef {
     /// The call value is stored to a scalar variable.
-    Scalar(Rc<CID<ServiceResultCidAggregate>>),
+    Scalar(CID<ServiceResultCidAggregate>),
     /// The call value is stored to a stream variable.
     Stream {
-        cid: Rc<CID<ServiceResultCidAggregate>>,
+        cid: CID<ServiceResultCidAggregate>,
         generation: GenerationIdx,
     },
     /// The call value is not stored.
-    Unused(Rc<CID<JValue>>),
+    Unused(CID<JValue>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -114,11 +114,11 @@ impl CallServiceFailed {
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
 pub struct ServiceResultCidAggregate {
-    pub value_cid: Rc<CID<JValue>>,
+    pub value_cid: CID<JValue>,
     /// Hash of the call arguments.
     pub argument_hash: Rc<str>,
     /// The tetraplet of the call result.
-    pub tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+    pub tetraplet_cid: CID<SecurityTetraplet>,
 }
 
 /// Let's consider an example of trace that could be produces by the following fold:
@@ -190,21 +190,21 @@ pub enum CanonResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     #[serde(rename = "sent_by")]
     RequestSentBy(Rc<String>),
-    Executed(Rc<CID<CanonResultCidAggregate>>),
+    Executed(CID<CanonResultCidAggregate>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CanonResultCidAggregate {
-    pub tetraplet: Rc<CID<SecurityTetraplet>>,
-    pub values: Vec<Rc<CID<CanonCidAggregate>>>,
+    pub tetraplet: CID<SecurityTetraplet>,
+    pub values: Vec<CID<CanonCidAggregate>>,
 }
 
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CanonCidAggregate {
-    pub value: Rc<CID<serde_json::Value>>,
-    pub tetraplet: Rc<CID<SecurityTetraplet>>,
+    pub value: CID<serde_json::Value>,
+    pub tetraplet: CID<SecurityTetraplet>,
     pub provenance: Provenance,
 }
 
@@ -214,11 +214,11 @@ pub enum Provenance {
     Literal,
     ServiceResult {
         // the original call result CID; not changed on lambda application
-        cid: Rc<CID<ServiceResultCidAggregate>>,
+        cid: CID<ServiceResultCidAggregate>,
     },
     Canon {
         // the original canon CID; not changed on lambda application
-        cid: Rc<CID<CanonResultCidAggregate>>,
+        cid: CID<CanonResultCidAggregate>,
     },
 }
 

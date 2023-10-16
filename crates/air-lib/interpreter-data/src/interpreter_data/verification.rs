@@ -21,7 +21,7 @@ use crate::ExecutedState;
 use crate::ExecutionTrace;
 use crate::InterpreterData;
 
-use air_interpreter_cid::CID;
+use air_interpreter_cid::{CidRef, CID};
 use air_interpreter_signatures::PublicKey;
 use air_interpreter_signatures::Signature;
 use air_interpreter_signatures::SignatureStore;
@@ -179,11 +179,11 @@ fn collect_peers_cids_from_trace<'data>(
 fn try_push_cid<T>(
     grouped_cids: &mut HashMap<Box<str>, PeerInfo<'_>>,
     peer_pk: &str,
-    cid: &Rc<CID<T>>,
+    cid: &CID<T>,
 ) -> Result<(), DataVerifierError> {
     match grouped_cids.get_mut(peer_pk) {
         Some(peer_info) => {
-            peer_info.cids.push((**cid).clone().into_inner().into());
+            peer_info.cids.push(cid.get_inner());
             Ok(())
         }
         None => Err(DataVerifierError::PeerIdNotFound(peer_pk.into())),
@@ -214,7 +214,7 @@ fn check_cid_multiset_invariant(
     }
 }
 
-fn to_count_map(cids: &Vec<Box<str>>) -> HashMap<&str, usize> {
+fn to_count_map(cids: &Vec<Rc<CidRef>>) -> HashMap<&str, usize> {
     let mut count_map = HashMap::<_, usize>::new();
     for cid in cids {
         // the counter can't overflow, the memory will overflow first
@@ -244,7 +244,7 @@ struct PeerInfo<'data> {
     /// A peer's signature.
     signature: &'data Signature,
     /// Sorted vector of CIDs that belong to the peer.
-    cids: Vec<Box<str>>,
+    cids: Vec<Rc<CidRef>>,
 }
 
 impl<'data> PeerInfo<'data> {

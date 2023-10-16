@@ -35,7 +35,6 @@ use air_parser::AirPos;
 use air_trace_handler::merger::MergerCanonResult;
 
 use std::borrow::Cow;
-use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
@@ -65,7 +64,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonMap<'i> {
 fn epilog_closure<'closure, 'name: 'closure>(canon_stream_map_name: &'name str) -> Box<CanonEpilogClosure<'closure>> {
     Box::new(
         move |canon_stream: CanonStream,
-              canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
+              canon_result_cid: CID<CanonResultCidAggregate>,
               exec_ctx: &mut ExecutionCtx<'_>,
               trace_ctx: &mut TraceHandler|
               -> ExecutionResult<()> {

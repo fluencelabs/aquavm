@@ -16,7 +16,7 @@
 
 use crate::SaltedData;
 
-use air_interpreter_cid::CID;
+use air_interpreter_cid::{CidRef, CID};
 use fluence_keypair::error::SigningError;
 use fluence_keypair::KeyPair;
 
@@ -26,7 +26,7 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct PeerCidTracker {
     current_peer_id: Rc<String>,
-    cids: Vec<Box<str>>,
+    cids: Vec<Rc<CidRef>>,
 }
 
 impl PeerCidTracker {
@@ -39,7 +39,7 @@ impl PeerCidTracker {
 
     pub fn register<T>(&mut self, peer: &str, cid: &CID<T>) {
         if peer == *self.current_peer_id {
-            self.cids.push(cid.clone().into_inner().into())
+            self.cids.push(cid.get_inner())
         }
     }
 
@@ -53,7 +53,7 @@ impl PeerCidTracker {
 }
 
 fn sign_cids(
-    mut cids: Vec<Box<str>>,
+    mut cids: Vec<Rc<CidRef>>,
     salt: &str,
     keypair: &KeyPair,
 ) -> Result<crate::Signature, SigningError> {

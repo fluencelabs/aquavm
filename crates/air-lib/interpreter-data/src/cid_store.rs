@@ -18,6 +18,7 @@ use crate::JValue;
 
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CidRef;
 use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
@@ -28,7 +29,7 @@ use std::{collections::HashMap, rc::Rc};
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
-pub struct CidStore<Val>(HashMap<Rc<CID<Val>>, Rc<Val>>);
+pub struct CidStore<Val>(HashMap<CID<Val>, Rc<Val>>);
 
 impl<Val> CidStore<Val> {
     pub fn new() -> Self {
@@ -47,21 +48,21 @@ impl<Val> CidStore<Val> {
         self.0.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&Rc<CID<Val>>, &Rc<Val>)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&CID<Val>, &Rc<Val>)> {
         self.0.iter()
     }
 
     pub fn check_reference<Src>(
         &self,
         _source_cid: &CID<Src>,
-        target_cid: &Rc<CID<Val>>,
+        target_cid: &CID<Val>,
     ) -> Result<(), CidStoreVerificationError> {
         self.0
             .get(target_cid)
             .ok_or_else(|| CidStoreVerificationError::MissingReference {
                 source_type_name: std::any::type_name::<Src>(),
                 target_type_name: std::any::type_name::<Val>(),
-                target_cid_repr: (**target_cid).clone().into_inner(),
+                target_cid_repr: target_cid.get_inner(),
             })?;
         Ok(())
     }
@@ -71,10 +72,10 @@ impl<Val: Serialize> CidStore<Val> {
     pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
         for (cid, value) in &self.0 {
             let expected_cid = value_to_json_cid::<Val>(value)?;
-            if expected_cid != **cid {
+            if expected_cid != *cid {
                 return Err(CidStoreVerificationError::MismatchError {
                     type_name: std::any::type_name::<Val>(),
-                    cid_repr: (**cid).clone().into_inner(),
+                    cid_repr: (*cid).get_inner(),
                 });
             }
         }
@@ -91,14 +92,14 @@ pub enum CidStoreVerificationError {
     MismatchError {
         // nb: type_name is std::any::type_name() result that may be inconsistent between the Rust compiler versions
         type_name: &'static str,
-        cid_repr: String,
+        cid_repr: Rc<CidRef>,
     },
 
     #[error("Reference CID {target_cid_repr:?} from type {source_type_name:?} to {target_type_name:?} was not found")]
     MissingReference {
         source_type_name: &'static str,
         target_type_name: &'static str,
-        target_cid_repr: String,
+        target_cid_repr: Rc<CidRef>,
     },
 }
 
@@ -110,7 +111,7 @@ impl<Val> Default for CidStore<Val> {
 
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
-    cids: HashMap<Rc<CID<Val>>, Rc<Val>>,
+    cids: HashMap<CID<Val>, Rc<Val>>,
 }
 
 impl<Val> CidTracker<Val> {
@@ -136,9 +137,9 @@ impl<Val: Serialize> CidTracker<Val> {
     pub fn track_value(
         &mut self,
         value: impl Into<Rc<Val>>,
-    ) -> Result<Rc<CID<Val>>, CidCalculationError> {
+    ) -> Result<CID<Val>, CidCalculationError> {
         let value = value.into();
-        let cid = Rc::new(value_to_json_cid(&*value)?);
+        let cid = value_to_json_cid(&*value)?;
         self.cids.insert(cid.clone(), value);
         Ok(cid)
     }
@@ -159,9 +160,9 @@ impl<Val> From<CidTracker<Val>> for CidStore<Val> {
 }
 
 impl<Val> IntoIterator for CidStore<Val> {
-    type Item = (Rc<CID<Val>>, Rc<Val>);
+    type Item = (CID<Val>, Rc<Val>);
 
-    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID<Val>>, Rc<Val>>;
+    type IntoIter = std::collections::hash_map::IntoIter<CID<Val>, Rc<Val>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()

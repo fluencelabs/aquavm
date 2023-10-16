@@ -45,14 +45,14 @@ pub enum ValueAggregate {
         result: ServiceResultAggregate,
         // the original call result CID; not changed on lambda application
         #[serde(rename = "cid")]
-        provenance_cid: Rc<CID<ServiceResultCidAggregate>>,
+        provenance_cid: CID<ServiceResultCidAggregate>,
     },
     Canon {
         #[serde(flatten)]
         result: CanonResultAggregate,
         // the original canon CID; not changed on lambda application
         #[serde(rename = "cid")]
-        provenance_cid: Rc<CID<CanonResultCidAggregate>>,
+        provenance_cid: CID<CanonResultCidAggregate>,
     },
 }
 
@@ -109,7 +109,7 @@ impl ValueAggregate {
 
     pub(crate) fn from_service_result(
         service_result: ServiceResultAggregate,
-        service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>,
+        service_result_agg_cid: CID<ServiceResultCidAggregate>,
     ) -> Self {
         Self::ServiceResult {
             result: service_result,
@@ -119,7 +119,7 @@ impl ValueAggregate {
 
     pub(crate) fn from_canon_result(
         canon_result: CanonResultAggregate,
-        canon_result_agg_cid: Rc<CID<CanonResultCidAggregate>>,
+        canon_result_agg_cid: CID<CanonResultCidAggregate>,
     ) -> Self {
         Self::Canon {
             result: canon_result,

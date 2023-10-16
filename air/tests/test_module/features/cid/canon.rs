@@ -230,7 +230,7 @@ fn test_canon_value_not_found() {
     cid_state.value_tracker = CidTracker::<_>::new();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    let expected_error = ValueForCidNotFound("value", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("value", missing_cid.into());
     assert!(check_error(&result, expected_error));
 }
 
@@ -281,7 +281,7 @@ fn test_canon_root_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
     assert!(check_error(&result, expected_error));
 }
 
@@ -337,7 +337,7 @@ fn test_canon_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
     assert!(check_error(&result, expected_error), "{}", result.error_message);
 }
 
@@ -383,6 +383,6 @@ fn test_canon_agg_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("canon aggregate", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("canon aggregate", missing_cid.into());
     assert!(check_error(&result, expected_error));
 }

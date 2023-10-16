@@ -126,7 +126,7 @@ fn value_for_cid_not_found() {
     let data = raw_data_from_trace(wrong_trace, <_>::default());
     let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
 
-    let missing_cid = String::from("bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq");
+    let missing_cid = "bagaaierax2kxw256denmh2rmtot4cnuvz7wrf6e2l7jnxhtv3qb6xvqj2vhq".into();
     let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
     assert!(check_error(&result, expected_error));
 }

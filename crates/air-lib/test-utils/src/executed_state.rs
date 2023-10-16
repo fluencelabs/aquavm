@@ -46,7 +46,7 @@ use std::rc::Rc;
 pub fn simple_value_aggregate_cid(
     result: impl Into<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     let value_cid = cid_state
         .value_tracker
         .track_value(Rc::new(result.into()))
@@ -72,7 +72,7 @@ pub fn value_aggregate_cid(
     tetraplet: SecurityTetraplet,
     args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     let value_cid = cid_state
         .value_tracker
         .track_value(Rc::new(result.into()))
@@ -83,7 +83,7 @@ pub fn value_aggregate_cid(
         .unwrap();
 
     let arguments = serde_json::Value::Array(args);
-    let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
+    let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
 
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
@@ -344,7 +344,7 @@ impl ExecutedCallBuilder {
 
     pub fn unused(self) -> ExecutedState {
         let value_cid = value_to_json_cid(&self.result).unwrap();
-        let value = ValueRef::Unused(value_cid.into());
+        let value = ValueRef::Unused(value_cid);
         ExecutedState::Call(CallResult::Executed(value))
     }
 
@@ -389,7 +389,7 @@ impl ExecutedCallBuilder {
 
 pub fn extract_service_result_cid(
     stream_exec_state: &ExecutedState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     match stream_exec_state {
         ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid, .. })) => cid.clone(),
         ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))) => cid.clone(),
@@ -397,7 +397,7 @@ pub fn extract_service_result_cid(
     }
 }
 
-pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> Rc<CID<CanonResultCidAggregate>> {
+pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> CID<CanonResultCidAggregate> {
     match canon_state {
         ExecutedState::Canon(CanonResult::Executed(cid)) => cid.clone(),
         _ => panic!("the function is intended for executed canon only"),
