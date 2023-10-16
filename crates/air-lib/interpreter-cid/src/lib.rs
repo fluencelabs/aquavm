@@ -168,27 +168,19 @@ mod tests {
     fn test_cid_sha2_256() {
         assert_eq!(
             value_to_json_cid(&json!("test")).unwrap(),
-            CID::new(
-                    "bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa"
-                )
+            CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
         );
         assert_eq!(
             value_to_json_cid(&json!([1, 2, 3])).unwrap(),
-            CID::new(
-                    "bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a"
-                )
+            CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
         );
         assert_eq!(
             value_to_json_cid(&json!(1)).unwrap(),
-            CID::new(
-                    "bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq"
-                )
+            CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
         );
         assert_eq!(
             value_to_json_cid(&json!({"key": 42})).unwrap(),
-            CID::new(
-                    "bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq"
-                )
+            CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
         );
     }
 }

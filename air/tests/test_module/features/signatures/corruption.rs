@@ -18,6 +18,7 @@
 /// values forged in the CID stores.
 use air::ExecutionCidState;
 use air::PreparationError;
+use air_interpreter_cid::CidVerificationError;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::PublicKey;
 use air_interpreter_signatures::SignatureStore;
@@ -92,10 +93,13 @@ fn test_attack_replace_value() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "serde_json::value::Value",
-            cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "serde_json::value::Value",
+                cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".into(),
+            }
+            .into()
+        )
     );
 }
 
@@ -165,10 +169,13 @@ fn test_attack_replace_tetraplet() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "marine_call_parameters::SecurityTetraplet",
-            cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "marine_call_parameters::SecurityTetraplet",
+                cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".into(),
+            }
+            .into()
+        )
     );
 }
 
@@ -245,10 +252,13 @@ fn test_attack_replace_call_result() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
-            cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
+                cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".into(),
+            }
+            .into()
+        )
     );
 }
 
@@ -332,10 +342,13 @@ fn test_attack_replace_canon_value() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
-            cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
+                cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".into(),
+            }
+            .into()
+        )
     );
 }
 
@@ -428,10 +441,13 @@ fn test_attack_replace_canon_result_values() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
+                cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
+            }
+            .into()
+        )
     );
 }
 
@@ -528,9 +544,12 @@ fn test_attack_replace_canon_result_tetraplet() {
 
     assert_error_eq!(
         &res,
-        PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
-            type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
-        })
+        PreparationError::CidStoreVerificationError(
+            CidVerificationError::MismatchError {
+                type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
+                cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
+            }
+            .into()
+        )
     );
 }
