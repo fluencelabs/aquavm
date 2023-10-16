@@ -26,6 +26,7 @@ use crate::verification_step::verify;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_log_targets::RUN_PARAMS;
+use air_utils::farewell_if_fail;
 use air_utils::measure;
 
 #[tracing::instrument(skip_all)]
@@ -62,38 +63,22 @@ fn execute_air_impl(
     let ParsedDataPair {
         prev_data,
         current_data,
-    } = match parse_data(&raw_prev_data, &raw_current_data) {
-        Ok(parsed_datas) => parsed_datas,
-        // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
-    };
+    } = farewell_if_fail!(parse_data(&raw_prev_data, &raw_current_data), raw_prev_data);
 
     // TODO currently we use particle ID, but it should be changed to signature,
     // as partical ID can be equally replayed
     let salt = params.particle_id.clone();
-    let signature_store = match verify(&prev_data, &current_data, &salt) {
-        Ok(signature_store) => signature_store,
-        // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
-    };
+    let signature_store = farewell_if_fail!(verify(&prev_data, &current_data, &salt), raw_prev_data);
 
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
         keypair,
-    } = match prepare(
-        prev_data,
-        current_data,
-        air.as_str(),
-        &call_results,
-        params,
-        signature_store,
-    ) {
-        Ok(descriptor) => descriptor,
-        // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
-    };
+    } = farewell_if_fail!(
+        prepare(prev_data, current_data, &air, &call_results, params, signature_store,),
+        raw_prev_data
+    );
 
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
@@ -103,15 +88,15 @@ fn execute_air_impl(
         "execute",
     );
 
-    match sign_produced_cids(
-        &mut exec_ctx.peer_cid_tracker,
-        &mut exec_ctx.signature_store,
-        &salt,
-        &keypair,
-    ) {
-        Ok(()) => {}
-        Err(error) => return Err(farewell::from_uncatchable_error(raw_prev_data, error)),
-    }
+    farewell_if_fail!(
+        sign_produced_cids(
+            &mut exec_ctx.peer_cid_tracker,
+            &mut exec_ctx.signature_store,
+            &salt,
+            &keypair,
+        ),
+        raw_prev_data
+    );
 
     measure!(
         match exec_result {
