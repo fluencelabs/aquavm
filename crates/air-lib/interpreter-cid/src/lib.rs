@@ -32,6 +32,7 @@ pub use crate::verify::{verify_value, CidVerificationError};
 
 use serde::Deserialize;
 use serde::Serialize;
+use thiserror::Error as ThisError;
 
 use std::fmt;
 use std::io::BufWriter;
@@ -124,34 +125,14 @@ pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
     CID::new(cid.to_string())
 }
 
-pub struct CidCalculationError(serde_json::Error);
-
-impl fmt::Debug for CidCalculationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.0, f)
-    }
-}
-
-impl fmt::Display for CidCalculationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.0, f)
-    }
-}
-
-impl From<serde_json::Error> for CidCalculationError {
-    fn from(source: serde_json::Error) -> Self {
-        Self(source)
-    }
-}
-
-impl std::error::Error for CidCalculationError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        Some(&self.0)
-    }
+#[derive(Debug, ThisError)]
+pub enum CidCalculationError {
+    #[error(transparent)]
+    Json(#[from] serde_json::Error),
 }
 
 /// Calculate a CID of JSON-serialized value.
-// TODO we might refactor this to `SerializationFormat` trait
+// TODO we might refactor this to `SerializationCodec` trait
 // that both transform data to binary/text form (be it JSON, CBOR or something else)
 // and produces CID too
 pub fn value_to_json_cid<Val: Serialize + ?Sized>(
