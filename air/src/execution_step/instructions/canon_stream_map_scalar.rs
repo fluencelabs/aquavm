@@ -68,7 +68,7 @@ impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
 fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<CanonEpilogClosure<'closure>> {
     Box::new(
         move |canon_stream: CanonStream,
-              canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
+              canon_result_cid: CID<CanonResultCidAggregate>,
               exec_ctx: &mut ExecutionCtx<'_>,
               trace_ctx: &mut TraceHandler|
               -> ExecutionResult<()> {

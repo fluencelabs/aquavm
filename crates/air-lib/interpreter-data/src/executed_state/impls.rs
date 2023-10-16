@@ -43,25 +43,25 @@ impl CallResult {
         Self::Executed(value_ref)
     }
 
-    pub fn executed_scalar(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
+    pub fn executed_scalar(service_result_agg_cid: CID<ServiceResultCidAggregate>) -> Self {
         Self::executed_service_result(ValueRef::Scalar(service_result_agg_cid))
     }
 
-    pub fn executed_stream_stub(cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
+    pub fn executed_stream_stub(cid: CID<ServiceResultCidAggregate>) -> CallResult {
         let generation = GenerationIdx::stub();
         let value = ValueRef::Stream { cid, generation };
         CallResult::Executed(value)
     }
 
-    pub fn executed_unused(value_cid: Rc<CID<JValue>>) -> CallResult {
+    pub fn executed_unused(value_cid: CID<JValue>) -> CallResult {
         Self::executed_service_result(ValueRef::Unused(value_cid))
     }
 
-    pub fn failed(service_result_agg_cid: Rc<CID<ServiceResultCidAggregate>>) -> CallResult {
+    pub fn failed(service_result_agg_cid: CID<ServiceResultCidAggregate>) -> CallResult {
         CallResult::Failed(service_result_agg_cid)
     }
 
-    pub fn get_cid(&self) -> Option<&Rc<CID<ServiceResultCidAggregate>>> {
+    pub fn get_cid(&self) -> Option<&CID<ServiceResultCidAggregate>> {
         match self {
             CallResult::RequestSentBy(_) => None,
             CallResult::Executed(executed) => executed.get_cid(),
@@ -105,7 +105,7 @@ impl ApResult {
 }
 
 impl CanonResult {
-    pub fn executed(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+    pub fn executed(cid: CID<CanonResultCidAggregate>) -> Self {
         CanonResult::Executed(cid)
     }
 
@@ -115,18 +115,15 @@ impl CanonResult {
 }
 
 impl CanonResultCidAggregate {
-    pub fn new(
-        tetraplet: Rc<CID<SecurityTetraplet>>,
-        values: Vec<Rc<CID<CanonCidAggregate>>>,
-    ) -> Self {
+    pub fn new(tetraplet: CID<SecurityTetraplet>, values: Vec<CID<CanonCidAggregate>>) -> Self {
         Self { tetraplet, values }
     }
 }
 
 impl CanonCidAggregate {
     pub fn new(
-        value: Rc<CID<serde_json::Value>>,
-        tetraplet: Rc<CID<SecurityTetraplet>>,
+        value: CID<serde_json::Value>,
+        tetraplet: CID<SecurityTetraplet>,
         provenance: Provenance,
     ) -> Self {
         Self {
@@ -139,9 +136,9 @@ impl CanonCidAggregate {
 
 impl ServiceResultCidAggregate {
     pub fn new(
-        value_cid: Rc<CID<JValue>>,
+        value_cid: CID<JValue>,
         argument_hash: Rc<str>,
-        tetraplet_cid: Rc<CID<SecurityTetraplet>>,
+        tetraplet_cid: CID<SecurityTetraplet>,
     ) -> Self {
         Self {
             value_cid,
@@ -158,12 +155,12 @@ impl Provenance {
     }
 
     #[inline]
-    pub fn service_result(cid: Rc<CID<ServiceResultCidAggregate>>) -> Self {
+    pub fn service_result(cid: CID<ServiceResultCidAggregate>) -> Self {
         Self::ServiceResult { cid }
     }
 
     #[inline]
-    pub fn canon(cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+    pub fn canon(cid: CID<CanonResultCidAggregate>) -> Self {
         Self::Canon { cid }
     }
 }
@@ -211,7 +208,7 @@ impl std::fmt::Display for ExecutedState {
 }
 
 impl ValueRef {
-    pub(crate) fn get_cid(&self) -> Option<&Rc<CID<ServiceResultCidAggregate>>> {
+    pub(crate) fn get_cid(&self) -> Option<&CID<ServiceResultCidAggregate>> {
         match self {
             ValueRef::Scalar(cid) => Some(cid),
             ValueRef::Stream { cid, .. } => Some(cid),

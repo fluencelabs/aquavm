@@ -112,11 +112,11 @@ impl fmt::Display for CanonStreamMap<'_> {
 #[derive(Debug, Clone)]
 pub struct CanonStreamMapWithProvenance<'a> {
     pub(crate) canon_stream_map: CanonStreamMap<'a>,
-    pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
+    pub(crate) cid: CID<CanonResultCidAggregate>,
 }
 
 impl<'a> CanonStreamMapWithProvenance<'a> {
-    pub(crate) fn new(canon_stream_map: CanonStreamMap<'a>, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+    pub(crate) fn new(canon_stream_map: CanonStreamMap<'a>, cid: CID<CanonResultCidAggregate>) -> Self {
         Self { canon_stream_map, cid }
     }
 }

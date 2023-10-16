@@ -42,7 +42,7 @@ fn test_missing_cid() {
 
     let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    let missing_cid = String::from("bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq");
+    let missing_cid = "bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq".into();
     let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
     assert!(check_error(&result, expected_error), "{:?}", result);
 }

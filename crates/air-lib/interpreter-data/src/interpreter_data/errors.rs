@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use std::rc::Rc;
+
+use air_interpreter_cid::CidRef;
 use thiserror::Error as ThisError;
 #[derive(Debug, ThisError)]
 pub enum DataVerifierError {
@@ -29,7 +32,7 @@ pub enum DataVerifierError {
     #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
     SignatureMismatch {
         error: Box<fluence_keypair::error::VerificationError>,
-        cids: Vec<Box<str>>,
+        cids: Vec<Rc<CidRef>>,
         peer_id: String,
     },
 
@@ -38,7 +41,7 @@ pub enum DataVerifierError {
     )]
     MergeMismatch {
         peer_id: String,
-        larger_cids: Vec<Box<str>>,
-        smaller_cids: Vec<Box<str>>,
+        larger_cids: Vec<Rc<CidRef>>,
+        smaller_cids: Vec<Rc<CidRef>>,
     },
 }

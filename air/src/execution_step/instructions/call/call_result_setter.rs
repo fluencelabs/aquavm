@@ -65,9 +65,7 @@ pub(crate) fn populate_context_from_peer_service_result<'i>(
             Ok(CallResult::executed_stream_stub(service_result_agg_cid))
         }
         CallOutputValue::None => {
-            let value_cid = value_to_json_cid(&*executed_result.result)
-                .map_err(UncatchableError::from)?
-                .into();
+            let value_cid = value_to_json_cid(&*executed_result.result).map_err(UncatchableError::from)?;
 
             Ok(CallResult::executed_unused(value_cid))
         }

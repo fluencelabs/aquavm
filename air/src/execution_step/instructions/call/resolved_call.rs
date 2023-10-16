@@ -29,6 +29,7 @@ use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::CidRef;
 use air_interpreter_data::CallResult;
 use air_interpreter_interface::CallRequestParams;
 use air_parser::ast;
@@ -102,12 +103,8 @@ impl<'i> ResolvedCall<'i> {
             CheckArgsResult::Ok(args) => Some(args),
             CheckArgsResult::Joinable(_) => None,
         };
-        let argument_hash: Option<Rc<str>> = checked_args.map(|args| {
-            value_to_json_cid(&args)
-                .expect("JSON serializer shouldn't fail")
-                .into_inner()
-                .into()
-        });
+        let argument_hash: Option<Rc<CidRef>> =
+            checked_args.map(|args| value_to_json_cid(&args).expect("serializer shouldn't fail").get_inner());
 
         let state = self.prepare_current_executed_state(raw_call, argument_hash.as_ref(), exec_ctx, trace_ctx)?;
 

@@ -27,9 +27,7 @@ use air_interpreter_data::CanonResultCidAggregate;
 use air_parser::ast::ResolvableToPeerIdVariable;
 use polyplets::SecurityTetraplet;
 
-use std::rc::Rc;
-
-pub(crate) type CanonEpilogClosure<'closure> = dyn Fn(CanonStream, Rc<CID<CanonResultCidAggregate>>, &mut ExecutionCtx<'_>, &mut TraceHandler) -> ExecutionResult<()>
+pub(crate) type CanonEpilogClosure<'closure> = dyn Fn(CanonStream, CID<CanonResultCidAggregate>, &mut ExecutionCtx<'_>, &mut TraceHandler) -> ExecutionResult<()>
     + 'closure;
 
 pub(crate) type CreateCanonStreamClosure<'closure> = dyn Fn(&mut ExecutionCtx<'_>, String) -> CanonStream + 'closure;
@@ -78,7 +76,7 @@ pub(crate) fn handle_canon_request_sent_by(
 pub(crate) fn handle_canon_executed(
     peer_id_var: &ResolvableToPeerIdVariable<'_>,
     epilog: &CanonEpilogClosure<'_>,
-    canon_result_cid: Rc<CID<CanonResultCidAggregate>>,
+    canon_result_cid: CID<CanonResultCidAggregate>,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
@@ -143,7 +141,7 @@ fn create_canon_stream_for_first_time(
 fn populate_seen_cid_context(
     exec_ctx: &mut ExecutionCtx<'_>,
     peer_id: &str,
-    canon_result_cid: &Rc<CID<CanonResultCidAggregate>>,
+    canon_result_cid: &CID<CanonResultCidAggregate>,
 ) {
     exec_ctx.record_canon_cid(peer_id, canon_result_cid)
 }
@@ -151,7 +149,7 @@ fn populate_seen_cid_context(
 fn populate_unseen_cid_context(
     exec_ctx: &mut ExecutionCtx<'_>,
     canon_stream: &CanonStream,
-) -> ExecutionResult<Rc<CID<CanonResultCidAggregate>>> {
+) -> ExecutionResult<CID<CanonResultCidAggregate>> {
     let value_cids = canon_stream
         .iter()
         .map(|canon_value| exec_ctx.cid_state.track_canon_value(canon_value))

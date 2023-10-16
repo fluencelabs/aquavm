@@ -32,18 +32,37 @@ use serde::Serialize;
 use std::fmt;
 use std::io::BufWriter;
 use std::marker::PhantomData;
+use std::rc::Rc;
+
+/// Should-be-opaque type for the inner representation of CID.
+/// It has to be serializable and Borsh-serializable, as well as implement `Debug`, `Eq`, `Ord`, `Hash` and similar
+/// basic traits.  It is also can be unsized.
+// You should be able to replace it with [u8], and most of the code will just work.
+pub type CidRef = str;
 
 #[derive(Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct CID<T: ?Sized>(String, #[serde(skip)] PhantomData<*const T>);
+pub struct CID<T: ?Sized>(Rc<CidRef>, #[serde(skip)] PhantomData<*const T>);
 
 impl<T: ?Sized> CID<T> {
-    pub fn new(cid: impl Into<String>) -> Self {
+    pub fn new(cid: impl Into<Rc<CidRef>>) -> Self {
         Self(cid.into(), PhantomData)
     }
 
-    pub fn into_inner(self) -> String {
-        self.0
+    pub fn get_inner(&self) -> Rc<CidRef> {
+        self.0.clone()
+    }
+}
+
+impl<T: ?Sized> std::convert::AsRef<CidRef> for CID<T> {
+    fn as_ref(&self) -> &CidRef {
+        &self.0
+    }
+}
+
+impl<T: ?Sized> std::borrow::Borrow<CidRef> for CID<T> {
+    fn borrow(&self) -> &CidRef {
+        &self.0
     }
 }
 
@@ -71,12 +90,6 @@ impl<Val> std::hash::Hash for CID<Val> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
         self.1.hash(state);
-    }
-}
-
-impl<T: ?Sized> From<CID<T>> for String {
-    fn from(value: CID<T>) -> Self {
-        value.0
     }
 }
 

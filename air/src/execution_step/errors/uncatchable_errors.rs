@@ -23,6 +23,7 @@ use crate::StreamMapKeyError;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CidRef;
 use air_interpreter_data::ValueRef;
 use air_trace_handler::GenerationCompactificationError;
 use air_trace_handler::IntConversionError;
@@ -32,6 +33,8 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+use std::rc::Rc;
 
 /// Uncatchable errors arisen during AIR script execution. Uncatchable here means that these errors
 /// couldn't be handled by a xor instruction and their error_code couldn't be used in a match
@@ -90,7 +93,7 @@ pub enum UncatchableError {
     /// We consider now that every CID should present in the data;
     /// and not having any CID is considered a non-catching error.
     #[error("{0} for CID {1:?} not found")]
-    ValueForCidNotFound(&'static str, String),
+    ValueForCidNotFound(&'static str, Rc<CidRef>),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error(

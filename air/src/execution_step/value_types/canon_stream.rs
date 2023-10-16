@@ -103,11 +103,11 @@ impl fmt::Display for CanonStream {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStreamWithProvenance {
     pub(crate) canon_stream: CanonStream,
-    pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
+    pub(crate) cid: CID<CanonResultCidAggregate>,
 }
 
 impl CanonStreamWithProvenance {
-    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+    pub(crate) fn new(canon_stream: CanonStream, cid: CID<CanonResultCidAggregate>) -> Self {
         Self { canon_stream, cid }
     }
 }

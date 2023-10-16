@@ -538,7 +538,7 @@ mod test {
 
         let trace = ExecutionTrace::from(vec![]);
         let mut trace_ctx = TraceHandler::from_trace(trace.clone(), trace);
-        let canon_result = CanonResult::executed(Rc::new(CID::new("fake canon CID")));
+        let canon_result = CanonResult::executed(CID::new("fake canon CID"));
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result.clone());
         trace_ctx.meet_canon_end(canon_result);
