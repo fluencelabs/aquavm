@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.52.0](https://github.com/fluencelabs/aquavm/compare/air-v0.51.0...air-v0.52.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** intro farewell_if_error_macro ([#719](https://github.com/fluencelabs/aquavm/issues/719))
+
+### Features
+
+* **execution-engine:** intro farewell_if_error_macro ([#719](https://github.com/fluencelabs/aquavm/issues/719)) ([cdcb86c](https://github.com/fluencelabs/aquavm/commit/cdcb86cb554d6462e0a1a50b12aef6571669a7b1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.12.0 to 0.12.1
+    * air-trace-handler bumped from 0.5.4 to 0.5.5
+    * air-utils bumped from 0.1.1 to 0.2.0
+
 ## [0.51.0](https://github.com/fluencelabs/aquavm/compare/air-v0.50.0...air-v0.51.0) (2023-10-13)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.52.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.51.0...air-interpreter-v0.52.0) (2023-10-16)
+
+
+### Miscellaneous Chores
+
+* **air-interpreter:** Synchronize air-interpreter versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.51.0 to 0.52.0
+
 ## [0.51.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.50.0...air-interpreter-v0.51.0) (2023-10-13)
 
 

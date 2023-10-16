@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/fluencelabs/aquavm/compare/air-utils-v0.1.1...air-utils-v0.2.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** intro farewell_if_error_macro ([#719](https://github.com/fluencelabs/aquavm/issues/719))
+
+### Features
+
+* **execution-engine:** intro farewell_if_error_macro ([#719](https://github.com/fluencelabs/aquavm/issues/719)) ([cdcb86c](https://github.com/fluencelabs/aquavm/commit/cdcb86cb554d6462e0a1a50b12aef6571669a7b1))
+
 ## [0.1.1](https://github.com/fluencelabs/aquavm/compare/air-utils-v0.1.0...air-utils-v0.1.1) (2023-06-22)
 
 
