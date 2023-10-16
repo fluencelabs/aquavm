@@ -64,6 +64,26 @@
     * avm-interface bumped from 0.29.1 to 0.29.2
     * avm-server bumped from 0.33.1 to 0.33.2
 
+## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.11.1...air-test-utils-v0.12.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718))
+
+### Features
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718)) ([c2108e0](https://github.com/fluencelabs/aquavm/commit/c2108e0fa09ea83854bb48c640e0cf23883a0bd0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.52.0 to 0.53.0
+    * air-interpreter-cid bumped from 0.4.0 to 0.5.0
+    * air-interpreter-data bumped from 0.12.1 to 0.13.0
+
 ## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.10.6...air-test-utils-v0.11.0) (2023-10-13)
 
 

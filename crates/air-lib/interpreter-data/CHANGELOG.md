@@ -25,6 +25,25 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.12.1...air-interpreter-data-v0.13.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718))
+
+### Features
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718)) ([c2108e0](https://github.com/fluencelabs/aquavm/commit/c2108e0fa09ea83854bb48c640e0cf23883a0bd0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.4.0 to 0.5.0
+    * air-interpreter-signatures bumped from 0.1.2 to 0.1.3
+
 ## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.11.3...air-interpreter-data-v0.12.0) (2023-10-13)
 
 
