@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.4.0...air-interpreter-cid-v0.5.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718))
+
+### Features
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718)) ([c2108e0](https://github.com/fluencelabs/aquavm/commit/c2108e0fa09ea83854bb48c640e0cf23883a0bd0))
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.3.0...air-interpreter-cid-v0.4.0) (2023-10-13)
 
 
