@@ -94,7 +94,7 @@ fn test_attack_replace_value() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "serde_json::value::Value",
-            cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".to_owned(),
+            cid_repr: "bagaaierabjifaczkgq2745dsq57lelki2r5cfduunmfzsgvxiavi2ahwwmwq".into(),
         })
     );
 }
@@ -167,7 +167,7 @@ fn test_attack_replace_tetraplet() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "marine_call_parameters::SecurityTetraplet",
-            cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".to_owned(),
+            cid_repr: "bagaaierapisclqfeq36psuo6uxiazvcash32pndayqlwxrqchii2ykxerfba".into(),
         })
     );
 }
@@ -196,7 +196,7 @@ fn test_attack_replace_call_result() {
 
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_trace_1 = scalar_tracked!("alice", &mut mallory_cid_state, peer = &alice_peer_id);
-    let alice_trace_1_cid = (*extract_service_result_cid(&alice_trace_1)).clone().into_inner();
+    let alice_trace_1_cid = extract_service_result_cid(&alice_trace_1).get_inner();
 
     let mallory_trace = vec![
         alice_trace_1,
@@ -210,7 +210,7 @@ fn test_attack_replace_call_result() {
         .unwrap()
         .iter_mut()
     {
-        if *cid == alice_trace_1_cid {
+        if &*cid == &*alice_trace_1_cid {
             service_cid_val["argument_hash"] = "42".into();
             cnt += 1;
         }
@@ -247,7 +247,7 @@ fn test_attack_replace_call_result() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
-            cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".to_owned(),
+            cid_repr: "bagaaierarbji6ebokx3pantdp6xg2l57bhdj7pmlydwe2wnbd6fdkatg7xka".into(),
         })
     );
 }
@@ -334,7 +334,7 @@ fn test_attack_replace_canon_value() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
-            cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".to_owned(),
+            cid_repr: "bagaaierayrb7yu6tvdofr3d7tvuzx7fb3uve27rqty4ckzy7ox66oicuhjjq".into(),
         })
     );
 }
@@ -430,7 +430,7 @@ fn test_attack_replace_canon_result_values() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".to_owned(),
+            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
         })
     );
 }
@@ -530,7 +530,7 @@ fn test_attack_replace_canon_result_tetraplet() {
         &res,
         PreparationError::CidStoreVerificationError(CidStoreVerificationError::MismatchError {
             type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".to_owned(),
+            cid_repr: "bagaaieratezrhuyz2eprlmiidxywv6ir2tmswlxycad37noykg3p5oxhs5tq".into(),
         })
     );
 }
