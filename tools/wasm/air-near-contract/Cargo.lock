@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-cid"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "cid",
  "multihash 0.18.1",
@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.11.3"
+version = "0.12.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -89,7 +89,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-signatures"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "air-interpreter-cid",
  "borsh 0.10.3",
@@ -127,7 +127,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.50.0"
+version = "0.52.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -139,7 +139,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.3"
+version = "0.5.5"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -156,7 +156,7 @@ dependencies = [
 
 [[package]]
 name = "air-utils"
-version = "0.1.1"
+version = "0.2.0"
 
 [[package]]
 name = "android-tzdata"
@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.50.0"
+version = "0.52.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
