@@ -33,11 +33,8 @@ pub enum CidVerificationError {
 
     #[error("JSON error: {0}")]
     JsonError(#[from] serde_json::Error),
-
     #[error(transparent)]
     MalformedCid(#[from] cid::Error),
-    #[error(transparent)]
-    MalformedMultihash(#[from] multihash::Error),
     #[error("unsupported CID codec: {0}")]
     UnsupportedCidCodec(u64),
     #[error("unsupported multihash code: {0}")]
@@ -65,7 +62,9 @@ fn verify_json_value<Val: Serialize>(
     use multihash::Code;
 
     let raw_code = mhash.code();
-    let code: Code = raw_code.try_into()?;
+    let code: Code = raw_code
+        .try_into()
+        .map_err(|_| CidVerificationError::UnsupportedHashCode(raw_code))?;
 
     let expected_hash = match code {
         Code::Sha2_256 => value_json_hash::<sha2::Sha256, Val>(value)?,
@@ -87,6 +86,7 @@ fn verify_json_value<Val: Serialize>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use multihash::Multihash;
     use serde_json::json;
 
     #[test]
@@ -136,5 +136,108 @@ mod tests {
             &json!({"key": 42}),
         )
         .unwrap();
+    }
+
+    #[test]
+    fn test_incorrect_value() {
+        // CID of json!(1)
+        let cid_1 = CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq");
+        let err = verify_value(&cid_1, &json!(2));
+        assert!(
+            matches!(err, Err(CidVerificationError::MismatchError { .. })),
+            "{:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn test_verify_unknown_codec() {
+        use std::str::FromStr;
+
+        //  git raw object
+        const GIT_RAW_CODEC: u64 = 0x78;
+        // CID of json!(1)
+        let cid_1 =
+            cid::Cid::from_str("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                .unwrap();
+
+        let unknown_format_cid =
+            cid::Cid::new(cid::Version::V1, GIT_RAW_CODEC, cid_1.hash().clone()).unwrap();
+        let unknown_format_cid = CID::new(unknown_format_cid.to_string());
+
+        let err = verify_value(&unknown_format_cid, &json!(1));
+        match err {
+            Err(CidVerificationError::UnsupportedCidCodec(codec)) => {
+                assert_eq!(codec, GIT_RAW_CODEC);
+            }
+            _ => panic!("wrong result: {:?}", err),
+        }
+    }
+
+    #[test]
+    fn test_verify_unknown_hasher() {
+        use std::str::FromStr;
+
+        const SHAKE_128_CODE: u64 = 0x18;
+
+        let cid_1 =
+            cid::Cid::from_str("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                .unwrap();
+
+        let unknown_hasher_multihash =
+            Multihash::wrap(SHAKE_128_CODE, cid_1.hash().digest()).unwrap();
+
+        let unknown_hasher_cid =
+            cid::Cid::new(cid::Version::V1, JSON_CODEC, unknown_hasher_multihash).unwrap();
+        let unknown_hasher_cid = CID::new(unknown_hasher_cid.to_string());
+
+        let err = verify_value(&unknown_hasher_cid, &json!(1));
+        match err {
+            Err(CidVerificationError::UnsupportedHashCode(code)) => {
+                assert_eq!(code, SHAKE_128_CODE);
+            }
+            _ => panic!("wrong result: {:?}", err),
+        }
+    }
+
+    #[test]
+    fn test_verify_unsupported_hasher() {
+        use std::str::FromStr;
+
+        // we have no plan to support it, but it may change, and the test should be corrected
+        let identity_code: u64 = multihash::Code::Identity.into();
+
+        let cid_1 =
+            cid::Cid::from_str("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                .unwrap();
+
+        let unknown_hasher_multihash =
+            Multihash::wrap(identity_code, cid_1.hash().digest()).unwrap();
+
+        let unknown_hasher_cid =
+            cid::Cid::new(cid::Version::V1, JSON_CODEC, unknown_hasher_multihash).unwrap();
+        let unknown_hasher_cid = CID::new(unknown_hasher_cid.to_string());
+
+        let err = verify_value(&unknown_hasher_cid, &json!(1));
+        match err {
+            Err(CidVerificationError::UnsupportedHashCode(code)) => {
+                assert_eq!(code, identity_code);
+            }
+            _ => panic!("wrong result: {:?}", err),
+        }
+    }
+
+    #[test]
+    fn test_verify_garbage() {
+        let garbage_cid = CID::new("garbage");
+        let err = verify_value(&garbage_cid, &json!(1));
+        assert!(
+            matches!(
+                err,
+                Err(CidVerificationError::MalformedCid(cid::Error::ParsingError))
+            ),
+            "{:?}",
+            err
+        );
     }
 }
