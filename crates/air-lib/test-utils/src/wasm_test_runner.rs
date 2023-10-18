@@ -16,8 +16,8 @@
 
 use crate::test_runner::AirRunner;
 
+use air_interpreter_signatures::KeyPair;
 use avm_server::avm_runner::*;
-use fluence_keypair::KeyPair;
 use once_cell::sync::OnceCell;
 
 use std::path::PathBuf;
@@ -88,7 +88,7 @@ impl AirRunner for WasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
-            keypair,
+            keypair.as_inner(),
             particle_id,
         )?)
     }
@@ -147,7 +147,7 @@ impl AirRunner for ReleaseWasmAirRunner {
             ttl,
             current_peer_id,
             call_results,
-            keypair,
+            keypair.as_inner(),
             particle_id,
         )?)
     }

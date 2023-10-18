@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use crate::KeyPair;
 use crate::SaltedData;
 
 use air_interpreter_cid::{CidRef, CID};
 use fluence_keypair::error::SigningError;
-use fluence_keypair::KeyPair;
 
 use std::rc::Rc;
 
@@ -60,5 +60,5 @@ fn sign_cids(
     cids.sort_unstable();
 
     let serialized_cids = SaltedData::new(&cids, salt).serialize();
-    keypair.sign(&serialized_cids).map(crate::Signature::new)
+    keypair.sign(&serialized_cids)
 }

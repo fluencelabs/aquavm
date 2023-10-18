@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence_keypair::KeyPair;
+use air_interpreter_signatures::KeyPair;
 use rand_chacha::rand_core::SeedableRng;
 
 ///  Derive fake keypair for testing proposes.
@@ -25,6 +25,7 @@ use rand_chacha::rand_core::SeedableRng;
 // Should be moved to test lib when keypair interface PR is merged.
 pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
     use sha2::{Digest as _, Sha256};
+    use std::convert::TryFrom;
 
     let mut rng = {
         let mut hasher = Sha256::new();
@@ -33,7 +34,8 @@ pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
     };
 
     let keypair_ed25519 = ed25519_dalek::Keypair::generate(&mut rng);
-    let keypair: KeyPair = KeyPair::Ed25519(keypair_ed25519.into());
+    let keypair = fluence_keypair::KeyPair::Ed25519(keypair_ed25519.into());
+    let keypair = KeyPair::try_from(keypair).expect("cannot happen");
 
     let peer_id = keypair.public().to_peer_id().to_string();
     (keypair, peer_id)

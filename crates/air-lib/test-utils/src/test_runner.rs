@@ -26,8 +26,8 @@ pub use crate::wasm_test_runner::WasmAirRunner;
 
 use super::CallServiceClosure;
 
+use air_interpreter_signatures::KeyPair;
 use avm_server::avm_runner::*;
-use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -257,8 +257,8 @@ mod tests {
         };
 
         let key_format = fluence_keypair::KeyFormat::Ed25519;
-        let keypair = KeyPair::generate(key_format);
-        let keypair2 = KeyPair::generate(key_format);
+        let keypair = KeyPair::generate(key_format).unwrap();
+        let keypair2 = KeyPair::generate(key_format).unwrap();
 
         let mut client = create_custom_avm::<NativeAirRunner>(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),

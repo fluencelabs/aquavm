@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+use air_interpreter_signatures::KeyPair;
 use air_test_utils::prelude::*;
 use fluence_keypair::KeyFormat;
-use fluence_keypair::KeyPair;
 
 #[test]
 fn canon_generates_hop() {
@@ -128,7 +128,7 @@ fn canon_with_join_behaviour() {
         "#
     );
 
-    let keypair = KeyPair::generate(KeyFormat::Ed25519);
+    let keypair = KeyPair::generate(KeyFormat::Ed25519).unwrap();
     let run_parameters = TestRunParameters::new(client_peer_id.to_string(), 0, 0, "".to_string());
 
     let client_result = client_vm

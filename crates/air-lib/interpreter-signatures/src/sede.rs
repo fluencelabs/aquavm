@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::validate_with_key_format;
+
 pub(crate) fn public_key_to_b58<S: serde::Serializer>(
     key: &fluence_keypair::PublicKey,
     serializer: S,
@@ -45,7 +47,9 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
 
         let public_key = fluence_keypair::PublicKey::from_base58(v)
             .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        Ok(public_key)
+        let key_format = public_key.get_key_format();
+        validate_with_key_format(public_key, key_format)
+            .map_err(|err| de::Error::invalid_value(de::Unexpected::Str(&err.to_string()), &self))
     }
 }
 
