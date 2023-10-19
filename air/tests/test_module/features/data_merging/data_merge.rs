@@ -474,14 +474,15 @@ fn test_merge_unused_mismatch() {
     let data2 = raw_data_from_trace(trace2, <_>::default());
 
     let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    // TODO rewrite here and above with assert_error_eq
     assert_eq!(result.ret_code, 20000);
     assert_eq!(
         result.error_message,
         concat!(
             r#"on instruction 'call "peer" ("" "") [] ' trace handler encountered an error:"#,
             r#" values in call results are not equal:"#,
-            r#" Unused(CID("bagaajiheaiqm6aoj3hpiz4kdhuqsvw4xxzc6z7ap3bufth5ph3shigs6swouetq"))"#,
-            r#" != Unused(CID("bagaajiheaiqm4cf3ckjrcui3xl62gdl4drdcvxzm2nb6mospxz4ex3lzz66fzeq"))"#
+            r#" Unused(CID("bagaaihra3ijwi5gxk5odex3qfo32u5prci4giaz4ysel67m4a5hk3l432djq"))"#,
+            r#" != Unused(CID("bagaaihrahhyeotni37z6kds47boxa2llqffxlz4vqt7jbt76jeimm6eu7uhq"))"#
         )
     );
 }

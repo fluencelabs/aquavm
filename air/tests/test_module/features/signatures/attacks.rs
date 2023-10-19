@@ -447,10 +447,10 @@ fn test_attack_replay() {
     let nested_error = fluence_keypair::error::VerificationError::Ed25519(
         dalek_error,
         // will break if signed data format changes
-        "42zZGWojbnPHpa5wog6b2T5ay65DXUSrGH5sK7httitDgX6fSp7VHNpG1c3EYPeKNEQX8WH2DJDGNNqS8TEFgN5S".to_owned(),
+        "8ATKuSr1J6NvqT3PBBf3qcDWsnDcnNpznFBSdzAVJnASV8MHrc15zKYYQkCcywcXFPgXJAdEzTNdhixDQKQjDL4".to_owned(),
         "6m3zmtymxDL56KBpNgKqc7QiGRuWuxr82bG2q7dF5xCD".to_owned(),
     );
-    let cids: Vec<Rc<CidRef>> = vec!["bagaajiheaiqcm6lgy7bnsqua4alqp5gjvvgu3ukyfp5mwlyq54jfg4kzheen2ea".into()];
+    let cids: Vec<Rc<CidRef>> = vec!["bagaaihra7fcndppbd44kltfjcy6ihc4fmxepwt256vswc7x2qqgznazx3j3a".into()];
     let expected = PreparationError::DataSignatureCheckError(verification::DataVerifierError::SignatureMismatch {
         error: nested_error.into(),
         cids,

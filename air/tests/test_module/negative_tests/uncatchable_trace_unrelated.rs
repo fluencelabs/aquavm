@@ -144,7 +144,7 @@ fn malformed_call_service_failed() {
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
-        argument_hash: "bagaajiheaiqnghajgyz5odvybefyoljsm3q4x36bepn2hyhdlvf5j6wpdeyiq6y".into(),
+        argument_hash: "bagaaihra2u6rrqrsclvhwyyalff3rg6omaqy63x7foowfc4myqwt46n32wvq".into(),
         tetraplet_cid,
     };
     let service_result_agg_cid = cid_state

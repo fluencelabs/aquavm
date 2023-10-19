@@ -222,7 +222,7 @@ fn test_canon_value_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaajiheaiqm6aoj3hpiz4kdhuqsvw4xxzc6z7ap3bufth5ph3shigs6swouetq";
+    let missing_cid = "bagaaihra3ijwi5gxk5odex3qfo32u5prci4giaz4ysel67m4a5hk3l432djq";
     let value_store: CidStore<_> = cid_state.value_tracker.into();
     assert!(
         value_store.get(&CID::<_>::new(missing_cid)).is_some(),
@@ -271,7 +271,7 @@ fn test_canon_root_tetraplet_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaajiheaiqgpoeo2fka5wbuaetyvbcxu5g66csdtbjwovvws52n7ibqfrpwgwy";
+    let missing_cid = "bagaaihraydnoggy3vbf42ebqdjffuqnqpiwk2ryytc4esqasavlo6zzv7e4a";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(
         tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
@@ -331,7 +331,7 @@ fn test_canon_tetraplet_not_found() {
             &mut cid_state,
         ),
     ];
-    let missing_cid = "bagaajiheaiqm7bayfza2unlkhedb2kt2axudfje6ipkx4prm4n4npnkmeoey3ui";
+    let missing_cid = "bagaaihrasj5rizxwp3gypeiszoyq6nwmlvyu3fxqmfv6yu7uvuir6litgyna";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(
         tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
@@ -385,7 +385,7 @@ fn test_canon_agg_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaajiheaiqcjff4ewtwhhj2crzio5rj7op24wi3hrw6g47whwyjjhm3434wati";
+    let missing_cid = "bagaaihraqxwgyh7ihp2cmyt6piqqm7s2bz2xr2sgohzn34tnstksoyb4wsza";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
     assert!(
         canon_element_store.get(&CID::<_>::new(missing_cid)).is_some(),

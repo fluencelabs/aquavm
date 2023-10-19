@@ -67,8 +67,8 @@ fn test_runtime_executed_call_argument_hash() {
         &bob_res,
         UncatchableError::InstructionParametersMismatch {
             param: "call argument_hash",
-            expected_value: "bagaajiheaiqoct7k7y5dy6zelsxrcyd76sx7luwn7wggp6ozzup6ynziybgagba".to_owned(),
-            stored_value: "bagaajiheaiqkdvgwvlhsonz4zy5vsk6463urb6mzqqaleompt3nrevbvsjoztca".to_owned(),
+            expected_value: "bagaaihraryhzxrhasfve7jwovrl4rb4j45lljt5prmoci34y3i6qx7joxy2a".to_owned(),
+            stored_value: "bagaaihra7w4yil3eqnjimo4d3yp4kr2yra2o6svycab67oymtseafak4la6a".to_owned(),
         }
     );
 }
@@ -191,8 +191,8 @@ fn test_runtime_executed_failed_argument_hash() {
             param: "call argument_hash",
             // please note that order is important here: if values are swapped, then the error is
             // handled by Executed branch, not Failed branch
-            expected_value: "bagaajiheaiqoct7k7y5dy6zelsxrcyd76sx7luwn7wggp6ozzup6ynziybgagba".to_owned(),
-            stored_value: "bagaajiheaiqkdvgwvlhsonz4zy5vsk6463urb6mzqqaleompt3nrevbvsjoztca".to_owned(),
+            expected_value: "bagaaihraryhzxrhasfve7jwovrl4rb4j45lljt5prmoci34y3i6qx7joxy2a".to_owned(),
+            stored_value: "bagaaihra7w4yil3eqnjimo4d3yp4kr2yra2o6svycab67oymtseafak4la6a".to_owned(),
         }
     );
 }

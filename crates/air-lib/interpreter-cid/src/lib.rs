@@ -101,7 +101,7 @@ pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
     use multihash::{Code, MultihashDigest};
 
     // n.b.: current multihash 0.18.1 uses blake2s_simd which is more performant
-    let digest = Code::Blake2s256.digest(data);
+    let digest = Code::Blake3_256.digest(data);
     // seems to be better than RAW_CODEC = 0x55
     const JSON_CODEC: u64 = 0x0200;
 
@@ -145,11 +145,11 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
     use cid::Cid;
     use multihash::{Code, MultihashDigest};
 
-    let mut hasher = blake2s_simd::State::default();
+    let mut hasher = blake3::Hasher::new();
     serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
     let hash = hasher.finalize();
 
-    let digest = Code::Blake2b256
+    let digest = Code::Blake3_256
         .wrap(hash.as_bytes())
         .expect("can't happend: incorrect hash length");
     // seems to be better than RAW_CODEC = 0x55
