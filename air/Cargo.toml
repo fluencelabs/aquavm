@@ -52,6 +52,7 @@ fluence-app-service = "0.29.0"
 marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
 
 borsh = "0.10.3"
+bs58 = "0.5.0"
 # the feature just silence a warning in the criterion 0.3.x.
 criterion = { version = "0.3.3", features = ["html_reports"] }
 csv = "1.1.5"

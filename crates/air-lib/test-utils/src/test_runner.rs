@@ -26,8 +26,8 @@ pub use crate::wasm_test_runner::WasmAirRunner;
 
 use super::CallServiceClosure;
 
-use air_interpreter_signatures::KeyPair;
 use avm_server::avm_runner::*;
+use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -177,14 +177,15 @@ pub fn create_custom_avm<R: AirRunner>(
     TestRunner {
         runner,
         call_service,
-        keypair,
+        keypair: keypair.into_inner(),
     }
 }
 
 pub fn create_avm_with_key<R: AirRunner>(
-    keypair: KeyPair,
+    keypair: impl Into<KeyPair>,
     call_service: CallServiceClosure,
 ) -> TestRunner<R> {
+    let keypair = keypair.into();
     let current_peer_id = keypair.public().to_peer_id().to_string();
     let runner = R::new(current_peer_id);
 
@@ -257,8 +258,8 @@ mod tests {
         };
 
         let key_format = fluence_keypair::KeyFormat::Ed25519;
-        let keypair = KeyPair::generate(key_format).unwrap();
-        let keypair2 = KeyPair::generate(key_format).unwrap();
+        let keypair = KeyPair::generate(key_format);
+        let keypair2 = KeyPair::generate(key_format);
 
         let mut client = create_custom_avm::<NativeAirRunner>(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),

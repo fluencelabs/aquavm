@@ -16,9 +16,9 @@
 
 use crate::test_runner::AirRunner;
 use air_interpreter_interface::RunParameters;
-use air_interpreter_signatures::KeyPair;
 use avm_server::avm_runner::*;
 use avm_server::into_raw_result;
+use fluence_keypair::KeyPair;
 
 pub struct NativeAirRunner {
     current_peer_id: String,
@@ -52,7 +52,7 @@ impl AirRunner for NativeAirRunner {
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
         let key_format = keypair.key_format().into();
-        let secret_key_bytes = keypair.secret();
+        let secret_key_bytes = keypair.secret().unwrap();
 
         let outcome = air::execute_air(
             air.into(),

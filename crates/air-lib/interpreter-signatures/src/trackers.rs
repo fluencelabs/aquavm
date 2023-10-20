@@ -48,15 +48,15 @@ impl PeerCidTracker {
         salt: &str,
         keypair: &KeyPair,
     ) -> Result<crate::Signature, SigningError> {
-        sign_cids(self.cids.clone(), salt, keypair)
+        sign_cids(self.cids.clone(), salt, &keypair.0).map(Into::into)
     }
 }
 
-fn sign_cids(
+pub fn sign_cids(
     mut cids: Vec<Rc<CidRef>>,
     salt: &str,
-    keypair: &KeyPair,
-) -> Result<crate::Signature, SigningError> {
+    keypair: &fluence_keypair::KeyPair,
+) -> Result<fluence_keypair::Signature, SigningError> {
     cids.sort_unstable();
 
     let serialized_cids = SaltedData::new(&cids, salt).serialize();

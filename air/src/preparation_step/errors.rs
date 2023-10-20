@@ -81,7 +81,7 @@ pub enum PreparationError {
     },
 
     /// Malformed keypair format data.
-    #[error("malformed keypair format: {0:?}")]
+    #[error("malformed keypair format: {0}")]
     MalformedKeyPairData(#[from] air_interpreter_signatures::KeyError),
 
     /// Failed to verify CidStore contents of the current data.

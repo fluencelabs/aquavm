@@ -19,6 +19,7 @@ mod attacks;
 #[cfg(feature = "check_signatures")]
 mod corruption;
 
+mod algorithms;
 mod runtime;
 
 #[cfg(feature = "gen_signatures")]

@@ -58,8 +58,8 @@ pub struct PublicKey(
 
 #[derive(thiserror::Error, Debug)]
 pub enum KeyError {
-    #[error("algorithm {0:?} not allowed")]
-    AlgorithmNotAllowed(fluence_keypair::KeyFormat),
+    #[error("algorithm {0:?} not whitelisted")]
+    AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
     #[error("invalid key data: {0}")]
     InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
 }
@@ -110,6 +110,7 @@ impl TryFrom<fluence_keypair::PublicKey> for PublicKey {
     }
 }
 
+#[derive(Clone)]
 pub struct KeyPair(fluence_keypair::KeyPair);
 
 impl KeyPair {
@@ -141,6 +142,10 @@ impl KeyPair {
         self.0.secret().expect("cannot fail on supported formats")
     }
 
+    pub fn into_inner(self) -> fluence_keypair::KeyPair {
+        self.0
+    }
+
     pub fn as_inner(&self) -> &fluence_keypair::KeyPair {
         &self.0
     }
@@ -161,10 +166,16 @@ impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
     }
 }
 
+impl From<KeyPair> for fluence_keypair::KeyPair {
+    fn from(value: KeyPair) -> Self {
+        value.0
+    }
+}
+
 pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
     match key_format {
         fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
-        _ => Err(KeyError::AlgorithmNotAllowed(key_format)),
+        _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
     }
 }
 
