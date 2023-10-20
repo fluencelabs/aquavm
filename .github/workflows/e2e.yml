@@ -53,8 +53,8 @@ jobs:
     needs:
       - cargo
 
-    uses: fluencelabs/nox/.github/workflows/build.yml@master
-    with:
+    uses: fluencelabs/nox/.github/workflows/build.yml@debug-spell-dtos-override
+      ref:
       cargo-dependencies: |
         [
           {
