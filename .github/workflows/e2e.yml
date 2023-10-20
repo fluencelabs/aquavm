@@ -70,7 +70,7 @@ jobs:
     needs:
       - cargo
 
-    uses: fluencelabs/nox/.github/workflows/build.yml@master
+    uses: fluencelabs/nox/.github/workflows/build.yml@debug-spell-dtos-override
     with:
       cargo-dependencies: |
         [
