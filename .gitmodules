@@ -1,4 +1,4 @@
 [submodule "benches/performance_metering"]
 	path = benches/performance_metering
 	url = git@github.com:fluencelabs/aquavm-benchmark-data.git
-	branch = chore/update-benchmark-limit-1024
+	branch = tmp/sigs-with-blake2
