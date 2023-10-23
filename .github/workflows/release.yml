@@ -78,7 +78,7 @@ jobs:
         working-directory: tools/wasm/air-near-contract
 
       - name: Commit version bump
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Bump air-interpreter and air-near-contract version to ${{ steps.version.outputs.version }}"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
