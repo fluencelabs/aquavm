@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout AquaVM
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/aquavm
           ref: ${{ inputs.ref }}
