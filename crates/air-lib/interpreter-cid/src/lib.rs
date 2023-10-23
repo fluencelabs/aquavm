@@ -93,22 +93,6 @@ impl<Val> std::hash::Hash for CID<Val> {
     }
 }
 
-// TODO we might refactor this to `SerializationFormat` trait
-// that both transform data to binary/text form (be it JSON, CBOR or something else)
-// and produces CID too
-pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
-    use cid::Cid;
-    use multihash::{Code, MultihashDigest};
-
-    // n.b.: current multihash 0.18.1 uses blake2s_simd which is more performant
-    let digest = Code::Blake3_256.digest(data);
-    // seems to be better than RAW_CODEC = 0x55
-    const JSON_CODEC: u64 = 0x0200;
-
-    let cid = Cid::new_v1(JSON_CODEC, digest);
-    CID::new(cid.to_string())
-}
-
 pub struct CidCalculationError(serde_json::Error);
 
 impl fmt::Debug for CidCalculationError {
