@@ -54,7 +54,7 @@ jobs:
 
       - name: Run cargo nextest
         # It should have "--all-features", but it is temporarly disabled because of the signature-related feature flags
-        run: cargo llvm-cov nextest --features test_with_native_code --release --profile ci --lcov --output-path lcov.info
+        run: cargo llvm-cov nextest --no-default-features --features test_with_native_code --release --profile ci --lcov --output-path lcov.info
 
       - name: Coveralls upload
         if: inputs.cargo-dependencies == 'null'
