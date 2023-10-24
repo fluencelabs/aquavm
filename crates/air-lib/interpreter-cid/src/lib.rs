@@ -143,7 +143,10 @@ pub(crate) fn value_json_hash<D: digest::Digest + std::io::Write, Val: Serialize
     const HASH_BUFFER_SIZE: usize = 8 * 1024;
 
     let mut hasher = D::new();
-    serde_json::to_writer(BufWriter::with_capacity(HASH_BUFFER_SIZE, &mut hasher), value)?;
+    serde_json::to_writer(
+        BufWriter::with_capacity(HASH_BUFFER_SIZE, &mut hasher),
+        value,
+    )?;
     let hash = hasher.finalize();
 
     Ok(hash.to_vec())
