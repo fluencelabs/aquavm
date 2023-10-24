@@ -84,7 +84,7 @@ jobs:
         run: |
           # The `memory` sanitizer on cargo test has false positive even on empty project.
           for san in address leak; do
-            RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --features test_with_native_code --target x86_64-unknown-linux-gnu
+            RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$san" cargo test --no-default-features --features test_with_native_code --target x86_64-unknown-linux-gnu
           done
       - name: Run signature tests with test_with_native_code
         env:
