@@ -7,9 +7,9 @@ set -e
 echo "Pre-build a binary..." >&2
 cargo build --quiet --release
 
-for bench in multiple-cids10 multiple-cids50 \
-             multiple-peers14 multiple-peers25 \
-             multiple-sigs50 multiple-sigs200 \
+for bench in multiple-cids10 \
+             multiple-peers8 \
+             multiple-sigs30 \
              dashboard network-explore; do
     echo "Generating ${bench} ..." >&2
     if [ "${bench}" == multiple-peers25 ]; then

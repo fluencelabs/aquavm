@@ -68,7 +68,6 @@ fn verify_json_value<Val: Serialize>(
 
     let expected_hash = match code {
         Code::Sha2_256 => value_json_hash::<sha2::Sha256, Val>(value)?,
-        #[cfg(feature = "blake3")]
         Code::Blake3_256 => value_json_hash::<blake3::Hasher, Val>(value)?,
         _ => return Err(CidVerificationError::UnsupportedHashCode(raw_code)),
     };
@@ -113,7 +112,6 @@ mod tests {
         .unwrap();
     }
 
-    #[cfg(feature = "blake3")]
     #[test]
     fn test_verify_blake3() {
         verify_value(

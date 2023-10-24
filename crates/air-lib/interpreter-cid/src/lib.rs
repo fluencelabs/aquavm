@@ -111,20 +111,6 @@ impl<T: ?Sized> std::convert::TryFrom<&'_ CID<T>> for cid::Cid {
     }
 }
 
-// TODO we might refactor this to `SerializationFormat` trait
-// that both transform data to binary/text form (be it JSON, CBOR or something else)
-// and produces CID too
-pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
-    use cid::Cid;
-    use multihash::{Code, MultihashDigest};
-
-    // the Sha2_256 is current IPFS default hash
-    let digest = Code::Sha2_256.digest(data);
-
-    let cid = Cid::new_v1(JSON_CODEC, digest);
-    CID::new(cid.to_string())
-}
-
 #[derive(Debug, ThisError)]
 pub enum CidCalculationError {
     #[error(transparent)]
@@ -140,9 +126,10 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
 ) -> Result<CID<Val>, CidCalculationError> {
     use cid::Cid;
     use multihash::{Code, MultihashDigest};
-    let hash = value_json_hash::<sha2::Sha256, Val>(value)?;
 
-    let digest = Code::Sha2_256
+    let hash = value_json_hash::<blake3::Hasher, Val>(value)?;
+
+    let digest = Code::Blake3_256
         .wrap(&hash)
         .expect("can't happend: incorrect hash length");
 
@@ -154,8 +141,10 @@ pub(crate) fn value_json_hash<D: digest::Digest + std::io::Write, Val: Serialize
     value: &Val,
 ) -> Result<Vec<u8>, serde_json::Error> {
     let mut hasher = D::new();
+
     serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
     let hash = hasher.finalize();
+
     Ok(hash.to_vec())
 }
 
@@ -165,22 +154,22 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn test_cid_sha2_256() {
+    fn test_cid_default() {
         assert_eq!(
             value_to_json_cid(&json!("test")).unwrap(),
-            CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
+            CID::new("bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa")
         );
         assert_eq!(
             value_to_json_cid(&json!([1, 2, 3])).unwrap(),
-            CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
+            CID::new("bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a"),
         );
         assert_eq!(
             value_to_json_cid(&json!(1)).unwrap(),
-            CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+            CID::new("bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq"),
         );
         assert_eq!(
             value_to_json_cid(&json!({"key": 42})).unwrap(),
-            CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
+            CID::new("bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq"),
         );
     }
 }
