@@ -25,14 +25,14 @@ use std::rc::Rc;
 #[derive(ThisError, Debug)]
 pub enum CidVerificationError {
     #[error("Value mismatch in the {type_name:?} store for CID {cid_repr:?}")]
-    MismatchError {
+    ValueMismatch {
         // nb: type_name is std::any::type_name() result that may be inconsistent between the Rust compiler versions
         type_name: &'static str,
         cid_repr: Rc<CidRef>,
     },
 
     #[error("JSON error: {0}")]
-    JsonError(#[from] serde_json::Error),
+    InvalidJson(#[from] serde_json::Error),
     #[error(transparent)]
     MalformedCid(#[from] cid::Error),
     #[error("unsupported CID codec: {0}")]
@@ -75,7 +75,7 @@ fn verify_json_value<Val: Serialize>(
     if expected_hash == mhash.digest() {
         Ok(())
     } else {
-        Err(CidVerificationError::MismatchError {
+        Err(CidVerificationError::ValueMismatch {
             type_name: std::any::type_name::<Val>(),
             cid_repr: cid.get_inner(),
         })
@@ -142,7 +142,7 @@ mod tests {
         let cid_1 = CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq");
         let err = verify_value(&cid_1, &json!(2));
         assert!(
-            matches!(err, Err(CidVerificationError::MismatchError { .. })),
+            matches!(err, Err(CidVerificationError::ValueMismatch { .. })),
             "{:?}",
             err
         );

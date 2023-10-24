@@ -114,7 +114,7 @@ impl<T: ?Sized> std::convert::TryFrom<&'_ CID<T>> for cid::Cid {
 #[derive(Debug, ThisError)]
 pub enum CidCalculationError {
     #[error(transparent)]
-    Json(#[from] serde_json::Error),
+    InvalidJson(#[from] serde_json::Error),
 }
 
 /// Calculate a CID of JSON-serialized value.
@@ -140,9 +140,10 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
 pub(crate) fn value_json_hash<D: digest::Digest + std::io::Write, Val: Serialize + ?Sized>(
     value: &Val,
 ) -> Result<Vec<u8>, serde_json::Error> {
-    let mut hasher = D::new();
+    const HASH_BUFFER_SIZE: usize = 8 * 1024;
 
-    serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
+    let mut hasher = D::new();
+    serde_json::to_writer(BufWriter::with_capacity(HASH_BUFFER_SIZE, &mut hasher), value)?;
     let hash = hasher.finalize();
 
     Ok(hash.to_vec())
