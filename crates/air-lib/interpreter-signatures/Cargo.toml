@@ -12,7 +12,7 @@ categories = ["wasm"]
 
 [dependencies]
 air-interpreter-cid = { version = "0.5.0", path = "../interpreter-cid" }
-fluence-keypair = { version = "0.10.1", default-features = false }
+fluence-keypair = { version = "0.10.3", default-features = false }
 
 bs58 = "0.5.0"
 borsh = { version = "0.10.3", features = ["rc"]}
