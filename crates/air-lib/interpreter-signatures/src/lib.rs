@@ -33,7 +33,7 @@ mod trackers;
 pub use crate::stores::*;
 pub use crate::trackers::*;
 
-use fluence_keypair::KeyFormat;
+pub use fluence_keypair::KeyFormat;
 
 use borsh::BorshSerialize;
 use fluence_keypair::error::SigningError;

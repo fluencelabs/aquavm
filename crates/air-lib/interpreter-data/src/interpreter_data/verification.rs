@@ -44,7 +44,12 @@ impl<'data> DataVerifier<'data> {
     pub fn new(data: &'data InterpreterData, salt: &'data str) -> Result<Self, DataVerifierError> {
         // validate key algoritms
         for (public_key, _) in data.signatures.iter() {
-            public_key.validate()?;
+            public_key
+                .validate()
+                .map_err(|error| DataVerifierError::MalformedKey {
+                    error,
+                    peer_id: public_key.to_peer_id(),
+                })?;
         }
 
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error

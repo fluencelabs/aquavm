@@ -21,8 +21,8 @@ use air_interpreter_signatures::KeyError;
 use thiserror::Error as ThisError;
 #[derive(Debug, ThisError)]
 pub enum DataVerifierError {
-    #[error("malformed signature: {0}")]
-    MalformedKey(#[from] KeyError),
+    #[error("malformed key at peer: {peer_id:?}: {error}")]
+    MalformedKey { error: KeyError, peer_id: String },
 
     #[error(transparent)]
     MalformedSignature(fluence_keypair::error::DecodingError),

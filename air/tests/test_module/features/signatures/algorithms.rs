@@ -38,9 +38,10 @@ fn test_banned_signature() {
             .into();
 
     let bad_algo_pk_ser = bs58::encode(bad_algo_pk.encode()).into_string();
-    let signature_store = json!({
+    let bad_signature_store = json!({
         bad_algo_pk_ser: bad_algo_signature,
     });
+    let bad_peer_id = bad_algo_pk.to_peer_id().to_string();
 
     let trace = vec![request_sent_by("init_peer_fake_id")];
 
@@ -53,7 +54,7 @@ fn test_banned_signature() {
     ))
     .unwrap();
 
-    data["signatures"] = signature_store;
+    data["signatures"] = bad_signature_store;
 
     let current_data = data.to_string();
 
@@ -69,9 +70,10 @@ fn test_banned_signature() {
 
     assert_error_eq!(
         &res,
-        PreparationError::DataSignatureCheckError(DataVerifierError::MalformedKey(KeyError::AlgorithmNotWhitelisted(
-            KeyFormat::Secp256k1
-        )))
+        PreparationError::DataSignatureCheckError(DataVerifierError::MalformedKey {
+            error: KeyError::AlgorithmNotWhitelisted(KeyFormat::Secp256k1),
+            peer_id: bad_peer_id
+        })
     );
 }
 
