@@ -15,11 +15,12 @@
  */
 
 #[cfg(feature = "check_signatures")]
+mod algorithms;
+#[cfg(feature = "check_signatures")]
 mod attacks;
 #[cfg(feature = "check_signatures")]
 mod corruption;
 
-mod algorithms;
 mod runtime;
 
 #[cfg(feature = "gen_signatures")]

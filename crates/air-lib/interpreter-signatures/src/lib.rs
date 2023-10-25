@@ -43,6 +43,14 @@ use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
 
+#[derive(thiserror::Error, Debug)]
+pub enum KeyError {
+    #[error("signature algorithm {0:?} not whitelisted")]
+    AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
+    #[error("invalid key data: {0}")]
+    InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
+}
+
 /// An opaque serializable representation of a public key.
 ///
 /// It can be a string or a binary, you shouldn't care about it unless you change serialization format.
@@ -56,19 +64,9 @@ pub struct PublicKey(
     fluence_keypair::PublicKey,
 );
 
-#[derive(thiserror::Error, Debug)]
-pub enum KeyError {
-    #[error("algorithm {0:?} not whitelisted")]
-    AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
-    #[error("invalid key data: {0}")]
-    InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
-}
-
 impl PublicKey {
-    pub fn new(inner: fluence_keypair::PublicKey) -> Result<Self, KeyError> {
-        // We accept only deterministic algorithms, i.e. that do
-        let key_format = inner.get_key_format();
-        validate_with_key_format(inner, key_format).map(Self)
+    pub fn new(inner: fluence_keypair::PublicKey) -> Self {
+        Self(inner)
     }
 
     pub fn verify<T: BorshSerialize + ?Sized>(
@@ -86,6 +84,11 @@ impl PublicKey {
     pub fn to_peer_id(&self) -> String {
         self.0.to_peer_id().to_string()
     }
+
+    pub fn validate(&self) -> Result<(), KeyError> {
+        let key_format = self.get_key_format();
+        validate_with_key_format((), key_format)
+    }
 }
 
 impl Deref for PublicKey {
@@ -99,14 +102,6 @@ impl Deref for PublicKey {
 impl Hash for PublicKey {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.to_vec().hash(state);
-    }
-}
-
-impl TryFrom<fluence_keypair::PublicKey> for PublicKey {
-    type Error = KeyError;
-
-    fn try_from(value: fluence_keypair::PublicKey) -> Result<Self, Self::Error> {
-        Self::new(value)
     }
 }
 
@@ -127,7 +122,7 @@ impl KeyPair {
     }
 
     pub fn public(&self) -> PublicKey {
-        PublicKey(self.0.public())
+        PublicKey::new(self.0.public())
     }
 
     pub fn key_format(&self) -> KeyFormat {

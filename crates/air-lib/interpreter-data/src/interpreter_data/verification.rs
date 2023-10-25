@@ -42,6 +42,11 @@ impl<'data> DataVerifier<'data> {
     // it can be further optimized if only required parts are passed
     // SignatureStore is not used elsewhere
     pub fn new(data: &'data InterpreterData, salt: &'data str) -> Result<Self, DataVerifierError> {
+        // validate key algoritms
+        for (public_key, _) in data.signatures.iter() {
+            public_key.validate()?;
+        }
+
         // it contains signature too; if we try to add a value to a peer w/o signature, it is an immediate error
         let mut grouped_cids: HashMap<Box<str>, PeerInfo<'data>> = data
             .signatures

@@ -17,11 +17,12 @@
 use std::rc::Rc;
 
 use air_interpreter_cid::CidRef;
+use air_interpreter_signatures::KeyError;
 use thiserror::Error as ThisError;
 #[derive(Debug, ThisError)]
 pub enum DataVerifierError {
-    #[error(transparent)]
-    MalformedKey(fluence_keypair::error::DecodingError),
+    #[error("malformed signature: {0}")]
+    MalformedKey(#[from] KeyError),
 
     #[error(transparent)]
     MalformedSignature(fluence_keypair::error::DecodingError),

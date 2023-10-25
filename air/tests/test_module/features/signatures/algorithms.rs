@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-use air::min_supported_version;
-use air_interpreter_data::InterpreterData;
+use air::{min_supported_version, PreparationError};
+use air_interpreter_data::{verification::DataVerifierError, InterpreterData};
+use air_interpreter_signatures::KeyError;
 use air_test_utils::{
     assert_error_eq,
     prelude::{request_sent_by, unit_call_service},
     test_runner::{create_avm, create_avm_with_key, NativeAirRunner, TestRunParameters},
 };
+use fluence_keypair::KeyFormat;
 use serde_json::json;
 
 /// Checking that other peers' key algorithms are valid.
@@ -65,16 +67,17 @@ fn test_banned_signature() {
         )
         .unwrap();
 
-    assert!(res.ret_code == 0, "{:#?}", res);
+    assert_error_eq!(
+        &res,
+        PreparationError::DataSignatureCheckError(DataVerifierError::MalformedKey(KeyError::AlgorithmNotWhitelisted(
+            KeyFormat::Secp256k1
+        )))
+    );
 }
 
 /// Checking that local key is valid.
 #[test]
 fn test_banned_signing_key() {
-    use air::PreparationError;
-    use air_interpreter_signatures::KeyError;
-    use fluence_keypair::KeyFormat;
-
     let air_script = "(null)";
     let bad_algo_keypair = fluence_keypair::KeyPair::generate_secp256k1();
 

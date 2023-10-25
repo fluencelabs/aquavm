@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use crate::validate_with_key_format;
-
 pub(crate) fn public_key_to_b58<S: serde::Serializer>(
     key: &fluence_keypair::PublicKey,
     serializer: S,
@@ -36,7 +34,7 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     type Value = fluence_keypair::PublicKey;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("expecting a base58-encoded public key string")
+        formatter.write_str("a base58-encoded public key string")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -45,11 +43,8 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     {
         use serde::de;
 
-        let public_key = fluence_keypair::PublicKey::from_base58(v)
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        let key_format = public_key.get_key_format();
-        validate_with_key_format(public_key, key_format)
-            .map_err(|err| de::Error::invalid_value(de::Unexpected::Str(&err.to_string()), &self))
+        fluence_keypair::PublicKey::from_base58(v)
+            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
     }
 }
 
