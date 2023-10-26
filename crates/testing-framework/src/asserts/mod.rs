@@ -106,7 +106,7 @@ impl ServiceDefinition {
                 call_map,
             } => call_seq_error(call_number_seq, call_map),
             ServiceDefinition::Behaviour(name) => name.call(params),
-            ServiceDefinition::DbgBehaviour(name) => name.call(dbg!(params)),
+            ServiceDefinition::DbgBehaviour(name) => dbg!(name.call(dbg!(params))),
             ServiceDefinition::Map(map) => call_map_service(map, params),
         }
     }
