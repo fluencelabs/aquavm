@@ -40,3 +40,4 @@ marine = []
 gen_signatures = ["aquavm-air/gen_signatures"]
 check_signatures = ["aquavm-air/check_signatures"]
 
+default = ["check_signatures", "gen_signatures"]
