@@ -70,7 +70,7 @@ pub enum PreparationError {
     )]
     CallResultsDeFailed {
         call_results: Vec<u8>,
-        error: SerdeJsonError,
+        error: rmp_serde::decode::Error,
     },
 
     /// Error occurred when a version of interpreter produced supplied data is less then minimal.
@@ -112,7 +112,7 @@ impl PreparationError {
         Self::DataDeFailedWithVersions { data, error, versions }
     }
 
-    pub fn call_results_de_failed(call_results: Vec<u8>, error: SerdeJsonError) -> Self {
+    pub fn call_results_de_failed(call_results: Vec<u8>, error: rmp_serde::decode::Error) -> Self {
         Self::CallResultsDeFailed { call_results, error }
     }
 

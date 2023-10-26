@@ -126,7 +126,7 @@ fn make_exec_ctx(
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let call_results = serde_json::from_slice(call_results)
+    let call_results = rmp_serde::from_slice(call_results)
         .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
 
     let ctx = ExecutionCtx::new(

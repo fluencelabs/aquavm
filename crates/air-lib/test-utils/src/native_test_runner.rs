@@ -46,7 +46,7 @@ impl AirRunner for NativeAirRunner {
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
-        let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
+        let raw_call_results = rmp_serde::to_vec(&raw_call_results).unwrap();
 
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());

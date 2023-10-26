@@ -84,7 +84,7 @@ fn invalid_callresults() {
     let prev_data: Vec<u8> = serde_json::to_vec(&prev_data).unwrap();
     let data = Vec::<u8>::new();
     let wrong_call_results = Vec::<u32>::new();
-    let wrong_call_results = serde_json::to_vec(&wrong_call_results).unwrap();
+    let wrong_call_results = rmp_serde::to_vec(&wrong_call_results).unwrap();
     let keypair = fluence_keypair::KeyPair::generate_ed25519();
     let run_parameters = RunParameters::new(
         client_peer_id.clone(),
@@ -99,7 +99,7 @@ fn invalid_callresults() {
     let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone());
     let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
 
-    let expected_serde_error = serde_json::from_slice::<CallResults>(&wrong_call_results)
+    let expected_serde_error = rmp_serde::from_slice::<CallResults>(&wrong_call_results)
         .err()
         .unwrap();
     let expected_error = PreparationError::CallResultsDeFailed {

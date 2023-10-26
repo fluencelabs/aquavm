@@ -33,6 +33,7 @@ fluence-keypair = "0.10.3"
 ed25519-dalek = "1.0.1"
 rand_chacha = "0.2.2"
 sha2 = "0.10.6"
+rmp-serde = "1.1.2"
 
 [dev-dependencies]
 maplit = "1.0.2"
