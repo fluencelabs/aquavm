@@ -25,6 +25,30 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.14.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.13.0...air-interpreter-data-v0.14.0) (2023-10-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-cid:** use Blake3 for CIDs ([#729](https://github.com/fluencelabs/aquavm/issues/729))
+
+### Features
+
+* **interpreter-cid:** use Blake3 for CIDs ([#729](https://github.com/fluencelabs/aquavm/issues/729)) ([776d81a](https://github.com/fluencelabs/aquavm/commit/776d81a1dba2379e4019dc6bf851ae8396550d66))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.5.0 to 0.6.0
+    * air-interpreter-signatures bumped from 0.1.3 to 0.1.4
+
 ## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.12.1...air-interpreter-data-v0.13.0) (2023-10-16)
 
 
