@@ -89,7 +89,7 @@ pub(crate) fn from_raw_call_requests(
     raw_call_params: Vec<u8>,
 ) -> Result<CallRequests, CallSeDeErrors> {
     let call_requests: air_interpreter_interface::CallRequests =
-        match serde_json::from_slice(&raw_call_params) {
+        match rmp_serde::from_slice(&raw_call_params) {
             Ok(requests) => requests,
             Err(error) => {
                 return Err(CallSeDeErrors::CallRequestsDeError {

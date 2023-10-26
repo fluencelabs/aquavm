@@ -111,7 +111,7 @@ pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData>
     InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
 }
 
-fn to_date_de_error(raw_data: Vec<u8>, de_error: serde_json::Error) -> PreparationError {
+fn to_date_de_error(raw_data: Vec<u8>, de_error: rmp_serde::decode::Error) -> PreparationError {
     match InterpreterData::try_get_versions(&raw_data) {
         Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),
         Err(_) => PreparationError::data_de_failed(raw_data, de_error),

@@ -87,7 +87,7 @@ fn test_attack_replace_value() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(
@@ -160,7 +160,7 @@ fn test_attack_replace_tetraplet() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(
@@ -240,7 +240,7 @@ fn test_attack_replace_call_result() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(
@@ -327,7 +327,7 @@ fn test_attack_replace_canon_value() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(
@@ -423,7 +423,7 @@ fn test_attack_replace_canon_result_values() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(
@@ -523,7 +523,7 @@ fn test_attack_replace_canon_result_tetraplet() {
     let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = serde_json::to_vec(&mallory_data).unwrap();
+    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     assert_error_eq!(

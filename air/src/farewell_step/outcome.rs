@@ -60,7 +60,7 @@ pub(crate) fn from_uncatchable_error(
 ) -> InterpreterOutcome {
     let ret_code = error.to_error_code();
     let data = data.into();
-    let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
+    let call_requests = rmp_serde::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
 
     InterpreterOutcome::new(ret_code, error.to_string(), data, vec![], call_requests)
 }
@@ -109,16 +109,16 @@ fn populate_outcome_from_contexts(
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
     let data = measure!(
-        serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
+        rmp_serde::to_vec(&data).expect("default serializer shouldn't fail"),
         tracing::Level::TRACE,
-        "serde_json::to_vec(data)"
+        "rmp_serde::to_vec(data)"
     );
 
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = measure!(
-        serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
+        rmp_serde::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
         tracing::Level::TRACE,
-        "serde_json::to_vec(call_results)",
+        "rmp_serde::to_vec(call_results)",
     );
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
 }

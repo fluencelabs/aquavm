@@ -20,7 +20,7 @@ use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::Versions;
 
-use serde_json::Error as SerdeJsonError;
+use rmp_serde::decode::Error as SerdeDeserializeError;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -43,7 +43,10 @@ pub enum PreparationError {
         super::interpreter_version(),
         data_version()
     )]
-    DataDeFailed { data: Vec<u8>, error: SerdeJsonError },
+    DataDeFailed {
+        data: Vec<u8>,
+        error: SerdeDeserializeError,
+    },
 
     /// Errors occurred on executed trace deserialization
     /// when it was possible to recover versions.
@@ -59,7 +62,7 @@ pub enum PreparationError {
     )]
     DataDeFailedWithVersions {
         data: Vec<u8>,
-        error: SerdeJsonError,
+        error: SerdeDeserializeError,
         versions: Versions,
     },
 
@@ -104,11 +107,11 @@ impl ToErrorCode for PreparationError {
 }
 
 impl PreparationError {
-    pub fn data_de_failed(data: Vec<u8>, error: SerdeJsonError) -> Self {
+    pub fn data_de_failed(data: Vec<u8>, error: SerdeDeserializeError) -> Self {
         Self::DataDeFailed { data, error }
     }
 
-    pub fn data_de_failed_with_versions(data: Vec<u8>, error: SerdeJsonError, versions: Versions) -> Self {
+    pub fn data_de_failed_with_versions(data: Vec<u8>, error: SerdeDeserializeError, versions: Versions) -> Self {
         Self::DataDeFailedWithVersions { data, error, versions }
     }
 

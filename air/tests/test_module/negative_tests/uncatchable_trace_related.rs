@@ -321,7 +321,7 @@ fn invalid_dst_generations() {
     let mut data_value = serde_json::to_value(&empty_data).unwrap();
     data_value["trace"] = json!([{"ap": {"gens": [42, 42]}}]);
 
-    let data: Vec<u8> = serde_json::to_vec(&data_value).unwrap();
+    let data: Vec<u8> = rmp_serde::to_vec(&data_value).unwrap();
     // let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
     let result = call_vm!(peer_vm_1, <_>::default(), &script, "", data);
     let expected_error = UncatchableError::TraceError {

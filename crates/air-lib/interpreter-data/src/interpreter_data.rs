@@ -97,17 +97,17 @@ impl InterpreterData {
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, rmp_serde::decode::Error> {
         measure!(
-            serde_json::from_slice(slice),
+            rmp_serde::from_slice(slice),
             tracing::Level::INFO,
-            "serde_json::from_slice"
+            "rmp_serde::from_slice"
         )
     }
 
     /// Tries to de only versions part of interpreter data.
-    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, serde_json::Error> {
-        serde_json::from_slice(slice)
+    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, rmp_serde::decode::Error> {
+        rmp_serde::from_slice(slice)
     }
 }
 

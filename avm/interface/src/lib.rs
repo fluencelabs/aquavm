@@ -32,7 +32,9 @@ mod outcome;
 mod particle_parameters;
 pub mod raw_outcome;
 
-use serde_json::Error as SerdeError;
+use rmp_serde::decode::Error as SerdeDeError;
+use rmp_serde::encode::Error as SerdeSeError;
+use serde_json::Error as SerdeJsonError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -42,14 +44,14 @@ pub enum CallSeDeErrors {
     #[error("error occurred while call results `{call_results:?}` deserialization: {se_error}")]
     CallResultsSeFailed {
         call_results: air_interpreter_interface::CallResults,
-        se_error: SerdeError,
+        se_error: SerdeSeError,
     },
 
     /// This error is encountered when deserialization pof call requests failed for some reason.
     #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
     CallRequestsDeError {
         raw_call_request: Vec<u8>,
-        error: SerdeError,
+        error: SerdeDeError,
     },
 
     /// Errors encountered while trying to deserialize arguments from call parameters returned
@@ -58,7 +60,7 @@ pub enum CallSeDeErrors {
     #[error("error occurred while deserialization of arguments from call params `{call_params:?}`: {de_error}")]
     CallParamsArgsDeFailed {
         call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeError,
+        de_error: SerdeJsonError,
     },
 
     /// Errors encountered while trying to deserialize tetraplets from call parameters returned
@@ -67,7 +69,7 @@ pub enum CallSeDeErrors {
     #[error("error occurred while deserialization of tetraplets from call params `{call_params:?}`: {de_error}")]
     CallParamsTetrapletsDeFailed {
         call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeError,
+        de_error: SerdeJsonError,
     },
 }
 type JValue = serde_json::Value;
