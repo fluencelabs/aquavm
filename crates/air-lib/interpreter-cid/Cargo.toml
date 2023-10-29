@@ -16,4 +16,4 @@ cid = { version = "0.10.1", default-features = false, features = ["std"] }
 multihash = { version = "0.18.1", default-features = false, features = ["multihash-impl", "std", "blake3"] }
 serde = { version = "1.0.164", features = ["derive", "rc"] }
 serde_json = "1.0.95"
-sha2 = "0.10.7"
+sha2 = "0.10.8"
