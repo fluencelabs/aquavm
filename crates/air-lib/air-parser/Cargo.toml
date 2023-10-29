@@ -32,7 +32,7 @@ serde = { version = "1.0.164", features = ["rc", "derive"] }
 serde_json = "1.0.95"
 
 itertools = "0.10.5"
-thiserror = "1.0.40"
+thiserror = "1.0.50"
 tracing = "0.1.37"
 
 [dev-dependencies]
