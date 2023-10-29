@@ -27,4 +27,4 @@ regex = "1.10.2"
 serde = { version = "1.0.164", features = ["rc", "derive"] }
 
 itertools = "0.10.5"
-thiserror = "1.0.40"
+thiserror = "1.0.50"
