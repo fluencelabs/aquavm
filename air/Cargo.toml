@@ -43,7 +43,7 @@ thiserror = "1.0.50"
 semver = "1.0.17"
 strum = "0.24"
 strum_macros = "0.24"
-tracing = "0.1.37"
+tracing = "0.1.40"
 
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
