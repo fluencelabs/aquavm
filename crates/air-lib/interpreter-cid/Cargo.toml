@@ -14,6 +14,6 @@ categories = ["wasm"]
 blake3 = "1.5.0"
 cid = { version = "0.10.1", default-features = false, features = ["std"] }
 multihash = { version = "0.18.1", default-features = false, features = ["multihash-impl", "std", "blake3"] }
-serde = { version = "1.0.164", features = ["derive", "rc"] }
+serde = { version = "1.0.190", features = ["derive", "rc"] }
 serde_json = "1.0.95"
 sha2 = "0.10.7"
