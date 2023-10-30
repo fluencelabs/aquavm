@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#[macro_use]
-extern crate fstrings;
-
 use std::rc::Rc;
 
 use criterion::criterion_group;
