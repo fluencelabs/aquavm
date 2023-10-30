@@ -86,8 +86,8 @@ impl<'i> CanonStreamMapScalar<'i> {
 
 impl<'i> Seq<'i> {
     pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
+        left_instruction: &'i Instruction<'i>,
+        right_instruction: &'i Instruction<'i>,
     ) -> Self {
         Self(left_instruction, right_instruction)
     }
@@ -95,8 +95,8 @@ impl<'i> Seq<'i> {
 
 impl<'i> Par<'i> {
     pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
+        left_instruction: &'i Instruction<'i>,
+        right_instruction: &'i Instruction<'i>,
     ) -> Self {
         Self(left_instruction, right_instruction)
     }
@@ -104,8 +104,8 @@ impl<'i> Par<'i> {
 
 impl<'i> Xor<'i> {
     pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
+        left_instruction: &'i Instruction<'i>,
+        right_instruction: &'i Instruction<'i>,
     ) -> Self {
         Self(left_instruction, right_instruction)
     }
@@ -115,7 +115,7 @@ impl<'i> Match<'i> {
     pub fn new(
         left_value: ImmutableValue<'i>,
         right_value: ImmutableValue<'i>,
-        instruction: Box<Instruction<'i>>,
+        instruction: &'i Instruction<'i>,
     ) -> Self {
         Self {
             left_value,
@@ -129,7 +129,7 @@ impl<'i> MisMatch<'i> {
     pub fn new(
         left_value: ImmutableValue<'i>,
         right_value: ImmutableValue<'i>,
-        instruction: Box<Instruction<'i>>,
+        instruction: &'i Instruction<'i>,
     ) -> Self {
         Self {
             left_value,
@@ -143,15 +143,15 @@ impl<'i> FoldScalar<'i> {
     pub fn new(
         iterable: FoldScalarIterable<'i>,
         iterator: Scalar<'i>,
-        instruction: Instruction<'i>,
-        last_instruction: Option<Instruction<'i>>,
+        instruction: &'i Instruction<'i>,
+        last_instruction: Option<&'i Instruction<'i>>,
         span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
-            instruction: Rc::new(instruction),
-            last_instruction: last_instruction.map(Rc::new),
+            instruction,
+            last_instruction,
             span,
         }
     }
@@ -161,15 +161,15 @@ impl<'i> FoldStream<'i> {
     pub fn new(
         iterable: Stream<'i>,
         iterator: Scalar<'i>,
-        instruction: Instruction<'i>,
-        last_instruction: Option<Instruction<'i>>,
+        instruction: &'i Instruction<'i>,
+        last_instruction: Option<&'i Instruction<'i>>,
         span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
-            instruction: Rc::new(instruction),
-            last_instruction: last_instruction.map(Rc::new),
+            instruction,
+            last_instruction,
             span,
         }
     }
@@ -179,15 +179,15 @@ impl<'i> FoldStreamMap<'i> {
     pub fn new(
         iterable: StreamMap<'i>,
         iterator: Scalar<'i>,
-        instruction: Instruction<'i>,
-        last_instruction: Option<Instruction<'i>>,
+        instruction: &'i Instruction<'i>,
+        last_instruction: Option<&'i Instruction<'i>>,
         span: Span,
     ) -> Self {
         Self {
             iterable,
             iterator,
-            instruction: Rc::new(instruction),
-            last_instruction: last_instruction.map(Rc::new),
+            instruction,
+            last_instruction,
             span,
         }
     }
@@ -201,7 +201,7 @@ impl<'i> Next<'i> {
 
 impl<'i> New<'i> {
     #[allow(clippy::self_named_constructors)]
-    pub fn new(argument: NewArgument<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
+    pub fn new(argument: NewArgument<'i>, instruction: &'i Instruction<'i>, span: Span) -> Self {
         Self {
             argument,
             instruction,

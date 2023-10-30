@@ -40,11 +40,12 @@ pub fn beautify(air_script: &str, output: &mut impl io::Write) -> Result<(), Bea
 /// Beautify the `air_script` to a string with default settings.
 /// Return error on parsing error.
 pub fn beautify_to_string(air_script: &str) -> Result<String, String> {
-    let ast = air_parser::parse(air_script)?;
+    let arena = typed_arena::Arena::new();
+    let ast = air_parser::parse(air_script, &arena)?;
     let mut buffer = vec![];
     let mut beautifier = Beautifier::new(&mut buffer);
 
-    beautifier.beautify_ast(&ast).unwrap();
+    beautifier.beautify_ast(ast).unwrap();
     // Safety: safe because Beautifier produces valid utf8 strings
     Ok(unsafe { String::from_utf8_unchecked(buffer) })
 }

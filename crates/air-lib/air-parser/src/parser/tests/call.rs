@@ -30,7 +30,8 @@ fn parse_json_path() {
         (call peer_id.$.a! ("service_id" "function_name") ["hello" name] $void)
         "#;
 
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
             "peer_id",
@@ -45,7 +46,7 @@ fn parse_json_path() {
         ]),
         CallOutputValue::Stream(Stream::new("$void", 74.into())),
     );
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -54,7 +55,8 @@ fn parse_empty_array() {
         (call peer_id (service_id "function_name") ["" [] arg])
     "#;
 
-    let actual = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
         ResolvableToStringVariable::Scalar(Scalar::new("service_id", 24.into())),
@@ -67,7 +69,7 @@ fn parse_empty_array() {
         CallOutputValue::None,
     );
 
-    assert_eq!(actual, expected);
+    assert_eq!(actual, &expected);
 }
 
 #[test]
@@ -76,7 +78,8 @@ fn parse_empty_array_2() {
         (call peer_id ("service_id" "function_name") [k [] []])
         "#;
 
-    let actual = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
         ResolvableToStringVariable::Literal("service_id"),
@@ -89,7 +92,7 @@ fn parse_empty_array_2() {
         CallOutputValue::None,
     );
 
-    assert_eq!(actual, expected);
+    assert_eq!(actual, &expected);
 }
 
 #[test]
@@ -103,8 +106,9 @@ fn parse_undefined_variable() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
+    let arena = typed_arena::Arena::new();
     parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
+        .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
 
     let errors = validator.finalize();
@@ -135,8 +139,9 @@ fn parse_undefined_stream_without_json_path() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
+    let arena = typed_arena::Arena::new();
     parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
+        .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
 
     let errors = validator.finalize();
@@ -152,9 +157,10 @@ fn parse_lambda_complex() {
             (call m.$.abc[0].cde[1][0].cde[1]! ("service_id" "function_name") [] void)
         )
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = seq(
-        call(
+        arena.alloc(call(
             ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![ValueAccessor::ArrayAccess { idx: 1 }],
@@ -164,8 +170,8 @@ fn parse_lambda_complex() {
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 75.into())),
-        ),
-        call(
+        )),
+        arena.alloc(call(
             ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
@@ -183,9 +189,9 @@ fn parse_lambda_complex() {
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 162.into())),
-        ),
+        )),
     );
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -196,9 +202,11 @@ fn parse_lambda_with_scalars_complex() {
             (call m.$.abc[0].[scalar_2].cde[1][0][scalar_3].cde[1]! ("service_id" "function_name") [] void)
         )
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
+    let a = |v| arena.alloc(v);
     let expected = seq(
-        call(
+        a(call(
             ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
@@ -216,8 +224,8 @@ fn parse_lambda_with_scalars_complex() {
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 97.into())),
-        ),
-        call(
+        )),
+        a(call(
             ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
                 "m",
                 vec![
@@ -241,9 +249,9 @@ fn parse_lambda_with_scalars_complex() {
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("void", 205.into())),
-        ),
+        )),
     );
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -251,7 +259,8 @@ fn json_path_square_braces() {
     let source_code = r#"
         (call u.$.peer_id! ("return" "") [u.$[1].cde[0][0].abc u.$.name] $void)
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
             "u",
@@ -283,7 +292,7 @@ fn json_path_square_braces() {
         CallOutputValue::Stream(Stream::new("$void", 74.into())),
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -297,25 +306,27 @@ fn parse_init_peer_id() {
         )"#
     );
 
-    let instruction = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(&source_code, &arena);
+    let a = |i| arena.alloc(i);
     let expected = seq(
-        call(
+        a(call(
             ResolvableToPeerIdVariable::Literal(peer_id),
             ResolvableToStringVariable::Literal("local_service_id"),
             ResolvableToStringVariable::Literal("local_fn_name"),
             Rc::new(vec![]),
             CallOutputValue::None,
-        ),
-        call(
+        )),
+        a(call(
             ResolvableToPeerIdVariable::InitPeerId,
             ResolvableToStringVariable::Literal("service_id"),
             ResolvableToStringVariable::Literal("fn_name"),
             Rc::new(vec![]),
             CallOutputValue::None,
-        ),
+        )),
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -324,7 +335,8 @@ fn parse_timestamp() {
         (call "peer_id" ("service_id" "fn_name") [%timestamp%])
         "#;
 
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Literal("peer_id"),
         ResolvableToStringVariable::Literal("service_id"),
@@ -333,7 +345,7 @@ fn parse_timestamp() {
         CallOutputValue::None,
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -342,7 +354,8 @@ fn parse_ttl() {
         (call "peer_id" ("service_id" "fn_name") [%ttl%])
         "#;
 
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Literal("peer_id"),
         ResolvableToStringVariable::Literal("service_id"),
@@ -351,7 +364,7 @@ fn parse_ttl() {
         CallOutputValue::None,
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -363,19 +376,21 @@ fn parse_last_error() {
         )"#
     .to_string();
 
-    let instruction = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(&source_code, &arena);
+    let a = |i| arena.alloc(i);
     let expected = seq(
-        call(
+        a(call(
             ResolvableToPeerIdVariable::InitPeerId,
             ResolvableToStringVariable::Literal("service_id"),
             ResolvableToStringVariable::Literal("fn_name"),
             Rc::new(vec![ImmutableValue::LastError(None)]),
             CallOutputValue::None,
-        ),
-        null(),
+        )),
+        a(null()),
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -389,7 +404,8 @@ fn canon_stream_in_args() {
         "#
     );
 
-    let instruction = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(&source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::InitPeerId,
         ResolvableToStringVariable::Literal(service_id),
@@ -400,7 +416,7 @@ fn canon_stream_in_args() {
         CallOutputValue::None,
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -419,8 +435,9 @@ fn canon_stream_in_triplet() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
+    let arena = typed_arena::Arena::new();
     parser
-        .parse(&source_code, &mut errors, &mut validator, lexer)
+        .parse(&source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
 
     assert_eq!(errors.len(), 1);
@@ -442,7 +459,8 @@ fn canon_stream_with_lambda_in_triplet() {
         "#
     );
 
-    let instruction = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(&source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(
             canon_stream,
@@ -459,7 +477,7 @@ fn canon_stream_with_lambda_in_triplet() {
         CallOutputValue::None,
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -476,34 +494,36 @@ fn seq_par_call() {
         )"#
     );
 
-    let instruction = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(&source_code, &arena);
+    let a = |i| arena.alloc(i);
     let expected = seq(
-        par(
-            call(
+        a(par(
+            a(call(
                 ResolvableToPeerIdVariable::Literal(peer_id),
                 ResolvableToStringVariable::Literal("local_service_id"),
                 ResolvableToStringVariable::Literal("local_fn_name"),
                 Rc::new(vec![]),
                 CallOutputValue::Scalar(Scalar::new("result_1", 108.into())),
-            ),
-            call(
+            )),
+            a(call(
                 ResolvableToPeerIdVariable::Literal(peer_id),
                 ResolvableToStringVariable::Literal("service_id"),
                 ResolvableToStringVariable::Literal("fn_name"),
                 Rc::new(vec![]),
                 CallOutputValue::Scalar(Scalar::new("g", 183.into())),
-            ),
-        ),
-        call(
+            )),
+        )),
+        a(call(
             ResolvableToPeerIdVariable::Literal(peer_id),
             ResolvableToStringVariable::Literal("local_service_id"),
             ResolvableToStringVariable::Literal("local_fn_name"),
             Rc::new(vec![]),
             CallOutputValue::Scalar(Scalar::new("result_2", 273.into())),
-        ),
+        )),
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -530,35 +550,37 @@ fn seq_with_empty_and_dash() {
         )
         "#;
 
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
+    let a = |i| arena.alloc(i);
     let expected = seq(
-        seq(
-            seq(
-                call(
+        a(seq(
+            a(seq(
+                a(call(
                     ResolvableToPeerIdVariable::Literal("set_variables"),
                     ResolvableToStringVariable::Literal(""),
                     ResolvableToStringVariable::Literal(""),
                     Rc::new(vec![ImmutableValue::Literal("module-bytes")]),
                     CallOutputValue::Scalar(Scalar::new("module-bytes", 119.into())),
-                ),
-                call(
+                )),
+                a(call(
                     ResolvableToPeerIdVariable::Literal("set_variables"),
                     ResolvableToStringVariable::Literal(""),
                     ResolvableToStringVariable::Literal(""),
                     Rc::new(vec![ImmutableValue::Literal("module_config")]),
                     CallOutputValue::Scalar(Scalar::new("module_config", 201.into())),
-                ),
-            ),
-            call(
+                )),
+            )),
+            a(call(
                 ResolvableToPeerIdVariable::Literal("set_variables"),
                 ResolvableToStringVariable::Literal(""),
                 ResolvableToStringVariable::Literal(""),
                 Rc::new(vec![ImmutableValue::Literal("blueprint")]),
                 CallOutputValue::Scalar(Scalar::new("blueprint", 294.into())),
-            ),
-        ),
-        seq(
-            call(
+            )),
+        )),
+        a(seq(
+            a(call(
                 ResolvableToPeerIdVariable::Literal("A"),
                 ResolvableToStringVariable::Literal("add_module"),
                 ResolvableToStringVariable::Literal(""),
@@ -570,9 +592,9 @@ fn seq_with_empty_and_dash() {
                     )),
                 ]),
                 CallOutputValue::Scalar(Scalar::new("module", 409.into())),
-            ),
-            seq(
-                Instruction::Call(Call {
+            )),
+            a(seq(
+                a(Instruction::Call(Call {
                     triplet: Triplet {
                         peer_id: ResolvableToPeerIdVariable::Literal("A"),
                         service_id: ResolvableToStringVariable::Literal("add_blueprint"),
@@ -583,9 +605,9 @@ fn seq_with_empty_and_dash() {
                         490.into(),
                     ))]),
                     output: CallOutputValue::Scalar(Scalar::new("blueprint_id", 501.into())),
-                }),
-                seq(
-                    call(
+                })),
+                a(seq(
+                    a(call(
                         ResolvableToPeerIdVariable::Literal("A"),
                         ResolvableToStringVariable::Literal("create"),
                         ResolvableToStringVariable::Literal(""),
@@ -594,8 +616,8 @@ fn seq_with_empty_and_dash() {
                             589.into(),
                         ))]),
                         CallOutputValue::Scalar(Scalar::new("service_id", 603.into())),
-                    ),
-                    call(
+                    )),
+                    a(call(
                         ResolvableToPeerIdVariable::Literal("remote_peer_id"),
                         ResolvableToStringVariable::Literal(""),
                         ResolvableToStringVariable::Literal(""),
@@ -604,13 +626,13 @@ fn seq_with_empty_and_dash() {
                             671.into(),
                         ))]),
                         CallOutputValue::Scalar(Scalar::new("client_result", 683.into())),
-                    ),
-                ),
-            ),
-        ),
+                    )),
+                )),
+            )),
+        )),
     );
 
-    assert_eq!(instruction, expected);
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -619,7 +641,8 @@ fn no_output() {
         (call peer (service fname) [])
     "#;
 
-    let actual = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(source_code, &arena);
 
     let expected = call(
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer", 15.into())),
@@ -628,7 +651,7 @@ fn no_output() {
         Rc::new(vec![]),
         CallOutputValue::None,
     );
-    assert_eq!(actual, expected);
+    assert_eq!(actual, &expected);
 }
 
 #[test]
@@ -645,8 +668,9 @@ fn not_defined_scalar_in_lambda() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
+    let arena = typed_arena::Arena::new();
     parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
+        .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
 
     let errors = validator.finalize();

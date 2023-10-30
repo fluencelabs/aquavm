@@ -26,7 +26,9 @@ fn parse_null() {
             ( never     )
         )
         "#;
-    let instruction = parse(source_code);
-    let expected = seq(never(), never());
-    assert_eq!(instruction, expected)
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
+    let never = never();
+    let expected = seq(&never, &never);
+    assert_eq!(instruction, &expected);
 }

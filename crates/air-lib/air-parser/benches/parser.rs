@@ -16,6 +16,7 @@
 
 use std::rc::Rc;
 
+use criterion::black_box;
 use criterion::criterion_group;
 use criterion::criterion_main;
 use criterion::Criterion;
@@ -82,11 +83,14 @@ fn parse(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_GOOD);
+                let arena = typed_arena::Arena::new();
 
-                parser
-                    .clone()
-                    .parse("", &mut Vec::new(), &mut validator, lexer)
-                    .expect("success")
+                black_box(
+                    parser
+                        .clone()
+                        .parse("", &mut Vec::new(), &mut validator, &arena, lexer)
+                        .expect("success"),
+                );
             })
         },
     );
@@ -102,9 +106,12 @@ fn parse_to_fail(c: &mut Criterion) {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_BAD);
 
-                parser
-                    .clone()
-                    .parse("", &mut Vec::new(), &mut validator, lexer)
+                let arena = typed_arena::Arena::new();
+                black_box(
+                    parser
+                        .clone()
+                        .parse("", &mut Vec::new(), &mut validator, &arena, lexer),
+                );
             })
         },
     );
@@ -127,11 +134,14 @@ fn parse_deep(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(code);
+                let arena = typed_arena::Arena::new();
 
-                parser
-                    .clone()
-                    .parse("", &mut Vec::new(), &mut validator, lexer)
-                    .expect("success")
+                black_box(
+                    parser
+                        .clone()
+                        .parse("", &mut Vec::new(), &mut validator, &arena, lexer)
+                        .expect("success"),
+                );
             });
         });
     }
@@ -149,11 +159,14 @@ fn parse_dashboard_script(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(DASHBOARD_SCRIPT);
+                let arena = typed_arena::Arena::new();
 
-                parser
-                    .clone()
-                    .parse("", &mut Vec::new(), &mut validator, lexer)
-                    .expect("success")
+                black_box(
+                    parser
+                        .clone()
+                        .parse("", &mut Vec::new(), &mut validator, &arena, lexer)
+                        .expect("success"),
+                );
             })
         },
     );

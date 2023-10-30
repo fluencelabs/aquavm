@@ -29,14 +29,15 @@ fn canon_with_literal_peer_id() {
     "#
     );
 
-    let actual = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(&source_code, &arena);
     let expected = canon(
         ResolvableToPeerIdVariable::Literal(peer_id),
         Stream::new(stream, 26.into()),
         CanonStream::new(canon_stream, 34.into()),
     );
 
-    assert_eq!(actual, expected);
+    assert_eq!(actual, &expected);
 }
 
 #[test]
@@ -50,14 +51,15 @@ fn canon_with_variable_peer_id() {
     "#
     );
 
-    let actual = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(&source_code, &arena);
     let expected = canon(
         ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
         Stream::new(stream, 24.into()),
         CanonStream::new(canon_stream, 32.into()),
     );
 
-    assert_eq!(actual, expected);
+    assert_eq!(actual, &expected);
 }
 
 #[test]
@@ -71,14 +73,15 @@ fn canon_with_stream_map_to_scalar() {
     "#
     );
 
-    let actual = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(&source_code, &arena);
     let expected = canon_stream_map_scalar(
         ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
         StreamMap::new(stream_map, 24.into()),
         Scalar::new(scalar, 36.into()),
     );
 
-    assert_eq!(actual, expected, "{:#?} {:#?}", actual, expected);
+    assert_eq!(actual, &expected, "{:#?} {:#?}", actual, expected);
 }
 
 #[test]
@@ -92,7 +95,8 @@ fn canon_with_stream_map_to_canon_stream_map() {
     "#
     );
 
-    let actual = parse(&source_code);
+    let arena = typed_arena::Arena::new();
+    let actual = parse(&source_code, &arena);
 
     let expected = canon_stream_map_canon_map(
         ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
@@ -100,5 +104,5 @@ fn canon_with_stream_map_to_canon_stream_map() {
         CanonStreamMap::new(canon_stream_map, 36.into()),
     );
 
-    assert_eq!(actual, expected, "{:#?} {:#?}", actual, expected);
+    assert_eq!(actual, &expected, "{:#?} {:#?}", actual, expected);
 }

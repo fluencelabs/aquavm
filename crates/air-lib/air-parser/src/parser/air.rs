@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 3f2a00b4e0b0922c986743c02f1829a8610259b5697c6508b93c823c487de1de
+// sha3: 75053c4bca5417fa27f4b475cde5afd339d0ca1fe148303483385d0690357fa7
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -49,7 +49,7 @@ mod __parse__AIR {
         Variant9(ImmutableValue<'input>),
         Variant10(alloc::vec::Vec<ImmutableValue<'input>>),
         Variant11(AirPos),
-        Variant12(Box<Instruction<'input>>),
+        Variant12(&'input Instruction<'input>),
         Variant13(ApArgument<'input>),
         Variant14(ApResult<'input>),
         Variant15(Vec<ImmutableValue<'input>>),
@@ -60,7 +60,7 @@ mod __parse__AIR {
         Variant20(Fail<'input>),
         Variant21(FoldScalarIterable<'input>),
         Variant22(ResolvableToStringVariable<'input>),
-        Variant23(core::option::Option<Box<Instruction<'input>>>),
+        Variant23(core::option::Option<&'input Instruction<'input>>),
         Variant24(NewArgument<'input>),
         Variant25(Number),
         Variant26(ResolvableToPeerIdVariable<'input>),
@@ -927,6 +927,7 @@ mod __parse__AIR {
     where
         'input: 'err,
         'input: 'v,
+        'input: 'input,
     {
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
             if __accepts(None, __states, Some(index), core::marker::PhantomData::<(&(), &(), &())>) {
@@ -937,22 +938,23 @@ mod __parse__AIR {
         }).collect()
     }
     pub(crate) struct __StateMachine<'err, 'input, 'v>
-    where 'input: 'err, 'input: 'v
+    where 'input: 'err, 'input: 'v, 'input: 'input
     {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __phantom: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
     }
     impl<'err, 'input, 'v> __state_machine::ParserDefinition for __StateMachine<'err, 'input, 'v>
-    where 'input: 'err, 'input: 'v
+    where 'input: 'err, 'input: 'v, 'input: 'input
     {
         type Location = AirPos;
         type Error = ParserError;
         type Token = Token<'input>;
         type TokenIndex = usize;
         type Symbol = __Symbol<'input>;
-        type Success = Box<Instruction<'input>>;
+        type Success = &'input Instruction<'input>;
         type StateIndex = i16;
         type Action = i16;
         type ReduceIndex = i16;
@@ -1029,6 +1031,7 @@ mod __parse__AIR {
                 self.input,
                 self.errors,
                 self.validator,
+                self.arena,
                 action,
                 start_location,
                 states,
@@ -1145,6 +1148,7 @@ mod __parse__AIR {
     where
         'input: 'err,
         'input: 'v,
+        'input: 'input,
     {
         match __reduce_index {
             0 => {
@@ -1888,8 +1892,9 @@ mod __parse__AIR {
             input: &'input str,
             errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
             validator: &'v mut VariableValidator<'input>,
+            arena: &'input typed_arena::Arena<Instruction<'input>>,
             __tokens0: __TOKENS,
-        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>
+        ) -> Result<&'input Instruction<'input>, __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -1898,6 +1903,7 @@ mod __parse__AIR {
                     input,
                     errors,
                     validator,
+                    arena,
                     __phantom: core::marker::PhantomData::<(&(), &(), &())>,
                 },
                 __tokens,
@@ -1917,6 +1923,7 @@ mod __parse__AIR {
     where
         'input: 'err,
         'input: 'v,
+        'input: 'input,
     {
         let mut __states = __states.to_vec();
         __states.extend(__error_state);
@@ -1950,377 +1957,378 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __action: i16,
         __lookahead_start: Option<&AirPos>,
         __states: &mut alloc::vec::Vec<i16>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>>
+    ) -> Option<Result<&'input Instruction<'input>,__lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
-                __reduce0(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce0(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             1 => {
-                __reduce1(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce1(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             2 => {
-                __reduce2(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce2(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             3 => {
-                __reduce3(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce3(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             4 => {
-                __reduce4(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce4(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             5 => {
-                __reduce5(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce5(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             6 => {
-                __reduce6(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce6(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             7 => {
-                __reduce7(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce7(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             8 => {
-                __reduce8(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce8(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             9 => {
-                __reduce9(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce9(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             10 => {
-                __reduce10(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce10(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             11 => {
-                __reduce11(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce11(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             12 => {
-                __reduce12(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce12(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             13 => {
-                __reduce13(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce13(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             14 => {
-                __reduce14(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce14(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             15 => {
-                __reduce15(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce15(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             16 => {
-                __reduce16(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce16(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             17 => {
-                __reduce17(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce17(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             18 => {
-                __reduce18(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce18(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             19 => {
-                __reduce19(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce19(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             20 => {
-                __reduce20(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce20(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             21 => {
-                __reduce21(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce21(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             22 => {
-                __reduce22(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce22(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             23 => {
-                __reduce23(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce23(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             24 => {
-                __reduce24(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce24(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             25 => {
-                __reduce25(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce25(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             26 => {
-                __reduce26(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce26(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             27 => {
-                __reduce27(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce27(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             28 => {
-                __reduce28(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce28(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             29 => {
-                __reduce29(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce29(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             30 => {
-                __reduce30(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce30(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             31 => {
-                __reduce31(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce31(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             32 => {
-                __reduce32(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce32(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             33 => {
-                __reduce33(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce33(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             34 => {
-                __reduce34(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce34(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             35 => {
-                __reduce35(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce35(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             36 => {
-                __reduce36(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce36(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             37 => {
-                __reduce37(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce37(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             38 => {
-                __reduce38(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce38(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             39 => {
-                __reduce39(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce39(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             40 => {
-                __reduce40(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce40(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             41 => {
-                __reduce41(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce41(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             42 => {
-                __reduce42(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce42(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             43 => {
-                __reduce43(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce43(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             44 => {
-                __reduce44(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce44(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             45 => {
-                __reduce45(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce45(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             46 => {
-                __reduce46(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce46(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             47 => {
-                __reduce47(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce47(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             48 => {
-                __reduce48(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce48(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             49 => {
-                __reduce49(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce49(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             50 => {
-                __reduce50(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce50(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             51 => {
-                __reduce51(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce51(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             52 => {
-                __reduce52(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce52(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             53 => {
-                __reduce53(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce53(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             54 => {
-                __reduce54(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce54(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             55 => {
-                __reduce55(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce55(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             56 => {
-                __reduce56(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce56(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             57 => {
-                __reduce57(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce57(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             58 => {
-                __reduce58(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce58(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             59 => {
-                __reduce59(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce59(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             60 => {
-                __reduce60(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce60(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             61 => {
-                __reduce61(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce61(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             62 => {
-                __reduce62(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce62(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             63 => {
-                __reduce63(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce63(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             64 => {
-                __reduce64(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce64(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             65 => {
-                __reduce65(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce65(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             66 => {
-                __reduce66(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce66(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             67 => {
-                __reduce67(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce67(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             68 => {
-                __reduce68(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce68(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             69 => {
-                __reduce69(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce69(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             70 => {
-                __reduce70(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce70(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             71 => {
-                __reduce71(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce71(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             72 => {
-                __reduce72(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce72(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             73 => {
-                __reduce73(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce73(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             74 => {
-                __reduce74(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce74(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             75 => {
-                __reduce75(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce75(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             76 => {
-                __reduce76(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce76(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             77 => {
-                __reduce77(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce77(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             78 => {
-                __reduce78(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce78(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             79 => {
-                __reduce79(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce79(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             80 => {
-                __reduce80(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce80(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             81 => {
-                __reduce81(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce81(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             82 => {
-                __reduce82(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce82(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             83 => {
-                __reduce83(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce83(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             84 => {
-                __reduce84(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce84(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             85 => {
-                __reduce85(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce85(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             86 => {
-                __reduce86(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce86(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             87 => {
-                __reduce87(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce87(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             88 => {
-                __reduce88(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce88(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             89 => {
-                __reduce89(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce89(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             90 => {
-                __reduce90(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce90(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             91 => {
-                __reduce91(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce91(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             92 => {
-                __reduce92(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce92(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             93 => {
-                __reduce93(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce93(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             94 => {
-                __reduce94(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce94(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             95 => {
-                __reduce95(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce95(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             96 => {
-                __reduce96(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce96(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             97 => {
-                __reduce97(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce97(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             98 => {
-                __reduce98(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce98(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             99 => {
-                __reduce99(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce99(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             100 => {
-                __reduce100(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce100(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             101 => {
-                __reduce101(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce101(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             102 => {
-                __reduce102(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce102(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             103 => {
-                __reduce103(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce103(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             104 => {
-                __reduce104(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce104(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             105 => {
-                __reduce105(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce105(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             106 => {
-                __reduce106(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce106(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             107 => {
-                __reduce107(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce107(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             108 => {
-                __reduce108(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce108(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             109 => {
-                __reduce109(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce109(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             110 => {
-                __reduce110(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce110(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             111 => {
-                __reduce111(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce111(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             112 => {
-                __reduce112(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce112(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             113 => {
-                __reduce113(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce113(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             114 => {
-                __reduce114(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce114(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             115 => {
-                __reduce115(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce115(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             116 => {
-                __reduce116(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce116(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             117 => {
-                __reduce117(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce117(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             118 => {
-                __reduce118(input, errors, validator, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
+                __reduce118(input, errors, validator, arena, __lookahead_start, __symbols, core::marker::PhantomData::<(&(), &(), &())>)
             }
             119 => {
                 // __AIR = AIR => ActionFn(0);
                 let __sym0 = __pop_Variant12(__symbols);
                 let __start = __sym0.0;
                 let __end = __sym0.2;
-                let __nt = super::__action0::<>(input, errors, validator, __sym0);
+                let __nt = super::__action0::<>(input, errors, validator, arena, __sym0);
                 return Some(Ok(__nt));
             }
             _ => panic!("invalid action code {}", __action)
@@ -2388,17 +2396,6 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant14(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
-    fn __pop_Variant12<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
-    ) -> (AirPos, Box<Instruction<'input>>, AirPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2622,17 +2619,6 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant23<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
-    ) -> (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant17<
       'input,
     >(
@@ -2641,6 +2627,17 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant23<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2666,6 +2663,17 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
+    fn __pop_Variant12<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, &'input Instruction<'input>, AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
     fn __pop_Variant7<
       'input,
     >(
@@ -2685,6 +2693,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2694,7 +2703,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant9(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action106::<>(input, errors, validator, __sym0);
+        let __nt = super::__action106::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 0)
     }
@@ -2706,6 +2715,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2714,7 +2724,7 @@ mod __parse__AIR {
         // (<Arg>)* =  => ActionFn(104);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action104::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action104::<>(input, errors, validator, arena, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (0, 1)
     }
@@ -2726,6 +2736,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2735,7 +2746,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant10(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action105::<>(input, errors, validator, __sym0);
+        let __nt = super::__action105::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 1)
     }
@@ -2747,6 +2758,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2756,7 +2768,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant9(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action115::<>(input, errors, validator, __sym0);
+        let __nt = super::__action115::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 2)
     }
@@ -2768,6 +2780,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2779,7 +2792,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant10(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action116::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action116::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (2, 2)
     }
@@ -2791,6 +2804,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2799,7 +2813,7 @@ mod __parse__AIR {
         // @L =  => ActionFn(112);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action112::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action112::<>(input, errors, validator, arena, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (0, 3)
     }
@@ -2811,6 +2825,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2819,7 +2834,7 @@ mod __parse__AIR {
         // @R =  => ActionFn(109);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action109::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action109::<>(input, errors, validator, arena, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (0, 4)
     }
@@ -2831,6 +2846,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2840,7 +2856,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant12(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action1::<>(input, errors, validator, __sym0);
+        let __nt = super::__action1::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 5)
     }
@@ -2852,6 +2868,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2861,7 +2878,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action84::<>(input, errors, validator, __sym0);
+        let __nt = super::__action84::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2873,6 +2890,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2882,7 +2900,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action85::<>(input, errors, validator, __sym0);
+        let __nt = super::__action85::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2894,6 +2912,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2903,7 +2922,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action86::<>(input, errors, validator, __sym0);
+        let __nt = super::__action86::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2915,6 +2934,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2924,7 +2944,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action87::<>(input, errors, validator, __sym0);
+        let __nt = super::__action87::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2936,6 +2956,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2945,7 +2966,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action88::<>(input, errors, validator, __sym0);
+        let __nt = super::__action88::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2957,6 +2978,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2966,7 +2988,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action89::<>(input, errors, validator, __sym0);
+        let __nt = super::__action89::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2978,6 +3000,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -2987,7 +3010,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action90::<>(input, errors, validator, __sym0);
+        let __nt = super::__action90::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -2999,6 +3022,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3008,7 +3032,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action91::<>(input, errors, validator, __sym0);
+        let __nt = super::__action91::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3020,6 +3044,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3029,7 +3054,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant25(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action92::<>(input, errors, validator, __sym0);
+        let __nt = super::__action92::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3041,6 +3066,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3050,7 +3076,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action93::<>(input, errors, validator, __sym0);
+        let __nt = super::__action93::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3062,6 +3088,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3073,7 +3100,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action94::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action94::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (2, 6)
     }
@@ -3085,6 +3112,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3094,7 +3122,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action95::<>(input, errors, validator, __sym0);
+        let __nt = super::__action95::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3106,6 +3134,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3115,7 +3144,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action96::<>(input, errors, validator, __sym0);
+        let __nt = super::__action96::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3127,6 +3156,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3136,7 +3166,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action97::<>(input, errors, validator, __sym0);
+        let __nt = super::__action97::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3148,6 +3178,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3157,7 +3188,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action98::<>(input, errors, validator, __sym0);
+        let __nt = super::__action98::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3169,6 +3200,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3178,7 +3210,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action99::<>(input, errors, validator, __sym0);
+        let __nt = super::__action99::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 6)
     }
@@ -3190,6 +3222,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3199,7 +3232,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action24::<>(input, errors, validator, __sym0);
+        let __nt = super::__action24::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
     }
@@ -3211,6 +3244,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3220,7 +3254,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action25::<>(input, errors, validator, __sym0);
+        let __nt = super::__action25::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 7)
     }
@@ -3232,6 +3266,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3241,7 +3276,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant9(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action66::<>(input, errors, validator, __sym0);
+        let __nt = super::__action66::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 8)
     }
@@ -3253,6 +3288,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3264,7 +3300,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action117::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action117::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (2, 9)
     }
@@ -3276,6 +3312,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3288,7 +3325,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym2.2;
-        let __nt = super::__action118::<>(input, errors, validator, __sym0, __sym1, __sym2);
+        let __nt = super::__action118::<>(input, errors, validator, arena, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (3, 9)
     }
@@ -3300,6 +3337,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3309,7 +3347,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action31::<>(input, errors, validator, __sym0);
+        let __nt = super::__action31::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
@@ -3321,6 +3359,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3330,7 +3369,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action32::<>(input, errors, validator, __sym0);
+        let __nt = super::__action32::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (1, 10)
     }
@@ -3342,6 +3381,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3351,7 +3391,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant16(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action110::<>(input, errors, validator, __sym0);
+        let __nt = super::__action110::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (1, 11)
     }
@@ -3363,6 +3403,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3371,7 +3412,7 @@ mod __parse__AIR {
         // CallOutput? =  => ActionFn(111);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action111::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action111::<>(input, errors, validator, arena, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (0, 11)
     }
@@ -3383,6 +3424,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3392,7 +3434,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action102::<>(input, errors, validator, __sym0);
+        let __nt = super::__action102::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (1, 12)
     }
@@ -3404,6 +3446,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3413,7 +3456,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action103::<>(input, errors, validator, __sym0);
+        let __nt = super::__action103::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (1, 13)
     }
@@ -3425,6 +3468,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3434,7 +3478,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action33::<>(input, errors, validator, __sym0);
+        let __nt = super::__action33::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3446,6 +3490,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3455,7 +3500,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action34::<>(input, errors, validator, __sym0);
+        let __nt = super::__action34::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3467,6 +3512,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3478,7 +3524,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action35::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action35::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (2, 14)
     }
@@ -3490,6 +3536,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3499,7 +3546,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action36::<>(input, errors, validator, __sym0);
+        let __nt = super::__action36::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3511,6 +3558,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3520,7 +3568,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action135::<>(input, errors, validator, __sym0);
+        let __nt = super::__action135::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3532,6 +3580,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3541,7 +3590,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action136::<>(input, errors, validator, __sym0);
+        let __nt = super::__action136::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (1, 14)
     }
@@ -3553,6 +3602,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3562,7 +3612,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action39::<>(input, errors, validator, __sym0);
+        let __nt = super::__action39::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
@@ -3574,6 +3624,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3583,7 +3634,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action40::<>(input, errors, validator, __sym0);
+        let __nt = super::__action40::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
@@ -3595,6 +3646,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3604,7 +3656,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action41::<>(input, errors, validator, __sym0);
+        let __nt = super::__action41::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
@@ -3616,6 +3668,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3625,7 +3678,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action42::<>(input, errors, validator, __sym0);
+        let __nt = super::__action42::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
@@ -3637,6 +3690,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3646,7 +3700,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action43::<>(input, errors, validator, __sym0);
+        let __nt = super::__action43::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 15)
     }
@@ -3658,6 +3712,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3669,7 +3724,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action44::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action44::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (2, 15)
     }
@@ -3681,6 +3736,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3690,7 +3746,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant22(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action46::<>(input, errors, validator, __sym0);
+        let __nt = super::__action46::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 16)
     }
@@ -3702,6 +3758,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3717,7 +3774,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action151::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action151::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3729,6 +3786,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3743,7 +3801,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action152::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action152::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3755,6 +3813,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3770,7 +3829,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action138::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action138::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3782,6 +3841,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3797,7 +3857,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action139::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action139::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3809,6 +3869,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3824,7 +3885,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action140::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action140::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -3836,6 +3897,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3850,7 +3912,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action141::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action141::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3862,6 +3924,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3879,7 +3942,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym7.2;
-        let __nt = super::__action142::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6, __sym7);
+        let __nt = super::__action142::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6, __sym7);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (8, 17)
     }
@@ -3891,6 +3954,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3905,7 +3969,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action8::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action8::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3917,6 +3981,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3931,7 +3996,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action9::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action9::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -3943,6 +4008,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3955,7 +4021,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym2.2;
-        let __nt = super::__action10::<>(input, errors, validator, __sym0, __sym1, __sym2);
+        let __nt = super::__action10::<>(input, errors, validator, arena, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (3, 17)
     }
@@ -3967,6 +4033,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -3979,7 +4046,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym2.2;
-        let __nt = super::__action11::<>(input, errors, validator, __sym0, __sym1, __sym2);
+        let __nt = super::__action11::<>(input, errors, validator, arena, __sym0, __sym1, __sym2);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (3, 17)
     }
@@ -3991,6 +4058,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4005,7 +4073,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action143::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action143::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -4017,6 +4085,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4030,7 +4099,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym3.2;
-        let __nt = super::__action144::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action144::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
@@ -4042,6 +4111,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4058,7 +4128,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action153::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action153::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4070,6 +4140,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4085,7 +4156,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action154::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action154::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4097,6 +4168,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4113,7 +4185,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action155::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action155::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4125,6 +4197,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4140,7 +4213,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action156::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action156::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4152,6 +4225,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4168,7 +4242,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym6.2;
-        let __nt = super::__action157::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
+        let __nt = super::__action157::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5, __sym6);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (7, 17)
     }
@@ -4180,6 +4254,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4195,7 +4270,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action158::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action158::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4207,6 +4282,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4220,7 +4296,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym3.2;
-        let __nt = super::__action148::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3);
+        let __nt = super::__action148::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (4, 17)
     }
@@ -4232,6 +4308,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4246,7 +4323,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action18::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action18::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (5, 17)
     }
@@ -4258,6 +4335,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4273,7 +4351,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action149::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action149::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4285,6 +4363,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4300,7 +4379,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym5.2;
-        let __nt = super::__action150::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
+        let __nt = super::__action150::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4, __sym5);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (6, 17)
     }
@@ -4312,6 +4391,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4321,7 +4401,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant8(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action21::<>(input, errors, validator, __sym0);
+        let __nt = super::__action21::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 17)
     }
@@ -4333,6 +4413,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4342,7 +4423,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant12(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action107::<>(input, errors, validator, __sym0);
+        let __nt = super::__action107::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (1, 18)
     }
@@ -4354,6 +4435,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4362,7 +4444,7 @@ mod __parse__AIR {
         // Instr? =  => ActionFn(108);
         let __start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.2.clone())).unwrap_or_default();
         let __end = __start.clone();
-        let __nt = super::__action108::<>(input, errors, validator, &__start, &__end);
+        let __nt = super::__action108::<>(input, errors, validator, arena, &__start, &__end);
         __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (0, 18)
     }
@@ -4374,6 +4456,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4383,7 +4466,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action59::<>(input, errors, validator, __sym0);
+        let __nt = super::__action59::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
     }
@@ -4395,6 +4478,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4404,7 +4488,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action60::<>(input, errors, validator, __sym0);
+        let __nt = super::__action60::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
     }
@@ -4416,6 +4500,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4425,7 +4510,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action61::<>(input, errors, validator, __sym0);
+        let __nt = super::__action61::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
     }
@@ -4437,6 +4522,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4446,7 +4532,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action62::<>(input, errors, validator, __sym0);
+        let __nt = super::__action62::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
     }
@@ -4458,6 +4544,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4467,7 +4554,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action63::<>(input, errors, validator, __sym0);
+        let __nt = super::__action63::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (1, 19)
     }
@@ -4479,6 +4566,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4488,7 +4576,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action64::<>(input, errors, validator, __sym0);
+        let __nt = super::__action64::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 20)
     }
@@ -4500,6 +4588,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4509,7 +4598,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant5(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action65::<>(input, errors, validator, __sym0);
+        let __nt = super::__action65::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 20)
     }
@@ -4521,6 +4610,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4530,7 +4620,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant26(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action45::<>(input, errors, validator, __sym0);
+        let __nt = super::__action45::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 21)
     }
@@ -4542,6 +4632,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4551,7 +4642,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action48::<>(input, errors, validator, __sym0);
+        let __nt = super::__action48::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4563,6 +4654,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4572,7 +4664,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action49::<>(input, errors, validator, __sym0);
+        let __nt = super::__action49::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4584,6 +4676,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4593,7 +4686,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action50::<>(input, errors, validator, __sym0);
+        let __nt = super::__action50::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4605,6 +4698,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4614,7 +4708,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action51::<>(input, errors, validator, __sym0);
+        let __nt = super::__action51::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4626,6 +4720,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4635,7 +4730,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action52::<>(input, errors, validator, __sym0);
+        let __nt = super::__action52::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4647,6 +4742,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4656,7 +4752,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action53::<>(input, errors, validator, __sym0);
+        let __nt = super::__action53::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 22)
     }
@@ -4668,6 +4764,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4677,7 +4774,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action54::<>(input, errors, validator, __sym0);
+        let __nt = super::__action54::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
     }
@@ -4689,6 +4786,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4698,7 +4796,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action55::<>(input, errors, validator, __sym0);
+        let __nt = super::__action55::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
     }
@@ -4710,6 +4808,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4719,7 +4818,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action56::<>(input, errors, validator, __sym0);
+        let __nt = super::__action56::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
     }
@@ -4731,6 +4830,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4740,7 +4840,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action57::<>(input, errors, validator, __sym0);
+        let __nt = super::__action57::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
     }
@@ -4752,6 +4852,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4761,7 +4862,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action58::<>(input, errors, validator, __sym0);
+        let __nt = super::__action58::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 23)
     }
@@ -4773,6 +4874,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4782,7 +4884,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant22(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action47::<>(input, errors, validator, __sym0);
+        let __nt = super::__action47::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 24)
     }
@@ -4794,6 +4896,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4803,7 +4906,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action100::<>(input, errors, validator, __sym0);
+        let __nt = super::__action100::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant27(__nt), __end));
         (1, 25)
     }
@@ -4815,6 +4918,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4824,7 +4928,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action101::<>(input, errors, validator, __sym0);
+        let __nt = super::__action101::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (1, 26)
     }
@@ -4836,6 +4940,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4845,7 +4950,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action26::<>(input, errors, validator, __sym0);
+        let __nt = super::__action26::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 27)
     }
@@ -4857,6 +4962,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4866,7 +4972,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant6(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action27::<>(input, errors, validator, __sym0);
+        let __nt = super::__action27::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 27)
     }
@@ -4878,6 +4984,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4887,7 +4994,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action28::<>(input, errors, validator, __sym0);
+        let __nt = super::__action28::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 27)
     }
@@ -4899,6 +5006,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4908,7 +5016,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action29::<>(input, errors, validator, __sym0);
+        let __nt = super::__action29::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 27)
     }
@@ -4920,6 +5028,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4929,7 +5038,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action30::<>(input, errors, validator, __sym0);
+        let __nt = super::__action30::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 27)
     }
@@ -4941,6 +5050,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4955,7 +5065,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant26(__symbols);
         let __start = __sym0.0;
         let __end = __sym4.2;
-        let __nt = super::__action23::<>(input, errors, validator, __sym0, __sym1, __sym2, __sym3, __sym4);
+        let __nt = super::__action23::<>(input, errors, validator, arena, __sym0, __sym1, __sym2, __sym3, __sym4);
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (5, 28)
     }
@@ -4967,6 +5077,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4976,7 +5087,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action67::<>(input, errors, validator, __sym0);
+        let __nt = super::__action67::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -4988,6 +5099,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -4997,7 +5109,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action68::<>(input, errors, validator, __sym0);
+        let __nt = super::__action68::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5009,6 +5121,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5018,7 +5131,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action69::<>(input, errors, validator, __sym0);
+        let __nt = super::__action69::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5030,6 +5143,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5039,7 +5153,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action70::<>(input, errors, validator, __sym0);
+        let __nt = super::__action70::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5051,6 +5165,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5060,7 +5175,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant4(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action71::<>(input, errors, validator, __sym0);
+        let __nt = super::__action71::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5072,6 +5187,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5081,7 +5197,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant7(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action72::<>(input, errors, validator, __sym0);
+        let __nt = super::__action72::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5093,6 +5209,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5102,7 +5219,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action73::<>(input, errors, validator, __sym0);
+        let __nt = super::__action73::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5114,6 +5231,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5123,7 +5241,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action74::<>(input, errors, validator, __sym0);
+        let __nt = super::__action74::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5135,6 +5253,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5144,7 +5263,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant25(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action75::<>(input, errors, validator, __sym0);
+        let __nt = super::__action75::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5156,6 +5275,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5165,7 +5285,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant1(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action76::<>(input, errors, validator, __sym0);
+        let __nt = super::__action76::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5177,6 +5297,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5188,7 +5309,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant0(__symbols);
         let __start = __sym0.0;
         let __end = __sym1.2;
-        let __nt = super::__action77::<>(input, errors, validator, __sym0, __sym1);
+        let __nt = super::__action77::<>(input, errors, validator, arena, __sym0, __sym1);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (2, 29)
     }
@@ -5200,6 +5321,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5209,7 +5331,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action78::<>(input, errors, validator, __sym0);
+        let __nt = super::__action78::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5221,6 +5343,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5230,7 +5353,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action79::<>(input, errors, validator, __sym0);
+        let __nt = super::__action79::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5242,6 +5365,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5251,7 +5375,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action80::<>(input, errors, validator, __sym0);
+        let __nt = super::__action80::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5263,6 +5387,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5272,7 +5397,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action81::<>(input, errors, validator, __sym0);
+        let __nt = super::__action81::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5284,6 +5409,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5293,7 +5419,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant2(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action82::<>(input, errors, validator, __sym0);
+        let __nt = super::__action82::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5305,6 +5431,7 @@ mod __parse__AIR {
         input: &'input str,
         errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
         validator: &'v mut VariableValidator<'input>,
+        arena: &'input typed_arena::Arena<Instruction<'input>>,
         __lookahead_start: Option<&AirPos>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
@@ -5314,7 +5441,7 @@ mod __parse__AIR {
         let __sym0 = __pop_Variant3(__symbols);
         let __start = __sym0.0;
         let __end = __sym0.2;
-        let __nt = super::__action83::<>(input, errors, validator, __sym0);
+        let __nt = super::__action83::<>(input, errors, validator, arena, __sym0);
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 29)
     }
@@ -5331,8 +5458,9 @@ fn __action0<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> Box<Instruction<'input>>
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
+    (_, __0, _): (AirPos, &'input Instruction<'input>, AirPos),
+) -> &'input Instruction<'input>
 {
     __0
 }
@@ -5347,8 +5475,9 @@ fn __action1<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> Box<Instruction<'input>>
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
+    (_, __0, _): (AirPos, &'input Instruction<'input>, AirPos),
+) -> &'input Instruction<'input>
 {
     __0
 }
@@ -5363,6 +5492,7 @@ fn __action2<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5371,7 +5501,7 @@ fn __action2<
     (_, output, _): (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let args = Rc::new(args);
@@ -5381,7 +5511,7 @@ fn __action2<
 
         validator.met_call(&call, span);
 
-        Box::new(Instruction::Call(call))
+        arena.alloc(Instruction::Call(call))
     }
 }
 
@@ -5395,6 +5525,7 @@ fn __action3<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5403,7 +5534,7 @@ fn __action3<
     (_, canon_stream, _): (AirPos, CanonStream<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let canon = Canon::new(peer_id, stream, canon_stream);
@@ -5411,7 +5542,7 @@ fn __action3<
         let span = Span::new(left, right);
         validator.met_canon(&canon, span);
 
-        Box::new(Instruction::Canon(canon))
+        arena.alloc(Instruction::Canon(canon))
     }
 }
 
@@ -5425,6 +5556,7 @@ fn __action4<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5433,7 +5565,7 @@ fn __action4<
     (_, canon_stream_map, _): (AirPos, CanonStreamMap<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let canon_map = CanonMap::new(peer_id, stream_map, canon_stream_map);
@@ -5441,7 +5573,7 @@ fn __action4<
         let span = Span::new(left, right);
         validator.met_canon_map(&canon_map, span);
 
-        Box::new(Instruction::CanonMap(canon_map))
+        arena.alloc(Instruction::CanonMap(canon_map))
     }
 }
 
@@ -5455,6 +5587,7 @@ fn __action5<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5463,7 +5596,7 @@ fn __action5<
     (_, scalar_pair, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let scalar = Scalar::new(scalar_pair.0, scalar_pair.1);
@@ -5472,7 +5605,7 @@ fn __action5<
         let span = Span::new(left, right);
         validator.met_canon_map_scalar(&canon, span);
 
-        Box::new(Instruction::CanonStreamMapScalar(canon))
+        arena.alloc(Instruction::CanonStreamMapScalar(canon))
     }
 }
 
@@ -5486,6 +5619,7 @@ fn __action6<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5493,7 +5627,7 @@ fn __action6<
     (_, result, _): (AirPos, ApResult<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let apply = Ap::new(arg, result);
@@ -5501,7 +5635,7 @@ fn __action6<
         let span = Span::new(left, right);
         validator.met_ap(&apply, span);
 
-        Box::new(Instruction::Ap(apply))
+        arena.alloc(Instruction::Ap(apply))
     }
 }
 
@@ -5515,6 +5649,7 @@ fn __action7<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5525,7 +5660,7 @@ fn __action7<
     (_, map, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let map = StreamMap::new(map.0, map.1);
@@ -5534,7 +5669,7 @@ fn __action7<
         let span = Span::new(left, right);
         validator.met_ap_map(&apply, span);
 
-        Box::new(Instruction::ApMap(apply))
+        arena.alloc(Instruction::ApMap(apply))
     }
 }
 
@@ -5548,14 +5683,15 @@ fn __action8<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    Box::new(Instruction::Seq(Seq::new(l, r)))
+    arena.alloc(Instruction::Seq(Seq::new(l, r)))
 }
 
 #[allow(unused_variables)]
@@ -5568,14 +5704,15 @@ fn __action9<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    Box::new(Instruction::Par(Par::new(l, r)))
+    arena.alloc(Instruction::Par(Par::new(l, r)))
 }
 
 #[allow(unused_variables)]
@@ -5588,12 +5725,13 @@ fn __action10<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
     (_, __2, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    Box::new(Instruction::Never(Never))
+    arena.alloc(Instruction::Never(Never))
 }
 
 #[allow(unused_variables)]
@@ -5606,12 +5744,13 @@ fn __action11<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
     (_, __2, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    Box::new(Instruction::Null(Null))
+    arena.alloc(Instruction::Null(Null))
 }
 
 #[allow(unused_variables)]
@@ -5624,14 +5763,15 @@ fn __action12<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, argument, _): (AirPos, NewArgument<'input>, AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, instruction, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let span = Span::new(left, right);
@@ -5639,7 +5779,7 @@ fn __action12<
 
         validator.met_new(&new, span);
 
-        Box::new(Instruction::New(new))
+        arena.alloc(Instruction::New(new))
     }
 }
 
@@ -5653,19 +5793,20 @@ fn __action13<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, fail_body, _): (AirPos, Fail<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let span = Span::new(left, right);
         validator.met_fail_literal(&fail_body, span);
 
-        Box::new(Instruction::Fail(fail_body))
+        arena.alloc(Instruction::Fail(fail_body))
     }
 }
 
@@ -5679,25 +5820,26 @@ fn __action14<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, iterable, _): (AirPos, FoldScalarIterable<'input>, AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldScalar::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldScalar::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.met_fold_scalar(&fold, span);
 
-        Box::new(Instruction::FoldScalar(fold))
+        arena.alloc(Instruction::FoldScalar(fold))
     }
 }
 
@@ -5711,26 +5853,27 @@ fn __action15<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let iterable = Stream::new(stream.0, stream.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStream::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.meet_fold_stream(&fold, span);
 
-        Box::new(Instruction::FoldStream(fold))
+        arena.alloc(Instruction::FoldStream(fold))
     }
 }
 
@@ -5744,24 +5887,25 @@ fn __action16<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
-        let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStreamMap::new(iterable, iterator, instruction, last_instruction, span);
         validator.meet_fold_stream_map(&fold, span);
-        Box::new(Instruction::FoldStreamMap(fold))
+        arena.alloc(Instruction::FoldStreamMap(fold))
     }
 }
 
@@ -5775,13 +5919,14 @@ fn __action17<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
@@ -5789,7 +5934,7 @@ fn __action17<
         let span = Span::new(left, right);
         validator.met_next(&next, span);
 
-        Box::new(Instruction::Next(next))
+        arena.alloc(Instruction::Next(next))
     }
 }
 
@@ -5803,14 +5948,15 @@ fn __action18<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, &'input Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    Box::new(Instruction::Xor(Xor(l, r)))
+    arena.alloc(Instruction::Xor(Xor(l, r)))
 }
 
 #[allow(unused_variables)]
@@ -5823,22 +5969,23 @@ fn __action19<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, l, _): (AirPos, ImmutableValue<'input>, AirPos),
     (_, r, _): (AirPos, ImmutableValue<'input>, AirPos),
-    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, i, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
 
-        Box::new(Instruction::Match(match_))
+        arena.alloc(Instruction::Match(match_))
     }
 }
 
@@ -5852,22 +5999,23 @@ fn __action20<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, l, _): (AirPos, ImmutableValue<'input>, AirPos),
     (_, r, _): (AirPos, ImmutableValue<'input>, AirPos),
-    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, i, _): (AirPos, &'input Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     {
         let mismatch = MisMatch::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_mismatch(&mismatch, span);
 
-        Box::new(Instruction::MisMatch(mismatch))
+        arena.alloc(Instruction::MisMatch(mismatch))
      }
 }
 
@@ -5881,10 +6029,11 @@ fn __action21<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, __lalrpop_util::ErrorRecovery<AirPos, Token<'input>, ParserError>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
-    { errors.push(__0); Box::new(Instruction::Error) }
+    { errors.push(__0); arena.alloc(Instruction::Error) }
 }
 
 #[allow(unused_variables)]
@@ -5897,6 +6046,7 @@ fn __action22<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, args, _): (AirPos, alloc::vec::Vec<ImmutableValue<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
@@ -5915,6 +6065,7 @@ fn __action23<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, peer_id, _): (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, service_id, _): (AirPos, ResolvableToStringVariable<'input>, AirPos),
@@ -5939,6 +6090,7 @@ fn __action24<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApResult<'input>
 {
@@ -5955,6 +6107,7 @@ fn __action25<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApResult<'input>
 {
@@ -5971,6 +6124,7 @@ fn __action26<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> StreamMapKeyClause<'input>
 {
@@ -5987,6 +6141,7 @@ fn __action27<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, integer, _): (AirPos, i64, AirPos),
 ) -> StreamMapKeyClause<'input>
 {
@@ -6003,6 +6158,7 @@ fn __action28<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> StreamMapKeyClause<'input>
 {
@@ -6019,6 +6175,7 @@ fn __action29<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> StreamMapKeyClause<'input>
 {
@@ -6035,6 +6192,7 @@ fn __action30<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> StreamMapKeyClause<'input>
 {
@@ -6051,6 +6209,7 @@ fn __action31<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallOutputValue<'input>
 {
@@ -6067,6 +6226,7 @@ fn __action32<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CallOutputValue<'input>
 {
@@ -6083,6 +6243,7 @@ fn __action33<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Fail<'input>
 {
@@ -6099,6 +6260,7 @@ fn __action34<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Fail<'input>
 {
@@ -6115,6 +6277,7 @@ fn __action35<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, ret_code, _): (AirPos, i64, AirPos),
     (_, error_message, _): (AirPos, &'input str, AirPos),
 ) -> Fail<'input>
@@ -6135,6 +6298,7 @@ fn __action36<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> Fail<'input>
 {
@@ -6151,6 +6315,7 @@ fn __action37<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, l, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
@@ -6171,6 +6336,7 @@ fn __action38<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, left, _): (AirPos, AirPos, AirPos),
     (_, l, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
@@ -6191,6 +6357,7 @@ fn __action39<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
@@ -6207,6 +6374,7 @@ fn __action40<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
@@ -6223,6 +6391,7 @@ fn __action41<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
@@ -6239,6 +6408,7 @@ fn __action42<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
@@ -6255,6 +6425,7 @@ fn __action43<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> FoldScalarIterable<'input>
 {
@@ -6271,6 +6442,7 @@ fn __action44<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> FoldScalarIterable<'input>
@@ -6288,6 +6460,7 @@ fn __action45<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6304,6 +6477,7 @@ fn __action46<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ResolvableToStringVariable<'input>, AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6320,6 +6494,7 @@ fn __action47<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ResolvableToStringVariable<'input>, AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6336,6 +6511,7 @@ fn __action48<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6352,6 +6528,7 @@ fn __action49<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, literal, _): (AirPos, &'input str, AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6368,6 +6545,7 @@ fn __action50<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6384,6 +6562,7 @@ fn __action51<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6400,6 +6579,7 @@ fn __action52<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6416,6 +6596,7 @@ fn __action53<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToPeerIdVariable<'input>
 {
@@ -6432,6 +6613,7 @@ fn __action54<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, literal, _): (AirPos, &'input str, AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6448,6 +6630,7 @@ fn __action55<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6464,6 +6647,7 @@ fn __action56<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6480,6 +6664,7 @@ fn __action57<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6496,6 +6681,7 @@ fn __action58<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ResolvableToStringVariable<'input>
 {
@@ -6512,6 +6698,7 @@ fn __action59<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
@@ -6528,6 +6715,7 @@ fn __action60<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
@@ -6544,6 +6732,7 @@ fn __action61<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
@@ -6560,6 +6749,7 @@ fn __action62<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
@@ -6576,6 +6766,7 @@ fn __action63<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> NewArgument<'input>
 {
@@ -6592,6 +6783,7 @@ fn __action64<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, integer, _): (AirPos, i64, AirPos),
 ) -> Number
 {
@@ -6608,6 +6800,7 @@ fn __action65<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, float, _): (AirPos, f64, AirPos),
 ) -> Number
 {
@@ -6624,6 +6817,7 @@ fn __action66<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ImmutableValue<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6640,6 +6834,7 @@ fn __action67<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6656,6 +6851,7 @@ fn __action68<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6672,6 +6868,7 @@ fn __action69<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6688,6 +6885,7 @@ fn __action70<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6704,6 +6902,7 @@ fn __action71<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6720,6 +6919,7 @@ fn __action72<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6736,6 +6936,7 @@ fn __action73<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6752,6 +6953,7 @@ fn __action74<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6768,6 +6970,7 @@ fn __action75<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, n, _): (AirPos, Number, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6784,6 +6987,7 @@ fn __action76<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, b, _): (AirPos, bool, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6800,6 +7004,7 @@ fn __action77<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> ImmutableValue<'input>
@@ -6817,6 +7022,7 @@ fn __action78<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6833,6 +7039,7 @@ fn __action79<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6849,6 +7056,7 @@ fn __action80<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6865,6 +7073,7 @@ fn __action81<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6881,6 +7090,7 @@ fn __action82<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6897,6 +7107,7 @@ fn __action83<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -6913,6 +7124,7 @@ fn __action84<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -6929,6 +7141,7 @@ fn __action85<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -6945,6 +7158,7 @@ fn __action86<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -6961,6 +7175,7 @@ fn __action87<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -6977,6 +7192,7 @@ fn __action88<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, le, _): (AirPos, LambdaAST<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -6993,6 +7209,7 @@ fn __action89<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -7009,6 +7226,7 @@ fn __action90<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
 {
@@ -7025,6 +7243,7 @@ fn __action91<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> ApArgument<'input>
 {
@@ -7041,6 +7260,7 @@ fn __action92<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, n, _): (AirPos, Number, AirPos),
 ) -> ApArgument<'input>
 {
@@ -7057,6 +7277,7 @@ fn __action93<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, b, _): (AirPos, bool, AirPos),
 ) -> ApArgument<'input>
 {
@@ -7073,6 +7294,7 @@ fn __action94<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
 ) -> ApArgument<'input>
@@ -7090,6 +7312,7 @@ fn __action95<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
@@ -7106,6 +7329,7 @@ fn __action96<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, scalar, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
@@ -7122,6 +7346,7 @@ fn __action97<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
@@ -7138,6 +7363,7 @@ fn __action98<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
@@ -7154,6 +7380,7 @@ fn __action99<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, LambdaAST<'input>, AirPos), AirPos),
 ) -> ApArgument<'input>
 {
@@ -7170,6 +7397,7 @@ fn __action100<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> Stream<'input>
 {
@@ -7186,6 +7414,7 @@ fn __action101<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> StreamMap<'input>
 {
@@ -7202,6 +7431,7 @@ fn __action102<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CanonStream<'input>
 {
@@ -7218,6 +7448,7 @@ fn __action103<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, canon_stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
 ) -> CanonStreamMap<'input>
 {
@@ -7234,6 +7465,7 @@ fn __action104<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
@@ -7251,6 +7483,7 @@ fn __action105<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, v, _): (AirPos, alloc::vec::Vec<ImmutableValue<'input>>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
 {
@@ -7267,6 +7500,7 @@ fn __action106<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ImmutableValue<'input>, AirPos),
 ) -> ImmutableValue<'input>
 {
@@ -7283,8 +7517,9 @@ fn __action107<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> core::option::Option<Box<Instruction<'input>>>
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
+    (_, __0, _): (AirPos, &'input Instruction<'input>, AirPos),
+) -> core::option::Option<&'input Instruction<'input>>
 {
     Some(__0)
 }
@@ -7299,9 +7534,10 @@ fn __action108<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
-) -> core::option::Option<Box<Instruction<'input>>>
+) -> core::option::Option<&'input Instruction<'input>>
 {
     None
 }
@@ -7315,6 +7551,7 @@ fn __action109<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
 ) -> AirPos
@@ -7332,6 +7569,7 @@ fn __action110<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, CallOutputValue<'input>, AirPos),
 ) -> core::option::Option<CallOutputValue<'input>>
 {
@@ -7348,6 +7586,7 @@ fn __action111<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
 ) -> core::option::Option<CallOutputValue<'input>>
@@ -7364,6 +7603,7 @@ fn __action112<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
 ) -> AirPos
@@ -7381,6 +7621,7 @@ fn __action113<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, __0, _): (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
 {
@@ -7397,6 +7638,7 @@ fn __action114<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     (_, v, _): (AirPos, alloc::vec::Vec<ImmutableValue<'input>>, AirPos),
     (_, e, _): (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
@@ -7414,6 +7656,7 @@ fn __action115<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
 {
@@ -7423,6 +7666,7 @@ fn __action115<
         input,
         errors,
         validator,
+        arena,
         __0,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -7430,6 +7674,7 @@ fn __action115<
         input,
         errors,
         validator,
+        arena,
         __temp0,
     )
 }
@@ -7444,6 +7689,7 @@ fn __action116<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, alloc::vec::Vec<ImmutableValue<'input>>, AirPos),
     __1: (AirPos, ImmutableValue<'input>, AirPos),
 ) -> alloc::vec::Vec<ImmutableValue<'input>>
@@ -7454,6 +7700,7 @@ fn __action116<
         input,
         errors,
         validator,
+        arena,
         __1,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -7461,6 +7708,7 @@ fn __action116<
         input,
         errors,
         validator,
+        arena,
         __0,
         __temp0,
     )
@@ -7476,6 +7724,7 @@ fn __action117<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
 ) -> Vec<ImmutableValue<'input>>
@@ -7486,6 +7735,7 @@ fn __action117<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7494,6 +7744,7 @@ fn __action117<
         input,
         errors,
         validator,
+        arena,
         __0,
         __temp0,
         __1,
@@ -7510,6 +7761,7 @@ fn __action118<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, alloc::vec::Vec<ImmutableValue<'input>>, AirPos),
     __2: (AirPos, Token<'input>, AirPos),
@@ -7521,6 +7773,7 @@ fn __action118<
         input,
         errors,
         validator,
+        arena,
         __1,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -7528,6 +7781,7 @@ fn __action118<
         input,
         errors,
         validator,
+        arena,
         __0,
         __temp0,
         __2,
@@ -7544,6 +7798,7 @@ fn __action119<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, AirPos, AirPos),
 ) -> Fail<'input>
@@ -7554,6 +7809,7 @@ fn __action119<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7562,6 +7818,7 @@ fn __action119<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7578,6 +7835,7 @@ fn __action120<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, AirPos, AirPos),
 ) -> Fail<'input>
@@ -7588,6 +7846,7 @@ fn __action120<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7596,6 +7855,7 @@ fn __action120<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7612,6 +7872,7 @@ fn __action121<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Triplet<'input>, AirPos),
@@ -7619,7 +7880,7 @@ fn __action121<
     __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7627,6 +7888,7 @@ fn __action121<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7635,6 +7897,7 @@ fn __action121<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7656,6 +7919,7 @@ fn __action122<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
@@ -7663,7 +7927,7 @@ fn __action122<
     __4: (AirPos, CanonStream<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7671,6 +7935,7 @@ fn __action122<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7679,6 +7944,7 @@ fn __action122<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7700,6 +7966,7 @@ fn __action123<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
@@ -7707,7 +7974,7 @@ fn __action123<
     __4: (AirPos, CanonStreamMap<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7715,6 +7982,7 @@ fn __action123<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7723,6 +7991,7 @@ fn __action123<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7744,6 +8013,7 @@ fn __action124<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
@@ -7751,7 +8021,7 @@ fn __action124<
     __4: (AirPos, (&'input str, AirPos), AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7759,6 +8029,7 @@ fn __action124<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7767,6 +8038,7 @@ fn __action124<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7788,13 +8060,14 @@ fn __action125<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ApArgument<'input>, AirPos),
     __3: (AirPos, ApResult<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
     __5: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7802,6 +8075,7 @@ fn __action125<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7810,6 +8084,7 @@ fn __action125<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7830,6 +8105,7 @@ fn __action126<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Token<'input>, AirPos),
@@ -7839,7 +8115,7 @@ fn __action126<
     __6: (AirPos, (&'input str, AirPos), AirPos),
     __7: (AirPos, Token<'input>, AirPos),
     __8: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7847,6 +8123,7 @@ fn __action126<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7855,6 +8132,7 @@ fn __action126<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7878,13 +8156,14 @@ fn __action127<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, NewArgument<'input>, AirPos),
-    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __3: (AirPos, &'input Instruction<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
     __5: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7892,6 +8171,7 @@ fn __action127<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7900,6 +8180,7 @@ fn __action127<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7920,12 +8201,13 @@ fn __action128<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Fail<'input>, AirPos),
     __3: (AirPos, Token<'input>, AirPos),
     __4: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7933,6 +8215,7 @@ fn __action128<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7941,6 +8224,7 @@ fn __action128<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -7960,15 +8244,16 @@ fn __action129<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7976,6 +8261,7 @@ fn __action129<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -7984,6 +8270,7 @@ fn __action129<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8006,15 +8293,16 @@ fn __action130<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8022,6 +8310,7 @@ fn __action130<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8030,6 +8319,7 @@ fn __action130<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8052,15 +8342,16 @@ fn __action131<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8068,6 +8359,7 @@ fn __action131<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8076,6 +8368,7 @@ fn __action131<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8098,12 +8391,13 @@ fn __action132<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, Token<'input>, AirPos),
     __4: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8111,6 +8405,7 @@ fn __action132<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8119,6 +8414,7 @@ fn __action132<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8138,14 +8434,15 @@ fn __action133<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8153,6 +8450,7 @@ fn __action133<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8161,6 +8459,7 @@ fn __action133<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8182,14 +8481,15 @@ fn __action134<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8197,6 +8497,7 @@ fn __action134<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8205,6 +8506,7 @@ fn __action134<
         input,
         errors,
         validator,
+        arena,
         __temp0,
         __0,
         __1,
@@ -8226,6 +8528,7 @@ fn __action135<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
 ) -> Fail<'input>
 {
@@ -8235,6 +8538,7 @@ fn __action135<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8243,6 +8547,7 @@ fn __action135<
         input,
         errors,
         validator,
+        arena,
         __0,
         __temp0,
     )
@@ -8258,6 +8563,7 @@ fn __action136<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
 ) -> Fail<'input>
 {
@@ -8267,6 +8573,7 @@ fn __action136<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8275,6 +8582,7 @@ fn __action136<
         input,
         errors,
         validator,
+        arena,
         __0,
         __temp0,
     )
@@ -8290,13 +8598,14 @@ fn __action137<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Triplet<'input>, AirPos),
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8304,6 +8613,7 @@ fn __action137<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8312,6 +8622,7 @@ fn __action137<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8332,13 +8643,14 @@ fn __action138<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
     __3: (AirPos, Stream<'input>, AirPos),
     __4: (AirPos, CanonStream<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8346,6 +8658,7 @@ fn __action138<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8354,6 +8667,7 @@ fn __action138<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8374,13 +8688,14 @@ fn __action139<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
     __3: (AirPos, StreamMap<'input>, AirPos),
     __4: (AirPos, CanonStreamMap<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8388,6 +8703,7 @@ fn __action139<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8396,6 +8712,7 @@ fn __action139<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8416,13 +8733,14 @@ fn __action140<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ResolvableToPeerIdVariable<'input>, AirPos),
     __3: (AirPos, StreamMap<'input>, AirPos),
     __4: (AirPos, (&'input str, AirPos), AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8430,6 +8748,7 @@ fn __action140<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8438,6 +8757,7 @@ fn __action140<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8458,12 +8778,13 @@ fn __action141<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ApArgument<'input>, AirPos),
     __3: (AirPos, ApResult<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __4.2;
@@ -8471,6 +8792,7 @@ fn __action141<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8479,6 +8801,7 @@ fn __action141<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8498,6 +8821,7 @@ fn __action142<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Token<'input>, AirPos),
@@ -8506,7 +8830,7 @@ fn __action142<
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, (&'input str, AirPos), AirPos),
     __7: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __7.2;
     let __end0 = __7.2;
@@ -8514,6 +8838,7 @@ fn __action142<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8522,6 +8847,7 @@ fn __action142<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8544,12 +8870,13 @@ fn __action143<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, NewArgument<'input>, AirPos),
-    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __3: (AirPos, &'input Instruction<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __4.2;
@@ -8557,6 +8884,7 @@ fn __action143<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8565,6 +8893,7 @@ fn __action143<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8584,11 +8913,12 @@ fn __action144<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Fail<'input>, AirPos),
     __3: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __3.2;
@@ -8596,6 +8926,7 @@ fn __action144<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8604,6 +8935,7 @@ fn __action144<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8622,14 +8954,15 @@ fn __action145<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8637,6 +8970,7 @@ fn __action145<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8645,6 +8979,7 @@ fn __action145<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8666,14 +9001,15 @@ fn __action146<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8681,6 +9017,7 @@ fn __action146<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8689,6 +9026,7 @@ fn __action146<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8710,14 +9048,15 @@ fn __action147<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<&'input Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8725,6 +9064,7 @@ fn __action147<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8733,6 +9073,7 @@ fn __action147<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8754,11 +9095,12 @@ fn __action148<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __3.2;
@@ -8766,6 +9108,7 @@ fn __action148<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8774,6 +9117,7 @@ fn __action148<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8792,13 +9136,14 @@ fn __action149<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8806,6 +9151,7 @@ fn __action149<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8814,6 +9160,7 @@ fn __action149<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8834,13 +9181,14 @@ fn __action150<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8848,6 +9196,7 @@ fn __action150<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8856,6 +9205,7 @@ fn __action150<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8876,13 +9226,14 @@ fn __action151<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Triplet<'input>, AirPos),
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, CallOutputValue<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.0;
     let __end0 = __4.2;
@@ -8890,6 +9241,7 @@ fn __action151<
         input,
         errors,
         validator,
+        arena,
         __4,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -8897,6 +9249,7 @@ fn __action151<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8916,12 +9269,13 @@ fn __action152<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Triplet<'input>, AirPos),
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __4.0;
@@ -8929,6 +9283,7 @@ fn __action152<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -8937,6 +9292,7 @@ fn __action152<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8956,14 +9312,15 @@ fn __action153<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, &'input Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -8971,6 +9328,7 @@ fn __action153<
         input,
         errors,
         validator,
+        arena,
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -8978,6 +9336,7 @@ fn __action153<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -8998,13 +9357,14 @@ fn __action154<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;
@@ -9012,6 +9372,7 @@ fn __action154<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -9020,6 +9381,7 @@ fn __action154<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -9040,14 +9402,15 @@ fn __action155<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, &'input Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -9055,6 +9418,7 @@ fn __action155<
         input,
         errors,
         validator,
+        arena,
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -9062,6 +9426,7 @@ fn __action155<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -9082,13 +9447,14 @@ fn __action156<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;
@@ -9096,6 +9462,7 @@ fn __action156<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -9104,6 +9471,7 @@ fn __action156<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -9124,14 +9492,15 @@ fn __action157<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
+    __5: (AirPos, &'input Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -9139,6 +9508,7 @@ fn __action157<
         input,
         errors,
         validator,
+        arena,
         __5,
     );
     let __temp0 = (__start0, __temp0, __end0);
@@ -9146,6 +9516,7 @@ fn __action157<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,
@@ -9166,13 +9537,14 @@ fn __action158<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, &'input Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> &'input Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;
@@ -9180,6 +9552,7 @@ fn __action158<
         input,
         errors,
         validator,
+        arena,
         &__start0,
         &__end0,
     );
@@ -9188,6 +9561,7 @@ fn __action158<
         input,
         errors,
         validator,
+        arena,
         __0,
         __1,
         __2,

@@ -37,30 +37,30 @@ pub(super) fn call<'i>(
     })
 }
 
-pub(super) fn seq<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
-    Instruction::Seq(Seq(Box::new(l), Box::new(r)))
+pub(super) fn seq<'i>(l: &'i Instruction<'i>, r: &'i Instruction<'i>) -> Instruction<'i> {
+    Instruction::Seq(Seq(l, r))
 }
 
-pub(super) fn par<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
-    Instruction::Par(Par(Box::new(l), Box::new(r)))
+pub(super) fn par<'i>(l: &'i Instruction<'i>, r: &'i Instruction<'i>) -> Instruction<'i> {
+    Instruction::Par(Par(l, r))
 }
 
-pub(super) fn xor<'i>(l: Instruction<'i>, r: Instruction<'i>) -> Instruction<'i> {
-    Instruction::Xor(Xor(Box::new(l), Box::new(r)))
+pub(super) fn xor<'i>(l: &'i Instruction<'i>, r: &'i Instruction<'i>) -> Instruction<'i> {
+    Instruction::Xor(Xor(l, r))
 }
 
-pub(super) fn seqnn() -> Instruction<'static> {
-    seq(null(), null())
-}
+// pub(super) fn seqnn() -> Instruction<'static> {
+//     seq(null(), null())
+// }
 
 pub(super) fn new<'i>(
     argument: NewArgument<'i>,
-    instruction: Instruction<'i>,
+    instruction: &'i Instruction<'i>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::New(New {
         argument,
-        instruction: Box::new(instruction),
+        instruction: (instruction),
         span,
     })
 }
@@ -99,15 +99,15 @@ pub(super) fn fail_error() -> Instruction<'static> {
 pub(super) fn fold_scalar_variable<'i>(
     scalar: Scalar<'i>,
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::Scalar(scalar),
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
@@ -115,15 +115,15 @@ pub(super) fn fold_scalar_variable<'i>(
 pub(super) fn fold_scalar_variable_wl<'i>(
     scalar: ScalarWithLambda<'i>,
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::ScalarWithLambda(scalar),
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
@@ -131,15 +131,15 @@ pub(super) fn fold_scalar_variable_wl<'i>(
 pub(super) fn fold_scalar_canon_stream<'i>(
     canon_stream: CanonStream<'i>,
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::CanonStream(canon_stream),
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
@@ -147,30 +147,30 @@ pub(super) fn fold_scalar_canon_stream<'i>(
 pub(super) fn fold_scalar_canon_stream_map<'i>(
     canon_stream_map: CanonStreamMap<'i>,
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::CanonStreamMap(canon_stream_map),
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
 
 pub(super) fn fold_scalar_empty_array<'i>(
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldScalar(FoldScalar {
         iterable: FoldScalarIterable::EmptyArray,
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
@@ -178,15 +178,15 @@ pub(super) fn fold_scalar_empty_array<'i>(
 pub(super) fn fold_stream<'i>(
     iterable: Stream<'i>,
     iterator: Scalar<'i>,
-    instruction: Instruction<'i>,
-    last_instruction: Option<Instruction<'i>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     span: Span,
 ) -> Instruction<'i> {
     Instruction::FoldStream(FoldStream {
         iterable,
         iterator,
-        instruction: Rc::new(instruction),
-        last_instruction: last_instruction.map(Rc::new),
+        instruction,
+        last_instruction,
         span,
     })
 }
@@ -194,24 +194,24 @@ pub(super) fn fold_stream<'i>(
 pub(super) fn match_<'i>(
     left_value: ImmutableValue<'i>,
     right_value: ImmutableValue<'i>,
-    instruction: Instruction<'i>,
+    instruction: &'i Instruction<'i>,
 ) -> Instruction<'i> {
     Instruction::Match(Match {
         left_value,
         right_value,
-        instruction: Box::new(instruction),
+        instruction,
     })
 }
 
 pub(super) fn mismatch<'i>(
     left_value: ImmutableValue<'i>,
     right_value: ImmutableValue<'i>,
-    instruction: Instruction<'i>,
+    instruction: &'i Instruction<'i>,
 ) -> Instruction<'i> {
     Instruction::MisMatch(MisMatch {
         left_value,
         right_value,
-        instruction: Box::new(instruction),
+        instruction,
     })
 }
 
@@ -225,7 +225,7 @@ pub(super) fn ap_with_map<'i>(
     result: StreamMap<'i>,
 ) -> Instruction<'i> {
     Instruction::ApMap(ApMap {
-        key: key,
+        key,
         value: argument,
         map: result,
     })
@@ -269,7 +269,7 @@ pub(super) fn canon_stream_map_canon_map<'i>(
 
 pub(super) fn binary_instruction<'i, 'b>(
     name: &'i str,
-) -> impl Fn(Instruction<'b>, Instruction<'b>) -> Instruction<'b> {
+) -> impl Fn(&'i Instruction<'i>, &'i Instruction<'i>) -> Instruction<'i> {
     match name {
         "xor" => xor,
         "par" => par,

@@ -27,9 +27,10 @@ fn parse_fail_last_error() {
     let source_code = r#"
            (fail %last_error%)
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = fail_last_error();
-    assert_eq!(instruction, expected)
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -37,9 +38,10 @@ fn parse_fail_literals() {
     let source_code = r#"
            (fail 1 "error message")
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = fail_literals(1, "error message");
-    assert_eq!(instruction, expected)
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -47,9 +49,10 @@ fn parse_fail_scalars() {
     let source_code = r#"
            (fail scalar)
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = fail_scalar(Scalar::new("scalar", 18.into()));
-    assert_eq!(instruction, expected)
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -57,7 +60,8 @@ fn parse_fail_scalar_with_lambda() {
     let source_code = r#"
            (fail scalar.$.field_accessor)
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = fail_scalar_wl(ScalarWithLambda::new(
         "scalar",
         LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
@@ -66,7 +70,7 @@ fn parse_fail_scalar_with_lambda() {
         .unwrap(),
         18.into(),
     ));
-    assert_eq!(instruction, expected)
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -74,9 +78,10 @@ fn parse_fail_scalar_with_error() {
     let source_code = r#"
            (fail :error:)
         "#;
-    let instruction = parse(source_code);
+    let arena = typed_arena::Arena::new();
+    let instruction = parse(source_code, &arena);
     let expected = fail_error();
-    assert_eq!(instruction, expected)
+    assert_eq!(instruction, &expected);
 }
 
 #[test]
@@ -90,11 +95,12 @@ fn parse_fail_literal_0() {
 
     let lexer = crate::AIRLexer::new(source_code);
 
+    let arena = typed_arena::Arena::new();
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
     parser
-        .parse(source_code, &mut errors, &mut validator, lexer)
+        .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
 
     let errors = validator.finalize();

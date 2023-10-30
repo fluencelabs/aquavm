@@ -34,7 +34,10 @@ thread_local!(static PARSER: AIRParser = AIRParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
 #[tracing::instrument(skip_all)]
-pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
+pub fn parse<'input>(
+    air_script: &'input str,
+    arena: &'input typed_arena::Arena<Instruction<'input>>,
+) -> Result<&'input Instruction<'input>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.air", air_script);
 
@@ -42,7 +45,7 @@ pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
         let mut errors: Vec<ErrorRecovery<AirPos, Token<'_>, ParserError>> = Vec::new();
         let lexer = AIRLexer::new(air_script);
         let mut validator = VariableValidator::new();
-        let result = parser.parse(air_script, &mut errors, &mut validator, lexer);
+        let result = parser.parse(air_script, &mut errors, &mut validator, arena, lexer);
 
         let validator_errors = validator.finalize();
         errors.extend(validator_errors);

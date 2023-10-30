@@ -18,6 +18,7 @@ use air_parser::ast;
 
 use std::fmt::Display;
 use std::io;
+use std::ops::Deref;
 
 pub const DEFAULT_INDENT_STEP: usize = 4;
 
@@ -108,16 +109,17 @@ impl<W: io::Write> Beautifier<W> {
 
     /// Emit beautified code for the `air_script`.
     pub fn beautify(&mut self, air_script: &str) -> Result<(), BeautifyError> {
-        let tree = air_parser::parse(air_script).map_err(BeautifyError::Parse)?;
+        let arena = typed_arena::Arena::new();
+        let tree = air_parser::parse(air_script, &arena).map_err(BeautifyError::Parse)?;
         self.beautify_ast(tree)
     }
 
     /// Emit beautified code for the `ast`.
     pub fn beautify_ast<'i>(
         &mut self,
-        ast: impl AsRef<ast::Instruction<'i>>,
+        ast: impl Deref<Target = ast::Instruction<'i>>,
     ) -> Result<(), BeautifyError> {
-        Ok(self.beautify_walker(ast.as_ref(), 0)?)
+        Ok(self.beautify_walker(&ast, 0)?)
     }
 
     fn beautify_walker(&mut self, node: &ast::Instruction<'_>, indent: usize) -> io::Result<()> {

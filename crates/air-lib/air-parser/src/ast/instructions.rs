@@ -98,22 +98,22 @@ pub struct CanonStreamMapScalar<'i> {
 
 /// (seq instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Seq<'i>(pub &'i Instruction<'i>, pub &'i Instruction<'i>);
 
 /// (par instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Par<'i>(pub &'i Instruction<'i>, pub &'i Instruction<'i>);
 
 /// (xor instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Xor<'i>(pub &'i Instruction<'i>, pub &'i Instruction<'i>);
 
 /// (match left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Match<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
 }
 
 /// (mismatch left_value right_value instruction)
@@ -121,7 +121,7 @@ pub struct Match<'i> {
 pub struct MisMatch<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
 }
 
 /// (fail 1337 "error message")
@@ -147,9 +147,9 @@ pub struct FoldScalar<'i> {
     pub iterable: FoldScalarIterable<'i>,
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
-    pub instruction: Rc<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
     // option is needed to provide a graceful period of adoption
-    pub last_instruction: Option<Rc<Instruction<'i>>>,
+    pub last_instruction: Option<&'i Instruction<'i>>,
     pub span: Span,
 }
 
@@ -159,9 +159,9 @@ pub struct FoldStream<'i> {
     pub iterable: Stream<'i>,
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
-    pub instruction: Rc<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
     // option is needed to provide a graceful period of adoption
-    pub last_instruction: Option<Rc<Instruction<'i>>>,
+    pub last_instruction: Option<&'i Instruction<'i>>,
     pub span: Span,
 }
 
@@ -171,9 +171,9 @@ pub struct FoldStreamMap<'i> {
     pub iterable: StreamMap<'i>,
     #[serde(borrow)]
     pub iterator: Scalar<'i>,
-    pub instruction: Rc<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
     // option is needed to provide a graceful period of adoption
-    pub last_instruction: Option<Rc<Instruction<'i>>>,
+    pub last_instruction: Option<&'i Instruction<'i>>,
     pub span: Span,
 }
 
@@ -191,7 +191,7 @@ pub struct Never;
 #[derive(Serialize, Debug, PartialEq)]
 pub struct New<'i> {
     pub argument: NewArgument<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: &'i Instruction<'i>,
     pub span: Span,
 }
 
