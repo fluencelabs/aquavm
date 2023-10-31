@@ -59,7 +59,7 @@ fn main() {
         Bench::Dashboard => dashboard::dashboard(),
         Bench::NetworkExplore => network_explore::network_explore(),
         Bench::PopulateMapMultipleKeys => populate_map_multiple_keys(MAX_STREAM_SIZE),
-        Bench::PopulateMapSingleKey => populate_map_single_key(770),
+        Bench::PopulateMapSingleKey => populate_map_single_key(1000),
         Bench::CanonMapMultipleKeys => canon_map_multiple_keys(MAX_STREAM_SIZE),
         Bench::CanonMapSingleKey => canon_map_single_key(770),
         Bench::CanonMapScalarMultipleKeys => canon_map_scalar_multiple_keys(MAX_STREAM_SIZE),
