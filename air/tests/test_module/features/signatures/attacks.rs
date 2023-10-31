@@ -400,7 +400,7 @@ fn test_attack_injection_other_peer_unused() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
-    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
+    let cur_data = mallory_data.serialize().unwrap();
     let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
 
     // please not that such injection is not caught

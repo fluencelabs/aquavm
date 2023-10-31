@@ -15,11 +15,14 @@
  */
 
 pub(crate) mod errors;
+pub(crate) mod repr;
 pub mod verification;
 
+pub use crate::interpreter_data::repr::InterpreterDataRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
+use air_interpreter_sede::{FromRepresentation, ToRepresentation};
 use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
 
@@ -97,17 +100,27 @@ impl InterpreterData {
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(slice: &[u8]) -> Result<Self, rmp_serde::decode::Error> {
+    pub fn try_from_slice(
+        slice: &[u8],
+    ) -> Result<Self, <InterpreterDataRepr as FromRepresentation<InterpreterData>>::Error> {
         measure!(
-            rmp_serde::from_slice(slice),
+            InterpreterDataRepr.from_representation(slice),
             tracing::Level::INFO,
-            "rmp_serde::from_slice"
+            "InterpreterData::try_from_slice"
         )
     }
 
     /// Tries to de only versions part of interpreter data.
-    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, rmp_serde::decode::Error> {
-        rmp_serde::from_slice(slice)
+    pub fn try_get_versions(
+        slice: &[u8],
+    ) -> Result<Versions, <InterpreterDataRepr as FromRepresentation<Versions>>::Error> {
+        InterpreterDataRepr.from_representation(slice)
+    }
+
+    pub fn serialize(
+        &self,
+    ) -> Result<Vec<u8>, <InterpreterDataRepr as ToRepresentation<InterpreterData>>::Error> {
+        InterpreterDataRepr.to_representation(self)
     }
 }
 

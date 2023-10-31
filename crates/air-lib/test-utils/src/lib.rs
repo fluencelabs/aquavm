@@ -35,6 +35,8 @@ pub mod native_test_runner;
 pub mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
+use air_interpreter_sede::ToRepresentation;
+
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
@@ -84,7 +86,7 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    rmp_serde::from_slice(&result.data).expect("default serializer shouldn't fail")
+    InterpreterData::try_from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace(
@@ -98,7 +100,11 @@ pub fn raw_data_from_trace(
         0,
         semver::Version::new(1, 1, 1),
     );
-    rmp_serde::to_vec(&data).expect("default serializer shouldn't fail")
+    <InterpreterDataRepr as ToRepresentation<InterpreterData>>::to_representation(
+        &<_>::default(),
+        &data,
+    )
+    .expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace_with_canon(
@@ -118,7 +124,11 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    rmp_serde::to_vec(&data).expect("default serializer shouldn't fail")
+    <InterpreterDataRepr as ToRepresentation<InterpreterData>>::to_representation(
+        &<_>::default(),
+        &data,
+    )
+    .expect("default serializer shouldn't fail")
 }
 
 #[macro_export]

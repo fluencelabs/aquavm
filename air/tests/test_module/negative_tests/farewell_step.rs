@@ -23,7 +23,7 @@ fn unprocessed_call_result() {
     let client_peer_id = "some_peer_id";
     let mut client_vm = create_avm(unit_call_service(), client_peer_id);
     let prev_data = InterpreterData::new(semver::Version::new(1, 1, 1));
-    let prev_data: Vec<u8> = rmp_serde::to_vec(&prev_data).unwrap();
+    let prev_data: Vec<u8> = prev_data.serialize().unwrap();
     let call_service_result = air_test_utils::CallServiceResult::ok(json!("null"));
     let call_results_4_call = maplit::hashmap!(
         70 => call_service_result,

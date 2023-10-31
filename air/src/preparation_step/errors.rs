@@ -15,16 +15,19 @@
  */
 
 use crate::ToErrorCode;
+use air_interpreter_data::InterpreterData;
+use air_interpreter_data::InterpreterDataRepr;
 use air_interpreter_data::data_version;
 use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::Versions;
-
-use rmp_serde::decode::Error as SerdeDeserializeError;
+use air_interpreter_sede::FromRepresentation;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+type SerdeDeserializeError = <InterpreterDataRepr as FromRepresentation<InterpreterData>>::Error;
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]

@@ -109,6 +109,7 @@ name = "air-interpreter-data"
 version = "0.13.0"
 dependencies = [
  "air-interpreter-cid",
+ "air-interpreter-sede",
  "air-interpreter-signatures",
  "air-utils",
  "aquavm-air-parser",
@@ -134,6 +135,10 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "air-interpreter-sede"
+version = "0.1.0"
 
 [[package]]
 name = "air-interpreter-signatures"
@@ -180,6 +185,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "aquavm-air",
  "avm-interface",
  "avm-server",
@@ -333,6 +339,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-interpreter-signatures",
  "air-lambda-ast",
  "air-lambda-parser",
