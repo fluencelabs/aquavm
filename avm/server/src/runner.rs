@@ -149,17 +149,31 @@ impl AVMRunner {
         args.push(IValue::String(tracing_params));
         args.push(IValue::U8(tracing_output_mode));
 
-        let result = measure!(
-            self.marine.call_with_ivalues(
-                &self.wasm_filename,
-                "invoke_tracing",
-                &args,
-                <_>::default(),
-            )?,
-            tracing::Level::INFO,
-            "marine.call_with_ivalues",
-            method = "invoke_tracing",
+        // let result = measure!(
+        //     self.marine.call_with_ivalues(
+        //         &self.wasm_filename,
+        //         "invoke_tracing",
+        //         &args,
+        //         <_>::default(),
+        //     )?,
+        //     tracing::Level::INFO,
+        //     "marine.call_with_ivalues",
+        //     method = "invoke_tracing",
+        // );
+
+        let result = self.marine.call_with_ivalues(
+            &self.wasm_filename,
+            "invoke_tracing",
+            &args,
+            <_>::default(),
         );
+        println!("!!!!!!!!!!!!!###################result: {:?}", result);
+        if let Err(e) = result {
+            println!("Marine error: {}", e);
+            return Err(RunnerError::MarineError(e));
+        }
+        let result = result.unwrap();
+        // let result: Vec<IValue> =
 
         let result = try_as_one_value_vec(result)?;
         let outcome = InterpreterOutcome::from_ivalue(result)

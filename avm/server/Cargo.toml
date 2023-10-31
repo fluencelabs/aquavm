@@ -31,3 +31,9 @@ log = "0.4.17"
 parking_lot = "0.12.1"
 tracing = "0.1.37"
 fluence-keypair = { version = "0.10.3", default-features = false }
+
+[patch.crates-io]
+marine-runtime = { version = "0.30.0", git = "https://github.com/fluencelabs/marine", branch = "feat/it-with-error-propagation"}
+wasmer-it = { version = "0.26.1", package = "wasmer-interface-types-fl", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
+it-lilo = { version = "0.5.1", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
+it-memory-traits = { version = "0.4.0", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
