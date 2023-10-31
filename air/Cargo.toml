@@ -84,6 +84,3 @@ harness = false
 [[bench]]
 name = "data_long_benchmark"
 harness = false
-
-[patch.crates-io]
-fluence-app-service = { version = "0.29.0", git = "https://github.com/fluencelabs/marine", branch = "feat/it-with-error-propagation"}
