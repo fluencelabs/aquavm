@@ -23,6 +23,8 @@ use serde::Serialize;
 
 #[test]
 fn invalid_data_without_versions() {
+    use air_interpreter_sede::Format;
+
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {
         pub trace: Vec<u8>,
@@ -33,8 +35,8 @@ fn invalid_data_without_versions() {
 
     let script = r#"(null)"#;
     let invalid_data = InvalidDataStruct { trace: vec![1, 2, 3] };
-    // TODO serialization format leaks here
-    let invalid_data = serde_json::to_vec(&invalid_data).unwrap();
+
+    let invalid_data = InterpreterDataRepr::get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
@@ -48,6 +50,8 @@ fn invalid_data_without_versions() {
 
 #[test]
 fn invalid_data_with_versions() {
+    use air_interpreter_sede::Format;
+
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {
         pub trace: Vec<u8>,
@@ -64,8 +68,7 @@ fn invalid_data_with_versions() {
         trace: vec![1, 2, 3],
         versions: versions.clone(),
     };
-    // TODO serialization format leaks here
-    let invalid_data = serde_json::to_vec(&invalid_data).unwrap();
+    let invalid_data = InterpreterDataRepr::get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 

@@ -16,10 +16,18 @@
 
 use crate::{InterpreterData, Versions};
 
-use air_interpreter_sede::{FromRepresentation, ToRepresentation, ToWrite};
+use air_interpreter_sede::{
+    Format, FromRepresentation, SerdeJsonFormat, ToRepresentation, ToWrite,
+};
 
 #[derive(Default)]
 pub struct InterpreterDataRepr;
+
+impl InterpreterDataRepr {
+    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> impl Format<V> {
+        SerdeJsonFormat
+    }
+}
 
 impl ToRepresentation<InterpreterData> for InterpreterDataRepr {
     type Error = serde_json::Error;
@@ -31,9 +39,14 @@ impl ToRepresentation<InterpreterData> for InterpreterDataRepr {
 
 impl FromRepresentation<InterpreterData> for InterpreterDataRepr {
     type Error = serde_json::Error;
+    type Format = SerdeJsonFormat;
 
     fn from_representation(&self, repr: &[u8]) -> Result<InterpreterData, Self::Error> {
         serde_json::from_slice(repr)
+    }
+
+    fn get_format(&self) -> Self::Format {
+        SerdeJsonFormat
     }
 }
 
@@ -51,8 +64,13 @@ impl ToWrite<InterpreterData> for InterpreterDataRepr {
 
 impl FromRepresentation<Versions> for InterpreterDataRepr {
     type Error = serde_json::Error;
+    type Format = SerdeJsonFormat;
 
     fn from_representation(&self, repr: &[u8]) -> Result<Versions, Self::Error> {
         serde_json::from_slice(repr)
+    }
+
+    fn get_format(&self) -> Self::Format {
+        SerdeJsonFormat
     }
 }

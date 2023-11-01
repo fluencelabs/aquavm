@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-pub trait ToRepresentation<Value> {
-    type Error;
+pub(crate) mod format;
+pub(crate) mod repr;
+#[cfg(feature = "rmp-serde")]
+mod rmp_serde;
+#[cfg(feature = "serde_json")]
+pub(crate) mod serde_json;
 
-    fn to_representation(&self, value: &Value) -> Result<Vec<u8>, Self::Error>;
-    // TODO to value
-}
+pub use crate::format::Format;
+pub use crate::repr::{FromRepresentation, ToRepresentation, ToWrite};
 
-pub trait FromRepresentation<Value> {
-    type Error;
+#[cfg(feature = "rmp-serde")]
+pub use crate::rmp_serde::RmpSerdeFormat;
 
-    fn from_representation(&self, repr: &[u8]) -> Result<Value, Self::Error>;
-    // TODO from value
-}
-
-pub trait ToWrite<Value> {
-    type WriteError;
-
-    fn to_writer<W: std::io::Write>(
-        &self,
-        value: &Value,
-        writer: &mut W,
-    ) -> Result<(), Self::WriteError>;
-}
+#[cfg(feature = "serde_json")]
+pub use crate::serde_json::SerdeJsonFormat;
