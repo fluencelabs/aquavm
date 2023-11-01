@@ -1,4 +1,5 @@
 use air_interpreter_data::ExecutedState;
+use air_interpreter_sede::Format;
 use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
@@ -97,12 +98,19 @@ fn main() {
         .unwrap()
         .insert("interpreter_version".to_owned(), json!("0.41.0"));
     let mut ss = <SignatureStore>::new();
-    ss.put(keypair.public().into(), signature_tracker.gen_signature("particle_id", &keypair).unwrap());
+    ss.put(
+        keypair.public().into(),
+        signature_tracker
+            .gen_signature("particle_id", &keypair)
+            .unwrap(),
+    );
     data.other_fields
         .as_object_mut()
         .unwrap()
         .insert("signatures".to_owned(), json!(ss));
-    serde_json::to_writer(std::io::stdout(), &data).unwrap();
+    InterpreterDataRepr::get_format::<Value>()
+        .to_writer(&data, &mut std::io::stdout())
+        .unwrap();
 }
 
 fn derive_peer_id(peer_name: &str, peer_id_cache: &mut HashMap<String, String>) -> String {
@@ -141,7 +149,6 @@ fn transform_cid(
     if let Some(json_path) = meta.json_path {
         builder = builder.json_path(json_path);
     }
-
 
     match meta.kind {
         Some(Kind::Scalar) | None => {

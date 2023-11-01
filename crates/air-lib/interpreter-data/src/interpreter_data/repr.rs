@@ -17,60 +17,59 @@
 use crate::{InterpreterData, Versions};
 
 use air_interpreter_sede::{
-    Format, FromRepresentation, SerdeJsonFormat, ToRepresentation, ToWrite,
+    Format, FromRepresentation, ToRepresentation, ToWrite,
+    RmpSerdeFormat
 };
 
 #[derive(Default)]
 pub struct InterpreterDataRepr;
 
+// type InterpreterDataFormat = SerdeJsonFormat;
+type InterpreterDataFormat = RmpSerdeFormat;
+
 impl InterpreterDataRepr {
-    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> impl Format<V> {
-        SerdeJsonFormat
+    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> InterpreterDataFormat {
+        InterpreterDataFormat::default()
     }
 }
 
 impl ToRepresentation<InterpreterData> for InterpreterDataRepr {
-    type Error = serde_json::Error;
+    type Error = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
 
+    #[inline]
     fn to_representation(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::Error> {
-        serde_json::to_vec(value)
+        InterpreterDataRepr::get_format::<InterpreterData>().to_vec(value)
     }
 }
 
 impl FromRepresentation<InterpreterData> for InterpreterDataRepr {
-    type Error = serde_json::Error;
-    type Format = SerdeJsonFormat;
+    type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
 
+    #[inline]
     fn from_representation(&self, repr: &[u8]) -> Result<InterpreterData, Self::Error> {
-        serde_json::from_slice(repr)
+        InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
     }
 
-    fn get_format(&self) -> Self::Format {
-        SerdeJsonFormat
-    }
 }
 
 impl ToWrite<InterpreterData> for InterpreterDataRepr {
-    type WriteError = serde_json::Error;
+    type Error = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
 
+    #[inline]
     fn to_writer<W: std::io::Write>(
         &self,
         value: &InterpreterData,
         writer: &mut W,
-    ) -> Result<(), Self::WriteError> {
-        serde_json::to_writer(writer, value)
+    ) -> Result<(), Self::Error> {
+        InterpreterDataRepr::get_format::<InterpreterData>().to_writer(value, writer)
     }
 }
 
 impl FromRepresentation<Versions> for InterpreterDataRepr {
-    type Error = serde_json::Error;
-    type Format = SerdeJsonFormat;
+    type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
 
+    #[inline]
     fn from_representation(&self, repr: &[u8]) -> Result<Versions, Self::Error> {
-        serde_json::from_slice(repr)
-    }
-
-    fn get_format(&self) -> Self::Format {
-        SerdeJsonFormat
+        InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
     }
 }

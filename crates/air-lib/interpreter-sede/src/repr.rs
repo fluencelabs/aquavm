@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use crate::Format;
-
 // TODO
 // TODO All the traits can be replaced with a trait that has a Format and some default implementations...
 // TODO
@@ -30,20 +28,17 @@ pub trait ToRepresentation<Value> {
 
 pub trait FromRepresentation<Value> {
     type Error;
-    type Format: Format<Value>;
 
     fn from_representation(&self, repr: &[u8]) -> Result<Value, Self::Error>;
     // TODO from value
-
-    fn get_format(&self) -> Self::Format;
 }
 
 pub trait ToWrite<Value> {
-    type WriteError;
+    type Error;
 
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
         writer: &mut W,
-    ) -> Result<(), Self::WriteError>;
+    ) -> Result<(), Self::Error>;
 }

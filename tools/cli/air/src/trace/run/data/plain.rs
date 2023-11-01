@@ -22,7 +22,7 @@ use anyhow::Context;
 
 use std::path::{Path, PathBuf};
 
-const DEFAULT_DATA: &str = "";
+const DEFAULT_DATA: &[u8] = b"";
 
 #[derive(clap::Args, Debug)]
 pub(crate) struct PlainDataArgs {

@@ -36,7 +36,9 @@ fn invalid_data_without_versions() {
     let script = r#"(null)"#;
     let invalid_data = InvalidDataStruct { trace: vec![1, 2, 3] };
 
-    let invalid_data = InterpreterDataRepr::get_format().to_vec(&invalid_data).unwrap();
+    let invalid_data = InterpreterDataRepr::get_format::<InvalidDataStruct>()
+        .to_vec(&invalid_data)
+        .unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
@@ -68,7 +70,9 @@ fn invalid_data_with_versions() {
         trace: vec![1, 2, 3],
         versions: versions.clone(),
     };
-    let invalid_data = InterpreterDataRepr::get_format().to_vec(&invalid_data).unwrap();
+    let invalid_data = InterpreterDataRepr::get_format::<InvalidDataStruct>()
+        .to_vec(&invalid_data)
+        .unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 

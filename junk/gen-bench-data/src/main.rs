@@ -70,14 +70,7 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
 
 /// make zero-indentation data for better git diffs
 fn reformat_json(data: &[u8]) -> Vec<u8> {
-    use serde::ser::Serialize;
-
-    let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
-    let fmt = serde_json::ser::PrettyFormatter::with_indent(&[]);
-    let mut out = vec![];
-    let mut ser = serde_json::ser::Serializer::with_formatter(&mut out, fmt);
-    obj.serialize(&mut ser).unwrap();
-    out
+    data.to_owned()
 }
 
 fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> Result<(), Box<dyn std::error::Error>>{

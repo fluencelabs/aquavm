@@ -28,14 +28,17 @@ where
     type DeserializationError = rmp_serde::decode::Error;
     type WriteError = rmp_serde::encode::Error;
 
+    #[inline]
     fn to_vec(&self, val: &Value) -> Result<Vec<u8>, Self::SerializationError> {
         rmp_serde::to_vec(val)
     }
 
+    #[inline]
     fn from_slice(&self, slice: &[u8]) -> Result<Value, Self::DeserializationError> {
         rmp_serde::from_slice(slice)
     }
 
+    #[inline]
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
@@ -49,6 +52,7 @@ impl<'data, Value: 'data> BorrowFormat<'data, Value> for RmpSerdeFormat
 where
     Value: serde::Serialize + for<'de> serde::Deserialize<'de>,
 {
+    #[inline]
     fn borrow_from_slice(&self, slice: &'data [u8]) -> Result<Value, Self::DeserializationError> {
         rmp_serde::from_slice(slice)
     }

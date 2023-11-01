@@ -274,7 +274,7 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
         Some(call_results_path) => {
             let call_results_json =
                 load_data(call_results_path).context("failed to read call_results")?;
-            Ok(serde_json::from_str(&call_results_json)
+            Ok(serde_json::from_slice(&call_results_json)
                 .context("failed to parse call_results data")?)
         }
     }
@@ -282,16 +282,16 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
 
 fn load_data_or_default(
     data_path: Option<impl AsRef<Path>>,
-    default: &str,
-) -> anyhow::Result<String> {
+    default: &[u8],
+) -> anyhow::Result<Vec<u8>> {
     match data_path {
         None => Ok(default.to_owned()),
         Some(data_path) => load_data(data_path.as_ref()),
     }
 }
 
-fn load_data(data_path: &Path) -> anyhow::Result<String> {
-    Ok(std::fs::read_to_string(data_path)?)
+fn load_data(data_path: &Path) -> anyhow::Result<Vec<u8>> {
+    Ok(std::fs::read(data_path)?)
 }
 
 fn load_keypair_ed25519(path: &PathBuf) -> Result<KeyPair, anyhow::Error> {

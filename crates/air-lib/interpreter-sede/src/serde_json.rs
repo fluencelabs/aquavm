@@ -28,14 +28,17 @@ where
     type DeserializationError = serde_json::Error;
     type WriteError = serde_json::Error;
 
+    #[inline]
     fn to_vec(&self, value: &Value) -> Result<Vec<u8>, Self::SerializationError> {
         serde_json::to_vec(value)
     }
 
+    #[inline]
     fn from_slice(&self, slice: &[u8]) -> Result<Value, Self::DeserializationError> {
         serde_json::from_slice(slice)
     }
 
+    #[inline]
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
