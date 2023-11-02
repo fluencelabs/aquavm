@@ -191,8 +191,8 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
         let result = runner
             .call_tracing(
                 execution_data.air_script.clone(),
-                execution_data.prev_data.clone().into(),
-                execution_data.current_data.clone().into(),
+                execution_data.prev_data.clone(),
+                execution_data.current_data.clone(),
                 particle.init_peer_id.clone().into_owned(),
                 particle.timestamp,
                 particle.ttl,
