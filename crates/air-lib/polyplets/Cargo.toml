@@ -17,4 +17,4 @@ path = "src/lib.rs"
 [dependencies]
 marine-call-parameters = { version = "0.10.0", default-features = false }
 
-serde = { version = "1.0.164", features = ["rc", "derive"] }
+serde = { version = "1.0.190", features = ["rc", "derive"] }

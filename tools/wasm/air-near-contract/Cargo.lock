@@ -48,8 +48,9 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-cid"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
+ "blake3",
  "cid",
  "multihash 0.18.1",
  "serde",
@@ -59,7 +60,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -89,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-signatures"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "air-interpreter-cid",
  "borsh 0.10.3",
@@ -127,7 +128,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.53.0"
+version = "0.54.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -139,7 +140,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.6"
+version = "0.5.7"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -175,7 +176,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.53.0"
+version = "0.54.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -1397,9 +1398,9 @@ dependencies = [
 
 [[package]]
 name = "multimap"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70db9248a93dc36a36d9a47898caa007a32755c7ad140ec64eeeb50d5a730631"
+checksum = "e1a5d38b9b352dbd913288736af36af41c48d61b1a8cd34bcecd727561b7d511"
 dependencies = [
  "serde",
 ]
@@ -2138,9 +2139,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.188"
+version = "1.0.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf9e0fcba69a370eed61bcf2b728575f726b50b55cba78064753d708ddc7549e"
+checksum = "91d3c334ca1ee894a2c6f6ad698fe8c435b76d504b13d436f0685d648d6d96f7"
 dependencies = [
  "serde_derive",
 ]
@@ -2156,9 +2157,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.188"
+version = "1.0.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4eca7ac642d82aa35b60049a6eccb4be6be75e599bd2e9adb5f875a737654af2"
+checksum = "67c5609f394e5c2bd7fc51efda478004ea80ef42fee983d5c67a65e34f32c0e3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2381,18 +2382,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.48"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d6d7a740b8a666a7e828dd00da9c0dc290dff53154ea77ac109281de90589b7"
+checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.48"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49922ecae66cc8a249b77e68d1d0623c1b2c514f0060c27cdc68bd62a1219d35"
+checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
 dependencies = [
  "proc-macro2",
  "quote",

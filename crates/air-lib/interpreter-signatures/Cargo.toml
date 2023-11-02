@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-signatures"
 description = "AIR interpreter signatures util module"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -11,13 +11,13 @@ keywords = ["fluence", "air", "programming-language"]
 categories = ["wasm"]
 
 [dependencies]
-air-interpreter-cid = { version = "0.5.0", path = "../interpreter-cid" }
+air-interpreter-cid = { version = "0.6.0", path = "../interpreter-cid" }
 fluence-keypair = { version = "0.10.3", default-features = false }
 
 bs58 = "0.5.0"
 borsh = { version = "0.10.3", features = ["rc"]}
 borsh-derive = "0.10.3"
-serde = { version = "1.0.164", features = ["derive"] }
+serde = { version = "1.0.190", features = ["derive"] }
 thiserror = "1.0.49"
 
 [features]

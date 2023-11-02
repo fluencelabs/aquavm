@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter"
-version = "0.53.0"
+version = "0.54.0"
 description = "Crate-wrapper for air"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -18,7 +18,7 @@ name = "air_interpreter_server"
 path = "src/marine.rs"
 
 [dependencies]
-aquavm-air = { version = "0.53.0", path = "../air" }
+aquavm-air = { version = "0.54.0", path = "../air" }
 air-interpreter-interface = { version = "0.15.1", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
@@ -27,9 +27,9 @@ marine-rs-sdk = {version = "0.10.0", features = ["logger"] }
 wasm-bindgen = "=0.2.83"
 
 log = "0.4.20"
-serde = { version = "1.0.164", features = [ "derive", "rc" ] }
+serde = { version = "1.0.190", features = [ "derive", "rc" ] }
 serde_json = "1.0.95"
-tracing = "0.1.37"
+tracing = "0.1.40"
 # exclude tracing-log feature that interferes with the log crate:
 tracing-subscriber = { version = "0.3.17", default-features = false, features = [ "env-filter", "json", "smallvec", "time", "fmt" ] }
 
@@ -40,3 +40,4 @@ marine = []
 gen_signatures = ["aquavm-air/gen_signatures"]
 check_signatures = ["aquavm-air/check_signatures"]
 
+default = ["check_signatures", "gen_signatures"]
