@@ -34,7 +34,7 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     type Value = fluence_keypair::PublicKey;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("expecting a base58-encoded public key string")
+        formatter.write_str("a base58-encoded public key string")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -43,9 +43,8 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     {
         use serde::de;
 
-        let public_key = fluence_keypair::PublicKey::from_base58(v)
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        Ok(public_key)
+        fluence_keypair::PublicKey::from_base58(v)
+            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
     }
 }
 

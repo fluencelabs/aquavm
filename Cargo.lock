@@ -144,6 +144,7 @@ dependencies = [
  "bs58 0.5.0",
  "fluence-keypair",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -179,6 +180,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-signatures",
  "aquavm-air",
  "avm-interface",
  "avm-server",
@@ -202,6 +204,7 @@ dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
  "aquavm-air-parser",
+ "fluence-keypair",
  "itertools",
  "maplit",
  "nom",
@@ -341,6 +344,7 @@ dependencies = [
  "air-utils",
  "aquavm-air-parser",
  "borsh 0.10.3",
+ "bs58 0.5.0",
  "concat-idents",
  "criterion 0.3.6",
  "csv",
