@@ -22,7 +22,7 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_data::InterpreterDataRepr;
 use air_interpreter_interface::RunParameters;
-use air_interpreter_sede::FromRepresentation;
+use air_interpreter_sede::FromSerialized;
 use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use fluence_keypair::KeyFormat;
@@ -115,7 +115,7 @@ pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData>
 
 fn to_date_de_error(
     raw_data: Vec<u8>,
-    de_error: <InterpreterDataRepr as FromRepresentation<InterpreterData>>::Error,
+    de_error: <InterpreterDataRepr as FromSerialized<InterpreterData>>::Error,
 ) -> PreparationError {
     match InterpreterData::try_get_versions(&raw_data) {
         Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),

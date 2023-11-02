@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-// TODO
-// TODO All the traits can be replaced with a trait that has a Format and some default implementations...
-// TODO
-
-
-pub trait ToRepresentation<Value> {
+pub trait ToSerialized<Value> {
     type Error;
 
-    fn to_representation(&self, value: &Value) -> Result<Vec<u8>, Self::Error>;
-    // TODO to value
+    fn serialize(&self, value: &Value) -> Result<Vec<u8>, Self::Error>;
 }
 
-pub trait FromRepresentation<Value> {
+pub trait FromSerialized<Value> {
     type Error;
 
-    fn from_representation(&self, repr: &[u8]) -> Result<Value, Self::Error>;
-    // TODO from value
+    fn deserialize(&self, repr: &[u8]) -> Result<Value, Self::Error>;
 }
 
-pub trait ToWrite<Value> {
+pub trait FromSerialiedBorrow<'data, Value: 'data> {
+    type Error;
+
+    fn deserialize_borrow(&self, repr: &'data [u8]) -> Result<Value, Self::Error>;
+}
+
+pub trait ToWriter<Value> {
     type Error;
 
     fn to_writer<W: std::io::Write>(

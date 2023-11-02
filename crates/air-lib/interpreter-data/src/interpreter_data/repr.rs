@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-use crate::{InterpreterData, Versions};
+use crate::InterpreterData;
+use crate::Versions;
 
-use air_interpreter_sede::{
-    Format, FromRepresentation, ToRepresentation, ToWrite,
-    RmpSerdeFormat
-};
+use air_interpreter_sede::Format;
+use air_interpreter_sede::FromSerialized;
+use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::ToSerialized;
+use air_interpreter_sede::ToWriter;
 
 #[derive(Default)]
 pub struct InterpreterDataRepr;
@@ -28,31 +30,31 @@ pub struct InterpreterDataRepr;
 type InterpreterDataFormat = RmpSerdeFormat;
 
 impl InterpreterDataRepr {
-    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> InterpreterDataFormat {
+    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> InterpreterDataFormat
+    {
         InterpreterDataFormat::default()
     }
 }
 
-impl ToRepresentation<InterpreterData> for InterpreterDataRepr {
+impl ToSerialized<InterpreterData> for InterpreterDataRepr {
     type Error = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
 
     #[inline]
-    fn to_representation(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::Error> {
+    fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::Error> {
         InterpreterDataRepr::get_format::<InterpreterData>().to_vec(value)
     }
 }
 
-impl FromRepresentation<InterpreterData> for InterpreterDataRepr {
+impl FromSerialized<InterpreterData> for InterpreterDataRepr {
     type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
 
     #[inline]
-    fn from_representation(&self, repr: &[u8]) -> Result<InterpreterData, Self::Error> {
+    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::Error> {
         InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
     }
-
 }
 
-impl ToWrite<InterpreterData> for InterpreterDataRepr {
+impl ToWriter<InterpreterData> for InterpreterDataRepr {
     type Error = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
 
     #[inline]
@@ -65,11 +67,11 @@ impl ToWrite<InterpreterData> for InterpreterDataRepr {
     }
 }
 
-impl FromRepresentation<Versions> for InterpreterDataRepr {
+impl FromSerialized<Versions> for InterpreterDataRepr {
     type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
 
     #[inline]
-    fn from_representation(&self, repr: &[u8]) -> Result<Versions, Self::Error> {
+    fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::Error> {
         InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
     }
 }
