@@ -16,7 +16,9 @@
 
 use crate::ExecutionError;
 
-use air_interpreter_signatures::{KeyPair, PeerCidTracker, SignatureStore};
+use air_interpreter_signatures::KeyPair;
+use air_interpreter_signatures::PeerCidTracker;
+use air_interpreter_signatures::SignatureStore;
 
 #[cfg(feature = "gen_signatures")]
 #[tracing::instrument(skip_all)]
