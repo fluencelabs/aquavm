@@ -37,6 +37,8 @@ use marine_rs_sdk::module_manifest;
 
 module_manifest!();
 
+static mut TRACING_IS_INITED: bool = false;
+
 pub fn main() {
     logger::init_logger(None);
 }
@@ -63,7 +65,12 @@ pub fn invoke_tracing(
     tracing_params: String,
     tracing_output_mode: u8,
 ) -> InterpreterOutcome {
-    logger::init_tracing(tracing_params, tracing_output_mode);
+    if unsafe { !TRACING_IS_INITED } {
+        logger::init_tracing(tracing_params, tracing_output_mode);
+        unsafe {
+            TRACING_IS_INITED = true;
+        }
+    }
     execute_air(air, prev_data, data, params, call_results)
 }
 
