@@ -3,30 +3,32 @@ Here is the `fold` syntax.
 
 `(fold <iterable> <iterator> <instruction> [<last_instruction>])`
 
-`last_instruction` is:
-- an implicit `null` for scalar-based iterables
-- an implicit `never` for stream-based iterables
+Iterable can be: a stream, map, canonicalized stream, canonicalized map or scalar array.
+
+If `last_instruction` is not set, then it's assumed:
+ - `null` in case of `(fold (seq ...`
+ - `never` in case of `(fold (par ...`
 
 ```clojure
-(fold data value
+(fold iterable iterator
 	(seq
-	  (ap ("somesome-lengthy-and-scary-key" value) %map)
-	  (next value)
+	  (ap ("key" iterator) %map)
+	  (next iterator)
 	)
 	;; here is an implicit (null)
 )
 ```
 
-Here is an operational semantics of fold is if data is `[1 2 3]`. Please note that the recursion produced by `next` expressed in recursion of AquaVM execution engine function calls. Putting this differently the depth of the recursion depends on the size of the iterable.
+Let's consider the fold's operational semantics if iterable is the following scalar array `[1 2 3]`. Note that the recursion produced by `next` expressed in recursion of AquaVM execution engine function calls. Putting this differently the depth of the recursion depends on the size of the iterable.
 
 ```clojure
-(fold data value
+(fold iterable iterator
 	(seq
-	  (ap ("somesome-lengthy-and-scary-key" value) %map)
+	  (ap ("key" iterator) %map)
 	  	(seq ;; next
-		  (ap ("somesome-lengthy-and-scary-key" value) %map)
+		  (ap ("key" iterator) %map)
 			(seq ;; next
-				(ap ("somesome-lengthy-and-scary-key" value) %map)
+				(ap ("key" iterator) %map)
 				;; an implicit (null)
 			)
 		)
@@ -37,10 +39,10 @@ Here is an operational semantics of fold is if data is `[1 2 3]`. Please note th
 There is so-called recursive fold which populates iterable stream `fold` is iterating over.
 
 ```clojure
-(fold $data value ; data is a stream in the context
+(fold $iterable iterator ; data is a stream in the context
 	(seq
-	  (ap 42 $data)
-	  (next value)
+	  (ap 42 $iterable)
+	  (next iterator)
 	)
 	;; here is an implicit (null)
 )
@@ -48,13 +50,13 @@ There is so-called recursive fold which populates iterable stream `fold` is iter
 
 
 ```clojure
-(fold $data value ; data is a stream in the context
+(fold $iterable iterator ; data is a stream in the context
 	(seq
-	  (ap 42 $data)
+	  (ap 42 $iterable)
 		(seq ;; next
-		  (ap 42 $data)
+		  (ap 42 $iterable)
 			(seq ;; next
-				(ap 42 $data)
+				(ap 42 $iterable)
 					...
 			)
 		)
@@ -63,7 +65,7 @@ There is so-called recursive fold which populates iterable stream `fold` is iter
 )
 ```
 
-Fold internally is a vector of vectors where inner vectors are called generations. In the previous case ap adds a new generation into `fold`.
+A stream internally is a vector of vectors where inner vectors are called generations. In the previous case ap adds a new generation into `fold`.
 
 Here is a high level overview how `fold` handles multiple generations of an iterable.
 
