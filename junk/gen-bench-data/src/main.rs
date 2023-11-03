@@ -424,30 +424,6 @@ fn populate_map_single_key(size: usize) -> Data {
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
 
-    // let cur_res: RawAVMOutcome = exec.execute_one("other_peer_id").unwrap();
-
-    // println!(
-    //     "{:}",
-    //     serde_json::to_string_pretty(
-    //         &serde_json::from_slice::<InterpreterData>(&prev_res.data.clone()).unwrap()
-    //     )
-    //     .unwrap()
-    // );
-    // dbg!(prev_res.next_peer_pks.clone());
-    // println!("{:?}", prev_res.data);
-
-    // println!(
-    //     "{:}",
-    //     serde_json::to_string_pretty(
-    //         &serde_json::from_slice::<InterpreterData>(&cur_res.data).unwrap()
-    //     )
-    //     .unwrap()
-    // );
-
-    // assert!(false);
-
-    // assert!(!prev_res.next_peer_pks.is_empty());
-
     let keypair = exec
         .get_network()
         .get_named_peer_env("other_peer_id")
