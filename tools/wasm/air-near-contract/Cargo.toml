@@ -1,6 +1,6 @@
 [package]
 name = "air-near-contract"
-version = "0.53.0"
+version = "0.54.0"
 description = "AIR interpreter as a NEAR contract"
 authors = ["Fluence labs"]
 edition = "2018"
@@ -16,8 +16,8 @@ crate-type = ["cdylib"]
 aquavm-air = { path = "../../../air" }
 air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
 near-sdk = "4.1.1"
-serde = { version = "1.0.118", features = [ "derive", "rc" ] }
-serde_json = "1.0.61"
+serde = { version = "1.0.190", features = [ "derive", "rc" ] }
+serde_json = "1.0.108"
 hashbrown = { version = "0.14.2", default-features = false }
 
 [profile.release]

@@ -21,10 +21,11 @@ use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_signatures::KeyError;
+use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use fluence_keypair::KeyFormat;
-use fluence_keypair::KeyPair;
 
 use std::convert::TryFrom;
 
@@ -88,7 +89,7 @@ pub(crate) fn prepare<'i>(
     )?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
-    let key_format = KeyFormat::try_from(run_parameters.key_format)?;
+    let key_format = KeyFormat::try_from(run_parameters.key_format).map_err(KeyError::from)?;
     let keypair = KeyPair::from_secret_key(run_parameters.secret_key_bytes, key_format)?;
 
     let result = PreparationDescriptor {

@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter"
-version = "0.53.0"
+version = "0.54.0"
 dependencies = [
  "air-interpreter-interface",
  "air-log-targets",
@@ -94,21 +94,19 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-cid"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "blake3",
  "cid",
- "digest 0.10.7",
  "multihash 0.18.1",
  "serde",
  "serde_json",
  "sha2 0.10.7",
- "thiserror",
 ]
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -138,7 +136,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-signatures"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "air-interpreter-cid",
  "borsh 0.10.3",
@@ -146,6 +144,7 @@ dependencies = [
  "bs58 0.5.0",
  "fluence-keypair",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -176,11 +175,12 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-signatures",
  "aquavm-air",
  "avm-interface",
  "avm-server",
@@ -199,11 +199,12 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
  "aquavm-air-parser",
+ "fluence-keypair",
  "itertools",
  "maplit",
  "nom",
@@ -216,7 +217,7 @@ dependencies = [
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.6"
+version = "0.5.7"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -327,7 +328,7 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 
 [[package]]
 name = "aquavm-air"
-version = "0.53.0"
+version = "0.54.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -343,6 +344,7 @@ dependencies = [
  "air-utils",
  "aquavm-air-parser",
  "borsh 0.10.3",
+ "bs58 0.5.0",
  "concat-idents",
  "criterion 0.3.6",
  "csv",
@@ -369,7 +371,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
@@ -380,7 +382,7 @@ dependencies = [
  "avm-data-store",
  "avm-interface",
  "bs58 0.5.0",
- "clap 4.4.6",
+ "clap 4.4.7",
  "fluence-keypair",
  "itertools",
  "near-sdk",
@@ -406,7 +408,7 @@ dependencies = [
  "itertools",
  "lalrpop",
  "lalrpop-util",
- "multimap 0.9.0",
+ "multimap 0.9.1",
  "non-empty-vec",
  "regex",
  "serde",
@@ -592,7 +594,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.33.2"
+version = "0.33.3"
 dependencies = [
  "air-interpreter-interface",
  "air-utils",
@@ -776,7 +778,6 @@ dependencies = [
  "cc",
  "cfg-if 1.0.0",
  "constant_time_eq 0.3.0",
- "digest 0.10.7",
 ]
 
 [[package]]
@@ -1168,9 +1169,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.4.6"
+version = "4.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d04704f56c2cde07f43e8e2c154b43f216dc5c92fc98ada720177362f953b956"
+checksum = "ac495e00dcec98c83465d5ad66c5c4fabd652fd6686e7c6269b117e729a6f17b"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -1178,21 +1179,21 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.4.6"
+version = "4.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e231faeaca65ebd1ea3c737966bf858971cd38c3849107aa3ea7de90a804e45"
+checksum = "c77ed9a32a62e6ca27175d00d29d05ca32e396ea1eb5fb01d8256b669cec7663"
 dependencies = [
  "anstream",
  "anstyle",
- "clap_lex 0.5.0",
+ "clap_lex 0.6.0",
  "strsim",
 ]
 
 [[package]]
 name = "clap_derive"
-version = "4.4.2"
+version = "4.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0862016ff20d69b84ef8247369fabf5c008a7417002411897d40ee1f4532b873"
+checksum = "cf9804afaaf59a91e75b022a30fb7229a7901f60c755489cc61c9b423b836442"
 dependencies = [
  "heck 0.4.1",
  "proc-macro2",
@@ -1211,9 +1212,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b"
+checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
 
 [[package]]
 name = "codespan"
@@ -1772,7 +1773,6 @@ checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
  "block-buffer 0.10.4",
  "crypto-common",
- "subtle",
 ]
 
 [[package]]
@@ -2826,7 +2826,7 @@ dependencies = [
  "ed25519-dalek",
  "libsecp256k1",
  "log",
- "multihash 0.19.1",
+ "multihash 0.19.0",
  "quick-protobuf",
  "rand 0.8.5",
  "ring",
@@ -3326,9 +3326,9 @@ dependencies = [
 
 [[package]]
 name = "multihash"
-version = "0.19.1"
+version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "076d548d76a0e2a0d4ab471d0b1c36c577786dfc4471242035d97a12a735c492"
+checksum = "2fd59dcc2bbe70baabeac52cd22ae52c55eefe6c38ff11a9439f16a350a939f2"
 dependencies = [
  "core2",
  "unsigned-varint",
@@ -3359,9 +3359,9 @@ dependencies = [
 
 [[package]]
 name = "multimap"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70db9248a93dc36a36d9a47898caa007a32755c7ad140ec64eeeb50d5a730631"
+checksum = "e1a5d38b9b352dbd913288736af36af41c48d61b1a8cd34bcecd727561b7d511"
 dependencies = [
  "serde",
 ]
@@ -4812,9 +4812,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.183"
+version = "1.0.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32ac8da02677876d532745a130fc9d8e6edfa81a269b107c5b00829b91d8eb3c"
+checksum = "91d3c334ca1ee894a2c6f6ad698fe8c435b76d504b13d436f0685d648d6d96f7"
 dependencies = [
  "serde_derive",
 ]
@@ -4840,9 +4840,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.183"
+version = "1.0.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aafe972d60b0b9bee71a91b92fee2d4fb3c9d7e8f6b179aa99f27203d99a4816"
+checksum = "67c5609f394e5c2bd7fc51efda478004ea80ef42fee983d5c67a65e34f32c0e3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4862,9 +4862,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.105"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "693151e1ac27563d6dbcec9dee9fbd5da8539b20fa14ad3752b2e6d363ace360"
+checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "itoa",
  "ryu",
@@ -5251,18 +5251,18 @@ checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "thiserror"
-version = "1.0.49"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1177e8c6d7ede7afde3585fd2513e611227efd6481bd78d2e82ba1ce16557ed4"
+checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.49"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10712f02019e9288794769fba95cd6847df9874d49d871d062172f9dd41bc4cc"
+checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5434,11 +5434,10 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "tracing"
-version = "0.1.37"
+version = "0.1.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
+checksum = "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
 dependencies = [
- "cfg-if 1.0.0",
  "log",
  "pin-project-lite",
  "tracing-attributes",
@@ -5447,9 +5446,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.26"
+version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f4f31f56159e98206da9efd823404b79b6ef3143b4a7ab76e67b1751b25a4ab"
+checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5458,9 +5457,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
+checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
  "valuable",

@@ -33,13 +33,23 @@ mod trackers;
 pub use crate::stores::*;
 pub use crate::trackers::*;
 
-pub use fluence_keypair::KeyPair;
+pub use fluence_keypair::KeyFormat;
 
 use borsh::BorshSerialize;
+use fluence_keypair::error::SigningError;
 use serde::{Deserialize, Serialize};
 
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
+
+#[derive(thiserror::Error, Debug)]
+pub enum KeyError {
+    #[error("signature algorithm {0:?} not whitelisted")]
+    AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
+    #[error("invalid key data: {0}")]
+    InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
+}
 
 /// An opaque serializable representation of a public key.
 ///
@@ -55,6 +65,10 @@ pub struct PublicKey(
 );
 
 impl PublicKey {
+    pub fn new(inner: fluence_keypair::PublicKey) -> Self {
+        Self(inner)
+    }
+
     pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
@@ -65,6 +79,15 @@ impl PublicKey {
 
         let serialized_value = SaltedData::new(&value, salt).serialize();
         pk.verify(&serialized_value, signature)
+    }
+
+    pub fn to_peer_id(&self) -> String {
+        self.0.to_peer_id().to_string()
+    }
+
+    pub fn validate(&self) -> Result<(), KeyError> {
+        let key_format = self.get_key_format();
+        validate_with_key_format((), key_format)
     }
 }
 
@@ -82,9 +105,72 @@ impl Hash for PublicKey {
     }
 }
 
-impl From<fluence_keypair::PublicKey> for PublicKey {
-    fn from(value: fluence_keypair::PublicKey) -> Self {
-        Self(value)
+#[derive(Clone)]
+pub struct KeyPair(fluence_keypair::KeyPair);
+
+impl KeyPair {
+    pub fn new(inner: fluence_keypair::KeyPair) -> Result<Self, KeyError> {
+        let key_format = inner.key_format();
+        validate_with_key_format((), key_format)?;
+
+        Ok(Self(inner))
+    }
+
+    pub fn from_secret_key(secret_key: Vec<u8>, key_format: KeyFormat) -> Result<Self, KeyError> {
+        let inner = fluence_keypair::KeyPair::from_secret_key(secret_key, key_format)?;
+        Self::new(inner)
+    }
+
+    pub fn public(&self) -> PublicKey {
+        PublicKey::new(self.0.public())
+    }
+
+    pub fn key_format(&self) -> KeyFormat {
+        self.0.key_format()
+    }
+
+    pub fn sign(&self, msg: &[u8]) -> Result<Signature, SigningError> {
+        self.0.sign(msg).map(Signature::new)
+    }
+
+    pub fn secret(&self) -> Vec<u8> {
+        self.0.secret().expect("cannot fail on supported formats")
+    }
+
+    pub fn into_inner(self) -> fluence_keypair::KeyPair {
+        self.0
+    }
+
+    pub fn as_inner(&self) -> &fluence_keypair::KeyPair {
+        &self.0
+    }
+
+    #[cfg(feature = "rand")]
+    pub fn generate(key_format: KeyFormat) -> Result<Self, KeyError> {
+        validate_with_key_format((), key_format)?;
+
+        Ok(Self(fluence_keypair::KeyPair::generate(key_format)))
+    }
+}
+
+impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
+    type Error = KeyError;
+
+    fn try_from(value: fluence_keypair::KeyPair) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl From<KeyPair> for fluence_keypair::KeyPair {
+    fn from(value: KeyPair) -> Self {
+        value.0
+    }
+}
+
+pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
+    match key_format {
+        fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
+        _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
     }
 }
 
