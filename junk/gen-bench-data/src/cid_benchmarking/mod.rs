@@ -1,11 +1,11 @@
 use air::interpreter_version;
 use air_interpreter_data::ExecutedState;
+use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 
-use fluence_keypair::KeyPair;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde::Serialize;
@@ -148,9 +148,9 @@ pub fn cid_benchmarking_data(
     );
     let mut ss = <SignatureStore>::new();
     ss.put(
-        keypair.public().into(),
+        keypair.public(),
         signature_tracker
-            .gen_signature(particle_id, &keypair)
+            .gen_signature(particle_id, keypair)
             .unwrap(),
     );
     curr_data

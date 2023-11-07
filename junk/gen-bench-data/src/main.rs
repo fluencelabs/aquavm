@@ -639,12 +639,12 @@ fn long_data() -> Data {
 
     let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";
-    let (prev_data, curr_data) = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
+    let (prev_data, cur_data) = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
 
     Data {
         air: "(null)".to_owned(),
-        prev_data: prev_data,
-        cur_data: curr_data,
+        prev_data,
+        cur_data,
         params_json: hashmap! {
             "comment".to_owned() => "Long data trace".to_owned(),
             "particle-id".to_owned() => particle_id.to_owned(),
@@ -652,7 +652,7 @@ fn long_data() -> Data {
             "init-peer-id".to_owned() => peer_id,
         },
         call_results: None,
-        keypair: bs58::encode(keypair.to_vec()).into_string(),
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
     }
 }
 
@@ -661,13 +661,13 @@ fn big_values_data() -> Data {
 
     let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";
-    let (prev_data, curr_data) =
+    let (prev_data, cur_data) =
         cid_benchmarking_big_values_data(&keypair, peer_id.clone(), particle_id);
 
     Data {
         air: "(null)".to_owned(),
-        prev_data: prev_data,
-        cur_data: curr_data,
+        prev_data,
+        cur_data,
         params_json: hashmap! {
             "comment".to_owned() => "Loading a trace with huge values".to_owned(),
             "particle-id".to_owned() => particle_id.to_owned(),
@@ -675,6 +675,6 @@ fn big_values_data() -> Data {
             "init-peer-id".to_owned() => peer_id,
         },
         call_results: None,
-        keypair: bs58::encode(keypair.to_vec()).into_string(),
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
     }
 }
