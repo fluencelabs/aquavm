@@ -1,16 +1,22 @@
 use air_test_framework::*;
+use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
-use clap::{Parser, Subcommand};
+
+use clap::Parser;
+use clap::Subcommand;
 use itertools::Itertools as _;
 use maplit::hashmap;
-
+use serde::Serialize;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 const MAX_STREAM_SIZE: usize = 1023;
 
+mod cid_benchmarking;
 mod dashboard;
+mod data;
 mod network_explore;
 
 #[derive(Debug, Parser)]
@@ -42,6 +48,8 @@ enum Bench {
     CanonMapSingleKey,
     CanonMapScalarMultipleKeys,
     CanonMapScalarSingleKey,
+    LongData,
+    BigValuesData,
 }
 
 fn main() {
@@ -66,6 +74,8 @@ fn main() {
         Bench::CanonMapScalarSingleKey => canon_map_scalar_single_key(770),
         Bench::CanonMapKeyByLens => canon_map_key_by_lens(770),
         Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770),
+        Bench::LongData => long_data(),
+        Bench::BigValuesData => big_values_data(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -99,8 +109,6 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
 
 /// make zero-indentation data for better git diffs
 fn reformat_json_if_possible(data: &[u8]) -> Option<Vec<u8>> {
-    use serde::ser::Serialize;
-
     if data.is_empty() {
         return None;
     }
@@ -620,6 +628,51 @@ fn canon_map_scalar_single_key(size: usize) -> Data {
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn long_data() -> Data {
+    use cid_benchmarking::cid_benchmarking_long_data;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+    let (prev_data, curr_data) = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
+
+    Data {
+        air: "(null)".to_owned(),
+        prev_data: prev_data,
+        cur_data: curr_data,
+        params_json: hashmap! {
+            "comment".to_owned() => "Long data trace".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn big_values_data() -> Data {
+    use cid_benchmarking::cid_benchmarking_big_values_data;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+    let (prev_data, curr_data) =
+        cid_benchmarking_big_values_data(&keypair, peer_id.clone(), particle_id);
+
+    Data {
+        air: "(null)".to_owned(),
+        prev_data: prev_data,
+        cur_data: curr_data,
+        params_json: hashmap! {
+            "comment".to_owned() => "Loading a trace with huge values".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
