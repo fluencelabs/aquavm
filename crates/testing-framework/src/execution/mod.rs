@@ -771,14 +771,12 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_behaviour_service() {
-        let peer_name = "peer1";
+    fn run_behaviour_service(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
-            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=service"#,
+            air_script,
         )
         .unwrap();
 
@@ -802,14 +800,28 @@ mod tests {
     }
 
     #[test]
-    fn test_behaviour_function() {
+    fn test_behaviour_service() {
         let peer_name = "peer1";
+        let air_script =
+            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=service"#);
+        run_behaviour_service(peer_name, air_script)
+    }
 
+    #[test]
+    fn test_dbg_behaviour_service() {
+        let peer_name = "peer1";
+        let air_script = &format!(
+            r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=service"#
+        );
+        run_behaviour_service(peer_name, air_script)
+    }
+
+    fn run_behaviour_function(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
-            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=function"#,
+            air_script,
         )
         .unwrap();
 
@@ -833,14 +845,28 @@ mod tests {
     }
 
     #[test]
-    fn test_behaviour_arg() {
+    fn test_behaviour_function() {
         let peer_name = "peer1";
+        let air_script =
+            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=function"#);
+        run_behaviour_function(peer_name, air_script)
+    }
 
+    #[test]
+    fn test_dbg_behaviour_function() {
+        let peer_name = "peer1";
+        let air_script = &format!(
+            r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=function"#
+        );
+        run_behaviour_function(peer_name, air_script)
+    }
+
+    fn run_behaviour_arg(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
-            r#"(call "peer1" ("service" "func") [1 22] arg) ; behaviour=arg.1"#,
+            air_script,
         )
         .unwrap();
 
@@ -864,15 +890,31 @@ mod tests {
     }
 
     #[test]
-    fn test_behaviour_tetraplet() {
+    fn test_behaviour_arg() {
         let peer_name = "peer1";
+        let air_script =
+            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=arg.1"#);
+
+        run_behaviour_arg(peer_name, air_script)
+    }
+
+    #[test]
+    fn test_dbg_behaviour_arg() {
+        let peer_name = "peer1";
+        let air_script =
+            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=arg.1"#);
+
+        run_behaviour_arg(peer_name, air_script)
+    }
+
+    fn run_behaviour_tetraplet(peer_name: &str, air_script: &str) {
         let (_peer_pk, peer_id) = derive_dummy_keypair(peer_name);
 
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
-            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=tetraplet"#),
+            air_script,
         )
         .unwrap();
 
@@ -903,5 +945,22 @@ mod tests {
                 args = vec![1, 22]
             )]),
         )
+    }
+
+    #[test]
+    fn test_behaviour_tetraplet() {
+        let peer_name = "peer1";
+        let air_script =
+            &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=tetraplet"#);
+        run_behaviour_tetraplet(peer_name, air_script)
+    }
+
+    #[test]
+    fn test_dbg_behaviour_tetraplet() {
+        let peer_name = "peer1";
+        let air_script = &format!(
+            r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=tetraplet"#
+        );
+        run_behaviour_tetraplet(peer_name, air_script)
     }
 }
