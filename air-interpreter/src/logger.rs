@@ -32,18 +32,6 @@ pub fn init_logger(default_level: Option<LevelFilter>) {
 }
 
 #[allow(dead_code)]
-// TODO it worth moving it to marine_rs_sdk
-pub fn init_tracing(tracing_params: String, trace_mode: u8) {
-    use tracing_subscriber::fmt::format::FmtSpan;
-
-    let builder = tracing_subscriber::fmt()
-        .with_env_filter(tracing_params)
-        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
-        .with_writer(std::io::stderr);
-    if trace_mode == 0 {
-        builder.json().init();
-    } else {
-        // Human-readable output.
-        builder.init();
-    }
+pub fn json_output_mode(trace_mode: u8) -> bool {
+    trace_mode == 0
 }
