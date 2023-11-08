@@ -66,10 +66,7 @@ impl Behavior {
         use Behavior::*;
 
         match self {
-            Echo => {
-                println!("echo_call_service() {:#?}", params);
-                echo_call_service()(params)
-            }
+            Echo => echo_call_service()(params),
             Unit => unit_call_service()(params),
             Function => CallServiceResult::ok(params.function_name.into()),
             Service => CallServiceResult::ok(params.service_id.into()),
