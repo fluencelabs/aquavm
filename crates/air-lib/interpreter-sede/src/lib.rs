@@ -22,7 +22,7 @@ mod rmp_serde;
 pub(crate) mod serde_json;
 
 pub use crate::format::Format;
-pub use crate::repr::{FromSerialized, ToSerialized, ToWriter};
+pub use crate::repr::{FromSerialiedBorrow, FromSerialized, ToSerialized, ToWriter, TypedFormat};
 
 #[cfg(feature = "rmp-serde")]
 pub use crate::rmp_serde::RmpSerdeFormat;

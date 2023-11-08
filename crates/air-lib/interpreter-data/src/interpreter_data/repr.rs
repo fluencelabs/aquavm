@@ -22,56 +22,53 @@ use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::RmpSerdeFormat;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
+use air_interpreter_sede::TypedFormat;
 
 #[derive(Default)]
 pub struct InterpreterDataRepr;
 
-// type InterpreterDataFormat = SerdeJsonFormat;
 type InterpreterDataFormat = RmpSerdeFormat;
 
-impl InterpreterDataRepr {
-    pub fn get_format<V: serde::Serialize + serde::de::DeserializeOwned>() -> InterpreterDataFormat
-    {
+impl TypedFormat for InterpreterDataRepr {
+    type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
+    type DeserializeError =
+        <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
+    type WriteError = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
+    type Format = InterpreterDataFormat;
+
+    fn get_format(&self) -> InterpreterDataFormat {
         InterpreterDataFormat::default()
     }
 }
 
 impl ToSerialized<InterpreterData> for InterpreterDataRepr {
-    type Error = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
-
     #[inline]
-    fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::Error> {
-        InterpreterDataRepr::get_format::<InterpreterData>().to_vec(value)
+    fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::SerializeError> {
+        InterpreterDataRepr::get_format(self).to_vec(value)
     }
 }
 
 impl FromSerialized<InterpreterData> for InterpreterDataRepr {
-    type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
-
     #[inline]
-    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::Error> {
-        InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
+    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::DeserializeError> {
+        InterpreterDataRepr::get_format(self).from_slice(repr)
     }
 }
 
 impl ToWriter<InterpreterData> for InterpreterDataRepr {
-    type Error = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
-
     #[inline]
     fn to_writer<W: std::io::Write>(
         &self,
         value: &InterpreterData,
         writer: &mut W,
-    ) -> Result<(), Self::Error> {
-        InterpreterDataRepr::get_format::<InterpreterData>().to_writer(value, writer)
+    ) -> Result<(), Self::WriteError> {
+        InterpreterDataRepr::get_format(self).to_writer(value, writer)
     }
 }
 
 impl FromSerialized<Versions> for InterpreterDataRepr {
-    type Error = <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
-
     #[inline]
-    fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::Error> {
-        InterpreterDataRepr::get_format::<InterpreterData>().from_slice(repr)
+    fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::DeserializeError> {
+        InterpreterDataRepr::get_format(self).from_slice(repr)
     }
 }

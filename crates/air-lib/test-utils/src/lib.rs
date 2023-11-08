@@ -100,7 +100,8 @@ pub fn raw_data_from_trace(
         0,
         semver::Version::new(1, 1, 1),
     );
-    <InterpreterDataRepr as ToSerialized<InterpreterData>>::serialize(&<_>::default(), &data)
+    InterpreterDataRepr
+        .serialize(&data)
         .expect("default serializer shouldn't fail")
 }
 
@@ -121,7 +122,8 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    <InterpreterDataRepr as ToSerialized<InterpreterData>>::serialize(&<_>::default(), &data)
+    InterpreterDataRepr
+        .serialize(&data)
         .expect("default serializer shouldn't fail")
 }
 

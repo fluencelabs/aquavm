@@ -37,9 +37,8 @@ pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionDat
     let air_script = anomaly_data.air_script.to_string();
     let prev_data = anomaly_data.prev_data.to_vec();
     let current_data = anomaly_data.current_data.to_vec();
-    let particle: ParticleParameters<'static> =
-        serde_json::from_slice(&anomaly_data.particle)
-            .context("Anomaly particle is not a valid JSON")?;
+    let particle: ParticleParameters<'static> = serde_json::from_slice(&anomaly_data.particle)
+        .context("Anomaly particle is not a valid JSON")?;
 
     Ok(ExecutionData {
         air_script,

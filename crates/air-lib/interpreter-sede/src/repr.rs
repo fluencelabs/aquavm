@@ -14,30 +14,37 @@
  * limitations under the License.
  */
 
-pub trait ToSerialized<Value> {
-    type Error;
+/// A formatter intended for particular type, a base type that defines generic behavior
+/// used by particular implementations.
+pub trait TypedFormat {
+    type SerializeError;
+    type DeserializeError;
+    type WriteError;
+    type Format;
 
-    fn serialize(&self, value: &Value) -> Result<Vec<u8>, Self::Error>;
+    fn get_format(&self) -> Self::Format;
 }
 
-pub trait FromSerialized<Value> {
-    type Error;
-
-    fn deserialize(&self, repr: &[u8]) -> Result<Value, Self::Error>;
+/// Serialization trait restricted to for particular type.
+pub trait ToSerialized<Value>: TypedFormat {
+    fn serialize(&self, value: &Value) -> Result<Vec<u8>, Self::SerializeError>;
 }
 
-pub trait FromSerialiedBorrow<'data, Value: 'data> {
-    type Error;
-
-    fn deserialize_borrow(&self, repr: &'data [u8]) -> Result<Value, Self::Error>;
+/// Owned deserialization trait restricted to for particular type.
+pub trait FromSerialized<Value>: TypedFormat {
+    fn deserialize(&self, repr: &[u8]) -> Result<Value, Self::DeserializeError>;
 }
 
-pub trait ToWriter<Value> {
-    type Error;
+/// Borrow deserialization trait restricted to for particular type.
+pub trait FromSerialiedBorrow<'data, Value: 'data>: TypedFormat {
+    fn deserialize_borrow(&self, repr: &'data [u8]) -> Result<Value, Self::DeserializeError>;
+}
 
+/// Writing deserialization trait restricted to for particular type.
+pub trait ToWriter<Value>: TypedFormat {
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
         writer: &mut W,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), Self::WriteError>;
 }

@@ -110,7 +110,8 @@ fn populate_outcome_from_contexts(
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
     let data = measure!(
-        <InterpreterDataRepr as ToSerialized<_>>::serialize(&<_>::default(), &data)
+        InterpreterDataRepr
+            .serialize(&data)
             .expect("default serializer shouldn't fail"),
         tracing::Level::TRACE,
         "InterpreterData::to_representation"

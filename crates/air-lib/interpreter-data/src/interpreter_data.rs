@@ -24,6 +24,7 @@ use crate::ExecutionTrace;
 
 use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::ToSerialized;
+use air_interpreter_sede::TypedFormat;
 use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
 
@@ -103,7 +104,7 @@ impl InterpreterData {
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(
         slice: &[u8],
-    ) -> Result<Self, <InterpreterDataRepr as FromSerialized<InterpreterData>>::Error> {
+    ) -> Result<Self, <InterpreterDataRepr as TypedFormat>::DeserializeError> {
         measure!(
             InterpreterDataRepr.deserialize(slice),
             tracing::Level::INFO,
@@ -114,13 +115,13 @@ impl InterpreterData {
     /// Tries to de only versions part of interpreter data.
     pub fn try_get_versions(
         slice: &[u8],
-    ) -> Result<Versions, <InterpreterDataRepr as FromSerialized<Versions>>::Error> {
+    ) -> Result<Versions, <InterpreterDataRepr as TypedFormat>::DeserializeError> {
         InterpreterDataRepr.deserialize(slice)
     }
 
     pub fn serialize(
         &self,
-    ) -> Result<Vec<u8>, <InterpreterDataRepr as ToSerialized<InterpreterData>>::Error> {
+    ) -> Result<Vec<u8>, <InterpreterDataRepr as TypedFormat>::SerializeError> {
         InterpreterDataRepr.serialize(self)
     }
 }
