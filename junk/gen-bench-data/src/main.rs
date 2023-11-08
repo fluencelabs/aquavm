@@ -639,11 +639,11 @@ fn long_data() -> Data {
 
     let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";
-    let (prev_data, cur_data) = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
+    let cur_data = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
 
     Data {
         air: "(null)".to_owned(),
-        prev_data,
+        prev_data: vec![],
         cur_data,
         params_json: hashmap! {
             "comment".to_owned() => "Long data trace".to_owned(),
@@ -661,12 +661,11 @@ fn big_values_data() -> Data {
 
     let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";
-    let (prev_data, cur_data) =
-        cid_benchmarking_big_values_data(&keypair, peer_id.clone(), particle_id);
+    let cur_data = cid_benchmarking_big_values_data(&keypair, peer_id.clone(), particle_id);
 
     Data {
         air: "(null)".to_owned(),
-        prev_data,
+        prev_data: vec![],
         cur_data,
         params_json: hashmap! {
             "comment".to_owned() => "Loading a trace with huge values".to_owned(),

@@ -105,11 +105,10 @@ fn transform_cid(
 
 pub fn cid_benchmarking_data(
     curr_data_filename: &str,
-    prev_data_filename: &str,
     keypair: &KeyPair,
     peer_id: String,
     particle_id: &str,
-) -> (Vec<u8>, Vec<u8>) {
+) -> Vec<u8> {
     let mut curr_data: PreCidInterpeterData = read_data(curr_data_filename);
     let calls: TraceCalls = read_data("src/cid_benchmarking/simple-calls-info.json");
     let mut calls = calls.into_iter();
@@ -161,23 +160,16 @@ pub fn cid_benchmarking_data(
 
     let curr_data = serde_json::to_vec(&curr_data).unwrap();
 
-    let mut prev_data: PreCidInterpeterData = read_data(prev_data_filename);
-    prev_data.other_fields.as_object_mut().unwrap().insert(
-        "interpreter_version".to_owned(),
-        json!(interpreter_version()),
-    );
-    let prev_data = serde_json::to_vec(&prev_data).unwrap();
-    (prev_data, curr_data)
+    curr_data
 }
 
 pub fn cid_benchmarking_long_data(
     keypair: &KeyPair,
     peer_id: String,
     particle_id: &str,
-) -> (Vec<u8>, Vec<u8>) {
+) -> Vec<u8> {
     cid_benchmarking_data(
         "src/cid_benchmarking/anomaly_long.json",
-        "src/cid_benchmarking/long_data_prev_data.json",
         keypair,
         peer_id,
         particle_id,
@@ -188,10 +180,9 @@ pub fn cid_benchmarking_big_values_data(
     keypair: &KeyPair,
     peer_id: String,
     particle_id: &str,
-) -> (Vec<u8>, Vec<u8>) {
+) -> Vec<u8> {
     cid_benchmarking_data(
         "src/cid_benchmarking/anomaly_big.json",
-        "src/cid_benchmarking/big_values_data_prev_data.json",
         keypair,
         peer_id,
         particle_id,
