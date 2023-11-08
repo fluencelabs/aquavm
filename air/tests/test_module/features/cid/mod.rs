@@ -40,10 +40,11 @@ fn test_missing_cid() {
     ];
     cid_state.service_result_agg_tracker = <_>::default();
 
+    let missing_cid = extract_service_result_cid(&trace[0]);
+
     let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    let missing_cid = "bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq".into();
-    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
+    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid.get_inner());
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 

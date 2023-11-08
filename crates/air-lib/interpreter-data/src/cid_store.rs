@@ -192,22 +192,22 @@ mod tests {
             store.into_iter().collect::<HashMap<_, _>>(),
             HashMap::from_iter(vec![
                 (
-                    CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
+                    CID::new("bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa")
                         .into(),
                     json!("test").into()
                 ),
                 (
-                    CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
+                    CID::new("bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a")
                         .into(),
                     json!([1, 2, 3]).into(),
                 ),
                 (
-                    CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                    CID::new("bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq")
                         .into(),
                     json!(1).into(),
                 ),
                 (
-                    CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
+                    CID::new("bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq")
                         .into(),
                     json!({
                         "key": 42,
@@ -234,7 +234,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa"
+                    "bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa"
                 ))
                 .unwrap(),
             &json!("test"),
@@ -242,7 +242,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a"
+                    "bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a"
                 ))
                 .unwrap(),
             &json!([1, 2, 3]),
@@ -250,7 +250,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq"
+                    "bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq"
                 ))
                 .unwrap(),
             &json!(1),
@@ -258,7 +258,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq"
+                    "bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq"
                 ))
                 .unwrap(),
             &json!({"key": 42}),

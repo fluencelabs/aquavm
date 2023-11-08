@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.54.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.53.0...air-interpreter-v0.54.0) (2023-10-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-interpreter:** enable signature generation and verification features ([#731](https://github.com/fluencelabs/aquavm/issues/731))
+
+### Features
+
+* **air-interpreter:** enable signature generation and verification features ([#731](https://github.com/fluencelabs/aquavm/issues/731)) ([635352b](https://github.com/fluencelabs/aquavm/commit/635352bc5d4036378bb9e534866bb879f18d373c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.53.0 to 0.54.0
+
 ## [0.53.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.52.0...air-interpreter-v0.53.0) (2023-10-16)
 
 

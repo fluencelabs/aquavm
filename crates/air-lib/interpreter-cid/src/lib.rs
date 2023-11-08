@@ -93,22 +93,6 @@ impl<Val> std::hash::Hash for CID<Val> {
     }
 }
 
-// TODO we might refactor this to `SerializationFormat` trait
-// that both transform data to binary/text form (be it JSON, CBOR or something else)
-// and produces CID too
-pub fn json_data_cid<Val: ?Sized>(data: &[u8]) -> CID<Val> {
-    use cid::Cid;
-    use multihash::{Code, MultihashDigest};
-
-    // the Sha2_256 is current IPFS default hash
-    let digest = Code::Sha2_256.digest(data);
-    // seems to be better than RAW_CODEC = 0x55
-    const JSON_CODEC: u64 = 0x0200;
-
-    let cid = Cid::new_v1(JSON_CODEC, digest);
-    CID::new(cid.to_string())
-}
-
 pub struct CidCalculationError(serde_json::Error);
 
 impl fmt::Debug for CidCalculationError {
@@ -144,14 +128,13 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
 ) -> Result<CID<Val>, CidCalculationError> {
     use cid::Cid;
     use multihash::{Code, MultihashDigest};
-    use sha2::Digest;
 
-    let mut hasher = sha2::Sha256::new();
+    let mut hasher = blake3::Hasher::new();
     serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
     let hash = hasher.finalize();
 
-    let digest = Code::Sha2_256
-        .wrap(&hash)
+    let digest = Code::Blake3_256
+        .wrap(hash.as_bytes())
         .expect("can't happend: incorrect hash length");
     // seems to be better than RAW_CODEC = 0x55
     const JSON_CODEC: u64 = 0x0200;

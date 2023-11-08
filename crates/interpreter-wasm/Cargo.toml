@@ -1,6 +1,6 @@
 [package]
 name = "air-interpreter-wasm"
-version = "0.53.0"
+version = "0.54.0"
 description = "Distribution of AIR interpreter as .wasm"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
@@ -16,4 +16,4 @@ keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
 [build-dependencies]
-built = "0.7.0"
+built = "0.7.1"

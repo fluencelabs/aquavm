@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.1 to 0.7.2
     * avm-interface bumped from 0.29.1 to 0.29.2
 
+## [0.33.3](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.2...avm-server-v0.33.3) (2023-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
 ## [0.33.1](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.0...avm-server-v0.33.1) (2023-09-21)
 
 
