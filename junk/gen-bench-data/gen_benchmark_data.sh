@@ -8,13 +8,22 @@ echo "Pre-build a binary..." >&2
 cargo build --quiet --release
 
 for bench in multiple-cids10 \
-             multiple-peers8 \
-             multiple-sigs30 \
-             dashboard network-explore; do
+            multiple-peers8 \
+            multiple-sigs30 \
+            big-values-data \
+            canon-map-key-by-lens \
+            canon-map-key-element-by-lens \
+            canon-map-multiple-keys \
+            canon-map-single-key \
+            canon-map-scalar-multiple-keys \
+            canon-map-scalar-single-key \
+            dashboard \
+            network-explore \
+            long-data \
+            populate-map-multiple-keys \
+            populate-map-single-key ;
+do
     echo "Generating ${bench} ..." >&2
-    if [ "${bench}" == multiple-peers25 ]; then
-        echo "WARNING: this bench data generation can take more than 10 minutes..." >&2
-    fi
     DESTDIR="../../benches/performance_metering/${bench}/"
     mkdir -p "${DESTDIR}"
     time cargo run --quiet --release -- --dest-dir "${DESTDIR}" "${bench}"

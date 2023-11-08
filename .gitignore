@@ -6,3 +6,5 @@ air/target
 *.wasm
 
 !./artifacts/*.wasm
+
+benches/performance_metering/*
