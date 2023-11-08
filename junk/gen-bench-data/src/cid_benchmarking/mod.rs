@@ -158,9 +158,7 @@ pub fn cid_benchmarking_data(
         .unwrap()
         .insert("signatures".to_owned(), json!(ss));
 
-    let curr_data = serde_json::to_vec(&curr_data).unwrap();
-
-    curr_data
+    serde_json::to_vec(&curr_data).unwrap()
 }
 
 pub fn cid_benchmarking_long_data(
