@@ -85,3 +85,7 @@ harness = false
 [[bench]]
 name = "data_long_benchmark"
 harness = false
+
+[[bench]]
+name = "nox_tc2_benchmark"
+harness = false
