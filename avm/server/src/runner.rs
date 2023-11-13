@@ -169,6 +169,60 @@ impl AVMRunner {
         Ok(outcome)
     }
 
+    pub fn call_tracing_(
+        &mut self,
+        air: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
+        init_peer_id: impl Into<String>,
+        timestamp: u64,
+        ttl: u32,
+        current_peer_id: impl Into<String>,
+        call_results: CallResults,
+        keypair: &KeyPair,
+        tracing_params: String,
+        tracing_output_mode: u8,
+        particle_id: String,
+    ) -> RunnerResult<RawAVMOutcome> {
+        let key_format = keypair.key_format();
+        let secret_key_bytes: Vec<u8> = keypair.secret().map_err(RunnerError::KeyError)?;
+
+        let mut args = prepare_args(
+            air,
+            prev_data,
+            data,
+            current_peer_id.into(),
+            init_peer_id.into(),
+            timestamp,
+            ttl,
+            call_results,
+            key_format.into(),
+            secret_key_bytes,
+            particle_id,
+        );
+        args.push(IValue::String(tracing_params));
+        args.push(IValue::U8(tracing_output_mode));
+
+        let result = measure!(
+            self.marine.call_with_ivalues(
+                &self.wasm_filename,
+                "invoke_tracing",
+                &args,
+                <_>::default(),
+            )?,
+            tracing::Level::INFO,
+            "marine.call_with_ivalues",
+            method = "invoke_tracing",
+        );
+
+        let result = try_as_one_value_vec(result)?;
+        let outcome = InterpreterOutcome::from_ivalue(result)
+            .map_err(RunnerError::InterpreterResultDeError)?;
+        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+
+        Ok(outcome)
+    }
+
     pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.marine.module_memory_stats();
 

@@ -30,6 +30,8 @@ use fluence_keypair::KeyPair;
 
 use std::ops::Deref;
 use std::ops::DerefMut;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -55,6 +57,7 @@ impl DerefMut for SendSafeRunner {
 pub struct AVM<E> {
     runner: SendSafeRunner,
     data_store: AVMDataStore<E>,
+    counter: AtomicUsize,
 }
 
 impl<E> AVM<E> {
@@ -73,12 +76,16 @@ impl<E> AVM<E> {
         let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask)
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
-        let avm = Self { runner, data_store };
+        let counter = AtomicUsize::new(0);
+        let avm = Self {
+            runner,
+            data_store,
+            counter,
+        };
 
         Ok(avm)
     }
 
-    #[allow(clippy::result_large_err)]
     pub fn call(
         &mut self,
         air: impl Into<String>,
@@ -87,6 +94,27 @@ impl<E> AVM<E> {
         call_results: CallResults,
         keypair: &KeyPair,
     ) -> AVMResult<AVMOutcome, E> {
+        let enable_tracing = self.counter.load(Ordering::Relaxed) % 200 == 0;
+        self.call_(
+            air,
+            data,
+            particle_parameters,
+            call_results,
+            keypair,
+            enable_tracing,
+        )
+    }
+
+    #[allow(clippy::result_large_err)]
+    pub fn call_(
+        &mut self,
+        air: impl Into<String>,
+        data: impl Into<Vec<u8>>,
+        particle_parameters: ParticleParameters<'_>,
+        call_results: CallResults,
+        keypair: &KeyPair,
+        enable_tracing: bool,
+    ) -> AVMResult<AVMOutcome, E> {
         let air = air.into();
         let prev_data = self.data_store.read_data(
             &particle_parameters.particle_id,
@@ -94,23 +122,43 @@ impl<E> AVM<E> {
         )?;
         let current_data = data.into();
 
+        self.counter.fetch_add(1, Ordering::Relaxed);
+
         let execution_start_time = Instant::now();
         let memory_size_before = self.memory_stats().memory_size;
-        let outcome = self
-            .runner
-            .call(
-                air.clone(),
-                prev_data,
-                current_data.clone(),
-                particle_parameters.init_peer_id.clone().into_owned(),
-                particle_parameters.timestamp,
-                particle_parameters.ttl,
-                particle_parameters.current_peer_id.clone(),
-                call_results.clone(),
-                keypair,
-                particle_parameters.particle_id.to_string(),
-            )
-            .map_err(AVMError::RunnerError)?;
+        let outcome = if !enable_tracing {
+            self.runner
+                .call(
+                    air.clone(),
+                    prev_data,
+                    current_data.clone(),
+                    particle_parameters.init_peer_id.clone().into_owned(),
+                    particle_parameters.timestamp,
+                    particle_parameters.ttl,
+                    particle_parameters.current_peer_id.clone(),
+                    call_results.clone(),
+                    keypair,
+                    particle_parameters.particle_id.to_string(),
+                )
+                .map_err(AVMError::RunnerError)?
+        } else {
+            self.runner
+                .call_tracing_(
+                    air.clone(),
+                    prev_data,
+                    current_data.clone(),
+                    particle_parameters.init_peer_id.clone().into_owned(),
+                    particle_parameters.timestamp,
+                    particle_parameters.ttl,
+                    particle_parameters.current_peer_id.clone(),
+                    call_results.clone(),
+                    keypair,
+                    "info".into(),
+                    0,
+                    particle_parameters.particle_id.to_string(),
+                )
+                .map_err(AVMError::RunnerError)?
+        };
 
         let execution_time = execution_start_time.elapsed();
         let memory_delta = self.memory_stats().memory_size - memory_size_before;
