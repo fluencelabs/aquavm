@@ -30,6 +30,15 @@ use multimap::MultiMap;
 use std::collections::HashMap;
 use std::ops::Deref;
 
+#[derive(Clone, Debug)]
+pub enum CheckInstructionKind<'names> {
+    Merging,
+    Replacing,
+    ReplacingWithCheck(&'names str),
+    Checking(&'names str),
+    Simple,
+}
+
 /// Intermediate implementation of variable validator.
 ///
 /// It is intended to track variables (i.e., those that were defined as
@@ -65,19 +74,33 @@ pub struct VariableValidator<'i> {
 
     /// This vector contains all literal error codes used with fail.
     unsupported_literal_errcodes: Vec<(i64, Span)>,
+
+    /// WIP stack for no-instruction-after-next check.
+    after_next_check_stack: Vec<(CheckInstructionKind<'i>, Span)>,
+
+    /// WIP vector that contains spans with instr after next.
+    after_next_check_spans: Vec<Span>,
+
+    /// after_next_check stack machine state is broken flag.
+    after_next_check_enabled: bool,
 }
 
 impl<'i> VariableValidator<'i> {
     pub fn new() -> Self {
-        <_>::default()
+        let mut a: Self = <_>::default(); // TODO add a default
+        a.after_next_check_enabled = true;
+        a
     }
 
     pub(super) fn met_call(&mut self, call: &Call<'i>, span: Span) {
+        println!("met_call: {:?}", span);
         self.met_peer_id_resolvable_value(&call.triplet.peer_id, span);
         self.met_string_resolvable_value(&call.triplet.service_id, span);
         self.met_string_resolvable_value(&call.triplet.function_name, span);
 
         self.met_args(call.args.deref(), span);
+
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
 
         match &call.output {
             CallOutputValue::Scalar(scalar) => self.met_variable_name_definition(scalar.name, span),
@@ -89,11 +112,15 @@ impl<'i> VariableValidator<'i> {
     // canon doesn't check stream to be defined, because empty streams are considered to be empty
     // and it is useful for code generation
     pub(super) fn met_canon(&mut self, canon: &Canon<'i>, span: Span) {
+        println!("met_canon: {:?}", span);
+
         self.met_variable_name_definition(canon.canon_stream.name, span);
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     pub(super) fn met_canon_map(&mut self, canon_map: &CanonMap<'i>, span: Span) {
         self.met_variable_name_definition(canon_map.canon_stream_map.name, span);
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     pub(super) fn met_canon_map_scalar(
@@ -102,20 +129,25 @@ impl<'i> VariableValidator<'i> {
         span: Span,
     ) {
         self.met_variable_name_definition(canon_stream_map_scalar.scalar.name, span);
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
         self.met_matchable(&match_.left_value, span);
         self.met_matchable(&match_.right_value, span);
+        self.met_instruction_kind(CheckInstructionKind::Replacing, span);
     }
 
     pub(super) fn met_mismatch(&mut self, mismatch: &MisMatch<'i>, span: Span) {
         self.met_matchable(&mismatch.left_value, span);
         self.met_matchable(&mismatch.right_value, span);
+        self.met_instruction_kind(CheckInstructionKind::Replacing, span);
     }
 
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
         use FoldScalarIterable::*;
+
+        // println!("met_fold_scalar: {:?} {:?}", fold, span);
 
         match &fold.iterable {
             Scalar(scalar) => self.met_scalar(scalar, span),
@@ -128,16 +160,28 @@ impl<'i> VariableValidator<'i> {
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
+        self.met_instruction_kind(
+            CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
+            span,
+        );
     }
 
     pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+        self.met_instruction_kind(
+            CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
+            span,
+        );
     }
 
     pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+        self.met_instruction_kind(
+            CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
+            span,
+        );
     }
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
@@ -145,6 +189,7 @@ impl<'i> VariableValidator<'i> {
             .push((new.argument.name(), span));
         // new defines a new variable
         self.met_variable_name_definition(new.argument.name(), span);
+        self.met_instruction_kind(CheckInstructionKind::Replacing, span);
     }
 
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
@@ -152,8 +197,10 @@ impl<'i> VariableValidator<'i> {
         // due to the right to left convolution in lalrpop, a next instruction will be met earlier
         // than a corresponding fold instruction with the definition of this iterable, so they're
         // just put without a check for being already met
+        // println!("met_next: {:?} {:?}", iterable_name, span);
         self.unresolved_iterables.insert(iterable_name, span);
         self.multiple_next_candidates.insert(iterable_name, span);
+        self.met_instruction_kind(CheckInstructionKind::Checking(iterable_name), span);
     }
 
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
@@ -181,12 +228,14 @@ impl<'i> VariableValidator<'i> {
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     pub(super) fn met_ap_map(&mut self, ap_map: &ApMap<'i>, span: Span) {
         let key = &ap_map.key;
         self.met_map_key(key, span);
         self.met_variable_name_definition(ap_map.map.name, span);
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     fn met_map_key(&mut self, key: &StreamMapKeyClause<'i>, span: Span) {
@@ -207,6 +256,19 @@ impl<'i> VariableValidator<'i> {
             }
             _ => {}
         }
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
+    }
+
+    pub(super) fn met_replacing_instr(&mut self, span: Span) {
+        self.met_instruction_kind(CheckInstructionKind::Replacing, span);
+    }
+
+    pub(super) fn met_merging_instr(&mut self, span: Span) {
+        self.met_instruction_kind(CheckInstructionKind::Merging, span);
+    }
+
+    pub(super) fn met_simple_instr(&mut self, span: Span) {
+        self.met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
     pub(super) fn finalize(self) -> Vec<ErrorRecovery<AirPos, Token<'i>, ParserError>> {
@@ -218,6 +280,7 @@ impl<'i> VariableValidator<'i> {
             .check_iterator_for_multiple_definitions()
             .check_for_unsupported_map_keys()
             .check_for_unsupported_literal_errcodes()
+            .check_for_instr_after_next()
             .build()
     }
 
@@ -383,6 +446,118 @@ impl<'i> VariableValidator<'i> {
     fn met_iterator_definition(&mut self, iterator: &Scalar<'i>, span: Span) {
         self.met_iterator_definitions.insert(iterator.name, span);
     }
+
+    fn met_instruction_kind(&mut self, instr_kind: CheckInstructionKind<'i>, span: Span) {
+        println!("met_instruction_kind {:}", self.after_next_check_enabled);
+        dbg!(instr_kind.clone());
+        if !self.after_next_check_enabled {
+            return;
+        }
+        match instr_kind {
+            CheckInstructionKind::Replacing => {
+                let child = self.after_next_check_stack.pop();
+                match child {
+                    Some((CheckInstructionKind::Checking(name), _)) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Checking(name), span));
+                    }
+                    Some(..) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Replacing, span));
+                    }
+                    None => self.after_next_check_enabled = false,
+                }
+                self.after_next_check_stack
+                    .push((CheckInstructionKind::Simple, span));
+            }
+            CheckInstructionKind::Merging => {
+                let right_branch = self.after_next_check_stack.pop();
+                println!("left_branch");
+                dbg!(self
+                    .after_next_check_stack
+                    .iter()
+                    .map(|(k, _)| k)
+                    .collect::<Vec<_>>());
+                let left_branch = self.after_next_check_stack.pop();
+                println!("right_branch");
+                dbg!(self
+                    .after_next_check_stack
+                    .iter()
+                    .map(|(k, _)| k)
+                    .collect::<Vec<_>>());
+                match (left_branch, right_branch) {
+                    // This should change instr to merging
+                    (
+                        Some((CheckInstructionKind::Checking(left_iterable), _)),
+                        Some((CheckInstructionKind::Checking(right_iterable), _)),
+                    ) if left_iterable == right_iterable => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Checking(left_iterable), span));
+                    }
+                    (Some((CheckInstructionKind::Checking(_), _)), Some((..))) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Merging, span));
+                        self.after_next_check_spans.push(span); // failure
+                        println!("failure!!!!");
+                    }
+                    (Some((..)), Some((CheckInstructionKind::Checking(iterable), _))) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Checking(iterable), span));
+                    }
+                    (Some(_), Some(_)) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Merging, span));
+                    }
+                    _ => {
+                        // disable machine if Merging invariant, namely there must be 2 kinds on a stack, is broken.
+                        self.after_next_check_stack.clear();
+                        self.after_next_check_enabled = false;
+                    }
+                }
+            }
+            CheckInstructionKind::ReplacingWithCheck(iterable) => {
+                let child = self.after_next_check_stack.pop();
+                match child {
+                    // TODO get back to this when Checking has fold iterable id
+                    Some((CheckInstructionKind::Checking(checking_iterable), _))
+                        if checking_iterable == iterable =>
+                    {
+                        self.after_next_check_stack.push((instr_kind, span));
+                    }
+                    Some((CheckInstructionKind::Checking(checking_iterable), _)) => {
+                        self.after_next_check_stack
+                            .push((CheckInstructionKind::Checking(checking_iterable), span));
+                    }
+                    Some(..) => {
+                        self.after_next_check_stack.push((instr_kind, span));
+                    }
+                    None => self.after_next_check_enabled = false,
+                }
+            }
+            CheckInstructionKind::Checking(_) => {
+                self.after_next_check_stack.push((instr_kind, span))
+            }
+            CheckInstructionKind::Simple => self.after_next_check_stack.push((instr_kind, span)),
+        }
+        dbg!(self
+            .after_next_check_stack
+            .iter()
+            .map(|(k, _)| k)
+            .collect::<Vec<_>>());
+    }
+
+    fn _instr_after_next_check(&mut self) {
+        println!("after_next_check_stack");
+        dbg!(self.after_next_check_stack.clone());
+        if !self.after_next_check_stack.is_empty() {
+            self.after_next_check_spans.push(
+                self.after_next_check_stack
+                    .first()
+                    .map(|(_, span)| *span)
+                    .unwrap(), // TODO replace ?
+            )
+        }
+    }
 }
 
 struct ValidatorErrorBuilder<'i> {
@@ -513,6 +688,14 @@ impl<'i> ValidatorErrorBuilder<'i> {
         for (_, span) in self.validator.unsupported_literal_errcodes.iter_mut() {
             let error = ParserError::unsupported_literal_errcodes(*span);
             add_to_errors(&mut self.errors, *span, Token::New, error);
+        }
+        self
+    }
+
+    fn check_for_instr_after_next(mut self) -> Self {
+        for span in self.validator.after_next_check_spans.iter_mut() {
+            let error = ParserError::fold_has_instruction_after_next(*span);
+            add_to_errors(&mut self.errors, *span, Token::Next, error);
         }
         self
     }

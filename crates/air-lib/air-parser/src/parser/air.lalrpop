@@ -72,10 +72,37 @@ Instr: Instruction<'input> = {
         Instruction::ApMap(apply.into())
     },
 
-    "(" seq <l:Instr> <r:Instr> ")" => Instruction::Seq(Seq::new(l, r).into()),
-    "(" par <l:Instr> <r:Instr> ")" => Instruction::Par(Par::new(l, r).into()),
-    "(" never ")" => Instruction::Never(Never),
-    "(" null ")" => Instruction::Null(Null),
+    <left: @L> "(" seq <l:Instr> <r:Instr> ")" <right: @R> => {
+        println!("seq");
+
+        let span = Span::new(left, right);
+        validator.met_merging_instr(span);
+
+        Instruction::Seq(Seq::new(l, r).into())
+    },
+    <left: @L> "(" par <l:Instr> <r:Instr> ")" <right: @R> => {
+        println!("par");
+
+        let span = Span::new(left, right);
+        validator.met_merging_instr(span);
+
+        Instruction::Par(Par::new(l, r).into())
+    },
+    <left: @L> "(" never ")" <right: @R> => {
+        let span = Span::new(left, right);
+        println!("never");
+        validator.met_simple_instr(span);
+
+        Instruction::Never(Never)
+    },
+    <left: @L> "(" null ")" <right: @R> => {
+        let span = Span::new(left, right);
+        println!("null");
+
+        validator.met_simple_instr(span);
+
+        Instruction::Null(Null)
+    },
 
     <left: @L> "(" new <argument: NewArgument> <instruction:Instr> ")" <right: @R> => {
         let span = Span::new(left, right);
@@ -138,6 +165,7 @@ Instr: Instruction<'input> = {
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
+        validator.met_replacing_instr(span);
 
         Instruction::Match(match_.into())
     },
