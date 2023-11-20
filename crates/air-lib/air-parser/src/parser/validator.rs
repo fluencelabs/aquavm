@@ -32,10 +32,12 @@ use std::ops::Deref;
 
 #[derive(Clone, Debug)]
 pub enum CheckInstructionKind<'names> {
+    Checking(&'names str),
     Merging,
+    Pop1,
+    Pop2,
     Replacing,
     ReplacingWithCheck(&'names str),
-    Checking(&'names str),
     Simple,
 }
 
@@ -77,6 +79,9 @@ pub struct VariableValidator<'i> {
 
     /// WIP stack for no-instruction-after-next check.
     after_next_check_stack: Vec<(CheckInstructionKind<'i>, Span)>,
+
+    /// WIP vector that contains spans with instr after next.
+    after_next_check_spans_: Vec<(&'i str, Span)>,
 
     /// WIP vector that contains spans with instr after next.
     after_next_check_spans: Vec<Span>,
@@ -147,8 +152,6 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
         use FoldScalarIterable::*;
 
-        // println!("met_fold_scalar: {:?} {:?}", fold, span);
-
         match &fold.iterable {
             Scalar(scalar) => self.met_scalar(scalar, span),
             ScalarWithLambda(scalar) => self.met_scalar_wl(scalar, span),
@@ -160,15 +163,21 @@ impl<'i> VariableValidator<'i> {
             EmptyArray => {}
         };
         self.met_iterator_definition(&fold.iterator, span);
-        self.met_instruction_kind(
-            CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
-            span,
-        );
+        let instruction_kind = match fold.last_instruction {
+            Some(_) => CheckInstructionKind::Pop2,
+            None => CheckInstructionKind::Pop1,
+        };
+        self.met_instruction_kind(instruction_kind, span);
     }
 
     pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+        // TODO Replace with a type that pops last instruction if needed.
+        if fold.last_instruction.is_some() {
+            self.met_instruction_kind(CheckInstructionKind::Pop1, span);
+        }
+
         self.met_instruction_kind(
             CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
             span,
@@ -178,6 +187,11 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+
+        // TODO Replace with a type that pops last instruction if needed.
+        if fold.last_instruction.is_some() {
+            self.met_instruction_kind(CheckInstructionKind::Pop1, span);
+        }
         self.met_instruction_kind(
             CheckInstructionKind::ReplacingWithCheck(fold.iterator.name),
             span,
@@ -197,7 +211,7 @@ impl<'i> VariableValidator<'i> {
         // due to the right to left convolution in lalrpop, a next instruction will be met earlier
         // than a corresponding fold instruction with the definition of this iterable, so they're
         // just put without a check for being already met
-        // println!("met_next: {:?} {:?}", iterable_name, span);
+        println!("met_next: {:?} {:?}", next, span);
         self.unresolved_iterables.insert(iterable_name, span);
         self.multiple_next_candidates.insert(iterable_name, span);
         self.met_instruction_kind(CheckInstructionKind::Checking(iterable_name), span);
@@ -494,11 +508,11 @@ impl<'i> VariableValidator<'i> {
                         self.after_next_check_stack
                             .push((CheckInstructionKind::Checking(left_iterable), span));
                     }
-                    (Some((CheckInstructionKind::Checking(_), _)), Some((..))) => {
+                    (Some((CheckInstructionKind::Checking(iterator), _)), Some((..))) => {
                         self.after_next_check_stack
                             .push((CheckInstructionKind::Merging, span));
-                        self.after_next_check_spans.push(span); // failure
-                        println!("failure!!!!");
+                        self.after_next_check_spans_.push((iterator, span)); // failure
+                        println!("potential failure!!!!");
                     }
                     (Some((..)), Some((CheckInstructionKind::Checking(iterable), _))) => {
                         self.after_next_check_stack
@@ -518,17 +532,45 @@ impl<'i> VariableValidator<'i> {
             CheckInstructionKind::ReplacingWithCheck(iterable) => {
                 let child = self.after_next_check_stack.pop();
                 match child {
-                    // TODO get back to this when Checking has fold iterable id
                     Some((CheckInstructionKind::Checking(checking_iterable), _))
                         if checking_iterable == iterable =>
                     {
+                        dbg!("ReplacingWithCheck match");
+                        let error_span = self
+                            .after_next_check_spans_
+                            .iter()
+                            .find(|(kind_iterable, _)| iterable == *kind_iterable)
+                            .map(|(_, span)| span);
+                        if error_span.is_some() {
+                            self.after_next_check_spans.push(*error_span.unwrap());
+                        }
                         self.after_next_check_stack.push((instr_kind, span));
                     }
                     Some((CheckInstructionKind::Checking(checking_iterable), _)) => {
+                        dbg!("ReplacingWithCheck doesn't match");
+                        let error_span = self
+                            .after_next_check_spans_
+                            .iter()
+                            .find(|(kind_iterable, _)| iterable == *kind_iterable)
+                            .map(|(_, span)| span);
+                        if error_span.is_some() {
+                            self.after_next_check_spans.push(*error_span.unwrap());
+                            println!("real failure!!!!");
+                        }
                         self.after_next_check_stack
                             .push((CheckInstructionKind::Checking(checking_iterable), span));
                     }
                     Some(..) => {
+                        dbg!("ReplacingWithCheck fold with branched instr");
+                        let error_span = self
+                            .after_next_check_spans_
+                            .iter()
+                            .find(|(kind_iterable, _)| iterable == *kind_iterable)
+                            .map(|(_, span)| span);
+                        if error_span.is_some() {
+                            self.after_next_check_spans.push(*error_span.unwrap());
+                            println!("real failure!!!!");
+                        }
                         self.after_next_check_stack.push((instr_kind, span));
                     }
                     None => self.after_next_check_enabled = false,
@@ -538,25 +580,21 @@ impl<'i> VariableValidator<'i> {
                 self.after_next_check_stack.push((instr_kind, span))
             }
             CheckInstructionKind::Simple => self.after_next_check_stack.push((instr_kind, span)),
+            CheckInstructionKind::Pop1 => {
+                self.after_next_check_stack.pop();
+                self.after_next_check_stack.push((instr_kind, span))
+            }
+            CheckInstructionKind::Pop2 => {
+                self.after_next_check_stack.pop();
+                self.after_next_check_stack.pop();
+                self.after_next_check_stack.push((instr_kind, span))
+            }
         }
         dbg!(self
             .after_next_check_stack
             .iter()
             .map(|(k, _)| k)
             .collect::<Vec<_>>());
-    }
-
-    fn _instr_after_next_check(&mut self) {
-        println!("after_next_check_stack");
-        dbg!(self.after_next_check_stack.clone());
-        if !self.after_next_check_stack.is_empty() {
-            self.after_next_check_spans.push(
-                self.after_next_check_stack
-                    .first()
-                    .map(|(_, span)| *span)
-                    .unwrap(), // TODO replace ?
-            )
-        }
     }
 }
 
