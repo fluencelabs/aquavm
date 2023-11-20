@@ -491,7 +491,7 @@ fn fold_on_canon_stream_map() {
 }
 
 #[test]
-fn fold_with_subtree_and_next() {
+fn fold_on_scalar_with_subtree_and_next() {
     let source_code = r#"
         (seq
             (call "" ("" "") [] iterable)
@@ -521,7 +521,7 @@ fn fold_with_subtree_and_next() {
 }
 
 #[test]
-fn fold_with_next_in_a_fold() {
+fn fold_on_scalar_with_next_in_a_fold() {
     let source_code = r#"
         (seq
             (seq
@@ -553,11 +553,242 @@ fn fold_with_next_in_a_fold() {
 }
 
 #[test]
-fn fold_with_next_neg() {
+fn fold_on_scalar_with_next() {
     let source_code = r#"
     (seq
         (call "" ("" "") [] iterable)
         (fold iterable i
+            (seq
+                (next i)
+                (call "" ("" "") ["hello" ""] $void)
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_scalar_with_next_in_a_fold1() {
+    let source_code = r#"
+        (seq
+            (seq
+                (call "" ("" "") [] iterable1)
+                (call "" ("" "") [] iterable2)
+            )
+            (fold iterable1 i
+                (seq
+                    (fold iterable2 it
+                        (seq
+                            (next i)
+                            (call "" ("" "") ["hello" ""] $void)
+                        )
+                    )
+                    (call "" ("" "") ["hello" ""] $voida)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_scalar_with_next_in_a_fold2() {
+    let source_code = r#"
+        (seq
+            (seq
+                (call "" ("" "") [] iterable1)
+                (call "" ("" "") [] iterable2)
+            )
+            (fold iterable1 i
+                (seq
+                    (fold iterable2 it
+                        (seq
+                            (call "" ("" "") ["hello" ""] $void)
+                            (next i)
+                        )
+                    )
+                    (call "" ("" "") ["hello" ""] $voida)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_scalar_with_next_in_a_branch1() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] iterable)
+            (fold iterable i
+                (seq
+                    (seq
+                        (call "" ("" "") ["hello" ""] $void)
+                        (next i)
+                    )
+                    (call "" ("" "") ["hello" ""] $voida)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_scalar_with_next_in_a_branch2() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] $iterable)
+            (fold $iterable i
+                (seq
+                    (call "" ("" "") ["hello" ""] $voida)
+                    (seq
+                        (next i)
+                        (call "" ("" "") ["hello" ""] $void)
+                    )
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    dbg!(&errors);
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::FoldHasInstructionAfterNext { .. }
+    ));
+}
+
+#[test]
+fn fold_on_stream_with_subtree_and_next() {
+    let source_code = r#"
+        (seq
+            (call "" ("" "") [] $iterable)
+            (fold $iterable i
+                (seq
+                    (seq
+                        (call "" ("" "") ["hello" ""] $void)
+                        (call "" ("" "") ["hello" ""] $voida)
+                    )
+                    (next i)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_stream_with_next_in_a_fold() {
+    let source_code = r#"
+        (seq
+            (seq
+                (call "" ("" "") [] $iterable1)
+                (call "" ("" "") [] $iterable2)
+            )
+            (fold $iterable1 i
+                (seq
+                    (fold $iterable2 it
+                        (call "" ("" "") ["hello" ""] $void)
+                    )
+                    (next i)
+                )
+            )
+        )
+        "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_stream_with_next_neg() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
             (seq
                 (next i)
                 (call "" ("" "") ["hello" ""] $void)
@@ -592,16 +823,16 @@ fn fold_with_next_neg() {
 }
 
 #[test]
-fn fold_with_next_in_a_fold1_neg() {
+fn fold_on_stream_with_next_in_a_fold1() {
     let source_code = r#"
         (seq
             (seq
-                (call "" ("" "") [] iterable1)
-                (call "" ("" "") [] iterable2)
+                (call "" ("" "") [] $iterable1)
+                (call "" ("" "") [] $iterable2)
             )
-            (fold iterable1 i
+            (fold $iterable1 i
                 (seq
-                    (fold iterable2 it
+                    (fold $iterable2 it
                         (seq
                             (next i)
                             (call "" ("" "") ["hello" ""] $void)
@@ -639,16 +870,16 @@ fn fold_with_next_in_a_fold1_neg() {
 }
 
 #[test]
-fn fold_with_next_in_a_fold2_neg() {
+fn fold_on_stream_with_next_in_a_fold2() {
     let source_code = r#"
         (seq
             (seq
-                (call "" ("" "") [] iterable1)
-                (call "" ("" "") [] iterable2)
+                (call "" ("" "") [] $iterable1)
+                (call "" ("" "") [] $iterable2)
             )
-            (fold iterable1 i
+            (fold $iterable1 i
                 (seq
-                    (fold iterable2 it
+                    (fold $iterable2 it
                         (seq
                             (call "" ("" "") ["hello" ""] $void)
                             (next i)
@@ -686,11 +917,11 @@ fn fold_with_next_in_a_fold2_neg() {
 }
 
 #[test]
-fn fold_with_next_in_a_branch1_neg() {
+fn fold_on_stream_with_next_in_a_branch1_neg() {
     let source_code = r#"
         (seq
-            (call "" ("" "") [] iterable)
-            (fold iterable i
+            (call "" ("" "") [] $iterable)
+            (fold $iterable i
                 (seq
                     (seq
                         (call "" ("" "") ["hello" ""] $void)
@@ -728,11 +959,11 @@ fn fold_with_next_in_a_branch1_neg() {
 }
 
 #[test]
-fn fold_with_next_in_a_branch2_neg() {
+fn fold_on_stream_with_next_in_a_branch2_neg() {
     let source_code = r#"
         (seq
-            (call "" ("" "") [] iterable)
-            (fold iterable i
+            (call "" ("" "") [] $iterable)
+            (fold $iterable i
                 (seq
                     (call "" ("" "") ["hello" ""] $voida)
                     (seq
