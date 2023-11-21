@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 7b1b322efc25eab68a466abec18fb06f2c7aed84ad87fd7dab0bdde42d0c8edd
+// sha3: 2cd606404d4b4f2b23dfb0dcc7cce11cc1b093f91040565ac8f6d1125ebd326e
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -5558,8 +5558,6 @@ fn __action8<
 ) -> Instruction<'input>
 {
     {
-        println!("seq");
-
         let span = Span::new(left, right);
         validator.met_merging_instr(span);
 
@@ -5587,8 +5585,6 @@ fn __action9<
 ) -> Instruction<'input>
 {
     {
-        println!("par");
-
         let span = Span::new(left, right);
         validator.met_merging_instr(span);
 
@@ -5615,7 +5611,6 @@ fn __action10<
 {
     {
         let span = Span::new(left, right);
-        println!("never");
         validator.met_simple_instr(span);
 
         Instruction::Never(Never)
@@ -5641,8 +5636,6 @@ fn __action11<
 {
     {
         let span = Span::new(left, right);
-        println!("null");
-
         validator.met_simple_instr(span);
 
         Instruction::Null(Null)
@@ -5872,7 +5865,6 @@ fn __action19<
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
-        validator.met_replacing_instr(span);
 
         Instruction::Match(match_.into())
     }
