@@ -73,16 +73,12 @@ Instr: Box<Instruction<'input>> = {
     },
 
     <left: @L> "(" seq <l:Instr> <r:Instr> ")" <right: @R> => {
-        println!("seq");
-
         let span = Span::new(left, right);
         validator.met_merging_instr(span);
 
         Box::new(Instruction::Seq(Seq::new(l, r)))
     },
     <left: @L> "(" par <l:Instr> <r:Instr> ")" <right: @R> => {
-        println!("par");
-
         let span = Span::new(left, right);
         validator.met_merging_instr(span);
 
@@ -90,15 +86,12 @@ Instr: Box<Instruction<'input>> = {
     },
     <left: @L> "(" never ")" <right: @R> => {
         let span = Span::new(left, right);
-        println!("never");
         validator.met_simple_instr(span);
 
         Box::new(Instruction::Never(Never))
     },
     <left: @L> "(" null ")" <right: @R> => {
         let span = Span::new(left, right);
-        println!("null");
-
         validator.met_simple_instr(span);
 
         Box::new(Instruction::Null(Null))
@@ -165,7 +158,6 @@ Instr: Box<Instruction<'input>> = {
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
-        validator.met_replacing_instr(span);
 
         Box::new(Instruction::Match(match_))
     },

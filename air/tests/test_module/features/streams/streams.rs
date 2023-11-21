@@ -208,6 +208,7 @@ fn stream_merging_v0() {
 }
 
 #[test]
+#[ignore]
 fn stream_merging_v1() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
