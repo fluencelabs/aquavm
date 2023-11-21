@@ -162,8 +162,8 @@ impl<'name> AfterNextCheckMachine<'name> {
             .iter()
             .find(|(kind_iterable, _)| iterable == *kind_iterable)
             .map(|(_, span)| span);
-        if error_span.is_some() {
-            self.impossible_spans.push(*error_span.unwrap());
+        if let Some(span) = error_span {
+            self.impossible_spans.push(*span);
         }
     }
 
