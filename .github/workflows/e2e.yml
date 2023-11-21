@@ -94,8 +94,6 @@ jobs:
     uses: fluencelabs/nox/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/aquavm"
-      flavour: "minimal"
-      nox-sha: "${{ needs.nox.outputs.rust-peer-sha }}"
 
   nox-tests:
     name: "nox"
@@ -137,12 +135,12 @@ jobs:
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
 
-  flox-snapshot:
-    name: "flox"
+  fcli-snapshot:
+    name: "fcli"
     needs:
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/cli/.github/workflows/snapshot.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
@@ -158,20 +156,20 @@ jobs:
 
   registry:
     needs:
-      - flox-snapshot
+      - fcli-snapshot
       - nox-snapshot
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
+      fcli-version: "${{ needs.fcli-snapshot.outputs.version }}"
 
-  flox:
+  fcli:
     needs:
       - nox-snapshot
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/tests.yml@main
+    uses: fluencelabs/cli/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
