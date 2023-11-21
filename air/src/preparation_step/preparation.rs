@@ -21,7 +21,10 @@ use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::SerializedCallResults;
+use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::TypedFormat;
 use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
@@ -65,7 +68,7 @@ pub(crate) fn prepare<'i>(
     prev_data: InterpreterData,
     current_data: InterpreterData,
     raw_air: &'i str,
-    call_results: &[u8],
+    call_results: &SerializedCallResults,
     run_parameters: RunParameters,
     signature_store: SignatureStore,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
@@ -127,12 +130,13 @@ fn to_date_de_error(
 fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
-    call_results: &[u8],
+    call_results: &SerializedCallResults,
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let call_results = rmp_serde::from_slice(call_results)
-        .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
+    let call_results = CallResultsRepr
+        .deserialize(call_results)
+        .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?;
 
     let ctx = ExecutionCtx::new(
         prev_ingredients,

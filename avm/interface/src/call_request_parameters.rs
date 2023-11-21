@@ -17,6 +17,7 @@
 use super::JValue;
 use crate::CallSeDeErrors;
 
+use air_interpreter_interface::SerializedCallRequests;
 use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -60,15 +61,19 @@ impl CallRequestParams {
     pub(crate) fn from_raw(
         call_params: air_interpreter_interface::CallRequestParams,
     ) -> Result<Self, CallSeDeErrors> {
-        let arguments: Vec<JValue> =
-            serde_json::from_str(&call_params.arguments).map_err(|de_error| {
-                CallSeDeErrors::CallParamsArgsDeFailed {
-                    call_params: call_params.clone(),
-                    de_error,
-                }
+        use air_interpreter_interface::CallArgumentsRepr;
+        use air_interpreter_interface::TetrapletsRepr;
+        use air_interpreter_sede::FromSerialized;
+
+        let arguments: Vec<JValue> = CallArgumentsRepr
+            .deserialize(&call_params.arguments)
+            .map_err(|de_error| CallSeDeErrors::CallParamsArgsDeFailed {
+                call_params: call_params.clone(),
+                de_error,
             })?;
 
-        let tetraplets: Vec<Vec<SecurityTetraplet>> = serde_json::from_str(&call_params.tetraplets)
+        let tetraplets: Vec<Vec<SecurityTetraplet>> = TetrapletsRepr
+            .deserialize(&call_params.tetraplets)
             .map_err(|de_error| CallSeDeErrors::CallParamsTetrapletsDeFailed {
                 call_params: call_params.clone(),
                 de_error,
@@ -86,10 +91,13 @@ impl CallRequestParams {
 }
 
 pub(crate) fn from_raw_call_requests(
-    raw_call_params: Vec<u8>,
+    raw_call_params: SerializedCallRequests,
 ) -> Result<CallRequests, CallSeDeErrors> {
+    use air_interpreter_interface::CallRequestsRepr;
+    use air_interpreter_sede::FromSerialized;
+
     let call_requests: air_interpreter_interface::CallRequests =
-        match rmp_serde::from_slice(&raw_call_params) {
+        match CallRequestsRepr.deserialize(&raw_call_params) {
             Ok(requests) => requests,
             Err(error) => {
                 return Err(CallSeDeErrors::CallRequestsDeError {

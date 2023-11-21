@@ -32,6 +32,7 @@ mod outcome;
 mod particle_parameters;
 pub mod raw_outcome;
 
+use air_interpreter_interface::SerializedCallRequests;
 use rmp_serde::decode::Error as SerdeDeError;
 use rmp_serde::encode::Error as SerdeSeError;
 use serde_json::Error as SerdeJsonError;
@@ -50,7 +51,7 @@ pub enum CallSeDeErrors {
     /// This error is encountered when deserialization pof call requests failed for some reason.
     #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
     CallRequestsDeError {
-        raw_call_request: Vec<u8>,
+        raw_call_request: SerializedCallRequests,
         error: SerdeDeError,
     },
 
@@ -72,6 +73,7 @@ pub enum CallSeDeErrors {
         de_error: SerdeJsonError,
     },
 }
+
 type JValue = serde_json::Value;
 
 pub use call_request_parameters::*;

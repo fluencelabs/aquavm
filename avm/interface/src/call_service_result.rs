@@ -53,6 +53,7 @@ impl CallServiceResult {
 
         air_interpreter_interface::CallServiceResult {
             ret_code,
+            // TODO serializer
             result: result.to_string(),
         }
     }

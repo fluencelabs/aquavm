@@ -17,7 +17,9 @@
 use crate::RunnerError;
 use crate::RunnerResult;
 
+use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::InterpreterOutcome;
+use air_interpreter_sede::ToSerialized;
 use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
@@ -210,9 +212,11 @@ fn prepare_args(
 
     let call_results = avm_interface::into_raw_result(call_results);
     let call_results = measure!(
-        rmp_serde::to_vec(&call_results).expect("the default serializer shouldn't fail"),
+        CallResultsRepr
+            .serialize(&call_results)
+            .expect("the default serializer shouldn't fail"),
         tracing::Level::INFO,
-        "serde_json::to_vec call_results"
+        "CallResultsRepr.serialize"
     );
 
     vec![
@@ -220,7 +224,7 @@ fn prepare_args(
         IValue::ByteArray(prev_data.into()),
         IValue::ByteArray(data.into()),
         run_parameters,
-        IValue::ByteArray(call_results),
+        IValue::ByteArray(call_results.to_vec()),
     ]
 }
 

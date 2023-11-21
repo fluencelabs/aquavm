@@ -42,7 +42,7 @@ pub struct InterpreterOutcome {
     pub next_peer_pks: Vec<String>,
 
     /// Collected parameters of all met call instructions that could be executed on a current peer.
-    pub call_requests: Vec<u8>,
+    pub call_requests: SerializedCallRequests,
 }
 
 impl InterpreterOutcome {
@@ -51,7 +51,7 @@ impl InterpreterOutcome {
         error_message: String,
         data: Vec<u8>,
         next_peer_pks: Vec<String>,
-        call_requests: Vec<u8>,
+        call_requests: SerializedCallRequests,
     ) -> Self {
         Self {
             ret_code,
@@ -75,13 +75,26 @@ impl InterpreterOutcome {
             ));
         }
 
-        let call_requests = try_as_byte_vec(record_values.pop().unwrap(), "call_requests")?;
+        let call_requests = try_as_byte_vec(
+            try_as_record(record_values.pop().unwrap())
+                .unwrap()
+                .into_vec()
+                .pop()
+                .unwrap(),
+            "call_requests",
+        )?;
         let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
         let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
 
-        let outcome = Self::new(ret_code, error_message, data, next_peer_pks, call_requests);
+        let outcome = Self::new(
+            ret_code,
+            error_message,
+            data,
+            next_peer_pks,
+            call_requests.into(),
+        );
 
         Ok(outcome)
     }
@@ -89,6 +102,8 @@ impl InterpreterOutcome {
 
 #[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
+
+use crate::SerializedCallRequests;
 
 #[cfg(feature = "marine")]
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {

@@ -15,7 +15,7 @@
  */
 
 use super::runner::AirRunner;
-use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::{CallResultsRepr, RunParameters};
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 
@@ -38,11 +38,12 @@ impl AirRunner for NativeAvmRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> anyhow::Result<RawAVMOutcome> {
+        use air_interpreter_sede::ToSerialized;
         use avm_interface::into_raw_result;
 
         // some inner parts transformations
         let raw_call_results = into_raw_result(call_results);
-        let raw_call_results = serde_json::to_vec(&raw_call_results).unwrap();
+        let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
 
         let key_format = keypair.key_format().into();
         let secret_key_bytes = keypair.secret().expect("Failed to get secret key");

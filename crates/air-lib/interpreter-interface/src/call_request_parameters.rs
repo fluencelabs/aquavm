@@ -14,13 +14,64 @@
  * limitations under the License.
  */
 
+use air_interpreter_sede::define_simple_representation;
+use air_interpreter_sede::derive_serialized_type;
+use air_interpreter_sede::Format;
+use air_interpreter_sede::FromSerialized;
+use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::SerdeJsonFormat;
+use air_interpreter_sede::TypedFormat;
+
+use marine_call_parameters::SecurityTetraplet;
 #[cfg(feature = "marine")]
 use marine_rs_sdk::marine;
 use serde::Deserialize;
 use serde::Serialize;
+
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub type CallRequests = HashMap<u32, CallRequestParams>;
+
+derive_serialized_type!(SerializedCallArguments);
+derive_serialized_type!(SerializedTetraplets);
+derive_serialized_type!(SerializedCallRequests);
+
+pub type CallArgumentsFormat = SerdeJsonFormat;
+pub type TetrapletsFormat = SerdeJsonFormat;
+pub type CallRequestsFormat = RmpSerdeFormat;
+
+define_simple_representation! {
+    CallArgumentsRepr,
+    Vec<serde_json::Value>,
+    CallArgumentsFormat,
+    SerializedCallArguments
+}
+
+define_simple_representation! {
+    TetrapletsRepr,
+    // additional implementation for Vec<Vec<SecurityTetraplet>> is defined below
+    // TODO allow this macro to define implementations for multiple types
+    Vec<Vec<Rc<SecurityTetraplet>>>,
+    TetrapletsFormat,
+    SerializedTetraplets
+}
+
+define_simple_representation! {
+    CallRequestsRepr,
+    CallRequests,
+    CallRequestsFormat,
+    SerializedCallRequests
+}
+
+impl FromSerialized<Vec<Vec<SecurityTetraplet>>> for TetrapletsRepr {
+    fn deserialize(
+        &self,
+        repr: &[u8],
+    ) -> Result<Vec<Vec<SecurityTetraplet>>, Self::DeserializeError> {
+        CallArgumentsRepr.get_format().from_slice(repr)
+    }
+}
 
 /// Contains arguments of a call instruction and all other necessary information
 /// required for calling a service.
@@ -34,18 +85,18 @@ pub struct CallRequestParams {
     pub function_name: String,
 
     /// Serialized to JSON string Vec<JValue> of arguments that should be passed to a service.
-    pub arguments: String,
+    pub arguments: SerializedCallArguments,
 
     /// Serialized to JSON string Vec<Vec<SecurityTetraplet>> that should be passed to a service.
-    pub tetraplets: String,
+    pub tetraplets: SerializedTetraplets,
 }
 
 impl CallRequestParams {
     pub fn new(
         service_id: String,
         function_name: String,
-        arguments: String,
-        tetraplets: String,
+        arguments: SerializedCallArguments,
+        tetraplets: SerializedTetraplets,
     ) -> Self {
         Self {
             service_id,

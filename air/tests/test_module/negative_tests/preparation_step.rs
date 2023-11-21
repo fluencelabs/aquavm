@@ -15,7 +15,10 @@
  */
 
 use air::PreparationError;
-use air_interpreter_interface::{CallResults, RunParameters};
+use air_interpreter_interface::CallResultsFormat;
+use air_interpreter_interface::CallResultsRepr;
+use air_interpreter_interface::RunParameters;
+use air_interpreter_sede::FromSerialized;
 use air_test_utils::prelude::*;
 
 use serde::Deserialize;
@@ -23,7 +26,7 @@ use serde::Serialize;
 
 #[test]
 fn invalid_data_without_versions() {
-    use air_interpreter_sede::Format;
+    use air_interpreter_sede::{Format, TypedFormat};
 
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {
@@ -36,9 +39,7 @@ fn invalid_data_without_versions() {
     let script = r#"(null)"#;
     let invalid_data = InvalidDataStruct { trace: vec![1, 2, 3] };
 
-    let invalid_data = InterpreterDataRepr::get_format::<InvalidDataStruct>()
-        .to_vec(&invalid_data)
-        .unwrap();
+    let invalid_data = InterpreterDataRepr.get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
@@ -52,7 +53,7 @@ fn invalid_data_without_versions() {
 
 #[test]
 fn invalid_data_with_versions() {
-    use air_interpreter_sede::Format;
+    use air_interpreter_sede::{Format, TypedFormat};
 
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {
@@ -70,9 +71,7 @@ fn invalid_data_with_versions() {
         trace: vec![1, 2, 3],
         versions: versions.clone(),
     };
-    let invalid_data = InterpreterDataRepr::get_format::<InvalidDataStruct>()
-        .to_vec(&invalid_data)
-        .unwrap();
+    let invalid_data = InterpreterDataRepr.get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
@@ -87,13 +86,15 @@ fn invalid_data_with_versions() {
 
 #[test]
 fn invalid_callresults() {
+    use air_interpreter_sede::Format;
+
     let air = r#"(null)"#.to_string();
     let client_peer_id = "some_peer_id".to_string();
     let prev_data = InterpreterData::new(semver::Version::new(1, 1, 1));
     let prev_data: Vec<u8> = prev_data.serialize().unwrap();
     let data = Vec::<u8>::new();
-    let wrong_call_results = Vec::<u32>::new();
-    let wrong_call_results = rmp_serde::to_vec(&wrong_call_results).unwrap();
+    let vec = Vec::<u8>::new();
+    let wrong_call_results = CallResultsFormat::default().to_vec(&vec).unwrap();
     let keypair = fluence_keypair::KeyPair::generate_ed25519();
     let run_parameters = RunParameters::new(
         client_peer_id.clone(),
@@ -105,13 +106,13 @@ fn invalid_callresults() {
         "".to_owned(),
     );
 
-    let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone());
+    let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone().into());
     let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
 
-    let expected_serde_error = rmp_serde::from_slice::<CallResults>(&wrong_call_results).err().unwrap();
+    let expected_serde_error = CallResultsRepr.deserialize(&wrong_call_results).unwrap_err();
     let expected_error = PreparationError::CallResultsDeFailed {
         error: expected_serde_error,
-        call_results: wrong_call_results,
+        call_results: wrong_call_results.into(),
     };
 
     assert!(check_error(&result, expected_error));

@@ -35,6 +35,7 @@ impl TypedFormat for InterpreterDataRepr {
         <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
     type WriteError = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
     type Format = InterpreterDataFormat;
+    type SerializedValue = Vec<u8>; // TODO a typed wrapper
 
     fn get_format(&self) -> InterpreterDataFormat {
         InterpreterDataFormat::default()
@@ -44,14 +45,14 @@ impl TypedFormat for InterpreterDataRepr {
 impl ToSerialized<InterpreterData> for InterpreterDataRepr {
     #[inline]
     fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::SerializeError> {
-        InterpreterDataRepr::get_format(self).to_vec(value)
+        Self::get_format(self).to_vec(value)
     }
 }
 
 impl FromSerialized<InterpreterData> for InterpreterDataRepr {
     #[inline]
     fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::DeserializeError> {
-        InterpreterDataRepr::get_format(self).from_slice(repr)
+        Self::get_format(self).from_slice(repr)
     }
 }
 
@@ -62,7 +63,7 @@ impl ToWriter<InterpreterData> for InterpreterDataRepr {
         value: &InterpreterData,
         writer: &mut W,
     ) -> Result<(), Self::WriteError> {
-        InterpreterDataRepr::get_format(self).to_writer(value, writer)
+        Self::get_format(self).to_writer(value, writer)
     }
 }
 

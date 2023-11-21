@@ -12,10 +12,12 @@ categories = ["wasm"]
 
 [dependencies]
 rmp-serde = { version = "1.1.2", optional = true }
-serde = { version = "1.0.190", optional = true }
-serde_json = { version = "1.0.108", optional = true }
+serde = { version = "1.0.190" }
+serde_json = { version = "1.0.108" }
+marine-rs-sdk = {version = "0.10.0", optional = true }
 
 [features]
-default = ["serde_json", "rmp-serde"]
-serde_json = ["dep:serde_json", "serde"]
-rmp-serde = ["dep:rmp-serde", "serde"]
+default = ["serde_json", "rmp-serde", "marine"]
+serde_json = []
+rmp-serde = ["dep:rmp-serde"]
+marine = ["marine-rs-sdk"]

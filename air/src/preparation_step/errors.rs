@@ -20,6 +20,8 @@ use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::InterpreterDataRepr;
 use air_interpreter_data::Versions;
+use air_interpreter_interface::CallResultsDeserializeError;
+use air_interpreter_interface::SerializedCallResults;
 use air_interpreter_sede::TypedFormat;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
@@ -74,8 +76,8 @@ pub enum PreparationError {
     Call results: {call_results:?}"
     )]
     CallResultsDeFailed {
-        call_results: Vec<u8>,
-        error: rmp_serde::decode::Error,
+        call_results: SerializedCallResults,
+        error: CallResultsDeserializeError,
     },
 
     /// Error occurred when a version of interpreter produced supplied data is less then minimal.
@@ -117,7 +119,7 @@ impl PreparationError {
         Self::DataDeFailedWithVersions { data, error, versions }
     }
 
-    pub fn call_results_de_failed(call_results: Vec<u8>, error: rmp_serde::decode::Error) -> Self {
+    pub fn call_results_de_failed(call_results: SerializedCallResults, error: CallResultsDeserializeError) -> Self {
         Self::CallResultsDeFailed { call_results, error }
     }
 

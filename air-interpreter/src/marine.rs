@@ -49,7 +49,7 @@ pub fn invoke(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> InterpreterOutcome {
-    execute_air(air, prev_data, data, params, call_results)
+    execute_air(air, prev_data, data, params, call_results.into())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -64,7 +64,7 @@ pub fn invoke_tracing(
     tracing_output_mode: u8,
 ) -> InterpreterOutcome {
     logger::init_tracing(tracing_params, tracing_output_mode);
-    execute_air(air, prev_data, data, params, call_results)
+    execute_air(air, prev_data, data, params, call_results.into())
 }
 
 #[marine]

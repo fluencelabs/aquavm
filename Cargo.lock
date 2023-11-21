@@ -130,7 +130,9 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.15.1"
 dependencies = [
+ "air-interpreter-sede",
  "fluence-it-types",
+ "marine-call-parameters",
  "marine-rs-sdk",
  "serde",
  "serde_json",
@@ -140,6 +142,7 @@ dependencies = [
 name = "air-interpreter-sede"
 version = "0.1.0"
 dependencies = [
+ "marine-rs-sdk",
  "rmp-serde",
  "serde",
  "serde_json",
@@ -386,6 +389,7 @@ version = "0.5.2"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-test-utils",
  "anyhow",
  "aquavm-air",
@@ -593,6 +597,7 @@ name = "avm-interface"
 version = "0.29.2"
 dependencies = [
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-utils",
  "log",
  "maplit",
@@ -609,6 +614,7 @@ name = "avm-server"
 version = "0.33.2"
 dependencies = [
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-utils",
  "avm-data-store",
  "avm-interface",
@@ -1094,18 +1100,17 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.26"
+version = "0.4.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
+checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits",
  "serde",
- "time 0.1.45",
  "wasm-bindgen",
- "winapi",
+ "windows-targets 0.48.2",
 ]
 
 [[package]]
@@ -2959,9 +2964,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-call-parameters"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9ca0439e5b2a812d8bc5c3b7d71e3691fb260a1f0384a7e842eec1b59f13069"
+checksum = "979e5c52888bae300c937e36240293c20e34bb7b29d058375b15f85e713dd854"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -3045,11 +3050,11 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0088fc9cb6a970dc17a510c3cb28fe459c368d566e8cb7f8354e06ef3395c883"
+checksum = "93835918915610947b5ce96a4b3d89268fde2842a6d18d893c86ffe1b605c16e"
 dependencies = [
- "marine-macro-impl 0.10.0",
+ "marine-macro-impl 0.10.1",
  "marine-rs-sdk-main",
 ]
 
@@ -3068,9 +3073,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e457b58c826679139896f04e6cfa38c5d23870a88e957e8e0a6f646e7c3f0ac4"
+checksum = "c794126e4a2f5b78b43bc7c82329dc6ffa0c2511591803f89a6d97c037feb068"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3125,9 +3130,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6ecd45528096514b4db8d23523eadaf9e5d5a7d3fce637e4bb684afccc0e9a3"
+checksum = "85eeb2e2a1ab3f7a2ba270ff42bc2d4fa0d1a0b0f6bdb377b2db4403030a854a"
 dependencies = [
  "marine-call-parameters",
  "marine-macro",
@@ -3138,9 +3143,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11eabbc74c69ad11874fb6cf686604833d084633293324524a40ec581663f978"
+checksum = "997cdfb9fdef7066a527e9436938618d0596e00f4cceea1ab3b5bb32d20947f6"
 dependencies = [
  "log",
  "serde",
@@ -3177,9 +3182,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acf956d174fdbf940b474089d5388aa35b4fc73fedbfade2a92dc198084b9afa"
+checksum = "55ccb7870fd62eb4cc34a86b0ae8bdca680067138c3bb10fca7fb67e03242ca4"
 dependencies = [
  "chrono",
  "quote",
@@ -4298,9 +4303,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.66"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18fb31db3f9bddb2ea821cde30a9f70117e3f119938b5ee630b7403aa6e2ead9"
+checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
 dependencies = [
  "unicode-ident",
 ]
