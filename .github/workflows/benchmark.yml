@@ -59,7 +59,10 @@ jobs:
           path: lcov.info
 
       - name: Print benchmark results to checks
-        run: cat ./benches/PERFORMANCE.txt >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo ``` >> $GITHUB_STEP_SUMMARY
+          cat ./benches/PERFORMANCE.txt >> $GITHUB_STEP_SUMMARY
+          echo ``` >> $GITHUB_STEP_SUMMARY
 
       - name: Upload benchmark results to release
         if: inputs.tag != 'null'
