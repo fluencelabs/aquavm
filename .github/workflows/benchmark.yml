@@ -30,8 +30,6 @@ jobs:
 
       - name: Setup marine
         uses: fluencelabs/setup-marine@v1
-        with:
-          artifact-name: marine
 
       - name: Generate benchmark data
         working-directory: junk/gen-bench-data
