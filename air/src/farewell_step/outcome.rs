@@ -26,9 +26,9 @@ use air_interpreter_data::{InterpreterData, InterpreterDataRepr};
 use air_interpreter_interface::CallRequests;
 use air_interpreter_interface::CallRequestsRepr;
 use air_interpreter_sede::ToSerialized;
+use air_interpreter_signatures::KeyPair;
 use air_utils::measure;
 use fluence_keypair::error::SigningError;
-use fluence_keypair::KeyPair;
 
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -146,7 +146,7 @@ fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(),
         .map_err(signing_error_into_outcome)?;
 
     let current_pubkey = keypair.public();
-    exec_ctx.signature_store.put(current_pubkey.into(), current_signature);
+    exec_ctx.signature_store.put(current_pubkey, current_signature);
 
     Ok(())
 }

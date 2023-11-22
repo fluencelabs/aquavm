@@ -63,8 +63,25 @@ pub fn invoke_tracing(
     tracing_params: String,
     tracing_output_mode: u8,
 ) -> InterpreterOutcome {
-    logger::init_tracing(tracing_params, tracing_output_mode);
-    execute_air(air, prev_data, data, params, call_results.into())
+    use tracing::Dispatch;
+    use tracing_subscriber::fmt::format::FmtSpan;
+
+    let builder = tracing_subscriber::fmt()
+        .with_env_filter(tracing_params)
+        .with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        .with_writer(std::io::stderr);
+
+    let dispatch = if logger::json_output_mode(tracing_output_mode) {
+        let subscriber = builder.json().finish();
+        Dispatch::new(subscriber)
+    } else {
+        // Human-readable output.
+        let subscriber = builder.finish();
+        Dispatch::new(subscriber)
+    };
+    tracing::dispatcher::with_default(&dispatch, || {
+        execute_air(air, prev_data, data, params, call_results.into())
+    })
 }
 
 #[marine]

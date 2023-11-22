@@ -54,6 +54,9 @@ pub enum ServiceDefinition {
     /// Some known service by name: "echo", "unit" (more to follow).
     #[strum_discriminants(strum(serialize = "behaviour"))]
     Behaviour(Behavior),
+    /// Same services as defined by the enum element above with dbg! applied to the arguments.
+    #[strum_discriminants(strum(serialize = "dbg_behaviour"))]
+    DbgBehaviour(Behavior),
     /// Maps first argument to a value
     #[strum_discriminants(strum(serialize = "map"))]
     Map(HashMap<String, JValue>),
@@ -103,6 +106,7 @@ impl ServiceDefinition {
                 call_map,
             } => call_seq_error(call_number_seq, call_map),
             ServiceDefinition::Behaviour(name) => name.call(params),
+            ServiceDefinition::DbgBehaviour(name) => dbg!(name.call(dbg!(params))),
             ServiceDefinition::Map(map) => call_map_service(map, params),
         }
     }

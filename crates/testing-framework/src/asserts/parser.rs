@@ -92,6 +92,13 @@ pub fn parse_kw(inp: &str) -> IResult<&str, ServiceDefinition, ParseError> {
         ),
         map(
             preceded(
+                pair(tag(ServiceTagName::DbgBehaviour.as_ref()), equal()),
+                cut(parse_behaviour),
+            ),
+            ServiceDefinition::DbgBehaviour,
+        ),
+        map(
+            preceded(
                 pair(tag(ServiceTagName::Behaviour.as_ref()), equal()),
                 cut(parse_behaviour),
             ),
@@ -228,6 +235,12 @@ mod tests {
     fn test_behaviour() {
         let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
         assert_eq!(res, Ok(ServiceDefinition::Behaviour(Behavior::Echo)),);
+    }
+
+    #[test]
+    fn test_dbg_behaviour() {
+        let res = ServiceDefinition::from_str(r#"dbg_behaviour=echo"#);
+        assert_eq!(res, Ok(ServiceDefinition::DbgBehaviour(Behavior::Echo)),);
     }
 
     #[test]

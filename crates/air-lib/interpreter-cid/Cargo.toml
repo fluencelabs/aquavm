@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-cid"
 description = "AIR interpreter CID util module"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -11,9 +11,13 @@ keywords = ["fluence", "air", "programming-language", "cid", "ipld"]
 categories = ["wasm"]
 
 [dependencies]
-blake3 = "1.5.0"
 cid = { version = "0.10.1", default-features = false, features = ["std"] }
-multihash = { version = "0.18.1", default-features = false, features = ["multihash-impl", "std", "blake3"] }
-serde = { version = "1.0.164", features = ["derive", "rc"] }
+multihash = { version = "0.18.1", default-features = false, features = ["multihash-impl", "std", "sha2", "blake3"] }
+serde = { version = "1.0.190", features = ["derive", "rc"] }
 serde_json = "1.0.95"
+thiserror = "1.0.49"
+
+# beware: `digest` version should match one of the used in particular hash crates
+digest = "0.10.7"
 sha2 = "0.10.7"
+blake3 = { version = "1.5.0", features = ["traits-preview"] }

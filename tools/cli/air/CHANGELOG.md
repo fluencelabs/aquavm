@@ -102,6 +102,21 @@
     * aquavm-air bumped from 0.52.0 to 0.53.0
     * air-test-utils bumped from 0.11.1 to 0.12.0
 
+## [0.5.3](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.5.2...aquavm-air-cli-v0.5.3) (2023-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.53.0 to 0.54.0
+    * air-test-utils bumped from 0.12.0 to 0.12.1
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.7...aquavm-air-cli-v0.5.0) (2023-10-13)
 
 

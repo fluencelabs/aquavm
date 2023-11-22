@@ -1,17 +1,24 @@
 use air_interpreter_sede::{Format, RmpSerdeFormat, SerdeJsonFormat, TypedFormat};
 use air_test_framework::*;
+use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
-use clap::{Parser, Subcommand};
+
+use clap::Parser;
+use clap::Subcommand;
 use itertools::Itertools as _;
 use maplit::hashmap;
 
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 const PARTICLE_ID: &str = "0123456789ABCDEF";
+const MAX_STREAM_SIZE: usize = 1023;
 
+mod cid_benchmarking;
 mod dashboard;
+mod data;
 mod network_explore;
 
 #[derive(Debug, Parser)]
@@ -25,6 +32,7 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Bench {
+    Dashboard,
     MultipleCids10,
     MultipleCids50,
     MultiplePeers5,
@@ -33,8 +41,17 @@ enum Bench {
     MultipleSigs10,
     MultipleSigs30,
     MultipleSigs200,
-    Dashboard,
     NetworkExplore,
+    CanonMapKeyByLens,
+    CanonMapKeyElementByLens,
+    PopulateMapMultipleKeys,
+    PopulateMapSingleKey,
+    CanonMapMultipleKeys,
+    CanonMapSingleKey,
+    CanonMapScalarMultipleKeys,
+    CanonMapScalarSingleKey,
+    LongData,
+    BigValuesData,
 }
 
 fn main() {
@@ -51,6 +68,16 @@ fn main() {
         Bench::MultipleSigs200 => multiple_sigs(200),
         Bench::Dashboard => dashboard::dashboard(),
         Bench::NetworkExplore => network_explore::network_explore(),
+        Bench::PopulateMapMultipleKeys => populate_map_multiple_keys(MAX_STREAM_SIZE),
+        Bench::PopulateMapSingleKey => populate_map_single_key(770),
+        Bench::CanonMapMultipleKeys => canon_map_multiple_keys(MAX_STREAM_SIZE),
+        Bench::CanonMapSingleKey => canon_map_single_key(770),
+        Bench::CanonMapScalarMultipleKeys => canon_map_scalar_multiple_keys(MAX_STREAM_SIZE),
+        Bench::CanonMapScalarSingleKey => canon_map_scalar_single_key(770),
+        Bench::CanonMapKeyByLens => canon_map_key_by_lens(770),
+        Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770),
+        Bench::LongData => long_data(),
+        Bench::BigValuesData => big_values_data(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -87,8 +114,13 @@ trait Reformatter: Format<()> {
 }
 
 impl Reformatter for SerdeJsonFormat {
+    /// make zero-indentation data for better git diffs
     fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
         use serde::ser::Serialize;
+
+        if data.is_empty() {
+            return data.into();
+        }
 
         let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
 
@@ -127,6 +159,7 @@ fn save_file(
 }
 
 #[derive(Debug, Default)]
+#[allow(dead_code)]
 pub(crate) struct Data {
     pub(crate) air: String,
     pub(crate) prev_data: Vec<u8>,
@@ -137,7 +170,7 @@ pub(crate) struct Data {
 }
 
 fn multiple_cids(size: usize) -> Data {
-    let data = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("multiple_cids.air.tmpl"), data = data);
 
     let exec = AirScriptExecutor::<NativeAirRunner>::new(
@@ -266,5 +299,399 @@ fn multiple_sigs(size: usize) -> Data {
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_key_by_lens(size: usize) -> Data {
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(include_str!("canon_map_key_by_lens.air.tmpl"), data = data);
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_key_element_by_lens(size: usize) -> Data {
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("canon_map_key_element_by_lens.air.tmpl"),
+        data = data,
+        idx = size - 1
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn populate_map_multiple_keys(size: usize) -> Data {
+    let sq_root = (size as f64).sqrt() as usize;
+    let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("populate_map_multiple_keys.air.tmpl"),
+        data = data
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn populate_map_single_key(size: usize) -> Data {
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("populate_map_single_key.air.tmpl"),
+        data = data
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_multiple_keys(size: usize) -> Data {
+    let sq_root = (size as f64).sqrt() as usize;
+    let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("canon_map_multiple_keys.air.tmpl"),
+        data = data
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_single_key(size: usize) -> Data {
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(include_str!("canon_map_single_key.air.tmpl"), data = data);
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_scalar_multiple_keys(size: usize) -> Data {
+    let sq_root = (size as f64).sqrt() as usize;
+    let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("canon_map_scalar_multiple_keys.air.tmpl"),
+        data = data
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn canon_map_scalar_single_key(size: usize) -> Data {
+    let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
+    let air_script = format!(
+        include_str!("canon_map_scalar_single_key.air.tmpl"),
+        data = data
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking a map insert operation".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn long_data() -> Data {
+    use cid_benchmarking::cid_benchmarking_long_data;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+    let cur_data = cid_benchmarking_long_data(&keypair, peer_id.clone(), particle_id);
+
+    Data {
+        air: "(null)".to_owned(),
+        prev_data: vec![],
+        cur_data,
+        params_json: hashmap! {
+            "comment".to_owned() => "Long data trace".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+    }
+}
+
+fn big_values_data() -> Data {
+    use cid_benchmarking::cid_benchmarking_big_values_data;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+    let cur_data = cid_benchmarking_big_values_data(&keypair, peer_id.clone(), particle_id);
+
+    Data {
+        air: "(null)".to_owned(),
+        prev_data: vec![],
+        cur_data,
+        params_json: hashmap! {
+            "comment".to_owned() => "Loading a trace with huge values".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
     }
 }

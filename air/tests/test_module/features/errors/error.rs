@@ -29,9 +29,9 @@ fn fail_with_rebubble_error() {
                 (match 1 2 (null) )
                 (fail :error:)
             )
-            (call "peer_id" ("m" "f1") [:error:] scalar1) ; behaviour = echo
+            (call "peer_id" ("m" "f1") [:error:] scalar1) ; dbg_behaviour = echo
         )
-        (call "peer_id" ("m" "f2") [:error:] scalar2) ; behaviour = echo
+        (call "peer_id" ("m" "f2") [:error:] scalar2) ; dbg_behaviour = echo
     )
     "#
     .to_string();

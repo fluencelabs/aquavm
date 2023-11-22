@@ -1,0 +1,20 @@
+(new %map
+  (seq
+    (seq
+      (call "init_peer_id" ("" "init") [] data) ; ok = [{data}]
+      (fold data value
+        (seq
+          (ap ("some-lengthy-and-scary-key" value) %map)
+          (next value)
+        )
+      )
+    )
+    (seq
+        (canon "init_peer_id" %map #%canon)
+        (seq
+            (canon "other_peer_id" $unused_stream #$node_change)
+            (ap #%canon.$.some-lengthy-and-scary-key scalar)
+        )
+    )
+  )
+)

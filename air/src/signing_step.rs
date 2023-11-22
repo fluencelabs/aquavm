@@ -16,7 +16,9 @@
 
 use crate::ExecutionError;
 
-use air_interpreter_signatures::{PeerCidTracker, SignatureStore};
+use air_interpreter_signatures::KeyPair;
+use air_interpreter_signatures::PeerCidTracker;
+use air_interpreter_signatures::SignatureStore;
 
 #[cfg(feature = "gen_signatures")]
 #[tracing::instrument(skip_all)]
@@ -24,7 +26,7 @@ pub(crate) fn sign_produced_cids(
     signature_tracker: &mut PeerCidTracker,
     signature_store: &mut SignatureStore,
     salt: &str,
-    keypair: &fluence_keypair::KeyPair,
+    keypair: &KeyPair,
 ) -> Result<(), ExecutionError> {
     use crate::UncatchableError;
 
@@ -42,7 +44,7 @@ pub(crate) fn sign_produced_cids(
     _signature_tracker: &mut PeerCidTracker,
     _signature_store: &mut SignatureStore,
     _salt: &str,
-    _keypair: &fluence_keypair::KeyPair,
+    _keypair: &KeyPair,
 ) -> Result<(), ExecutionError> {
     Ok(())
 }

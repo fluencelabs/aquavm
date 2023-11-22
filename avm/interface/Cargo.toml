@@ -20,10 +20,9 @@ air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpr
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
 polyplets = { version = "0.5.1", path = "../../crates/air-lib/polyplets" }
 
-thiserror = "1.0.40"
+thiserror = "1.0.50"
 maplit = "1.0.2"
-serde_json = "1.0.95"
-serde = "1.0.164"
+serde_json = "1.0.108"
+serde = "1.0.190"
 log = "0.4.20"
-tracing = "0.1.37"
-rmp-serde = "1.1.2"
+tracing = "0.1.40"
