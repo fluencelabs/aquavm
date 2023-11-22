@@ -204,7 +204,6 @@ dependencies = [
  "object-pool",
  "once_cell",
  "rand_chacha 0.2.2",
- "rmp-serde",
  "semver 1.0.18",
  "serde",
  "serde_json",

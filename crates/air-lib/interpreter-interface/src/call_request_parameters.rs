@@ -48,6 +48,8 @@ define_simple_representation! {
     SerializedCallArguments
 }
 
+pub type CallArgumentsDeserializeError = <CallArgumentsRepr as TypedFormat>::DeserializeError;
+
 define_simple_representation! {
     TetrapletsRepr,
     // additional implementation for Vec<Vec<SecurityTetraplet>> is defined below
@@ -57,12 +59,16 @@ define_simple_representation! {
     SerializedTetraplets
 }
 
+pub type TetrapletDeserializeError = <TetrapletsRepr as TypedFormat>::DeserializeError;
+
 define_simple_representation! {
     CallRequestsRepr,
     CallRequests,
     CallRequestsFormat,
     SerializedCallRequests
 }
+
+pub type CallRequestsDeserializeError = <CallRequestsRepr as TypedFormat>::DeserializeError;
 
 impl FromSerialized<Vec<Vec<SecurityTetraplet>>> for TetrapletsRepr {
     fn deserialize(

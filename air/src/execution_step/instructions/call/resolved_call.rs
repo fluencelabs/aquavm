@@ -210,7 +210,6 @@ impl<'i> ResolvedCall<'i> {
 
         let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
-        // TODO measure
         let call_arguments = CallArgumentsRepr.serialize(&call_arguments).unwrap();
 
         let resolved_arguments = ResolvedArguments {

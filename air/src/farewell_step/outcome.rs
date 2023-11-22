@@ -62,7 +62,6 @@ pub(crate) fn from_uncatchable_error(
 ) -> InterpreterOutcome {
     let ret_code = error.to_error_code();
     let data = data.into();
-    // TODO
     let call_requests = CallRequestsRepr
         .serialize(&CallRequests::new())
         .expect("default serializer shouldn't fail");

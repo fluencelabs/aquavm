@@ -70,6 +70,6 @@ impl ToWriter<InterpreterData> for InterpreterDataRepr {
 impl FromSerialized<Versions> for InterpreterDataRepr {
     #[inline]
     fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::DeserializeError> {
-        InterpreterDataRepr::get_format(self).from_slice(repr)
+        Self::get_format(self).from_slice(repr)
     }
 }

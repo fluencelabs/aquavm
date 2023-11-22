@@ -32,10 +32,11 @@ mod outcome;
 mod particle_parameters;
 pub mod raw_outcome;
 
+use air_interpreter_interface::CallArgumentsDeserializeError;
+use air_interpreter_interface::CallRequestsDeserializeError;
+use air_interpreter_interface::CallResultsSerializeError;
 use air_interpreter_interface::SerializedCallRequests;
-use rmp_serde::decode::Error as SerdeDeError;
-use rmp_serde::encode::Error as SerdeSeError;
-use serde_json::Error as SerdeJsonError;
+use air_interpreter_interface::TetrapletDeserializeError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -45,14 +46,14 @@ pub enum CallSeDeErrors {
     #[error("error occurred while call results `{call_results:?}` deserialization: {se_error}")]
     CallResultsSeFailed {
         call_results: air_interpreter_interface::CallResults,
-        se_error: SerdeSeError,
+        se_error: CallResultsSerializeError,
     },
 
     /// This error is encountered when deserialization pof call requests failed for some reason.
     #[error("'{raw_call_request:?}' can't been serialized with error '{error}'")]
     CallRequestsDeError {
         raw_call_request: SerializedCallRequests,
-        error: SerdeDeError,
+        error: CallRequestsDeserializeError,
     },
 
     /// Errors encountered while trying to deserialize arguments from call parameters returned
@@ -61,7 +62,7 @@ pub enum CallSeDeErrors {
     #[error("error occurred while deserialization of arguments from call params `{call_params:?}`: {de_error}")]
     CallParamsArgsDeFailed {
         call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeJsonError,
+        de_error: CallArgumentsDeserializeError,
     },
 
     /// Errors encountered while trying to deserialize tetraplets from call parameters returned
@@ -70,7 +71,7 @@ pub enum CallSeDeErrors {
     #[error("error occurred while deserialization of tetraplets from call params `{call_params:?}`: {de_error}")]
     CallParamsTetrapletsDeFailed {
         call_params: air_interpreter_interface::CallRequestParams,
-        de_error: SerdeJsonError,
+        de_error: TetrapletDeserializeError,
     },
 }
 

@@ -1,9 +1,11 @@
+use air_interpreter_sede::{Format, RmpSerdeFormat, SerdeJsonFormat, TypedFormat};
 use air_test_framework::*;
 use air_test_utils::prelude::*;
 use clap::{Parser, Subcommand};
 use itertools::Itertools as _;
 use maplit::hashmap;
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -60,20 +62,58 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     create_dir_all(dest_dir)?;
 
     save_file(dest_dir, "script.air", &data.air)?;
-    save_file(dest_dir, "prev_data.json", &reformat_json(&data.prev_data))?;
-    save_file(dest_dir, "cur_data.json", &reformat_json(&data.cur_data))?;
-    save_file(dest_dir, "params.json", &serde_json::to_vec_pretty(&data.params_json)?)?;
+    save_file(
+        dest_dir,
+        "prev_data.json",
+        &<InterpreterDataRepr as TypedFormat>::Format::reformat(&data.prev_data),
+    )?;
+    save_file(
+        dest_dir,
+        "cur_data.json",
+        &<InterpreterDataRepr as TypedFormat>::Format::reformat(&data.cur_data),
+    )?;
+    save_file(
+        dest_dir,
+        "params.json",
+        &serde_json::to_vec_pretty(&data.params_json)?,
+    )?;
     save_file(dest_dir, "keypair.ed25519", &data.keypair)?;
 
     Ok(())
 }
 
-/// make zero-indentation data for better git diffs
-fn reformat_json(data: &[u8]) -> Vec<u8> {
-    data.to_owned()
+trait Reformatter: Format<()> {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]>;
 }
 
-fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> Result<(), Box<dyn std::error::Error>>{
+impl Reformatter for SerdeJsonFormat {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        use serde::ser::Serialize;
+
+        let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
+
+        let fmt = serde_json::ser::PrettyFormatter::with_indent(&[]);
+        let mut out = vec![];
+        {
+            let mut ser = serde_json::ser::Serializer::with_formatter(&mut out, fmt);
+            obj.serialize(&mut ser).unwrap();
+        }
+
+        out.into()
+    }
+}
+
+impl Reformatter for RmpSerdeFormat {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
+fn save_file(
+    dest_dir: &Path,
+    filename: &str,
+    data: impl AsRef<[u8]>,
+) -> Result<(), Box<dyn std::error::Error>> {
     use std::fs::*;
     use std::io::prelude::*;
 
@@ -105,7 +145,8 @@ fn multiple_cids(size: usize) -> Data {
         vec![],
         vec![],
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
     let cur_res = exec.execute_one("other_peer_id").unwrap();
@@ -148,7 +189,8 @@ fn multiple_peers(size: usize) -> Data {
         vec![],
         peers.clone(),
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
 
@@ -193,7 +235,8 @@ fn multiple_sigs(size: usize) -> Data {
         vec![],
         vec![],
         &air_script,
-    ).unwrap();
+    )
+    .unwrap();
 
     let prev_res = exec.execute_one("init_peer_id").unwrap();
     let cur_res = exec.execute_one("other_peer_id").unwrap();
