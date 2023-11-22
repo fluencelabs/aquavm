@@ -28,6 +28,12 @@ jobs:
       - name: Setup Rust toolchain
         uses: dsherret/rust-toolchain-file@v1
 
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: aquavm
+          save-if: false
+
       - name: Setup marine
         uses: fluencelabs/setup-marine@v1
 
