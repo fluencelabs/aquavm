@@ -17,8 +17,10 @@
 use crate::JValue;
 
 use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::verify_value;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CidRef;
+use air_interpreter_cid::CidVerificationError;
 use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
@@ -71,13 +73,7 @@ impl<Val> CidStore<Val> {
 impl<Val: Serialize> CidStore<Val> {
     pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
         for (cid, value) in &self.0 {
-            let expected_cid = value_to_json_cid::<Val>(value)?;
-            if expected_cid != *cid {
-                return Err(CidStoreVerificationError::MismatchError {
-                    type_name: std::any::type_name::<Val>(),
-                    cid_repr: (*cid).get_inner(),
-                });
-            }
+            verify_value(cid, value)?;
         }
         Ok(())
     }
@@ -85,15 +81,8 @@ impl<Val: Serialize> CidStore<Val> {
 
 #[derive(ThisError, Debug)]
 pub enum CidStoreVerificationError {
-    #[error("Failed to recalculate CID during the verification: {0}")]
-    CidCalculationError(#[from] CidCalculationError),
-
-    #[error("Value mismatch in the {type_name:?} store for CID {cid_repr:?}")]
-    MismatchError {
-        // nb: type_name is std::any::type_name() result that may be inconsistent between the Rust compiler versions
-        type_name: &'static str,
-        cid_repr: Rc<CidRef>,
-    },
+    #[error(transparent)]
+    CidVerificationError(#[from] CidVerificationError),
 
     #[error("Reference CID {target_cid_repr:?} from type {source_type_name:?} to {target_type_name:?} was not found")]
     MissingReference {
@@ -264,6 +253,6 @@ mod tests {
             &json!({"key": 42}),
         );
 
-        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None,);
+        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None);
     }
 }
