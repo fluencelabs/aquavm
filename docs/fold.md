@@ -9,12 +9,33 @@ If `last_instruction` is not set, then it's assumed:
  - `null` in case of `(fold (seq ...`
  - `never` in case of `(fold (par ...`
 
+Here is a simple example when `fold` loops over a scalar to populate map using `iterator` as key-value pair value:
 ```clojure
 (fold iterable iterator
 	(seq
 	  (ap ("key" iterator) %map)
 	  (next iterator)
 	)
+	;; here is an implicit (null)
+)
+```
+
+This example demonstrates the case when `next` is not the last instruction. This feature is supported with `fold`` over scalar only.
+```clojure
+(fold iterable iterator
+	(seq
+	  (next iterator)
+	  (ap ("key" iterator) %map)
+	)
+	;; here is an implicit (null)
+)
+```
+
+Fold body can have no `next`. The body will be executed only once in this case.
+
+```clojure
+(fold iterable iterator
+	  (ap ("key" iterator) %map)
 	;; here is an implicit (null)
 )
 ```
@@ -79,6 +100,27 @@ fold
 	run fold body for generation N values
 		run last instruction
 ```
+There are some subtle details about fold processing over a number of generations, namely:
+- runs of previous generations do not affect next generations in any way
+- if previous generation doesn't call `next` AquaVM executes `fold` for the next generation.
 
 There is a property of `fold` completeness. The invariant for this property is as follows, if fold finishes a run for at least one generation the fold is marked as complete. This property belongs to AquaVM execution engine and it is not explicitly sent out in a particle.
-Please note that fold body that contains topology change events, e.g. `call`,`canon` destined for a node other than the current triggers that topology change.
+Please note that fold body that triggers a node change events, e.g. `call`,`canon` destined for a node other than the current, forces the executiont to migrate to the destined node.
+There is an exception for this rule. Consider the example:
+
+```clojure
+(seq
+	(call "local_node" ("m" "returns_array") [] $stream)
+	(fold $stream iter
+		(seq
+			(ap 42 $stream)
+			(seq
+				(call "remote_node" ("m" "f") [42] scalar)
+				(next iter)
+			)
+		)
+	)
+)
+```
+
+with the example above there will be multiple iterations b/c `$stream` is populated with a new generation every `(ap 42 $stream)` call. AquaVM runs the part that preceds the `call` at `remote_node` for every generation added. The migration triggered by the `call` does not stop the runs of that fold body part that preceds the `call`.
