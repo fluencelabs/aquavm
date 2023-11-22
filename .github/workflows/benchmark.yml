@@ -1,0 +1,65 @@
+name: Run benchmark with workflow_call
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "git ref to checkout to"
+        type: string
+        default: "master"
+      tag:
+        description: "Release tag to upload results to"
+        type: string
+        default: "null"
+
+jobs:
+  benchmark:
+    name: Run benchmark
+    timeout-minutes: 10
+    runs-on: builder
+
+    steps:
+      - name: Checkout AquaVM
+        uses: actions/checkout@v4
+        with:
+          repository: fluencelabs/aquavm
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Rust toolchain
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup marine
+        uses: fluencelabs/setup-marine@v1
+        with:
+          artifact-name: marine
+
+      - name: Generate benchmark data
+        working-directory: junk/gen-bench-data
+        run: ./gen_benchmark_data.sh
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install python module
+        run: pip install tools/cli/performance_metering
+
+      - name: Run benchmark
+        run: aquavm_performance_metering run
+
+      - name: Upload benchmark results to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ./benches/PERFORMANCE.txt
+          path: lcov.info
+
+      - name: Print benchmark results to checks
+        run: cat ./benches/PERFORMANCE.txt >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload benchmark results to release
+        if: inputs.tag != 'null'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./benches/PERFORMANCE.txt
+          tag_name: ${{ inputs.tag }}
