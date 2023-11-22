@@ -176,6 +176,6 @@ pub(crate) fn network_explore() -> Data {
             "init-peer-id".to_owned() => "".to_owned(),
         },
         call_results: None,
-        keypair: bs58::encode(relay_key.to_vec()).into_string(),
+        keypair: bs58::encode(relay_key.as_inner().to_vec()).into_string(),
     }
 }

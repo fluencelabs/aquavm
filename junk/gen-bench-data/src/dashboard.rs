@@ -16,9 +16,9 @@
 
 use super::Data;
 
-use air_test_utils::prelude::*;
-use air_test_utils::key_utils::derive_dummy_keypair;
 use air_interpreter_signatures::KeyPair;
+use air_test_utils::key_utils::derive_dummy_keypair;
+use air_test_utils::prelude::*;
 use maplit::hashmap;
 
 use std::cell::RefCell;
@@ -26,7 +26,9 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 fn create_peers() -> Vec<(KeyPair, String)> {
-    (0..7).map(|n| derive_dummy_keypair(&format!("n{n}"))).collect()
+    (0..7)
+        .map(|n| derive_dummy_keypair(&format!("n{n}")))
+        .collect()
 }
 
 fn into_hashset(peers: Vec<String>) -> HashSet<String> {
@@ -184,7 +186,8 @@ pub(crate) fn dashboard() -> super::Data {
         })
         .collect::<Vec<_>>();
 
-    let test_params = TestRunParameters::from_init_peer_id(client_id.clone()).with_particle_id(super::PARTICLE_ID);
+    let test_params = TestRunParameters::from_init_peer_id(client_id.clone())
+        .with_particle_id(super::PARTICLE_ID);
 
     // -> client 1
     let client_1_result = checked_call_vm!(client, test_params.clone(), script, "", "");
@@ -378,6 +381,6 @@ pub(crate) fn dashboard() -> super::Data {
             "init-peer-id".to_owned() => client_id,
         },
         call_results: None,
-        keypair: bs58::encode(relay_key.to_vec()).into_string(),
+        keypair: bs58::encode(relay_key.as_inner().to_vec()).into_string(),
     }
 }

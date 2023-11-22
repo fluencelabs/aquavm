@@ -1,0 +1,22 @@
+(new %map
+  (seq
+    (seq
+      (call "init_peer_id" ("" "init") [] data) ; ok = [{data}]
+      (seq
+        (canon "other_peer_id" %map #%switch_node1)
+        (fold data key
+          (seq
+            (fold data value
+              (seq
+                (ap (key value) %map)
+                (next value)
+              )
+            )
+            (next key)
+          )
+        )
+      )
+    )
+    (call "init_peer_id" ("" "complete") [])
+  )
+)
