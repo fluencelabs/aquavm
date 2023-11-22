@@ -16,7 +16,7 @@ jobs:
   benchmark:
     name: Run benchmark
     timeout-minutes: 10
-    runs-on: builder
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout AquaVM
