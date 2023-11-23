@@ -301,6 +301,7 @@ jobs:
         working-directory: tools/wasm/air-beautify-wasm/pkg
 
   benchmark:
+    needs: release-please
     if: needs.release-please.outputs.air-release-created
     uses: ./.github/workflows/benchmark.yml
     with:
