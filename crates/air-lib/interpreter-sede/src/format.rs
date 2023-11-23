@@ -22,8 +22,11 @@ pub trait Format<Value> {
     type WriteError: Debug;
 
     fn to_vec(&self, val: &Value) -> Result<Vec<u8>, Self::SerializationError>;
+
     // todo owned_from_slice
+    #[allow(clippy::wrong_self_convention)]
     fn from_slice(&self, slice: &[u8]) -> Result<Value, Self::DeserializationError>;
+
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
