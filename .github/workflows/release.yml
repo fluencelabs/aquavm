@@ -16,6 +16,9 @@ jobs:
       releases-created: ${{ steps.release.outputs.releases_created }}
       pr: ${{ steps.release.outputs['pr'] }}
 
+      air-release-created: ${{ steps.release.outputs['air--release_created'] }}
+      air-tag-name: ${{ steps.release.outputs['air--tag_name'] }}
+
       air-interpreter-release-created: ${{ steps.release.outputs['air-interpreter--release_created'] }}
       air-interpreter-version: ${{ steps.release.outputs['air-interpreter--version'] }}
       air-interpreter-tag-name: ${{ steps.release.outputs['air-interpreter--tag_name'] }}
@@ -296,6 +299,13 @@ jobs:
       - name: Publish to npm registry
         run: npm publish --access public
         working-directory: tools/wasm/air-beautify-wasm/pkg
+
+  benchmark:
+    if: needs.release-please.outputs.air-release-created
+    uses: ./.github/workflows/benchmark.yml
+    with:
+      ref: ${{ github.ref }}
+      tag: ${{ needs.release-please.outputs.air-tag-name }}
 
   slack:
     if: always()
