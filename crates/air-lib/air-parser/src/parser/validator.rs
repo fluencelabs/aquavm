@@ -65,6 +65,11 @@ pub struct VariableValidator<'i> {
 
     /// This vector contains all literal error codes used with fail.
     unsupported_literal_errcodes: Vec<(i64, Span)>,
+
+    fold_vec: HashMap<&'i str, Span>,
+    fold_iter_vec: Vec<(&'i str, Span)>,
+    other_instrs: Vec<Span>,
+    _after_next_failure_spans: Vec<Span>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -79,6 +84,8 @@ impl<'i> VariableValidator<'i> {
 
         self.met_args(call.args.deref(), span);
 
+        self.met_instr_w_span(span);
+
         match &call.output {
             CallOutputValue::Scalar(scalar) => self.met_variable_name_definition(scalar.name, span),
             CallOutputValue::Stream(stream) => self.met_variable_name_definition(stream.name, span),
@@ -90,10 +97,12 @@ impl<'i> VariableValidator<'i> {
     // and it is useful for code generation
     pub(super) fn met_canon(&mut self, canon: &Canon<'i>, span: Span) {
         self.met_variable_name_definition(canon.canon_stream.name, span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_canon_map(&mut self, canon_map: &CanonMap<'i>, span: Span) {
         self.met_variable_name_definition(canon_map.canon_stream_map.name, span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_canon_map_scalar(
@@ -102,16 +111,19 @@ impl<'i> VariableValidator<'i> {
         span: Span,
     ) {
         self.met_variable_name_definition(canon_stream_map_scalar.scalar.name, span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_match(&mut self, match_: &Match<'i>, span: Span) {
         self.met_matchable(&match_.left_value, span);
         self.met_matchable(&match_.right_value, span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_mismatch(&mut self, mismatch: &MisMatch<'i>, span: Span) {
         self.met_matchable(&mismatch.left_value, span);
         self.met_matchable(&mismatch.right_value, span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_fold_scalar(&mut self, fold: &FoldScalar<'i>, span: Span) {
@@ -133,11 +145,13 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+        self.fold_vec.insert(fold.iterator.name, span);
     }
 
     pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
+        self.fold_vec.insert(fold.iterator.name, span);
     }
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
@@ -145,6 +159,7 @@ impl<'i> VariableValidator<'i> {
             .push((new.argument.name(), span));
         // new defines a new variable
         self.met_variable_name_definition(new.argument.name(), span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_next(&mut self, next: &Next<'i>, span: Span) {
@@ -154,6 +169,7 @@ impl<'i> VariableValidator<'i> {
         // just put without a check for being already met
         self.unresolved_iterables.insert(iterable_name, span);
         self.multiple_next_candidates.insert(iterable_name, span);
+        self.fold_iter_vec.push((iterable_name, span));
     }
 
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
@@ -181,12 +197,14 @@ impl<'i> VariableValidator<'i> {
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);
+        self.met_instr_w_span(span);
     }
 
     pub(super) fn met_ap_map(&mut self, ap_map: &ApMap<'i>, span: Span) {
         let key = &ap_map.key;
         self.met_map_key(key, span);
         self.met_variable_name_definition(ap_map.map.name, span);
+        self.met_instr_w_span(span);
     }
 
     fn met_map_key(&mut self, key: &StreamMapKeyClause<'i>, span: Span) {
@@ -201,6 +219,8 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_fail_literal(&mut self, fail: &Fail<'i>, span: Span) {
+        self.met_instr_w_span(span);
+
         match fail {
             Fail::Literal { ret_code, .. } if *ret_code == 0 => {
                 self.unsupported_literal_errcodes.push((*ret_code, span))
@@ -218,6 +238,7 @@ impl<'i> VariableValidator<'i> {
             .check_iterator_for_multiple_definitions()
             .check_for_unsupported_map_keys()
             .check_for_unsupported_literal_errcodes()
+            .check_after_next_instr()
             .build()
     }
 
@@ -383,6 +404,10 @@ impl<'i> VariableValidator<'i> {
     fn met_iterator_definition(&mut self, iterator: &Scalar<'i>, span: Span) {
         self.met_iterator_definitions.insert(iterator.name, span);
     }
+
+    pub fn met_instr_w_span(&mut self, span: Span) {
+        self.other_instrs.push(span);
+    }
 }
 
 struct ValidatorErrorBuilder<'i> {
@@ -513,6 +538,27 @@ impl<'i> ValidatorErrorBuilder<'i> {
         for (_, span) in self.validator.unsupported_literal_errcodes.iter_mut() {
             let error = ParserError::unsupported_literal_errcodes(*span);
             add_to_errors(&mut self.errors, *span, Token::New, error);
+        }
+        self
+    }
+
+    fn check_after_next_instr(mut self) -> Self {
+        // dbg!(self.validator.fold_vec.clone());
+        // dbg!(self.validator.fold_iter_vec.clone());
+        // dbg!(self.validator.other_instrs.clone());
+        for (iterator_name, iterator_span) in self.validator.fold_iter_vec.clone() {
+            let after_next_left_pos = iterator_span.right;
+            if let Some(fold_span) = self.validator.fold_vec.get(iterator_name)
+            // .and_then(|fold_span| Some(fold_span.right))
+            {
+                let after_next_right_pos = fold_span.right;
+                if let Some(..) = self.validator.other_instrs.iter().find(|instr_span| {
+                    instr_span.left > after_next_left_pos && instr_span.right < after_next_right_pos
+                }) {
+                    let error = ParserError::fold_has_instruction_after_next(*fold_span);
+                    add_to_errors(&mut self.errors, *fold_span, Token::Next, error);
+                }
+            }
         }
         self
     }
