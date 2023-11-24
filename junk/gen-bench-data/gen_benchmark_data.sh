@@ -21,7 +21,10 @@ for bench in multiple-cids10 \
             network-explore \
             long-data \
             populate-map-multiple-keys \
-            populate-map-single-key ;
+            populate-map-single-key \
+            call-requests500 \
+            call-results500 \
+            ;
 do
     echo "Generating ${bench} ..." >&2
     DESTDIR="../../benches/performance_metering/${bench}/"

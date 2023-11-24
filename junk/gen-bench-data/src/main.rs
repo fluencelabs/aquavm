@@ -16,6 +16,7 @@ use std::path::PathBuf;
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 const MAX_STREAM_SIZE: usize = 1023;
 
+mod calls;
 mod cid_benchmarking;
 mod dashboard;
 mod data;
@@ -52,6 +53,8 @@ enum Bench {
     CanonMapScalarSingleKey,
     LongData,
     BigValuesData,
+    CallRequests500,
+    CallResults500,
 }
 
 fn main() {
@@ -78,6 +81,8 @@ fn main() {
         Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770),
         Bench::LongData => long_data(),
         Bench::BigValuesData => big_values_data(),
+        Bench::CallRequests500 => calls::call_requests(500),
+        Bench::CallResults500 => calls::call_results(500),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -106,6 +111,17 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     )?;
     save_file(dest_dir, "keypair.ed25519", &data.keypair)?;
 
+    if let Some(call_results) = data.call_results {
+        save_file(
+            dest_dir,
+            "call_results.json",
+            // these call results are intended for manual generation too for the AIR CLI, so
+            // simplier representation from avm_interface::CallResults is used, and JSON is used explicitely
+            &serde_json::to_vec(&call_results).unwrap(),
+        )
+        .unwrap();
+    }
+
     Ok(())
 }
 
@@ -114,7 +130,7 @@ trait Reformatter: Format<()> {
 }
 
 impl Reformatter for SerdeJsonFormat {
-    /// make zero-indentation data for better git diffs
+    /// make zero-indentation data for more convenient git diffs
     fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
         use serde::ser::Serialize;
 
@@ -165,7 +181,7 @@ pub(crate) struct Data {
     pub(crate) prev_data: Vec<u8>,
     pub(crate) cur_data: Vec<u8>,
     pub(crate) params_json: HashMap<String, String>,
-    pub(crate) call_results: Option<serde_json::Value>,
+    pub(crate) call_results: Option<CallResults>,
     pub(crate) keypair: String,
 }
 
