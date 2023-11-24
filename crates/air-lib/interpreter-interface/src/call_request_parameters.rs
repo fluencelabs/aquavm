@@ -18,7 +18,6 @@ use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::RmpSerdeFormat;
 use air_interpreter_sede::SerdeJsonFormat;
 use air_interpreter_sede::TypedFormat;
 
@@ -39,7 +38,7 @@ derive_serialized_type!(SerializedCallRequests);
 
 pub type CallArgumentsFormat = SerdeJsonFormat;
 pub type TetrapletsFormat = SerdeJsonFormat;
-pub type CallRequestsFormat = RmpSerdeFormat;
+pub type CallRequestsFormat = SerdeJsonFormat;
 
 define_simple_representation! {
     CallArgumentsRepr,

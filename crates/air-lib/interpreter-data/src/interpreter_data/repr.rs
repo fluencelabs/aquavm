@@ -19,7 +19,7 @@ use crate::Versions;
 
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::SerdeJsonFormat;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
 use air_interpreter_sede::TypedFormat;
@@ -27,7 +27,7 @@ use air_interpreter_sede::TypedFormat;
 #[derive(Default)]
 pub struct InterpreterDataRepr;
 
-type InterpreterDataFormat = RmpSerdeFormat;
+type InterpreterDataFormat = SerdeJsonFormat;
 
 impl TypedFormat for InterpreterDataRepr {
     type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
