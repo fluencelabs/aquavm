@@ -274,6 +274,8 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
         Some(call_results_path) => {
             let call_results_json =
                 load_data(call_results_path).context("failed to read call_results")?;
+            // call resuls are may be manually crafted, so JSON representation
+            // of avm_interface::CallResults is more user-friendly
             Ok(serde_json::from_str(&call_results_json)
                 .context("failed to parse call_results data")?)
         }

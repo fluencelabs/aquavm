@@ -14,6 +14,7 @@ use std::path::PathBuf;
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 const MAX_STREAM_SIZE: usize = 1023;
 
+mod calls;
 mod cid_benchmarking;
 mod dashboard;
 mod data;
@@ -50,6 +51,8 @@ enum Bench {
     CanonMapScalarSingleKey,
     LongData,
     BigValuesData,
+    CallRequests500,
+    CallResults500,
 }
 
 fn main() {
@@ -76,6 +79,8 @@ fn main() {
         Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770),
         Bench::LongData => long_data(),
         Bench::BigValuesData => big_values_data(),
+        Bench::CallRequests500 => calls::call_requests(500),
+        Bench::CallResults500 => calls::call_results(500),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -86,31 +91,42 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
 
     create_dir_all(dest_dir)?;
 
-    save_file(dest_dir, "script.air", Some(&data.air))?;
+    save_file(dest_dir, "script.air", &data.air)?;
     save_file(
         dest_dir,
         "prev_data.json",
-        reformat_json_if_possible(&data.prev_data),
+        &reformat_json_if_possible(&data.prev_data),
     )?;
     save_file(
         dest_dir,
         "cur_data.json",
-        reformat_json_if_possible(&data.cur_data),
+        &reformat_json_if_possible(&data.cur_data),
     )?;
     save_file(
         dest_dir,
         "params.json",
-        Some(&serde_json::to_vec_pretty(&data.params_json)?),
+        &serde_json::to_vec_pretty(&data.params_json)?,
     )?;
-    save_file(dest_dir, "keypair.ed25519", Some(&data.keypair))?;
+    save_file(dest_dir, "keypair.ed25519", &data.keypair)?;
+
+    if let Some(call_results) = data.call_results {
+        save_file(
+            dest_dir,
+            "call_results.json",
+            // these call results are intended for manual generation too for the AIR CLI, so
+            // simplier representation from avm_interface::CallResults is used, and JSON is used explicitely
+            &reformat_json_if_possible(&serde_json::to_vec(&call_results).unwrap()),
+        )
+        .unwrap();
+    }
 
     Ok(())
 }
 
 /// make zero-indentation data for better git diffs
-fn reformat_json_if_possible(data: &[u8]) -> Option<Vec<u8>> {
+fn reformat_json_if_possible(data: &[u8]) -> Vec<u8> {
     if data.is_empty() {
-        return None;
+        return data.into();
     }
 
     let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
@@ -118,26 +134,18 @@ fn reformat_json_if_possible(data: &[u8]) -> Option<Vec<u8>> {
     let mut out = vec![];
     let mut ser = serde_json::ser::Serializer::with_formatter(&mut out, fmt);
     obj.serialize(&mut ser).unwrap();
-    Some(out)
+    out
 }
 
 fn save_file(
     dest_dir: &Path,
     filename: &str,
-    data: Option<impl AsRef<[u8]>>,
+    data: impl AsRef<[u8]>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    use std::fs::*;
-    use std::io::prelude::*;
-
     let mut dest_dir = dest_dir.to_owned();
     dest_dir.push(filename);
 
-    let mut f = File::create(&dest_dir)?;
-    if let Some(data) = data {
-        f.write_all(data.as_ref())?;
-    }
-
-    Ok(())
+    Ok(std::fs::write(dest_dir, data)?)
 }
 
 #[derive(Debug, Default)]
@@ -147,7 +155,7 @@ pub(crate) struct Data {
     pub(crate) prev_data: Vec<u8>,
     pub(crate) cur_data: Vec<u8>,
     pub(crate) params_json: HashMap<String, String>,
-    pub(crate) call_results: Option<serde_json::Value>,
+    pub(crate) call_results: Option<CallResults>,
     pub(crate) keypair: String,
 }
 
