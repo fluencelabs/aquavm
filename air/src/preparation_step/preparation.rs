@@ -30,6 +30,7 @@ use air_interpreter_signatures::KeyError;
 use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
+use air_utils::measure;
 use fluence_keypair::KeyFormat;
 
 use std::convert::TryFrom;
@@ -135,9 +136,13 @@ fn make_exec_ctx(
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let call_results = CallResultsRepr
-        .deserialize(call_results)
-        .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?;
+    let call_results = measure!(
+        CallResultsRepr
+            .deserialize(call_results)
+            .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?,
+        tracing::Level::INFO,
+        "CallResultsRepr.deserialize",
+    );
 
     let ctx = ExecutionCtx::new(
         prev_ingredients,

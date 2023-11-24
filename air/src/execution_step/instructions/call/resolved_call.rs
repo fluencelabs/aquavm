@@ -210,7 +210,11 @@ impl<'i> ResolvedCall<'i> {
 
         let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
-        let call_arguments = CallArgumentsRepr.serialize(&call_arguments).unwrap();
+        let call_arguments = measure!(
+            CallArgumentsRepr.serialize(&call_arguments).unwrap(),
+            tracing::Level::INFO,
+            "CallArgumentsRepr.serialize",
+        );
 
         let resolved_arguments = ResolvedArguments {
             call_arguments,
