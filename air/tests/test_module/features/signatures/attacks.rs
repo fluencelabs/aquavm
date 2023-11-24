@@ -82,8 +82,8 @@ fn test_attack_injection_current_peer_scalar() {
 
     let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
-    let prev_data = rmp_serde::to_vec(&alice_data).unwrap();
-    let cur_data = rmp_serde::to_vec(&mallory_data).unwrap();
+    let prev_data = alice_data.serialize().unwrap();
+    let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
         .unwrap();
