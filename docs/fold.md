@@ -3,7 +3,11 @@ Here is the `fold` syntax.
 
 `(fold <iterable> <iterator> <instruction> [<last_instruction>])`
 
-Iterable can be: a stream, map, canonicalized stream, canonicalized map or scalar array.
+Iterable can be:
+- scalars: canonicalized stream, canonicalized map, scalar array
+- stream-based structs: stream, map
+
+Please note that `fold`'s algo for a scalar iterable is a subset of the `algo` for stream-based iterable. See [`fold` for stream specifics](#fold-for-stream-specifics)
 
 If `last_instruction` is not set, then it's assumed:
  - `null` in case of `(fold (seq ...`
@@ -20,7 +24,7 @@ Here is a simple example when `fold` loops over a scalar to populate map using `
 )
 ```
 
-This example demonstrates the case when `next` is not the last instruction. This feature is supported with `fold`` over scalar only.
+This example demonstrates the case when `next` is not the last instruction. This feature is supported with `fold` over scalar only.
 ```clojure
 (fold iterable iterator
 	(seq
@@ -86,6 +90,7 @@ There is so-called recursive fold which populates iterable stream `fold` is iter
 )
 ```
 
+# `fold` for stream specifics
 A stream internally is a vector of vectors where inner vectors are called generations. In the previous case ap adds a new generation into `fold`.
 
 Here is a high level overview how `fold` handles multiple generations of an iterable.
@@ -100,9 +105,9 @@ fold
 	run fold body for generation N values
 		run last instruction
 ```
-There are some subtle details about fold processing over a number of generations, namely:
+There are some subtle details about `fold` processing over a number of generations, namely:
 - runs of previous generations do not affect next generations in any way
-- if previous generation doesn't call `next` AquaVM executes `fold` for the next generation.
+- even if previous generation doesn't call `next` AquaVM executes `fold` for the next generation.
 
 There is a property of `fold` completeness. The invariant for this property is as follows, if fold finishes a run for at least one generation the fold is marked as complete. This property belongs to AquaVM execution engine and it is not explicitly sent out in a particle.
 Please note that fold body that triggers a node change events, e.g. `call`,`canon` destined for a node other than the current, forces the executiont to migrate to the destined node.
