@@ -26,8 +26,13 @@
     unreachable_patterns
 )]
 
+mod verify;
+
+pub use crate::verify::{verify_value, CidVerificationError};
+
 use serde::Deserialize;
 use serde::Serialize;
+use thiserror::Error as ThisError;
 
 use std::fmt;
 use std::io::BufWriter;
@@ -37,8 +42,11 @@ use std::rc::Rc;
 /// Should-be-opaque type for the inner representation of CID.
 /// It has to be serializable and Borsh-serializable, as well as implement `Debug`, `Eq`, `Ord`, `Hash` and similar
 /// basic traits.  It is also can be unsized.
-// You should be able to replace it with [u8], and most of the code will just work.
+// you should be able to replace it with [u8], and most of the code will just work
 pub type CidRef = str;
+
+// there is no Rust multicodec crate with appropriate constants
+const JSON_CODEC: u64 = 0x0200;
 
 #[derive(Serialize, Deserialize)]
 #[serde(transparent)]
@@ -93,34 +101,24 @@ impl<Val> std::hash::Hash for CID<Val> {
     }
 }
 
-pub struct CidCalculationError(serde_json::Error);
+impl<T: ?Sized> std::convert::TryFrom<&'_ CID<T>> for cid::Cid {
+    type Error = cid::Error;
 
-impl fmt::Debug for CidCalculationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.0, f)
+    fn try_from(value: &CID<T>) -> Result<Self, Self::Error> {
+        use std::str::FromStr;
+
+        cid::Cid::from_str(&value.0)
     }
 }
 
-impl fmt::Display for CidCalculationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.0, f)
-    }
-}
-
-impl From<serde_json::Error> for CidCalculationError {
-    fn from(source: serde_json::Error) -> Self {
-        Self(source)
-    }
-}
-
-impl std::error::Error for CidCalculationError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        Some(&self.0)
-    }
+#[derive(Debug, ThisError)]
+pub enum CidCalculationError {
+    #[error(transparent)]
+    InvalidJson(#[from] serde_json::Error),
 }
 
 /// Calculate a CID of JSON-serialized value.
-// TODO we might refactor this to `SerializationFormat` trait
+// TODO we might refactor this to `SerializationCodec` trait
 // that both transform data to binary/text form (be it JSON, CBOR or something else)
 // and produces CID too
 pub fn value_to_json_cid<Val: Serialize + ?Sized>(
@@ -129,16 +127,53 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
     use cid::Cid;
     use multihash::{Code, MultihashDigest};
 
-    let mut hasher = blake3::Hasher::new();
-    serde_json::to_writer(BufWriter::with_capacity(8 * 1024, &mut hasher), value)?;
-    let hash = hasher.finalize();
+    let hash = value_json_hash::<blake3::Hasher, Val>(value)?;
 
     let digest = Code::Blake3_256
-        .wrap(hash.as_bytes())
+        .wrap(&hash)
         .expect("can't happend: incorrect hash length");
-    // seems to be better than RAW_CODEC = 0x55
-    const JSON_CODEC: u64 = 0x0200;
 
     let cid = Cid::new_v1(JSON_CODEC, digest);
     Ok(CID::new(cid.to_string()))
+}
+
+pub(crate) fn value_json_hash<D: digest::Digest + std::io::Write, Val: Serialize + ?Sized>(
+    value: &Val,
+) -> Result<Vec<u8>, serde_json::Error> {
+    const HASH_BUFFER_SIZE: usize = 8 * 1024;
+
+    let mut hasher = D::new();
+    serde_json::to_writer(
+        BufWriter::with_capacity(HASH_BUFFER_SIZE, &mut hasher),
+        value,
+    )?;
+    let hash = hasher.finalize();
+
+    Ok(hash.to_vec())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_cid_default() {
+        assert_eq!(
+            value_to_json_cid(&json!("test")).unwrap(),
+            CID::new("bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa")
+        );
+        assert_eq!(
+            value_to_json_cid(&json!([1, 2, 3])).unwrap(),
+            CID::new("bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a"),
+        );
+        assert_eq!(
+            value_to_json_cid(&json!(1)).unwrap(),
+            CID::new("bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq"),
+        );
+        assert_eq!(
+            value_to_json_cid(&json!({"key": 42})).unwrap(),
+            CID::new("bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq"),
+        );
+    }
 }
