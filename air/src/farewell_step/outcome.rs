@@ -116,7 +116,7 @@ fn populate_outcome_from_contexts(
         InterpreterDataRepr
             .serialize(&data)
             .expect("default serializer shouldn't fail"),
-        tracing::Level::TRACE,
+        tracing::Level::INFO,
         "InterpreterData::to_representation"
     );
 
@@ -125,7 +125,7 @@ fn populate_outcome_from_contexts(
         CallRequestsRepr
             .serialize(&exec_ctx.call_requests)
             .expect("default serializer shouldn't fail"),
-        tracing::Level::TRACE,
+        tracing::Level::INFO,
         "CallRequestsRepr.serialize",
     );
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
