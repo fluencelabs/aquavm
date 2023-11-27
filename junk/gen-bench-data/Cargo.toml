@@ -9,6 +9,7 @@ edition = "2021"
 aquavm-air = { path = "../../air", features = ["gen_signatures", "check_signatures"] }
 air-interpreter-cid = { path = "../../crates/air-lib/interpreter-cid" }
 air-interpreter-data = { path = "../../crates/air-lib/interpreter-data" }
+air-interpreter-interface = { path = "../../crates/air-lib/interpreter-interface" }
 air-interpreter-signatures = { path = "../../crates/air-lib/interpreter-signatures" }
 air-test-utils = { path = "../../crates/air-lib/test-utils" }
 air-testing-framework = { path = "../../crates/testing-framework" }
