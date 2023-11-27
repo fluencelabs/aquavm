@@ -27,7 +27,7 @@ use air_interpreter_sede::TypedFormat;
 #[derive(Default)]
 pub struct InterpreterDataRepr;
 
-type InterpreterDataFormat = SerdeJsonFormat;
+pub type InterpreterDataFormat = SerdeJsonFormat;
 
 impl TypedFormat for InterpreterDataRepr {
     type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;

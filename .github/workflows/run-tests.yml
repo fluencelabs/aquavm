@@ -18,6 +18,12 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
+  aquavm-benchmark:
+    name: "aquavm"
+    uses: ./.github/workflows/benchmark.yml
+    with:
+      ref: ${{ github.ref }}
+
   lints:
     runs-on: builder
 

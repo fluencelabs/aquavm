@@ -45,8 +45,8 @@ pub(crate) fn call_requests(size: usize) -> Data {
     // initialization call requests
     let call_results: CallResults = res_init
         .call_requests
-        .iter()
-        .map(|(id, _)| (*id, CallServiceResult::ok(data.clone())))
+        .keys()
+        .map(|id| (*id, CallServiceResult::ok(data.clone())))
         .collect();
 
     Data {
@@ -96,8 +96,8 @@ pub(crate) fn call_results(size: usize) -> Data {
     // initialization call requests
     let init_call_results: CallResults = res_init
         .call_requests
-        .iter()
-        .map(|(id, _)| (*id, CallServiceResult::ok(data.clone())))
+        .keys()
+        .map(|id| (*id, CallServiceResult::ok(data.clone())))
         .collect();
 
     let res = avm

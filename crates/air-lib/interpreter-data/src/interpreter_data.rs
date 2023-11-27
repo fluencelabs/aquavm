@@ -18,6 +18,7 @@ pub(crate) mod errors;
 pub(crate) mod repr;
 pub mod verification;
 
+pub use crate::interpreter_data::repr::InterpreterDataFormat;
 pub use crate::interpreter_data::repr::InterpreterDataRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;

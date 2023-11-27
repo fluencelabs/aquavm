@@ -1,4 +1,5 @@
-use air_interpreter_sede::{Format, RmpSerdeFormat, SerdeJsonFormat, TypedFormat};
+use air_interpreter_data::InterpreterDataFormat;
+use air_interpreter_sede::{Format, RmpSerdeFormat, SerdeJsonFormat};
 use air_test_framework::*;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
@@ -97,17 +98,17 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     save_file(
         dest_dir,
         "prev_data.json",
-        &<InterpreterDataRepr as TypedFormat>::Format::reformat(&data.prev_data),
+        reformat_json_if_possible::<InterpreterDataFormat>(&data.prev_data),
     )?;
     save_file(
         dest_dir,
         "cur_data.json",
-        &<InterpreterDataRepr as TypedFormat>::Format::reformat(&data.cur_data),
+        reformat_json_if_possible::<InterpreterDataFormat>(&data.cur_data),
     )?;
     save_file(
         dest_dir,
         "params.json",
-        &serde_json::to_vec_pretty(&data.params_json)?,
+        serde_json::to_vec_pretty(&data.params_json)?,
     )?;
     save_file(dest_dir, "keypair.ed25519", &data.keypair)?;
 
@@ -117,7 +118,9 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
             "call_results.json",
             // these call results are intended for manual generation too for the AIR CLI, so
             // simplier representation from avm_interface::CallResults is used, and JSON is used explicitely
-            &serde_json::to_vec(&call_results).unwrap(),
+            reformat_json_if_possible::<SerdeJsonFormat>(
+                &serde_json::to_vec(&call_results).unwrap(),
+            ),
         )
         .unwrap();
     }
@@ -133,10 +136,6 @@ impl Reformatter for SerdeJsonFormat {
     /// make zero-indentation data for more convenient git diffs
     fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
         use serde::ser::Serialize;
-
-        if data.is_empty() {
-            return data.into();
-        }
 
         let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
 
@@ -157,21 +156,20 @@ impl Reformatter for RmpSerdeFormat {
     }
 }
 
-fn save_file(
-    dest_dir: &Path,
-    filename: &str,
-    data: impl AsRef<[u8]>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    use std::fs::*;
-    use std::io::prelude::*;
+/// make zero-indentation data for better git diffs
+fn reformat_json_if_possible<R: Reformatter>(data: &[u8]) -> Cow<'_, [u8]> {
+    if data.is_empty() {
+        return data.into();
+    }
 
+    R::reformat(data)
+}
+
+fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> std::io::Result<()> {
     let mut dest_dir = dest_dir.to_owned();
     dest_dir.push(filename);
 
-    let mut f = File::create(&dest_dir)?;
-    f.write_all(data.as_ref())?;
-
-    Ok(())
+    std::fs::write(dest_dir, data)
 }
 
 #[derive(Debug, Default)]

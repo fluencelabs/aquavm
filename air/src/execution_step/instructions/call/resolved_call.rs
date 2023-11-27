@@ -37,7 +37,6 @@ use air_interpreter_interface::TetrapletsRepr;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCallResult;
 use air_trace_handler::TraceHandler;
-use air_utils::measure;
 
 use std::rc::Rc;
 
@@ -166,11 +165,7 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let serialized_tetraplets = measure!(
-            TetrapletsRepr.serialize(&tetraplets).unwrap(),
-            tracing::Level::INFO,
-            "TetrapletsRepr.serialize(tetraplets)",
-        );
+        let serialized_tetraplets = TetrapletsRepr.serialize(&tetraplets).unwrap();
 
         let request_params = CallRequestParams::new(
             tetraplet.service_id.to_string(),
@@ -210,11 +205,7 @@ impl<'i> ResolvedCall<'i> {
 
         let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
-        let call_arguments = measure!(
-            CallArgumentsRepr.serialize(&call_arguments).unwrap(),
-            tracing::Level::INFO,
-            "CallArgumentsRepr.serialize",
-        );
+        let call_arguments = CallArgumentsRepr.serialize(&call_arguments).unwrap();
 
         let resolved_arguments = ResolvedArguments {
             call_arguments,
