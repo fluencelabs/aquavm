@@ -68,6 +68,7 @@ macro_rules! define_simple_representation {
 
             type SerializedValue = $serialized_value;
 
+            #[inline]
             fn get_format(&self) -> Self::Format {
                 <$format_type>::default()
             }
