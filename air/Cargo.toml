@@ -30,7 +30,6 @@ air-trace-handler = { version = "0.5.7", path = "../crates/air-lib/trace-handler
 air-utils = { version = "0.2.0", path = "../crates/air-lib/utils" }
 polyplets = { version = "0.5.1", path = "../crates/air-lib/polyplets" }
 fluence-keypair = { version = "0.10.3", default-features = false }
-rmp-serde = "1.1.2"
 
 serde = { version = "1.0.190", features = [ "derive", "rc" ] }
 serde_json = "1.0.108"

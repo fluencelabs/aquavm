@@ -376,7 +376,6 @@ dependencies = [
  "once_cell",
  "polyplets",
  "pretty_assertions 0.6.1",
- "rmp-serde",
  "semver 1.0.18",
  "serde",
  "serde_json",
