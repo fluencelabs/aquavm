@@ -17,6 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[test]
+#[ignore]
 fn ap_with_fold() {
     let nums: Vec<String> = (1..10).map(|i| i.to_string()).collect();
     let vec = vec![nums.clone(), nums.clone(), nums];

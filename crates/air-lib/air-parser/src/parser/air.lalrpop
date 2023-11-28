@@ -93,7 +93,7 @@ Instr: Box<Instruction<'input>> = {
     <left: @L> "(" null ")" <right: @R> => {
         let span = Span::new(left, right);
         validator.met_instr_w_span(span);
-
+        println!("!!!!!! null {span:?}");
         Box::new(Instruction::Null(Null))
     },
 
@@ -128,6 +128,7 @@ Instr: Box<Instruction<'input>> = {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        println!("!!!!!! fold {span:?}");
 
         validator.meet_fold_stream(&fold, span);
 
@@ -140,6 +141,7 @@ Instr: Box<Instruction<'input>> = {
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
         validator.meet_fold_stream_map(&fold, span);
+        println!("!!!!!! fold {span:?}");
         Box::new(Instruction::FoldStreamMap(fold))
     },
 
@@ -148,11 +150,23 @@ Instr: Box<Instruction<'input>> = {
         let next = Next::new(iterator);
         let span = Span::new(left, right);
         validator.met_next(&next, span);
+        println!("!!!!!! next {span:?}");
+
 
         Box::new(Instruction::Next(next))
     },
 
-    "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
+    <left: @L> "(" xor <l_start: @L> <l:Instr> <l_end: @R> <r_start: @L> <r:Instr> <r_end: @R>")" <right: @R> => {
+        let span = Span::new(left, right);
+        let left_branch_span = Span::new(l_start, l_end);
+        let right_branch_span = Span::new(r_start, r_end);
+
+        validator.met_xor(span, left_branch_span, right_branch_span);
+
+        let xor = Xor(l, r);
+
+        Box::new(Instruction::Xor(xor))
+    },
 
     <left: @L> "(" match_ <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
         let match_ = Match::new(l, r, i);

@@ -706,7 +706,6 @@ fn fold_on_scalar_with_next_in_a_branch2() {
         .expect("parser shouldn't fail");
 
     let errors = validator.finalize();
-    dbg!(&errors);
     assert_eq!(errors.len(), 1);
 
     let error = &errors[0].error;
@@ -823,7 +822,7 @@ fn fold_on_stream_with_next_neg() {
 }
 
 #[test]
-fn fold_on_stream_with_next_in_a_fold1() {
+fn fold_on_stream_with_next_in_a_fold1_neg() {
     let source_code = r#"
         (seq
             (seq
@@ -870,7 +869,7 @@ fn fold_on_stream_with_next_in_a_fold1() {
 }
 
 #[test]
-fn fold_on_stream_with_next_in_a_fold2() {
+fn fold_on_stream_with_next_in_a_fold2_neg() {
     let source_code = r#"
         (seq
             (seq
@@ -998,4 +997,337 @@ fn fold_on_stream_with_next_in_a_branch2_neg() {
         parser_error,
         ParserError::FoldHasInstructionAfterNext { .. }
     ));
+}
+
+#[test]
+fn fold_on_stream_multiple_folds_same_iter_names_neg() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (seq
+            (fold $iterable i
+                (seq
+                    (next i)
+                    (ap 42 scalar)
+                )
+            )
+            (fold $iterable i
+                (seq
+                    (next i)
+                    (ap 42 scalar)
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    dbg!(&errors);
+    assert_eq!(errors.len(), 2);
+
+    errors.iter().map(|e| &e.error).for_each(|error| {
+        let parser_error = match error {
+            ParseError::User { error } => error,
+            _ => panic!("unexpected error type"),
+        };
+
+        assert!(matches!(
+            parser_error,
+            ParserError::FoldHasInstructionAfterNext { .. }
+        ));
+    })
+}
+
+#[test]
+fn fold_on_stream_with_xor() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (xor
+                (next i)
+                (call "" ("" "") ["hello" ""] $void)
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_stream_with_xor_and_par() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (xor
+                (par
+                    (ap 42 some)
+                    (next i)
+                )
+                (par
+                    (call "" ("" "") ["hello" ""] $void)
+                    (ap 42 some)
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_stream_with_xor_and_nested_fold_neg_1() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (xor
+                (seq
+                    (fold $iterable it
+                        (seq
+                            (next it)
+                            (ap 42 some)
+                        )
+                    )
+                    (next i)
+                )
+                (seq
+                    (call "" ("" "") ["hello" ""] $void)
+                    (ap 42 some)
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::FoldHasInstructionAfterNext { .. }
+    ));
+}
+
+// (fold $stream i
+//     (seq
+//       (xor
+//          (next i)
+//          (fold $streama it)
+//            (seq
+//              (next it)
+//              (call ...)
+//            )
+//          )
+//       )
+//       (some instr) <--- Wrong
+//     )
+//  )
+
+#[test]
+fn fold_on_stream_with_xor_and_nested_fold_2() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (seq
+                (ap 42 some)
+                (xor
+                    (next i)
+                    (fold $iterable it
+                        (seq
+                            (next it)
+                            (ap 42 some)
+                        )
+                    )
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
+}
+
+#[test]
+fn fold_on_stream_with_xor_and_nested_fold_neg_2() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (seq
+                (xor
+                    (next i)
+                    (fold $iterable it
+                        (seq
+                            (next it)
+                            (ap 42 some)
+                        )
+                    )
+
+                )
+                (ap 42 some)
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::FoldHasInstructionAfterNext { .. }
+    ));
+}
+
+#[test]
+fn fold_on_stream_with_xor_and_par_neg() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (fold $iterable i
+            (xor
+                (par
+                    (next i)
+                    (ap 42 some)
+                )
+                (par
+                    (call "" ("" "") ["hello" ""] $void)
+                    (ap 42 some)
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 1);
+
+    let error = &errors[0].error;
+    let parser_error = match error {
+        ParseError::User { error } => error,
+        _ => panic!("unexpected error type"),
+    };
+
+    assert!(matches!(
+        parser_error,
+        ParserError::FoldHasInstructionAfterNext { .. }
+    ));
+}
+
+#[test]
+fn fold_on_stream_multiple_folds_same_iter_names() {
+    let source_code = r#"
+    (seq
+        (call "" ("" "") [] $iterable)
+        (seq
+            (fold $iterable i
+                (seq
+                    (ap 42 scalar)
+                    (next i)
+                )
+            )
+            (fold $iterable i
+                (seq
+                    (ap 42 scalar)
+                    (next i)
+                )
+            )
+        )
+    )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    assert_eq!(errors.len(), 0);
 }
