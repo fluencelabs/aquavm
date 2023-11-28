@@ -28,20 +28,18 @@ use crate::trace_to_exec_err;
 
 use air_parser::ast::Instruction;
 
-use std::rc::Rc;
-
 struct FoldStreamIngredients<'i> {
     iterable_name: &'i str,
-    instruction: Rc<Instruction<'i>>,
-    last_instruction: Option<Rc<Instruction<'i>>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     fold_id: u32,
 }
 
 impl<'i> FoldStreamIngredients<'i> {
     fn new(
         iterable_name: &'i str,
-        instruction: Rc<Instruction<'i>>,
-        last_instruction: Option<Rc<Instruction<'i>>>,
+        instruction: &'i Instruction<'i>,
+        last_instruction: Option<&'i Instruction<'i>>,
         fold_id: u32,
     ) -> Self {
         Self {
@@ -59,8 +57,8 @@ pub(crate) fn execute_with_stream<'i>(
     get_mut_stream: impl for<'ctx> Fn(&'ctx mut ExecutionCtx<'_>) -> &'ctx mut Stream,
     fold_to_string: &impl ToString,
     iterable_name: &'i str,
-    instruction: Rc<Instruction<'i>>,
-    last_instruction: Option<Rc<Instruction<'i>>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
 ) -> ExecutionResult<()> {
     let fold_id = exec_ctx.tracker.meet_fold_stream();
 
@@ -72,8 +70,7 @@ pub(crate) fn execute_with_stream<'i>(
 
     // this cycle manages recursive streams
     while let RecursiveCursorState::Continue(iterables) = cursor_state {
-        let ingredients =
-            FoldStreamIngredients::new(iterable_name, instruction.clone(), last_instruction.clone(), fold_id);
+        let ingredients = FoldStreamIngredients::new(iterable_name, instruction, last_instruction, fold_id);
         execute_iterations(
             iterables,
             fold_to_string,
@@ -120,8 +117,8 @@ fn execute_iterations<'i>(
             iterable,
             IterableType::Stream(ingredients.fold_id),
             ingredients.iterable_name,
-            ingredients.instruction.clone(),
-            ingredients.last_instruction.clone(),
+            ingredients.instruction,
+            ingredients.last_instruction,
             exec_ctx,
             trace_ctx,
         );

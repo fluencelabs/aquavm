@@ -174,8 +174,8 @@ impl<W: io::Write> Beautifier<W> {
     }
 
     fn beautify_seq(&mut self, seq: &ast::Seq<'_>, indent: usize) -> io::Result<()> {
-        self.beautify_walker(&seq.0, indent)?;
-        self.beautify_walker(&seq.1, indent)
+        self.beautify_walker(seq.0, indent)?;
+        self.beautify_walker(seq.1, indent)
     }
 
     fn beautify_par(&mut self, par: &ast::Par<'_>, indent: usize) -> io::Result<()> {

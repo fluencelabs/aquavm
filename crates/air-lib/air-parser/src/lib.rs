@@ -36,3 +36,6 @@ pub use parser::VariableValidator;
 
 use air_lambda_parser::parse as parse_lambda;
 use air_lambda_parser::LambdaAST;
+
+// for user code convenience
+pub use typed_arena::Arena;

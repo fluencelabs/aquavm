@@ -35,7 +35,7 @@ type PreparationResult<T> = Result<T, PreparationError>;
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {
     pub(crate) exec_ctx: ExecutionCtx<'ctx>,
     pub(crate) trace_handler: TraceHandler,
-    pub(crate) air: Instruction<'i>,
+    pub(crate) air: &'i Instruction<'i>,
     pub(crate) keypair: KeyPair,
 }
 
@@ -67,8 +67,9 @@ pub(crate) fn prepare<'i>(
     call_results: &[u8],
     run_parameters: RunParameters,
     signature_store: SignatureStore,
+    air_arena: &'i air_parser::Arena<Instruction<'i>>,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
+    let air: &'i Instruction<'i> = air_parser::parse(raw_air, air_arena).map_err(PreparationError::AIRParseError)?;
 
     let prev_ingredients = ExecCtxIngredients {
         last_call_request_id: prev_data.last_call_request_id,

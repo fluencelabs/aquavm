@@ -39,8 +39,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
 
             let fold_state = exec_ctx.scalars.get_iterable(iterator_name)?;
             // execute last instruction if any
-            if let Some(last_instr) = &fold_state.last_instr_head {
-                let last_instr = last_instr.clone();
+            if let Some(last_instr) = fold_state.last_instr_head {
                 exec_ctx.flush_subgraph_completeness(); // it's needed because of determine_subgraph_complete in par
                 last_instr.execute(exec_ctx, trace_ctx)?;
             } else {
@@ -58,7 +57,7 @@ impl<'i> super::ExecutableInstruction<'i> for Next<'i> {
             return Ok(());
         }
 
-        let next_instr = fold_state.instr_head.clone();
+        let next_instr = fold_state.instr_head;
         maybe_meet_iteration_start(self, fold_state, trace_ctx)?;
         exec_ctx.scalars.meet_next_before();
 

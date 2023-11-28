@@ -68,10 +68,14 @@ pub mod interpreter_data {
 
 pub mod parser {
     pub use air_parser::ast::Instruction;
+    pub use air_parser::Arena;
 
     /// Parse an AIR script to AST.
-    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
-        air_parser::parse(script)
+    pub fn parse<'i>(
+        script: &'i str,
+        air_arena: &'i air_parser::Arena<Instruction<'i>>,
+    ) -> Result<&'i Instruction<'i>, String> {
+        air_parser::parse(script, air_arena)
     }
 }
 

@@ -17,15 +17,13 @@
 use super::Instruction;
 use super::IterableValue;
 
-use std::rc::Rc;
-
 pub(crate) struct FoldState<'i> {
     pub(crate) iterable: IterableValue,
     pub(crate) iterable_type: IterableType,
     // true of iterator exhausted and reverse execution started
     pub(crate) back_iteration_started: bool,
-    pub(crate) instr_head: Rc<Instruction<'i>>,
-    pub(crate) last_instr_head: Option<Rc<Instruction<'i>>>,
+    pub(crate) instr_head: &'i Instruction<'i>,
+    pub(crate) last_instr_head: Option<&'i Instruction<'i>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -38,8 +36,8 @@ impl<'i> FoldState<'i> {
     pub(crate) fn from_iterable(
         iterable: IterableValue,
         iterable_type: IterableType,
-        instr_head: Rc<Instruction<'i>>,
-        last_instr_head: Option<Rc<Instruction<'i>>>,
+        instr_head: &'i Instruction<'i>,
+        last_instr_head: Option<&'i Instruction<'i>>,
     ) -> Self {
         Self {
             iterable,

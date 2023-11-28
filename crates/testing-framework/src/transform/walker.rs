@@ -36,8 +36,10 @@ impl<R: AirRunner> TransformedAirScript<R> {
     pub fn new(annotated_air_script: &str, network: Rc<Network<R>>) -> Result<Self, String> {
         let at_transformed_air_script = at_transform(annotated_air_script);
 
+        let arena = air_parser::Arena::<_>::new();
+
         // validate the AIR script with the standard parser first
-        air_parser::parse(&at_transformed_air_script)?;
+        air_parser::parse(&at_transformed_air_script, &arena)?;
 
         Self::new_unvalidated(&at_transformed_air_script, network)
     }

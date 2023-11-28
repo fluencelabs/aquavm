@@ -28,8 +28,6 @@ use air_parser::ast::FoldScalar;
 use air_parser::ast::FoldScalarIterable;
 use air_parser::ast::Instruction;
 
-use std::rc::Rc;
-
 impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         log_instruction!(fold, exec_ctx, trace_ctx);
@@ -65,8 +63,8 @@ impl<'i> ExecutableInstruction<'i> for FoldScalar<'i> {
                 iterable,
                 IterableType::Scalar,
                 self.iterator.name,
-                self.instruction.clone(),
-                self.last_instruction.clone(),
+                self.instruction,
+                self.last_instruction,
                 exec_ctx,
                 trace_ctx,
             ),
@@ -78,12 +76,12 @@ pub(super) fn fold<'i>(
     iterable: IterableValue,
     iterable_type: IterableType,
     iterator: &'i str,
-    instruction: Rc<Instruction<'i>>,
-    last_instruction: Option<Rc<Instruction<'i>>>,
+    instruction: &'i Instruction<'i>,
+    last_instruction: Option<&'i Instruction<'i>>,
     exec_ctx: &mut ExecutionCtx<'i>,
     trace_ctx: &mut TraceHandler,
 ) -> ExecutionResult<()> {
-    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction.clone(), last_instruction);
+    let fold_state = FoldState::from_iterable(iterable, iterable_type, instruction, last_instruction);
     exec_ctx.scalars.meet_fold_start();
     exec_ctx.scalars.set_iterable_value(iterator, fold_state)?;
 

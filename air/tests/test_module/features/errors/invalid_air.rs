@@ -26,7 +26,8 @@ fn invalid_air() {
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
 
-    let error_message = air_parser::parse(script).expect_err("air parser should fail on this script");
+    let air_arena = air_parser::Arena::<_>::new();
+    let error_message = air_parser::parse(script, &air_arena).expect_err("air parser should fail on this script");
     let expected_error = PreparationError::AIRParseError(error_message);
     assert!(check_error(&result, expected_error));
 }

@@ -19,7 +19,8 @@ use air::parser::parse;
 /// Parse AIR script and return it as minified JSON
 pub fn ast(script: String) -> String {
     let do_parse = || -> std::result::Result<_, Box<dyn std::error::Error>> {
-        let ast = parse(&script)?;
+        let air_arena = air::parser::Arena::<_>::new();
+        let ast = parse(&script, &air_arena)?;
         serde_json::to_string(&ast).map_err(Into::into)
     };
 

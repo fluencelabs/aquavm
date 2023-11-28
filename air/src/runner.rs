@@ -60,6 +60,7 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    let air_arena = air_parser::Arena::<_>::new();
     let ParsedDataPair {
         prev_data,
         current_data,
@@ -76,7 +77,15 @@ fn execute_air_impl(
         air,
         keypair,
     } = farewell_if_fail!(
-        prepare(prev_data, current_data, &air, &call_results, params, signature_store,),
+        prepare(
+            prev_data,
+            current_data,
+            &air,
+            &call_results,
+            params,
+            signature_store,
+            &air_arena
+        ),
         raw_prev_data
     );
 

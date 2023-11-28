@@ -49,8 +49,8 @@ impl<'i> ExecutableInstruction<'i> for FoldStream<'i> {
             get_mut_stream,
             self,
             self.iterator.name,
-            self.instruction.clone(),
-            self.last_instruction.clone(),
+            self.instruction,
+            self.last_instruction,
         )
     }
 }
