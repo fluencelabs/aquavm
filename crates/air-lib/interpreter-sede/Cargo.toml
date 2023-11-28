@@ -17,7 +17,7 @@ serde_json = { version = "1.0.108" }
 marine-rs-sdk = {version = "0.10.0", optional = true }
 
 [features]
-default = ["serde_json", "rmp-serde", "marine"]
+default = []
 serde_json = []
 rmp-serde = ["dep:rmp-serde"]
 marine = ["marine-rs-sdk"]
