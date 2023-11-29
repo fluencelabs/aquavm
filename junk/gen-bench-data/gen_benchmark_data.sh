@@ -24,6 +24,7 @@ for bench in multiple-cids10 \
             populate-map-single-key \
             call-requests500 \
             call-results500 \
+            parser-10000-100 \
             ;
 do
     echo "Generating ${bench} ..." >&2
