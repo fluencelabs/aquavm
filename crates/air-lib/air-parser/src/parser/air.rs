@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 8c04b4e335e8d4088d9eac1ff8006b5e6a351556360207db5c93a30309952060
+// sha3: e893ce4ca6c3eb674c461822e792437c9759e0ef2659865ac364795113ea04b3
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -5637,7 +5637,6 @@ fn __action11<
     {
         let span = Span::new(left, right);
         validator.met_instr_w_span(span);
-        println!("!!!!!! null {span:?}");
         Box::new(Instruction::Null(Null))
     }
 }
@@ -5755,7 +5754,6 @@ fn __action15<
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
-        println!("!!!!!! fold {span:?}");
 
         validator.meet_fold_stream(&fold, span);
 
@@ -5789,8 +5787,9 @@ fn __action16<
         let span = Span::new(left, right);
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+
         validator.meet_fold_stream_map(&fold, span);
-        println!("!!!!!! fold {span:?}");
+
         Box::new(Instruction::FoldStreamMap(fold))
     }
 }
@@ -5817,9 +5816,8 @@ fn __action17<
         let iterator = Scalar::new(iterator.0, iterator.1);
         let next = Next::new(iterator);
         let span = Span::new(left, right);
-        validator.met_next(&next, span);
-        println!("!!!!!! next {span:?}");
 
+        validator.met_next(&next, span);
 
         Box::new(Instruction::Next(next))
     }

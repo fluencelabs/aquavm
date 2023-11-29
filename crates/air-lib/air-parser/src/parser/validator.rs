@@ -603,7 +603,6 @@ impl<'i> ValidatorErrorBuilder<'i> {
         dbg!(self.validator.other_instrs.clone());
         for (iterator_name, iterator_span) in self.validator.fold_iter_vec.clone() {
             let after_next_left_pos = iterator_span.right;
-            // if let Some(fold_span) = self.validator.fold_vec.get(iterator_name) {
             if let Some(fold_spans) = self.validator.fold_vec.get_vec(iterator_name) {
                 for fold_span in fold_spans {
                     if fold_span.left <= iterator_span.left

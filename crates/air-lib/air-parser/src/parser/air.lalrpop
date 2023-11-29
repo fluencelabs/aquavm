@@ -93,7 +93,6 @@ Instr: Box<Instruction<'input>> = {
     <left: @L> "(" null ")" <right: @R> => {
         let span = Span::new(left, right);
         validator.met_instr_w_span(span);
-        println!("!!!!!! null {span:?}");
         Box::new(Instruction::Null(Null))
     },
 
@@ -128,7 +127,6 @@ Instr: Box<Instruction<'input>> = {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
-        println!("!!!!!! fold {span:?}");
 
         validator.meet_fold_stream(&fold, span);
 
@@ -140,8 +138,9 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
         let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+
         validator.meet_fold_stream_map(&fold, span);
-        println!("!!!!!! fold {span:?}");
+
         Box::new(Instruction::FoldStreamMap(fold))
     },
 
@@ -149,9 +148,8 @@ Instr: Box<Instruction<'input>> = {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let next = Next::new(iterator);
         let span = Span::new(left, right);
-        validator.met_next(&next, span);
-        println!("!!!!!! next {span:?}");
 
+        validator.met_next(&next, span);
 
         Box::new(Instruction::Next(next))
     },
