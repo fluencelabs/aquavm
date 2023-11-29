@@ -70,7 +70,12 @@ def run(args):
     _prepare(args)
 
     suite = discover_tests(args.bench_dir)
-    with Db(args.path, features=args.features, host_id=args.host_id) as db:
+    with Db(
+            args.path,
+            features=args.features,
+            host_id=args.host_id,
+            merge_results=args.unsafe_merge_results,
+    ) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
             walker = TraceWalker()
