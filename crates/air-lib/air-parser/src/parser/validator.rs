@@ -421,20 +421,12 @@ impl<'i> VariableValidator<'i> {
             .iter()
             .filter(|(_, fold_iter_span)| xor_span.contains_span(*fold_iter_span))
         {
-            // if left_span.left <= fold_iter_span.left && fold_iter_span.right <= left_span.right {
             if left_span.contains_or_equal_span(*fold_iter_span) {
-                self.other_instrs_spans.retain(|instr_span| {
-                    !right_span.contains_or_equal_span(*instr_span) //.left <= instr_span.left && instr_span.right <= right_span.right)
-                }) // TODO evaluate retain perf impact
-            } else if right_span.contains_or_equal_span(*fold_iter_span)
-            // right_span.left <= fold_iter_span.left
-            //     && fold_iter_span.right <= right_span.right
-            {
-                self.other_instrs_spans.retain(|instr_span| {
-                    !left_span.contains_or_equal_span(*instr_span) // !(left_span.left <= instr_span.left && instr_span.right <= left_span.right)
-                })
+                self.other_instrs_spans
+                    .retain(|instr_span| !right_span.contains_or_equal_span(*instr_span))
             } else {
-                assert!(false);
+                self.other_instrs_spans
+                    .retain(|instr_span| !left_span.contains_or_equal_span(*instr_span))
             }
         }
     }
@@ -590,20 +582,28 @@ impl<'i> ValidatorErrorBuilder<'i> {
         self
     }
 
+    // The check loops over all iterators set with `next iterator` then searches
+    // for the corresponding `fold` span and finaly checks for instructions that
+    // fits into the after-the-next-but-before-fold-ends span.
     fn check_after_next_instr(mut self) -> Self {
-        for (iterator_name, iterator_span) in self.validator.fold_iter_vec.clone() {
+        for (iterator_name, iterator_span) in &self.validator.fold_iter_vec {
             let after_next_left_pos = iterator_span.right;
             if let Some(fold_spans) = self.validator.fold_vec.get_vec(iterator_name) {
-                for fold_span in fold_spans {
-                    if fold_span.left <= iterator_span.left
-                        && fold_span.right >= iterator_span.right
+                for fold_span in fold_spans
+                    .iter()
+                    .filter(|fold_span| fold_span.contains_or_equal_span(*iterator_span))
+                {
                     {
                         let after_next_right_pos = fold_span.right;
-                        if let Some(_) =
-                            self.validator.other_instrs_spans.iter().find(|instr_span| {
-                                instr_span.left > after_next_left_pos
+                        if self
+                            .validator
+                            .other_instrs_spans
+                            .iter()
+                            .find(|instr_span| {
+                                after_next_left_pos < instr_span.left
                                     && instr_span.right < after_next_right_pos
                             })
+                            .is_some()
                         {
                             let error = ParserError::fold_has_instruction_after_next(*fold_span);
                             add_to_errors(&mut self.errors, *fold_span, Token::Next, error);
