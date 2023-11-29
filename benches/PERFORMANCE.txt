@@ -643,7 +643,7 @@ Machine c1f3ea5950db0a10b44da931c25774d64ab25084f47d504f72f311e694550ff1:
             new: 38.00µs
 Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
   Platform: macOS-14.1.1-arm64-arm-64bit
-  Timestamp: 2023-11-27 15:04:01.881477+00:00
+  Timestamp: 2023-11-29 16:50:22.959760+00:00
   AquaVM version: 0.54.0
   Benches:
   Features: check_signatures,gen_signatures
@@ -1005,18 +1005,18 @@ Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
         signing_step::sign_produced_cids: 109.00µs
         verification_step::verify: 39.00µs
           verify: 12.00µs
-    parser_10000_100 (23.60ms; 57.688 MiB, 57.688 MiB): Running very long AIR script with lot of variables and assignments
-      air::runner::execute_air: 23.60ms
-        preparation_step::preparation::parse_data: 22.00µs
-        preparation_step::preparation::prepare: 21.93ms
-          air::preparation_step::preparation::make_exec_ctx: 14.00µs
-          air_parser::parser::air_parser::parse: 21.79ms
-        runner::execute: 56.00µs
-        runner::farewell: 178.00µs
-          from_success_result: 158.00µs
-            populate_outcome_from_contexts: 126.00µs
-        signing_step::sign_produced_cids: 104.00µs
-        verification_step::verify: 44.00µs
+    parser-10000-100 (23.45ms; 57.688 MiB, 57.688 MiB): long air script with lot of variable assignments
+      air::runner::execute_air: 23.45ms
+        preparation_step::preparation::parse_data: 30.00µs
+        preparation_step::preparation::prepare: 21.84ms
+          air::preparation_step::preparation::make_exec_ctx: 20.00µs
+          air_parser::parser::air_parser::parse: 21.66ms
+        runner::execute: 45.00µs
+        runner::farewell: 188.00µs
+          from_success_result: 168.00µs
+            populate_outcome_from_contexts: 128.00µs
+        signing_step::sign_produced_cids: 110.00µs
+        verification_step::verify: 43.00µs
           verify: 12.00µs
     populate-map-multiple-keys (3.44ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
       air::runner::execute_air: 3.44ms
