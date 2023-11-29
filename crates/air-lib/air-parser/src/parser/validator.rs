@@ -66,10 +66,18 @@ pub struct VariableValidator<'i> {
     /// This vector contains all literal error codes used with fail.
     unsupported_literal_errcodes: Vec<(i64, Span)>,
 
+    /// This multimap maps iterator_name into the corresponding fold_span to facilitate
+    /// instr-after-next validator check. There can be the same iterator names so that
+    /// this is multumap.
     fold_vec: MultiMap<&'i str, Span>,
+
+    /// These are `(fold_iter_name, fold_iter_span)` pairs to facilitate
+    /// instr-after-next validator check.
     fold_iter_vec: Vec<(&'i str, Span)>,
-    other_instrs: Vec<Span>,
-    _after_next_failure_spans: Vec<Span>,
+
+    /// These are all other instructions spans to facilitate
+    /// instr-after-next validator check.
+    other_instrs_spans: Vec<Span>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -145,34 +153,13 @@ impl<'i> VariableValidator<'i> {
     pub(super) fn meet_fold_stream(&mut self, fold: &FoldStream<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
-        if let Some(..) = fold.last_instruction {
-            debug_assert!(!self.other_instrs.is_empty());
-            // WIP need to choose b/w last and find
-            if let Some(last_instr_span) = self.other_instrs.last() {
-                self.fold_vec.insert(
-                    fold.iterator.name,
-                    Span::new(span.left, last_instr_span.left),
-                );
-            }
-        } else {
-            self.fold_vec.insert(fold.iterator.name, span);
-        }
+        self.met_fold(fold.iterator.name, fold.last_instruction.is_some(), span)
     }
 
     pub(super) fn meet_fold_stream_map(&mut self, fold: &FoldStreamMap<'i>, span: Span) {
         self.met_variable_name(fold.iterable.name, span);
         self.met_iterator_definition(&fold.iterator, span);
-        if let Some(..) = fold.last_instruction {
-            debug_assert!(!self.other_instrs.is_empty());
-            if let Some(last_instr_span) = self.other_instrs.last() {
-                self.fold_vec.insert(
-                    fold.iterator.name,
-                    Span::new(span.left, last_instr_span.left),
-                );
-            }
-        } else {
-            self.fold_vec.insert(fold.iterator.name, span);
-        }
+        self.met_fold(fold.iterator.name, fold.last_instruction.is_some(), span)
     }
 
     pub(super) fn met_new(&mut self, new: &New<'i>, span: Span) {
@@ -218,7 +205,6 @@ impl<'i> VariableValidator<'i> {
             }
         }
         self.met_variable_name_definition(ap.result.name(), span);
-        println!("!!!!!! ap {:?}", span);
         self.met_instr_w_span(span);
     }
 
@@ -430,38 +416,45 @@ impl<'i> VariableValidator<'i> {
     // Meeting xor the validator has to choose one of the two xor branches
     // and clean up all instructions inserted into other_instr so far.
     pub fn met_xor(&mut self, xor_span: Span, left_span: Span, right_span: Span) {
-        dbg!(xor_span);
-        dbg!(left_span);
-        dbg!(right_span);
-        println!("met_xor bef {:?}", self.other_instrs.clone());
-        // debug_assert!(!self.fold_iter_vec.is_empty());
-        // let (_, last_next_span) = self.fold_iter_vec.last().unwrap();
-        for (_, fold_iter_span) in self.fold_iter_vec.iter().filter(|(_, fold_iter_span)| {
-            xor_span.left <= fold_iter_span.left && fold_iter_span.right <= xor_span.right
-        }) {
-            println!("met_xor iter {:?}", fold_iter_span);
-            if left_span.left <= fold_iter_span.left && fold_iter_span.right <= left_span.right {
-                println!("went left so drop all that on the right");
-                self.other_instrs.retain(|instr_span| {
-                    !(right_span.left <= instr_span.left && instr_span.right <= right_span.right)
+        for (_, fold_iter_span) in self
+            .fold_iter_vec
+            .iter()
+            .filter(|(_, fold_iter_span)| xor_span.contains_span(*fold_iter_span))
+        {
+            // if left_span.left <= fold_iter_span.left && fold_iter_span.right <= left_span.right {
+            if left_span.contains_or_equal_span(*fold_iter_span) {
+                self.other_instrs_spans.retain(|instr_span| {
+                    !right_span.contains_or_equal_span(*instr_span) //.left <= instr_span.left && instr_span.right <= right_span.right)
                 }) // TODO evaluate retain perf impact
-            } else if right_span.left <= fold_iter_span.left
-                && fold_iter_span.right <= right_span.right
+            } else if right_span.contains_or_equal_span(*fold_iter_span)
+            // right_span.left <= fold_iter_span.left
+            //     && fold_iter_span.right <= right_span.right
             {
-                println!("went right so drop all that on the right");
-                self.other_instrs.retain(|instr_span| {
-                    !(left_span.left <= instr_span.left && instr_span.right <= left_span.right)
+                self.other_instrs_spans.retain(|instr_span| {
+                    !left_span.contains_or_equal_span(*instr_span) // !(left_span.left <= instr_span.left && instr_span.right <= left_span.right)
                 })
             } else {
                 assert!(false);
             }
         }
-
-        println!("met_xor aft {:?}", self.other_instrs.clone());
     }
 
     pub fn met_instr_w_span(&mut self, span: Span) {
-        self.other_instrs.push(span);
+        self.other_instrs_spans.push(span);
+    }
+
+    fn met_fold(&mut self, iterator_name: &'i str, fold_has_last: bool, fold_span: Span) {
+        if fold_has_last {
+            debug_assert!(!self.other_instrs_spans.is_empty());
+            if let Some(last_instr_span) = self.other_instrs_spans.last() {
+                self.fold_vec.insert(
+                    iterator_name,
+                    Span::new(fold_span.left, last_instr_span.left),
+                );
+            }
+        } else {
+            self.fold_vec.insert(iterator_name, fold_span);
+        }
     }
 }
 
@@ -598,9 +591,6 @@ impl<'i> ValidatorErrorBuilder<'i> {
     }
 
     fn check_after_next_instr(mut self) -> Self {
-        dbg!(self.validator.fold_vec.clone());
-        dbg!(self.validator.fold_iter_vec.clone());
-        dbg!(self.validator.other_instrs.clone());
         for (iterator_name, iterator_span) in self.validator.fold_iter_vec.clone() {
             let after_next_left_pos = iterator_span.right;
             if let Some(fold_spans) = self.validator.fold_vec.get_vec(iterator_name) {
@@ -609,16 +599,12 @@ impl<'i> ValidatorErrorBuilder<'i> {
                         && fold_span.right >= iterator_span.right
                     {
                         let after_next_right_pos = fold_span.right;
-                        if let Some(instr_span) =
-                            self.validator.other_instrs.iter().find(|instr_span| {
+                        if let Some(_) =
+                            self.validator.other_instrs_spans.iter().find(|instr_span| {
                                 instr_span.left > after_next_left_pos
                                     && instr_span.right < after_next_right_pos
                             })
                         {
-                            println!(
-                                "failure! {:?} {:?} {:?}",
-                                fold_span, iterator_span, instr_span
-                            );
                             let error = ParserError::fold_has_instruction_after_next(*fold_span);
                             add_to_errors(&mut self.errors, *fold_span, Token::Next, error);
                         }

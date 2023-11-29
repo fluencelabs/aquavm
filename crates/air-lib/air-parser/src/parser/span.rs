@@ -39,6 +39,12 @@ impl Span {
     pub fn contains_span(&self, span: Self) -> bool {
         self.contains_position(span.left) && self.contains_position(span.right)
     }
+
+    // This presumes that a `span` that begins in `self` can not overlap
+    // and at the same time can not get outside the `self`.
+    pub fn contains_or_equal_span(&self, span: Self) -> bool {
+        self.left <= span.left && span.right <= self.right
+    }
 }
 
 impl From<Range<AirPos>> for Span {
