@@ -86,6 +86,6 @@ def run(args):
             memory_sizes = walker.get_memory_sizes(args.repeat)
             db.record(bench, combined_stats, total_time, memory_sizes)
 
-            with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
-                report = TextReporter(db.data)
-                report.save_text_report(out)
+        with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
+            report = TextReporter(db.data)
+            report.save_text_report(out)
