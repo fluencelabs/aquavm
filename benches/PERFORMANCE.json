@@ -3739,8 +3739,8 @@
         },
         "total_time": "749.00µs"
       },
-      "parser_10000_100": {
-        "comment": "Running very long AIR script with lot of variables and assignments",
+      "parser-10000-100": {
+        "comment": "long air script with lot of variable assignments",
         "memory_sizes": [
           "57.688 MiB",
           "57.688 MiB"
@@ -3748,35 +3748,35 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "23.60ms",
+            "duration": "23.45ms",
             "nested": {
-              "preparation_step::preparation::parse_data": "22.00µs",
+              "preparation_step::preparation::parse_data": "30.00µs",
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "21.93ms",
+                "duration": "21.84ms",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "14.00µs",
-                  "air_parser::parser::air_parser::parse": "21.79ms"
+                  "air::preparation_step::preparation::make_exec_ctx": "20.00µs",
+                  "air_parser::parser::air_parser::parse": "21.66ms"
                 }
               },
-              "runner::execute": "56.00µs",
+              "runner::execute": "45.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "178.00µs",
+                "duration": "188.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "158.00µs",
+                    "duration": "168.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "126.00µs"
+                      "populate_outcome_from_contexts": "128.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "104.00µs",
+              "signing_step::sign_produced_cids": "110.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "44.00µs",
+                "duration": "43.00µs",
                 "nested": {
                   "verify": "12.00µs"
                 }
@@ -3784,7 +3784,7 @@
             }
           }
         },
-        "total_time": "23.60ms"
+        "total_time": "23.45ms"
       },
       "populate-map-multiple-keys": {
         "comment": "benchmarking a map insert operation",
@@ -3893,7 +3893,7 @@
         "total_time": "2.74ms"
       }
     },
-    "datetime": "2023-11-27 15:04:01.881477+00:00",
+    "datetime": "2023-11-29 16:50:22.959760+00:00",
     "features": "check_signatures,gen_signatures",
     "platform": "macOS-14.1.1-arm64-arm-64bit",
     "version": "0.54.0"
@@ -5145,8 +5145,8 @@
         },
         "total_time": "848.00µs"
       },
-      "parser_10000_100": {
-        "comment": "Running very long AIR script with lot of variables and assignments",
+      "parser-10000-100": {
+        "comment": "long air script with lot of variable assignments",
         "memory_sizes": [
           "57.688 MiB",
           "57.688 MiB"
@@ -5154,43 +5154,43 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "30.20ms",
+            "duration": "29.56ms",
             "nested": {
-              "preparation_step::preparation::parse_data": "16.00µs",
+              "preparation_step::preparation::parse_data": "20.00µs",
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "28.48ms",
+                "duration": "27.87ms",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "17.00µs",
-                  "air_parser::parser::air_parser::parse": "28.28ms"
+                  "air::preparation_step::preparation::make_exec_ctx": "18.00µs",
+                  "air_parser::parser::air_parser::parse": "27.63ms"
                 }
               },
-              "runner::execute": "31.00µs",
+              "runner::execute": "30.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "258.00µs",
+                "duration": "257.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "236.00µs",
+                    "duration": "235.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "194.00µs"
+                      "populate_outcome_from_contexts": "196.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "160.00µs",
+              "signing_step::sign_produced_cids": "161.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "36.00µs",
+                "duration": "34.00µs",
                 "nested": {
-                  "verify": "11.00µs"
+                  "verify": "10.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "30.20ms"
+        "total_time": "29.56ms"
       },
       "populate-map-multiple-keys": {
         "comment": "benchmarking a map insert operation",
@@ -5299,7 +5299,7 @@
         "total_time": "3.62ms"
       }
     },
-    "datetime": "2023-11-27 15:10:46.006416+00:00",
+    "datetime": "2023-11-29 16:59:25.046502+00:00",
     "features": "check_signatures,gen_signatures",
     "platform": "Linux-5.15.0-76-generic-x86_64-with-glibc2.29",
     "version": "0.54.0"
