@@ -55,6 +55,7 @@ enum Bench {
     CallResults500,
     #[command(name="parser-10000-100")]
     Parser10000_100,
+    Null,
 }
 
 fn main() {
@@ -84,6 +85,7 @@ fn main() {
         Bench::CallRequests500 => calls::call_requests(500),
         Bench::CallResults500 => calls::call_results(500),
         Bench::Parser10000_100 => parser_10000_100(),
+        Bench::Null => null(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -703,6 +705,27 @@ fn parser_10000_100() -> Data {
         keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
         params_json: hashmap! {
             "comment".to_owned() => "long air script with lot of variable assignments".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+    }
+}
+
+fn null() -> Data {
+    let air_script = "(null)";
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+
+    Data {
+        air: air_script.to_owned(),
+        prev_data: vec![],
+        cur_data: vec![],
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "Empty data and null script".to_owned(),
             "particle-id".to_owned() => particle_id.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
