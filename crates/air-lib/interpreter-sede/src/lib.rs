@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+pub mod multiformat;
+
 pub(crate) mod format;
 pub(crate) mod repr;
 #[cfg(feature = "rmp-serde")]
-mod rmp_serde;
+pub(crate) mod rmp_serde;
 #[cfg(feature = "serde_json")]
 pub(crate) mod serde_json;
 pub(crate) mod serialized_type;

@@ -15,6 +15,7 @@
  */
 
 use crate::Format;
+use crate::multiformat::SerializationCodec;
 
 // TODO a human-readable flag?
 #[derive(Copy, Clone, Default)]
@@ -45,5 +46,11 @@ where
         write: &mut W,
     ) -> Result<(), Self::WriteError> {
         serde_json::to_writer(write, value)
+    }
+
+    #[inline]
+    fn get_codec(&self) -> SerializationCodec {
+        // https://github.com/multiformats/multicodec/blob/master/table.csv
+        0x0200
     }
 }

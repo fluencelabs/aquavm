@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use crate::{format::BorrowFormat, Format};
+use crate::format::BorrowFormat;
+use crate::multiformat::SerializationCodec;
+use crate::Format;
 
 // rmp_serde has config with human-readable representation too, but I'm not sure it worth it
 #[derive(Copy, Clone, Default)]
@@ -45,6 +47,12 @@ where
         write: &mut W,
     ) -> Result<(), Self::WriteError> {
         value.serialize(&mut rmp_serde::Serializer::new(write))
+    }
+
+    #[inline]
+    fn get_codec(&self) -> SerializationCodec {
+        // https://github.com/multiformats/multicodec/blob/master/table.csv
+        0x0201
     }
 }
 
