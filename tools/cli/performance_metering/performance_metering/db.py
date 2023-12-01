@@ -62,7 +62,8 @@ class Db:
             logging.warning("cannot open data at %r: %s", json_path, ex)
             self.data = {}
         if not merge_results:
-            del self.data[self.host_id]
+            # clean previous results
+            self.data.pop(self.host_id, None)
 
     def record(
             self, bench, stats, total_time, memory_sizes: Optional[List[str]]
