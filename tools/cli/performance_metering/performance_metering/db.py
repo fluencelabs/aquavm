@@ -41,7 +41,8 @@ class Db:
         self,
         json_path: Optional[str],
         host_id=None,
-        features: Optional[str] = None
+        features: Optional[str] = None,
+        merge_results: bool = False,
     ):
         """Load data from file, if it exits."""
         if json_path is None:
@@ -60,6 +61,9 @@ class Db:
         except IOError as ex:
             logging.warning("cannot open data at %r: %s", json_path, ex)
             self.data = {}
+        if not merge_results:
+            # clean previous results
+            self.data.pop(self.host_id, None)
 
     def record(
             self, bench, stats, total_time, memory_sizes: Optional[List[str]]
