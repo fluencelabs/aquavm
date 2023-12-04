@@ -18,6 +18,7 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::Scalar;
 use crate::ast::ScalarWithLambda;
+use crate::Arena;
 
 use air_lambda_ast::LambdaAST;
 use air_lambda_ast::ValueAccessor;
@@ -27,7 +28,7 @@ fn parse_fail_last_error() {
     let source_code = r#"
            (fail %last_error%)
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = fail_last_error();
     assert_eq!(instruction, &expected);
@@ -38,7 +39,7 @@ fn parse_fail_literals() {
     let source_code = r#"
            (fail 1 "error message")
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = fail_literals(1, "error message");
     assert_eq!(instruction, &expected);
@@ -49,7 +50,7 @@ fn parse_fail_scalars() {
     let source_code = r#"
            (fail scalar)
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = fail_scalar(Scalar::new("scalar", 18.into()));
     assert_eq!(instruction, &expected);
@@ -60,7 +61,7 @@ fn parse_fail_scalar_with_lambda() {
     let source_code = r#"
            (fail scalar.$.field_accessor)
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = fail_scalar_wl(ScalarWithLambda::new(
         "scalar",
@@ -78,7 +79,7 @@ fn parse_fail_scalar_with_error() {
     let source_code = r#"
            (fail :error:)
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = fail_error();
     assert_eq!(instruction, &expected);
@@ -95,7 +96,7 @@ fn parse_fail_literal_0() {
 
     let lexer = crate::AIRLexer::new(source_code);
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();

@@ -34,7 +34,7 @@ thread_local!(static TEST_PARSER: AIRParser = AIRParser::new());
 
 fn parse<'i>(
     source_code: &'i str,
-    arena: &'i typed_arena::Arena<Instruction<'i>>,
+    arena: &'i crate::Arena<Instruction<'i>>,
 ) -> &'i Instruction<'i> {
     TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();

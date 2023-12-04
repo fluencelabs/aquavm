@@ -36,7 +36,7 @@ thread_local!(static PARSER: AIRParser = AIRParser::new());
 #[tracing::instrument(skip_all)]
 pub fn parse<'input>(
     air_script: &'input str,
-    arena: &'input typed_arena::Arena<Instruction<'input>>,
+    arena: &'input crate::Arena<Instruction<'input>>,
 ) -> Result<&'input Instruction<'input>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.air", air_script);

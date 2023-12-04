@@ -24,6 +24,7 @@ use criterion::Criterion;
 use air_parser::AIRLexer;
 use air_parser::AIRParser;
 use air_parser::VariableValidator;
+use air_parser::Arena;
 
 const SOURCE_CODE_BAD: &str = r#"(seq
         (seq
@@ -83,7 +84,7 @@ fn parse(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_GOOD);
-                let arena = typed_arena::Arena::new();
+                let arena = Arena::new();
 
                 black_box(
                     parser
@@ -106,7 +107,7 @@ fn parse_to_fail(c: &mut Criterion) {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(SOURCE_CODE_BAD);
 
-                let arena = typed_arena::Arena::new();
+                let arena = Arena::new();
                 black_box(
                     parser
                         .clone()
@@ -134,7 +135,7 @@ fn parse_deep(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(code);
-                let arena = typed_arena::Arena::new();
+                let arena = Arena::new();
 
                 black_box(
                     parser
@@ -159,7 +160,7 @@ fn parse_dashboard_script(c: &mut Criterion) {
             b.iter(move || {
                 let mut validator = VariableValidator::new();
                 let lexer = AIRLexer::new(DASHBOARD_SCRIPT);
-                let arena = typed_arena::Arena::new();
+                let arena = Arena::new();
 
                 black_box(
                     parser

@@ -17,6 +17,7 @@
 use super::dsl::*;
 use super::parse;
 use crate::ast::*;
+use crate::Arena;
 
 #[test]
 fn canon_with_literal_peer_id() {
@@ -29,7 +30,7 @@ fn canon_with_literal_peer_id() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
     let expected = canon(
         ResolvableToPeerIdVariable::Literal(peer_id),
@@ -51,7 +52,7 @@ fn canon_with_variable_peer_id() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
     let expected = canon(
         ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
@@ -73,7 +74,7 @@ fn canon_with_stream_map_to_scalar() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
     let expected = canon_stream_map_scalar(
         ResolvableToPeerIdVariable::Scalar(Scalar::new(peer_id, 16.into())),
@@ -95,7 +96,7 @@ fn canon_with_stream_map_to_canon_stream_map() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
 
     let expected = canon_stream_map_canon_map(

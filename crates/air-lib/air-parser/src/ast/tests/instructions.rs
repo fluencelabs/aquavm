@@ -16,21 +16,21 @@
 
 #[test]
 fn display_fail_scalar() {
-    let arena = typed_arena::Arena::new();
+    let arena = crate::Arena::new();
     let ast = crate::parse("(fail x)", &arena).unwrap();
     assert_eq!(ast.to_string(), "fail x");
 }
 
 #[test]
 fn display_fail_literal() {
-    let arena = typed_arena::Arena::new();
+    let arena = crate::Arena::new();
     let ast = crate::parse(r#"(fail 123 "string")"#, &arena).unwrap();
     assert_eq!(ast.to_string(), r#"fail 123 "string""#);
 }
 
 #[test]
 fn display_fail_last_error() {
-    let arena = typed_arena::Arena::new();
+    let arena = crate::Arena::new();
     let ast = crate::parse("(fail %last_error%)", &arena).unwrap();
     assert_eq!(ast.to_string(), "fail %last_error%");
 }

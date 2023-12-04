@@ -1,3 +1,4 @@
+use crate::Arena;
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -9,7 +10,7 @@ use lalrpop_util::ErrorRecovery;
 use std::rc::Rc;
 
 // the only thing why input matters here is just introducing lifetime for Token
-grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>, arena: &'input typed_arena::Arena<Instruction<'input>>);
+grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>, validator: &'v mut VariableValidator<'input>, arena: &'input Arena<Instruction<'input>>);
 
 pub AIR = Instr;
 

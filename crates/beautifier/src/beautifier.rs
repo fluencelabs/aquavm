@@ -109,7 +109,7 @@ impl<W: io::Write> Beautifier<W> {
 
     /// Emit beautified code for the `air_script`.
     pub fn beautify(&mut self, air_script: &str) -> Result<(), BeautifyError> {
-        let arena = typed_arena::Arena::new();
+        let arena = air_parser::Arena::new();
         let tree = air_parser::parse(air_script, &arena).map_err(BeautifyError::Parse)?;
         self.beautify_ast(tree)
     }

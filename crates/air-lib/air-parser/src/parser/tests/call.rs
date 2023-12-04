@@ -18,6 +18,7 @@ use super::dsl::*;
 use super::parse;
 use crate::ast::*;
 use crate::parser::ParserError;
+use crate::Arena;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
 use lalrpop_util::ParseError;
@@ -30,7 +31,7 @@ fn parse_json_path() {
         (call peer_id.$.a! ("service_id" "function_name") ["hello" name] $void)
         "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
@@ -55,7 +56,7 @@ fn parse_empty_array() {
         (call peer_id (service_id "function_name") ["" [] arg])
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
@@ -78,7 +79,7 @@ fn parse_empty_array_2() {
         (call peer_id ("service_id" "function_name") [k [] []])
         "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Scalar(Scalar::new("peer_id", 15.into())),
@@ -106,7 +107,7 @@ fn parse_undefined_variable() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     parser
         .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
@@ -139,7 +140,7 @@ fn parse_undefined_stream_without_json_path() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     parser
         .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
@@ -157,7 +158,7 @@ fn parse_lambda_complex() {
             (call m.$.abc[0].cde[1][0].cde[1]! ("service_id" "function_name") [] void)
         )
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = seq(
         arena.alloc(call(
@@ -202,7 +203,7 @@ fn parse_lambda_with_scalars_complex() {
             (call m.$.abc[0].[scalar_2].cde[1][0][scalar_3].cde[1]! ("service_id" "function_name") [] void)
         )
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let a = |v| arena.alloc(v);
     let expected = seq(
@@ -259,7 +260,7 @@ fn json_path_square_braces() {
     let source_code = r#"
         (call u.$.peer_id! ("return" "") [u.$[1].cde[0][0].abc u.$.name] $void)
         "#;
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::ScalarWithLambda(ScalarWithLambda::from_raw_lambda(
@@ -306,7 +307,7 @@ fn parse_init_peer_id() {
         )"#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(&source_code, &arena);
     let a = |i| arena.alloc(i);
     let expected = seq(
@@ -335,7 +336,7 @@ fn parse_timestamp() {
         (call "peer_id" ("service_id" "fn_name") [%timestamp%])
         "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Literal("peer_id"),
@@ -354,7 +355,7 @@ fn parse_ttl() {
         (call "peer_id" ("service_id" "fn_name") [%ttl%])
         "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::Literal("peer_id"),
@@ -376,7 +377,7 @@ fn parse_last_error() {
         )"#
     .to_string();
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(&source_code, &arena);
     let a = |i| arena.alloc(i);
     let expected = seq(
@@ -404,7 +405,7 @@ fn canon_stream_in_args() {
         "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(&source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::InitPeerId,
@@ -435,7 +436,7 @@ fn canon_stream_in_triplet() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     parser
         .parse(&source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");
@@ -459,7 +460,7 @@ fn canon_stream_with_lambda_in_triplet() {
         "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(&source_code, &arena);
     let expected = call(
         ResolvableToPeerIdVariable::CanonStreamWithLambda(CanonStreamWithLambda::new(
@@ -494,7 +495,7 @@ fn seq_par_call() {
         )"#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(&source_code, &arena);
     let a = |i| arena.alloc(i);
     let expected = seq(
@@ -550,7 +551,7 @@ fn seq_with_empty_and_dash() {
         )
         "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let instruction = parse(source_code, &arena);
     let a = |i| arena.alloc(i);
     let expected = seq(
@@ -641,7 +642,7 @@ fn no_output() {
         (call peer (service fname) [])
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
 
     let expected = call(
@@ -668,7 +669,7 @@ fn not_defined_scalar_in_lambda() {
     let parser = crate::AIRParser::new();
     let mut errors = Vec::new();
     let mut validator = crate::parser::VariableValidator::new();
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     parser
         .parse(source_code, &mut errors, &mut validator, &arena, lexer)
         .expect("parser shouldn't fail");

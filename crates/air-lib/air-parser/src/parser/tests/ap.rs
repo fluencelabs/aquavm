@@ -17,6 +17,7 @@
 use super::dsl::*;
 use super::parse;
 use crate::ast::*;
+use crate::Arena;
 
 use air_lambda_ast::{LambdaAST, ValueAccessor};
 
@@ -26,7 +27,7 @@ fn ap_with_literal() {
         (ap "some_string" $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::Literal("some_string"),
@@ -42,7 +43,7 @@ fn ap_with_number() {
         (ap -100 $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::Number(Number::Int(-100)),
@@ -58,7 +59,7 @@ fn ap_with_bool() {
         (ap true $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::Boolean(true),
@@ -74,7 +75,7 @@ fn ap_with_last_error() {
         (ap %last_error%.$.message! $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::LastError(Some(
@@ -95,7 +96,7 @@ fn ap_with_empty_array() {
         (ap [] $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::EmptyArray,
@@ -111,7 +112,7 @@ fn ap_with_init_peer_id() {
         (ap %init_peer_id% $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::InitPeerId,
@@ -127,7 +128,7 @@ fn ap_with_timestamp() {
         (ap %timestamp% $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::Timestamp,
@@ -143,7 +144,7 @@ fn ap_with_ttl() {
         (ap %ttl% $stream)
     "#;
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code, &arena);
     let expected = ap(
         ApArgument::TTL,
@@ -163,7 +164,7 @@ fn ap_with_canon_stream() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
     let expected = ap(
         ApArgument::CanonStream(CanonStream::new(canon_stream, 13.into())),
@@ -183,7 +184,7 @@ fn ap_with_canon_stream_with_lambda() {
     "#
     );
 
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(&source_code, &arena);
     let expected = ap(
         ApArgument::CanonStreamWithLambda(CanonStreamWithLambda::new(
@@ -208,7 +209,7 @@ fn ap_with_stream_map() {
         (ap ("{key_name}" "{value}") %stream_map)
     "#
     );
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code.as_str(), &arena);
     let expected = ap_with_map(
         StreamMapKeyClause::Literal(key_name),
@@ -288,7 +289,7 @@ fn ap_with_canon_stream_map_lambda_literal_key() {
         (ap #%canon.$.key scalar)
     "#
     );
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code.as_str(), &arena);
     let canon_stream_map: CanonStreamMapWithLambda<'_> = CanonStreamMapWithLambda {
         name: "#%canon",
@@ -312,7 +313,7 @@ fn ap_with_canon_stream_map_lambda_numeric_key() {
         (ap #%canon.$.[42] scalar)
     "#
     );
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code.as_str(), &arena);
     let canon_stream_map: CanonStreamMapWithLambda<'_> = CanonStreamMapWithLambda {
         name: "#%canon",
@@ -334,7 +335,7 @@ fn ap_with_canon_stream_map_lambda_scalar_key() {
         (ap #%canon.$.[key_scalar] scalar)
     "#
     );
-    let arena = typed_arena::Arena::new();
+    let arena = Arena::new();
     let actual = parse(source_code.as_str(), &arena);
 
     let canon_stream_map: CanonStreamMapWithLambda<'_> = CanonStreamMapWithLambda {

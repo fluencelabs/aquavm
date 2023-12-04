@@ -17,4 +17,3 @@ path = "src/lib.rs"
 aquavm-air-parser = { version = "0.10.0", path = "../air-lib/air-parser" }
 itertools = "0.10.5"
 thiserror = "1.0.50"
-typed-arena = "2.0.2"
