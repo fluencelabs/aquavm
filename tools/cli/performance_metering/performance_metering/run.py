@@ -70,7 +70,12 @@ def run(args):
     _prepare(args)
 
     suite = discover_tests(args.bench_dir)
-    with Db(args.path, features=args.features, host_id=args.host_id) as db:
+    with Db(
+            args.path,
+            features=args.features,
+            host_id=args.host_id,
+            merge_results=args.unsafe_merge_results,
+    ) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
             walker = TraceWalker()
@@ -81,6 +86,6 @@ def run(args):
             memory_sizes = walker.get_memory_sizes(args.repeat)
             db.record(bench, combined_stats, total_time, memory_sizes)
 
-            with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
-                report = TextReporter(db.data)
-                report.save_text_report(out)
+        with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
+            report = TextReporter(db.data)
+            report.save_text_report(out)
