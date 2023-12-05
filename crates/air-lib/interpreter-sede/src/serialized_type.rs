@@ -35,6 +35,7 @@ macro_rules! derive_serialized_type {
         )]
         pub struct $type_name {
             // it cannot be implemented as a tuple as marine doesn't support tuple structs
+            #[serde(with = "serde_bytes")]
             value: ::std::vec::Vec<u8>,
         }
 

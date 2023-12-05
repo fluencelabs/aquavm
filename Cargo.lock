@@ -136,6 +136,7 @@ dependencies = [
  "marine-call-parameters",
  "marine-rs-sdk",
  "serde",
+ "serde_bytes",
  "serde_json",
 ]
 
@@ -146,6 +147,7 @@ dependencies = [
  "marine-rs-sdk",
  "rmp-serde",
  "serde",
+ "serde_bytes",
  "serde_json",
  "thiserror",
  "unsigned-varint 0.8.0",
