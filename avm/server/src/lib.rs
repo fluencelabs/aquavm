@@ -58,5 +58,5 @@ pub type AVMDataStore<E> = Box<dyn DataStore<Error = E> + Send + Sync + 'static>
 
 pub type AVMResult<T, E> = std::result::Result<T, AVMError<E>>;
 
-pub(crate) use errors::RunnerError;
+pub use errors::RunnerError;
 pub(crate) type RunnerResult<T> = std::result::Result<T, RunnerError>;
