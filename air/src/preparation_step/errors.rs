@@ -22,13 +22,13 @@ use air_interpreter_data::InterpreterDataRepr;
 use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsDeserializeError;
 use air_interpreter_interface::SerializedCallResults;
-use air_interpreter_sede::TypedFormat;
+use air_interpreter_sede::Representation;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
-type SerdeDeserializeError = <InterpreterDataRepr as TypedFormat>::DeserializeError;
+type SerdeDeserializeError = <InterpreterDataRepr as Representation>::DeserializeError;
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]

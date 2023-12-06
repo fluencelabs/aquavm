@@ -16,7 +16,7 @@
 
 /// A formatter intended for particular type, a base type that defines generic behavior
 /// used by particular implementations.
-pub trait TypedFormat {
+pub trait Representation {
     type SerializeError;
     type DeserializeError;
     type WriteError;
@@ -27,22 +27,22 @@ pub trait TypedFormat {
 }
 
 /// Serialization trait restricted to for particular type.
-pub trait ToSerialized<Value>: TypedFormat {
+pub trait ToSerialized<Value>: Representation {
     fn serialize(&self, value: &Value) -> Result<Self::SerializedValue, Self::SerializeError>;
 }
 
 /// Owned deserialization trait restricted to for particular type.
-pub trait FromSerialized<Value>: TypedFormat {
+pub trait FromSerialized<Value>: Representation {
     fn deserialize(&self, repr: &[u8]) -> Result<Value, Self::DeserializeError>;
 }
 
 /// Borrow deserialization trait restricted to for particular type.
-pub trait FromSerialiedBorrow<'data, Value: 'data>: TypedFormat {
+pub trait FromSerialiedBorrow<'data, Value: 'data>: Representation {
     fn deserialize_borrow(&self, repr: &'data [u8]) -> Result<Value, Self::DeserializeError>;
 }
 
 /// Writing deserialization trait restricted to for particular type.
-pub trait ToWriter<Value>: TypedFormat {
+pub trait ToWriter<Value>: Representation {
     fn to_writer<W: std::io::Write>(
         &self,
         value: &Value,
@@ -56,7 +56,7 @@ macro_rules! define_simple_representation {
         #[derive(Default)]
         pub struct $repr_type;
 
-        impl $crate::TypedFormat for $repr_type {
+        impl $crate::Representation for $repr_type {
             type SerializeError = <$format_type as $crate::Format<$value_type>>::SerializationError;
 
             type DeserializeError =
@@ -81,7 +81,7 @@ macro_rules! define_simple_representation {
                 value: &$value_type,
             ) -> Result<$serialized_value, Self::SerializeError> {
                 use $crate::Format;
-                use $crate::TypedFormat;
+                use $crate::Representation;
                 Self::get_format(self).to_vec(value).map(Into::into)
             }
         }
@@ -90,7 +90,7 @@ macro_rules! define_simple_representation {
             #[inline]
             fn deserialize(&self, repr: &[u8]) -> Result<$value_type, Self::DeserializeError> {
                 use $crate::Format;
-                use $crate::TypedFormat;
+                use $crate::Representation;
                 Self::get_format(self).from_slice(repr)
             }
         }
@@ -103,7 +103,7 @@ macro_rules! define_simple_representation {
                 writer: &mut W,
             ) -> Result<(), Self::WriteError> {
                 use $crate::Format;
-                use $crate::TypedFormat;
+                use $crate::Representation;
                 Self::get_format(self).to_writer(value, writer)
             }
         }

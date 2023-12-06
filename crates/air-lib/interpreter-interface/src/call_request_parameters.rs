@@ -18,8 +18,8 @@ use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
+use air_interpreter_sede::Representation;
 use air_interpreter_sede::RmpSerdeFormat;
-use air_interpreter_sede::TypedFormat;
 
 use marine_call_parameters::SecurityTetraplet;
 #[cfg(feature = "marine")]
@@ -47,7 +47,7 @@ define_simple_representation! {
     SerializedCallArguments
 }
 
-pub type CallArgumentsDeserializeError = <CallArgumentsRepr as TypedFormat>::DeserializeError;
+pub type CallArgumentsDeserializeError = <CallArgumentsRepr as Representation>::DeserializeError;
 
 define_simple_representation! {
     TetrapletsRepr,
@@ -58,7 +58,7 @@ define_simple_representation! {
     SerializedTetraplets
 }
 
-pub type TetrapletDeserializeError = <TetrapletsRepr as TypedFormat>::DeserializeError;
+pub type TetrapletDeserializeError = <TetrapletsRepr as Representation>::DeserializeError;
 
 define_simple_representation! {
     CallRequestsRepr,
@@ -67,7 +67,7 @@ define_simple_representation! {
     SerializedCallRequests
 }
 
-pub type CallRequestsDeserializeError = <CallRequestsRepr as TypedFormat>::DeserializeError;
+pub type CallRequestsDeserializeError = <CallRequestsRepr as Representation>::DeserializeError;
 
 impl FromSerialized<Vec<Vec<SecurityTetraplet>>> for TetrapletsRepr {
     fn deserialize(

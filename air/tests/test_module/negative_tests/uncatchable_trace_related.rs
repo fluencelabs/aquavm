@@ -303,7 +303,7 @@ fn different_executed_state_expected() {
 
 #[test]
 fn invalid_dst_generations() {
-    use air_interpreter_sede::{Format, TypedFormat};
+    use air_interpreter_sede::{Format, Representation};
 
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);

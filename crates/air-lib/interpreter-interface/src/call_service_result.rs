@@ -16,8 +16,8 @@
 
 use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
+use air_interpreter_sede::Representation;
 use air_interpreter_sede::RmpSerdeFormat;
-use air_interpreter_sede::TypedFormat;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
@@ -37,8 +37,8 @@ define_simple_representation! {
     SerializedCallResults
 }
 
-pub type CallResultsDeserializeError = <CallResultsRepr as TypedFormat>::DeserializeError;
-pub type CallResultsSerializeError = <CallResultsRepr as TypedFormat>::SerializeError;
+pub type CallResultsDeserializeError = <CallResultsRepr as Representation>::DeserializeError;
+pub type CallResultsSerializeError = <CallResultsRepr as Representation>::SerializeError;
 
 /// Represents an executed host function result.
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

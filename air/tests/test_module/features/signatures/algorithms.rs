@@ -16,7 +16,7 @@
 
 use air::{min_supported_version, PreparationError};
 use air_interpreter_data::{verification::DataVerifierError, InterpreterData, InterpreterDataRepr};
-use air_interpreter_sede::{Format, TypedFormat};
+use air_interpreter_sede::{Format, Representation};
 use air_interpreter_signatures::KeyError;
 use air_test_utils::{
     assert_error_eq,
