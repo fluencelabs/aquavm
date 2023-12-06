@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+use std::io::Write;
+
 use crate::Format;
-use crate::FromSerialized;
-use crate::ToWriter;
-use crate::TypedFormat;
 
 use unsigned_varint::decode as varint_decode;
 use unsigned_varint::encode as varint_encode;
@@ -38,52 +37,60 @@ pub enum DecodeError<FormatError> {
     VarInt(#[from] varint_decode::Error),
 }
 
-fn parse_multiformat_bytes(
+#[derive(thiserror::Error, Debug)]
+pub enum EncodeError<FormatError> {
+    #[error(transparent)]
+    Format(FormatError),
+    #[error("failed to write: {0}")]
+    Io(#[from] std::io::Error),
+}
+
+pub fn parse_multiformat_bytes(
     data: &[u8],
 ) -> Result<(SerializationCodec, &[u8]), varint_decode::Error> {
     varint_decode::u32(data)
 }
 
-pub fn encode_multiformat<Value, Fmt: TypedFormat + ToWriter<Value>>(
+pub fn encode_multiformat<Value, Fmt: Format<Value>>(
     data: &Value,
-    format: impl AsRef<Fmt>,
-) -> Result<Vec<u8>, <Fmt as TypedFormat>::WriteError>
-where
-    <Fmt as TypedFormat>::Format: Format<Value>,
-{
-    let format = format.as_ref();
+    codec: SerializationCodec,
+    format: &Fmt,
+) -> Result<Vec<u8>, EncodeError<<Fmt as Format<Value>>::WriteError>> {
     let mut output = Vec::with_capacity(ENCODING_BUFFER_CAPACITY);
 
-    // write codec
-    let codec: SerializationCodec = format.get_format().get_codec();
-    {
-        // looks weird, but that's how the API is
-        let mut buf = varint_encode::u32_buffer();
-        let codec_bytes = varint_encode::u32(codec, &mut buf);
-        output.extend_from_slice(codec_bytes);
-    }
-
-    // write data
-    format.to_writer(data, &mut output)?;
+    write_multiformat(data, codec, format, &mut output)?;
 
     Ok(output)
 }
 
-pub fn decode_multiformat<Value, Fmt: TypedFormat + FromSerialized<Value>>(
-    multiformat_data: &[u8],
-    format: impl AsRef<Fmt>,
-) -> Result<Value, DecodeError<<Fmt as TypedFormat>::DeserializeError>>
-where
-    <Fmt as TypedFormat>::Format: Format<Value>,
-{
-    let format = format.as_ref();
-    let (codec, data) = parse_multiformat_bytes(multiformat_data)?;
+pub fn write_multiformat<Value, Fmt: Format<Value>, W: Write>(
+    data: &Value,
+    codec: SerializationCodec,
+    format: &Fmt,
+    output: &mut W,
+) -> Result<(), EncodeError<<Fmt as Format<Value>>::WriteError>> {
+    // looks weird, but that's how the API is
+    let mut buf = varint_encode::u32_buffer();
+    let codec_bytes = varint_encode::u32(codec, &mut buf);
+    output.write_all(codec_bytes)?;
+    format
+        .to_writer(data, output)
+        .map_err(EncodeError::Format)?;
+    Ok(())
+}
 
-    if codec != format.get_format().get_codec() {
+pub fn decode_multiformat<Value, Fmt: Format<Value>>(
+    multiformat_data: &[u8],
+    expected_codec: SerializationCodec,
+    format: &Fmt,
+) -> Result<Value, DecodeError<<Fmt as Format<Value>>::DeserializationError>> {
+    let (data_codec, data) = parse_multiformat_bytes(multiformat_data)?;
+
+    if data_codec != expected_codec {
         // TODO we may be more permissive, having kind of registry for the possible incoming formats, akin to
         // CID algorithms; but it may be *really* tricky to organize it
-        return Err(DecodeError::CodecError(codec));
+        return Err(DecodeError::CodecError(data_codec));
     }
 
-    format.deserialize(data).map_err(DecodeError::FormatError)
+    format.from_slice(data).map_err(DecodeError::FormatError)
 }

@@ -22,7 +22,7 @@ use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
 
-use air_interpreter_data::{InterpreterData, InterpreterDataRepr};
+use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
 use air_interpreter_interface::CallRequestsRepr;
 use air_interpreter_sede::ToSerialized;
@@ -113,11 +113,9 @@ fn populate_outcome_from_contexts(
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
     let data = measure!(
-        InterpreterDataRepr
-            .serialize(&data)
-            .expect("default serializer shouldn't fail"),
+        data.serialize().expect("default serializer shouldn't fail"),
         tracing::Level::INFO,
-        "InterpreterData::to_representation"
+        "InterpreterData::serialize"
     );
 
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);

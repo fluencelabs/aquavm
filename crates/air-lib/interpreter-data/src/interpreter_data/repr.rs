@@ -19,15 +19,15 @@ use crate::Versions;
 
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::RmpSerdeMultiformat;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
 use air_interpreter_sede::TypedFormat;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct InterpreterDataRepr;
 
-pub type InterpreterDataFormat = RmpSerdeFormat;
+pub type InterpreterDataFormat = RmpSerdeMultiformat;
 
 impl TypedFormat for InterpreterDataRepr {
     type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;

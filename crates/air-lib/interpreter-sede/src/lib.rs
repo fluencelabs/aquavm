@@ -28,7 +28,7 @@ pub use crate::format::Format;
 pub use crate::repr::{FromSerialiedBorrow, FromSerialized, ToSerialized, ToWriter, TypedFormat};
 
 #[cfg(feature = "rmp-serde")]
-pub use crate::rmp_serde::RmpSerdeFormat;
+pub use crate::rmp_serde::{RmpSerdeFormat, RmpSerdeMultiformat};
 
 #[cfg(feature = "serde_json")]
-pub use crate::serde_json::SerdeJsonFormat;
+pub use crate::serde_json::{SerdeJsonFormat, SerdeJsonMultiformat};

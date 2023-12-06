@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-use crate::Format;
 use crate::multiformat::SerializationCodec;
+use crate::Format;
 
-// TODO a human-readable flag?
+// https://github.com/multiformats/multicodec/blob/master/table.csv
+const MULTIFORMAT_JSON: SerializationCodec = 0x0200;
+
+// TODO a human-readability flag?
 #[derive(Copy, Clone, Default)]
 pub struct SerdeJsonFormat;
 
@@ -47,10 +50,35 @@ where
     ) -> Result<(), Self::WriteError> {
         serde_json::to_writer(write, value)
     }
+}
+
+#[derive(Copy, Clone, Default)]
+pub struct SerdeJsonMultiformat;
+
+impl<Value> Format<Value> for SerdeJsonMultiformat
+where
+    Value: serde::Serialize + serde::de::DeserializeOwned,
+{
+    type SerializationError = crate::multiformat::EncodeError<serde_json::Error>;
+    type DeserializationError = crate::multiformat::DecodeError<serde_json::Error>;
+    type WriteError = crate::multiformat::EncodeError<serde_json::Error>;
 
     #[inline]
-    fn get_codec(&self) -> SerializationCodec {
-        // https://github.com/multiformats/multicodec/blob/master/table.csv
-        0x0200
+    fn to_vec(&self, value: &Value) -> Result<Vec<u8>, Self::SerializationError> {
+        crate::multiformat::encode_multiformat(value, MULTIFORMAT_JSON, &SerdeJsonFormat)
+    }
+
+    #[inline]
+    fn from_slice(&self, slice: &[u8]) -> Result<Value, Self::DeserializationError> {
+        crate::multiformat::decode_multiformat(slice, MULTIFORMAT_JSON, &SerdeJsonFormat)
+    }
+
+    #[inline]
+    fn to_writer<W: std::io::Write>(
+        &self,
+        value: &Value,
+        write: &mut W,
+    ) -> Result<(), Self::WriteError> {
+        crate::multiformat::write_multiformat(value, MULTIFORMAT_JSON, &SerdeJsonFormat, write)
     }
 }

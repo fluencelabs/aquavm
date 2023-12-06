@@ -16,8 +16,6 @@
 
 use std::fmt::Debug;
 
-use crate::multiformat::SerializationCodec;
-
 pub trait Format<Value> {
     type SerializationError: Debug;
     type DeserializationError: Debug;
@@ -34,8 +32,6 @@ pub trait Format<Value> {
         value: &Value,
         write: &mut W,
     ) -> Result<(), Self::WriteError>;
-
-    fn get_codec(&self) -> SerializationCodec;
 }
 
 pub trait BorrowFormat<'data, Value: 'data>: Format<Value> {
