@@ -17,7 +17,7 @@
 pub mod multiformat;
 
 pub(crate) mod format;
-pub(crate) mod repr;
+pub(crate) mod representation;
 #[cfg(feature = "rmp-serde")]
 pub(crate) mod rmp_serde;
 #[cfg(feature = "serde_json")]
@@ -25,7 +25,7 @@ pub(crate) mod serde_json;
 pub(crate) mod serialized_type;
 
 pub use crate::format::Format;
-pub use crate::repr::{
+pub use crate::representation::{
     FromSerialiedBorrow, FromSerialized, Representation, ToSerialized, ToWriter,
 };
 
