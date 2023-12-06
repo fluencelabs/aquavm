@@ -631,7 +631,6 @@ dependencies = [
  "marine-runtime",
  "parking_lot 0.12.1",
  "polyplets",
- "rmp-serde",
  "serde",
  "serde_json",
  "thiserror",

@@ -32,4 +32,3 @@ log = "0.4.20"
 parking_lot = "0.12.1"
 tracing = "0.1.40"
 fluence-keypair = { version = "0.10.3", default-features = false }
-rmp-serde = "1.1.2"

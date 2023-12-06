@@ -30,9 +30,9 @@ const ENCODING_BUFFER_CAPACITY: usize = 1024;
 #[derive(thiserror::Error, Debug)]
 pub enum DecodeError<FormatError> {
     #[error(transparent)]
-    FormatError(FormatError),
+    Format(FormatError),
     #[error("unsupported multiformat codec: {0}")]
-    CodecError(SerializationCodec),
+    Codec(SerializationCodec),
     #[error("failed to parse multiformat: {0}")]
     VarInt(#[from] varint_decode::Error),
 }
@@ -89,8 +89,8 @@ pub fn decode_multiformat<Value, Fmt: Format<Value>>(
     if data_codec != expected_codec {
         // TODO we may be more permissive, having kind of registry for the possible incoming formats, akin to
         // CID algorithms; but it may be *really* tricky to organize it
-        return Err(DecodeError::CodecError(data_codec));
+        return Err(DecodeError::Codec(data_codec));
     }
 
-    format.from_slice(data).map_err(DecodeError::FormatError)
+    format.from_slice(data).map_err(DecodeError::Format)
 }
