@@ -20,14 +20,14 @@ use crate::Versions;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::Representation;
-use air_interpreter_sede::SerdeJsonFormat;
+use air_interpreter_sede::JsonFormat;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
 
 #[derive(Default, Debug)]
 pub struct InterpreterDataRepr;
 
-pub type InterpreterDataFormat = SerdeJsonFormat;
+pub type InterpreterDataFormat = JsonFormat;
 
 impl Representation for InterpreterDataRepr {
     type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
