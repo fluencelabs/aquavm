@@ -1,5 +1,7 @@
 use air_interpreter_data::InterpreterDataFormat;
-use air_interpreter_sede::{Format, RmpSerdeFormat, SerdeJsonFormat};
+use air_interpreter_sede::{
+    Format, RmpSerdeFormat, RmpSerdeMultiformat, SerdeJsonFormat, SerdeJsonMultiformat,
+};
 use air_test_framework::*;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
@@ -56,7 +58,7 @@ enum Bench {
     BigValuesData,
     CallRequests500,
     CallResults500,
-    #[command(name="parser-10000-100")]
+    #[command(name = "parser-10000-100")]
     Parser10000_100,
     Null,
 }
@@ -155,7 +157,20 @@ impl Reformatter for SerdeJsonFormat {
     }
 }
 
+impl Reformatter for SerdeJsonMultiformat {
+    /// make zero-indentation data for more convenient git diffs
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
 impl Reformatter for RmpSerdeFormat {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
+impl Reformatter for RmpSerdeMultiformat {
     fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
         data.into()
     }
