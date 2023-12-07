@@ -125,7 +125,7 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
     value: &Val,
 ) -> Result<CID<Val>, CidCalculationError> {
     use cid::Cid;
-    use multihash::{Code, MultihashDigest};
+    use multihash_codetable::{Code, MultihashDigest};
 
     let hash = value_json_hash::<blake3::Hasher, Val>(value)?;
 
