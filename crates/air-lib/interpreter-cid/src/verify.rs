@@ -55,11 +55,11 @@ pub fn verify_value<Val: Serialize>(
 }
 
 fn verify_json_value<Val: Serialize>(
-    mhash: &multihash::Multihash,
+    mhash: &multihash_codetable::Multihash,
     value: &Val,
     cid: &CID<Val>,
 ) -> Result<(), CidVerificationError> {
-    use multihash::Code;
+    use multihash_codetable::Code;
 
     let raw_code = mhash.code();
     let code: Code = raw_code
@@ -200,17 +200,18 @@ mod tests {
 
     #[test]
     fn test_verify_unsupported_hasher() {
+        use multihash_codetable::Code;
         use std::str::FromStr;
 
         // we have no plan to support it, but it may change, and the test should be corrected
-        let identity_code: u64 = multihash::Code::Identity.into();
+        let ripemd160_code: u64 = Code::Ripemd160.into();
 
         let cid_1 =
             cid::Cid::from_str("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
                 .unwrap();
 
         let unknown_hasher_multihash =
-            Multihash::wrap(identity_code, cid_1.hash().digest()).unwrap();
+            Multihash::wrap(ripemd160_code, cid_1.hash().digest()).unwrap();
 
         let unknown_hasher_cid =
             cid::Cid::new(cid::Version::V1, JSON_CODEC, unknown_hasher_multihash).unwrap();
@@ -219,7 +220,7 @@ mod tests {
         let err = verify_value(&unknown_hasher_cid, &json!(1));
         match err {
             Err(CidVerificationError::UnsupportedHashCode(code)) => {
-                assert_eq!(code, identity_code);
+                assert_eq!(code, ripemd160_code);
             }
             _ => panic!("wrong result: {:?}", err),
         }
