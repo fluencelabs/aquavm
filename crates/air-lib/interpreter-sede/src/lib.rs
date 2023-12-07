@@ -33,10 +33,14 @@ pub use crate::representation::{
 pub use crate::rmp_serde::{RmpSerdeFormat, RmpSerdeMultiformat};
 
 #[cfg(feature = "msgpack")]
-pub use crate::rmp_serde::{RmpSerdeFormat as MsgPackFormat, RmpSerdeMultiformat as MsgPackMultiformat};
+pub use crate::rmp_serde::{
+    RmpSerdeFormat as MsgPackFormat, RmpSerdeMultiformat as MsgPackMultiformat,
+};
 
 #[cfg(feature = "serde_json")]
 pub use crate::serde_json::{SerdeJsonFormat, SerdeJsonMultiformat};
 
 #[cfg(feature = "json")]
-pub use crate::serde_json::{SerdeJsonFormat as JsonFormat, SerdeJsonMultiformat as JsonMultiformat};
+pub use crate::serde_json::{
+    SerdeJsonFormat as JsonFormat, SerdeJsonMultiformat as JsonMultiformat,
+};

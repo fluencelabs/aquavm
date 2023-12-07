@@ -19,8 +19,8 @@ use crate::Versions;
 
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::Representation;
 use air_interpreter_sede::JsonFormat;
+use air_interpreter_sede::Representation;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
 

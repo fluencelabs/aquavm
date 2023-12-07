@@ -16,8 +16,8 @@
 
 use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
-use air_interpreter_sede::Representation;
 use air_interpreter_sede::MsgPackMultiformat;
+use air_interpreter_sede::Representation;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
