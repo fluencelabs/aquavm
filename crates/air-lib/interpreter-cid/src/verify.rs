@@ -201,7 +201,7 @@ mod tests {
     #[test]
     fn test_verify_unsupported_hasher() {
         use std::str::FromStr;
-        use mulithash_table::Code;
+        use mulithash_codetable::Code;
 
         // we have no plan to support it, but it may change, and the test should be corrected
         let identity_code: u64 = Code::Identity.into();
