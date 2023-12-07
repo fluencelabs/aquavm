@@ -55,11 +55,11 @@ pub fn verify_value<Val: Serialize>(
 }
 
 fn verify_json_value<Val: Serialize>(
-    mhash: &multihash::Multihash,
+    mhash: &multihash_codetable::Multihash,
     value: &Val,
     cid: &CID<Val>,
 ) -> Result<(), CidVerificationError> {
-    use multihash::Code;
+    use multihash_codetable::Code;
 
     let raw_code = mhash.code();
     let code: Code = raw_code
