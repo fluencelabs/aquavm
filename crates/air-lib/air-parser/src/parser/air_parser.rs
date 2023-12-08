@@ -34,7 +34,7 @@ thread_local!(static PARSER: AIRParser = AIRParser::new());
 
 /// Parse AIR `source_code` to `Box<Instruction>`
 #[tracing::instrument(skip_all)]
-pub fn parse(air_script: &str) -> Result<Box<Instruction<'_>>, String> {
+pub fn parse(air_script: &str) -> Result<Instruction<'_>, String> {
     let mut files = SimpleFiles::new();
     let file_id = files.add("script.air", air_script);
 

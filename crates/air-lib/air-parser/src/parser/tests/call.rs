@@ -572,18 +572,21 @@ fn seq_with_empty_and_dash() {
                 CallOutputValue::Scalar(Scalar::new("module", 409.into())),
             ),
             seq(
-                Instruction::Call(Call {
-                    triplet: Triplet {
-                        peer_id: ResolvableToPeerIdVariable::Literal("A"),
-                        service_id: ResolvableToStringVariable::Literal("add_blueprint"),
-                        function_name: ResolvableToStringVariable::Literal(""),
-                    },
-                    args: Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
-                        "blueprint",
-                        490.into(),
-                    ))]),
-                    output: CallOutputValue::Scalar(Scalar::new("blueprint_id", 501.into())),
-                }),
+                Instruction::Call(
+                    Call {
+                        triplet: Triplet {
+                            peer_id: ResolvableToPeerIdVariable::Literal("A"),
+                            service_id: ResolvableToStringVariable::Literal("add_blueprint"),
+                            function_name: ResolvableToStringVariable::Literal(""),
+                        },
+                        args: Rc::new(vec![ImmutableValue::Variable(ImmutableVariable::scalar(
+                            "blueprint",
+                            490.into(),
+                        ))]),
+                        output: CallOutputValue::Scalar(Scalar::new("blueprint_id", 501.into())),
+                    }
+                    .into(),
+                ),
                 seq(
                     call(
                         ResolvableToPeerIdVariable::Literal("A"),
