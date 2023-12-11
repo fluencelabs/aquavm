@@ -3259,6 +3259,53 @@
         },
         "total_time": "23.04ms"
       },
+      "parser-calls-10000-100": {
+        "comment": "multiple calls parser benchmark",
+        "memory_sizes": [
+          "54.500 MiB",
+          "54.500 MiB"
+        ],
+        "stats": {
+          "air::runner::execute_air": {
+            "common_prefix": "air",
+            "duration": "22.76ms",
+            "nested": {
+              "preparation_step::preparation::parse_data": "28.00µs",
+              "preparation_step::preparation::prepare": {
+                "common_prefix": "",
+                "duration": "21.04ms",
+                "nested": {
+                  "air::preparation_step::preparation::make_exec_ctx": "28.00µs",
+                  "air_parser::parser::air_parser::parse": "20.87ms"
+                }
+              },
+              "runner::execute": "47.00µs",
+              "runner::farewell": {
+                "common_prefix": "air::farewell_step::outcome",
+                "duration": "188.00µs",
+                "nested": {
+                  "from_success_result": {
+                    "common_prefix": "air::farewell_step::outcome",
+                    "duration": "167.00µs",
+                    "nested": {
+                      "populate_outcome_from_contexts": "131.00µs"
+                    }
+                  }
+                }
+              },
+              "signing_step::sign_produced_cids": "106.00µs",
+              "verification_step::verify": {
+                "common_prefix": "air_interpreter_data::cid_info",
+                "duration": "39.00µs",
+                "nested": {
+                  "verify": "9.00µs"
+                }
+              }
+            }
+          }
+        },
+        "total_time": "22.76ms"
+      },
       "populate-map-multiple-keys": {
         "comment": "benchmarking a map insert operation",
         "memory_sizes": [
@@ -3366,7 +3413,7 @@
         "total_time": "2.74ms"
       }
     },
-    "datetime": "2023-12-08 15:19:32.841413+00:00",
+    "datetime": "2023-12-11 13:56:25.495152+00:00",
     "features": "check_signatures,gen_signatures",
     "platform": "macOS-14.1.2-arm64-arm-64bit",
     "version": "0.54.0"
