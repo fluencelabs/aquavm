@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.1 to 0.7.2
     * avm-interface bumped from 0.29.1 to 0.29.2
 
+## [0.33.4](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.3...avm-server-v0.33.4) (2023-12-12)
+
+
+### Bug Fixes
+
+* **avm-server:** make avm_server::RunnerError a public type ([#764](https://github.com/fluencelabs/aquavm/issues/764)) ([2c78fd5](https://github.com/fluencelabs/aquavm/commit/2c78fd5f7a8581ed006d392b12ca0143f9923a86))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+    * avm-data-store bumped from 0.7.2 to 0.7.3
+    * avm-interface bumped from 0.29.2 to 0.29.3
+
 ## [0.33.3](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.2...avm-server-v0.33.3) (2023-10-26)
 
 

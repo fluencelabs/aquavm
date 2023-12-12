@@ -20,6 +20,10 @@
   * dependencies
     * aquavm-air-parser bumped from 0.9.0 to 0.10.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+
 ## [0.7.5](https://github.com/fluencelabs/aquavm/compare/air-execution-info-collector-v0.7.4...air-execution-info-collector-v0.7.5) (2023-06-22)
 
 
