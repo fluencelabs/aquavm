@@ -70,7 +70,7 @@ pub mod parser {
     pub use air_parser::ast::Instruction;
 
     /// Parse an AIR script to AST.
-    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
+    pub fn parse(script: &str) -> Result<Instruction<'_>, String> {
         air_parser::parse(script)
     }
 }

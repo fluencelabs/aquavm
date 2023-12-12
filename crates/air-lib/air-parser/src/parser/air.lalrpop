@@ -13,7 +13,7 @@ grammar<'err, 'input, 'v>(input: &'input str, errors: &'err mut Vec<ErrorRecover
 
 pub AIR = Instr;
 
-Instr: Box<Instruction<'input>> = {
+Instr: Instruction<'input> = {
     <left: @L> "(" call <triplet:Triplet> <args:Args> <output:CallOutput?> ")" <right: @R> => {
         let args = Rc::new(args);
         let output = output.unwrap_or(CallOutputValue::None);
@@ -22,7 +22,7 @@ Instr: Box<Instruction<'input>> = {
 
         validator.met_call(&call, span);
 
-        Box::new(Instruction::Call(call))
+        Instruction::Call(call.into())
     },
 
     <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream:StreamArgument> <canon_stream:CanonStreamArgument> ")" <right: @R> => {
@@ -31,7 +31,7 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_canon(&canon, span);
 
-        Box::new(Instruction::Canon(canon))
+        Instruction::Canon(canon.into())
     },
 
     <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <canon_stream_map:CanonStreamMapArgument> ")" <right: @R> => {
@@ -40,7 +40,7 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_canon_map(&canon_map, span);
 
-        Box::new(Instruction::CanonMap(canon_map))
+        Instruction::CanonMap(canon_map.into())
     },
 
     <left: @L> "(" canon <peer_id:ResolvableToPeerIdVariable> <stream_map:StreamMapArgument> <scalar_pair:Scalar> ")" <right: @R> => {
@@ -50,7 +50,7 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_canon_map_scalar(&canon, span);
 
-        Box::new(Instruction::CanonStreamMapScalar(canon))
+        Instruction::CanonStreamMapScalar(canon.into())
     },
 
     <left: @L> "(" ap <arg:ApArgument> <result:ApResult> ")" <right: @R> => {
@@ -59,7 +59,7 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_ap(&apply, span);
 
-        Box::new(Instruction::Ap(apply))
+        Instruction::Ap(apply.into())
     },
 
     <left: @L> "(" ap "(" <key:StreamMapKeyClause> <value:ApArgument> ")" <map:StreamMap> ")" <right: @R> => {
@@ -69,13 +69,13 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_ap_map(&apply, span);
 
-        Box::new(Instruction::ApMap(apply))
+        Instruction::ApMap(apply.into())
     },
 
-    "(" seq <l:Instr> <r:Instr> ")" => Box::new(Instruction::Seq(Seq::new(l, r))),
-    "(" par <l:Instr> <r:Instr> ")" => Box::new(Instruction::Par(Par::new(l, r))),
-    "(" never ")" => Box::new(Instruction::Never(Never)),
-    "(" null ")" => Box::new(Instruction::Null(Null)),
+    "(" seq <l:Instr> <r:Instr> ")" => Instruction::Seq(Seq::new(l, r).into()),
+    "(" par <l:Instr> <r:Instr> ")" => Instruction::Par(Par::new(l, r).into()),
+    "(" never ")" => Instruction::Never(Never),
+    "(" null ")" => Instruction::Null(Null),
 
     <left: @L> "(" new <argument: NewArgument> <instruction:Instr> ")" <right: @R> => {
         let span = Span::new(left, right);
@@ -83,44 +83,44 @@ Instr: Box<Instruction<'input>> = {
 
         validator.met_new(&new, span);
 
-        Box::new(Instruction::New(new))
+        Instruction::New(new.into())
     },
 
     <left: @L> "(" fail <fail_body: FailBody> ")" <right: @R> => {
         let span = Span::new(left, right);
         validator.met_fail_literal(&fail_body, span);
 
-        Box::new(Instruction::Fail(fail_body))
+        Instruction::Fail(fail_body.into())
     },
 
     <left: @L> "(" fold <iterable:FoldScalarIterable> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?>")" <right: @R> => {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldScalar::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldScalar::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.met_fold_scalar(&fold, span);
 
-        Box::new(Instruction::FoldScalar(fold))
+        Instruction::FoldScalar(fold.into())
     },
 
     <left: @L> "(" fold <stream:Stream> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
         let iterable = Stream::new(stream.0, stream.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStream::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.meet_fold_stream(&fold, span);
 
-        Box::new(Instruction::FoldStream(fold))
+        Instruction::FoldStream(fold.into())
     },
 
     <left: @L> "(" fold <stream_map:StreamMap> <iterator:Scalar> <instruction:Instr> <last_instruction:Instr?> ")" <right: @R> => {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
-        let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStreamMap::new(iterable, iterator, instruction, last_instruction, span);
         validator.meet_fold_stream_map(&fold, span);
-        Box::new(Instruction::FoldStreamMap(fold))
+        Instruction::FoldStreamMap(fold.into())
     },
 
     <left: @L> "(" next <iterator:Scalar> ")" <right: @R> => {
@@ -129,17 +129,17 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_next(&next, span);
 
-        Box::new(Instruction::Next(next))
+        Instruction::Next(next.into())
     },
 
-    "(" xor <l:Instr> <r:Instr> ")" => Box::new(Instruction::Xor(Xor(l, r))),
+    "(" xor <l:Instr> <r:Instr> ")" => Instruction::Xor(Xor(l, r).into()),
 
     <left: @L> "(" match_ <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
 
-        Box::new(Instruction::Match(match_))
+        Instruction::Match(match_.into())
     },
 
     <left: @L> "(" mismatch <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
@@ -147,10 +147,10 @@ Instr: Box<Instruction<'input>> = {
         let span = Span::new(left, right);
         validator.met_mismatch(&mismatch, span);
 
-        Box::new(Instruction::MisMatch(mismatch))
+        Instruction::MisMatch(mismatch.into())
      },
 
-    ! => { errors.push(<>); Box::new(Instruction::Error) },
+    ! => { errors.push(<>); Instruction::Error },
 }
 
 Args: Vec<ImmutableValue<'input>> = {

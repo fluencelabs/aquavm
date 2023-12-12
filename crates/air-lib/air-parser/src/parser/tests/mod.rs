@@ -33,7 +33,7 @@ use crate::parser::AIRParser;
 thread_local!(static TEST_PARSER: AIRParser = AIRParser::new());
 
 fn parse(source_code: &str) -> Instruction {
-    *TEST_PARSER.with(|parser| {
+    TEST_PARSER.with(|parser| {
         let mut errors = Vec::new();
         let lexer = crate::parser::AIRLexer::new(source_code);
         let mut validator = crate::parser::VariableValidator::new();

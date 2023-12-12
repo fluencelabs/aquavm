@@ -27,24 +27,24 @@ use std::rc::Rc;
 #[allow(clippy::large_enum_variant)] // for Null and Error variants
 #[derive(Serialize, Debug, PartialEq)]
 pub enum Instruction<'i> {
-    Call(Call<'i>),
-    Ap(Ap<'i>),
-    ApMap(ApMap<'i>),
-    Canon(Canon<'i>),
-    CanonMap(CanonMap<'i>),
-    CanonStreamMapScalar(CanonStreamMapScalar<'i>),
-    Seq(Seq<'i>),
-    Par(Par<'i>),
-    Xor(Xor<'i>),
-    Match(Match<'i>),
-    MisMatch(MisMatch<'i>),
-    Fail(Fail<'i>),
-    FoldScalar(FoldScalar<'i>),
-    FoldStream(FoldStream<'i>),
-    FoldStreamMap(FoldStreamMap<'i>),
+    Call(Box<Call<'i>>),
+    Ap(Box<Ap<'i>>),
+    ApMap(Box<ApMap<'i>>),
+    Canon(Box<Canon<'i>>),
+    CanonMap(Box<CanonMap<'i>>),
+    CanonStreamMapScalar(Box<CanonStreamMapScalar<'i>>),
+    Seq(Box<Seq<'i>>),
+    Par(Box<Par<'i>>),
+    Xor(Box<Xor<'i>>),
+    Match(Box<Match<'i>>),
+    MisMatch(Box<MisMatch<'i>>),
+    Fail(Box<Fail<'i>>),
+    FoldScalar(Box<FoldScalar<'i>>),
+    FoldStream(Box<FoldStream<'i>>),
+    FoldStreamMap(Box<FoldStreamMap<'i>>),
     Never(Never),
-    New(New<'i>),
-    Next(Next<'i>),
+    New(Box<New<'i>>),
+    Next(Box<Next<'i>>),
     Null(Null),
     Error,
 }
@@ -98,22 +98,22 @@ pub struct CanonStreamMapScalar<'i> {
 
 /// (seq instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Seq<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Seq<'i>(pub Instruction<'i>, pub Instruction<'i>);
 
 /// (par instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Par<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Par<'i>(pub Instruction<'i>, pub Instruction<'i>);
 
 /// (xor instruction instruction)
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Xor<'i>(pub Box<Instruction<'i>>, pub Box<Instruction<'i>>);
+pub struct Xor<'i>(pub Instruction<'i>, pub Instruction<'i>);
 
 /// (match left_value right_value instruction)
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Match<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: Instruction<'i>,
 }
 
 /// (mismatch left_value right_value instruction)
@@ -121,7 +121,7 @@ pub struct Match<'i> {
 pub struct MisMatch<'i> {
     pub left_value: ImmutableValue<'i>,
     pub right_value: ImmutableValue<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: Instruction<'i>,
 }
 
 /// (fail 1337 "error message")
@@ -191,7 +191,7 @@ pub struct Never;
 #[derive(Serialize, Debug, PartialEq)]
 pub struct New<'i> {
     pub argument: NewArgument<'i>,
-    pub instruction: Box<Instruction<'i>>,
+    pub instruction: Instruction<'i>,
     pub span: Span,
 }
 
