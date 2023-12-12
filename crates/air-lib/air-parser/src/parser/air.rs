@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 993dbb5ce92c8cefdaa029ad3852c96bafbd0bd1bb6cf24b78fdf40c2189256b
+// sha3: 127100bc464d586a4839740daea718cfbd4c90154fcbc34ebfb7cc898a24b6d7
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -5789,7 +5789,7 @@ fn __action17<
         let span = Span::new(left, right);
         validator.met_next(&next, span);
 
-        Instruction::Next(next)
+        Instruction::Next(next.into())
     }
 }
 

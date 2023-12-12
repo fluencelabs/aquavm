@@ -44,7 +44,7 @@ pub enum Instruction<'i> {
     FoldStreamMap(Box<FoldStreamMap<'i>>),
     Never(Never),
     New(Box<New<'i>>),
-    Next(Next<'i>),
+    Next(Box<Next<'i>>),
     Null(Null),
     Error,
 }

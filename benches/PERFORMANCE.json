@@ -2379,24 +2379,24 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "13.01ms",
+            "duration": "13.10ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "5.31ms",
+                "duration": "5.36ms",
                 "nested": {
-                  "from_slice": "5.26ms"
+                  "from_slice": "5.30ms"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "182.00µs",
+                "duration": "170.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "28.00µs",
-                  "air_parser::parser::air_parser::parse": "33.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "22.00µs",
+                  "air_parser::parser::air_parser::parse": "32.00µs"
                 }
               },
-              "runner::execute": "9.00µs",
+              "runner::execute": "8.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
                 "duration": "3.29ms",
@@ -2410,18 +2410,18 @@
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "102.00µs",
+              "signing_step::sign_produced_cids": "100.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "3.98ms",
+                "duration": "3.99ms",
                 "nested": {
-                  "verify": "3.62ms"
+                  "verify": "3.63ms"
                 }
               }
             }
           }
         },
-        "total_time": "13.01ms"
+        "total_time": "13.10ms"
       },
       "call-requests500": {
         "comment": "multiple call requests",
@@ -2432,41 +2432,41 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "25.90ms",
+            "duration": "26.11ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "147.00µs",
+                "duration": "134.00µs",
                 "nested": {
-                  "from_slice": "101.00µs"
+                  "from_slice": "97.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "254.00µs",
+                "duration": "238.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "52.00µs",
-                  "air_parser::parser::air_parser::parse": "76.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "48.00µs",
+                  "air_parser::parser::air_parser::parse": "68.00µs"
                 }
               },
-              "runner::execute": "20.00ms",
+              "runner::execute": "20.23ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "5.15ms",
+                "duration": "5.16ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "5.13ms",
+                    "duration": "5.14ms",
                     "nested": {
-                      "populate_outcome_from_contexts": "5.02ms"
+                      "populate_outcome_from_contexts": "5.04ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "106.00µs",
+              "signing_step::sign_produced_cids": "107.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "76.00µs",
+                "duration": "75.00µs",
                 "nested": {
                   "verify": "9.00µs"
                 }
@@ -2474,7 +2474,7 @@
             }
           }
         },
-        "total_time": "25.90ms"
+        "total_time": "26.11ms"
       },
       "call-results500": {
         "comment": "multiple call results",
@@ -2485,41 +2485,41 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "15.70ms",
+            "duration": "15.96ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "621.00µs",
+                "duration": "624.00µs",
                 "nested": {
-                  "from_slice": "577.00µs"
+                  "from_slice": "581.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "1.01ms",
+                "duration": "1.00ms",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "812.00µs",
-                  "air_parser::parser::air_parser::parse": "72.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "810.00µs",
+                  "air_parser::parser::air_parser::parse": "67.00µs"
                 }
               },
-              "runner::execute": "11.70ms",
+              "runner::execute": "11.94ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "1.81ms",
+                "duration": "1.82ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "1.78ms",
+                    "duration": "1.79ms",
                     "nested": {
-                      "populate_outcome_from_contexts": "1.33ms"
+                      "populate_outcome_from_contexts": "1.35ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "289.00µs",
+              "signing_step::sign_produced_cids": "292.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "90.00µs",
+                "duration": "92.00µs",
                 "nested": {
                   "verify": "9.00µs"
                 }
@@ -2527,7 +2527,7 @@
             }
           }
         },
-        "total_time": "15.70ms"
+        "total_time": "15.96ms"
       },
       "canon-map-key-by-lens": {
         "comment": "benchmarking a map insert operation",
@@ -2538,49 +2538,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "10.84ms",
+            "duration": "10.80ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "3.17ms",
+                "duration": "3.18ms",
                 "nested": {
                   "from_slice": "3.13ms"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "396.00µs",
+                "duration": "378.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "192.00µs",
-                  "air_parser::parser::air_parser::parse": "79.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "189.00µs",
+                  "air_parser::parser::air_parser::parse": "73.00µs"
                 }
               },
-              "runner::execute": "1.95ms",
+              "runner::execute": "1.94ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "1.88ms",
+                "duration": "1.87ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "1.86ms",
+                    "duration": "1.85ms",
                     "nested": {
                       "populate_outcome_from_contexts": "1.49ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "102.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "3.17ms",
+                "duration": "3.15ms",
                 "nested": {
-                  "verify": "2.80ms"
+                  "verify": "2.79ms"
                 }
               }
             }
           }
         },
-        "total_time": "10.84ms"
+        "total_time": "10.80ms"
       },
       "canon-map-key-element-by-lens": {
         "comment": "benchmarking a map insert operation",
@@ -2595,39 +2595,39 @@
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "3.16ms",
+                "duration": "3.18ms",
                 "nested": {
-                  "from_slice": "3.12ms"
+                  "from_slice": "3.13ms"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "395.00µs",
+                "duration": "387.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "192.00µs",
-                  "air_parser::parser::air_parser::parse": "82.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "194.00µs",
+                  "air_parser::parser::air_parser::parse": "75.00µs"
                 }
               },
               "runner::execute": "1.93ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "1.87ms",
+                "duration": "1.86ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "1.85ms",
+                    "duration": "1.84ms",
                     "nested": {
-                      "populate_outcome_from_contexts": "1.51ms"
+                      "populate_outcome_from_contexts": "1.50ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "3.16ms",
+                "duration": "3.15ms",
                 "nested": {
-                  "verify": "2.80ms"
+                  "verify": "2.79ms"
                 }
               }
             }
@@ -2648,27 +2648,27 @@
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "423.00µs",
+                "duration": "410.00µs",
                 "nested": {
-                  "from_slice": "377.00µs"
+                  "from_slice": "363.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "209.00µs",
+                "duration": "196.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
-                  "air_parser::parser::air_parser::parse": "66.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "20.00µs",
+                  "air_parser::parser::air_parser::parse": "59.00µs"
                 }
               },
-              "runner::execute": "6.04ms",
+              "runner::execute": "6.05ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
                 "duration": "1.63ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "1.61ms",
+                    "duration": "1.60ms",
                     "nested": {
                       "populate_outcome_from_contexts": "1.32ms"
                     }
@@ -2678,9 +2678,9 @@
               "signing_step::sign_produced_cids": "100.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "401.00µs",
+                "duration": "406.00µs",
                 "nested": {
-                  "verify": "35.00µs"
+                  "verify": "39.00µs"
                 }
               }
             }
@@ -2697,49 +2697,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "4.11ms",
+            "duration": "4.10ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "430.00µs",
+                "duration": "420.00µs",
                 "nested": {
-                  "from_slice": "385.00µs"
+                  "from_slice": "369.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "213.00µs",
+                "duration": "195.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "24.00µs",
-                  "air_parser::parser::air_parser::parse": "69.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "20.00µs",
+                  "air_parser::parser::air_parser::parse": "59.00µs"
                 }
               },
-              "runner::execute": "2.44ms",
+              "runner::execute": "2.45ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "352.00µs",
+                "duration": "349.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "332.00µs",
+                    "duration": "329.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "294.00µs"
+                      "populate_outcome_from_contexts": "292.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "404.00µs",
+                "duration": "406.00µs",
                 "nested": {
-                  "verify": "34.00µs"
+                  "verify": "40.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "4.11ms"
+        "total_time": "4.10ms"
       },
       "canon-map-scalar-single-key": {
         "comment": "benchmarking a map insert operation",
@@ -2750,49 +2750,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "3.28ms",
+            "duration": "3.26ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "427.00µs",
+                "duration": "423.00µs",
                 "nested": {
-                  "from_slice": "379.00µs"
+                  "from_slice": "375.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "205.00µs",
+                "duration": "192.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
-                  "air_parser::parser::air_parser::parse": "62.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "19.00µs",
+                  "air_parser::parser::air_parser::parse": "56.00µs"
                 }
               },
-              "runner::execute": "1.58ms",
+              "runner::execute": "1.57ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "362.00µs",
+                "duration": "359.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "343.00µs",
+                    "duration": "339.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "287.00µs"
+                      "populate_outcome_from_contexts": "284.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "432.00µs",
+                "duration": "435.00µs",
                 "nested": {
-                  "verify": "70.00µs"
+                  "verify": "73.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "3.28ms"
+        "total_time": "3.26ms"
       },
       "canon-map-single-key": {
         "comment": "benchmarking a map insert operation",
@@ -2803,49 +2803,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "7.51ms",
+            "duration": "7.48ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "429.00µs",
+                "duration": "421.00µs",
                 "nested": {
-                  "from_slice": "383.00µs"
+                  "from_slice": "373.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "204.00µs",
+                "duration": "192.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
-                  "air_parser::parser::air_parser::parse": "62.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "20.00µs",
+                  "air_parser::parser::air_parser::parse": "56.00µs"
                 }
               },
-              "runner::execute": "4.45ms",
+              "runner::execute": "4.44ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "1.73ms",
+                "duration": "1.72ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "1.71ms",
+                    "duration": "1.70ms",
                     "nested": {
                       "populate_outcome_from_contexts": "1.46ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "430.00µs",
+                "duration": "434.00µs",
                 "nested": {
-                  "verify": "69.00µs"
+                  "verify": "72.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "7.51ms"
+        "total_time": "7.48ms"
       },
       "dashboard": {
         "comment": "big dashboard test",
@@ -2856,49 +2856,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "5.73ms",
+            "duration": "5.69ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
                 "duration": "1.01ms",
                 "nested": {
-                  "from_slice": "954.00µs"
+                  "from_slice": "955.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "326.00µs",
+                "duration": "313.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "38.00µs",
-                  "air_parser::parser::air_parser::parse": "168.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "36.00µs",
+                  "air_parser::parser::air_parser::parse": "160.00µs"
                 }
               },
-              "runner::execute": "766.00µs",
+              "runner::execute": "759.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "468.00µs",
+                "duration": "461.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "446.00µs",
+                    "duration": "441.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "402.00µs"
+                      "populate_outcome_from_contexts": "398.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "103.00µs",
+              "signing_step::sign_produced_cids": "101.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "2.89ms",
+                "duration": "2.87ms",
                 "nested": {
-                  "verify": "151.00µs"
+                  "verify": "157.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "5.73ms"
+        "total_time": "5.69ms"
       },
       "long-data": {
         "comment": "Long data trace",
@@ -2909,49 +2909,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "4.98ms",
+            "duration": "5.01ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "1.91ms",
+                "duration": "1.95ms",
                 "nested": {
-                  "from_slice": "1.86ms"
+                  "from_slice": "1.89ms"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "191.00µs",
+                "duration": "182.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "40.00µs",
+                  "air::preparation_step::preparation::make_exec_ctx": "34.00µs",
                   "air_parser::parser::air_parser::parse": "31.00µs"
                 }
               },
               "runner::execute": "8.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "907.00µs",
+                "duration": "895.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "887.00µs",
+                    "duration": "876.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "849.00µs"
+                      "populate_outcome_from_contexts": "838.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "98.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
                 "duration": "1.71ms",
                 "nested": {
-                  "verify": "659.00µs"
+                  "verify": "662.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "4.98ms"
+        "total_time": "5.01ms"
       },
       "multiple-cids10": {
         "comment": "verifying multiple CIDs for single peer",
@@ -2966,39 +2966,39 @@
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "435.00µs",
+                "duration": "425.00µs",
                 "nested": {
-                  "from_slice": "381.00µs"
+                  "from_slice": "371.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "210.00µs",
+                "duration": "206.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "31.00µs",
-                  "air_parser::parser::air_parser::parse": "61.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "30.00µs",
+                  "air_parser::parser::air_parser::parse": "60.00µs"
                 }
               },
-              "runner::execute": "414.00µs",
+              "runner::execute": "418.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "326.00µs",
+                "duration": "320.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "306.00µs",
+                    "duration": "299.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "255.00µs"
+                      "populate_outcome_from_contexts": "249.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "102.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "882.00µs",
+                "duration": "890.00µs",
                 "nested": {
-                  "verify": "176.00µs"
+                  "verify": "180.00µs"
                 }
               }
             }
@@ -3015,49 +3015,49 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "9.40ms",
+            "duration": "9.43ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
                 "duration": "1.38ms",
                 "nested": {
-                  "from_slice": "1.32ms"
+                  "from_slice": "1.33ms"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "265.00µs",
+                "duration": "258.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "79.00µs",
-                  "air_parser::parser::air_parser::parse": "67.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "78.00µs",
+                  "air_parser::parser::air_parser::parse": "64.00µs"
                 }
               },
-              "runner::execute": "2.65ms",
+              "runner::execute": "2.68ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "914.00µs",
+                "duration": "896.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "894.00µs",
+                    "duration": "875.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "791.00µs"
+                      "populate_outcome_from_contexts": "774.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "101.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "3.92ms",
+                "duration": "3.93ms",
                 "nested": {
-                  "verify": "734.00µs"
+                  "verify": "733.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "9.40ms"
+        "total_time": "9.43ms"
       },
       "multiple-sigs30": {
         "comment": "signing multiple CIDs",
@@ -3068,7 +3068,7 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "17.54ms",
+            "duration": "17.47ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
@@ -3079,38 +3079,38 @@
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "344.00µs",
+                "duration": "330.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "156.00µs",
-                  "air_parser::parser::air_parser::parse": "67.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "151.00µs",
+                  "air_parser::parser::air_parser::parse": "63.00µs"
                 }
               },
-              "runner::execute": "7.06ms",
+              "runner::execute": "7.04ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "2.57ms",
+                "duration": "2.55ms",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "2.55ms",
+                    "duration": "2.53ms",
                     "nested": {
-                      "populate_outcome_from_contexts": "2.37ms"
+                      "populate_outcome_from_contexts": "2.35ms"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "445.00µs",
+              "signing_step::sign_produced_cids": "443.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "2.98ms",
+                "duration": "2.96ms",
                 "nested": {
-                  "verify": "1.27ms"
+                  "verify": "1.26ms"
                 }
               }
             }
           }
         },
-        "total_time": "17.54ms"
+        "total_time": "17.47ms"
       },
       "network-explore": {
         "comment": "5 peers of network are discovered",
@@ -3125,39 +3125,39 @@
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "494.00µs",
+                "duration": "490.00µs",
                 "nested": {
-                  "from_slice": "439.00µs"
+                  "from_slice": "434.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "228.00µs",
+                "duration": "219.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "26.00µs",
-                  "air_parser::parser::air_parser::parse": "81.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "25.00µs",
+                  "air_parser::parser::air_parser::parse": "78.00µs"
                 }
               },
-              "runner::execute": "145.00µs",
+              "runner::execute": "144.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "257.00µs",
+                "duration": "251.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "238.00µs",
+                    "duration": "231.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "199.00µs"
+                      "populate_outcome_from_contexts": "193.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "103.00µs",
+              "signing_step::sign_produced_cids": "100.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "1.68ms",
+                "duration": "1.69ms",
                 "nested": {
-                  "verify": "60.00µs"
+                  "verify": "65.00µs"
                 }
               }
             }
@@ -3174,121 +3174,27 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "741.00µs",
+            "duration": "737.00µs",
             "nested": {
-              "preparation_step::preparation::parse_data": "30.00µs",
+              "preparation_step::preparation::parse_data": "23.00µs",
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "198.00µs",
+                "duration": "190.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "27.00µs",
-                  "air_parser::parser::air_parser::parse": "37.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
+                  "air_parser::parser::air_parser::parse": "34.00µs"
                 }
               },
               "runner::execute": "8.00µs",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "183.00µs",
+                "duration": "184.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "164.00µs",
+                    "duration": "165.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "128.00µs"
-                    }
-                  }
-                }
-              },
-              "signing_step::sign_produced_cids": "104.00µs",
-              "verification_step::verify": {
-                "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "38.00µs",
-                "nested": {
-                  "verify": "10.00µs"
-                }
-              }
-            }
-          }
-        },
-        "total_time": "741.00µs"
-      },
-      "parser-10000-100": {
-        "comment": "long air script with lot of variable assignments",
-        "memory_sizes": [
-          "54.938 MiB",
-          "54.938 MiB"
-        ],
-        "stats": {
-          "air::runner::execute_air": {
-            "common_prefix": "air",
-            "duration": "23.04ms",
-            "nested": {
-              "preparation_step::preparation::parse_data": "29.00µs",
-              "preparation_step::preparation::prepare": {
-                "common_prefix": "",
-                "duration": "21.53ms",
-                "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "31.00µs",
-                  "air_parser::parser::air_parser::parse": "21.35ms"
-                }
-              },
-              "runner::execute": "46.00µs",
-              "runner::farewell": {
-                "common_prefix": "air::farewell_step::outcome",
-                "duration": "188.00µs",
-                "nested": {
-                  "from_success_result": {
-                    "common_prefix": "air::farewell_step::outcome",
-                    "duration": "168.00µs",
-                    "nested": {
-                      "populate_outcome_from_contexts": "132.00µs"
-                    }
-                  }
-                }
-              },
-              "signing_step::sign_produced_cids": "105.00µs",
-              "verification_step::verify": {
-                "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "40.00µs",
-                "nested": {
-                  "verify": "9.00µs"
-                }
-              }
-            }
-          }
-        },
-        "total_time": "23.04ms"
-      },
-      "parser-calls-10000-100": {
-        "comment": "multiple calls parser benchmark",
-        "memory_sizes": [
-          "54.500 MiB",
-          "54.500 MiB"
-        ],
-        "stats": {
-          "air::runner::execute_air": {
-            "common_prefix": "air",
-            "duration": "22.76ms",
-            "nested": {
-              "preparation_step::preparation::parse_data": "28.00µs",
-              "preparation_step::preparation::prepare": {
-                "common_prefix": "",
-                "duration": "21.04ms",
-                "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "28.00µs",
-                  "air_parser::parser::air_parser::parse": "20.87ms"
-                }
-              },
-              "runner::execute": "47.00µs",
-              "runner::farewell": {
-                "common_prefix": "air::farewell_step::outcome",
-                "duration": "188.00µs",
-                "nested": {
-                  "from_success_result": {
-                    "common_prefix": "air::farewell_step::outcome",
-                    "duration": "167.00µs",
-                    "nested": {
-                      "populate_outcome_from_contexts": "131.00µs"
+                      "populate_outcome_from_contexts": "125.00µs"
                     }
                   }
                 }
@@ -3296,15 +3202,109 @@
               "signing_step::sign_produced_cids": "106.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "39.00µs",
+                "duration": "44.00µs",
                 "nested": {
-                  "verify": "9.00µs"
+                  "verify": "10.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "22.76ms"
+        "total_time": "737.00µs"
+      },
+      "parser-10000-100": {
+        "comment": "long air script with lot of variable assignments",
+        "memory_sizes": [
+          "54.625 MiB",
+          "54.625 MiB"
+        ],
+        "stats": {
+          "air::runner::execute_air": {
+            "common_prefix": "air",
+            "duration": "22.89ms",
+            "nested": {
+              "preparation_step::preparation::parse_data": "25.00µs",
+              "preparation_step::preparation::prepare": {
+                "common_prefix": "",
+                "duration": "21.40ms",
+                "nested": {
+                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
+                  "air_parser::parser::air_parser::parse": "21.25ms"
+                }
+              },
+              "runner::execute": "39.00µs",
+              "runner::farewell": {
+                "common_prefix": "air::farewell_step::outcome",
+                "duration": "187.00µs",
+                "nested": {
+                  "from_success_result": {
+                    "common_prefix": "air::farewell_step::outcome",
+                    "duration": "168.00µs",
+                    "nested": {
+                      "populate_outcome_from_contexts": "131.00µs"
+                    }
+                  }
+                }
+              },
+              "signing_step::sign_produced_cids": "107.00µs",
+              "verification_step::verify": {
+                "common_prefix": "air_interpreter_data::cid_info",
+                "duration": "45.00µs",
+                "nested": {
+                  "verify": "11.00µs"
+                }
+              }
+            }
+          }
+        },
+        "total_time": "22.89ms"
+      },
+      "parser-calls-10000-100": {
+        "comment": "multiple calls parser benchmark",
+        "memory_sizes": [
+          "54.375 MiB",
+          "54.375 MiB"
+        ],
+        "stats": {
+          "air::runner::execute_air": {
+            "common_prefix": "air",
+            "duration": "22.65ms",
+            "nested": {
+              "preparation_step::preparation::parse_data": "25.00µs",
+              "preparation_step::preparation::prepare": {
+                "common_prefix": "",
+                "duration": "21.00ms",
+                "nested": {
+                  "air::preparation_step::preparation::make_exec_ctx": "25.00µs",
+                  "air_parser::parser::air_parser::parse": "20.84ms"
+                }
+              },
+              "runner::execute": "39.00µs",
+              "runner::farewell": {
+                "common_prefix": "air::farewell_step::outcome",
+                "duration": "187.00µs",
+                "nested": {
+                  "from_success_result": {
+                    "common_prefix": "air::farewell_step::outcome",
+                    "duration": "168.00µs",
+                    "nested": {
+                      "populate_outcome_from_contexts": "130.00µs"
+                    }
+                  }
+                }
+              },
+              "signing_step::sign_produced_cids": "107.00µs",
+              "verification_step::verify": {
+                "common_prefix": "air_interpreter_data::cid_info",
+                "duration": "42.00µs",
+                "nested": {
+                  "verify": "10.00µs"
+                }
+              }
+            }
+          }
+        },
+        "total_time": "22.65ms"
       },
       "populate-map-multiple-keys": {
         "comment": "benchmarking a map insert operation",
@@ -3315,33 +3315,33 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "3.44ms",
+            "duration": "3.45ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "168.00µs",
+                "duration": "162.00µs",
                 "nested": {
-                  "from_slice": "122.00µs"
+                  "from_slice": "113.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "209.00µs",
+                "duration": "196.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
-                  "air_parser::parser::air_parser::parse": "66.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "19.00µs",
+                  "air_parser::parser::air_parser::parse": "60.00µs"
                 }
               },
-              "runner::execute": "2.11ms",
+              "runner::execute": "2.14ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "295.00µs",
+                "duration": "285.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "275.00µs",
+                    "duration": "266.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "236.00µs"
+                      "populate_outcome_from_contexts": "231.00µs"
                     }
                   }
                 }
@@ -3349,15 +3349,15 @@
               "signing_step::sign_produced_cids": "100.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "386.00µs",
+                "duration": "392.00µs",
                 "nested": {
-                  "verify": "36.00µs"
+                  "verify": "39.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "3.44ms"
+        "total_time": "3.45ms"
       },
       "populate-map-single-key": {
         "comment": "benchmarking a map insert operation",
@@ -3368,52 +3368,52 @@
         "stats": {
           "air::runner::execute_air": {
             "common_prefix": "air",
-            "duration": "2.74ms",
+            "duration": "2.73ms",
             "nested": {
               "preparation_step::preparation::parse_data": {
                 "common_prefix": "air_interpreter_data::interpreter_data::serde_json",
-                "duration": "223.00µs",
+                "duration": "215.00µs",
                 "nested": {
-                  "from_slice": "176.00µs"
+                  "from_slice": "168.00µs"
                 }
               },
               "preparation_step::preparation::prepare": {
                 "common_prefix": "",
-                "duration": "207.00µs",
+                "duration": "195.00µs",
                 "nested": {
-                  "air::preparation_step::preparation::make_exec_ctx": "23.00µs",
-                  "air_parser::parser::air_parser::parse": "65.00µs"
+                  "air::preparation_step::preparation::make_exec_ctx": "20.00µs",
+                  "air_parser::parser::air_parser::parse": "60.00µs"
                 }
               },
               "runner::execute": "1.30ms",
               "runner::farewell": {
                 "common_prefix": "air::farewell_step::outcome",
-                "duration": "317.00µs",
+                "duration": "308.00µs",
                 "nested": {
                   "from_success_result": {
                     "common_prefix": "air::farewell_step::outcome",
-                    "duration": "297.00µs",
+                    "duration": "289.00µs",
                     "nested": {
-                      "populate_outcome_from_contexts": "240.00µs"
+                      "populate_outcome_from_contexts": "235.00µs"
                     }
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "100.00µs",
+              "signing_step::sign_produced_cids": "99.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
-                "duration": "419.00µs",
+                "duration": "425.00µs",
                 "nested": {
-                  "verify": "69.00µs"
+                  "verify": "74.00µs"
                 }
               }
             }
           }
         },
-        "total_time": "2.74ms"
+        "total_time": "2.73ms"
       }
     },
-    "datetime": "2023-12-11 13:56:25.495152+00:00",
+    "datetime": "2023-12-12 10:20:35.572977+00:00",
     "features": "check_signatures,gen_signatures",
     "platform": "macOS-14.1.2-arm64-arm-64bit",
     "version": "0.54.0"

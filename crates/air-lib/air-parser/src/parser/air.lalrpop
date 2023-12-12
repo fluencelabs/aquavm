@@ -129,7 +129,7 @@ Instr: Instruction<'input> = {
         let span = Span::new(left, right);
         validator.met_next(&next, span);
 
-        Instruction::Next(next)
+        Instruction::Next(next.into())
     },
 
     "(" xor <l:Instr> <r:Instr> ")" => Instruction::Xor(Xor(l, r).into()),
