@@ -926,271 +926,284 @@ Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
           verify: 74.00µs
 Machine e536f8eaae8c978493a773ba566ae3393e2e6240d6ea8e05b5ca1b8f77e9c441:
   Platform: Linux-5.15.0-76-generic-x86_64-with-glibc2.29
-  Timestamp: 2023-12-08 16:06:36.836015+00:00
+  Timestamp: 2023-12-12 12:01:06.070549+00:00
   AquaVM version: 0.54.0
   Benches:
   Features: check_signatures,gen_signatures
-    big-values-data (17.65ms; 59.000 MiB, 59.000 MiB): Loading a trace with huge values
-      air::runner::execute_air: 17.65ms
-        preparation_step::preparation::parse_data: 7.03ms
-          from_slice: 6.98ms
-        preparation_step::preparation::prepare: 214.00µs
-          air::preparation_step::preparation::make_exec_ctx: 20.00µs
-          air_parser::parser::air_parser::parse: 18.00µs
-        runner::execute: 9.00µs
-        runner::farewell: 4.71ms
-          from_success_result: 4.68ms
-            populate_outcome_from_contexts: 4.63ms
-        signing_step::sign_produced_cids: 155.00µs
-        verification_step::verify: 5.40ms
-          verify: 4.87ms
-    call-requests500 (35.31ms; 58.562 MiB, 58.562 MiB): multiple call requests
-      air::runner::execute_air: 35.31ms
-        preparation_step::preparation::parse_data: 116.00µs
-          from_slice: 80.00µs
-        preparation_step::preparation::prepare: 276.00µs
-          air::preparation_step::preparation::make_exec_ctx: 38.00µs
-          air_parser::parser::air_parser::parse: 50.00µs
-        runner::execute: 25.24ms
+    big-values-data (17.84ms; 59.000 MiB, 59.000 MiB): Loading a trace with huge values
+      air::runner::execute_air: 17.84ms
+        preparation_step::preparation::parse_data: 7.24ms
+          from_slice: 7.19ms
+        preparation_step::preparation::prepare: 222.00µs
+          air::preparation_step::preparation::make_exec_ctx: 21.00µs
+          air_parser::parser::air_parser::parse: 19.00µs
+        runner::execute: 10.00µs
+        runner::farewell: 4.70ms
+          from_success_result: 4.67ms
+            populate_outcome_from_contexts: 4.61ms
+        signing_step::sign_produced_cids: 158.00µs
+        verification_step::verify: 5.35ms
+          verify: 4.81ms
+    call-requests500 (35.41ms; 58.562 MiB, 58.562 MiB): multiple call requests
+      air::runner::execute_air: 35.41ms
+        preparation_step::preparation::parse_data: 112.00µs
+          from_slice: 76.00µs
+        preparation_step::preparation::prepare: 270.00µs
+          air::preparation_step::preparation::make_exec_ctx: 40.00µs
+          air_parser::parser::air_parser::parse: 48.00µs
+        runner::execute: 25.35ms
         runner::farewell: 9.31ms
           from_success_result: 9.29ms
             populate_outcome_from_contexts: 9.14ms
-        signing_step::sign_produced_cids: 161.00µs
-        verification_step::verify: 78.00µs
+        signing_step::sign_produced_cids: 165.00µs
+        verification_step::verify: 77.00µs
           verify: 10.00µs
-    call-results500 (19.65ms; 54.438 MiB, 54.438 MiB): multiple call results
-      air::runner::execute_air: 19.65ms
-        preparation_step::preparation::parse_data: 676.00µs
-          from_slice: 636.00µs
-        preparation_step::preparation::prepare: 930.00µs
-          air::preparation_step::preparation::make_exec_ctx: 687.00µs
+    call-results500 (19.57ms; 54.438 MiB, 54.438 MiB): multiple call results
+      air::runner::execute_air: 19.57ms
+        preparation_step::preparation::parse_data: 667.00µs
+          from_slice: 627.00µs
+        preparation_step::preparation::prepare: 931.00µs
+          air::preparation_step::preparation::make_exec_ctx: 694.00µs
           air_parser::parser::air_parser::parse: 50.00µs
-        runner::execute: 15.19ms
+        runner::execute: 15.12ms
         runner::farewell: 2.20ms
           from_success_result: 2.17ms
-            populate_outcome_from_contexts: 1.74ms
+            populate_outcome_from_contexts: 1.75ms
         signing_step::sign_produced_cids: 432.00µs
-        verification_step::verify: 83.00µs
+        verification_step::verify: 82.00µs
           verify: 10.00µs
-    canon-map-key-by-lens (14.99ms; 56.625 MiB, 56.625 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 14.99ms
-        preparation_step::preparation::parse_data: 4.07ms
-          from_slice: 4.02ms
-        preparation_step::preparation::prepare: 526.00µs
-          air::preparation_step::preparation::make_exec_ctx: 286.00µs
-          air_parser::parser::air_parser::parse: 56.00µs
-        runner::execute: 2.76ms
-        runner::farewell: 2.77ms
-          from_success_result: 2.75ms
-            populate_outcome_from_contexts: 2.38ms
-        signing_step::sign_produced_cids: 160.00µs
-        verification_step::verify: 4.55ms
-          verify: 4.02ms
-    canon-map-key-element-by-lens (14.93ms; 56.625 MiB, 56.625 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 14.93ms
+    canon-map-key-by-lens (14.97ms; 56.625 MiB, 56.625 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 14.97ms
         preparation_step::preparation::parse_data: 4.08ms
           from_slice: 4.03ms
-        preparation_step::preparation::prepare: 527.00µs
-          air::preparation_step::preparation::make_exec_ctx: 290.00µs
-          air_parser::parser::air_parser::parse: 58.00µs
-        runner::execute: 2.76ms
-        runner::farewell: 2.74ms
-          from_success_result: 2.72ms
-            populate_outcome_from_contexts: 2.36ms
-        signing_step::sign_produced_cids: 158.00µs
-        verification_step::verify: 4.51ms
+        preparation_step::preparation::prepare: 530.00µs
+          air::preparation_step::preparation::make_exec_ctx: 289.00µs
+          air_parser::parser::air_parser::parse: 57.00µs
+        runner::execute: 2.75ms
+        runner::farewell: 2.78ms
+          from_success_result: 2.76ms
+            populate_outcome_from_contexts: 2.39ms
+        signing_step::sign_produced_cids: 160.00µs
+        verification_step::verify: 4.52ms
           verify: 3.98ms
-    canon-map-multiple-keys (12.56ms; 54.500 MiB, 54.500 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 12.56ms
-        preparation_step::preparation::parse_data: 356.00µs
-          from_slice: 315.00µs
-        preparation_step::preparation::prepare: 248.00µs
+    canon-map-key-element-by-lens (14.92ms; 56.625 MiB, 56.625 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 14.92ms
+        preparation_step::preparation::parse_data: 4.09ms
+          from_slice: 4.04ms
+        preparation_step::preparation::prepare: 526.00µs
+          air::preparation_step::preparation::make_exec_ctx: 285.00µs
+          air_parser::parser::air_parser::parse: 58.00µs
+        runner::execute: 2.73ms
+        runner::farewell: 2.78ms
+          from_success_result: 2.75ms
+            populate_outcome_from_contexts: 2.40ms
+        signing_step::sign_produced_cids: 161.00µs
+        verification_step::verify: 4.51ms
+          verify: 3.97ms
+    canon-map-multiple-keys (12.43ms; 54.500 MiB, 54.500 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 12.43ms
+        preparation_step::preparation::parse_data: 355.00µs
+          from_slice: 313.00µs
+        preparation_step::preparation::prepare: 247.00µs
           air::preparation_step::preparation::make_exec_ctx: 18.00µs
           air_parser::parser::air_parser::parse: 46.00µs
-        runner::execute: 8.75ms
+        runner::execute: 8.64ms
         runner::farewell: 2.31ms
-          from_success_result: 2.29ms
+          from_success_result: 2.28ms
             populate_outcome_from_contexts: 1.99ms
-        signing_step::sign_produced_cids: 171.00µs
-        verification_step::verify: 580.00µs
+        signing_step::sign_produced_cids: 164.00µs
+        verification_step::verify: 566.00µs
           verify: 28.00µs
     canon-map-scalar-multiple-keys (5.33ms; 53.125 MiB, 53.125 MiB): benchmarking a map insert operation
       air::runner::execute_air: 5.33ms
-        preparation_step::preparation::parse_data: 360.00µs
-          from_slice: 317.00µs
-        preparation_step::preparation::prepare: 261.00µs
+        preparation_step::preparation::parse_data: 358.00µs
+          from_slice: 316.00µs
+        preparation_step::preparation::prepare: 244.00µs
           air::preparation_step::preparation::make_exec_ctx: 18.00µs
-          air_parser::parser::air_parser::parse: 46.00µs
-        runner::execute: 3.34ms
-        runner::farewell: 449.00µs
-          from_success_result: 425.00µs
+          air_parser::parser::air_parser::parse: 45.00µs
+        runner::execute: 3.40ms
+        runner::farewell: 460.00µs
+          from_success_result: 438.00µs
+            populate_outcome_from_contexts: 394.00µs
+        signing_step::sign_produced_cids: 161.00µs
+        verification_step::verify: 576.00µs
+          verify: 27.00µs
+    canon-map-scalar-single-key (4.35ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 4.35ms
+        preparation_step::preparation::parse_data: 387.00µs
+          from_slice: 342.00µs
+        preparation_step::preparation::prepare: 244.00µs
+          air::preparation_step::preparation::make_exec_ctx: 18.00µs
+          air_parser::parser::air_parser::parse: 43.00µs
+        runner::execute: 2.35ms
+        runner::farewell: 462.00µs
+          from_success_result: 438.00µs
+            populate_outcome_from_contexts: 380.00µs
+        signing_step::sign_produced_cids: 165.00µs
+        verification_step::verify: 599.00µs
+          verify: 62.00µs
+    canon-map-single-key (10.81ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 10.81ms
+        preparation_step::preparation::parse_data: 381.00µs
+          from_slice: 340.00µs
+        preparation_step::preparation::prepare: 239.00µs
+          air::preparation_step::preparation::make_exec_ctx: 18.00µs
+          air_parser::parser::air_parser::parse: 43.00µs
+        runner::execute: 6.62ms
+        runner::farewell: 2.68ms
+          from_success_result: 2.66ms
+            populate_outcome_from_contexts: 2.40ms
+        signing_step::sign_produced_cids: 160.00µs
+        verification_step::verify: 590.00µs
+          verify: 61.00µs
+    dashboard (8.65ms; 52.625 MiB, 52.625 MiB): big dashboard test
+      air::runner::execute_air: 8.65ms
+        preparation_step::preparation::parse_data: 1.32ms
+          from_slice: 1.26ms
+        preparation_step::preparation::prepare: 360.00µs
+          air::preparation_step::preparation::make_exec_ctx: 41.00µs
+          air_parser::parser::air_parser::parse: 132.00µs
+        runner::execute: 1.08ms
+        runner::farewell: 674.00µs
+          from_success_result: 650.00µs
+            populate_outcome_from_contexts: 596.00µs
+        signing_step::sign_produced_cids: 172.00µs
+        verification_step::verify: 4.89ms
+          verify: 198.00µs
+    long-data (6.29ms; 53.812 MiB, 53.812 MiB): Long data trace
+      air::runner::execute_air: 6.29ms
+        preparation_step::preparation::parse_data: 2.44ms
+          from_slice: 2.40ms
+        preparation_step::preparation::prepare: 239.00µs
+          air::preparation_step::preparation::make_exec_ctx: 41.00µs
+          air_parser::parser::air_parser::parse: 18.00µs
+        runner::execute: 9.00µs
+        runner::farewell: 1.09ms
+          from_success_result: 1.07ms
+            populate_outcome_from_contexts: 1.03ms
+        signing_step::sign_produced_cids: 160.00µs
+        verification_step::verify: 2.23ms
+          verify: 838.00µs
+    multiple-cids10 (3.43ms; 52.438 MiB, 52.438 MiB): verifying multiple CIDs for single peer
+      air::runner::execute_air: 3.43ms
+        preparation_step::preparation::parse_data: 478.00µs
+          from_slice: 423.00µs
+        preparation_step::preparation::prepare: 260.00µs
+          air::preparation_step::preparation::make_exec_ctx: 32.00µs
+          air_parser::parser::air_parser::parse: 45.00µs
+        runner::execute: 572.00µs
+        runner::farewell: 464.00µs
+          from_success_result: 441.00µs
             populate_outcome_from_contexts: 383.00µs
         signing_step::sign_produced_cids: 162.00µs
-        verification_step::verify: 620.00µs
-          verify: 28.00µs
-    canon-map-scalar-single-key (4.39ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 4.39ms
-        preparation_step::preparation::parse_data: 391.00µs
-          from_slice: 347.00µs
-        preparation_step::preparation::prepare: 258.00µs
-          air::preparation_step::preparation::make_exec_ctx: 18.00µs
-          air_parser::parser::air_parser::parse: 44.00µs
-        runner::execute: 2.35ms
-        runner::farewell: 443.00µs
-          from_success_result: 420.00µs
-            populate_outcome_from_contexts: 365.00µs
-        signing_step::sign_produced_cids: 159.00µs
-        verification_step::verify: 650.00µs
-          verify: 65.00µs
-    canon-map-single-key (10.82ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 10.82ms
-        preparation_step::preparation::parse_data: 383.00µs
-          from_slice: 343.00µs
-        preparation_step::preparation::prepare: 250.00µs
-          air::preparation_step::preparation::make_exec_ctx: 18.00µs
-          air_parser::parser::air_parser::parse: 41.00µs
-        runner::execute: 6.60ms
-        runner::farewell: 2.61ms
-          from_success_result: 2.59ms
-            populate_outcome_from_contexts: 2.34ms
-        signing_step::sign_produced_cids: 166.00µs
-        verification_step::verify: 672.00µs
-          verify: 63.00µs
-    dashboard (8.62ms; 52.625 MiB, 52.625 MiB): big dashboard test
-      air::runner::execute_air: 8.62ms
-        preparation_step::preparation::parse_data: 1.36ms
-          from_slice: 1.30ms
-        preparation_step::preparation::prepare: 356.00µs
-          air::preparation_step::preparation::make_exec_ctx: 42.00µs
-          air_parser::parser::air_parser::parse: 133.00µs
-        runner::execute: 1.10ms
-        runner::farewell: 656.00µs
-          from_success_result: 633.00µs
-            populate_outcome_from_contexts: 580.00µs
-        signing_step::sign_produced_cids: 161.00µs
-        verification_step::verify: 4.85ms
-          verify: 200.00µs
-    long-data (6.47ms; 53.812 MiB, 53.812 MiB): Long data trace
-      air::runner::execute_air: 6.47ms
-        preparation_step::preparation::parse_data: 2.43ms
-          from_slice: 2.38ms
-        preparation_step::preparation::prepare: 247.00µs
-          air::preparation_step::preparation::make_exec_ctx: 40.00µs
-          air_parser::parser::air_parser::parse: 19.00µs
-        runner::execute: 9.00µs
-        runner::farewell: 1.11ms
-          from_success_result: 1.09ms
-            populate_outcome_from_contexts: 1.05ms
-        signing_step::sign_produced_cids: 170.00µs
-        verification_step::verify: 2.38ms
-          verify: 844.00µs
-    multiple-cids10 (3.42ms; 52.438 MiB, 52.438 MiB): verifying multiple CIDs for single peer
-      air::runner::execute_air: 3.42ms
-        preparation_step::preparation::parse_data: 482.00µs
-          from_slice: 424.00µs
-        preparation_step::preparation::prepare: 261.00µs
-          air::preparation_step::preparation::make_exec_ctx: 33.00µs
-          air_parser::parser::air_parser::parse: 45.00µs
-        runner::execute: 570.00µs
-        runner::farewell: 455.00µs
-          from_success_result: 430.00µs
-            populate_outcome_from_contexts: 370.00µs
-        signing_step::sign_produced_cids: 158.00µs
-        verification_step::verify: 1.35ms
-          verify: 238.00µs
-    multiple-peers8 (14.23ms; 53.375 MiB, 53.375 MiB): verifying many CIDs for many peers
-      air::runner::execute_air: 14.23ms
-        preparation_step::preparation::parse_data: 1.82ms
-          from_slice: 1.77ms
-        preparation_step::preparation::prepare: 349.00µs
-          air::preparation_step::preparation::make_exec_ctx: 105.00µs
+        verification_step::verify: 1.36ms
+          verify: 233.00µs
+    multiple-peers8 (13.67ms; 53.375 MiB, 53.375 MiB): verifying many CIDs for many peers
+      air::runner::execute_air: 13.67ms
+        preparation_step::preparation::parse_data: 1.77ms
+          from_slice: 1.71ms
+        preparation_step::preparation::prepare: 338.00µs
+          air::preparation_step::preparation::make_exec_ctx: 104.00µs
+          air_parser::parser::air_parser::parse: 51.00µs
+        runner::execute: 3.68ms
+        runner::farewell: 1.30ms
+          from_success_result: 1.28ms
+            populate_outcome_from_contexts: 1.17ms
+        signing_step::sign_produced_cids: 162.00µs
+        verification_step::verify: 6.26ms
+          verify: 1.04ms
+    multiple-sigs30 (24.71ms; 56.188 MiB, 56.188 MiB): signing multiple CIDs
+      air::runner::execute_air: 24.71ms
+        preparation_step::preparation::parse_data: 5.05ms
+          from_slice: 4.98ms
+        preparation_step::preparation::prepare: 444.00µs
+          air::preparation_step::preparation::make_exec_ctx: 208.00µs
           air_parser::parser::air_parser::parse: 49.00µs
-        runner::execute: 3.70ms
-        runner::farewell: 1.29ms
-          from_success_result: 1.27ms
-            populate_outcome_from_contexts: 1.16ms
-        signing_step::sign_produced_cids: 158.00µs
-        verification_step::verify: 6.80ms
-          verify: 1.05ms
-    multiple-sigs30 (24.93ms; 56.188 MiB, 56.188 MiB): signing multiple CIDs
-      air::runner::execute_air: 24.93ms
-        preparation_step::preparation::parse_data: 5.02ms
-          from_slice: 4.96ms
-        preparation_step::preparation::prepare: 443.00µs
-          air::preparation_step::preparation::make_exec_ctx: 217.00µs
-          air_parser::parser::air_parser::parse: 49.00µs
-        runner::execute: 10.60ms
+        runner::execute: 10.47ms
         runner::farewell: 3.69ms
-          from_success_result: 3.67ms
-            populate_outcome_from_contexts: 3.49ms
-        signing_step::sign_produced_cids: 667.00µs
-        verification_step::verify: 4.35ms
-          verify: 1.83ms
-    network-explore (4.36ms; 52.375 MiB, 52.375 MiB): 5 peers of network are discovered
-      air::runner::execute_air: 4.36ms
+          from_success_result: 3.66ms
+            populate_outcome_from_contexts: 3.48ms
+        signing_step::sign_produced_cids: 654.00µs
+        verification_step::verify: 4.27ms
+          verify: 1.80ms
+    network-explore (4.40ms; 52.375 MiB, 52.375 MiB): 5 peers of network are discovered
+      air::runner::execute_air: 4.40ms
         preparation_step::preparation::parse_data: 587.00µs
-          from_slice: 532.00µs
-        preparation_step::preparation::prepare: 270.00µs
+          from_slice: 531.00µs
+        preparation_step::preparation::prepare: 273.00µs
           air::preparation_step::preparation::make_exec_ctx: 23.00µs
-          air_parser::parser::air_parser::parse: 67.00µs
-        runner::execute: 166.00µs
-        runner::farewell: 366.00µs
-          from_success_result: 344.00µs
-            populate_outcome_from_contexts: 299.00µs
-        signing_step::sign_produced_cids: 160.00µs
-        verification_step::verify: 2.68ms
+          air_parser::parser::air_parser::parse: 68.00µs
+        runner::execute: 159.00µs
+        runner::farewell: 369.00µs
+          from_success_result: 346.00µs
+            populate_outcome_from_contexts: 301.00µs
+        signing_step::sign_produced_cids: 162.00µs
+        verification_step::verify: 2.72ms
           verify: 64.00µs
-    null (888.00µs; 52.375 MiB, 52.375 MiB): Empty data and null script
-      air::runner::execute_air: 888.00µs
-        preparation_step::preparation::parse_data: 22.00µs
-        preparation_step::preparation::prepare: 238.00µs
-          air::preparation_step::preparation::make_exec_ctx: 16.00µs
+    null (834.00µs; 52.375 MiB, 52.375 MiB): Empty data and null script
+      air::runner::execute_air: 834.00µs
+        preparation_step::preparation::parse_data: 19.00µs
+        preparation_step::preparation::prepare: 224.00µs
+          air::preparation_step::preparation::make_exec_ctx: 15.00µs
           air_parser::parser::air_parser::parse: 19.00µs
         runner::execute: 9.00µs
-        runner::farewell: 270.00µs
-          from_success_result: 248.00µs
-            populate_outcome_from_contexts: 209.00µs
-        signing_step::sign_produced_cids: 177.00µs
-        verification_step::verify: 37.00µs
-          verify: 12.00µs
-    parser-10000-100 (28.81ms; 54.938 MiB, 54.938 MiB): long air script with lot of variable assignments
-      air::runner::execute_air: 28.81ms
-        preparation_step::preparation::parse_data: 19.00µs
-        preparation_step::preparation::prepare: 27.56ms
-          air::preparation_step::preparation::make_exec_ctx: 16.00µs
-          air_parser::parser::air_parser::parse: 27.34ms
-        runner::execute: 29.00µs
-        runner::farewell: 254.00µs
-          from_success_result: 231.00µs
-            populate_outcome_from_contexts: 192.00µs
-        signing_step::sign_produced_cids: 158.00µs
+        runner::farewell: 256.00µs
+          from_success_result: 235.00µs
+            populate_outcome_from_contexts: 195.00µs
+        signing_step::sign_produced_cids: 161.00µs
+        verification_step::verify: 35.00µs
+          verify: 10.00µs
+    parser-10000-100 (28.73ms; 54.625 MiB, 54.625 MiB): long air script with lot of variable assignments
+      air::runner::execute_air: 28.73ms
+        preparation_step::preparation::parse_data: 20.00µs
+        preparation_step::preparation::prepare: 27.47ms
+          air::preparation_step::preparation::make_exec_ctx: 17.00µs
+          air_parser::parser::air_parser::parse: 27.23ms
+        runner::execute: 27.00µs
+        runner::farewell: 263.00µs
+          from_success_result: 240.00µs
+            populate_outcome_from_contexts: 201.00µs
+        signing_step::sign_produced_cids: 162.00µs
         verification_step::verify: 36.00µs
           verify: 10.00µs
-    populate-map-multiple-keys (4.54ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 4.54ms
-        preparation_step::preparation::parse_data: 140.00µs
-          from_slice: 96.00µs
-        preparation_step::preparation::prepare: 258.00µs
-          air::preparation_step::preparation::make_exec_ctx: 19.00µs
-          air_parser::parser::air_parser::parse: 49.00µs
-        runner::execute: 2.85ms
-        runner::farewell: 394.00µs
-          from_success_result: 370.00µs
-            populate_outcome_from_contexts: 328.00µs
-        signing_step::sign_produced_cids: 167.00µs
-        verification_step::verify: 588.00µs
-          verify: 29.00µs
-    populate-map-single-key (3.71ms; 52.938 MiB, 52.938 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 3.71ms
-        preparation_step::preparation::parse_data: 206.00µs
-          from_slice: 162.00µs
-        preparation_step::preparation::prepare: 255.00µs
-          air::preparation_step::preparation::make_exec_ctx: 20.00µs
+    parser-calls-10000-100 (25.94ms; 54.375 MiB, 54.375 MiB): multiple calls parser benchmark
+      air::runner::execute_air: 25.94ms
+        preparation_step::preparation::parse_data: 18.00µs
+        preparation_step::preparation::prepare: 24.66ms
+          air::preparation_step::preparation::make_exec_ctx: 15.00µs
+          air_parser::parser::air_parser::parse: 24.46ms
+        runner::execute: 28.00µs
+        runner::farewell: 255.00µs
+          from_success_result: 233.00µs
+            populate_outcome_from_contexts: 195.00µs
+        signing_step::sign_produced_cids: 160.00µs
+        verification_step::verify: 36.00µs
+          verify: 10.00µs
+    populate-map-multiple-keys (4.40ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 4.40ms
+        preparation_step::preparation::parse_data: 131.00µs
+          from_slice: 91.00µs
+        preparation_step::preparation::prepare: 243.00µs
+          air::preparation_step::preparation::make_exec_ctx: 17.00µs
+          air_parser::parser::air_parser::parse: 48.00µs
+        runner::execute: 2.80ms
+        runner::farewell: 383.00µs
+          from_success_result: 361.00µs
+            populate_outcome_from_contexts: 321.00µs
+        signing_step::sign_produced_cids: 158.00µs
+        verification_step::verify: 557.00µs
+          verify: 27.00µs
+    populate-map-single-key (3.62ms; 52.938 MiB, 52.938 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 3.62ms
+        preparation_step::preparation::parse_data: 200.00µs
+          from_slice: 159.00µs
+        preparation_step::preparation::prepare: 244.00µs
+          air::preparation_step::preparation::make_exec_ctx: 17.00µs
           air_parser::parser::air_parser::parse: 45.00µs
-        runner::execute: 1.94ms
-        runner::farewell: 400.00µs
-          from_success_result: 377.00µs
-            populate_outcome_from_contexts: 322.00µs
-        signing_step::sign_produced_cids: 157.00µs
-        verification_step::verify: 614.00µs
-          verify: 64.00µs
+        runner::execute: 1.89ms
+        runner::farewell: 403.00µs
+          from_success_result: 381.00µs
+            populate_outcome_from_contexts: 325.00µs
+        signing_step::sign_produced_cids: 160.00µs
+        verification_step::verify: 586.00µs
+          verify: 60.00µs
