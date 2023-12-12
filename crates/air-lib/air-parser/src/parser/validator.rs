@@ -595,16 +595,10 @@ impl<'i> ValidatorErrorBuilder<'i> {
                 {
                     {
                         let after_next_right_pos = fold_span.right;
-                        if self
-                            .validator
-                            .other_instrs_spans
-                            .iter()
-                            .find(|instr_span| {
-                                after_next_left_pos < instr_span.left
-                                    && instr_span.right < after_next_right_pos
-                            })
-                            .is_some()
-                        {
+                        if self.validator.other_instrs_spans.iter().any(|instr_span| {
+                            after_next_left_pos < instr_span.left
+                                && instr_span.right < after_next_right_pos
+                        }) {
                             let error = ParserError::fold_has_instruction_after_next(*fold_span);
                             add_to_errors(&mut self.errors, *fold_span, Token::Next, error);
                         }

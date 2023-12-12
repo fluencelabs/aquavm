@@ -42,8 +42,8 @@ impl Span {
 
     // This presumes that a `span` that begins in `self` can not overlap
     // and at the same time can not get outside the `self`.
-    pub fn contains_or_equal_span(&self, span: Self) -> bool {
-        self.left <= span.left && span.right <= self.right
+    pub fn contains_or_equal_span(&self, target_span: Self) -> bool {
+        self.left <= target_span.left && target_span.right <= self.right
     }
 }
 
