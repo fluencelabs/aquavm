@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.55.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.54.0...air-interpreter-v0.55.0) (2023-12-12)
+
+
+### Bug Fixes
+
+* **air-interpreter:** enable multiple invoke_tracing calls for air-interpreter ([#753](https://github.com/fluencelabs/aquavm/issues/753)) ([938e5eb](https://github.com/fluencelabs/aquavm/commit/938e5eb0339cc2c94446da882e34e3d98bfa3c01))
+* **deps:** update rust crate marine-rs-sdk to 0.10.2 ([#733](https://github.com/fluencelabs/aquavm/issues/733)) ([05fda3e](https://github.com/fluencelabs/aquavm/commit/05fda3ee16d5d15e7af542a0d69d998d17827c15))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.54.0 to 0.55.0
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+
 ## [0.54.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.53.0...air-interpreter-v0.54.0) (2023-10-26)
 
 

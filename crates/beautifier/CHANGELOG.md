@@ -8,6 +8,24 @@
   * dependencies
     * aquavm-air-parser bumped from 0.8.1 to 0.8.2
 
+## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.3.1...air-beautifier-v0.4.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767))
+
+### Features
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767)) ([1673cdf](https://github.com/fluencelabs/aquavm/commit/1673cdf06c1fcdd9d06789b0d9d76e71d1625fea))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+
 ## [0.3.1](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.3.0...air-beautifier-v0.3.1) (2023-09-21)
 
 

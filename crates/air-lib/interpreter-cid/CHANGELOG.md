@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.6.0...air-interpreter-cid-v0.7.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722))
+
+### Features
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722)) ([524c302](https://github.com/fluencelabs/aquavm/commit/524c30243bc544d5e265d9c6c7d1119a447202af))
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.5.0...air-interpreter-cid-v0.6.0) (2023-10-26)
 
 

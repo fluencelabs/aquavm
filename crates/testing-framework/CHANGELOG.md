@@ -62,6 +62,26 @@
     * air-test-utils bumped from 0.12.0 to 0.12.1
     * air-interpreter-signatures bumped from 0.1.3 to 0.1.4
 
+## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.7.3...air-testing-framework-v0.8.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.12.1 to 0.13.0
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+    * air-interpreter-signatures bumped from 0.1.4 to 0.1.5
+
 ## [0.7.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.6.1...air-testing-framework-v0.7.0) (2023-10-13)
 
 

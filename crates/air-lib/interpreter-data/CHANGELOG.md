@@ -25,6 +25,28 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.15.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.14.0...air-interpreter-data-v0.15.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722)) ([524c302](https://github.com/fluencelabs/aquavm/commit/524c30243bc544d5e265d9c6c7d1119a447202af))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-signatures bumped from 0.1.4 to 0.1.5
+
 ## [0.14.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.13.0...air-interpreter-data-v0.14.0) (2023-10-26)
 
 

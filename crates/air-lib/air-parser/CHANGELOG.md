@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.10.0...air-parser-v0.11.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767))
+
+### Features
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767)) ([1673cdf](https://github.com/fluencelabs/aquavm/commit/1673cdf06c1fcdd9d06789b0d9d76e71d1625fea))
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.9.0...air-parser-v0.10.0) (2023-09-21)
 
 
