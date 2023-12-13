@@ -165,7 +165,9 @@ impl<'i> ResolvedCall<'i> {
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let serialized_tetraplets = TetrapletsRepr.serialize(&tetraplets).unwrap();
+        let serialized_tetraplets = TetrapletsRepr
+            .serialize(&tetraplets)
+            .map_err(UncatchableError::TetrapletSerializationFailed)?;
 
         let request_params = CallRequestParams::new(
             tetraplet.service_id.to_string(),
@@ -205,7 +207,9 @@ impl<'i> ResolvedCall<'i> {
 
         let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
-        let call_arguments = CallArgumentsRepr.serialize(&call_arguments).unwrap();
+        let call_arguments = CallArgumentsRepr
+            .serialize(&call_arguments)
+            .map_err(UncatchableError::CallArgumentsSerializationFailed)?;
 
         let resolved_arguments = ResolvedArguments {
             call_arguments,
