@@ -64,6 +64,35 @@
     * avm-interface bumped from 0.29.1 to 0.29.2
     * avm-server bumped from 0.33.1 to 0.33.2
 
+## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.12.1...air-test-utils-v0.13.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.2 ([#733](https://github.com/fluencelabs/aquavm/issues/733)) ([05fda3e](https://github.com/fluencelabs/aquavm/commit/05fda3ee16d5d15e7af542a0d69d998d17827c15))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.54.0 to 0.55.0
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-data bumped from 0.14.0 to 0.15.0
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+    * air-interpreter-signatures bumped from 0.1.3 to 0.1.5
+    * avm-interface bumped from 0.29.2 to 0.29.3
+    * avm-server bumped from 0.33.3 to 0.33.4
+
 ## [0.12.1](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.12.0...air-test-utils-v0.12.1) (2023-10-26)
 
 

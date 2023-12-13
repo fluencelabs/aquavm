@@ -40,6 +40,12 @@
     * air-interpreter-cid bumped from 0.5.0 to 0.6.0
     * air-interpreter-data bumped from 0.13.0 to 0.14.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-data bumped from 0.14.0 to 0.15.0
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-trace-handler-v0.4.0...air-trace-handler-v0.5.0) (2023-08-31)
 
 

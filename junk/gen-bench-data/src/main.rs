@@ -60,6 +60,8 @@ enum Bench {
     CallResults500,
     #[command(name = "parser-10000-100")]
     Parser10000_100,
+    #[command(name = "parser-calls-10000-100")]
+    ParserCalls10000_100,
     Null,
 }
 
@@ -90,6 +92,7 @@ fn main() {
         Bench::CallRequests500 => calls::call_requests(500),
         Bench::CallResults500 => calls::call_results(500),
         Bench::Parser10000_100 => parser_10000_100(),
+        Bench::ParserCalls10000_100 => parser_calls(10000, 100),
         Bench::Null => null(),
     };
 
@@ -744,6 +747,55 @@ fn parser_10000_100() -> Data {
         keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
         params_json: hashmap! {
             "comment".to_owned() => "long air script with lot of variable assignments".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+    }
+}
+
+fn parser_calls(calls: usize, vars: usize) -> Data {
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+
+    let vars = (0..vars).map(|n| format!("var{}", n)).collect_vec();
+    let init_var = vars[0].clone();
+    let statements = vars
+        .iter()
+        .cycle()
+        .take(calls)
+        .tuple_windows()
+        .map(|(a, b)| format!(r#"(call {a} ("serv" "func") [] {b})"#))
+        .collect_vec();
+
+    fn build_tree(statements: &[String]) -> String {
+        assert!(!statements.is_empty());
+        if statements.len() == 1 {
+            statements[0].clone()
+        } else {
+            let mid = statements.len() / 2;
+            format!(
+                "(seq {} {})",
+                build_tree(&statements[..mid]),
+                build_tree(&statements[mid..])
+            )
+        }
+    }
+
+    let tree = build_tree(&statements);
+    let air = format!(
+        r#"(seq (call "peer" ("serv" "func") [] {}) {})"#,
+        init_var, tree
+    );
+
+    Data {
+        air,
+        prev_data: vec![],
+        cur_data: vec![],
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "multiple calls parser benchmark".to_owned(),
             "particle-id".to_owned() => particle_id.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,

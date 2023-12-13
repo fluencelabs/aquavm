@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+
 ## [0.29.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.28.5...avm-interface-v0.29.0) (2023-08-17)
 
 

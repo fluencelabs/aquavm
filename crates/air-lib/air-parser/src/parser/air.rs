@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 3f2a00b4e0b0922c986743c02f1829a8610259b5697c6508b93c823c487de1de
+// sha3: 127100bc464d586a4839740daea718cfbd4c90154fcbc34ebfb7cc898a24b6d7
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -49,7 +49,7 @@ mod __parse__AIR {
         Variant9(ImmutableValue<'input>),
         Variant10(alloc::vec::Vec<ImmutableValue<'input>>),
         Variant11(AirPos),
-        Variant12(Box<Instruction<'input>>),
+        Variant12(Instruction<'input>),
         Variant13(ApArgument<'input>),
         Variant14(ApResult<'input>),
         Variant15(Vec<ImmutableValue<'input>>),
@@ -60,7 +60,7 @@ mod __parse__AIR {
         Variant20(Fail<'input>),
         Variant21(FoldScalarIterable<'input>),
         Variant22(ResolvableToStringVariable<'input>),
-        Variant23(core::option::Option<Box<Instruction<'input>>>),
+        Variant23(core::option::Option<Instruction<'input>>),
         Variant24(NewArgument<'input>),
         Variant25(Number),
         Variant26(ResolvableToPeerIdVariable<'input>),
@@ -952,7 +952,7 @@ mod __parse__AIR {
         type Token = Token<'input>;
         type TokenIndex = usize;
         type Symbol = __Symbol<'input>;
-        type Success = Box<Instruction<'input>>;
+        type Success = Instruction<'input>;
         type StateIndex = i16;
         type Action = i16;
         type ReduceIndex = i16;
@@ -1889,7 +1889,7 @@ mod __parse__AIR {
             errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
             validator: &'v mut VariableValidator<'input>,
             __tokens0: __TOKENS,
-        ) -> Result<Box<Instruction<'input>>, __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>
+        ) -> Result<Instruction<'input>, __lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>
         {
             let __tokens = __tokens0.into_iter();
             let mut __tokens = __tokens.map(|t| __ToTriple::to_triple(t));
@@ -1955,7 +1955,7 @@ mod __parse__AIR {
         __states: &mut alloc::vec::Vec<i16>,
         __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>,
         _: core::marker::PhantomData<(&'err (), &'input (), &'v ())>,
-    ) -> Option<Result<Box<Instruction<'input>>,__lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>>
+    ) -> Option<Result<Instruction<'input>,__lalrpop_util::ParseError<AirPos, Token<'input>, ParserError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
@@ -2391,17 +2391,6 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant12<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
-    ) -> (AirPos, Box<Instruction<'input>>, AirPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant16<
       'input,
     >(
@@ -2465,6 +2454,17 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant9(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant12<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, Instruction<'input>, AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant12(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -2622,17 +2622,6 @@ mod __parse__AIR {
             _ => __symbol_type_mismatch()
         }
     }
-    fn __pop_Variant23<
-      'input,
-    >(
-        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
-    ) -> (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos)
-     {
-        match __symbols.pop() {
-            Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
-            _ => __symbol_type_mismatch()
-        }
-    }
     fn __pop_Variant17<
       'input,
     >(
@@ -2641,6 +2630,17 @@ mod __parse__AIR {
      {
         match __symbols.pop() {
             Some((__l, __Symbol::Variant17(__v), __r)) => (__l, __v, __r),
+            _ => __symbol_type_mismatch()
+        }
+    }
+    fn __pop_Variant23<
+      'input,
+    >(
+        __symbols: &mut alloc::vec::Vec<(AirPos,__Symbol<'input>,AirPos)>
+    ) -> (AirPos, core::option::Option<Instruction<'input>>, AirPos)
+     {
+        match __symbols.pop() {
+            Some((__l, __Symbol::Variant23(__v), __r)) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
@@ -5331,8 +5331,8 @@ fn __action0<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> Box<Instruction<'input>>
+    (_, __0, _): (AirPos, Instruction<'input>, AirPos),
+) -> Instruction<'input>
 {
     __0
 }
@@ -5347,8 +5347,8 @@ fn __action1<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> Box<Instruction<'input>>
+    (_, __0, _): (AirPos, Instruction<'input>, AirPos),
+) -> Instruction<'input>
 {
     __0
 }
@@ -5371,7 +5371,7 @@ fn __action2<
     (_, output, _): (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let args = Rc::new(args);
@@ -5381,7 +5381,7 @@ fn __action2<
 
         validator.met_call(&call, span);
 
-        Box::new(Instruction::Call(call))
+        Instruction::Call(call.into())
     }
 }
 
@@ -5403,7 +5403,7 @@ fn __action3<
     (_, canon_stream, _): (AirPos, CanonStream<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let canon = Canon::new(peer_id, stream, canon_stream);
@@ -5411,7 +5411,7 @@ fn __action3<
         let span = Span::new(left, right);
         validator.met_canon(&canon, span);
 
-        Box::new(Instruction::Canon(canon))
+        Instruction::Canon(canon.into())
     }
 }
 
@@ -5433,7 +5433,7 @@ fn __action4<
     (_, canon_stream_map, _): (AirPos, CanonStreamMap<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let canon_map = CanonMap::new(peer_id, stream_map, canon_stream_map);
@@ -5441,7 +5441,7 @@ fn __action4<
         let span = Span::new(left, right);
         validator.met_canon_map(&canon_map, span);
 
-        Box::new(Instruction::CanonMap(canon_map))
+        Instruction::CanonMap(canon_map.into())
     }
 }
 
@@ -5463,7 +5463,7 @@ fn __action5<
     (_, scalar_pair, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let scalar = Scalar::new(scalar_pair.0, scalar_pair.1);
@@ -5472,7 +5472,7 @@ fn __action5<
         let span = Span::new(left, right);
         validator.met_canon_map_scalar(&canon, span);
 
-        Box::new(Instruction::CanonStreamMapScalar(canon))
+        Instruction::CanonStreamMapScalar(canon.into())
     }
 }
 
@@ -5493,7 +5493,7 @@ fn __action6<
     (_, result, _): (AirPos, ApResult<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let apply = Ap::new(arg, result);
@@ -5501,7 +5501,7 @@ fn __action6<
         let span = Span::new(left, right);
         validator.met_ap(&apply, span);
 
-        Box::new(Instruction::Ap(apply))
+        Instruction::Ap(apply.into())
     }
 }
 
@@ -5525,7 +5525,7 @@ fn __action7<
     (_, map, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let map = StreamMap::new(map.0, map.1);
@@ -5534,7 +5534,7 @@ fn __action7<
         let span = Span::new(left, right);
         validator.met_ap_map(&apply, span);
 
-        Box::new(Instruction::ApMap(apply))
+        Instruction::ApMap(apply.into())
     }
 }
 
@@ -5550,12 +5550,12 @@ fn __action8<
     validator: &'v mut VariableValidator<'input>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    Box::new(Instruction::Seq(Seq::new(l, r)))
+    Instruction::Seq(Seq::new(l, r).into())
 }
 
 #[allow(unused_variables)]
@@ -5570,12 +5570,12 @@ fn __action9<
     validator: &'v mut VariableValidator<'input>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    Box::new(Instruction::Par(Par::new(l, r)))
+    Instruction::Par(Par::new(l, r).into())
 }
 
 #[allow(unused_variables)]
@@ -5591,9 +5591,9 @@ fn __action10<
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
     (_, __2, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    Box::new(Instruction::Never(Never))
+    Instruction::Never(Never)
 }
 
 #[allow(unused_variables)]
@@ -5609,9 +5609,9 @@ fn __action11<
     (_, __0, _): (AirPos, Token<'input>, AirPos),
     (_, __1, _): (AirPos, Token<'input>, AirPos),
     (_, __2, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    Box::new(Instruction::Null(Null))
+    Instruction::Null(Null)
 }
 
 #[allow(unused_variables)]
@@ -5628,10 +5628,10 @@ fn __action12<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, argument, _): (AirPos, NewArgument<'input>, AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, instruction, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let span = Span::new(left, right);
@@ -5639,7 +5639,7 @@ fn __action12<
 
         validator.met_new(&new, span);
 
-        Box::new(Instruction::New(new))
+        Instruction::New(new.into())
     }
 }
 
@@ -5659,13 +5659,13 @@ fn __action13<
     (_, fail_body, _): (AirPos, Fail<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let span = Span::new(left, right);
         validator.met_fail_literal(&fail_body, span);
 
-        Box::new(Instruction::Fail(fail_body))
+        Instruction::Fail(fail_body.into())
     }
 }
 
@@ -5684,20 +5684,20 @@ fn __action14<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, iterable, _): (AirPos, FoldScalarIterable<'input>, AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldScalar::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldScalar::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.met_fold_scalar(&fold, span);
 
-        Box::new(Instruction::FoldScalar(fold))
+        Instruction::FoldScalar(fold.into())
     }
 }
 
@@ -5716,21 +5716,21 @@ fn __action15<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, stream, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let iterable = Stream::new(stream.0, stream.1);
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
-        let fold = FoldStream::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStream::new(iterable, iterator, instruction, last_instruction, span);
 
         validator.meet_fold_stream(&fold, span);
 
-        Box::new(Instruction::FoldStream(fold))
+        Instruction::FoldStream(fold.into())
     }
 }
 
@@ -5749,19 +5749,19 @@ fn __action16<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, stream_map, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
-    (_, instruction, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, last_instruction, _): (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    (_, instruction, _): (AirPos, Instruction<'input>, AirPos),
+    (_, last_instruction, _): (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
         let span = Span::new(left, right);
         let iterable = StreamMap::new(stream_map.0, stream_map.1);
-        let fold = FoldStreamMap::new(iterable, iterator, *instruction, last_instruction.map(|v| *v), span);
+        let fold = FoldStreamMap::new(iterable, iterator, instruction, last_instruction, span);
         validator.meet_fold_stream_map(&fold, span);
-        Box::new(Instruction::FoldStreamMap(fold))
+        Instruction::FoldStreamMap(fold.into())
     }
 }
 
@@ -5781,7 +5781,7 @@ fn __action17<
     (_, iterator, _): (AirPos, (&'input str, AirPos), AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let iterator = Scalar::new(iterator.0, iterator.1);
@@ -5789,7 +5789,7 @@ fn __action17<
         let span = Span::new(left, right);
         validator.met_next(&next, span);
 
-        Box::new(Instruction::Next(next))
+        Instruction::Next(next.into())
     }
 }
 
@@ -5805,12 +5805,12 @@ fn __action18<
     validator: &'v mut VariableValidator<'input>,
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-    (_, l, _): (AirPos, Box<Instruction<'input>>, AirPos),
-    (_, r, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, l, _): (AirPos, Instruction<'input>, AirPos),
+    (_, r, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    Box::new(Instruction::Xor(Xor(l, r)))
+    Instruction::Xor(Xor(l, r).into())
 }
 
 #[allow(unused_variables)]
@@ -5828,17 +5828,17 @@ fn __action19<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, l, _): (AirPos, ImmutableValue<'input>, AirPos),
     (_, r, _): (AirPos, ImmutableValue<'input>, AirPos),
-    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, i, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let match_ = Match::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_match(&match_, span);
 
-        Box::new(Instruction::Match(match_))
+        Instruction::Match(match_.into())
     }
 }
 
@@ -5857,17 +5857,17 @@ fn __action20<
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, l, _): (AirPos, ImmutableValue<'input>, AirPos),
     (_, r, _): (AirPos, ImmutableValue<'input>, AirPos),
-    (_, i, _): (AirPos, Box<Instruction<'input>>, AirPos),
+    (_, i, _): (AirPos, Instruction<'input>, AirPos),
     (_, _, _): (AirPos, Token<'input>, AirPos),
     (_, right, _): (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     {
         let mismatch = MisMatch::new(l, r, i);
         let span = Span::new(left, right);
         validator.met_mismatch(&mismatch, span);
 
-        Box::new(Instruction::MisMatch(mismatch))
+        Instruction::MisMatch(mismatch.into())
      }
 }
 
@@ -5882,9 +5882,9 @@ fn __action21<
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
     (_, __0, _): (AirPos, __lalrpop_util::ErrorRecovery<AirPos, Token<'input>, ParserError>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
-    { errors.push(__0); Box::new(Instruction::Error) }
+    { errors.push(__0); Instruction::Error }
 }
 
 #[allow(unused_variables)]
@@ -7283,8 +7283,8 @@ fn __action107<
     input: &'input str,
     errors: &'err mut Vec<ErrorRecovery<AirPos, Token<'input>, ParserError>>,
     validator: &'v mut VariableValidator<'input>,
-    (_, __0, _): (AirPos, Box<Instruction<'input>>, AirPos),
-) -> core::option::Option<Box<Instruction<'input>>>
+    (_, __0, _): (AirPos, Instruction<'input>, AirPos),
+) -> core::option::Option<Instruction<'input>>
 {
     Some(__0)
 }
@@ -7301,7 +7301,7 @@ fn __action108<
     validator: &'v mut VariableValidator<'input>,
     __lookbehind: &AirPos,
     __lookahead: &AirPos,
-) -> core::option::Option<Box<Instruction<'input>>>
+) -> core::option::Option<Instruction<'input>>
 {
     None
 }
@@ -7619,7 +7619,7 @@ fn __action121<
     __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7663,7 +7663,7 @@ fn __action122<
     __4: (AirPos, CanonStream<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7707,7 +7707,7 @@ fn __action123<
     __4: (AirPos, CanonStreamMap<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7751,7 +7751,7 @@ fn __action124<
     __4: (AirPos, (&'input str, AirPos), AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7794,7 +7794,7 @@ fn __action125<
     __3: (AirPos, ApResult<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
     __5: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7839,7 +7839,7 @@ fn __action126<
     __6: (AirPos, (&'input str, AirPos), AirPos),
     __7: (AirPos, Token<'input>, AirPos),
     __8: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7881,10 +7881,10 @@ fn __action127<
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, NewArgument<'input>, AirPos),
-    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __3: (AirPos, Instruction<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
     __5: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7925,7 +7925,7 @@ fn __action128<
     __2: (AirPos, Fail<'input>, AirPos),
     __3: (AirPos, Token<'input>, AirPos),
     __4: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -7964,11 +7964,11 @@ fn __action129<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8010,11 +8010,11 @@ fn __action130<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8056,11 +8056,11 @@ fn __action131<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
     __7: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8103,7 +8103,7 @@ fn __action132<
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, Token<'input>, AirPos),
     __4: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8142,10 +8142,10 @@ fn __action133<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8186,10 +8186,10 @@ fn __action134<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, AirPos, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __0.0;
     let __end0 = __0.0;
@@ -8296,7 +8296,7 @@ fn __action137<
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, core::option::Option<CallOutputValue<'input>>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8338,7 +8338,7 @@ fn __action138<
     __3: (AirPos, Stream<'input>, AirPos),
     __4: (AirPos, CanonStream<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8380,7 +8380,7 @@ fn __action139<
     __3: (AirPos, StreamMap<'input>, AirPos),
     __4: (AirPos, CanonStreamMap<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8422,7 +8422,7 @@ fn __action140<
     __3: (AirPos, StreamMap<'input>, AirPos),
     __4: (AirPos, (&'input str, AirPos), AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8463,7 +8463,7 @@ fn __action141<
     __2: (AirPos, ApArgument<'input>, AirPos),
     __3: (AirPos, ApResult<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __4.2;
@@ -8506,7 +8506,7 @@ fn __action142<
     __5: (AirPos, Token<'input>, AirPos),
     __6: (AirPos, (&'input str, AirPos), AirPos),
     __7: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __7.2;
     let __end0 = __7.2;
@@ -8547,9 +8547,9 @@ fn __action143<
     __0: (AirPos, Token<'input>, AirPos),
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, NewArgument<'input>, AirPos),
-    __3: (AirPos, Box<Instruction<'input>>, AirPos),
+    __3: (AirPos, Instruction<'input>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __4.2;
@@ -8588,7 +8588,7 @@ fn __action144<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, Fail<'input>, AirPos),
     __3: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __3.2;
@@ -8626,10 +8626,10 @@ fn __action145<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8670,10 +8670,10 @@ fn __action146<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8714,10 +8714,10 @@ fn __action147<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, core::option::Option<Box<Instruction<'input>>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, core::option::Option<Instruction<'input>>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __6.2;
     let __end0 = __6.2;
@@ -8758,7 +8758,7 @@ fn __action148<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __3.2;
@@ -8796,9 +8796,9 @@ fn __action149<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8838,9 +8838,9 @@ fn __action150<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, ImmutableValue<'input>, AirPos),
     __3: (AirPos, ImmutableValue<'input>, AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.2;
     let __end0 = __5.2;
@@ -8882,7 +8882,7 @@ fn __action151<
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, CallOutputValue<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.0;
     let __end0 = __4.2;
@@ -8921,7 +8921,7 @@ fn __action152<
     __2: (AirPos, Triplet<'input>, AirPos),
     __3: (AirPos, Vec<ImmutableValue<'input>>, AirPos),
     __4: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __3.2;
     let __end0 = __4.0;
@@ -8960,10 +8960,10 @@ fn __action153<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -9002,9 +9002,9 @@ fn __action154<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, FoldScalarIterable<'input>, AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;
@@ -9044,10 +9044,10 @@ fn __action155<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -9086,9 +9086,9 @@ fn __action156<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;
@@ -9128,10 +9128,10 @@ fn __action157<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
-    __5: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
+    __5: (AirPos, Instruction<'input>, AirPos),
     __6: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __5.0;
     let __end0 = __5.2;
@@ -9170,9 +9170,9 @@ fn __action158<
     __1: (AirPos, Token<'input>, AirPos),
     __2: (AirPos, (&'input str, AirPos), AirPos),
     __3: (AirPos, (&'input str, AirPos), AirPos),
-    __4: (AirPos, Box<Instruction<'input>>, AirPos),
+    __4: (AirPos, Instruction<'input>, AirPos),
     __5: (AirPos, Token<'input>, AirPos),
-) -> Box<Instruction<'input>>
+) -> Instruction<'input>
 {
     let __start0 = __4.2;
     let __end0 = __5.0;

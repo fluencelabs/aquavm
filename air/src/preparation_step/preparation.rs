@@ -74,7 +74,7 @@ pub(crate) fn prepare<'i>(
     run_parameters: RunParameters,
     signature_store: SignatureStore,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
-    let air: Instruction<'i> = *air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
+    let air: Instruction<'i> = air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
     let prev_ingredients = ExecCtxIngredients {
         last_call_request_id: prev_data.last_call_request_id,

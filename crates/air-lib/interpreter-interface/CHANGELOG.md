@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.2](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.1...air-interpreter-interface-v0.15.2) (2023-12-12)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.2 ([#733](https://github.com/fluencelabs/aquavm/issues/733)) ([05fda3e](https://github.com/fluencelabs/aquavm/commit/05fda3ee16d5d15e7af542a0d69d998d17827c15))
+
 ## [0.15.1](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.0...air-interpreter-interface-v0.15.1) (2023-09-21)
 
 

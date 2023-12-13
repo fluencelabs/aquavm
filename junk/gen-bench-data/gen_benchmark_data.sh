@@ -25,6 +25,7 @@ for bench in multiple-cids10 \
             call-requests500 \
             call-results500 \
             parser-10000-100 \
+            parser-calls-10000-100 \
             null \
             ;
 do

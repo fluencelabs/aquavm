@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.55.0](https://github.com/fluencelabs/aquavm/compare/air-v0.54.0...air-v0.55.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767))
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767)) ([1673cdf](https://github.com/fluencelabs/aquavm/commit/1673cdf06c1fcdd9d06789b0d9d76e71d1625fea))
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722)) ([524c302](https://github.com/fluencelabs/aquavm/commit/524c30243bc544d5e265d9c6c7d1119a447202af))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.2 ([#733](https://github.com/fluencelabs/aquavm/issues/733)) ([05fda3e](https://github.com/fluencelabs/aquavm/commit/05fda3ee16d5d15e7af542a0d69d998d17827c15))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+    * air-execution-info-collector bumped from 0.7.10 to 0.7.11
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-data bumped from 0.14.0 to 0.15.0
+    * air-interpreter-signatures bumped from 0.1.4 to 0.1.5
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+    * air-trace-handler bumped from 0.5.7 to 0.5.8
+
 ## [0.54.0](https://github.com/fluencelabs/aquavm/compare/air-v0.53.0...air-v0.54.0) (2023-10-26)
 
 
