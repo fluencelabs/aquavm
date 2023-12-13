@@ -15,7 +15,8 @@
  */
 
 use super::runner::AirRunner;
-use air_interpreter_interface::{CallResultsRepr, RunParameters};
+use air_interpreter_interface::CallResultsRepr;
+use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 

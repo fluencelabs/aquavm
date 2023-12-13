@@ -18,29 +18,35 @@ pub mod multiformat;
 
 pub(crate) mod format;
 pub(crate) mod representation;
-#[cfg(feature = "rmp-serde")]
-pub(crate) mod rmp_serde;
-#[cfg(feature = "serde_json")]
-pub(crate) mod serde_json;
 pub(crate) mod serialized_type;
 
 pub use crate::format::Format;
-pub use crate::representation::{
-    FromSerialiedBorrow, FromSerialized, Representation, ToSerialized, ToWriter,
-};
+pub use crate::representation::FromSerialiedBorrow;
+pub use crate::representation::FromSerialized;
+pub use crate::representation::Representation;
+pub use crate::representation::ToSerialized;
+pub use crate::representation::ToWriter;
 
 #[cfg(feature = "rmp-serde")]
-pub use crate::rmp_serde::{RmpSerdeFormat, RmpSerdeMultiformat};
+pub(crate) mod rmp_serde;
+#[cfg(feature = "rmp-serde")]
+pub use crate::rmp_serde::RmpSerdeFormat;
+#[cfg(feature = "rmp-serde")]
+pub use crate::rmp_serde::RmpSerdeMultiformat;
 
 #[cfg(feature = "msgpack")]
-pub use crate::rmp_serde::{
-    RmpSerdeFormat as MsgPackFormat, RmpSerdeMultiformat as MsgPackMultiformat,
-};
+pub use crate::rmp_serde::RmpSerdeFormat as MsgPackFormat;
+#[cfg(feature = "msgpack")]
+pub use crate::rmp_serde::RmpSerdeMultiformat as MsgPackMultiformat;
 
 #[cfg(feature = "serde_json")]
-pub use crate::serde_json::{SerdeJsonFormat, SerdeJsonMultiformat};
+pub(crate) mod serde_json;
+#[cfg(feature = "serde_json")]
+pub use crate::serde_json::SerdeJsonFormat;
+#[cfg(feature = "serde_json")]
+pub use crate::serde_json::SerdeJsonMultiformat;
 
 #[cfg(feature = "json")]
-pub use crate::serde_json::{
-    SerdeJsonFormat as JsonFormat, SerdeJsonMultiformat as JsonMultiformat,
-};
+pub use crate::serde_json::SerdeJsonFormat as JsonFormat;
+#[cfg(feature = "json")]
+pub use crate::serde_json::SerdeJsonMultiformat as JsonMultiformat;

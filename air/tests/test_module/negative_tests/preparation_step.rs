@@ -26,7 +26,8 @@ use serde::Serialize;
 
 #[test]
 fn invalid_data_without_versions() {
-    use air_interpreter_sede::{Format, Representation};
+    use air_interpreter_sede::Format;
+    use air_interpreter_sede::Representation;
 
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {
@@ -53,7 +54,8 @@ fn invalid_data_without_versions() {
 
 #[test]
 fn invalid_data_with_versions() {
-    use air_interpreter_sede::{Format, Representation};
+    use air_interpreter_sede::Format;
+    use air_interpreter_sede::Representation;
 
     #[derive(Serialize, Deserialize)]
     struct InvalidDataStruct {

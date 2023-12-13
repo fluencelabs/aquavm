@@ -1,7 +1,9 @@
 use air_interpreter_data::InterpreterDataFormat;
-use air_interpreter_sede::{
-    Format, RmpSerdeFormat, RmpSerdeMultiformat, SerdeJsonFormat, SerdeJsonMultiformat,
-};
+use air_interpreter_sede::Format;
+use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::RmpSerdeMultiformat;
+use air_interpreter_sede::SerdeJsonFormat;
+use air_interpreter_sede::SerdeJsonMultiformat;
 use air_test_framework::*;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
