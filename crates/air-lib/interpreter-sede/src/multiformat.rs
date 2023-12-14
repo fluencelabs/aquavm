@@ -23,8 +23,6 @@ use unsigned_varint::encode as varint_encode;
 
 pub type SerializationCodec = u32;
 
-pub const MIN_PRIVATE_MULTIFORMAT_CODE: SerializationCodec = 0x300000;
-
 const ENCODING_BUFFER_CAPACITY: usize = 1024;
 
 #[derive(thiserror::Error, Debug)]
