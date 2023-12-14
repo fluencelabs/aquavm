@@ -16,7 +16,7 @@
 
 use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
-use air_interpreter_sede::MsgPackMultiformat;
+use air_interpreter_sede::JsonFormat;
 use air_interpreter_sede::Representation;
 use serde::Deserialize;
 use serde::Serialize;
@@ -26,7 +26,7 @@ use std::collections::HashMap;
 pub type CallResults = HashMap<u32, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
-pub type CallResultsFormat = MsgPackMultiformat;
+pub type CallResultsFormat = JsonFormat;
 
 derive_serialized_type!(SerializedCallResults);
 
