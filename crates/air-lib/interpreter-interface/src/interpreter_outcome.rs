@@ -42,7 +42,7 @@ pub struct InterpreterOutcome {
     pub next_peer_pks: Vec<String>,
 
     /// Collected parameters of all met call instructions that could be executed on a current peer.
-    pub call_requests: SerializedCallRequests,
+    pub call_requests: Vec<u8>,
 }
 
 impl InterpreterOutcome {
@@ -53,6 +53,7 @@ impl InterpreterOutcome {
         next_peer_pks: Vec<String>,
         call_requests: SerializedCallRequests,
     ) -> Self {
+        let call_requests = call_requests.into();
         Self {
             ret_code,
             error_message,
@@ -75,14 +76,7 @@ impl InterpreterOutcome {
             ));
         }
 
-        let call_requests = try_as_byte_vec(
-            try_as_record(record_values.pop().unwrap())
-                .unwrap()
-                .into_vec()
-                .pop()
-                .unwrap(),
-            "call_requests",
-        )?;
+        let call_requests = try_as_byte_vec(record_values.pop().unwrap(), "call_requests")?;
         let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;

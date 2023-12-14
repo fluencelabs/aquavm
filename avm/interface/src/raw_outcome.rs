@@ -43,7 +43,7 @@ impl RawAVMOutcome {
             next_peer_pks,
         } = outcome;
 
-        let call_requests = crate::from_raw_call_requests(call_requests)?;
+        let call_requests = crate::from_raw_call_requests(call_requests.into())?;
 
         let raw_avm_outcome = Self {
             ret_code,

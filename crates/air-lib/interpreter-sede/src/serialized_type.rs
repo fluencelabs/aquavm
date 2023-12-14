@@ -46,6 +46,13 @@ macro_rules! derive_serialized_type {
             }
         }
 
+        impl ::core::convert::From<$type_name> for ::std::vec::Vec<u8> {
+            #[inline]
+            fn from(value: $type_name) -> Self {
+                value.value
+            }
+        }
+
         impl ::core::ops::Deref for $type_name {
             type Target = [u8];
 
