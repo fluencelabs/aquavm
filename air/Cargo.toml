@@ -48,7 +48,7 @@ tracing = "0.1.40"
 [dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
 air-testing-framework = { path = "../crates/testing-framework" }
-fluence-app-service = "0.29.0"
+fluence-app-service = "0.31.0"
 marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
 
 borsh = "0.10.3"

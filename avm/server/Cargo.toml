@@ -18,7 +18,7 @@ path = "src/lib.rs"
 air-interpreter-interface = { version = "0.15.2", path = "../../crates/air-lib/interpreter-interface" }
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.3", path = "../../crates/data-store" }
-marine-runtime = "0.30.0"
+marine-runtime = "0.32.0"
 polyplets = { version = "0.5.1", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.29.3", path = "../../avm/interface" }
 
