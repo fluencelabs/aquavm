@@ -61,6 +61,7 @@ fn derive_peer_id(peer_name: &str, peer_id_cache: &mut HashMap<String, String>) 
         .clone()
 }
 
+// input data is always JSON and doesn't depend on InterpreterData representation
 fn read_data<T: DeserializeOwned>(path: &str) -> T {
     let inp = std::fs::File::open(path).unwrap();
     serde_json::from_reader(inp).unwrap()
@@ -109,6 +110,8 @@ pub fn cid_benchmarking_data(
     peer_id: String,
     particle_id: &str,
 ) -> Vec<u8> {
+    use air_interpreter_sede::Format;
+
     let mut curr_data: PreCidInterpeterData = read_data(curr_data_filename);
     let calls: TraceCalls = read_data("src/cid_benchmarking/simple-calls-info.json");
     let mut calls = calls.into_iter();
@@ -158,7 +161,7 @@ pub fn cid_benchmarking_data(
         .unwrap()
         .insert("signatures".to_owned(), json!(ss));
 
-    serde_json::to_vec(&curr_data).unwrap()
+    InterpreterDataFormat::default().to_vec(&curr_data).unwrap().into()
 }
 
 pub fn cid_benchmarking_long_data(

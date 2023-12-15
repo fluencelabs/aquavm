@@ -10,6 +10,7 @@ members = [
     "crates/air-lib/interpreter-cid",
     "crates/air-lib/interpreter-data",
     "crates/air-lib/interpreter-interface",
+    "crates/air-lib/interpreter-sede",
     "crates/air-lib/interpreter-signatures",
     "crates/air-lib/lambda/ast",
     "crates/air-lib/lambda/parser",

@@ -18,13 +18,17 @@ use crate::ToErrorCode;
 use air_interpreter_data::data_version;
 use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
+use air_interpreter_data::InterpreterDataRepr;
 use air_interpreter_data::Versions;
-
-use serde_json::Error as SerdeJsonError;
+use air_interpreter_interface::CallResultsDeserializeError;
+use air_interpreter_interface::SerializedCallResults;
+use air_interpreter_sede::Representation;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+type SerdeDeserializeError = <InterpreterDataRepr as Representation>::DeserializeError;
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]
@@ -43,7 +47,10 @@ pub enum PreparationError {
         super::interpreter_version(),
         data_version()
     )]
-    DataDeFailed { data: Vec<u8>, error: SerdeJsonError },
+    DataDeFailed {
+        data: Vec<u8>,
+        error: SerdeDeserializeError,
+    },
 
     /// Errors occurred on executed trace deserialization
     /// when it was possible to recover versions.
@@ -59,7 +66,7 @@ pub enum PreparationError {
     )]
     DataDeFailedWithVersions {
         data: Vec<u8>,
-        error: SerdeJsonError,
+        error: SerdeDeserializeError,
         versions: Versions,
     },
 
@@ -69,8 +76,8 @@ pub enum PreparationError {
     Call results: {call_results:?}"
     )]
     CallResultsDeFailed {
-        call_results: Vec<u8>,
-        error: SerdeJsonError,
+        call_results: SerializedCallResults,
+        error: CallResultsDeserializeError,
     },
 
     /// Error occurred when a version of interpreter produced supplied data is less then minimal.
@@ -101,15 +108,15 @@ impl ToErrorCode for PreparationError {
 }
 
 impl PreparationError {
-    pub fn data_de_failed(data: Vec<u8>, error: SerdeJsonError) -> Self {
+    pub fn data_de_failed(data: Vec<u8>, error: SerdeDeserializeError) -> Self {
         Self::DataDeFailed { data, error }
     }
 
-    pub fn data_de_failed_with_versions(data: Vec<u8>, error: SerdeJsonError, versions: Versions) -> Self {
+    pub fn data_de_failed_with_versions(data: Vec<u8>, error: SerdeDeserializeError, versions: Versions) -> Self {
         Self::DataDeFailedWithVersions { data, error, versions }
     }
 
-    pub fn call_results_de_failed(call_results: Vec<u8>, error: SerdeJsonError) -> Self {
+    pub fn call_results_de_failed(call_results: SerializedCallResults, error: CallResultsDeserializeError) -> Self {
         Self::CallResultsDeFailed { call_results, error }
     }
 
