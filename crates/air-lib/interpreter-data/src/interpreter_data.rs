@@ -15,11 +15,17 @@
  */
 
 pub(crate) mod errors;
+pub(crate) mod repr;
 pub mod verification;
 
+pub use self::repr::InterpreterDataFormat;
+pub use self::repr::InterpreterDataRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
+use air_interpreter_sede::FromSerialized;
+use air_interpreter_sede::Representation;
+use air_interpreter_sede::ToSerialized;
 use air_interpreter_signatures::SignatureStore;
 use air_utils::measure;
 
@@ -97,17 +103,27 @@ impl InterpreterData {
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(slice: &[u8]) -> Result<Self, serde_json::Error> {
+    pub fn try_from_slice(
+        slice: &[u8],
+    ) -> Result<Self, <InterpreterDataRepr as Representation>::DeserializeError> {
         measure!(
-            serde_json::from_slice(slice),
+            InterpreterDataRepr.deserialize(slice),
             tracing::Level::INFO,
-            "serde_json::from_slice"
+            "InterpreterData::try_from_slice"
         )
     }
 
     /// Tries to de only versions part of interpreter data.
-    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, serde_json::Error> {
-        serde_json::from_slice(slice)
+    pub fn try_get_versions(
+        slice: &[u8],
+    ) -> Result<Versions, <InterpreterDataRepr as Representation>::DeserializeError> {
+        InterpreterDataRepr.deserialize(slice)
+    }
+
+    pub fn serialize(
+        &self,
+    ) -> Result<Vec<u8>, <InterpreterDataRepr as Representation>::SerializeError> {
+        InterpreterDataRepr.serialize(self)
     }
 }
 
