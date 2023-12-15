@@ -34,7 +34,6 @@ pub use lambda_applier::LambdaError;
 
 pub mod errors_prelude {
     pub use super::CatchableError;
-    pub use super::ExecutionError;
     pub use super::UncatchableError;
 }
 
