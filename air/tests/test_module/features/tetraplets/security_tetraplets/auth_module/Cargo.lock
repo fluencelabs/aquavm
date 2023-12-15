@@ -24,14 +24,14 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.10"
+version = "0.7.11"
 dependencies = [
  "aquavm-air-parser",
 ]
 
 [[package]]
 name = "air-interpreter-cid"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "blake3",
  "cid",
@@ -46,7 +46,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-signatures",
@@ -66,7 +66,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -74,7 +74,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-signatures"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "air-interpreter-cid",
  "borsh",
@@ -113,7 +113,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.7"
+version = "0.5.8"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -149,7 +149,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.54.0"
+version = "0.55.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -181,7 +181,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-parser"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "air-lambda-ast",
  "air-lambda-parser",

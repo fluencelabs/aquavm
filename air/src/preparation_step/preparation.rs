@@ -27,8 +27,6 @@ use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use fluence_keypair::KeyFormat;
 
-use std::convert::TryFrom;
-
 type PreparationResult<T> = Result<T, PreparationError>;
 
 /// Represents result of the preparation_step step.
