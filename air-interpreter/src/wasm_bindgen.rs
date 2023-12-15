@@ -67,7 +67,7 @@ pub fn invoke(
 
     let params: RunParameters = serde_json::from_slice(&params).expect("cannot parse RunParameters");
 
-    let outcome = execute_air(air, prev_data, data, params, call_results);
+    let outcome = execute_air(air, prev_data, data, params, call_results.into());
     serde_json::to_string(&outcome).expect("Cannot parse InterpreterOutcome")
 }
 

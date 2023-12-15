@@ -15,7 +15,8 @@
  */
 
 use air::{min_supported_version, PreparationError};
-use air_interpreter_data::{verification::DataVerifierError, InterpreterData};
+use air_interpreter_data::{verification::DataVerifierError, InterpreterData, InterpreterDataRepr};
+use air_interpreter_sede::{Format, Representation};
 use air_interpreter_signatures::KeyError;
 use air_test_utils::{
     assert_error_eq,
@@ -56,7 +57,7 @@ fn test_banned_signature() {
 
     data["signatures"] = bad_signature_store;
 
-    let current_data = data.to_string();
+    let current_data = InterpreterDataRepr.get_format().to_vec(&data).unwrap();
 
     let mut avm = create_avm(unit_call_service(), "other_peer_id");
     let res = avm

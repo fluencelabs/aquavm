@@ -17,10 +17,13 @@ path = "src/lib.rs"
 [dependencies]
 marine-rs-sdk = {version = "0.10.2", optional = true }
 fluence-it-types = { version = "0.4.1", optional = true }
+air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json"] }
 
+marine-call-parameters = { version = "0.10.1", default-features = false }
 serde = "1.0.190"
 serde_json = "1.0.108"
+serde_bytes = "0.11.12"
 
 [features]
 default = ["marine"]
-marine = ["marine-rs-sdk", "fluence-it-types"]
+marine = ["marine-rs-sdk", "fluence-it-types", "air-interpreter-sede/marine", "marine-call-parameters/marine-abi"]

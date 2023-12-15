@@ -108,7 +108,19 @@ class Bench:
             )
             lines = proc.stderr.decode("utf-8").split('\n')
             all_output.extend(lines)
-        return list(map(json.loads, filter(lambda x: x, all_output)))
+
+        def try_to_parse_json(s):
+            try:
+                return json.loads(s)
+            except Exception:
+                logger.error("failed to parse JSON: %r", s)
+                return None
+
+        return list(filter(
+            lambda x: x is not None,
+            map(try_to_parse_json,
+                filter(lambda x: x, all_output))
+        ))
 
     def get_name(self):
         """Return the bench name."""

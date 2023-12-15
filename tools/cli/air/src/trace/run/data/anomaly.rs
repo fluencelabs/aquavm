@@ -32,16 +32,13 @@ pub(crate) struct AnomalyDataArgs {
 pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionData<'_>> {
     let anomaly_json = load_data(&args.anomaly_data_path).context("Failed to read anomaly data")?;
     let anomaly_data: AnomalyData<'_> =
-        serde_json::from_str(&anomaly_json).context("Failed to parse anomaly data")?;
+        serde_json::from_slice(&anomaly_json).context("Failed to parse anomaly data")?;
 
     let air_script = anomaly_data.air_script.to_string();
-    let prev_data = String::from_utf8(anomaly_data.prev_data.to_vec())
-        .context("Anomaly current_data is not a valid string")?;
-    let current_data = String::from_utf8(anomaly_data.current_data.to_vec())
-        .context("Anomaly current_data is not a valid string")?;
-    let particle: ParticleParameters<'static> =
-        serde_json::from_reader(&*anomaly_data.particle.to_vec())
-            .context("Anomaly particle is not a valid JSON")?;
+    let prev_data = anomaly_data.prev_data.to_vec();
+    let current_data = anomaly_data.current_data.to_vec();
+    let particle: ParticleParameters<'static> = serde_json::from_slice(&anomaly_data.particle)
+        .context("Anomaly particle is not a valid JSON")?;
 
     Ok(ExecutionData {
         air_script,

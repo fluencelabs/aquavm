@@ -112,6 +112,7 @@ name = "air-interpreter-data"
 version = "0.15.0"
 dependencies = [
  "air-interpreter-cid",
+ "air-interpreter-sede",
  "air-interpreter-signatures",
  "air-utils",
  "aquavm-air-parser",
@@ -131,10 +132,26 @@ dependencies = [
 name = "air-interpreter-interface"
 version = "0.15.2"
 dependencies = [
+ "air-interpreter-sede",
  "fluence-it-types",
+ "marine-call-parameters",
  "marine-rs-sdk",
  "serde",
+ "serde_bytes",
  "serde_json",
+]
+
+[[package]]
+name = "air-interpreter-sede"
+version = "0.1.0"
+dependencies = [
+ "marine-rs-sdk",
+ "rmp-serde",
+ "serde",
+ "serde_bytes",
+ "serde_json",
+ "thiserror",
+ "unsigned-varint 0.8.0",
 ]
 
 [[package]]
@@ -183,6 +200,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-interpreter-signatures",
  "aquavm-air",
  "avm-interface",
@@ -337,6 +355,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-interpreter-signatures",
  "air-lambda-ast",
  "air-lambda-parser",
@@ -378,6 +397,7 @@ version = "0.5.4"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-test-utils",
  "anyhow",
  "aquavm-air",
@@ -585,6 +605,7 @@ name = "avm-interface"
 version = "0.29.3"
 dependencies = [
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-utils",
  "log",
  "maplit",
@@ -600,6 +621,7 @@ name = "avm-server"
 version = "0.33.4"
 dependencies = [
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-utils",
  "avm-data-store",
  "avm-interface",
@@ -4669,6 +4691,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd124222d17ad93a644ed9d011a40f4fb64aa54275c08cc216524a9ea82fb09f"
 dependencies = [
  "digest 0.10.7",
+]
+
+[[package]]
+name = "rmp"
+version = "0.8.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f9860a6cc38ed1da53456442089b4dfa35e7cedaa326df63017af88385e6b20"
+dependencies = [
+ "byteorder",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
+name = "rmp-serde"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bffea85eea980d8a74453e5d02a8d93028f3c34725de143085a844ebe953258a"
+dependencies = [
+ "byteorder",
+ "rmp",
+ "serde",
 ]
 
 [[package]]

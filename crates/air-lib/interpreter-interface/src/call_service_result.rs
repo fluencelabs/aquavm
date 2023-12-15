@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+use air_interpreter_sede::define_simple_representation;
+use air_interpreter_sede::derive_serialized_type;
+use air_interpreter_sede::JsonFormat;
+use air_interpreter_sede::Representation;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
@@ -21,6 +25,20 @@ use std::collections::HashMap;
 
 pub type CallResults = HashMap<u32, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
+
+pub type CallResultsFormat = JsonFormat;
+
+derive_serialized_type!(SerializedCallResults);
+
+define_simple_representation! {
+    CallResultsRepr,
+    CallResults,
+    CallResultsFormat,
+    SerializedCallResults
+}
+
+pub type CallResultsDeserializeError = <CallResultsRepr as Representation>::DeserializeError;
+pub type CallResultsSerializeError = <CallResultsRepr as Representation>::SerializeError;
 
 /// Represents an executed host function result.
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

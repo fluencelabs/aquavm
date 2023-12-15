@@ -83,15 +83,17 @@ export function deserializeAvmResult(result: any): InterpreterResult {
         let arguments_;
         let tetraplets;
         try {
-            arguments_ = JSON.parse(callRequest.arguments);
+            const argumentsStr = decoder.decode(new Uint8Array(callRequest.arguments));
+            arguments_ = JSON.parse(argumentsStr);
         } catch (e) {
-            throw "Couldn't parse arguments: " + e + '. Original string is: ' + arguments_;
+            throw "Couldn't parse arguments: " + e + '. Original data is: ' + callRequest.arguments;
         }
 
         try {
-            tetraplets = JSON.parse(callRequest.tetraplets);
+            const tetrapletsStr = decoder.decode(new Uint8Array(callRequest.tetraplets));
+            tetraplets = JSON.parse(tetrapletsStr);
         } catch (e) {
-            throw "Couldn't parse tetraplets: " + e + '. Original string is: ' + tetraplets;
+            throw "Couldn't parse tetraplets: " + e + '. Original data is: ' + callRequest.tetraplets;
         }
 
         resultCallRequests.push([
