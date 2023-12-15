@@ -7,4 +7,4 @@ rustflags = [
 ]
 
 [registries]
-fluence = { index = "sparse+https://crates.fluence.dev" }
+fluence = { index = "sparse+https://crates.fluence.dev/api/v1/crates/" }
