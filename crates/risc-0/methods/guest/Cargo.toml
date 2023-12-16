@@ -12,7 +12,7 @@ publish = false
 [dependencies]
 risc0-zkvm = { version = "0.19.1", default-features = false, features = [ "std" ] }
 zk-aquavm-interface = { path = "../../core" }
-aquavm-air = { path = "../../../../air" }
+aquavm-air = { path = "../../../../air", version = "0.55.0" }
 
 [patch.crates-io]
 fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair-2" }
