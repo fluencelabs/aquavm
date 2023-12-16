@@ -465,6 +465,7 @@ version = "0.5.4"
 dependencies = [
  "air-beautifier",
  "air-interpreter-interface",
+ "air-interpreter-sede",
  "air-test-utils",
  "anyhow",
  "aquavm-air",
@@ -2801,11 +2802,11 @@ dependencies = [
 
 [[package]]
 name = "home"
-version = "0.5.5"
+version = "0.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5444c27eef6923071f7ebcc33e3444508466a76f7a2b93da00ed6e19f30c1ddb"
+checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4205,7 +4206,8 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "5.0.0-alpha.1"
-source = "git+https://github.com/near/near-sdk-rs?rev=0022685#00226858199419aaa8c99f756bd192851666fb36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62385d178cbf20d7b62277e0ffe5d65b133989994240b2789d5510fa7de332da"
 dependencies = [
  "base64 0.13.1",
  "borsh 1.1.2",
@@ -4230,7 +4232,8 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "5.0.0-alpha.1"
-source = "git+https://github.com/near/near-sdk-rs?rev=0022685#00226858199419aaa8c99f756bd192851666fb36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d00f960e5f28e8b5a223de7ba35f494c094c213c7b50f94927713a93736013dd"
 dependencies = [
  "Inflector",
  "darling",
@@ -4252,7 +4255,8 @@ checksum = "6540152fba5e96fe5d575b79e8cd244cf2add747bb01362426bdc069bc3a23bc"
 [[package]]
 name = "near-sys"
 version = "0.2.1"
-source = "git+https://github.com/near/near-sdk-rs?rev=0022685#00226858199419aaa8c99f756bd192851666fb36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "397688591acf8d3ebf2c2485ba32d4b24fc10aad5334e3ad8ec0b7179bfdf06b"
 
 [[package]]
 name = "near-token"
@@ -6106,18 +6110,18 @@ checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "thiserror"
-version = "1.0.50"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
+checksum = "f11c217e1416d6f036b870f14e0413d480dbf28edbee1f877abaf0206af43bb7"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.50"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
+checksum = "01742297787513b79cf8e29d1056ede1313e2420b7b3b15d0a768b4921f549df"
 dependencies = [
  "proc-macro2",
  "quote",
