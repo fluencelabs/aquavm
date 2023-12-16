@@ -25,7 +25,3 @@ log = "0.4.20"
 thiserror = "1.0.50"
 tracing = "0.1.40"
 num-traits = "0.2.17"
-
-[features]
-default = ["rand"]
-rand = ["air-interpreter-data/rand"]

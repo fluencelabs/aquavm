@@ -31,7 +31,3 @@ tracing = "0.1.40"
 newtype_derive = "0.1.6"
 num-traits = "0.2.17"
 thiserror = "1.0.50"
-
-[features]
-default = ["rand"]
-rand = ["air-interpreter-signatures/rand"]

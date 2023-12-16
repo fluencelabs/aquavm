@@ -125,7 +125,7 @@ name = "air-beautifier"
 version = "0.4.0"
 dependencies = [
  "aquavm-air-parser",
- "itertools",
+ "itertools 0.10.5",
  "thiserror",
 ]
 
@@ -239,7 +239,7 @@ dependencies = [
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
- "itertools",
+ "itertools 0.10.5",
  "non-empty-vec",
  "serde",
 ]
@@ -249,7 +249,7 @@ name = "air-lambda-parser"
 version = "0.1.0"
 dependencies = [
  "air-lambda-ast",
- "itertools",
+ "itertools 0.10.5",
  "lalrpop",
  "lalrpop-util",
  "regex",
@@ -294,7 +294,7 @@ dependencies = [
  "air-test-utils",
  "aquavm-air-parser",
  "fluence-keypair",
- "itertools",
+ "itertools 0.10.5",
  "maplit",
  "nom",
  "nom_locate",
@@ -475,7 +475,7 @@ dependencies = [
  "bs58 0.5.0",
  "clap 4.4.11",
  "fluence-keypair",
- "itertools",
+ "itertools 0.10.5",
  "near-sdk",
  "risc0-zkvm",
  "serde",
@@ -499,7 +499,7 @@ dependencies = [
  "codespan",
  "codespan-reporting",
  "criterion 0.4.0",
- "itertools",
+ "itertools 0.10.5",
  "lalrpop",
  "lalrpop-util",
  "multimap 0.9.1",
@@ -1691,7 +1691,7 @@ dependencies = [
  "cranelift-codegen",
  "cranelift-entity",
  "cranelift-frontend",
- "itertools",
+ "itertools 0.10.5",
  "log",
  "smallvec",
  "wasmparser 0.100.0",
@@ -1718,7 +1718,7 @@ dependencies = [
  "clap 2.34.0",
  "criterion-plot 0.4.5",
  "csv",
- "itertools",
+ "itertools 0.10.5",
  "lazy_static",
  "num-traits",
  "oorandom",
@@ -1745,7 +1745,7 @@ dependencies = [
  "ciborium",
  "clap 3.2.25",
  "criterion-plot 0.5.0",
- "itertools",
+ "itertools 0.10.5",
  "lazy_static",
  "num-traits",
  "oorandom",
@@ -1766,7 +1766,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2673cc8207403546f45f5fd319a974b1e6983ad1a3ee7e6041650013be041876"
 dependencies = [
  "cast",
- "itertools",
+ "itertools 0.10.5",
 ]
 
 [[package]]
@@ -1776,7 +1776,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b50826342786a51a89e2da3a28f1c32b06e387201bc2d19791f622c673706b1"
 dependencies = [
  "cast",
- "itertools",
+ "itertools 0.10.5",
 ]
 
 [[package]]
@@ -3199,6 +3199,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3268,7 +3277,7 @@ dependencies = [
  "diff",
  "ena",
  "is-terminal",
- "itertools",
+ "itertools 0.10.5",
  "lalrpop-util",
  "petgraph",
  "pico-args",
@@ -3531,7 +3540,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52907d7e7b9487a029dd3d99e647307c8808d7fba327e27113b0807d4868b315"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.10.5",
  "marine-it-interfaces",
  "marine-module-interface",
  "marine-wasm-backend-traits",
@@ -3613,7 +3622,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49d8f21255b94f1c8b2731a2b49c2ed34f955ed2e11dae3fb6c580a346d10bdd"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.10.5",
  "marine-it-interfaces",
  "nom",
  "semver 1.0.20",
@@ -3655,7 +3664,7 @@ dependencies = [
  "bytesize",
  "it-json-serde",
  "it-memory-traits",
- "itertools",
+ "itertools 0.10.5",
  "log",
  "marine-core",
  "marine-module-interface",
@@ -5107,7 +5116,7 @@ checksum = "62941722fb675d463659e49c4f3fe1fe792ff24fe5bbaa9c08cd3b98a1c354f5"
 dependencies = [
  "bytes",
  "heck 0.3.3",
- "itertools",
+ "itertools 0.10.5",
  "lazy_static",
  "log",
  "multimap 0.8.3",
@@ -5127,7 +5136,7 @@ checksum = "c55e02e35260070b6f716a2423c2ff1c3bb1642ddca6f99e1f26d06268a0e2d2"
 dependencies = [
  "bytes",
  "heck 0.4.1",
- "itertools",
+ "itertools 0.11.0",
  "log",
  "multimap 0.8.3",
  "once_cell",
@@ -5148,7 +5157,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9cc1a3263e07e0bf68e96268f37665207b49560d98739662cdfaae215c720fe"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -5161,7 +5170,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "efb6c9a1dd1def8e2124d17e83a20af56f1570d6c2d2bd9e266ccb768df3840e"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.11.0",
  "proc-macro2",
  "quote",
  "syn 2.0.41",
@@ -7264,7 +7273,7 @@ dependencies = [
  "it-lilo",
  "it-memory-traits",
  "it-to-bytes",
- "itertools",
+ "itertools 0.10.5",
  "log",
  "nom",
  "safe-transmute",
