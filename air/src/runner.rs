@@ -16,12 +16,18 @@
 
 use crate::execution_step::ExecutableInstruction;
 use crate::farewell_step as farewell;
+use crate::preparation_step::parse_data;
 use crate::preparation_step::prepare;
+use crate::preparation_step::ParsedDataPair;
 use crate::preparation_step::PreparationDescriptor;
+use crate::signing_step::sign_produced_cids;
+use crate::verification_step::verify;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::SerializedCallResults;
 use air_log_targets::RUN_PARAMS;
+use air_utils::farewell_if_fail;
 use air_utils::measure;
 
 #[tracing::instrument(skip_all)]
@@ -30,7 +36,7 @@ pub fn execute_air(
     prev_data: Vec<u8>,
     data: Vec<u8>,
     params: RunParameters,
-    call_results: Vec<u8>,
+    call_results: SerializedCallResults,
 ) -> InterpreterOutcome {
     use std::convert::identity;
 
@@ -50,21 +56,30 @@ pub fn execute_air(
 #[allow(clippy::result_large_err)]
 fn execute_air_impl(
     air: String,
-    prev_data: Vec<u8>,
-    data: Vec<u8>,
+    raw_prev_data: Vec<u8>,
+    raw_current_data: Vec<u8>,
     params: RunParameters,
-    call_results: Vec<u8>,
+    call_results: SerializedCallResults,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    let ParsedDataPair {
+        prev_data,
+        current_data,
+    } = farewell_if_fail!(parse_data(&raw_prev_data, &raw_current_data), raw_prev_data);
+
+    // TODO currently we use particle ID, but it should be changed to signature,
+    // as partical ID can be equally replayed
+    let salt = params.particle_id.clone();
+    let signature_store = farewell_if_fail!(verify(&prev_data, &current_data, &salt), raw_prev_data);
+
     let PreparationDescriptor {
         mut exec_ctx,
         mut trace_handler,
         air,
         keypair,
-    } = match prepare(&prev_data, &data, air.as_str(), &call_results, params) {
-        Ok(descriptor) => descriptor,
-        // return the prev data in case of errors
-        Err(error) => return Err(farewell::from_uncatchable_error(prev_data, error)),
-    };
+    } = farewell_if_fail!(
+        prepare(prev_data, current_data, &air, &call_results, params, signature_store,),
+        raw_prev_data
+    );
 
     // match here is used instead of map_err, because the compiler can't determine that
     // they are exclusive and would treat exec_ctx and trace_handler as moved
@@ -73,6 +88,17 @@ fn execute_air_impl(
         tracing::Level::INFO,
         "execute",
     );
+
+    farewell_if_fail!(
+        sign_produced_cids(
+            &mut exec_ctx.peer_cid_tracker,
+            &mut exec_ctx.signature_store,
+            &salt,
+            &keypair,
+        ),
+        raw_prev_data
+    );
+
     measure!(
         match exec_result {
             Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair),
@@ -81,7 +107,7 @@ fn execute_air_impl(
                 Err(farewell::from_execution_error(exec_ctx, trace_handler, error, &keypair))
             }
             // return the prev data in case of any trace errors
-            Err(error) => Err(farewell::from_uncatchable_error(prev_data, error)),
+            Err(error) => Err(farewell::from_uncatchable_error(raw_prev_data, error)),
         },
         tracing::Level::INFO,
         "farewell",

@@ -46,7 +46,7 @@ fn issue_310() {
                 0,
                 None,
                 call_results,
-                &key_pair,
+                key_pair.as_inner(),
                 particle_id.to_owned(),
             )
             .unwrap()

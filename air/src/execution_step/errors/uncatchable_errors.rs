@@ -17,10 +17,17 @@
 use super::Stream;
 use crate::execution_step::Generation;
 use crate::execution_step::STREAM_MAX_SIZE;
+use crate::CanonStreamMapError;
+use crate::StreamMapError;
+use crate::StreamMapKeyError;
 use crate::ToErrorCode;
 
 use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CidRef;
 use air_interpreter_data::ValueRef;
+use air_interpreter_interface::CallArgumentsRepr;
+use air_interpreter_interface::TetrapletsRepr;
+use air_interpreter_sede::Representation;
 use air_trace_handler::GenerationCompactificationError;
 use air_trace_handler::IntConversionError;
 use air_trace_handler::TraceHandlerError;
@@ -29,6 +36,8 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+use std::rc::Rc;
 
 /// Uncatchable errors arisen during AIR script execution. Uncatchable here means that these errors
 /// couldn't be handled by a xor instruction and their error_code couldn't be used in a match
@@ -87,7 +96,7 @@ pub enum UncatchableError {
     /// We consider now that every CID should present in the data;
     /// and not having any CID is considered a non-catching error.
     #[error("{0} for CID {1:?} not found")]
-    ValueForCidNotFound(&'static str, String),
+    ValueForCidNotFound(&'static str, Rc<CidRef>),
 
     /// Errors occurred while insertion of a value inside stream that doesn't have corresponding generation.
     #[error(
@@ -102,6 +111,35 @@ pub enum UncatchableError {
     /// Stream size estimate goes over a hardcoded limit.
     #[error("stream size goes over the allowed limit of {STREAM_MAX_SIZE}")]
     StreamSizeLimitExceeded,
+
+    /// CanonStreamMapKey related errors.
+    #[error(transparent)]
+    StreamMapKeyError(#[from] StreamMapKeyError),
+
+    /// Stream map related errors.
+    #[error(transparent)]
+    StreamMapError(#[from] StreamMapError),
+
+    /// CanonStreamMap related errors.
+    #[error(transparent)]
+    CanonStreamMapError(#[from] CanonStreamMapError),
+
+    /// Argument hash or tetraplet mismatch in a call/canon merged from current_data with an evaluated value.
+    #[error("{param} doesn't match expected parameters: expected {expected_value}, got {stored_value} ")]
+    InstructionParametersMismatch {
+        param: &'static str,
+        expected_value: String,
+        stored_value: String,
+    },
+
+    #[error("failed to sign data: {0}")]
+    SigningError(#[from] fluence_keypair::error::SigningError),
+
+    #[error("failed to serialize tetraplets {0}")]
+    TetrapletSerializationFailed(<TetrapletsRepr as Representation>::SerializeError),
+
+    #[error("failed to serialize call arguments {0}")]
+    CallArgumentsSerializationFailed(<CallArgumentsRepr as Representation>::SerializeError),
 }
 
 impl ToErrorCode for UncatchableError {

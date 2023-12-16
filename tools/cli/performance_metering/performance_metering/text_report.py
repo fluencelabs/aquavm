@@ -17,7 +17,9 @@
 
 
 class TextReporter:
-    """A generator for human readable text report."""
+    """
+    A generator for human readable text report.
+    """
     data: dict
     indent_step = 2
 
@@ -41,6 +43,15 @@ class TextReporter:
         _print_indent("AquaVM version: {}".format(machine["version"]),
                       indent=indent, file=file)
         _print_indent("Benches:", indent=indent, file=file)
+
+        try:
+            features = machine["features"]
+        except KeyError:
+            pass
+        else:
+            _print_indent(
+                "Features: {}".format(features),
+                indent=indent, file=file)
 
         nested_indent = indent + self.indent_step
         for bench_name, bench in _sorted_items(machine["benches"]):
@@ -82,6 +93,7 @@ class TextReporter:
 
 def _print_indent(line, indent, file):
     print("{:<{indent}}{}".format("", line, indent=indent), file=file)
+
 
 def _sorted_items(d):
     return sorted(d.items(), key=lambda pair: pair[0])

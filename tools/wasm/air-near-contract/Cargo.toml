@@ -1,6 +1,6 @@
 [package]
 name = "air-near-contract"
-version = "0.43.1"
+version = "0.55.0"
 description = "AIR interpreter as a NEAR contract"
 authors = ["Fluence labs"]
 edition = "2018"
@@ -16,9 +16,9 @@ crate-type = ["cdylib"]
 aquavm-air = { path = "../../../air" }
 air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
 near-sdk = "4.1.1"
-serde = { version = "1.0.118", features = [ "derive", "rc" ] }
-serde_json = "1.0.61"
-hashbrown = { version = "0.14.0", default-features = false }
+serde = { version = "1.0.190", features = [ "derive", "rc" ] }
+serde_json = "1.0.108"
+hashbrown = { version = "0.14.2", default-features = false }
 
 [profile.release]
 codegen-units = 1
@@ -31,6 +31,10 @@ overflow-checks = true
 # it is required to be build in own workspace, as it has special profile
 [workspace]
 members = []
+
+[features]
+gen_signatures = ["aquavm-air/gen_signatures"]
+check_signatures = ["aquavm-air/check_signatures"]
 
 [patch.crates-io]
 fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair" }

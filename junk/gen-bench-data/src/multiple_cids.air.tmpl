@@ -1,0 +1,11 @@
+(seq
+  (seq
+    (call "init_peer_id" ("" "init") [] data) ; ok = [{data}]
+      (fold data x
+      (seq
+        (fold data y
+          (seq
+            (call "other_peer_id" ("serv" "args") [x y] $stream) ; behaviour = echo
+            (next y)))
+        (next x))))
+  (call "init_peer_id" ("" "complete") []))

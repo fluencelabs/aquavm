@@ -62,6 +62,10 @@ class Bench:
         self.cur_data_path = discover_file(bench_path, "cur_data.json")
         self.air_script_path = discover_file(bench_path, "script.air")
         self.keypair = discover_file(bench_path, "keypair.ed25519")
+        try:
+            self.call_results = discover_file(bench_path, "call_results.json")
+        except IOError:
+            self.call_results = None
         self.native = native
 
     def run(self, repeat, tracing_params):
@@ -85,6 +89,9 @@ class Bench:
                     "--ed25519-key", self.keypair,
                 ] + (
                     ["--native"] if self.native else []
+                ) + (
+                    ["--call-results", self.call_results] if self.call_results
+                    else []
                 ) + [
                     "--tracing-params", tracing_params,
                     "--plain",
@@ -101,7 +108,19 @@ class Bench:
             )
             lines = proc.stderr.decode("utf-8").split('\n')
             all_output.extend(lines)
-        return list(map(json.loads, filter(lambda x: x, all_output)))
+
+        def try_to_parse_json(s):
+            try:
+                return json.loads(s)
+            except Exception:
+                logger.error("failed to parse JSON: %r", s)
+                return None
+
+        return list(filter(
+            lambda x: x is not None,
+            map(try_to_parse_json,
+                filter(lambda x: x, all_output))
+        ))
 
     def get_name(self):
         """Return the bench name."""

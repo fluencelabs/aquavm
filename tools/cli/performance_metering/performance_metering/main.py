@@ -35,12 +35,14 @@ def main():
     run_subparser.add_argument("--host-id", required=False, type=str)
     run_subparser.add_argument("--bench-dir", required=False, type=str)
     run_subparser.add_argument("--repeat", required=False, type=int, default=1)
+    run_subparser.add_argument("--features", required=False)
+    run_subparser.add_argument("--unsafe-merge-results", action="store_true")
     run_subparser.add_argument(
         "--no-prepare-binaries",
         action='store_false',
         dest='prepare_binaries',
     )
-    run_subparser.add_argument("--tracing-params", type=str, default="trace")
+    run_subparser.add_argument("--tracing-params", type=str, default="info")
 
     args = parser.parse_args()
 

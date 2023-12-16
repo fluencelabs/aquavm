@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use air::no_error_last_error_object;
+use air::no_error_object;
 use air::CatchableError;
+use air::ErrorObjectError;
 use air::ExecutionCidState;
 use air::ExecutionError;
 use air::LambdaError;
-use air::LastErrorObjectError;
 use air::SecurityTetraplet;
 use air::NO_ERROR_ERROR_CODE;
 use air::NO_ERROR_MESSAGE;
@@ -124,7 +124,7 @@ fn not_clear_last_error_in_match() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 }
 
 #[test]
@@ -159,7 +159,7 @@ fn not_clear_last_error_in_mismatch() {
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 }
 
 #[test]
@@ -241,7 +241,7 @@ fn non_initialized_last_error() {
     let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
     let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_last_error_object(),);
+    assert_eq!(actual_value, no_error_object(),);
 
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
     assert_eq!(
@@ -422,7 +422,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustContainField {
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustContainField {
         scalar: service_result,
         field_name: "message",
     });
@@ -446,8 +446,7 @@ fn fail_with_scalar_from_call_not_right_type() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error =
-        CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarMustBeObject(service_result));
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustBeObject(service_result));
     assert!(check_error(&result, expected_error));
 }
 
@@ -468,7 +467,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error = CatchableError::InvalidLastErrorObjectError(LastErrorObjectError::ScalarFieldIsWrongType {
+    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarFieldIsWrongType {
         scalar: service_result,
         field_name: "error_code",
         expected_type: "integer",
@@ -518,7 +517,7 @@ fn undefined_last_error_errcode() {
     let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
         errcode_lambda_output.clone(),
         cid_state,
-        peer = local_peer_id,
+        peer_name = local_peer_id,
         service = "test..0",
         function = "error_code",
         args = vec![errcode_lambda_output]
@@ -546,7 +545,7 @@ fn undefined_last_error_msg_errcode() {
     let expected_trace = ExecutionTrace::from(vec![scalar_tracked!(
         message_lambda_output.clone(),
         cid_state,
-        peer = local_peer_id,
+        peer_name = local_peer_id,
         service = "test..0",
         function = "message",
         args = vec![message_lambda_output]

@@ -36,9 +36,13 @@ logger = logging.getLogger(__name__)
 def _prepare(args):
     """Prepare the environment: build the tools required."""
     if args.prepare_binaries:
+        if args.features:
+            features = 'marine,' + args.features
+        else:
+            features = 'marine'
         logger.info("Build air-interpreter...")
         subprocess.check_call([
-            "marine", "build", "--release", "--features", "marine",
+            "marine", "build", "--release", "--features", features,
             "--package", "air-interpreter",
         ])
         logger.info("Build air-trace...")
@@ -47,7 +51,7 @@ def _prepare(args):
         ])
 
 
-def discover_tests(bench_dir: typing.Optional[str]) -> list[Bench]:
+def discover_tests(bench_dir: typing.Optional[str]) -> typing.List[Bench]:
     """Discover bench suite elements."""
     if bench_dir is None:
         bench_dir = DEFAULT_TEST_DIR
@@ -66,7 +70,12 @@ def run(args):
     _prepare(args)
 
     suite = discover_tests(args.bench_dir)
-    with Db(args.path, args.host_id) as db:
+    with Db(
+            args.path,
+            features=args.features,
+            host_id=args.host_id,
+            merge_results=args.unsafe_merge_results,
+    ) as db:
         for bench in suite:
             raw_stats = bench.run(args.repeat, args.tracing_params)
             walker = TraceWalker()
@@ -77,9 +86,6 @@ def run(args):
             memory_sizes = walker.get_memory_sizes(args.repeat)
             db.record(bench, combined_stats, total_time, memory_sizes)
 
-            with (
-                    intermediate_temp_file(
-                        args.report_path or DEFAULT_REPORT_PATH) as out
-            ):
-                report = TextReporter(db.data)
-                report.save_text_report(out)
+        with intermediate_temp_file(args.report_path or DEFAULT_REPORT_PATH) as out:
+            report = TextReporter(db.data)
+            report.save_text_report(out)

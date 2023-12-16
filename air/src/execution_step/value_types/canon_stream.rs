@@ -77,6 +77,14 @@ impl CanonStream {
     pub(crate) fn tetraplet(&self) -> &Rc<SecurityTetraplet> {
         &self.tetraplet
     }
+
+    pub(crate) fn push(&mut self, value_aggregate: ValueAggregate) {
+        self.values.push(value_aggregate);
+    }
+
+    pub fn into_values(self) -> Vec<ValueAggregate> {
+        self.values
+    }
 }
 
 use std::fmt;
@@ -95,11 +103,11 @@ impl fmt::Display for CanonStream {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CanonStreamWithProvenance {
     pub(crate) canon_stream: CanonStream,
-    pub(crate) cid: Rc<CID<CanonResultCidAggregate>>,
+    pub(crate) cid: CID<CanonResultCidAggregate>,
 }
 
 impl CanonStreamWithProvenance {
-    pub(crate) fn new(canon_stream: CanonStream, cid: Rc<CID<CanonResultCidAggregate>>) -> Self {
+    pub(crate) fn new(canon_stream: CanonStream, cid: CID<CanonResultCidAggregate>) -> Self {
         Self { canon_stream, cid }
     }
 }

@@ -16,7 +16,7 @@
 
 mod recursive_stream;
 mod stream_definition;
-pub(self) mod values_matrix;
+mod values_matrix;
 
 pub(crate) use recursive_stream::IterableValue;
 pub(crate) use recursive_stream::RecursiveCursorState;

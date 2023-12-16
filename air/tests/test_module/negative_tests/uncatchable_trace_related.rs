@@ -145,7 +145,7 @@ fn set_subtrace_len_and_pos_failed() {
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             1,
             subtrace_desc(5, 1),
@@ -184,7 +184,7 @@ fn no_element_at_position() {
     let mut cid_state = ExecutionCidState::new();
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             42,
             subtrace_desc(3, 1),
@@ -224,7 +224,7 @@ fn no_stream_state() {
     let wrong_state = request_sent_by("vm_peer_id_1");
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, &mut tracker),
+        stream_tracked!(json!([42, 43]), 0, &mut tracker, peer = vm_peer_id_1),
         executed_state::fold(vec![executed_state::subtrace_lore(
             3,
             subtrace_desc(3, 1), // try to change the number of elems to 3
@@ -303,6 +303,9 @@ fn different_executed_state_expected() {
 
 #[test]
 fn invalid_dst_generations() {
+    use air_interpreter_sede::Format;
+    use air_interpreter_sede::Representation;
+
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
     let script = format!(
@@ -321,7 +324,7 @@ fn invalid_dst_generations() {
     let mut data_value = serde_json::to_value(&empty_data).unwrap();
     data_value["trace"] = json!([{"ap": {"gens": [42, 42]}}]);
 
-    let data: Vec<u8> = serde_json::to_vec(&data_value).unwrap();
+    let data = InterpreterDataRepr.get_format().to_vec(&data_value).unwrap();
     // let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
     let result = call_vm!(peer_vm_1, <_>::default(), &script, "", data);
     let expected_error = UncatchableError::TraceError {
@@ -416,8 +419,8 @@ fn canon_result_error() {
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectCanonResult(
             CanonResultError::IncompatibleState {
-                prev_canon_result: air_interpreter_data::CanonResult::new(prev_cid),
-                current_canon_result: air_interpreter_data::CanonResult::new(curr_cid),
+                prev_canon_result: air_interpreter_data::CanonResult::executed(prev_cid),
+                current_canon_result: air_interpreter_data::CanonResult::executed(curr_cid),
             },
         )),
         instruction: String::from(r#"canon "vm_peer_id_1" $stream #canon"#),
@@ -444,7 +447,7 @@ fn several_records_with_same_pos() {
     let value_pos = 1;
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, &mut cid_state, peer = vm_peer_id_1),
         fold(vec![
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
             subtrace_lore(value_pos, subtrace_desc(3, 1), subtrace_desc(4, 0)),
@@ -543,7 +546,7 @@ fn fold_pos_overflow() {
     let wrong_after_subtrace_len = TraceLen::MAX - 1;
     let trace = vec![
         executed_state::par(1, 2),
-        stream_tracked!(json!([42, 43]), 0, cid_state),
+        stream_tracked!(json!([42, 43]), 0, cid_state, peer = vm_peer_id_1),
         fold(vec![subtrace_lore(
             value_pos,
             subtrace_desc(before_subtrace_pos, 1),

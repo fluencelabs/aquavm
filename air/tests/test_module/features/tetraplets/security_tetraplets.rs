@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use air::SecurityTetraplet;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
+use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
@@ -98,7 +99,7 @@ fn fold_with_inner_call() {
 
 #[test]
 fn fold_stream_with_inner_call() {
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
          (seq
@@ -112,20 +113,22 @@ fn fold_stream_with_inner_call() {
                (next i))))
     "#;
     let executor = air_test_framework::AirScriptExecutor::from_annotated(
-        TestRunParameters::from_init_peer_id(init_peer_id),
+        TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
     .unwrap();
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_trace = vec![
         stream!(
             json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
             0,
-            peer = init_peer_id,
+            peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
@@ -142,7 +145,7 @@ fn fold_stream_with_inner_call() {
 
 #[test]
 fn fold_canon_with_inner_call() {
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
          (seq
@@ -158,20 +161,22 @@ fn fold_canon_with_inner_call() {
                 (next x)))))
     "#;
     let executor = air_test_framework::AirScriptExecutor::from_annotated(
-        TestRunParameters::from_init_peer_id(init_peer_id),
+        TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
     .unwrap();
 
-    let result = executor.execute_one(init_peer_id).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
+
+    let init_peer_id = at(init_peer_name);
 
     let expected_trace = vec![
         stream!(
             json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
             0,
-            peer = init_peer_id,
+            peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
@@ -360,7 +365,11 @@ fn tetraplet_with_wasm_modules() {
         let service = service.get_mut(params.service_id.as_str()).unwrap();
 
         let result = service
-            .call(params.function_name, JValue::Array(params.arguments), call_parameters)
+            .call(
+                params.function_name,
+                JValue::Array(params.arguments),
+                to_app_service_call_parameters(call_parameters),
+            )
             .unwrap();
 
         CallServiceResult::ok(result)
@@ -384,4 +393,36 @@ fn tetraplet_with_wasm_modules() {
     let expected_state = scalar!("Ok");
 
     assert_eq!(actual_trace[1.into()], expected_state)
+}
+
+fn to_app_service_call_parameters(
+    call_parameters: marine_rs_sdk::CallParameters,
+) -> fluence_app_service::CallParameters {
+    fluence_app_service::CallParameters {
+        init_peer_id: call_parameters.init_peer_id,
+        service_id: call_parameters.service_id,
+        service_creator_peer_id: call_parameters.service_creator_peer_id,
+        host_id: call_parameters.host_id,
+        particle_id: call_parameters.particle_id,
+        tetraplets: call_parameters
+            .tetraplets
+            .into_iter()
+            .map(to_app_service_tetraplets)
+            .collect(),
+    }
+}
+
+fn to_app_service_tetraplets(
+    tetraplets: Vec<marine_rs_sdk::SecurityTetraplet>,
+) -> Vec<fluence_app_service::SecurityTetraplet> {
+    tetraplets.into_iter().map(to_app_service_tetraplet).collect()
+}
+
+fn to_app_service_tetraplet(tetraplet: marine_rs_sdk::SecurityTetraplet) -> fluence_app_service::SecurityTetraplet {
+    fluence_app_service::SecurityTetraplet {
+        peer_pk: tetraplet.peer_pk,
+        service_id: tetraplet.service_id,
+        function_name: tetraplet.function_name,
+        json_path: tetraplet.json_path,
+    }
 }

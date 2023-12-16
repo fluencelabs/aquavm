@@ -89,6 +89,20 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
     })
 }
 
+pub fn fallible_call_service_by_arg(arg: impl Into<JValue>) -> CallServiceClosure {
+    let arg = arg.into();
+
+    Box::new(move |params| -> CallServiceResult {
+        // return a error for service with specific arg
+        if params.arguments.get(0) == Some(&arg) {
+            CallServiceResult::err(1, json!("failed result from fallible_call_service_by_arg"))
+        } else {
+            // return success for services with other arg
+            CallServiceResult::ok(json!("success result from fallible_call_service_by_arg"))
+        }
+    })
+}
+
 pub type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
 
 pub fn tetraplet_host_function(

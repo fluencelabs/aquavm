@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 // test for github.com/fluencelabs/aquavm/issues/211
 // On the versions < 0.20.1 it just crashes
 fn issue_211() {
-    let peer_1_id = "peer_1_id";
+    let peer_1_name = "peer_1_id";
 
     let script = format!(
         r#"
@@ -68,23 +68,25 @@ fn issue_211() {
     "#
     );
 
-    let run_params = TestRunParameters::from_init_peer_id(peer_1_id);
+    let run_params = TestRunParameters::from_init_peer_id(peer_1_name);
 
     let engine = air_test_framework::AirScriptExecutor::from_annotated(run_params, &script)
         .expect("invalid test executor config");
+    let peer_1_id = engine.resolve_name(peer_1_name).to_string();
+    let peer_1_id = peer_1_id.as_str();
 
-    let result = engine.execute_one(peer_1_id).unwrap();
+    let result = engine.execute_one(peer_1_name).unwrap();
 
     let scalar_2 = scalar!(
         json!([1, 2, 3]),
-        peer = peer_1_id,
+        peer_name = peer_1_name,
         service = "getdatasrv..1",
         function = "nodes"
     );
     let cid_2 = extract_service_result_cid(&scalar_2);
 
     let expected_trace = ExecutionTrace::from(vec![
-        scalar!(2, peer = peer_1_id, service = "getdatasrv..0", function = "idx"),
+        scalar!(2, peer_name = peer_1_name, service = "getdatasrv..0", function = "idx"),
         scalar_2,
         executed_state::par(6, 0),
         executed_state::par(1, 4),
@@ -94,55 +96,55 @@ fn issue_211() {
         executed_state::par(1, 0),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_1_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
             ]
         })),
         unused!(
             "expected result",
-            peer = peer_1_id,
+            peer_name = peer_1_name,
             service = "op..2",
             function = "noop",
             args = vec![json!(3), json!([1, 2, 3])]
         ),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_1_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_1_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": "peer_1_id", "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2),
                 },
             ]
         })),
         scalar!(
             "expected result",
-            peer = peer_1_id,
+            peer_name = peer_1_name,
             service = "op..3",
             function = "identity",
             args = vec![json!([1, 2, 3])]

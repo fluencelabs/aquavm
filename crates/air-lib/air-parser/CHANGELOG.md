@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.10.0...air-parser-v0.11.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767))
+
+### Features
+
+* **air-parser:** optimize Instruction type layout ([#767](https://github.com/fluencelabs/aquavm/issues/767)) ([1673cdf](https://github.com/fluencelabs/aquavm/commit/1673cdf06c1fcdd9d06789b0d9d76e71d1625fea))
+
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.9.0...air-parser-v0.10.0) (2023-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702))
+
+### Features
+
+* **execution-engine:** this patch prohibits error code = 0 ([#702](https://github.com/fluencelabs/aquavm/issues/702)) ([45035cc](https://github.com/fluencelabs/aquavm/commit/45035ccff515344ee8c2dc63f172f00637226778))
+* **parser,execution-engine:** allow :error: in fail ([#696](https://github.com/fluencelabs/aquavm/issues/696)) ([bd80a12](https://github.com/fluencelabs/aquavm/commit/bd80a127eaab39f1ba02740e3e67d69cb36a699c))
+
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.2...air-parser-v0.9.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648))
+
+### Features
+
+* **execution-engine:** canon stream map support [fixes VM-301] ([#648](https://github.com/fluencelabs/aquavm/issues/648)) ([b4cbf8f](https://github.com/fluencelabs/aquavm/commit/b4cbf8f621b77ba2031900f021bf20d0f27e34b8))
+
+## [0.8.2](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.1...air-parser-v0.8.2) (2023-09-04)
+
+
+### Features
+
+* **execution-engine:** a new :error: runtime attribute according with FLIP-11 [fixes VM-329] ([#683](https://github.com/fluencelabs/aquavm/issues/683)) ([20afb79](https://github.com/fluencelabs/aquavm/commit/20afb79e3f345b83c367357171f1802ed2db0a66))
+
 ## [0.8.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.8.0...air-parser-v0.8.1) (2023-08-03)
 
 

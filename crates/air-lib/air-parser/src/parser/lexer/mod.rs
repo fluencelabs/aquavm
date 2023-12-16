@@ -25,11 +25,13 @@ mod tests;
 pub mod text_pos;
 
 pub use air_lexer::AIRLexer;
+pub(crate) use air_lexer::ERROR;
+pub(crate) use air_lexer::LAST_ERROR;
 pub use errors::LexerError;
 pub use text_pos::AirPos;
 pub use token::Token;
 
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 
-pub(self) use utils::is_air_alphanumeric;
-pub(self) use utils::is_json_path_allowed_char;
+use utils::is_air_alphanumeric;
+use utils::is_json_path_allowed_char;

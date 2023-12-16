@@ -21,7 +21,7 @@ use avm_interface::ParticleParameters;
 
 pub(crate) struct ExecutionData<'ctx> {
     pub(crate) air_script: String,
-    pub(crate) current_data: String,
-    pub(crate) prev_data: String,
+    pub(crate) current_data: Vec<u8>,
+    pub(crate) prev_data: Vec<u8>,
     pub(crate) particle: ParticleParameters<'ctx>,
 }

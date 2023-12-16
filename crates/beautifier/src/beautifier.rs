@@ -109,15 +109,12 @@ impl<W: io::Write> Beautifier<W> {
     /// Emit beautified code for the `air_script`.
     pub fn beautify(&mut self, air_script: &str) -> Result<(), BeautifyError> {
         let tree = air_parser::parse(air_script).map_err(BeautifyError::Parse)?;
-        self.beautify_ast(tree)
+        self.beautify_ast(&tree)
     }
 
     /// Emit beautified code for the `ast`.
-    pub fn beautify_ast<'i>(
-        &mut self,
-        ast: impl AsRef<ast::Instruction<'i>>,
-    ) -> Result<(), BeautifyError> {
-        Ok(self.beautify_walker(ast.as_ref(), 0)?)
+    pub fn beautify_ast(&mut self, ast: &ast::Instruction<'_>) -> Result<(), BeautifyError> {
+        Ok(self.beautify_walker(ast, 0)?)
     }
 
     fn beautify_walker(&mut self, node: &ast::Instruction<'_>, indent: usize) -> io::Result<()> {
@@ -126,6 +123,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::Ap(ap) => self.beautify_simple(ap, indent),
             ast::Instruction::ApMap(ap_map) => self.beautify_simple(ap_map, indent),
             ast::Instruction::Canon(canon) => self.beautify_simple(canon, indent),
+            ast::Instruction::CanonMap(canon_map) => self.beautify_simple(canon_map, indent),
             ast::Instruction::CanonStreamMapScalar(canon) => self.beautify_simple(canon, indent),
             ast::Instruction::Seq(seq) => self.beautify_seq(seq, indent),
             ast::Instruction::Par(par) => self.beautify_par(par, indent),

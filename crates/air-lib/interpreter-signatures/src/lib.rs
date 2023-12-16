@@ -27,16 +27,29 @@
 )]
 
 mod sede;
+mod stores;
+mod trackers;
 
-use air_interpreter_cid::CID;
+pub use crate::stores::*;
+pub use crate::trackers::*;
+
+pub use fluence_keypair::KeyFormat;
+
+use borsh::BorshSerialize;
 use fluence_keypair::error::SigningError;
-use fluence_keypair::KeyPair;
 use serde::{Deserialize, Serialize};
 
-use std::borrow::Borrow;
-use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
+
+#[derive(thiserror::Error, Debug)]
+pub enum KeyError {
+    #[error("signature algorithm {0:?} not whitelisted")]
+    AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
+    #[error("invalid key data: {0}")]
+    InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
+}
 
 /// An opaque serializable representation of a public key.
 ///
@@ -52,17 +65,29 @@ pub struct PublicKey(
 );
 
 impl PublicKey {
-    pub fn verify<T: Serialize + ?Sized>(
+    pub fn new(inner: fluence_keypair::PublicKey) -> Self {
+        Self(inner)
+    }
+
+    pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
+        salt: &str,
         signature: &fluence_keypair::Signature,
     ) -> Result<(), fluence_keypair::error::VerificationError> {
         let pk = &**self;
 
-        let serialized_value =
-            serde_json::to_vec(value).expect("default serialization shouldn't fail");
-
+        let serialized_value = SaltedData::new(&value, salt).serialize();
         pk.verify(&serialized_value, signature)
+    }
+
+    pub fn to_peer_id(&self) -> String {
+        self.0.to_peer_id().to_string()
+    }
+
+    pub fn validate(&self) -> Result<(), KeyError> {
+        let key_format = self.get_key_format();
+        validate_with_key_format((), key_format)
     }
 }
 
@@ -80,9 +105,72 @@ impl Hash for PublicKey {
     }
 }
 
-impl From<fluence_keypair::PublicKey> for PublicKey {
-    fn from(value: fluence_keypair::PublicKey) -> Self {
-        Self(value)
+#[derive(Clone)]
+pub struct KeyPair(fluence_keypair::KeyPair);
+
+impl KeyPair {
+    pub fn new(inner: fluence_keypair::KeyPair) -> Result<Self, KeyError> {
+        let key_format = inner.key_format();
+        validate_with_key_format((), key_format)?;
+
+        Ok(Self(inner))
+    }
+
+    pub fn from_secret_key(secret_key: Vec<u8>, key_format: KeyFormat) -> Result<Self, KeyError> {
+        let inner = fluence_keypair::KeyPair::from_secret_key(secret_key, key_format)?;
+        Self::new(inner)
+    }
+
+    pub fn public(&self) -> PublicKey {
+        PublicKey::new(self.0.public())
+    }
+
+    pub fn key_format(&self) -> KeyFormat {
+        self.0.key_format()
+    }
+
+    pub fn sign(&self, msg: &[u8]) -> Result<Signature, SigningError> {
+        self.0.sign(msg).map(Signature::new)
+    }
+
+    pub fn secret(&self) -> Vec<u8> {
+        self.0.secret().expect("cannot fail on supported formats")
+    }
+
+    pub fn into_inner(self) -> fluence_keypair::KeyPair {
+        self.0
+    }
+
+    pub fn as_inner(&self) -> &fluence_keypair::KeyPair {
+        &self.0
+    }
+
+    #[cfg(feature = "rand")]
+    pub fn generate(key_format: KeyFormat) -> Result<Self, KeyError> {
+        validate_with_key_format((), key_format)?;
+
+        Ok(Self(fluence_keypair::KeyPair::generate(key_format)))
+    }
+}
+
+impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
+    type Error = KeyError;
+
+    fn try_from(value: fluence_keypair::KeyPair) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
+impl From<KeyPair> for fluence_keypair::KeyPair {
+    fn from(value: KeyPair) -> Self {
+        value.0
+    }
+}
+
+pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
+    match key_format {
+        fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
+        _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
     }
 }
 
@@ -126,75 +214,18 @@ impl From<Signature> for fluence_keypair::Signature {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct SignatureTracker {
-    // from peer id to CID strings
-    peer_to_cids: HashMap<Box<str>, Vec<Box<str>>>,
-}
+#[derive(borsh_derive::BorshSerialize)]
+pub(crate) struct SaltedData<'ctx, Data: BorshSerialize>(&'ctx Data, &'ctx str);
 
-impl SignatureTracker {
-    pub fn new() -> Self {
-        Default::default()
+impl<'ctx, Data: BorshSerialize> SaltedData<'ctx, Data> {
+    pub(crate) fn new(data: &'ctx Data, salt: &'ctx str) -> Self {
+        Self(data, salt)
     }
 
-    pub fn register<T>(&mut self, peer_id: impl Into<Box<str>>, cid: &CID<T>) {
-        self.peer_to_cids
-            .entry(peer_id.into())
-            .or_default()
-            .push(cid.clone().into_inner().into());
-    }
-
-    pub fn into_signature(
-        &mut self,
-        peer_id: &str,
-        signer: &KeyPair,
-    ) -> Result<Signature, SigningError> {
-        let mut cids = self.peer_to_cids.get(peer_id).cloned().unwrap_or_default();
-        cids.sort_unstable();
-
+    pub(crate) fn serialize(&self) -> Vec<u8> {
         // TODO make pluggable serialization
         // TODO it will be useful for CID too
         // TODO please note that using serde::Serializer is not enough
-        let serialized_cids =
-            serde_json::to_string(&cids).expect("default serialization shouldn't fail");
-
-        signer.sign(serialized_cids.as_bytes()).map(Signature::new)
-    }
-}
-
-/// A dictionary-like structure that stores peer public keys and their particle data signatures.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
-
-impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>
-    where
-        Key: Borrow<Q>,
-        Q: Hash + Eq + ?Sized,
-    {
-        self.0.get(peer_pk)
-    }
-
-    pub fn put(&mut self, peer_pk: Key, signature: Sign) {
-        self.0.insert(peer_pk, signature);
-    }
-
-    pub fn merge(prev: Self, _current: Self) -> Self {
-        // TODO STUB
-        prev
-    }
-}
-
-impl<Key: Hash + Eq, Sign> Default for SignatureStore<Key, Sign> {
-    fn default() -> Self {
-        Self(Default::default())
+        borsh::to_vec(&self).expect("borsh serializer shouldn't fail")
     }
 }

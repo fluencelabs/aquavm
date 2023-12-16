@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout AquaVM
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/aquavm
           ref: ${{ inputs.ref }}
@@ -42,21 +42,10 @@ jobs:
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.3
 
-      - name: Download marine artifact
-        id: marine
-        uses: actions/download-artifact@v3
-        continue-on-error: true
-        with:
-          name: marine
-          path: ~/.local/bin
-
-      - name: Make marine executable
-        if: steps.marine.outcome == 'success'
-        run: chmod +x ~/.local/bin/marine
-
       - name: Setup marine
-        if: steps.marine.outcome == 'failure'
         uses: fluencelabs/setup-marine@v1
+        with:
+          artifact-name: marine
 
       - name: Set dependencies
         if: inputs.cargo-dependencies != 'null'

@@ -23,7 +23,7 @@ impl<'i> Ap<'i> {
 }
 
 impl<'i> ApMap<'i> {
-    pub fn new(key: ApMapKey<'i>, value: ApArgument<'i>, map: StreamMap<'i>) -> Self {
+    pub fn new(key: StreamMapKeyClause<'i>, value: ApArgument<'i>, map: StreamMap<'i>) -> Self {
         Self { key, value, map }
     }
 }
@@ -56,6 +56,20 @@ impl<'i> Canon<'i> {
     }
 }
 
+impl<'i> CanonMap<'i> {
+    pub fn new(
+        peer_id: ResolvableToPeerIdVariable<'i>,
+        stream_map: StreamMap<'i>,
+        canon_stream_map: CanonStreamMap<'i>,
+    ) -> Self {
+        Self {
+            peer_id,
+            stream_map,
+            canon_stream_map,
+        }
+    }
+}
+
 impl<'i> CanonStreamMapScalar<'i> {
     pub fn new(
         peer_id: ResolvableToPeerIdVariable<'i>,
@@ -71,28 +85,19 @@ impl<'i> CanonStreamMapScalar<'i> {
 }
 
 impl<'i> Seq<'i> {
-    pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
-    ) -> Self {
+    pub fn new(left_instruction: Instruction<'i>, right_instruction: Instruction<'i>) -> Self {
         Self(left_instruction, right_instruction)
     }
 }
 
 impl<'i> Par<'i> {
-    pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
-    ) -> Self {
+    pub fn new(left_instruction: Instruction<'i>, right_instruction: Instruction<'i>) -> Self {
         Self(left_instruction, right_instruction)
     }
 }
 
 impl<'i> Xor<'i> {
-    pub fn new(
-        left_instruction: Box<Instruction<'i>>,
-        right_instruction: Box<Instruction<'i>>,
-    ) -> Self {
+    pub fn new(left_instruction: Instruction<'i>, right_instruction: Instruction<'i>) -> Self {
         Self(left_instruction, right_instruction)
     }
 }
@@ -101,7 +106,7 @@ impl<'i> Match<'i> {
     pub fn new(
         left_value: ImmutableValue<'i>,
         right_value: ImmutableValue<'i>,
-        instruction: Box<Instruction<'i>>,
+        instruction: Instruction<'i>,
     ) -> Self {
         Self {
             left_value,
@@ -115,7 +120,7 @@ impl<'i> MisMatch<'i> {
     pub fn new(
         left_value: ImmutableValue<'i>,
         right_value: ImmutableValue<'i>,
-        instruction: Box<Instruction<'i>>,
+        instruction: Instruction<'i>,
     ) -> Self {
         Self {
             left_value,
@@ -187,7 +192,7 @@ impl<'i> Next<'i> {
 
 impl<'i> New<'i> {
     #[allow(clippy::self_named_constructors)]
-    pub fn new(argument: NewArgument<'i>, instruction: Box<Instruction<'i>>, span: Span) -> Self {
+    pub fn new(argument: NewArgument<'i>, instruction: Instruction<'i>, span: Span) -> Self {
         Self {
             argument,
             instruction,

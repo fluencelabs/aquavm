@@ -24,6 +24,7 @@ use super::ParResult;
 use super::Sender;
 use super::TracePos;
 use super::ValueRef;
+use crate::key_utils::at;
 use crate::FoldLore;
 use crate::FoldResult;
 use crate::FoldSubTraceLore;
@@ -45,7 +46,7 @@ use std::rc::Rc;
 pub fn simple_value_aggregate_cid(
     result: impl Into<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     let value_cid = cid_state
         .value_tracker
         .track_value(Rc::new(result.into()))
@@ -71,7 +72,7 @@ pub fn value_aggregate_cid(
     tetraplet: SecurityTetraplet,
     args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     let value_cid = cid_state
         .value_tracker
         .track_value(Rc::new(result.into()))
@@ -82,7 +83,7 @@ pub fn value_aggregate_cid(
         .unwrap();
 
     let arguments = serde_json::Value::Array(args);
-    let argument_hash = value_to_json_cid(&arguments).unwrap().into_inner().into();
+    let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
 
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
@@ -200,7 +201,11 @@ pub fn canon_tracked(
         .canon_result_tracker
         .track_value(canon_result.clone())
         .unwrap_or_else(|e| panic!("{:?}: failed to compute CID of {:?}", e, canon_result));
-    ExecutedState::Canon(CanonResult::new(canon_result_cid))
+    ExecutedState::Canon(CanonResult::executed(canon_result_cid))
+}
+
+pub fn canon_request(peer_id: impl Into<String>) -> ExecutedState {
+    ExecutedState::Canon(CanonResult::request_sent_by(peer_id.into().into()))
 }
 
 #[macro_export]
@@ -307,6 +312,11 @@ impl ExecutedCallBuilder {
         self
     }
 
+    pub fn peer_name(mut self, peer_name: impl AsRef<str>) -> Self {
+        self.tetraplet.peer_pk = at(peer_name.as_ref());
+        self
+    }
+
     pub fn service(mut self, service_id: impl Into<String>) -> Self {
         self.tetraplet.service_id = service_id.into();
         self
@@ -334,7 +344,7 @@ impl ExecutedCallBuilder {
 
     pub fn unused(self) -> ExecutedState {
         let value_cid = value_to_json_cid(&self.result).unwrap();
-        let value = ValueRef::Unused(value_cid.into());
+        let value = ValueRef::Unused(value_cid);
         ExecutedState::Call(CallResult::Executed(value))
     }
 
@@ -379,7 +389,7 @@ impl ExecutedCallBuilder {
 
 pub fn extract_service_result_cid(
     stream_exec_state: &ExecutedState,
-) -> Rc<CID<ServiceResultCidAggregate>> {
+) -> CID<ServiceResultCidAggregate> {
     match stream_exec_state {
         ExecutedState::Call(CallResult::Executed(ValueRef::Stream { cid, .. })) => cid.clone(),
         ExecutedState::Call(CallResult::Executed(ValueRef::Scalar(cid))) => cid.clone(),
@@ -387,10 +397,10 @@ pub fn extract_service_result_cid(
     }
 }
 
-pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> Rc<CID<CanonResultCidAggregate>> {
+pub fn extract_canon_result_cid(canon_state: &ExecutedState) -> CID<CanonResultCidAggregate> {
     match canon_state {
-        ExecutedState::Canon(CanonResult(cid)) => cid.clone(),
-        _ => panic!("the function is intended for canon only"),
+        ExecutedState::Canon(CanonResult::Executed(cid)) => cid.clone(),
+        _ => panic!("the function is intended for executed canon only"),
     }
 }
 

@@ -18,6 +18,8 @@ use air::ExecutionCidState;
 use air::PreparationError;
 use air::ToErrorCode;
 use air_interpreter_data::ExecutionTrace;
+use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -931,4 +933,244 @@ fn fold_stream_map() {
     ];
     let tetraplates_len = arg_tetraplets.borrow().len();
     assert_eq!(&arg_tetraplets.borrow()[tetraplates_len - 4..], &expected_tetraplets);
+}
+
+#[test]
+fn fold_canon_stream_map() {
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
+
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (ap ("key" "value1") %map)
+                (ap (-42 "value2") %map)
+            )
+            (seq
+                (canon "{vm_1_peer_name}" %map #%canon_map)
+                (fold #%canon_map iter
+                    (seq
+                        (call "{vm_1_peer_name}" ("m" "f") [iter] scalar) ; behaviour = echo
+                        (next iter)
+                    )
+                )
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+
+    let map_value_1 = json!({"key": "key", "value": "value1"});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+                {
+                "result": map_value_1,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value_1.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_1]
+        ),
+        scalar_tracked!(
+            map_value_2.clone(),
+            cid_tracker,
+            peer = vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_2]
+        ),
+    ];
+
+    assert_eq!(&*actual_trace, expected_trace,);
+}
+
+/// This test checks that fold over map and fold over canon map both produce
+/// the same kvpairs sequences. Please note that call results produced by
+/// the folds mentioned differ in their tetraplets b/c testing framework
+/// increments service name index for each call used.
+#[test]
+fn fold_map_and_canon_map_orders_are_same() {
+    let vm_1_peer_name = "vm_1_peer_id";
+    let vm_1_peer_id = at(vm_1_peer_name);
+
+    let script = format!(
+        r#"
+        (seq
+            (seq
+                (seq
+                    (ap ("key" "value1") %map)
+                    (ap (-42 "value2") %map)
+                )
+                (seq
+                    (ap (42 "value3") %map)
+                    (ap ("other" "value4") %map)
+                )
+            )
+            (seq
+                (seq
+                    (canon "{vm_1_peer_name}" %map #%canon_map)
+                    (fold #%canon_map iter
+                        (seq
+                            (call "{vm_1_peer_name}" ("m" "f") [iter] scalar) ; behaviour = echo
+                            (next iter)
+                        )
+                    )
+                )
+                (fold %map iter
+                    (seq
+                        (call "{vm_1_peer_name}" ("m" "f") [iter] scalar1) ; behaviour = echo
+                        (next iter)
+                    )
+                )
+            )
+        )
+        "#
+    );
+
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .expect("invalid test AIR script");
+    let result = executor.execute_all(vm_1_peer_name).unwrap();
+
+    let actual_trace = trace_from_result(&result.last().unwrap());
+
+    let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
+    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+
+    let map_value_1 = json!({"key": "key", "value": "value1"});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
+    let map_value_3 = json!({"key": 42, "value": "value3"});
+    let map_value_4 = json!({"key": "other", "value": "value4"});
+
+    let expected_trace: Vec<ExecutedState> = vec![
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        executed_state::ap(0),
+        canon_tracked(
+            json!({"tetraplet": tetraplet,
+            "values": [
+            {
+                "result": map_value_1,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_2,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_3,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_4,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            ]}),
+            &mut cid_tracker,
+        ),
+        scalar_tracked!(
+            map_value_1.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_1.clone()]
+        ),
+        scalar_tracked!(
+            map_value_2.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_2.clone()]
+        ),
+        scalar_tracked!(
+            map_value_3.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_3.clone()]
+        ),
+        scalar_tracked!(
+            map_value_4.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..0",
+            function = "f",
+            args = [map_value_4.clone()]
+        ),
+        fold(vec![
+            subtrace_lore(0, subtrace_desc(10, 1), subtrace_desc(14, 0)),
+            subtrace_lore(1, subtrace_desc(11, 1), subtrace_desc(14, 0)),
+            subtrace_lore(2, subtrace_desc(12, 1), subtrace_desc(14, 0)),
+            subtrace_lore(3, subtrace_desc(13, 1), subtrace_desc(14, 0)),
+        ]),
+        scalar_tracked!(
+            map_value_1.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..1",
+            function = "f",
+            args = [map_value_1]
+        ),
+        scalar_tracked!(
+            map_value_2.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..1",
+            function = "f",
+            args = [map_value_2]
+        ),
+        scalar_tracked!(
+            map_value_3.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..1",
+            function = "f",
+            args = [map_value_3]
+        ),
+        scalar_tracked!(
+            map_value_4.clone(),
+            cid_tracker,
+            peer = &vm_1_peer_id,
+            service = "m..1",
+            function = "f",
+            args = [map_value_4]
+        ),
+    ];
+
+    assert_eq!(&*actual_trace, expected_trace);
 }

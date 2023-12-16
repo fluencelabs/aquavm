@@ -92,6 +92,10 @@ impl AirRunner for WasmAirRunner {
             particle_id,
         )?)
     }
+
+    fn get_current_peer_id(&self) -> &str {
+        &self.current_peer_id
+    }
 }
 
 /// WASM runner that runs release build form benchmarking.
@@ -146,5 +150,9 @@ impl AirRunner for ReleaseWasmAirRunner {
             keypair,
             particle_id,
         )?)
+    }
+
+    fn get_current_peer_id(&self) -> &str {
+        &self.current_peer_id
     }
 }

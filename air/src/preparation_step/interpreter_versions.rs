@@ -21,7 +21,7 @@ use std::str::FromStr;
 /// Minimal supported interpreter version, should be updated according to
 /// [./docs/update-guide.md]
 static MINIMAL_INTERPRETER_VERSION: Lazy<semver::Version> =
-    Lazy::new(|| semver::Version::from_str("0.43.0").expect("valid minimal supported version specified"));
+    Lazy::new(|| semver::Version::from_str("0.54.0").expect("valid minimal supported version specified"));
 
 /// Current interpreter version, more info in
 /// [./docs/update-guide.md]

@@ -77,6 +77,7 @@ pub(crate) fn parse_error_to_message(e: nom::Err<ParseError>) -> String {
 pub(crate) fn parse_sexp(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     alt((
         parse_sexp_call,
+        parse_sexp_canon,
         parse_sexp_list,
         parse_sexp_string,
         parse_sexp_symbol,
@@ -135,13 +136,44 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
 fn parse_sexp_symbol(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     map(
         recognize(pair(
-            many1_count(alt((value((), alphanumeric1), value((), one_of("_-.$#%"))))),
+            many1_count(alt((
+                value((), alphanumeric1),
+                value((), one_of("_-.:$#%")),
+            ))),
             opt(terminated(
                 delimited(tag("["), parse_sexp_symbol, tag("]")),
                 opt(tag("!")),
             )),
         )),
         Sexp::symbol,
+    )(inp)
+}
+
+fn parse_sexp_canon(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    preceded(
+        delim_ws(tag("(")),
+        preceded(
+            tag("canon "),
+            context("within canon instructon", cut(parse_canon_content)),
+        ),
+    )(inp)
+}
+
+fn parse_canon_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    map(
+        terminated(
+            separated_pair(
+                separated_pair(
+                    context("canon peer", parse_sexp),
+                    sexp_multispace1,
+                    context("canon stream", parse_sexp_symbol),
+                ),
+                sexp_multispace1,
+                context("canon target", parse_sexp_symbol),
+            ),
+            pair(sexp_multispace0, tag(")")),
+        ),
+        |((peer, stream), target)| Sexp::canon(peer, stream, target),
     )(inp)
 }
 
@@ -171,12 +203,15 @@ fn parse_sexp_call_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseErro
             ),
         ),
         |((triplet, args), (var, annotation))| {
-            Sexp::Call(Call {
-                triplet,
-                args,
-                var,
-                service_desc: annotation,
-            })
+            Sexp::Call(
+                Call {
+                    triplet,
+                    args,
+                    var,
+                    service_desc: annotation,
+                }
+                .into(),
+            )
         },
     )(inp)
 }
@@ -231,7 +266,7 @@ fn parse_multiline_annotation(
     )(inp)
 }
 
-fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Box<Triplet>, ParseError<'_>> {
+fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Triplet, ParseError<'_>> {
     map(
         separated_pair(
             context("triplet peer_id", parse_sexp),
@@ -249,7 +284,7 @@ fn parse_sexp_call_triplet(inp: Input<'_>) -> IResult<Input<'_>, Box<Triplet>, P
                 delim_ws(tag(")")),
             ),
         ),
-        |(peer_id, (service, function))| Box::new((peer_id, service, function)),
+        |(peer_id, (service, function))| (peer_id, service, function),
     )(inp)
 }
 
@@ -316,6 +351,7 @@ pub(crate) fn sexp_multispace1(inp: Input<'_>) -> IResult<Input<'_>, (), ParseEr
 
 #[cfg(test)]
 mod tests {
+    use super::super::Canon;
     use super::*;
     use crate::asserts::ServiceDefinition;
 
@@ -441,16 +477,19 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::symbol("peer_id"),
-                    Sexp::string("serv"),
-                    Sexp::string("func"),
-                )),
-                args: vec![],
-                var: None,
-                service_desc: None,
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    ),
+                    args: vec![],
+                    var: None,
+                    service_desc: None,
+                }
+                .into()
+            ))
         );
     }
 
@@ -466,26 +505,32 @@ mod tests {
             res,
             Ok(Sexp::list(vec![
                 Sexp::symbol("seq"),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peer_id"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![],
-                    var: None,
-                    service_desc: None,
-                }),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peer_id"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![],
-                    var: None,
-                    service_desc: None,
-                }),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peer_id"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![],
+                        var: None,
+                        service_desc: None,
+                    }
+                    .into()
+                ),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peer_id"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![],
+                        var: None,
+                        service_desc: None,
+                    }
+                    .into()
+                ),
             ]))
         );
     }
@@ -508,16 +553,19 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::symbol("peer_id"),
-                    Sexp::string("serv"),
-                    Sexp::string("func"),
-                )),
-                args: vec![Sexp::symbol("a")],
-                var: None,
-                service_desc: None,
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    ),
+                    args: vec![Sexp::symbol("a")],
+                    var: None,
+                    service_desc: None,
+                }
+                .into()
+            ))
         );
     }
 
@@ -526,16 +574,19 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b])"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::symbol("peer_id"),
-                    Sexp::string("serv"),
-                    Sexp::string("func"),
-                )),
-                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                var: None,
-                service_desc: None,
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    ),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: None,
+                    service_desc: None,
+                }
+                .into()
+            ))
         );
     }
 
@@ -544,16 +595,19 @@ mod tests {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var)"#);
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::Symbol("peer_id".to_owned()),
-                    Sexp::String("serv".to_owned()),
-                    Sexp::String("func".to_owned()),
-                )),
-                args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
-                var: Some(Box::new(Sexp::Symbol("var".to_owned()))),
-                service_desc: None,
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::Symbol("peer_id".to_owned()),
+                        Sexp::String("serv".to_owned()),
+                        Sexp::String("func".to_owned()),
+                    ),
+                    args: vec![Sexp::Symbol("a".to_owned()), Sexp::Symbol("b".to_owned())],
+                    var: Some(Box::new(Sexp::Symbol("var".to_owned()))),
+                    service_desc: None,
+                }
+                .into()
+            ))
         );
     }
 
@@ -563,16 +617,19 @@ mod tests {
         let expected_annotation = ServiceDefinition::Ok(json!(42));
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::symbol("peer_id"),
-                    Sexp::string("serv"),
-                    Sexp::string("func"),
-                )),
-                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                var: Some(Box::new(Sexp::symbol("var"))),
-                service_desc: Some(expected_annotation),
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::symbol("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    ),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: Some(expected_annotation),
+                }
+                .into()
+            ))
         );
     }
 
@@ -746,16 +803,19 @@ mod tests {
         let res = Sexp::from_str(sexp_str);
         assert_eq!(
             res,
-            Ok(Sexp::Call(Call {
-                triplet: Box::new((
-                    Sexp::string("peer_id"),
-                    Sexp::string("serv"),
-                    Sexp::string("func"),
-                )),
-                args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                var: Some(Box::new(Sexp::symbol("var"))),
-                service_desc: Some(expected_annotation),
-            }))
+            Ok(Sexp::Call(
+                Call {
+                    triplet: (
+                        Sexp::string("peer_id"),
+                        Sexp::string("serv"),
+                        Sexp::string("func"),
+                    ),
+                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                    var: Some(Box::new(Sexp::symbol("var"))),
+                    service_desc: Some(expected_annotation),
+                }
+                .into()
+            ))
         );
     }
 
@@ -778,26 +838,32 @@ mod tests {
             res,
             Ok(Sexp::List(vec![
                 Sexp::symbol("seq"),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::string("peer_id"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                    var: Some(Box::new(Sexp::symbol("var"))),
-                    service_desc: Some(expected_annotation),
-                }),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::string("peer_id"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                    var: Some(Box::new(Sexp::symbol("var"))),
-                    service_desc: None,
-                }),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::string("peer_id"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                        var: Some(Box::new(Sexp::symbol("var"))),
+                        service_desc: Some(expected_annotation),
+                    }
+                    .into()
+                ),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::string("peer_id"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                        var: Some(Box::new(Sexp::symbol("var"))),
+                        service_desc: None,
+                    }
+                    .into()
+                ),
             ])),
         );
     }
@@ -814,26 +880,32 @@ mod tests {
             res,
             Ok(Sexp::List(vec![
                 Sexp::symbol("par"),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peerid"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                    var: Some(Box::new(Sexp::symbol("var"))),
-                    service_desc: None,
-                }),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peerid2"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![],
-                    var: None,
-                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
-                }),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peerid"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                        var: Some(Box::new(Sexp::symbol("var"))),
+                        service_desc: None,
+                    }
+                    .into()
+                ),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peerid2"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![],
+                        var: None,
+                        service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                    }
+                    .into()
+                ),
             ]))
         );
     }
@@ -851,27 +923,128 @@ mod tests {
             res,
             Ok(Sexp::List(vec![
                 Sexp::symbol("par"),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peerid"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
-                    var: Some(Box::new(Sexp::symbol("var"))),
-                    service_desc: None,
-                }),
-                Sexp::Call(Call {
-                    triplet: Box::new((
-                        Sexp::symbol("peerid2"),
-                        Sexp::string("serv"),
-                        Sexp::string("func"),
-                    )),
-                    args: vec![],
-                    var: None,
-                    service_desc: Some(ServiceDefinition::Ok(json!(42))),
-                }),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peerid"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        )
+                            .into(),
+                        args: vec![Sexp::symbol("a"), Sexp::symbol("b")],
+                        var: Some(Box::new(Sexp::symbol("var"))),
+                        service_desc: None,
+                    }
+                    .into()
+                ),
+                Sexp::Call(
+                    Call {
+                        triplet: (
+                            Sexp::symbol("peerid2"),
+                            Sexp::string("serv"),
+                            Sexp::string("func"),
+                        ),
+                        args: vec![],
+                        var: None,
+                        service_desc: Some(ServiceDefinition::Ok(json!(42))),
+                    }
+                    .into()
+                ),
             ]))
+        );
+    }
+
+    #[test]
+    fn test_canon_var_peer() {
+        let res = Sexp::from_str(r#"(canon peer $stream #canon)"#);
+
+        assert_eq!(
+            res,
+            Ok(Sexp::Canon(
+                Canon {
+                    peer: Sexp::symbol("peer"),
+                    stream: Sexp::symbol("$stream"),
+                    target: Sexp::symbol("#canon"),
+                }
+                .into()
+            ))
+        )
+    }
+
+    #[test]
+    fn test_canon_string_peer() {
+        let res = Sexp::from_str(r#"(canon "peer" $stream #canon)"#);
+
+        assert_eq!(
+            res,
+            Ok(Sexp::Canon(
+                Canon {
+                    peer: Sexp::string("peer"),
+                    stream: Sexp::symbol("$stream"),
+                    target: Sexp::symbol("#canon"),
+                }
+                .into()
+            ))
+        )
+    }
+
+    #[test]
+    fn test_canon_error_no_peer() {
+        let res = Sexp::from_str(r#"(canon )"#);
+        assert_eq!(
+            res,
+            Err(
+                "Failed to parse the script:\n  1:8: within canon instructon\n  1:8: canon peer"
+                    .to_owned()
+            )
+        );
+    }
+
+    #[test]
+    fn test_canon_error_no_stream() {
+        let res = Sexp::from_str(r#"(canon peer )"#);
+        assert_eq!(
+            res,
+            Err(
+                "Failed to parse the script:\n  1:8: within canon instructon\n  1:13: canon stream"
+                    .to_owned()
+            )
+        );
+    }
+
+    #[test]
+    fn test_canon_error_no_target() {
+        let res = Sexp::from_str(r#"(canon peer $stream )"#);
+        assert_eq!(
+            res,
+            Err(
+                "Failed to parse the script:\n  1:8: within canon instructon\n  1:21: canon target"
+                    .to_owned()
+            )
+        );
+    }
+
+    #[test]
+    fn test_canon_error_wrong_stream() {
+        let res = Sexp::from_str(r#"(canon peer "$stream" #canon)"#);
+        assert_eq!(
+            res,
+            Err(
+                "Failed to parse the script:\n  1:8: within canon instructon\n  1:13: canon stream"
+                    .to_owned()
+            )
+        );
+    }
+
+    #[test]
+    fn test_canon_error_wrong_target() {
+        let res = Sexp::from_str(r##"(canon peer $stream "#canon" )"##);
+        assert_eq!(
+            res,
+            Err(
+                "Failed to parse the script:\n  1:8: within canon instructon\n  1:21: canon target"
+                    .to_owned()
+            )
         );
     }
 }

@@ -49,12 +49,14 @@ pub trait AirRunner {
         key_pair: &KeyPair,
         particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
+
+    fn get_current_peer_id(&self) -> &str;
 }
 
 pub struct TestRunner<R = DefaultAirRunner> {
     pub runner: R,
     call_service: CallServiceClosure,
-    keypair: KeyPair,
+    pub keypair: KeyPair,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -175,6 +177,21 @@ pub fn create_custom_avm<R: AirRunner>(
     TestRunner {
         runner,
         call_service,
+        keypair: keypair.into_inner(),
+    }
+}
+
+pub fn create_avm_with_key<R: AirRunner>(
+    keypair: impl Into<KeyPair>,
+    call_service: CallServiceClosure,
+) -> TestRunner<R> {
+    let keypair = keypair.into();
+    let current_peer_id = keypair.public().to_peer_id().to_string();
+    let runner = R::new(current_peer_id);
+
+    TestRunner {
+        runner,
+        call_service,
         keypair,
     }
 }
@@ -214,6 +231,11 @@ impl TestRunParameters {
             ttl,
             ..<_>::default()
         }
+    }
+
+    pub fn with_particle_id(mut self, particle_id: impl Into<String>) -> Self {
+        self.particle_id = particle_id.into();
+        self
     }
 }
 
@@ -259,6 +281,12 @@ mod tests {
                 "".to_owned(),
             )
             .expect("call should be success");
+
+        assert_eq!(
+            current_result_1.ret_code, 0,
+            "{:?}",
+            current_result_1.error_message
+        );
 
         let expected_current_call_requests = HashMap::new();
         let expected_current_next_peers_pks = vec![spell_id.to_owned()];

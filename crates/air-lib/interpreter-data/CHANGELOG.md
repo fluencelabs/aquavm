@@ -8,6 +8,118 @@
   * dependencies
     * aquavm-air-parser bumped from 0.7.5 to 0.8.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.1 to 0.8.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.8.2 to 0.9.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.9.0 to 0.10.0
+    * polyplets bumped from 0.5.0 to 0.5.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-utils bumped from 0.1.1 to 0.2.0
+
+## [0.15.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.14.0...air-interpreter-data-v0.15.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **interpreter-cid,interpreter-data:** Support for multiple hash types in CID verification ([#722](https://github.com/fluencelabs/aquavm/issues/722)) ([524c302](https://github.com/fluencelabs/aquavm/commit/524c30243bc544d5e265d9c6c7d1119a447202af))
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.10.0 to 0.11.0
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-signatures bumped from 0.1.4 to 0.1.5
+
+## [0.14.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.13.0...air-interpreter-data-v0.14.0) (2023-10-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-cid:** use Blake3 for CIDs ([#729](https://github.com/fluencelabs/aquavm/issues/729))
+
+### Features
+
+* **interpreter-cid:** use Blake3 for CIDs ([#729](https://github.com/fluencelabs/aquavm/issues/729)) ([776d81a](https://github.com/fluencelabs/aquavm/commit/776d81a1dba2379e4019dc6bf851ae8396550d66))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.5.0 to 0.6.0
+    * air-interpreter-signatures bumped from 0.1.3 to 0.1.4
+
+## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.12.1...air-interpreter-data-v0.13.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718))
+
+### Features
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718)) ([c2108e0](https://github.com/fluencelabs/aquavm/commit/c2108e0fa09ea83854bb48c640e0cf23883a0bd0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.4.0 to 0.5.0
+    * air-interpreter-signatures bumped from 0.1.2 to 0.1.3
+
+## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.11.3...air-interpreter-data-v0.12.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607))
+
+### Features
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607)) ([8a07613](https://github.com/fluencelabs/aquavm/commit/8a076130274c0500025e5c2ea74ec57e4c455971))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.3.0 to 0.4.0
+    * air-interpreter-signatures bumped from 0.1.1 to 0.1.2
+
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.10.0...air-interpreter-data-v0.11.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.9.0...air-interpreter-data-v0.10.0) (2023-08-17)
 
 

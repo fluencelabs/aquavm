@@ -35,6 +35,8 @@ pub mod native_test_runner;
 pub mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
+use air_interpreter_sede::ToSerialized;
+
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
@@ -84,7 +86,7 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    serde_json::from_slice(&result.data).expect("default serializer shouldn't fail")
+    InterpreterData::try_from_slice(&result.data).expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace(
@@ -98,7 +100,9 @@ pub fn raw_data_from_trace(
         0,
         semver::Version::new(1, 1, 1),
     );
-    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+    InterpreterDataRepr
+        .serialize(&data)
+        .expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace_with_canon(
@@ -118,7 +122,9 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    serde_json::to_vec(&data).expect("default serializer shouldn't fail")
+    InterpreterDataRepr
+        .serialize(&data)
+        .expect("default serializer shouldn't fail")
 }
 
 #[macro_export]
@@ -141,7 +147,7 @@ pub fn print_trace(result: &RawAVMOutcome, trace_name: &str) {
         print!("  {id}: {state}");
         match state {
             ExecutedState::Call(call_result) => print_call_value(&data, call_result),
-            ExecutedState::Canon(CanonResult(canon_cid)) => print_canon_values(&data, canon_cid),
+            ExecutedState::Canon(canon_result) => print_canon_values(&data, canon_result),
             ExecutedState::Par(_) | ExecutedState::Fold(_) | ExecutedState::Ap(_) => {}
         }
         println!();
@@ -170,10 +176,11 @@ fn print_call_value(data: &InterpreterData, call_result: &CallResult) {
     print!(" => {:#?}", value);
 }
 
-fn print_canon_values(
-    data: &InterpreterData,
-    canon_result_cid: &std::rc::Rc<air_interpreter_cid::CID<CanonResultCidAggregate>>,
-) {
+fn print_canon_values(data: &InterpreterData, canon_result: &CanonResult) {
+    let canon_result_cid = match canon_result {
+        CanonResult::RequestSentBy(_) => return,
+        CanonResult::Executed(cid) => cid,
+    };
     let canon_agg = data
         .cid_info
         .canon_result_store
@@ -200,7 +207,7 @@ fn print_canon_values(
 #[macro_export]
 macro_rules! rc {
     ($expr:expr) => {
-        std::rc::Rc::new($expr)
+        ::std::rc::Rc::new($expr)
     };
 }
 
@@ -213,4 +220,25 @@ pub fn is_interpreter_succeded(result: &RawAVMOutcome) -> bool {
 
 pub fn check_error(result: &RawAVMOutcome, error: impl ToErrorCode + ToString) -> bool {
     result.ret_code == error.to_error_code() && result.error_message == error.to_string()
+}
+
+#[macro_export]
+macro_rules! assert_error_eq {
+    ($result:expr, $error:expr $(,)?) => {{
+        let result: &::air_test_utils::RawAVMOutcome = $result;
+        let error = $error;
+        ::std::assert_eq!(
+            (result.ret_code, &result.error_message),
+            (::air::ToErrorCode::to_error_code(&error), &::std::string::ToString::to_string(&error))
+        );
+    }};
+    ($result:expr, $error:expr, $($arg:tt)+) => {{
+        let result: &::air_test_utils::RawAVMOutcome = $result;
+        let error = $error;
+        ::std::assert_eq!(
+            (result.ret_code, &result.error_message),
+            (::air::ToErrorCode::to_error_code(&error), &::std::string::ToString::to_string(&error)),
+            $($arg)+
+        );
+    }};
 }

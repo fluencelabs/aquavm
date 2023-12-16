@@ -39,21 +39,21 @@ pub(crate) fn try_merge_next_state_as_par(data_keeper: &mut DataKeeper) -> Merge
 }
 
 impl MergerParResult {
-    pub(self) fn from_pars(prev_par: ParResult, current_par: ParResult) -> Self {
+    fn from_pars(prev_par: ParResult, current_par: ParResult) -> Self {
         Self {
             prev_par: Some(prev_par),
             current_par: Some(current_par),
         }
     }
 
-    pub(self) fn from_prev_par(prev_par: ParResult) -> Self {
+    fn from_prev_par(prev_par: ParResult) -> Self {
         Self {
             prev_par: Some(prev_par),
             current_par: None,
         }
     }
 
-    pub(self) fn from_current_par(current_par: ParResult) -> Self {
+    fn from_current_par(current_par: ParResult) -> Self {
         Self {
             prev_par: None,
             current_par: Some(current_par),

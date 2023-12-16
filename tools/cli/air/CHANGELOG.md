@@ -54,6 +54,112 @@
     * aquavm-air bumped from 0.43.0 to 0.43.1
     * air-test-utils bumped from 0.8.1 to 0.8.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.0 to 0.45.1
+    * air-beautifier bumped from 0.2.1 to 0.2.2
+    * air-test-utils bumped from 0.10.0 to 0.10.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.1 to 0.46.0
+    * air-test-utils bumped from 0.10.1 to 0.10.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.46.0 to 0.47.0
+    * air-beautifier bumped from 0.2.2 to 0.3.0
+    * air-test-utils bumped from 0.10.2 to 0.10.3
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.47.0 to 0.48.0
+    * air-beautifier bumped from 0.3.0 to 0.3.1
+    * avm-data-store bumped from 0.7.0 to 0.7.1
+    * avm-interface bumped from 0.29.0 to 0.29.1
+    * air-interpreter-interface bumped from 0.15.0 to 0.15.1
+    * air-test-utils bumped from 0.10.3 to 0.10.4
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.48.0 to 0.49.0
+    * air-test-utils bumped from 0.10.4 to 0.10.5
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.49.0 to 0.50.0
+    * air-test-utils bumped from 0.10.5 to 0.10.6
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.51.0 to 0.52.0
+    * avm-data-store bumped from 0.7.1 to 0.7.2
+    * avm-interface bumped from 0.29.1 to 0.29.2
+    * air-test-utils bumped from 0.11.0 to 0.11.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.52.0 to 0.53.0
+    * air-test-utils bumped from 0.11.1 to 0.12.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.54.0 to 0.55.0
+    * air-beautifier bumped from 0.3.1 to 0.4.0
+    * avm-data-store bumped from 0.7.2 to 0.7.3
+    * avm-interface bumped from 0.29.2 to 0.29.3
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+    * air-test-utils bumped from 0.12.1 to 0.13.0
+
+## [0.5.3](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.5.2...aquavm-air-cli-v0.5.3) (2023-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.53.0 to 0.54.0
+    * air-test-utils bumped from 0.12.0 to 0.12.1
+
+## [0.5.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.7...aquavm-air-cli-v0.5.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607))
+
+### Features
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607)) ([8a07613](https://github.com/fluencelabs/aquavm/commit/8a076130274c0500025e5c2ea74ec57e4c455971))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.50.0 to 0.51.0
+    * air-test-utils bumped from 0.10.6 to 0.11.0
+
+## [0.4.1](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.4.0...aquavm-air-cli-v0.4.1) (2023-08-31)
+
+
+### Bug Fixes
+
+* **aquavm-air-cli:** NEAR mode fixes ([#679](https://github.com/fluencelabs/aquavm/issues/679)) ([6978603](https://github.com/fluencelabs/aquavm/commit/6978603c76a2a2576fc4196369d944f25da7a559))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.44.0 to 0.45.0
+    * air-test-utils bumped from 0.9.0 to 0.10.0
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.3.5...aquavm-air-cli-v0.4.0) (2023-08-17)
 
 

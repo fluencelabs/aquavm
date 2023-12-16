@@ -220,3 +220,81 @@ fn mismatch_with_empty_array() {
     let instruction = parse(source_code);
     assert_eq!(expected, instruction);
 }
+
+#[test]
+fn match_with_canon_stream_wl() {
+    let source_code = r#"
+         (match #%canon.$.left_key #%canon.$.right_key
+            (null)
+         )
+        "#;
+
+    let left_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "left_key",
+    }])
+    .unwrap();
+    let left = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        left_lambda,
+        17.into(),
+    ));
+
+    let right_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "right_key",
+    }])
+    .unwrap();
+    let right = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        right_lambda,
+        36.into(),
+    ));
+
+    let instr = null();
+    let expected = match_(left, right, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(
+        instruction, expected,
+        "actual:\n{:#?}\n expected {:#?}",
+        instruction, expected
+    );
+}
+
+#[test]
+fn mismatch_with_canon_stream_wl() {
+    let source_code = r#"
+         (mismatch #%canon.$.left_key #%canon.$.right_key
+            (null)
+         )
+        "#;
+
+    let left_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "left_key",
+    }])
+    .unwrap();
+    let left = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        left_lambda,
+        20.into(),
+    ));
+
+    let right_lambda = LambdaAST::try_from_accessors(vec![ValueAccessor::FieldAccessByName {
+        field_name: "right_key",
+    }])
+    .unwrap();
+    let right = ImmutableValue::VariableWithLambda(ImmutableVariableWithLambda::canon_stream_map(
+        "#%canon",
+        right_lambda,
+        39.into(),
+    ));
+
+    let instr = null();
+    let expected = mismatch(left, right, instr);
+
+    let instruction = parse(source_code);
+    assert_eq!(
+        instruction, expected,
+        "actual:\n{:#?}\n expected {:#?}",
+        instruction, expected
+    );
+}

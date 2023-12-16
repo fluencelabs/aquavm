@@ -19,34 +19,37 @@ use air::UncatchableError::ValueForCidNotFound;
 use air_interpreter_cid::CID;
 use air_interpreter_data::{CidStore, CidTracker};
 use air_test_framework::AirScriptExecutor;
+use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
 #[test]
 fn test_canon_ok() {
-    let init_peer_id = "init_peer_id";
+    let init_peer_name = "init_peer_id";
 
     let script = format!(
         r#"(seq
        (seq
            (ap 42 $stream)
-           (call "{init_peer_id}" ("serv" "func") [] $stream)) ; ok = "to canon"
-       (canon "{init_peer_id}" $stream #canon)
+           (call "{init_peer_name}" ("serv" "func") [] $stream)) ; ok = "to canon"
+       (canon "{init_peer_name}" $stream #canon)
     )"#
     );
 
     let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &script).unwrap();
-    let result = executor.execute_one(init_peer_id).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
+    let result = executor.execute_one(init_peer_name).unwrap();
     let data = data_from_result(&result);
 
     let mut cid_state = ExecutionCidState::new();
+
+    let init_peer_id = at(init_peer_name);
 
     let stream_exec_state = stream_tracked!(
         "to canon",
         1,
         cid_state,
-        peer = init_peer_id,
+        peer_name = init_peer_name,
         service = "serv..0",
         function = "func"
     );
@@ -98,25 +101,28 @@ fn test_canon_ok() {
 
 #[test]
 fn test_canon_ok_multi() {
-    let init_peer_id = "init_peer_id";
-    let other_peer_id = "other_peer_id";
+    let init_peer_name = "init_peer_id";
+    let other_peer_name = "other_peer_id";
 
     let script = format!(
         r#"(seq
        (seq
-           (call "{init_peer_id}" ("serv" "func") [] $stream) ; ok = "to canon"
-           (call "{other_peer_id}" ("other_serv" "other_func") [] $stream) ; ok = "other"
+           (call "{init_peer_name}" ("serv" "func") [] $stream) ; ok = "to canon"
+           (call "{other_peer_name}" ("other_serv" "other_func") [] $stream) ; ok = "other"
        )
-       (canon "{init_peer_id}" $stream #canon)
+       (canon "{init_peer_name}" $stream #canon)
     )"#
     );
 
     let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), &script).unwrap();
-    let _result1 = executor.execute_one(init_peer_id).unwrap();
-    let _result2 = executor.execute_one(other_peer_id).unwrap();
-    let result3 = executor.execute_one(init_peer_id).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
+    let _result1 = executor.execute_one(init_peer_name).unwrap();
+    let _result2 = executor.execute_one(other_peer_name).unwrap();
+    let result3 = executor.execute_one(init_peer_name).unwrap();
     let data = data_from_result(&result3);
+
+    let init_peer_id = at(init_peer_name);
+    let other_peer_id = at(other_peer_name);
 
     let mut cid_state = ExecutionCidState::new();
 
@@ -124,7 +130,7 @@ fn test_canon_ok_multi() {
         "to canon",
         0,
         cid_state,
-        peer = init_peer_id,
+        peer_name = init_peer_name,
         service = "serv..0",
         function = "func"
     );
@@ -134,7 +140,7 @@ fn test_canon_ok_multi() {
         "other",
         1,
         cid_state,
-        peer = other_peer_id,
+        peer_name = other_peer_name,
         service = "other_serv..1",
         function = "other_func"
     );
@@ -216,15 +222,19 @@ fn test_canon_value_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaieraondvznakk2hi3kfaixhnceatpykz7cikytniqo3lc7ogkgz2qbeq";
+    let missing_cid = "bagaaihra3ijwi5gxk5odex3qfo32u5prci4giaz4ysel67m4a5hk3l432djq";
     let value_store: CidStore<_> = cid_state.value_tracker.into();
-    assert!(value_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        value_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        value_store
+    );
 
     // Override with fake data.
     cid_state.value_tracker = CidTracker::<_>::new();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    let expected_error = ValueForCidNotFound("value", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("value", missing_cid.into());
     assert!(check_error(&result, expected_error));
 }
 
@@ -261,9 +271,13 @@ fn test_canon_root_tetraplet_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaiera2bwoxisr5k7qlbzhxi2jmdqlgqybqgxcfwt3v652nqdo5fyc665q";
+    let missing_cid = "bagaaihraydnoggy3vbf42ebqdjffuqnqpiwk2ryytc4esqasavlo6zzv7e4a";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        tetraplet_store
+    );
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -275,8 +289,8 @@ fn test_canon_root_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
-    assert!(check_error(&result, expected_error));
+    let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]
@@ -310,17 +324,20 @@ fn test_canon_tetraplet_not_found() {
                         "function_name": "func",
                         "json_path": "",
                         "peer_pk": "peer_1",
-                        "service_id": "serv",
+                        "service_id": "serv..0",
                     },
                 }]
             }),
             &mut cid_state,
         ),
     ];
-
-    let missing_cid = "bagaaieracu6twiik6az3cosyzlplrscon3ek6rnu3lkjnflibphqkw6kcdiq";
+    let missing_cid = "bagaaihrasj5rizxwp3gypeiszoyq6nwmlvyu3fxqmfv6yu7uvuir6litgyna";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
-    assert!(tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        tetraplet_store
+    );
 
     let mut fake_tetraplet_tracker = CidTracker::<_>::new();
     fake_tetraplet_tracker
@@ -331,8 +348,8 @@ fn test_canon_tetraplet_not_found() {
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("tetraplet", String::from(missing_cid));
-    assert!(check_error(&result, expected_error));
+    let expected_error = ValueForCidNotFound("tetraplet", missing_cid.into());
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]
@@ -368,15 +385,19 @@ fn test_canon_agg_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaierar6b2hcv2ir66tmbwocj5h7yofseqlzxma2n67z5wybtto5ujrekq";
+    let missing_cid = "bagaaihraqxwgyh7ihp2cmyt6piqqm7s2bz2xr2sgohzn34tnstksoyb4wsza";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
-    assert!(canon_element_store.get(&CID::<_>::new(missing_cid)).is_some());
+    assert!(
+        canon_element_store.get(&CID::<_>::new(missing_cid)).is_some(),
+        "{:#?}",
+        canon_element_store
+    );
 
     // Fake data
     cid_state.canon_element_tracker = <_>::default();
     let cur_data = raw_data_from_trace_with_canon(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
 
-    let expected_error = ValueForCidNotFound("canon aggregate", String::from(missing_cid));
+    let expected_error = ValueForCidNotFound("canon aggregate", missing_cid.into());
     assert!(check_error(&result, expected_error));
 }

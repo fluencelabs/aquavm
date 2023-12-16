@@ -20,7 +20,6 @@ use super::TraceHandler;
 use crate::execution_step::execution_context::check_error_object;
 use crate::execution_step::resolver::Resolvable;
 use crate::execution_step::CatchableError;
-use crate::execution_step::LastError;
 use crate::execution_step::RcSecurityTetraplet;
 use crate::log_instruction;
 use crate::ExecutionError;
@@ -47,6 +46,7 @@ impl<'i> super::ExecutableInstruction<'i> for Fail<'i> {
             Fail::CanonStreamWithLambda(canon_stream) => fail_with_canon_stream(canon_stream, exec_ctx),
             // bubble last error up
             Fail::LastError => fail_with_last_error(exec_ctx),
+            Fail::Error => fail_with_error(exec_ctx),
         }
     }
 }
@@ -55,7 +55,7 @@ fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i
     let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
@@ -64,7 +64,7 @@ fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut Ex
     let (value, mut tetraplet, provenance) = scalar.resolve(exec_ctx)?;
     // tetraplets always have one element here and it'll be refactored after boxed value
     let tetraplet = tetraplet.remove(0);
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
 }
@@ -75,7 +75,7 @@ fn fail_with_literals(
     fail: &Fail<'_>,
     exec_ctx: &mut ExecutionCtx<'_>,
 ) -> ExecutionResult<()> {
-    let error_object = crate::execution_step::execution_context::error_from_raw_fields(
+    let error_object = crate::execution_step::execution_context::error_from_raw_fields_w_peerid(
         error_code,
         error_message,
         &fail.to_string(),
@@ -97,23 +97,52 @@ fn fail_with_canon_stream(
     let (value, mut tetraplets, provenance) = ast_canon.resolve(exec_ctx)?;
 
     // tetraplets always have one element here and it'll be refactored after boxed value
-    check_error_object(&value).map_err(CatchableError::InvalidLastErrorObjectError)?;
+    check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
     fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)), provenance)
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
-    let LastError {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
         error,
         tetraplet,
         provenance,
-    } = exec_ctx.last_error_descriptor.last_error();
+        ..
+    } = exec_ctx.last_error_descriptor.error();
+
+    check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
 
     // to avoid warnings from https://github.com/rust-lang/rust/issues/59159
     let error = error.clone();
     let tetraplet = tetraplet.clone();
 
     fail_with_error_object(exec_ctx, error, tetraplet, provenance.clone())
+}
+
+fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
+    use crate::execution_step::InstructionError;
+
+    let InstructionError {
+        error,
+        tetraplet,
+        provenance,
+        orig_catchable,
+    } = exec_ctx.error_descriptor.error();
+
+    check_error_object(error).map_err(CatchableError::InvalidErrorObjectError)?;
+
+    let result = match orig_catchable {
+        Some(orig_catchable) => {
+            let catchable_to_return = orig_catchable.clone();
+            let _ = fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone());
+            Err(ExecutionError::Catchable(catchable_to_return.into()))
+        }
+        None => fail_with_error_object(exec_ctx, error.clone(), tetraplet.clone(), provenance.clone()),
+    };
+    exec_ctx.error_descriptor.disable_error_setting();
+    result
 }
 
 fn fail_with_error_object(

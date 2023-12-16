@@ -1,6 +1,6 @@
 [package]
 name = "air-beautifier"
-version = "0.2.1"
+version = "0.4.0"
 description = "AIR human-readable format transformer library"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -14,6 +14,6 @@ name = "air_beautifier"
 path = "src/lib.rs"
 
 [dependencies]
-aquavm-air-parser = { version = "0.8.1", path = "../air-lib/air-parser" }
+aquavm-air-parser = { version = "0.11.0", path = "../air-lib/air-parser" }
 itertools = "0.10.5"
-thiserror = "1.0.40"
+thiserror = "1.0.50"

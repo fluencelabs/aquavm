@@ -18,6 +18,12 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
+  aquavm-benchmark:
+    name: "aquavm"
+    uses: ./.github/workflows/benchmark.yml
+    with:
+      ref: ${{ github.ref }}
+
   lints:
     runs-on: builder
 
@@ -27,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Rust toolchain
         uses: dsherret/rust-toolchain-file@v1

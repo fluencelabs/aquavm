@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+use super::ErrorAffectable;
 use super::Joinable;
-use super::LastErrorAffectable;
 use crate::execution_step::execution_context::errors::StreamMapError;
-use crate::execution_step::execution_context::LastErrorObjectError;
+use crate::execution_step::execution_context::ErrorObjectError;
 use crate::execution_step::lambda_applier::LambdaError;
 use crate::JValue;
 use crate::ToErrorCode;
@@ -32,7 +32,7 @@ use std::rc::Rc;
 /// Catchable errors arisen during AIR script execution. Catchable here means that these errors
 /// could be handled by a xor instruction and their error_code could be used in a match
 /// instruction.
-#[derive(ThisError, EnumDiscriminants, Debug)]
+#[derive(ThisError, EnumDiscriminants, Debug, Clone)]
 #[strum_discriminants(derive(EnumIter))]
 pub enum CatchableError {
     /// An error is occurred while calling local service via call_service.
@@ -40,11 +40,11 @@ pub enum CatchableError {
     LocalServiceError(i32, Rc<String>),
 
     /// This error type is produced by a match to notify xor that compared values aren't equal.
-    #[error("match is used without corresponding xor")]
+    #[error("compared values do not match")]
     MatchValuesNotEqual,
 
     /// This error type is produced by a mismatch to notify xor that compared values aren't equal.
-    #[error("mismatch is used without corresponding xor")]
+    #[error("compared values do not mismatch")]
     MismatchValuesEqual,
 
     /// Variable with such a name wasn't defined during AIR script execution.
@@ -77,7 +77,7 @@ pub enum CatchableError {
 
     /// This error type is produced by a fail instruction that tries to throw a scalar that have inappropriate type.
     #[error(transparent)]
-    InvalidLastErrorObjectError(#[from] LastErrorObjectError),
+    InvalidErrorObjectError(#[from] ErrorObjectError),
 
     /// A new with this variable name was met and right after that it was accessed
     /// that is prohibited.
@@ -119,12 +119,16 @@ impl ToErrorCode for CatchableError {
     }
 }
 
-impl LastErrorAffectable for CatchableError {
+impl ErrorAffectable for CatchableError {
     fn affects_last_error(&self) -> bool {
         !matches!(
             self,
             CatchableError::MatchValuesNotEqual | CatchableError::MismatchValuesEqual
         )
+    }
+
+    fn affects_error(&self) -> bool {
+        true
     }
 }
 

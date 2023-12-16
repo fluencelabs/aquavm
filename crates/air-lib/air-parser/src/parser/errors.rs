@@ -53,6 +53,9 @@ pub enum ParserError {
         ap_key_type: String,
         ap_result_name: String,
     },
+
+    #[error("error code 0 with fail is unsupported")]
+    UnsupportedLiteralErrCodes { span: Span },
 }
 
 impl ParserError {
@@ -67,6 +70,7 @@ impl ParserError {
             Self::MultipleIterableValuesForOneIterator { span, .. } => *span,
             Self::MultipleNextInFold { span, .. } => *span,
             Self::UnsupportedMapKeyType { span, .. } => *span,
+            Self::UnsupportedLiteralErrCodes { span } => *span,
         }
     }
 
@@ -115,6 +119,10 @@ impl ParserError {
             ap_key_type: ap_key_type.into(),
             ap_result_name: ap_result_name.into(),
         }
+    }
+
+    pub fn unsupported_literal_errcodes(span: Span) -> Self {
+        Self::UnsupportedLiteralErrCodes { span }
     }
 }
 

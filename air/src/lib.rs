@@ -30,23 +30,27 @@ mod execution_step;
 mod farewell_step;
 mod preparation_step;
 mod runner;
+mod signing_step;
 mod utils;
+mod verification_step;
 
 pub use air_interpreter_interface::InterpreterOutcome;
 pub use air_interpreter_interface::RunParameters;
 pub use air_interpreter_interface::INTERPRETER_SUCCESS;
 pub use execution_step::execution_context::errors::unsupported_map_key_type;
+pub use execution_step::execution_context::errors::CanonStreamMapError;
 pub use execution_step::execution_context::errors::StreamMapError;
-pub use execution_step::execution_context::no_error_last_error;
-pub use execution_step::execution_context::no_error_last_error_object;
+pub use execution_step::execution_context::errors::StreamMapKeyError;
+pub use execution_step::execution_context::no_error;
+pub use execution_step::execution_context::no_error_object;
 pub use execution_step::execution_context::ExecutionCidState;
-pub use execution_step::execution_context::LastError;
+pub use execution_step::execution_context::InstructionError;
 pub use execution_step::execution_context::NO_ERROR_ERROR_CODE;
 pub use execution_step::execution_context::NO_ERROR_MESSAGE;
 pub use execution_step::CatchableError;
+pub use execution_step::ErrorObjectError;
 pub use execution_step::ExecutionError;
 pub use execution_step::LambdaError;
-pub use execution_step::LastErrorObjectError;
 pub use execution_step::UncatchableError;
 pub use farewell_step::FarewellError;
 pub use polyplets::ResolvedTriplet;
@@ -66,7 +70,7 @@ pub mod parser {
     pub use air_parser::ast::Instruction;
 
     /// Parse an AIR script to AST.
-    pub fn parse(script: &str) -> Result<Box<Instruction<'_>>, String> {
+    pub fn parse(script: &str) -> Result<Instruction<'_>, String> {
         air_parser::parse(script)
     }
 }

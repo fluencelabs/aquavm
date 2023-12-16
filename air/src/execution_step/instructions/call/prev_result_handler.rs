@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::execution_context::ResolvedServiceInfo;
 use crate::execution_step::instructions::call::call_result_setter::populate_context_from_data;
 use crate::execution_step::CatchableError;
 use crate::execution_step::RcSecurityTetraplet;
@@ -50,15 +51,27 @@ pub(super) fn handle_prev_state<'i>(
         // this call was failed on one of the previous executions,
         // here it's needed to bubble this special error up
         Failed(ref failed_cid) => {
-            let err_value = exec_ctx
+            let ResolvedServiceInfo {
+                value: err_value,
+                tetraplet: current_tetraplet,
+                service_result_aggregate,
+            } = exec_ctx
                 .cid_state
-                .resolve_service_value(failed_cid)
+                .resolve_service_info(failed_cid)
                 .map_err(UncatchableError::from)?;
+
+            verifier::verify_call(
+                argument_hash.as_ref().unwrap(),
+                tetraplet,
+                &service_result_aggregate.argument_hash,
+                &current_tetraplet,
+            )?;
+
             let call_service_failed: CallServiceFailed =
                 serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
-            exec_ctx.record_call_cid(&*tetraplet.peer_pk, failed_cid);
+            exec_ctx.record_call_cid(&tetraplet.peer_pk, failed_cid);
             trace_ctx.meet_call_end(met_result.result);
 
             let err_msg = call_service_failed.message;
@@ -103,6 +116,7 @@ pub(super) fn handle_prev_state<'i>(
 
             populate_context_from_data(
                 value.clone(),
+                argument_hash.as_ref().unwrap(),
                 tetraplet.clone(),
                 met_result.trace_pos,
                 met_result.source,
@@ -112,7 +126,7 @@ pub(super) fn handle_prev_state<'i>(
 
             match &value {
                 ValueRef::Scalar(ref cid) | ValueRef::Stream { ref cid, .. } => {
-                    exec_ctx.record_call_cid(&*tetraplet.peer_pk, cid);
+                    exec_ctx.record_call_cid(&tetraplet.peer_pk, cid);
                 }
                 ValueRef::Unused(_) => {}
             }
@@ -178,13 +192,13 @@ fn handle_service_error(
 
     let failed_value = CallServiceFailed::new(service_result.ret_code, error_message).to_value();
 
-    let peer_id: Box<str> = tetraplet.peer_pk.as_str().into();
+    let peer_id = tetraplet.peer_pk.clone();
     let service_result_agg_cid =
         exec_ctx
             .cid_state
             .track_service_result(failed_value.into(), tetraplet, argument_hash)?;
 
-    exec_ctx.record_call_cid(peer_id, &service_result_agg_cid);
+    exec_ctx.record_call_cid(&peer_id, &service_result_agg_cid);
     trace_ctx.meet_call_end(Failed(service_result_agg_cid));
 
     Err(error.into())

@@ -35,6 +35,158 @@
   * dependencies
     * aquavm-air bumped from 0.43.0 to 0.43.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.0 to 0.45.1
+    * air-interpreter-data bumped from 0.11.0 to 0.11.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.45.1 to 0.46.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.46.0 to 0.47.0
+    * air-interpreter-data bumped from 0.11.1 to 0.11.2
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.48.0 to 0.49.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.49.0 to 0.50.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.51.0 to 0.52.0
+    * air-interpreter-data bumped from 0.12.0 to 0.12.1
+    * avm-interface bumped from 0.29.1 to 0.29.2
+    * avm-server bumped from 0.33.1 to 0.33.2
+
+## [0.13.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.12.1...air-test-utils-v0.13.0) (2023-12-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734))
+
+### Features
+
+* **interpreter-data:** allow only deterministic signature algorithms ([#734](https://github.com/fluencelabs/aquavm/issues/734)) ([15ce40a](https://github.com/fluencelabs/aquavm/commit/15ce40a1cd3271feb294666a1ef26d00282eb780))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.2 ([#733](https://github.com/fluencelabs/aquavm/issues/733)) ([05fda3e](https://github.com/fluencelabs/aquavm/commit/05fda3ee16d5d15e7af542a0d69d998d17827c15))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.54.0 to 0.55.0
+    * air-interpreter-cid bumped from 0.6.0 to 0.7.0
+    * air-interpreter-data bumped from 0.14.0 to 0.15.0
+    * air-interpreter-interface bumped from 0.15.1 to 0.15.2
+    * air-interpreter-signatures bumped from 0.1.3 to 0.1.5
+    * avm-interface bumped from 0.29.2 to 0.29.3
+    * avm-server bumped from 0.33.3 to 0.33.4
+
+## [0.12.1](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.12.0...air-test-utils-v0.12.1) (2023-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.3 ([#620](https://github.com/fluencelabs/aquavm/issues/620)) ([88e7dba](https://github.com/fluencelabs/aquavm/commit/88e7dba5f2ed6cf930f9bae52ad6dee7fa9e4ed0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.53.0 to 0.54.0
+    * air-interpreter-cid bumped from 0.5.0 to 0.6.0
+    * air-interpreter-data bumped from 0.13.0 to 0.14.0
+    * avm-server bumped from 0.33.2 to 0.33.3
+
+## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.11.1...air-test-utils-v0.12.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718))
+
+### Features
+
+* **execution-engine,test-utils,interpreter-data,interpreter-cid:** Rc into CID ([#718](https://github.com/fluencelabs/aquavm/issues/718)) ([c2108e0](https://github.com/fluencelabs/aquavm/commit/c2108e0fa09ea83854bb48c640e0cf23883a0bd0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.52.0 to 0.53.0
+    * air-interpreter-cid bumped from 0.4.0 to 0.5.0
+    * air-interpreter-data bumped from 0.12.1 to 0.13.0
+
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.10.6...air-test-utils-v0.11.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607))
+
+### Features
+
+* **aquavm-air:** signature checking ([#607](https://github.com/fluencelabs/aquavm/issues/607)) ([8a07613](https://github.com/fluencelabs/aquavm/commit/8a076130274c0500025e5c2ea74ec57e4c455971))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.50.0 to 0.51.0
+    * air-interpreter-cid bumped from 0.3.0 to 0.4.0
+    * air-interpreter-data bumped from 0.11.3 to 0.12.0
+
+## [0.10.4](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.10.3...air-test-utils-v0.10.4) (2023-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.0 ([#640](https://github.com/fluencelabs/aquavm/issues/640)) ([b713e44](https://github.com/fluencelabs/aquavm/commit/b713e447fca38e0877a6c0e56bf91880f02bf9e4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.47.0 to 0.48.0
+    * air-interpreter-data bumped from 0.11.2 to 0.11.3
+    * air-interpreter-interface bumped from 0.15.0 to 0.15.1
+    * avm-interface bumped from 0.29.0 to 0.29.1
+    * avm-server bumped from 0.33.0 to 0.33.1
+
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.9.0...air-test-utils-v0.10.0) (2023-08-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682))
+
+### Features
+
+* **execution-engine,interpreter-data:** insert state for canon join ([#682](https://github.com/fluencelabs/aquavm/issues/682)) ([2b636e8](https://github.com/fluencelabs/aquavm/commit/2b636e808ae1b1422d5cc57c6796f32d4663d37c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.44.0 to 0.45.0
+    * air-interpreter-data bumped from 0.10.0 to 0.11.0
+
 ## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.8.2...air-test-utils-v0.9.0) (2023-08-17)
 
 

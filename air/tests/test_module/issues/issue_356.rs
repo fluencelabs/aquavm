@@ -22,9 +22,9 @@ fn issue_356() {
     let script = r#"
         (seq
             (seq
-                (call "relay" ("kad" "neighborhood") ["relay"] neighs_top) ; ok = ["p1"]
+                (call "relay" ("kad" "neighborhood") ["relay"] neighs_top) ; ok = [@"p1"]
                 (seq
-                    (call "p1" ("kad" "neighborhood") ["p1"] neighs_inner) ; ok =["p1"]
+                    (call "p1" ("kad" "neighborhood") ["p1"] neighs_inner) ; ok =[@"p1"]
                     (par
                         (call "relay" ("peer" "identify") ["relay"] $external_addresses) ; behaviour = echo
                         (call "p1" ("peer" "identify") ["p1"] $external_addresses) ; behaviour = echo

@@ -17,17 +17,21 @@
 use crate::JValue;
 
 use air_interpreter_cid::value_to_json_cid;
+use air_interpreter_cid::verify_value;
 use air_interpreter_cid::CidCalculationError;
+use air_interpreter_cid::CidRef;
+use air_interpreter_cid::CidVerificationError;
 use air_interpreter_cid::CID;
 use serde::Deserialize;
 use serde::Serialize;
+use thiserror::Error as ThisError;
 
 use std::{collections::HashMap, rc::Rc};
 
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
-pub struct CidStore<Val>(HashMap<Rc<CID<Val>>, Rc<Val>>);
+pub struct CidStore<Val>(HashMap<CID<Val>, Rc<Val>>);
 
 impl<Val> CidStore<Val> {
     pub fn new() -> Self {
@@ -45,6 +49,47 @@ impl<Val> CidStore<Val> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&CID<Val>, &Rc<Val>)> {
+        self.0.iter()
+    }
+
+    pub fn check_reference<Src>(
+        &self,
+        _source_cid: &CID<Src>,
+        target_cid: &CID<Val>,
+    ) -> Result<(), CidStoreVerificationError> {
+        self.0
+            .get(target_cid)
+            .ok_or_else(|| CidStoreVerificationError::MissingReference {
+                source_type_name: std::any::type_name::<Src>(),
+                target_type_name: std::any::type_name::<Val>(),
+                target_cid_repr: target_cid.get_inner(),
+            })?;
+        Ok(())
+    }
+}
+
+impl<Val: Serialize> CidStore<Val> {
+    pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
+        for (cid, value) in &self.0 {
+            verify_value(cid, value)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(ThisError, Debug)]
+pub enum CidStoreVerificationError {
+    #[error(transparent)]
+    CidVerificationError(#[from] CidVerificationError),
+
+    #[error("Reference CID {target_cid_repr:?} from type {source_type_name:?} to {target_type_name:?} was not found")]
+    MissingReference {
+        source_type_name: &'static str,
+        target_type_name: &'static str,
+        target_cid_repr: Rc<CidRef>,
+    },
 }
 
 impl<Val> Default for CidStore<Val> {
@@ -55,7 +100,7 @@ impl<Val> Default for CidStore<Val> {
 
 #[derive(Clone, Debug)]
 pub struct CidTracker<Val = JValue> {
-    cids: HashMap<Rc<CID<Val>>, Rc<Val>>,
+    cids: HashMap<CID<Val>, Rc<Val>>,
 }
 
 impl<Val> CidTracker<Val> {
@@ -81,9 +126,9 @@ impl<Val: Serialize> CidTracker<Val> {
     pub fn track_value(
         &mut self,
         value: impl Into<Rc<Val>>,
-    ) -> Result<Rc<CID<Val>>, CidCalculationError> {
+    ) -> Result<CID<Val>, CidCalculationError> {
         let value = value.into();
-        let cid = Rc::new(value_to_json_cid(&*value)?);
+        let cid = value_to_json_cid(&*value)?;
         self.cids.insert(cid.clone(), value);
         Ok(cid)
     }
@@ -104,9 +149,9 @@ impl<Val> From<CidTracker<Val>> for CidStore<Val> {
 }
 
 impl<Val> IntoIterator for CidStore<Val> {
-    type Item = (Rc<CID<Val>>, Rc<Val>);
+    type Item = (CID<Val>, Rc<Val>);
 
-    type IntoIter = std::collections::hash_map::IntoIter<Rc<CID<Val>>, Rc<Val>>;
+    type IntoIter = std::collections::hash_map::IntoIter<CID<Val>, Rc<Val>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -136,22 +181,22 @@ mod tests {
             store.into_iter().collect::<HashMap<_, _>>(),
             HashMap::from_iter(vec![
                 (
-                    CID::new("bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa")
+                    CID::new("bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa")
                         .into(),
                     json!("test").into()
                 ),
                 (
-                    CID::new("bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a")
+                    CID::new("bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a")
                         .into(),
                     json!([1, 2, 3]).into(),
                 ),
                 (
-                    CID::new("bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq")
+                    CID::new("bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq")
                         .into(),
                     json!(1).into(),
                 ),
                 (
-                    CID::new("bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq")
+                    CID::new("bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq")
                         .into(),
                     json!({
                         "key": 42,
@@ -178,7 +223,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierajwlhumardpzj6dv2ahcerm3vyfrjwl7nahg7zq5o3eprwv6v3vpa"
+                    "bagaaihrarcyykpv4oj7zwdbepczyfthxya4og7s2rwvrzolm5kg2eu5dz3xa"
                 ))
                 .unwrap(),
             &json!("test"),
@@ -186,7 +231,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierauyk65lxcdxsrphpaqdpiymcszdnjaejyibv2ohbyyaziix35kt2a"
+                    "bagaaihram6sitn77tquub77n2jzjgttrlwkverv44pv3gns6qghm6hx6d36a"
                 ))
                 .unwrap(),
             &json!([1, 2, 3]),
@@ -194,7 +239,7 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaieranodle477gt6odhllqbhp6wr7k5d23jhkuixr2soadzjn3n4hlnfq"
+                    "bagaaihra2y55tkbgv6i4d7vdoglfuzhbd3ra6e7ennpvfrmzaejwmbntusdq"
                 ))
                 .unwrap(),
             &json!(1),
@@ -202,12 +247,12 @@ mod tests {
         assert_eq!(
             &*store
                 .get(&CID::new(
-                    "bagaaierad7lci6475zdrps4h6fmcpmqyknz5z6bw6p6tmpjkfyueavqw4kaq"
+                    "bagaaihracpzxhsrpviexa7k6glwdhyh3a4kvy6j7qlcqokzqbs3q424cmxyq"
                 ))
                 .unwrap(),
             &json!({"key": 42}),
         );
 
-        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None,);
+        assert_eq!(store.get(&CID::new("loremimpsumdolorsitament")), None);
     }
 }

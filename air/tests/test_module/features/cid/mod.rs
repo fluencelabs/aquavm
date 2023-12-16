@@ -40,10 +40,11 @@ fn test_missing_cid() {
     ];
     cid_state.service_result_agg_tracker = <_>::default();
 
+    let missing_cid = extract_service_result_cid(&trace[0]);
+
     let cur_data = raw_data_from_trace(trace, cid_state);
     let result = call_vm!(vm, <_>::default(), air_script, vec![], cur_data);
-    let missing_cid = String::from("bagaaierajmqwu6mhm7iw5mxxy647ri6yznuwjxfm72u4u5a5zdasfid4xwiq");
-    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid);
+    let expected_error = ValueForCidNotFound("service result aggregate", missing_cid.get_inner());
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
@@ -69,34 +70,36 @@ fn test_correct_cid() {
 
 #[test]
 fn test_scalar_cid() {
-    let vm_peer_id = "vm_peer_id";
+    let vm_peer_name = "vm_peer_id";
 
     let annotated_air_script = format!(
         r#"
        (seq
-          (call "{vm_peer_id}" ("service" "call1") [] x) ; ok="hi"
-          (call "{vm_peer_id}" ("service" "call2") [] y) ; ok="ipld"
+          (call "{vm_peer_name}" ("service" "call1") [] x) ; ok="hi"
+          (call "{vm_peer_name}" ("service" "call2") [] y) ; ok="ipld"
        )"#
     );
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
-            .unwrap();
+    let executor = AirScriptExecutor::from_annotated(
+        TestRunParameters::from_init_peer_id(vm_peer_name),
+        &annotated_air_script,
+    )
+    .unwrap();
 
-    let result = executor.execute_one(vm_peer_id).unwrap();
+    let result = executor.execute_one(vm_peer_name).unwrap();
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
         scalar_tracked!(
             "hi",
             cid_state,
-            peer = vm_peer_id,
+            peer_name = vm_peer_name,
             service = "service..0",
             function = "call1"
         ),
         scalar_tracked!(
             "ipld",
             cid_state,
-            peer = vm_peer_id,
+            peer_name = vm_peer_name,
             service = "service..1",
             function = "call2"
         ),
@@ -114,20 +117,22 @@ fn test_scalar_cid() {
 
 #[test]
 fn test_stream_cid() {
-    let vm_peer_id = "vm_peer_id";
+    let vm_peer_name = "vm_peer_id";
 
     let annotated_air_script = format!(
         r#"
        (seq
-          (call "{vm_peer_id}" ("service" "call1") [] $x) ; ok="hi"
-          (call "{vm_peer_id}" ("service" "call2") [] $x) ; ok="ipld"
+          (call "{vm_peer_name}" ("service" "call1") [] $x) ; ok="hi"
+          (call "{vm_peer_name}" ("service" "call2") [] $x) ; ok="ipld"
        )"#
     );
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
-            .unwrap();
+    let executor = AirScriptExecutor::from_annotated(
+        TestRunParameters::from_init_peer_id(vm_peer_name),
+        &annotated_air_script,
+    )
+    .unwrap();
 
-    let result = executor.execute_one(vm_peer_id).unwrap();
+    let result = executor.execute_one(vm_peer_name).unwrap();
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
@@ -135,7 +140,7 @@ fn test_stream_cid() {
             "hi",
             0,
             cid_state,
-            peer = vm_peer_id,
+            peer_name = vm_peer_name,
             service = "service..0",
             function = "call1"
         ),
@@ -143,7 +148,7 @@ fn test_stream_cid() {
             "ipld",
             1,
             cid_state,
-            peer = vm_peer_id,
+            peer_name = vm_peer_name,
             service = "service..1",
             function = "call2"
         ),

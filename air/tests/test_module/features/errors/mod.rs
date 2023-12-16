@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
+mod error;
 mod invalid_air;
 mod last_error;

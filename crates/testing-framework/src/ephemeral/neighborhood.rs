@@ -23,7 +23,6 @@ use std::{
     borrow::Borrow,
     collections::{HashMap, HashSet},
     hash::Hash,
-    ops::Deref,
     rc::{Rc, Weak},
 };
 
@@ -93,16 +92,13 @@ impl<R: AirRunner> Neighborhood<R> {
         self.unreachable.remove(target);
     }
 
-    pub fn is_reachable<Id>(&self, target: &Id) -> bool
-    where
-        PeerId: Borrow<Id>,
-        Id: Eq + Hash + ?Sized,
-    {
+    pub fn is_reachable(&self, target: impl Into<PeerId>) -> bool {
+        let target = target.into();
         let network = self.network.upgrade().expect(EXPECT_VALID_NETWORK);
-        if network.get_peer_env(target).is_some()
-            || self.altered.get(target) == Some(&AlterState::Added)
+        if network.get_named_peer_env::<PeerId>(&target).is_some()
+            || self.altered.get(&target) == Some(&AlterState::Added)
         {
-            !self.unreachable.contains(target)
+            !self.unreachable.contains(&target)
         } else {
             false
         }
@@ -153,13 +149,13 @@ impl<R: AirRunner> PeerEnv<R> {
         self.failed = failed;
     }
 
-    pub fn is_reachable(&self, target: impl Deref<Target = PeerId>) -> bool {
+    pub fn is_reachable(&self, target: impl Into<PeerId>) -> bool {
         if self.is_failed() {
             return false;
         }
 
-        let target_peer_id = target.deref();
-        if &self.peer.peer_id == target_peer_id {
+        let target_peer_id = target.into();
+        if self.peer.peer_id == target_peer_id {
             return true;
         }
 
@@ -215,6 +211,10 @@ impl<R: AirRunner> PeerEnv<R> {
             res
         })
     }
+
+    pub fn get_peer(&self) -> &Peer<R> {
+        &self.peer
+    }
 }
 
 impl<'a, R: AirRunner> IntoIterator for &'a PeerEnv<R> {
@@ -230,26 +230,37 @@ impl<'a, R: AirRunner> IntoIterator for &'a PeerEnv<R> {
 mod tests {
     use super::*;
 
+    use air_test_utils::key_utils::derive_dummy_keypair;
     use air_test_utils::prelude::*;
 
     use std::{iter::FromIterator, rc::Rc};
 
     #[test]
     fn test_empty_neighborhood() {
+        let peer_name = "someone";
+        let other_name = "other1";
+        let (peer_pk, peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk1, other_id) = derive_dummy_keypair(other_name);
+        let peer_id = PeerId::from(peer_id);
+        let other_id = PeerId::from(other_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+
+        let penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         assert!(penv.is_reachable(&peer_id));
         assert!(!penv.is_reachable(&other_id));
     }
 
     #[test]
     fn test_no_self_disconnect() {
+        let peer_name = "someone";
+        let other_name = "other1";
+        let (peer_pk, peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk, other_id) = derive_dummy_keypair(other_name);
+        let peer_id = PeerId::from(peer_id);
+        let other_id = PeerId::from(other_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         {
             let nei = penv.get_neighborhood_mut();
 
@@ -267,45 +278,63 @@ mod tests {
 
     #[test]
     fn test_set_neighborhood() {
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let other_id2: PeerId = "other2".into();
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let other_name2 = "other2";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk1, other_id1) = derive_dummy_keypair(other_name1);
+        let (_other_pk2, other_id2) = derive_dummy_keypair(other_name2);
+        let other_id1 = PeerId::from(other_id1);
+        let other_id2 = PeerId::from(other_id2);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
 
-        let penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+        let penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         // iter is empty
         assert!(penv.iter().next().is_none());
 
-        network.ensure_peer(other_id1.clone());
-        network.ensure_peer(other_id2.clone());
+        network.ensure_named_peer(other_name1);
+        network.ensure_named_peer(other_name1);
+        network.ensure_named_peer(other_name2);
         let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(penv.iter().collect::<PeerSet>(), expected_neighborhood);
     }
 
     #[test]
     fn test_insert() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let other_name2 = "other2";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk1, other_id1) = derive_dummy_keypair(other_name1);
+        let (_other_pk2, other_id2) = derive_dummy_keypair(other_name2);
+        let other_id1 = PeerId::from(other_id1);
+        let other_id2 = PeerId::from(other_id2);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let other_id2: PeerId = "other2".into();
-        let penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+
+        let penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
 
-        network.ensure_peer(other_id1.clone());
-        network.ensure_peer(other_id2.clone());
+        network.ensure_named_peer(other_name1);
+        network.ensure_named_peer(other_name2);
         let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
     #[test]
     fn test_ensure() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let other_name2 = "other2";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk1, other_id1) = derive_dummy_keypair(other_name1);
+        let (_other_pk2, other_id2) = derive_dummy_keypair(other_name2);
+        let other_id1 = PeerId::from(other_id1);
+        let other_id2 = PeerId::from(other_id2);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let other_id2: PeerId = "other2".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
@@ -319,10 +348,14 @@ mod tests {
 
     #[test]
     fn test_insert_insert() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk1, other_id1) = derive_dummy_keypair(other_name1);
+        let other_id1 = PeerId::from(other_id1);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id1: PeerId = "other1".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         // iter is empty
         assert!(penv.iter().next().is_none());
@@ -337,9 +370,12 @@ mod tests {
 
     #[test]
     fn test_extend_neighborhood() {
+        let peer_name = "peer";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
             .alter(PeerId::from("zero"), AlterState::Added);
         penv.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
@@ -353,8 +389,9 @@ mod tests {
     #[test]
     fn test_remove_from_neiborhood() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+        let (peer_pk, _peer_id) = derive_dummy_keypair("someone");
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
             .alter(PeerId::from("zero"), AlterState::Added);
         penv.extend_neighborhood(IntoIterator::into_iter(["one", "two"]));
@@ -369,10 +406,13 @@ mod tests {
     }
     #[test]
     fn test_fail() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
+        let other_id = PeerId::from(other_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);
@@ -385,10 +425,14 @@ mod tests {
 
     #[test]
     fn test_fail_remove() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
+        let other_id = PeerId::from(other_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);
@@ -406,10 +450,13 @@ mod tests {
 
     #[test]
     fn test_fail_unfail() {
+        let peer_name = "someone";
+        let other_name1 = "other1";
+        let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
+        let other_id = PeerId::from(other_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id, Rc::from(vec![])), &network);
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
 
         let nei = penv.get_neighborhood_mut();
         nei.alter(other_id.clone(), AlterState::Added);
@@ -423,11 +470,18 @@ mod tests {
 
     #[test]
     fn test_failed() {
+        let peer_name = "someone";
+        let other_name = "other1";
+        let remote_name = "remote";
+        let (peer_pk, peer_id) = derive_dummy_keypair(peer_name);
+        let (_other_pk, other_id) = derive_dummy_keypair(other_name);
+        let (_remote_pk, remote_id) = derive_dummy_keypair(remote_name);
+        let peer_id = PeerId::from(peer_id);
+        let other_id = PeerId::from(other_id);
+        let remote_id = PeerId::from(remote_id);
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
-        let peer_id: PeerId = "someone".into();
-        let other_id: PeerId = "other".into();
-        let remote_id: PeerId = "remote".into();
-        let mut penv = PeerEnv::new(Peer::new(peer_id.clone(), Rc::from(vec![])), &network);
+
+        let mut penv = PeerEnv::new(Peer::new(peer_pk, Rc::from(vec![])), &network);
         penv.get_neighborhood_mut()
             .alter(other_id.clone(), AlterState::Added);
 

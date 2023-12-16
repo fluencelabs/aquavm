@@ -29,7 +29,7 @@ const TETRAPLET_IDX_CORRECT: &str = "selects always return a correct index insid
 pub use errors::CatchableError;
 pub use errors::ExecutionError;
 pub use errors::UncatchableError;
-pub use execution_context::LastErrorObjectError;
+pub use execution_context::ErrorObjectError;
 pub use lambda_applier::LambdaError;
 
 pub mod errors_prelude {
@@ -40,10 +40,10 @@ pub mod errors_prelude {
 
 pub(super) use self::instructions::ExecutableInstruction;
 pub(super) use self::instructions::FoldState;
+pub(crate) use errors::ErrorAffectable;
 pub(crate) use errors::Joinable;
-pub(crate) use errors::LastErrorAffectable;
 pub(crate) use execution_context::ExecutionCtx;
-pub(crate) use execution_context::LastError;
+pub(crate) use execution_context::InstructionError;
 pub(super) use value_types::CanonResultAggregate;
 pub(super) use value_types::Generation;
 pub(super) use value_types::LiteralAggregate;
@@ -51,7 +51,7 @@ pub(super) use value_types::ScalarRef;
 pub(super) use value_types::ServiceResultAggregate;
 pub(super) use value_types::Stream;
 pub(super) use value_types::ValueAggregate;
-pub(self) use value_types::STREAM_MAX_SIZE;
+use value_types::STREAM_MAX_SIZE;
 
 pub(crate) use air_trace_handler::TraceHandler;
 
