@@ -23,7 +23,7 @@ use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 use zk_aquavm_interface::AquaVMProvingParameters;
 
-use risc0_zkvm::Executor;
+use risc0_zkvm::default_prover;
 use risc0_zkvm::ExecutorEnv;
 use zk_aquavm_methods::ZK_AQUAVM_ELF;
 use zk_aquavm_methods::ZK_AQUAVM_ID;
@@ -84,31 +84,20 @@ impl AirRunner for Risc0Runner {
 
 fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVMOutcome> {
     use risc0_zkvm::serde::from_slice;
-    use risc0_zkvm::serde::to_vec;
 
-    let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&arguments)?)
-        .build()?;
+    let env = ExecutorEnv::builder().write(&arguments)?.build()?;
 
-    let mut executor = Executor::from_elf(env, ZK_AQUAVM_ELF)?;
+    let prover = default_prover();
 
-    eprintln!("executor created, session is started");
+    eprintln!("default prover created, proving is started");
 
     let session_timer = Instant::now();
-    let session = executor.run()?;
+    let receipt = prover.prove_elf(env, ZK_AQUAVM_ELF)?;
     let session_duration = session_timer.elapsed();
 
-    eprintln!("session capturing finished:");
-    eprintln!("  segments count {}", session.segments.len());
-    eprintln!("  elapsed time {:?}", session_duration);
-
-    let proving_timer = Instant::now();
-    let receipt = session.prove()?;
-    let proving_duration = proving_timer.elapsed();
-
     eprintln!("proving finished:");
-    eprintln!("  elapsed time {:?}", proving_duration);
-    eprintln!("  journal size {}", receipt.journal.len());
+    eprintln!("  elapsed time {:?}", session_duration);
+    eprintln!("  journal size {}", receipt.journal.bytes.len());
 
     let verification_timer = Instant::now();
     receipt.verify(ZK_AQUAVM_ID)?;
@@ -119,6 +108,6 @@ fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVM
         verification_duration
     );
 
-    let outcome: InterpreterOutcome = from_slice(&receipt.journal)?;
+    let outcome: InterpreterOutcome = from_slice(&receipt.journal.bytes)?;
     Ok(RawAVMOutcome::from_interpreter_outcome(outcome)?)
 }
