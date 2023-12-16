@@ -64,8 +64,10 @@ pretty_assertions = "0.6.1"
 serde_json = "1.0.61"
 
 [features]
+default = ["rand"]
 check_signatures = []
 gen_signatures = []
+rand = ["air-interpreter-data/rand", "air-interpreter-signatures/rand"]
 
 [[bench]]
 name = "call_benchmark"

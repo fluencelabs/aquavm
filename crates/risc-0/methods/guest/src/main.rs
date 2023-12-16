@@ -14,7 +14,7 @@ pub fn main() {
         parameters.prev_data,
         parameters.current_data,
         parameters.run_params,
-        parameters.call_results,
+        parameters.call_results.into(),
     );
     env::commit(&result);
 }

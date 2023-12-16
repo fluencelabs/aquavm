@@ -145,12 +145,14 @@ impl KeyPair {
         &self.0
     }
 
+    /*
     #[cfg(feature = "rand")]
     pub fn generate(key_format: KeyFormat) -> Result<Self, KeyError> {
         validate_with_key_format((), key_format)?;
 
         Ok(Self(fluence_keypair::KeyPair::generate(key_format)))
     }
+     */
 }
 
 impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
@@ -168,9 +170,10 @@ impl From<KeyPair> for fluence_keypair::KeyPair {
 }
 
 pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
-    match key_format {
-        fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
-        _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
+    if let fluence_keypair::KeyFormat::Ed25519 = key_format {
+        Ok(inner)
+    } else {
+        Err(KeyError::AlgorithmNotWhitelisted(key_format))
     }
 }
 
