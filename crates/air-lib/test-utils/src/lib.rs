@@ -47,9 +47,6 @@ pub mod prelude {
     pub use executed_state::*;
     pub use test_runner::*;
 
-    pub use air::interpreter_data::*;
-    pub use avm_server::*;
-
     pub use serde_json::json;
 }
 
@@ -132,7 +129,7 @@ macro_rules! assert_next_pks {
     ($expected:expr, $actual:expr) => {
         let expected: std::collections::HashSet<_> =
             $expected.into_iter().map(|s| s.as_str()).collect();
-        let actual: std::collections::HashSet<_> = $actual.into_iter().map(|s| *s).collect();
+        let actual: std::collections::HashSet<_> = $actual.iter().map(|s| *s).collect();
 
         assert_eq!(expected, actual)
     };

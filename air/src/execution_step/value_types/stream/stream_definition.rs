@@ -171,8 +171,6 @@ pub enum Generation {
 impl Generation {
     #[cfg(test)]
     pub fn previous(generation_id: u32) -> Self {
-        use std::convert::TryFrom;
-
         let generation_id = usize::try_from(generation_id).unwrap();
         let generation_idx = GenerationIdx::from(generation_id);
         Self::Previous(generation_idx)
@@ -180,8 +178,6 @@ impl Generation {
 
     #[cfg(test)]
     pub fn current(generation_id: u32) -> Self {
-        use std::convert::TryFrom;
-
         let generation_id = usize::try_from(generation_id).unwrap();
         let generation_idx = GenerationIdx::from(generation_id);
         Self::Current(generation_idx)

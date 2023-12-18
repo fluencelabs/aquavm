@@ -21,8 +21,6 @@ use newtype_derive::*;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::convert::TryFrom;
-
 pub type PosType = u32;
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]

@@ -33,8 +33,6 @@ use air_parser::ast::Instruction;
 use air_utils::measure;
 use fluence_keypair::KeyFormat;
 
-use std::convert::TryFrom;
-
 type PreparationResult<T> = Result<T, PreparationError>;
 
 /// Represents result of the preparation_step step.
