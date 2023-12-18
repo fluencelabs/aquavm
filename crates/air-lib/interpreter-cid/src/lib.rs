@@ -28,7 +28,7 @@
 
 mod verify;
 
-pub use crate::verify::{verify_value, CidVerificationError};
+pub use crate::verify::{verify_raw_value, verify_value, CidVerificationError};
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -131,7 +131,7 @@ pub fn value_to_json_cid<Val: Serialize + ?Sized>(
 
     let digest = Code::Blake3_256
         .wrap(&hash)
-        .expect("can't happend: incorrect hash length");
+        .expect("can't happen: incorrect hash length");
 
     let cid = Cid::new_v1(JSON_CODEC, digest);
     Ok(CID::new(cid.to_string()))
@@ -150,6 +150,27 @@ pub(crate) fn value_json_hash<D: digest::Digest + std::io::Write, Val: Serialize
     let hash = hasher.finalize();
 
     Ok(hash.to_vec())
+}
+
+pub fn raw_value_to_json_cid<Val>(raw_value: impl AsRef<[u8]>) -> CID<Val> {
+    use cid::Cid;
+    use multihash_codetable::{Code, MultihashDigest};
+
+    let hash = raw_value_hash::<blake3::Hasher>(raw_value);
+    let digest = Code::Blake3_256
+        .wrap(&hash)
+        .expect("can't happen: incorrect hash length");
+
+    let cid = Cid::new_v1(JSON_CODEC, digest);
+    CID::new(cid.to_string())
+}
+
+pub(crate) fn raw_value_hash<D: digest::Digest>(raw_value: impl AsRef<[u8]>) -> Vec<u8> {
+    let mut hasher = D::new();
+    hasher.update(raw_value);
+    let hash = hasher.finalize();
+
+    hash.to_vec()
 }
 
 #[cfg(test)]

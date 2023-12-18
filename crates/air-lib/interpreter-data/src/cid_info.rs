@@ -57,7 +57,7 @@ impl CidInfo {
     }
 
     fn verify_value_store(&self) -> Result<(), CidStoreVerificationError> {
-        self.value_store.verify()
+        self.value_store.verify_raw_value()
     }
 
     fn verify_tetraplet_store(&self) -> Result<(), CidStoreVerificationError> {

@@ -24,7 +24,7 @@ use std::rc::Rc;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
 pub struct VmValue {
-    raw: Box<serde_json::value::RawValue>,
+    raw: Box<str>,
 
     #[serde(skip)]
     parsed: RefCell<Option<Rc<JValue>>>,
@@ -33,9 +33,7 @@ pub struct VmValue {
 impl VmValue {
     pub fn from_value(value: impl Into<Rc<JValue>>) -> Self {
         let value = value.into();
-        // it seems that serde_json API is too limited for no reason...
-        let raw =
-            serde_json::from_value((*value).clone()).expect("RawValue should be create from Value");
+        let raw = value.to_string().into();
         Self {
             raw,
             parsed: Some(value).into(),
@@ -45,12 +43,13 @@ impl VmValue {
     pub fn get_value(&self) -> Rc<JValue> {
         let mut parsed_guard = self.parsed.borrow_mut();
 
-        let parsed_value = parsed_guard.get_or_insert_with(|| {
-            serde_json::to_value(&self.raw)
-                .expect("RawValue should be always valid")
-                .into()
-        });
+        let parsed_value = parsed_guard
+            .get_or_insert_with(|| serde_json::from_str(&self.raw).expect("TODO handle error"));
         parsed_value.clone()
+    }
+
+    pub(crate) fn get_raw(&self) -> &str {
+        &self.raw
     }
 }
 

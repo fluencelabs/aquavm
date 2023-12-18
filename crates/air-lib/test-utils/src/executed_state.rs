@@ -51,15 +51,9 @@ pub fn simple_value_aggregate_cid(
     let value = result.into();
     let vm_value = VmValue::from_value(value);
 
-    let value_cid = cid_state
-        .value_tracker
-        .track_value(Rc::new(vm_value))
-        .unwrap();
+    let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet = SecurityTetraplet::default();
-    let tetraplet_cid = cid_state
-        .tetraplet_tracker
-        .track_value(Rc::new(tetraplet))
-        .unwrap();
+    let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash: "".into(),
@@ -67,7 +61,7 @@ pub fn simple_value_aggregate_cid(
     };
     cid_state
         .service_result_agg_tracker
-        .track_value(Rc::new(service_result_agg))
+        .track_value(service_result_agg)
         .unwrap()
 }
 
@@ -79,14 +73,8 @@ pub fn value_aggregate_cid(
 ) -> CID<ServiceResultCidAggregate> {
     let value = result.into();
     let vm_value = VmValue::from_value(value);
-    let value_cid = cid_state
-        .value_tracker
-        .track_value(Rc::new(vm_value))
-        .unwrap();
-    let tetraplet_cid = cid_state
-        .tetraplet_tracker
-        .track_value(Rc::new(tetraplet))
-        .unwrap();
+    let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
+    let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
 
     let arguments = serde_json::Value::Array(args);
     let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
@@ -99,7 +87,7 @@ pub fn value_aggregate_cid(
 
     cid_state
         .service_result_agg_tracker
-        .track_value(Rc::new(service_result_agg))
+        .track_value(service_result_agg)
         .unwrap()
 }
 
@@ -189,7 +177,7 @@ pub fn canon_tracked(
         .map(|value| {
             let vm_value = VmValue::from_value(value.result.clone());
 
-            let value_cid = cid_state.value_tracker.track_value(vm_value)?;
+            let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
             let tetraplet_cid = cid_state
                 .tetraplet_tracker
                 .track_value(value.tetraplet.clone())?;

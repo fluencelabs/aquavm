@@ -74,7 +74,7 @@ impl ExecutionCidState {
         argument_hash: Rc<str>,
     ) -> Result<CID<ServiceResultCidAggregate>, UncatchableError> {
         let vm_value = VmValue::from_value(value);
-        let value_cid = self.value_tracker.track_value(vm_value)?;
+        let value_cid = self.value_tracker.track_raw_value(vm_value);
         let tetraplet_cid = self.tetraplet_tracker.track_value(tetraplet)?;
         let service_result_agg = ServiceResultCidAggregate::new(value_cid, argument_hash, tetraplet_cid);
 
@@ -88,7 +88,7 @@ impl ExecutionCidState {
         canon_value: &ValueAggregate,
     ) -> Result<CID<CanonCidAggregate>, UncatchableError> {
         let vm_value = VmValue::from_value(canon_value.get_result().clone());
-        let value_cid = self.value_tracker.track_value(vm_value)?;
+        let value_cid = self.value_tracker.track_raw_value(vm_value);
         let tetraplet = self.tetraplet_tracker.track_value(canon_value.get_tetraplet())?;
 
         let canon_value_aggregate = CanonCidAggregate::new(value_cid, tetraplet, canon_value.get_provenance());
