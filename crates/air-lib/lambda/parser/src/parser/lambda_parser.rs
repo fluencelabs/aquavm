@@ -22,9 +22,6 @@ use crate::Functor;
 use crate::LambdaAST;
 use crate::ValueAccessor;
 
-use std::convert::TryFrom;
-use std::convert::TryInto;
-
 // Caching parser to cache internal regexes, which are expensive to instantiate
 // See also https://github.com/lalrpop/lalrpop/issues/269
 thread_local!(static PARSER: RawLambdaASTParser = RawLambdaASTParser::new());
