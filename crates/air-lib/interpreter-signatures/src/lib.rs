@@ -161,13 +161,12 @@ impl From<KeyPair> for fluence_keypair::KeyPair {
 }
 
 pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
-    // this is needed to satisfy forked fluence-keypar crate which contains only single
-    // variant of KeyFormat, this crate should be refactored in the future
-    #[allow(irrefutable_let_patterns)]
-    if let fluence_keypair::KeyFormat::Ed25519 = key_format {
-        Ok(inner)
-    } else {
-        Err(KeyError::AlgorithmNotWhitelisted(key_format))
+    // this allow is needed in order to support old versions of the fluence_keypair
+    // repos which is used to build it for RISC-0
+    #[allow(unreachable_patterns)]
+    match key_format {
+        fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
+        _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
     }
 }
 
