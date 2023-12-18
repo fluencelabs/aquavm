@@ -29,6 +29,7 @@ exclude = [
     "air/tests/test_module/integration/security_tetraplets/auth_module",
     "air/tests/test_module/integration/security_tetraplets/log_storage",
     "crates/interpreter-wasm",
+    "crates/risc-0",
     "junk",
 ]
 
