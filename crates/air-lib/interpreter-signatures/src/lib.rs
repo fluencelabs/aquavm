@@ -39,7 +39,6 @@ use borsh::BorshSerialize;
 use fluence_keypair::error::SigningError;
 use serde::{Deserialize, Serialize};
 
-use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
 
