@@ -36,8 +36,8 @@ use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::Provenance;
+use air_interpreter_data::RawValue;
 use air_interpreter_data::ServiceResultCidAggregate;
-use air_interpreter_data::VmValue;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
@@ -49,7 +49,7 @@ pub fn simple_value_aggregate_cid(
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
     let value = result.into();
-    let vm_value = VmValue::from_value(value);
+    let vm_value = RawValue::from_value(value);
 
     let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet = SecurityTetraplet::default();
@@ -72,7 +72,7 @@ pub fn value_aggregate_cid(
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
     let value = result.into();
-    let vm_value = VmValue::from_value(value);
+    let vm_value = RawValue::from_value(value);
     let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
 
@@ -175,7 +175,7 @@ pub fn canon_tracked(
         .values
         .iter()
         .map(|value| {
-            let vm_value = VmValue::from_value(value.result.clone());
+            let vm_value = RawValue::from_value(value.result.clone());
 
             let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
             let tetraplet_cid = cid_state

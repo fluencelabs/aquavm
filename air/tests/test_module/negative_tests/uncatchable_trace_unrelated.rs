@@ -17,8 +17,8 @@
 use air::interpreter_data::ExecutedState;
 use air::ExecutionCidState;
 use air::UncatchableError::*;
+use air_interpreter_data::RawValue;
 use air_interpreter_data::ValueRef;
-use air_interpreter_data::VmValue;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
@@ -142,7 +142,7 @@ fn malformed_call_service_failed() {
     let value = json!("error");
     let value_cid = cid_state
         .value_tracker
-        .track_raw_value(VmValue::from_value(value.clone()));
+        .track_raw_value(RawValue::from_value(value.clone()));
     let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {

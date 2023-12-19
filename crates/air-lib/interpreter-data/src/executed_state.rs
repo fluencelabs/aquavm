@@ -19,8 +19,8 @@ mod se_de;
 
 use crate::GenerationIdx;
 use crate::JValue;
+use crate::RawValue;
 use crate::TracePos;
-use crate::VmValue;
 
 use air_interpreter_cid::CID;
 use polyplets::SecurityTetraplet;
@@ -115,7 +115,7 @@ impl CallServiceFailed {
 #[serde(rename_all = "snake_case")]
 /// A proof of service result execution result.
 pub struct ServiceResultCidAggregate {
-    pub value_cid: CID<VmValue>,
+    pub value_cid: CID<RawValue>,
     /// Hash of the call arguments.
     pub argument_hash: Rc<str>,
     /// The tetraplet of the call result.
@@ -204,7 +204,7 @@ pub struct CanonResultCidAggregate {
 /// The type Canon trace CID refers to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CanonCidAggregate {
-    pub value: CID<VmValue>,
+    pub value: CID<RawValue>,
     pub tetraplet: CID<SecurityTetraplet>,
     pub provenance: Provenance,
 }

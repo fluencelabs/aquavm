@@ -23,14 +23,14 @@ use std::rc::Rc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
-pub struct VmValue {
+pub struct RawValue {
     raw: Box<str>,
 
     #[serde(skip)]
     parsed: RefCell<Option<Rc<JValue>>>,
 }
 
-impl VmValue {
+impl RawValue {
     pub fn from_value(value: impl Into<Rc<JValue>>) -> Self {
         let value = value.into();
         let raw = value.to_string().into();
@@ -53,17 +53,17 @@ impl VmValue {
     }
 }
 
-impl From<JValue> for VmValue {
+impl From<JValue> for RawValue {
     fn from(value: JValue) -> Self {
         Self::from_value(value)
     }
 }
 
-impl PartialEq for VmValue {
+impl PartialEq for RawValue {
     fn eq(&self, other: &Self) -> bool {
         self.get_value() == other.get_value()
     }
 }
 
 // TODO is it implemented for JValue?
-impl Eq for VmValue {}
+impl Eq for RawValue {}

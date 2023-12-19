@@ -15,7 +15,7 @@
  */
 
 use crate::JValue;
-use crate::VmValue;
+use crate::RawValue;
 
 use air_interpreter_cid::raw_value_to_json_cid;
 use air_interpreter_cid::value_to_json_cid;
@@ -82,7 +82,7 @@ impl<Val: Serialize> CidStore<Val> {
     }
 }
 
-impl CidStore<VmValue> {
+impl CidStore<RawValue> {
     pub fn verify_raw_value(&self) -> Result<(), CidStoreVerificationError> {
         for (cid, value) in &self.0 {
             verify_raw_value(cid, value.get_raw())?;
@@ -146,8 +146,8 @@ impl<Val: Serialize> CidTracker<Val> {
     }
 }
 
-impl CidTracker<VmValue> {
-    pub fn track_raw_value(&mut self, value: impl Into<Rc<VmValue>>) -> CID<VmValue> {
+impl CidTracker<RawValue> {
+    pub fn track_raw_value(&mut self, value: impl Into<Rc<RawValue>>) -> CID<RawValue> {
         let value = value.into();
         let cid = raw_value_to_json_cid(value.get_raw());
         self.cids.insert(cid.clone(), value);
