@@ -331,7 +331,7 @@ Machine 88756ca30bfb93b0da6a64252adc98fc3e97e142c3b4970af3d2948fd66107b4:
   Timestamp: 2023-12-25 12:09:49.153856+00:00
   AquaVM version: 0.55.0
   Benches:
-  Features: 
+  Features:
     big-values-data (19.30ms; 59.000 MiB, 59.000 MiB): Loading a trace with huge values
       air::runner::execute_air: 19.30ms
         preparation_step::preparation::parse_data: 6.94ms

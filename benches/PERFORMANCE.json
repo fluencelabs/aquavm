@@ -1448,7 +1448,7 @@
                   }
                 }
               },
-              "signing_step::sign_produced_cids": "186.00µs",
+              "signing_step::sign_produced_cids": "187.00µs",
               "verification_step::verify": {
                 "common_prefix": "air_interpreter_data::cid_info",
                 "duration": "5.00ms",
