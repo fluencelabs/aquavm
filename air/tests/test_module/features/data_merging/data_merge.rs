@@ -219,7 +219,6 @@ fn stream_merge() {
 }
 
 #[test]
-#[ignore]
 fn fold_merge() {
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";

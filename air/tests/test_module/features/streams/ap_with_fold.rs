@@ -17,7 +17,6 @@
 use air_test_utils::prelude::*;
 
 #[test]
-#[ignore]
 fn ap_with_fold() {
     let nums: Vec<String> = (1..10).map(|i| i.to_string()).collect();
     let vec = vec![nums.clone(), nums.clone(), nums];
@@ -49,8 +48,8 @@ fn ap_with_fold() {
                             (next pair)))
                     (fold $inner ns
                         (par
-                            (next ns)
-                            (null))))
+                            (null)
+                            (next ns))))
                 (seq
                     (call "{local_vm_peer_id}" ("op" "noop") [])
                     (seq
