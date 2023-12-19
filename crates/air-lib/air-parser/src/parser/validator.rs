@@ -38,6 +38,7 @@ pub enum CheckInstructionKind<'names> {
     PopStack2,
     Replacing,
     ReplacingWithCheck(&'names str),
+    Xoring,
     PopStack1ReplacingWithCheck(&'names str),
     Simple,
 }
@@ -102,7 +103,35 @@ impl<'name> AfterNextCheckMachine<'name> {
                     }
                     None => self.is_enabled = false,
                 }
-                self.stack.push((CheckInstructionKind::Simple, span));
+            }
+            CheckInstructionKind::Xoring => {
+                let right_branch = self.stack.pop();
+                let left_branch = self.stack.pop();
+                match (left_branch, right_branch) {
+                    (
+                        Some((CheckInstructionKind::PivotalNext(..), _)),
+                        Some((CheckInstructionKind::PivotalNext(..), _)),
+                    ) => {
+                        // `xor` has `next` in both branches. It is impossible
+                        // to tell which branch should poped up.
+                        self.stack.clear();
+                        self.is_enabled = false;
+                    }
+                    (Some((CheckInstructionKind::PivotalNext(iterator), _)), Some((..)))
+                    | (Some((..)), Some((CheckInstructionKind::PivotalNext(iterator), _))) => {
+                        // potential failure but need to check when fold pops up.
+                        self.stack
+                            .push((CheckInstructionKind::PivotalNext(iterator), span));
+                    }
+                    (Some(_), Some(_)) => {
+                        self.stack.push((CheckInstructionKind::Xoring, span));
+                    }
+                    _ => {
+                        // disable machine if Xoring invariant, namely there must be 2 kinds on a stack, is broken.
+                        self.stack.clear();
+                        self.is_enabled = false;
+                    }
+                }
             }
             CheckInstructionKind::Merging => {
                 let right_branch = self.stack.pop();
@@ -431,6 +460,11 @@ impl<'i> VariableValidator<'i> {
             CheckInstructionKind::ReplacingWithCheck(iterator_name),
             span,
         );
+    }
+
+    pub(super) fn met_xoring_instr(&mut self, span: Span) {
+        self.after_next_check
+            .met_instruction_kind(CheckInstructionKind::Xoring, span);
     }
 
     pub(super) fn met_simple_instr(&mut self, span: Span) {

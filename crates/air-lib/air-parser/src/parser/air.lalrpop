@@ -152,7 +152,12 @@ Instr: Instruction<'input> = {
         Instruction::Next(next.into())
     },
 
-    "(" xor <l:Instr> <r:Instr> ")" => Instruction::Xor(Xor(l, r).into()),
+    <left: @L> "(" xor <l:Instr> <r:Instr> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_xoring_instr(span);
+
+        Instruction::Xor(Xor(l, r).into())
+    },
 
     <left: @L> "(" match_ <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
         let match_ = Match::new(l, r, i);
