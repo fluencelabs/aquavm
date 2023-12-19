@@ -85,7 +85,7 @@ impl<Val: Serialize> CidStore<Val> {
 impl CidStore<RawValue> {
     pub fn verify_raw_value(&self) -> Result<(), CidStoreVerificationError> {
         for (cid, value) in &self.0 {
-            verify_raw_value(cid, value.get_raw())?;
+            verify_raw_value(cid, value.as_inner())?;
         }
         Ok(())
     }
@@ -149,7 +149,7 @@ impl<Val: Serialize> CidTracker<Val> {
 impl CidTracker<RawValue> {
     pub fn track_raw_value(&mut self, value: impl Into<Rc<RawValue>>) -> CID<RawValue> {
         let value = value.into();
-        let cid = raw_value_to_json_cid(value.get_raw());
+        let cid = raw_value_to_json_cid(value.as_inner());
         self.cids.insert(cid.clone(), value);
         cid
     }

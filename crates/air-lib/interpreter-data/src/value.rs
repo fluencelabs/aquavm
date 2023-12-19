@@ -48,7 +48,7 @@ impl RawValue {
         parsed_value.clone()
     }
 
-    pub(crate) fn get_raw(&self) -> &str {
+    pub(crate) fn as_inner(&self) -> &str {
         &self.raw
     }
 }
