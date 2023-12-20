@@ -25,6 +25,9 @@ use crate::ToErrorCode;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CidRef;
 use air_interpreter_data::ValueRef;
+use air_interpreter_interface::CallArgumentsRepr;
+use air_interpreter_interface::TetrapletsRepr;
+use air_interpreter_sede::Representation;
 use air_trace_handler::GenerationCompactificationError;
 use air_trace_handler::IntConversionError;
 use air_trace_handler::TraceHandlerError;
@@ -131,6 +134,12 @@ pub enum UncatchableError {
 
     #[error("failed to sign data: {0}")]
     SigningError(#[from] fluence_keypair::error::SigningError),
+
+    #[error("failed to serialize tetraplets {0}")]
+    TetrapletSerializationFailed(<TetrapletsRepr as Representation>::SerializeError),
+
+    #[error("failed to serialize call arguments {0}")]
+    CallArgumentsSerializationFailed(<CallArgumentsRepr as Representation>::SerializeError),
 }
 
 impl ToErrorCode for UncatchableError {

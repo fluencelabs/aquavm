@@ -3,7 +3,7 @@ name = "aquavm-air"
 version = "0.55.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/aquavm"
 documentation = "https://docs.rs/aquavm-air"
@@ -20,6 +20,7 @@ aquavm-air-parser = { version = "0.11.0", path = "../crates/air-lib/air-parser" 
 air-execution-info-collector = { version = "0.7.11", path = "../crates/air-lib/execution-info-collector" }
 air-interpreter-cid = { version = "0.7.0", path = "../crates/air-lib/interpreter-cid" }
 air-interpreter-data = { version = "0.15.0", path = "../crates/air-lib/interpreter-data" }
+air-interpreter-sede = { version = "0.1.0", path = "../crates/air-lib/interpreter-sede" }
 air-interpreter-signatures = { version = "0.1.5", path = "../crates/air-lib/interpreter-signatures" }
 air-interpreter-interface = { version = "0.15.2", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }

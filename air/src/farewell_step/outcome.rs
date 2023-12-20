@@ -24,6 +24,8 @@ use crate::INTERPRETER_SUCCESS;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_interface::CallRequests;
+use air_interpreter_interface::CallRequestsRepr;
+use air_interpreter_sede::ToSerialized;
 use air_interpreter_signatures::KeyPair;
 use air_utils::measure;
 use fluence_keypair::error::SigningError;
@@ -60,7 +62,9 @@ pub(crate) fn from_uncatchable_error(
 ) -> InterpreterOutcome {
     let ret_code = error.to_error_code();
     let data = data.into();
-    let call_requests = serde_json::to_vec(&CallRequests::new()).expect("default serializer shouldn't fail");
+    let call_requests = CallRequestsRepr
+        .serialize(&CallRequests::new())
+        .expect("default serializer shouldn't fail");
 
     InterpreterOutcome::new(ret_code, error.to_string(), data, vec![], call_requests)
 }
@@ -109,16 +113,18 @@ fn populate_outcome_from_contexts(
         semver::Version::parse(env!("CARGO_PKG_VERSION")).expect("cargo version is valid"),
     );
     let data = measure!(
-        serde_json::to_vec(&data).expect("default serializer shouldn't fail"),
-        tracing::Level::TRACE,
-        "serde_json::to_vec(data)"
+        data.serialize().expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "InterpreterData::serialize"
     );
 
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);
     let call_requests = measure!(
-        serde_json::to_vec(&exec_ctx.call_requests).expect("default serializer shouldn't fail"),
-        tracing::Level::TRACE,
-        "serde_json::to_vec(call_results)",
+        CallRequestsRepr
+            .serialize(&exec_ctx.call_requests)
+            .expect("default serializer shouldn't fail"),
+        tracing::Level::INFO,
+        "CallRequestsRepr.serialize",
     );
     InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
 }
@@ -146,11 +152,11 @@ fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(),
 // these methods are called only if there is an internal error in the interpreter and
 // new execution trace was corrupted
 fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
-    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], <_>::default())
 }
 
 fn signing_error_into_outcome(error: SigningError) -> InterpreterOutcome {
-    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], vec![])
+    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], <_>::default())
 }
 
 /// Deduplicate values in a supplied vector.

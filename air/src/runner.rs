@@ -25,6 +25,7 @@ use crate::verification_step::verify;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::SerializedCallResults;
 use air_log_targets::RUN_PARAMS;
 use air_utils::farewell_if_fail;
 use air_utils::measure;
@@ -35,7 +36,7 @@ pub fn execute_air(
     prev_data: Vec<u8>,
     data: Vec<u8>,
     params: RunParameters,
-    call_results: Vec<u8>,
+    call_results: SerializedCallResults,
 ) -> InterpreterOutcome {
     use std::convert::identity;
 
@@ -58,7 +59,7 @@ fn execute_air_impl(
     raw_prev_data: Vec<u8>,
     raw_current_data: Vec<u8>,
     params: RunParameters,
-    call_results: Vec<u8>,
+    call_results: SerializedCallResults,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let ParsedDataPair {
         prev_data,

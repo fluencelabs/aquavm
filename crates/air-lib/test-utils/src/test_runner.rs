@@ -282,6 +282,12 @@ mod tests {
             )
             .expect("call should be success");
 
+        assert_eq!(
+            current_result_1.ret_code, 0,
+            "{:?}",
+            current_result_1.error_message
+        );
+
         let expected_current_call_requests = HashMap::new();
         let expected_current_next_peers_pks = vec![spell_id.to_owned()];
 

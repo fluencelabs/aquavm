@@ -51,8 +51,9 @@ impl InterpreterOutcome {
         error_message: String,
         data: Vec<u8>,
         next_peer_pks: Vec<String>,
-        call_requests: Vec<u8>,
+        call_requests: SerializedCallRequests,
     ) -> Self {
+        let call_requests = call_requests.into();
         Self {
             ret_code,
             error_message,
@@ -81,7 +82,13 @@ impl InterpreterOutcome {
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
         let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
 
-        let outcome = Self::new(ret_code, error_message, data, next_peer_pks, call_requests);
+        let outcome = Self::new(
+            ret_code,
+            error_message,
+            data,
+            next_peer_pks,
+            call_requests.into(),
+        );
 
         Ok(outcome)
     }
@@ -89,6 +96,8 @@ impl InterpreterOutcome {
 
 #[cfg(feature = "marine")]
 use fluence_it_types::ne_vec::NEVec;
+
+use crate::SerializedCallRequests;
 
 #[cfg(feature = "marine")]
 fn try_as_record(ivalue: IValue) -> Result<NEVec<IValue>, String> {

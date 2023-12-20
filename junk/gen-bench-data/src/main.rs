@@ -1,3 +1,9 @@
+use air_interpreter_data::InterpreterDataFormat;
+use air_interpreter_sede::Format;
+use air_interpreter_sede::RmpSerdeFormat;
+use air_interpreter_sede::RmpSerdeMultiformat;
+use air_interpreter_sede::SerdeJsonFormat;
+use air_interpreter_sede::SerdeJsonMultiformat;
 use air_test_framework::*;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
@@ -6,7 +12,8 @@ use clap::Parser;
 use clap::Subcommand;
 use itertools::Itertools as _;
 use maplit::hashmap;
-use serde::Serialize;
+
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
@@ -103,17 +110,17 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     save_file(
         dest_dir,
         "prev_data.json",
-        &reformat_json_if_possible(&data.prev_data),
+        reformat_json_if_possible::<InterpreterDataFormat>(&data.prev_data),
     )?;
     save_file(
         dest_dir,
         "cur_data.json",
-        &reformat_json_if_possible(&data.cur_data),
+        reformat_json_if_possible::<InterpreterDataFormat>(&data.cur_data),
     )?;
     save_file(
         dest_dir,
         "params.json",
-        &serde_json::to_vec_pretty(&data.params_json)?,
+        serde_json::to_vec_pretty(&data.params_json)?,
     )?;
     save_file(dest_dir, "keypair.ed25519", &data.keypair)?;
 
@@ -123,7 +130,9 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
             "call_results.json",
             // these call results are intended for manual generation too for the AIR CLI, so
             // simplier representation from avm_interface::CallResults is used, and JSON is used explicitely
-            &reformat_json_if_possible(&serde_json::to_vec(&call_results).unwrap()),
+            reformat_json_if_possible::<SerdeJsonFormat>(
+                &serde_json::to_vec(&call_results).unwrap(),
+            ),
         )
         .unwrap();
     }
@@ -131,29 +140,61 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
+trait Reformatter: Format<()> {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]>;
+}
+
+impl Reformatter for SerdeJsonFormat {
+    /// make zero-indentation data for more convenient git diffs
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        use serde::ser::Serialize;
+
+        let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
+
+        let fmt = serde_json::ser::PrettyFormatter::with_indent(&[]);
+        let mut out = vec![];
+        {
+            let mut ser = serde_json::ser::Serializer::with_formatter(&mut out, fmt);
+            obj.serialize(&mut ser).unwrap();
+        }
+
+        out.into()
+    }
+}
+
+impl Reformatter for SerdeJsonMultiformat {
+    /// make zero-indentation data for more convenient git diffs
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
+impl Reformatter for RmpSerdeFormat {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
+impl Reformatter for RmpSerdeMultiformat {
+    fn reformat(data: &[u8]) -> Cow<'_, [u8]> {
+        data.into()
+    }
+}
+
 /// make zero-indentation data for better git diffs
-fn reformat_json_if_possible(data: &[u8]) -> Vec<u8> {
+fn reformat_json_if_possible<R: Reformatter>(data: &[u8]) -> Cow<'_, [u8]> {
     if data.is_empty() {
         return data.into();
     }
 
-    let obj: serde_json::Value = serde_json::from_slice(data).unwrap();
-    let fmt = serde_json::ser::PrettyFormatter::with_indent(&[]);
-    let mut out = vec![];
-    let mut ser = serde_json::ser::Serializer::with_formatter(&mut out, fmt);
-    obj.serialize(&mut ser).unwrap();
-    out
+    R::reformat(data)
 }
 
-fn save_file(
-    dest_dir: &Path,
-    filename: &str,
-    data: impl AsRef<[u8]>,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn save_file(dest_dir: &Path, filename: &str, data: impl AsRef<[u8]>) -> std::io::Result<()> {
     let mut dest_dir = dest_dir.to_owned();
     dest_dir.push(filename);
 
-    Ok(std::fs::write(dest_dir, data)?)
+    std::fs::write(dest_dir, data)
 }
 
 #[derive(Debug, Default)]

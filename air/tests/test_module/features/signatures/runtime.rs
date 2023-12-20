@@ -60,7 +60,7 @@ fn test_runtime_executed_call_argument_hash() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = serde_json::to_vec(&mallory_data).unwrap();
+    let mallory_data = mallory_data.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     assert_error_eq!(
@@ -112,7 +112,7 @@ fn test_runtime_executed_call_tetraplet() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = serde_json::to_vec(&mallory_data).unwrap();
+    let mallory_data = mallory_data.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(
@@ -182,7 +182,7 @@ fn test_runtime_executed_failed_argument_hash() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = serde_json::to_vec(&mallory_data).unwrap();
+    let mallory_data = mallory_data.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     assert_error_eq!(
@@ -238,7 +238,7 @@ fn test_runtime_failed_call_tetraplet() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = serde_json::to_vec(&mallory_data).unwrap();
+    let mallory_data = mallory_data.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(
@@ -306,7 +306,7 @@ fn test_runtime_canon_tetraplet() {
     mallory_raw_trace.swap(2, 3);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = serde_json::to_vec(&mallory_data).unwrap();
+    let mallory_data = mallory_data.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(

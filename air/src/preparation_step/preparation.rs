@@ -20,14 +20,18 @@ use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
+use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::SerializedCallResults;
+use air_interpreter_sede::FromSerialized;
+use air_interpreter_sede::Representation;
 use air_interpreter_signatures::KeyError;
 use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
+use air_utils::measure;
 use fluence_keypair::KeyFormat;
-
-use std::convert::TryFrom;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -64,7 +68,7 @@ pub(crate) fn prepare<'i>(
     prev_data: InterpreterData,
     current_data: InterpreterData,
     raw_air: &'i str,
-    call_results: &[u8],
+    call_results: &SerializedCallResults,
     run_parameters: RunParameters,
     signature_store: SignatureStore,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
@@ -112,7 +116,10 @@ pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData>
     InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
 }
 
-fn to_date_de_error(raw_data: Vec<u8>, de_error: serde_json::Error) -> PreparationError {
+fn to_date_de_error(
+    raw_data: Vec<u8>,
+    de_error: <InterpreterDataRepr as Representation>::DeserializeError,
+) -> PreparationError {
     match InterpreterData::try_get_versions(&raw_data) {
         Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),
         Err(_) => PreparationError::data_de_failed(raw_data, de_error),
@@ -123,12 +130,17 @@ fn to_date_de_error(raw_data: Vec<u8>, de_error: serde_json::Error) -> Preparati
 fn make_exec_ctx(
     prev_ingredients: ExecCtxIngredients,
     current_ingredients: ExecCtxIngredients,
-    call_results: &[u8],
+    call_results: &SerializedCallResults,
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let call_results = serde_json::from_slice(call_results)
-        .map_err(|e| PreparationError::call_results_de_failed(call_results.to_vec(), e))?;
+    let call_results = measure!(
+        CallResultsRepr
+            .deserialize(call_results)
+            .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?,
+        tracing::Level::INFO,
+        "CallResultsRepr.deserialize",
+    );
 
     let ctx = ExecutionCtx::new(
         prev_ingredients,

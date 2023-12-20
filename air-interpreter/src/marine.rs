@@ -49,7 +49,7 @@ pub fn invoke(
     params: RunParameters,
     call_results: Vec<u8>,
 ) -> InterpreterOutcome {
-    execute_air(air, prev_data, data, params, call_results)
+    execute_air(air, prev_data, data, params, call_results.into())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -79,7 +79,9 @@ pub fn invoke_tracing(
         let subscriber = builder.finish();
         Dispatch::new(subscriber)
     };
-    tracing::dispatcher::with_default(&dispatch, || execute_air(air, prev_data, data, params, call_results))
+    tracing::dispatcher::with_default(&dispatch, || {
+        execute_air(air, prev_data, data, params, call_results.into())
+    })
 }
 
 #[marine]

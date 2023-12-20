@@ -25,13 +25,15 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
-use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::CidRef;
 use air_interpreter_data::CallResult;
+use air_interpreter_interface::CallArgumentsRepr;
 use air_interpreter_interface::CallRequestParams;
+use air_interpreter_interface::SerializedCallArguments;
+use air_interpreter_interface::TetrapletsRepr;
 use air_parser::ast;
 use air_trace_handler::merger::MergerCallResult;
 use air_trace_handler::TraceHandler;
@@ -48,7 +50,7 @@ pub(super) struct ResolvedCall<'i> {
 
 #[derive(Debug, Clone, PartialEq)]
 struct ResolvedArguments {
-    call_arguments: String,
+    call_arguments: SerializedCallArguments,
     tetraplets: Vec<RcSecurityTetraplets>,
 }
 
@@ -156,12 +158,16 @@ impl<'i> ResolvedCall<'i> {
         exec_ctx: &ExecutionCtx<'_>,
         tetraplet: &SecurityTetraplet,
     ) -> ExecutionResult<CallRequestParams> {
+        use air_interpreter_sede::ToSerialized;
+
         let ResolvedArguments {
             call_arguments,
             tetraplets,
         } = self.resolve_args(exec_ctx)?;
 
-        let serialized_tetraplets = serde_json::to_string(&tetraplets).expect("default serializer shouldn't fail");
+        let serialized_tetraplets = TetrapletsRepr
+            .serialize(&tetraplets)
+            .map_err(UncatchableError::TetrapletSerializationFailed)?;
 
         let request_params = CallRequestParams::new(
             tetraplet.service_id.to_string(),
@@ -197,10 +203,13 @@ impl<'i> ResolvedCall<'i> {
 
     /// Prepare arguments of this call instruction by resolving and preparing their security tetraplets.
     fn resolve_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<ResolvedArguments> {
+        use air_interpreter_sede::ToSerialized;
+
         let (call_arguments, tetraplets) = self.collect_args(exec_ctx)?;
 
-        let call_arguments = JValue::Array(call_arguments);
-        let call_arguments = call_arguments.to_string();
+        let call_arguments = CallArgumentsRepr
+            .serialize(&call_arguments)
+            .map_err(UncatchableError::CallArgumentsSerializationFailed)?;
 
         let resolved_arguments = ResolvedArguments {
             call_arguments,

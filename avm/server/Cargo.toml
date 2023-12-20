@@ -3,7 +3,7 @@ name = "avm-server"
 description = "Fluence AIR VM"
 version = "0.33.4"
 authors = ["Fluence Labs"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 documentation = "https://docs.rs/avm-server"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/avm/server"
@@ -16,6 +16,7 @@ path = "src/lib.rs"
 
 [dependencies]
 air-interpreter-interface = { version = "0.15.2", path = "../../crates/air-lib/interpreter-interface" }
+air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpreter-sede" }
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.3", path = "../../crates/data-store" }
 marine-runtime = "0.32.0"

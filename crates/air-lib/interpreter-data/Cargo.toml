@@ -3,7 +3,7 @@ name = "air-interpreter-data"
 description = "Data format of the AIR interpreter"
 version = "0.15.0"
 authors = ["Fluence Labs"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/fluencelabs/aquavm"
 documentation = "https://docs.rs/air-interpreter-data"
@@ -19,6 +19,7 @@ air-utils = { version = "0.2.0", path = "../utils" }
 aquavm-air-parser = { version = "0.11.0", path = "../air-parser" }
 air-interpreter-cid = { version = "0.7.0", path = "../interpreter-cid" }
 air-interpreter-signatures = { version = "0.1.5", path = "../interpreter-signatures" }
+air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json"] }
 polyplets = { version = "0.5.1", path = "../polyplets" }
 
 fluence-keypair = { version = "0.10.3", default-features = false }
