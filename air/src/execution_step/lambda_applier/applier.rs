@@ -33,7 +33,6 @@ use air_lambda_parser::ValueAccessor;
 use non_empty_vec::NonEmpty;
 
 use std::borrow::Cow;
-use std::convert::TryFrom;
 use std::ops::Deref;
 use std::rc::Rc;
 

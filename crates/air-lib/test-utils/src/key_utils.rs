@@ -25,7 +25,6 @@ use rand_chacha::rand_core::SeedableRng;
 // Should be moved to test lib when keypair interface PR is merged.
 pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
     use sha2::{Digest as _, Sha256};
-    use std::convert::TryFrom;
 
     let mut rng = {
         let mut hasher = Sha256::new();

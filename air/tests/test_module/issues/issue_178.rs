@@ -52,7 +52,7 @@ fn par_ap_behaviour() {
     let client_result_1 = engine.execute_one(client_name).unwrap();
     assert_next_pks!(
         &client_result_1.next_peer_pks,
-        [relay_id.as_str(), variable_setter_id.as_str()]
+        &[relay_id.as_str(), variable_setter_id.as_str()]
     );
 
     let setter_result = engine.execute_one(variable_setter_name).unwrap();

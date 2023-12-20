@@ -21,8 +21,6 @@ use crate::ValueAccessor;
 pub use non_empty_vec::EmptyError;
 use non_empty_vec::NonEmpty;
 
-use std::convert::TryFrom;
-
 impl<'input> LambdaAST<'input> {
     pub fn try_from_accessors(accessors: Vec<ValueAccessor<'input>>) -> Result<Self, EmptyError> {
         let value_path = NonEmpty::try_from(accessors)?;
