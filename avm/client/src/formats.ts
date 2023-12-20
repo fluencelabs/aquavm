@@ -76,7 +76,7 @@ export class MulticodecRepr implements Representation {
 
     fromBinary(data: Uint8Array): object {
         let code = multicodec.getCodeFromData(data)
-        var repr = null;
+        let repr: Representation | null = null;
 
         if (code == multicodec.JSON) {
             repr = new JsonRepr()
