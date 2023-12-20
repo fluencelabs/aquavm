@@ -17,9 +17,6 @@
 import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
 import { JsonRepr } from './formats'
 
-const decoder = new TextDecoder();
-const encoder = new TextEncoder();
-
 // Have to match the air-interpreter-interface.
 const callRequestsRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
