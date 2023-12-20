@@ -13,7 +13,10 @@
         "build": "tsc && ./build_wasm.sh"
     },
     "private": false,
-    "dependencies": {},
+    "dependencies": {
+        "msgpackr": "^1.10.0",
+        "multicodec": "^3.2.1"
+    },
     "devDependencies": {
         "typescript": "5.2.2"
     }
