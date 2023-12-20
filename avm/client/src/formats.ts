@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as msgpackr from "msgpackr"
-import * as multicodec from "multicodec"
+import msgpackr from "msgpackr"
+import multicodec from "multicodec"
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
