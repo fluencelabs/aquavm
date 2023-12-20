@@ -26,7 +26,7 @@ const callRequestsRepr = new JsonRepr();
 const argumentRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
 const tetrapletRepr = new JsonRepr();
-
+// Have to match the air-interpreter-interface.
 const callResultsRepr = new JsonRepr();
 
 /**
@@ -74,13 +74,13 @@ export function serializeAvmArgs(
  * @returns structured InterpreterResult
  */
 export function deserializeAvmResult(result: any): InterpreterResult {
-    const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
+    const callRequestsBuf = new Uint8Array(result.call_requests);
     let parsedCallRequests: object;
     try {
-        if (callRequestsStr.length === 0) {
+        if (callRequestsBuf.length === 0) {
             parsedCallRequests = {};
         } else {
-            parsedCallRequests = callRequestsRepr.fromBinary(new Uint8Array(result.call_requests));
+            parsedCallRequests = callRequestsRepr.fromBinary(callRequestsBuf);
         }
     } catch (e) {
         throw "Couldn't parse call requests: " + e + '. Original data is: ' + result.call_requests;
