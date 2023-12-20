@@ -86,9 +86,9 @@ export class MulticodecRepr implements Representation {
 
         if (repr === null) {
             throw "Unknown code " + code + "in multiformat data " + data
-        } else {
-            return repr.fromBinary(multicodec.rmPrefix(data))
         }
+        
+        return repr.fromBinary(multicodec.rmPrefix(data))
     }
 
     toBinary(obj: object): Uint8Array {
