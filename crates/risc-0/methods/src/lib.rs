@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
+#[cfg(feature = "enable_risc_0_compilation")]
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));

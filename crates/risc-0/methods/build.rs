@@ -15,5 +15,6 @@
  */
 
 fn main() {
+    #[cfg(feature = "enable_risc_0_compilation")]
     risc0_build::embed_methods();
 }
