@@ -20,6 +20,7 @@ use std::path::PathBuf;
 
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 const MAX_STREAM_SIZE: usize = 1023;
+const MB: usize = 1024 * 1024;
 
 mod calls;
 mod cid_benchmarking;
@@ -65,6 +66,16 @@ enum Bench {
     #[command(name = "parser-calls-10000-100")]
     ParserCalls10000_100,
     Null,
+    #[command(name = "lense-100mb")]
+    Lense100MB,
+    #[command(name = "map-100mb")]
+    Map100MB,
+    #[command(name = "canon-map-100mb")]
+    CanonMap100MB,
+    #[command(name = "call-result-100mb")]
+    CallResult100MB,
+    #[command(name = "parser-air-100mb")]
+    ParserAir100MB,
 }
 
 fn main() {
@@ -96,6 +107,11 @@ fn main() {
         Bench::Parser10000_100 => parser_10000_100(),
         Bench::ParserCalls10000_100 => parser_calls(10000, 100),
         Bench::Null => null(),
+        Bench::CallResult100MB => mem_consumption_with_size_in_mb(100),
+        Bench::Lense100MB => mem_consumption_w_lense_with_size_in_mb(100),
+        Bench::Map100MB => mem_consumption_w_map_2_scalar_with_size_in_mb(100),
+        Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100),
+        Bench::ParserAir100MB => mem_consumption_air_100mb(280000, 10),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -732,6 +748,257 @@ fn big_values_data() -> Data {
         },
         call_results: None,
         keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+    }
+}
+
+fn generate_random_data(random_data_size: usize) -> Vec<u8> {
+    use rand::thread_rng;
+    use rand::Rng;
+
+    // hex::encode later prints out every byte as 2 bytes sequence.
+    let random_data_size = random_data_size / 2 * MB;
+
+    let mut random_data = Vec::<u8>::with_capacity(random_data_size);
+    let mut rng = thread_rng();
+
+    while random_data.len() < random_data_size {
+        let remaining_space = random_data_size - random_data.len();
+        let chunk_size = std::cmp::min(rng.gen_range(1..=remaining_space), remaining_space);
+        let mut chunk = vec![0u8; chunk_size];
+        rng.fill(&mut chunk[..]);
+        random_data.extend_from_slice(&chunk);
+    }
+
+    random_data.truncate(random_data_size);
+    random_data
+}
+
+fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
+    let random_data = generate_random_data(data_size);
+
+    let air_script = format!(
+        include_str!("mem_consumption_generic.air.tmpl"),
+        data = format_args!("\"{}\"", hex::encode(random_data))
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
+    let random_data = generate_random_data(data_size);
+
+    let air_script = format!(
+        include_str!("mem_consumption_lense.air.tmpl"),
+        data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
+    let random_data = generate_random_data(data_size);
+
+    let air_script = format!(
+        include_str!("mem_consumption_canon_map.air.tmpl"),
+        data = format_args!("\"{}\"", hex::encode(random_data))
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
+    let random_data = generate_random_data(data_size);
+
+    let air_script = format!(
+        include_str!("mem_consumption_canon_map_2.air.tmpl"),
+        data = format_args!("\"{}\"", hex::encode(random_data))
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "benchmarking".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn mem_consumption_air_100mb(calls: usize, vars: usize) -> Data {
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+    let particle_id = "particle_id";
+
+    let vars = (0..vars).map(|n| format!("var{}", n)).collect_vec();
+    let init_var = vars[0].clone();
+    let statements = vars
+        .iter()
+        .cycle()
+        .take(calls)
+        .tuple_windows()
+        .map(|(a, b)| format!(r#"(call {a} ("serv" "func") [] {b})"#))
+        .collect_vec();
+
+    fn build_tree(statements: &[String]) -> String {
+        assert!(!statements.is_empty());
+        if statements.len() == 1 {
+            statements[0].clone()
+        } else {
+            let mid = statements.len() / 2;
+            format!(
+                "(seq {} {})",
+                build_tree(&statements[..mid]),
+                build_tree(&statements[mid..])
+            )
+        }
+    }
+
+    let tree = build_tree(&statements);
+    let air = format!(
+        r#"(seq (call "peer" ("serv" "func") [] {}) {})"#,
+        init_var, tree
+    );
+
+    Data {
+        air,
+        prev_data: vec![],
+        cur_data: vec![],
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "multiple calls parser benchmark".to_owned(),
+            "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
     }
 }
 
