@@ -90,13 +90,15 @@ export function deserializeAvmResult(result: any): InterpreterResult {
         let arguments_;
         let tetraplets;
         try {
-            arguments_ = argumentRepr.fromBinary(callRequest.arguments)
+            let argumentsBuf = new Uint8Array(callRequest.arguments);
+            arguments_ = argumentRepr.fromBinary(argumentsBuf);
         } catch (e) {
             throw "Couldn't parse arguments: " + e + '. Original data is: ' + callRequest.arguments;
         }
 
         try {
-            tetraplets = tetrapletRepr.fromBinary(callRequest.tetraplets)
+            let tetrapletBuf = new Uint8Array(callRequest.tetraplets);
+            tetraplets = tetrapletRepr.fromBinary(tetrapletBuf);
         } catch (e) {
             throw "Couldn't parse tetraplets: " + e + '. Original data is: ' + callRequest.tetraplets;
         }
