@@ -143,13 +143,6 @@ impl KeyPair {
     pub fn as_inner(&self) -> &fluence_keypair::KeyPair {
         &self.0
     }
-
-    #[cfg(feature = "rand")]
-    pub fn generate(key_format: KeyFormat) -> Result<Self, KeyError> {
-        validate_with_key_format((), key_format)?;
-
-        Ok(Self(fluence_keypair::KeyPair::generate(key_format)))
-    }
 }
 
 impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
@@ -167,6 +160,9 @@ impl From<KeyPair> for fluence_keypair::KeyPair {
 }
 
 pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
+    // this allow is needed in order to support old versions of the fluence_keypair
+    // repos which is used to build it for RISC-0
+    #[allow(unreachable_patterns)]
     match key_format {
         fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
         _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
