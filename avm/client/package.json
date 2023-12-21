@@ -14,7 +14,7 @@
     },
     "private": false,
     "dependencies": {
-        "msgpackr": "^1.10.0",
+        "msgpack-lite": "^0.1.26",
         "multicodec": "^3.2.1"
     },
     "devDependencies": {

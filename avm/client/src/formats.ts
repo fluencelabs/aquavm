@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import msgpackr from "msgpackr"
+import msgpack from "msgpack-lite"
 import multicodec from "multicodec"
 
 const decoder = new TextDecoder();
@@ -52,11 +52,11 @@ export class JsonRepr implements Representation, Multiformatable {
  */
 export class MsgPackRepr implements Representation, Multiformatable {
     fromBinary(data: Uint8Array): object {
-        return msgpackr.unpack(data)
+        return msgpack.decode(data)
     }
 
     toBinary(obj: object): Uint8Array {
-        return msgpackr.pack(obj)
+        return msgpack.encode(obj)
     }
 
     get_code(): multicodec.CodecCode {
