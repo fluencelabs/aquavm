@@ -5,7 +5,7 @@ description = "RISC-0 guest wrapper for AquaVM"
 authors = ["Fluence Labs"]
 edition = "2021"
 license = "Apache-2.0"
-publish = false
+publish = true
 
 [workspace]
 
