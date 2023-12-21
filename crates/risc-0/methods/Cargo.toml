@@ -1,0 +1,17 @@
+[package]
+name = "zk-aquavm-methods"
+version = "0.1.0"
+description = "RISC-0 methods wrapper for AquaVM"
+authors = ["Fluence Labs"]
+edition = "2021"
+license = "Apache-2.0"
+
+[build-dependencies]
+risc0-build = { version = "0.19.1" }
+
+[package.metadata.risc0]
+methods = ["guest"]
+
+[features]
+# this features is needed to allow AquaVM compilation without installed risczero CLI tool
+enable_risc_0_compilation = []
