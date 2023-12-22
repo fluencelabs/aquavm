@@ -24,6 +24,9 @@ members = [
     "crates/testing-framework",
     "tools/cli/air",
     "tools/wasm/air-beautify-wasm",
+    "crates/risc-0/core",
+    "crates/risc-0/methods",
+    "crates/risc-0/methods/guest",
 ]
 
 exclude = [
