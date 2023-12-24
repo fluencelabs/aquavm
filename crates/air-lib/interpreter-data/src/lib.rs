@@ -33,7 +33,7 @@ mod generation_idx;
 mod interpreter_data;
 mod trace;
 mod trace_pos;
-mod value;
+mod raw_value;
 
 pub use cid_info::*;
 pub use cid_store::*;
@@ -42,7 +42,7 @@ pub use generation_idx::*;
 pub use interpreter_data::*;
 pub use trace::*;
 pub use trace_pos::*;
-pub use value::*;
+pub use raw_value::*;
 
 use once_cell::sync::Lazy;
 use serde_json::Value as JValue;
