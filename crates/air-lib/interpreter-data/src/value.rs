@@ -16,7 +16,8 @@
 
 use crate::JValue;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 use std::cell::RefCell;
 use std::rc::Rc;
