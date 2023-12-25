@@ -18,8 +18,8 @@ use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::MsgPackFormat;
+use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::Representation;
 
 use marine_call_parameters::SecurityTetraplet;
@@ -75,7 +75,7 @@ impl FromSerialized<Vec<Vec<SecurityTetraplet>>> for TetrapletsRepr {
         &self,
         repr: &[u8],
     ) -> Result<Vec<Vec<SecurityTetraplet>>, Self::DeserializeError> {
-        CallArgumentsRepr.get_format().from_slice(repr)
+        Self.get_format().from_slice(repr)
     }
 }
 
