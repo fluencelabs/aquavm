@@ -27,7 +27,7 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", default-features = false, features = [ "env-filter", "json", "smallvec", "time", "fmt" ] }
 atty = "0.2.14"
 termcolor = "1.2.0"
-fluence-keypair = "0.10.3"
+fluence-keypair = "0.10.4"
 bs58 = "0.5.0"
 zeroize = "1.6.0"
 

@@ -31,4 +31,4 @@ serde = "1.0.190"
 log = "0.4.20"
 parking_lot = "0.12.1"
 tracing = "0.1.40"
-fluence-keypair = { version = "0.10.3", default-features = false }
+fluence-keypair = { version = "0.10.4", default-features = false }
