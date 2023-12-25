@@ -33,7 +33,7 @@ pub(crate) fn sign_produced_cids(
     let signature = signature_tracker
         .gen_signature(salt, keypair)
         .map_err(UncatchableError::SigningError)?;
-    let public_key = keypair.public().into();
+    let public_key = keypair.public();
     signature_store.put(public_key, signature);
     Ok(())
 }
