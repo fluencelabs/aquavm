@@ -22,7 +22,7 @@ air-interpreter-signatures = { version = "0.1.5", path = "../interpreter-signatu
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json"] }
 polyplets = { version = "0.5.1", path = "../polyplets" }
 
-fluence-keypair = { version = "0.10.3", default-features = false }
+fluence-keypair = { version = "0.10.4", default-features = false }
 serde = {version = "1.0.190", features = ["derive", "rc"]}
 serde_json = { version = "1.0.95", features = ["raw_value"] }
 semver = { version = "1.0.17", features = ["serde"] }

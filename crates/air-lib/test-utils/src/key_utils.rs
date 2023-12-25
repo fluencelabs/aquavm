@@ -32,7 +32,7 @@ pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
         rand_chacha::ChaCha8Rng::from_seed(hasher.finalize().into())
     };
 
-    let keypair_ed25519 = ed25519_dalek::Keypair::generate(&mut rng);
+    let keypair_ed25519 = ed25519_dalek::SigningKey::generate(&mut rng);
     let keypair = fluence_keypair::KeyPair::Ed25519(keypair_ed25519.into());
     let keypair = KeyPair::try_from(keypair).expect("cannot happen");
 
