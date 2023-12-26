@@ -60,10 +60,10 @@ struct AfterNextCheckMachine<'name> {
     /// lalrpop effectively parses from right to left thus `next`
     /// happens before fold. It is impossible to tell whether `next`
     /// belongs to a scalar fold or not.
-    potentially_impossible_spans: Vec<(&'name str, Span)>,
+    potentially_malformed_spans: HashMap<&'name str, Span>,
 
     /// This vector contains all spans where an instruction after next was met.
-    impossible_spans: Vec<Span>,
+    malformed_spans: Vec<Span>,
 
     /// This flag disables the machine if invariants are broken, e.g. par/seq must see
     /// at least 2 instruction kinds in the stack.
@@ -74,110 +74,52 @@ impl<'name> Default for AfterNextCheckMachine<'name> {
     fn default() -> Self {
         Self {
             stack: Default::default(),
-            potentially_impossible_spans: Default::default(),
-            impossible_spans: Default::default(),
+            potentially_malformed_spans: Default::default(),
+            malformed_spans: Default::default(),
             is_enabled: true,
         }
     }
 }
 
 impl<'name> AfterNextCheckMachine<'name> {
-    fn impossible_spans_mut_iter(&mut self) -> std::slice::IterMut<Span> {
-        self.impossible_spans.iter_mut()
+    fn disable(&mut self) {
+        self.stack.clear();
+        self.is_enabled = false;
+    }
+
+    fn malformed_spans_iter(&self) -> std::slice::Iter<Span> {
+        self.malformed_spans.iter()
     }
 
     fn met_instruction_kind(&mut self, instr_kind: CheckInstructionKind<'name>, span: Span) {
+        use CheckInstructionKind::*;
+
         if !self.is_enabled {
             return;
         }
         match instr_kind {
             CheckInstructionKind::Replacing => {
-                let child = self.stack.pop();
-                match child {
-                    Some((CheckInstructionKind::PivotalNext(name), _)) => {
-                        self.stack
-                            .push((CheckInstructionKind::PivotalNext(name), span));
-                    }
-                    Some(..) => {
-                        self.stack.push((CheckInstructionKind::Replacing, span));
-                    }
-                    None => self.is_enabled = false,
-                }
+                self.process_replacing(span);
             }
             CheckInstructionKind::Xoring => {
-                let right_branch = self.stack.pop();
-                let left_branch = self.stack.pop();
-                match (left_branch, right_branch) {
-                    (
-                        Some((CheckInstructionKind::PivotalNext(..), _)),
-                        Some((CheckInstructionKind::PivotalNext(..), _)),
-                    ) => {
-                        // `xor` has `next` in both branches. It is impossible
-                        // to tell which branch should poped up.
-                        self.stack.clear();
-                        self.is_enabled = false;
-                    }
-                    (Some((CheckInstructionKind::PivotalNext(iterator), _)), Some((..)))
-                    | (Some((..)), Some((CheckInstructionKind::PivotalNext(iterator), _))) => {
-                        // potential failure but need to check when fold pops up.
-                        self.stack
-                            .push((CheckInstructionKind::PivotalNext(iterator), span));
-                    }
-                    (Some(_), Some(_)) => {
-                        self.stack.push((CheckInstructionKind::Xoring, span));
-                    }
-                    _ => {
-                        // disable machine if Xoring invariant, namely there must be 2 kinds on a stack, is broken.
-                        self.stack.clear();
-                        self.is_enabled = false;
-                    }
-                }
+                self.process_xoring(span);
             }
             CheckInstructionKind::Merging => {
-                let right_branch = self.stack.pop();
-                let left_branch = self.stack.pop();
-                match (left_branch, right_branch) {
-                    (
-                        Some((CheckInstructionKind::PivotalNext(left_iterable), _)),
-                        Some((CheckInstructionKind::PivotalNext(right_iterable), _)),
-                    ) if left_iterable == right_iterable => {
-                        self.stack
-                            .push((CheckInstructionKind::PivotalNext(left_iterable), span));
-                    }
-                    (Some((CheckInstructionKind::PivotalNext(iterator), _)), Some((..))) => {
-                        // potential failure but need to check when fold pops up.
-                        self.stack.push((CheckInstructionKind::Merging, span));
-                        self.potentially_impossible_spans.push((iterator, span));
-                    }
-                    (Some((..)), Some((CheckInstructionKind::PivotalNext(iterable), _))) => {
-                        self.stack
-                            .push((CheckInstructionKind::PivotalNext(iterable), span));
-                    }
-                    (Some(_), Some(_)) => {
-                        self.stack.push((CheckInstructionKind::Merging, span));
-                    }
-                    _ => {
-                        // disable machine if Merging invariant, namely there must be 2 kinds on a stack, is broken.
-                        self.stack.clear();
-                        self.is_enabled = false;
-                    }
-                }
+                self.process_merging(span);
             }
             CheckInstructionKind::ReplacingWithCheck(iterator_name) => {
                 self.replacing_with_check_common(iterator_name, span, &instr_kind);
             }
-            CheckInstructionKind::PopStack1ReplacingWithCheck(iterator_name) => {
+            PopStack1ReplacingWithCheck(iterator_name) => {
                 self.stack.pop();
                 self.replacing_with_check_common(iterator_name, span, &instr_kind);
             }
-            CheckInstructionKind::PivotalNext(_) | CheckInstructionKind::Simple => {
-                self.stack.push((instr_kind, span))
-            }
-            CheckInstructionKind::PopStack1 => {
+            PivotalNext(_) | Simple => self.stack.push((instr_kind, span)),
+            PopStack1 => {
                 self.stack.pop();
                 self.stack.push((instr_kind, span))
             }
-            CheckInstructionKind::PopStack2 => {
+            PopStack2 => {
                 self.stack.pop();
                 self.stack.pop();
                 self.stack.push((instr_kind, span))
@@ -185,14 +127,84 @@ impl<'name> AfterNextCheckMachine<'name> {
         }
     }
 
+    fn process_replacing(&mut self, span: Span) {
+        use CheckInstructionKind::*;
+
+        let child = self.stack.pop();
+        match child {
+            Some((PivotalNext(name), ..)) => {
+                self.stack.push((PivotalNext(name), span));
+            }
+            Some(_) => {
+                self.stack.push((Replacing, span));
+            }
+            None => self.disable(),
+        }
+    }
+
+    fn process_xoring(&mut self, span: Span) {
+        use CheckInstructionKind::*;
+
+        let right_branch = self.stack.pop();
+        let left_branch = self.stack.pop();
+        let left_right = left_branch.zip(right_branch);
+
+        match left_right {
+            Some(((PivotalNext(_), ..), (PivotalNext(_), ..))) => {
+                // `xor` has `next` in both branches. It is impossible
+                // to tell which branch should poped up.
+                self.disable();
+            }
+            Some(((PivotalNext(iterator), ..), ..)) | Some((_, (PivotalNext(iterator), _))) => {
+                // potential failure but need to check when fold pops up.
+                self.stack.push((PivotalNext(iterator), span));
+            }
+            Some(_) => {
+                self.stack.push((Xoring, span));
+            }
+            _ => {
+                // disable machine if Xoring invariant, namely there must be 2 kinds on a stack, is broken.
+                self.disable();
+            }
+        }
+    }
+
+    fn process_merging(&mut self, span: Span) {
+        use CheckInstructionKind::*;
+
+        let right_branch = self.stack.pop();
+        let left_branch = self.stack.pop();
+        let left_right = left_branch.zip(right_branch);
+        match left_right {
+            Some(((PivotalNext(left_iterable), ..), (PivotalNext(right_iterable), ..)))
+                if left_iterable == right_iterable =>
+            {
+                self.stack.push((PivotalNext(left_iterable), span));
+            }
+            Some(((PivotalNext(iterator), _), ..)) => {
+                // potential failure but need to check when fold pops up.
+                self.stack.push((Merging, span));
+                self.potentially_malformed_spans
+                    .entry(iterator)
+                    .or_insert(span);
+            }
+            Some((_, (PivotalNext(iterable), ..))) => {
+                self.stack.push((PivotalNext(iterable), span));
+            }
+            Some(_) => {
+                self.stack.push((Merging, span));
+            }
+            _ => {
+                // disable machine if Merging invariant, namely there must be 2 kinds on a stack, is broken.
+                self.disable();
+            }
+        }
+    }
+
     fn after_next_check(&mut self, iterable: &'name str) {
-        let error_span = self
-            .potentially_impossible_spans
-            .iter()
-            .find(|(kind_iterable, _)| iterable == *kind_iterable)
-            .map(|(_, span)| span);
-        if let Some(span) = error_span {
-            self.impossible_spans.push(*span);
+        let malformed_span = self.potentially_malformed_spans.get(iterable);
+        if let Some(span) = malformed_span {
+            self.malformed_spans.push(*span);
         }
     }
 
@@ -204,12 +216,12 @@ impl<'name> AfterNextCheckMachine<'name> {
     ) {
         let child = self.stack.pop();
         match child {
-            Some((CheckInstructionKind::PivotalNext(checking_iterable), _)) => {
+            Some((CheckInstructionKind::PivotalNext(checking_iterable), ..)) => {
                 self.after_next_check(iterator_name);
                 self.stack
                     .push((CheckInstructionKind::PivotalNext(checking_iterable), span));
             }
-            Some(..) => {
+            Some(_) => {
                 self.after_next_check(iterator_name);
                 self.stack.push((*instr_kind, span));
             }
@@ -255,7 +267,7 @@ pub struct VariableValidator<'i> {
     unsupported_literal_errcodes: Vec<(i64, Span)>,
 
     /// This machine is for after next instruction check.
-    after_next_check: AfterNextCheckMachine<'i>,
+    after_next_machine: AfterNextCheckMachine<'i>,
 }
 
 impl<'i> VariableValidator<'i> {
@@ -425,12 +437,12 @@ impl<'i> VariableValidator<'i> {
     }
 
     pub(super) fn met_merging_instr(&mut self, span: Span) {
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(CheckInstructionKind::Merging, span);
     }
 
     pub(super) fn met_pivotalnext_instr(&mut self, iterable_name: &'i str, span: Span) {
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(CheckInstructionKind::PivotalNext(iterable_name), span);
     }
 
@@ -439,36 +451,36 @@ impl<'i> VariableValidator<'i> {
             Some(_) => CheckInstructionKind::PopStack2,
             None => CheckInstructionKind::PopStack1,
         };
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(instruction_kind, span);
     }
 
     fn met_popstack_replacing_with_check_instr(&mut self, iterator_name: &'i str, span: Span) {
-        self.after_next_check.met_instruction_kind(
+        self.after_next_machine.met_instruction_kind(
             CheckInstructionKind::PopStack1ReplacingWithCheck(iterator_name),
             span,
         );
     }
 
     pub(super) fn met_replacing_instr(&mut self, span: Span) {
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(CheckInstructionKind::Replacing, span);
     }
 
     pub(super) fn met_replacing_with_check_instr(&mut self, iterator_name: &'i str, span: Span) {
-        self.after_next_check.met_instruction_kind(
+        self.after_next_machine.met_instruction_kind(
             CheckInstructionKind::ReplacingWithCheck(iterator_name),
             span,
         );
     }
 
     pub(super) fn met_xoring_instr(&mut self, span: Span) {
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(CheckInstructionKind::Xoring, span);
     }
 
     pub(super) fn met_simple_instr(&mut self, span: Span) {
-        self.after_next_check
+        self.after_next_machine
             .met_instruction_kind(CheckInstructionKind::Simple, span);
     }
 
@@ -782,7 +794,7 @@ impl<'i> ValidatorErrorBuilder<'i> {
     }
 
     fn check_after_next_instr(mut self) -> Self {
-        for span in self.validator.after_next_check.impossible_spans_mut_iter() {
+        for span in self.validator.after_next_machine.malformed_spans_iter() {
             let error = ParserError::fold_has_instruction_after_next(*span);
             add_to_errors(&mut self.errors, *span, Token::Next, error);
         }
