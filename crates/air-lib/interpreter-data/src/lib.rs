@@ -31,6 +31,7 @@ mod cid_store;
 mod executed_state;
 mod generation_idx;
 mod interpreter_data;
+mod raw_value;
 mod trace;
 mod trace_pos;
 
@@ -39,6 +40,7 @@ pub use cid_store::*;
 pub use executed_state::*;
 pub use generation_idx::*;
 pub use interpreter_data::*;
+pub use raw_value::*;
 pub use trace::*;
 pub use trace_pos::*;
 
