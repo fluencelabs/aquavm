@@ -35,7 +35,7 @@ pub mod native_test_runner;
 pub mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-use air_interpreter_sede::ToSerialized;
+use air_interpreter_sede::{FromSerialized, ToSerialized};
 
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
@@ -83,12 +83,15 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    let data_env = env_from_result(result);
-    data_env.inner_data
+    let (_version, data) = InterpreterDataEnv::try_from_slice(&result.data)
+        .expect("default serializer shouldn't fail");
+    data
 }
 
 pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnv {
-    InterpreterDataEnv::try_from_slice(&result.data).expect("default serializer shouldn't fail")
+    InterpreterDataEnvRepr
+        .deserialize(&result.data)
+        .expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace(

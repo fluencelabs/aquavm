@@ -20,6 +20,8 @@ pub mod verification;
 
 pub use self::repr::InterpreterDataEnvFormat;
 pub use self::repr::InterpreterDataEnvRepr;
+pub use self::repr::InterpreterDataFormat;
+pub use self::repr::InterpreterDataRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
@@ -32,19 +34,21 @@ use air_utils::measure;
 use serde::Deserialize;
 use serde::Serialize;
 
-/// The AIR interpreter could be considered as a function
-/// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
-/// This function receives prev and current data and produces a result data. All these data
-/// have the following format.
+/// An envelope for the AIR interpreter data that makes AIR data version info accessible in a stable way.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterDataEnv {
     /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
-    pub inner_data: InterpreterData,
+    #[serde(with = "serde_bytes")]
+    pub inner_data: <InterpreterDataRepr as Representation>::SerializedValue,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// The AIR interpreter could be considered as a function
+/// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
+/// This function receives prev and current data and produces a result data. All these data
+/// have the following format.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct InterpreterData {
     /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
@@ -78,12 +82,10 @@ impl InterpreterDataEnv {
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
-        let inner_data = InterpreterData {
-            trace: ExecutionTrace::default(),
-            last_call_request_id: 0,
-            cid_info: <_>::default(),
-            signatures: <_>::default(),
-        };
+        let inner_data = InterpreterData::default();
+        let inner_data = InterpreterDataRepr
+            .serialize(&inner_data)
+            .expect("shouldn't fail on empty data");
 
         Self {
             versions,
@@ -108,6 +110,11 @@ impl InterpreterDataEnv {
             signatures,
         };
 
+        // TODO return the error
+        let inner_data = InterpreterDataRepr
+            .serialize(&inner_data)
+            .expect("shouldn't fail");
+
         Self {
             versions,
             inner_data,
@@ -117,12 +124,21 @@ impl InterpreterDataEnv {
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(
         slice: &[u8],
-    ) -> Result<Self, <InterpreterDataEnvRepr as Representation>::DeserializeError> {
-        measure!(
+    ) -> Result<
+        (Versions, InterpreterData),
+        <InterpreterDataEnvRepr as Representation>::DeserializeError,
+    > {
+        let env: InterpreterDataEnv = measure!(
             InterpreterDataEnvRepr.deserialize(slice),
             tracing::Level::INFO,
             "InterpreterData::try_from_slice"
-        )
+        )?;
+
+        // TODO return error
+        let inner_data = InterpreterDataRepr
+            .deserialize(&env.inner_data)
+            .expect("shouldn't fail");
+        Ok((env.versions, inner_data))
     }
 
     /// Tries to de only versions part of interpreter data.

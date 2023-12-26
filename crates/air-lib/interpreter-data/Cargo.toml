@@ -19,7 +19,7 @@ air-utils = { version = "0.2.0", path = "../utils" }
 aquavm-air-parser = { version = "0.11.0", path = "../air-parser" }
 air-interpreter-cid = { version = "0.7.0", path = "../interpreter-cid" }
 air-interpreter-signatures = { version = "0.1.5", path = "../interpreter-signatures" }
-air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json"] }
+air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json", "msgpack"] }
 polyplets = { version = "0.5.1", path = "../polyplets" }
 
 fluence-keypair = { version = "0.10.4", default-features = false }
@@ -31,3 +31,4 @@ tracing = "0.1.40"
 newtype_derive = "0.1.6"
 num-traits = "0.2.17"
 thiserror = "1.0.50"
+serde_bytes = "0.11.13"

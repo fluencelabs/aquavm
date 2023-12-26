@@ -1,4 +1,4 @@
-use air_interpreter_data::InterpreterDataFormat;
+use air_interpreter_data::InterpreterDataEnvFormat;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::RmpSerdeFormat;
 use air_interpreter_sede::RmpSerdeMultiformat;
@@ -110,12 +110,12 @@ fn save_data(dest_dir: &Path, data: Data) -> Result<(), Box<dyn std::error::Erro
     save_file(
         dest_dir,
         "prev_data.json",
-        reformat_json_if_possible::<InterpreterDataFormat>(&data.prev_data),
+        reformat_json_if_possible::<InterpreterDataEnvFormat>(&data.prev_data),
     )?;
     save_file(
         dest_dir,
         "cur_data.json",
-        reformat_json_if_possible::<InterpreterDataFormat>(&data.cur_data),
+        reformat_json_if_possible::<InterpreterDataEnvFormat>(&data.cur_data),
     )?;
     save_file(
         dest_dir,

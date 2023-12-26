@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+use crate::InterpreterData;
 use crate::InterpreterDataEnv;
 use crate::Versions;
 
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::JsonFormat;
+use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::Representation;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
@@ -27,7 +28,7 @@ use air_interpreter_sede::ToWriter;
 #[derive(Default, Debug)]
 pub struct InterpreterDataEnvRepr;
 
-pub type InterpreterDataEnvFormat = JsonFormat;
+pub type InterpreterDataEnvFormat = MsgPackMultiformat;
 
 impl Representation for InterpreterDataEnvRepr {
     type SerializeError =
@@ -72,5 +73,48 @@ impl FromSerialized<Versions> for InterpreterDataEnvRepr {
     #[inline]
     fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::DeserializeError> {
         Self::get_format(self).from_slice(repr)
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct InterpreterDataRepr;
+
+pub type InterpreterDataFormat = MsgPackMultiformat;
+
+impl Representation for InterpreterDataRepr {
+    type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
+    type DeserializeError =
+        <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
+    type WriteError = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
+    type Format = InterpreterDataFormat;
+    type SerializedValue = Vec<u8>; // TODO a typed wrapper
+
+    fn get_format(&self) -> InterpreterDataFormat {
+        InterpreterDataFormat::default()
+    }
+}
+
+impl ToSerialized<InterpreterData> for InterpreterDataRepr {
+    #[inline]
+    fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::SerializeError> {
+        Self::get_format(self).to_vec(value)
+    }
+}
+
+impl FromSerialized<InterpreterData> for InterpreterDataRepr {
+    #[inline]
+    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::DeserializeError> {
+        Self::get_format(self).from_slice(repr)
+    }
+}
+
+impl ToWriter<InterpreterData> for InterpreterDataRepr {
+    #[inline]
+    fn to_writer<W: std::io::Write>(
+        &self,
+        value: &InterpreterData,
+        writer: &mut W,
+    ) -> Result<(), Self::WriteError> {
+        Self::get_format(self).to_writer(value, writer)
     }
 }

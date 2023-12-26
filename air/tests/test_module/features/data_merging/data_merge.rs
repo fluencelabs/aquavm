@@ -304,8 +304,7 @@ fn fold_merge() {
         local_vms_results[6].data.clone()
     );
 
-    let data_env = InterpreterDataEnv::try_from_slice(&result_7.data).expect("data should be well-formed");
-    let data = data_env.inner_data;
+    let (_version, data) = InterpreterDataEnv::try_from_slice(&result_7.data).expect("data should be well-formed");
 
     let mut fold_states_count = 0;
     let mut calls_count = HashMap::new();

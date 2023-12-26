@@ -15,13 +15,15 @@
  */
 
 use air::{min_supported_version, PreparationError};
-use air_interpreter_data::{verification::DataVerifierError, InterpreterDataEnv, InterpreterDataEnvRepr};
+use air_interpreter_data::verification::DataVerifierError;
+use air_interpreter_data::{InterpreterDataEnv, InterpreterDataRepr};
 use air_interpreter_sede::{Format, Representation};
 use air_interpreter_signatures::KeyError;
 use air_test_utils::{
     assert_error_eq,
     prelude::{request_sent_by, unit_call_service},
     test_runner::{create_avm, create_avm_with_key, NativeAirRunner, TestRunParameters},
+    JValue,
 };
 use fluence_keypair::KeyFormat;
 use serde_json::json;
@@ -46,18 +48,23 @@ fn test_banned_signature() {
 
     let trace = vec![request_sent_by("init_peer_fake_id")];
 
-    let mut data = serde_json::to_value(InterpreterDataEnv::from_execution_result(
+    let mut data_env = InterpreterDataEnv::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
         <_>::default(),
         min_supported_version().clone(),
-    ))
-    .unwrap();
+    );
 
-    data["inner_data"]["signatures"] = bad_signature_store;
+    let mut data: JValue = InterpreterDataRepr
+        .get_format()
+        .from_slice(&data_env.inner_data)
+        .unwrap();
 
-    let current_data = InterpreterDataEnvRepr.get_format().to_vec(&data).unwrap();
+    data["signatures"] = bad_signature_store;
+    data_env.inner_data = InterpreterDataRepr.get_format().to_vec(&data).unwrap();
+
+    let current_data = data_env.serialize().unwrap();
 
     let mut avm = create_avm(unit_call_service(), "other_peer_id");
     let res = avm

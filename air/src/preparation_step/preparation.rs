@@ -22,6 +22,7 @@ use crate::execution_step::TraceHandler;
 use air_interpreter_data::InterpreterData;
 use air_interpreter_data::InterpreterDataEnv;
 use air_interpreter_data::InterpreterDataEnvRepr;
+use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
@@ -45,17 +46,17 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
 }
 
 pub(crate) struct ParsedDataPair {
-    pub(crate) prev_data: InterpreterDataEnv,
-    pub(crate) current_data: InterpreterDataEnv,
+    pub(crate) prev_data: InterpreterData,
+    pub(crate) current_data: InterpreterData,
 }
 
 /// Parse data and check its version.
 #[tracing::instrument(skip_all)]
 pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDataPair> {
-    let prev_data = try_to_data(prev_data)?;
-    let current_data = try_to_data(current_data)?;
+    let (_prev_version, prev_data) = try_to_data(prev_data)?;
+    let (current_version, current_data) = try_to_data(current_data)?;
 
-    check_version_compatibility(&current_data)?;
+    check_version_compatibility(&current_version)?;
 
     Ok(ParsedDataPair {
         prev_data,
@@ -107,11 +108,14 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterDataEnv> {
+pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<(Versions, InterpreterData)> {
     // treat empty slice as an empty data,
     // it allows abstracting from an internal format for an empty data
     if raw_data.is_empty() {
-        return Ok(InterpreterDataEnv::new(super::min_supported_version().clone()));
+        return Ok((
+            Versions::new(super::min_supported_version().clone()),
+            InterpreterData::default(),
+        ));
     }
 
     InterpreterDataEnv::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
@@ -153,10 +157,10 @@ fn make_exec_ctx(
     Ok(ctx)
 }
 
-pub(crate) fn check_version_compatibility(data: &InterpreterDataEnv) -> PreparationResult<()> {
-    if &data.versions.interpreter_version < super::min_supported_version() {
+pub(crate) fn check_version_compatibility(versions: &Versions) -> PreparationResult<()> {
+    if &versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
-            actual_version: data.versions.interpreter_version.clone(),
+            actual_version: versions.interpreter_version.clone(),
             required_version: super::min_supported_version().clone(),
         });
     }

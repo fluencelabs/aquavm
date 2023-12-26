@@ -1,5 +1,6 @@
 use air::interpreter_version;
 use air_interpreter_data::ExecutedState;
+use air_interpreter_sede::Representation;
 use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
@@ -161,7 +162,14 @@ pub fn cid_benchmarking_data(
         .unwrap()
         .insert("signatures".to_owned(), json!(ss));
 
-    InterpreterDataFormat::default().to_vec(&curr_data).unwrap().into()
+    let inner_data = InterpreterDataRepr.get_format().to_vec(&curr_data).unwrap();
+
+    let data_env = InterpreterDataEnv {
+        versions: Versions::new(interpreter_version().clone()),
+        inner_data,
+    };
+
+    data_env.serialize().unwrap()
 }
 
 pub fn cid_benchmarking_long_data(
