@@ -19,7 +19,7 @@ use crate::CidStoreVerificationError;
 
 use crate::CanonCidAggregate;
 use crate::CanonResultCidAggregate;
-use crate::JValue;
+use crate::RawValue;
 use crate::ServiceResultCidAggregate;
 
 use polyplets::SecurityTetraplet;
@@ -29,7 +29,7 @@ use serde::Serialize;
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CidInfo {
     /// Map CID to value.
-    pub value_store: CidStore<JValue>,
+    pub value_store: CidStore<RawValue>,
 
     /// Map CID to a tetraplet.
     pub tetraplet_store: CidStore<SecurityTetraplet>,
@@ -57,7 +57,7 @@ impl CidInfo {
     }
 
     fn verify_value_store(&self) -> Result<(), CidStoreVerificationError> {
-        self.value_store.verify()
+        self.value_store.verify_raw_value()
     }
 
     fn verify_tetraplet_store(&self) -> Result<(), CidStoreVerificationError> {

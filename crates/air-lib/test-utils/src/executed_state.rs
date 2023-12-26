@@ -36,6 +36,7 @@ use air_interpreter_cid::CID;
 use air_interpreter_data::CanonCidAggregate;
 use air_interpreter_data::GenerationIdx;
 use air_interpreter_data::Provenance;
+use air_interpreter_data::RawValue;
 use air_interpreter_data::ServiceResultCidAggregate;
 use avm_server::SecurityTetraplet;
 use serde::Deserialize;
@@ -47,15 +48,12 @@ pub fn simple_value_aggregate_cid(
     result: impl Into<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
-    let value_cid = cid_state
-        .value_tracker
-        .track_value(Rc::new(result.into()))
-        .unwrap();
+    let value = result.into();
+    let vm_value = RawValue::from_value(value);
+
+    let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet = SecurityTetraplet::default();
-    let tetraplet_cid = cid_state
-        .tetraplet_tracker
-        .track_value(Rc::new(tetraplet))
-        .unwrap();
+    let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
         value_cid,
         argument_hash: "".into(),
@@ -63,7 +61,7 @@ pub fn simple_value_aggregate_cid(
     };
     cid_state
         .service_result_agg_tracker
-        .track_value(Rc::new(service_result_agg))
+        .track_value(service_result_agg)
         .unwrap()
 }
 
@@ -73,14 +71,10 @@ pub fn value_aggregate_cid(
     args: Vec<serde_json::Value>,
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
-    let value_cid = cid_state
-        .value_tracker
-        .track_value(Rc::new(result.into()))
-        .unwrap();
-    let tetraplet_cid = cid_state
-        .tetraplet_tracker
-        .track_value(Rc::new(tetraplet))
-        .unwrap();
+    let value = result.into();
+    let vm_value = RawValue::from_value(value);
+    let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
+    let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
 
     let arguments = serde_json::Value::Array(args);
     let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
@@ -93,7 +87,7 @@ pub fn value_aggregate_cid(
 
     cid_state
         .service_result_agg_tracker
-        .track_value(Rc::new(service_result_agg))
+        .track_value(service_result_agg)
         .unwrap()
 }
 
@@ -181,7 +175,9 @@ pub fn canon_tracked(
         .values
         .iter()
         .map(|value| {
-            let value_cid = cid_state.value_tracker.track_value(value.result.clone())?;
+            let vm_value = RawValue::from_value(value.result.clone());
+
+            let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
             let tetraplet_cid = cid_state
                 .tetraplet_tracker
                 .track_value(value.tetraplet.clone())?;
