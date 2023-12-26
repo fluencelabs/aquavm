@@ -18,8 +18,8 @@ pub(crate) mod errors;
 pub(crate) mod repr;
 pub mod verification;
 
-pub use self::repr::InterpreterDataFormat;
-pub use self::repr::InterpreterDataRepr;
+pub use self::repr::InterpreterDataEnvFormat;
+pub use self::repr::InterpreterDataEnvRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
@@ -37,11 +37,15 @@ use serde::Serialize;
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct InterpreterData {
+pub struct InterpreterDataEnv {
     /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
+    pub inner_data: InterpreterData,
+}
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InterpreterData {
     /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
 
@@ -70,16 +74,20 @@ pub struct Versions {
     pub interpreter_version: semver::Version,
 }
 
-impl InterpreterData {
+impl InterpreterDataEnv {
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
-        Self {
-            versions,
+        let inner_data = InterpreterData {
             trace: ExecutionTrace::default(),
             last_call_request_id: 0,
             cid_info: <_>::default(),
             signatures: <_>::default(),
+        };
+
+        Self {
+            versions,
+            inner_data,
         }
     }
 
@@ -93,21 +101,25 @@ impl InterpreterData {
     ) -> Self {
         let versions = Versions::new(interpreter_version);
 
-        Self {
-            versions,
+        let inner_data = InterpreterData {
             trace,
             last_call_request_id,
             cid_info,
             signatures,
+        };
+
+        Self {
+            versions,
+            inner_data,
         }
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(
         slice: &[u8],
-    ) -> Result<Self, <InterpreterDataRepr as Representation>::DeserializeError> {
+    ) -> Result<Self, <InterpreterDataEnvRepr as Representation>::DeserializeError> {
         measure!(
-            InterpreterDataRepr.deserialize(slice),
+            InterpreterDataEnvRepr.deserialize(slice),
             tracing::Level::INFO,
             "InterpreterData::try_from_slice"
         )
@@ -116,14 +128,14 @@ impl InterpreterData {
     /// Tries to de only versions part of interpreter data.
     pub fn try_get_versions(
         slice: &[u8],
-    ) -> Result<Versions, <InterpreterDataRepr as Representation>::DeserializeError> {
-        InterpreterDataRepr.deserialize(slice)
+    ) -> Result<Versions, <InterpreterDataEnvRepr as Representation>::DeserializeError> {
+        InterpreterDataEnvRepr.deserialize(slice)
     }
 
     pub fn serialize(
         &self,
-    ) -> Result<Vec<u8>, <InterpreterDataRepr as Representation>::SerializeError> {
-        InterpreterDataRepr.serialize(self)
+    ) -> Result<Vec<u8>, <InterpreterDataEnvRepr as Representation>::SerializeError> {
+        InterpreterDataEnvRepr.serialize(self)
     }
 }
 

@@ -18,7 +18,7 @@ use crate::ToErrorCode;
 use air_interpreter_data::data_version;
 use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
-use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_data::InterpreterDataEnvRepr;
 use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsDeserializeError;
 use air_interpreter_interface::SerializedCallResults;
@@ -28,7 +28,7 @@ use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
-type SerdeDeserializeError = <InterpreterDataRepr as Representation>::DeserializeError;
+type SerdeDeserializeError = <InterpreterDataEnvRepr as Representation>::DeserializeError;
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]

@@ -15,7 +15,7 @@
  */
 
 use air::{min_supported_version, PreparationError};
-use air_interpreter_data::{verification::DataVerifierError, InterpreterData, InterpreterDataRepr};
+use air_interpreter_data::{verification::DataVerifierError, InterpreterDataEnv, InterpreterDataEnvRepr};
 use air_interpreter_sede::{Format, Representation};
 use air_interpreter_signatures::KeyError;
 use air_test_utils::{
@@ -46,7 +46,7 @@ fn test_banned_signature() {
 
     let trace = vec![request_sent_by("init_peer_fake_id")];
 
-    let mut data = serde_json::to_value(InterpreterData::from_execution_result(
+    let mut data = serde_json::to_value(InterpreterDataEnv::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),
@@ -55,9 +55,9 @@ fn test_banned_signature() {
     ))
     .unwrap();
 
-    data["signatures"] = bad_signature_store;
+    data["inner_data"]["signatures"] = bad_signature_store;
 
-    let current_data = InterpreterDataRepr.get_format().to_vec(&data).unwrap();
+    let current_data = InterpreterDataEnvRepr.get_format().to_vec(&data).unwrap();
 
     let mut avm = create_avm(unit_call_service(), "other_peer_id");
     let res = avm

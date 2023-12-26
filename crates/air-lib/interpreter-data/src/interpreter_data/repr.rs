@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::InterpreterData;
+use crate::InterpreterDataEnv;
 use crate::Versions;
 
 use air_interpreter_sede::Format;
@@ -25,49 +25,50 @@ use air_interpreter_sede::ToSerialized;
 use air_interpreter_sede::ToWriter;
 
 #[derive(Default, Debug)]
-pub struct InterpreterDataRepr;
+pub struct InterpreterDataEnvRepr;
 
-pub type InterpreterDataFormat = JsonFormat;
+pub type InterpreterDataEnvFormat = JsonFormat;
 
-impl Representation for InterpreterDataRepr {
-    type SerializeError = <InterpreterDataFormat as Format<InterpreterData>>::SerializationError;
+impl Representation for InterpreterDataEnvRepr {
+    type SerializeError =
+        <InterpreterDataEnvFormat as Format<InterpreterDataEnv>>::SerializationError;
     type DeserializeError =
-        <InterpreterDataFormat as Format<InterpreterData>>::DeserializationError;
-    type WriteError = <InterpreterDataFormat as Format<InterpreterData>>::WriteError;
-    type Format = InterpreterDataFormat;
+        <InterpreterDataEnvFormat as Format<InterpreterDataEnv>>::DeserializationError;
+    type WriteError = <InterpreterDataEnvFormat as Format<InterpreterDataEnv>>::WriteError;
+    type Format = InterpreterDataEnvFormat;
     type SerializedValue = Vec<u8>; // TODO a typed wrapper
 
-    fn get_format(&self) -> InterpreterDataFormat {
-        InterpreterDataFormat::default()
+    fn get_format(&self) -> InterpreterDataEnvFormat {
+        InterpreterDataEnvFormat::default()
     }
 }
 
-impl ToSerialized<InterpreterData> for InterpreterDataRepr {
+impl ToSerialized<InterpreterDataEnv> for InterpreterDataEnvRepr {
     #[inline]
-    fn serialize(&self, value: &InterpreterData) -> Result<Vec<u8>, Self::SerializeError> {
+    fn serialize(&self, value: &InterpreterDataEnv) -> Result<Vec<u8>, Self::SerializeError> {
         Self::get_format(self).to_vec(value)
     }
 }
 
-impl FromSerialized<InterpreterData> for InterpreterDataRepr {
+impl FromSerialized<InterpreterDataEnv> for InterpreterDataEnvRepr {
     #[inline]
-    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterData, Self::DeserializeError> {
+    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterDataEnv, Self::DeserializeError> {
         Self::get_format(self).from_slice(repr)
     }
 }
 
-impl ToWriter<InterpreterData> for InterpreterDataRepr {
+impl ToWriter<InterpreterDataEnv> for InterpreterDataEnvRepr {
     #[inline]
     fn to_writer<W: std::io::Write>(
         &self,
-        value: &InterpreterData,
+        value: &InterpreterDataEnv,
         writer: &mut W,
     ) -> Result<(), Self::WriteError> {
         Self::get_format(self).to_writer(value, writer)
     }
 }
 
-impl FromSerialized<Versions> for InterpreterDataRepr {
+impl FromSerialized<Versions> for InterpreterDataEnvRepr {
     #[inline]
     fn deserialize(&self, repr: &[u8]) -> Result<Versions, Self::DeserializeError> {
         Self::get_format(self).from_slice(repr)

@@ -20,7 +20,8 @@ use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
-use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_data::InterpreterDataEnv;
+use air_interpreter_data::InterpreterDataEnvRepr;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
@@ -44,8 +45,8 @@ pub(crate) struct PreparationDescriptor<'ctx, 'i> {
 }
 
 pub(crate) struct ParsedDataPair {
-    pub(crate) prev_data: InterpreterData,
-    pub(crate) current_data: InterpreterData,
+    pub(crate) prev_data: InterpreterDataEnv,
+    pub(crate) current_data: InterpreterDataEnv,
 }
 
 /// Parse data and check its version.
@@ -106,21 +107,21 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterDataEnv> {
     // treat empty slice as an empty data,
     // it allows abstracting from an internal format for an empty data
     if raw_data.is_empty() {
-        return Ok(InterpreterData::new(super::min_supported_version().clone()));
+        return Ok(InterpreterDataEnv::new(super::min_supported_version().clone()));
     }
 
-    InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
+    InterpreterDataEnv::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
 }
 
 fn to_date_de_error(
     raw_data: Vec<u8>,
-    de_error: <InterpreterDataRepr as Representation>::DeserializeError,
+    de_error: <InterpreterDataEnvRepr as Representation>::DeserializeError,
 ) -> PreparationError {
-    match InterpreterData::try_get_versions(&raw_data) {
+    match InterpreterDataEnv::try_get_versions(&raw_data) {
         Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),
         Err(_) => PreparationError::data_de_failed(raw_data, de_error),
     }
@@ -152,7 +153,7 @@ fn make_exec_ctx(
     Ok(ctx)
 }
 
-pub(crate) fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
+pub(crate) fn check_version_compatibility(data: &InterpreterDataEnv) -> PreparationResult<()> {
     if &data.versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
             actual_version: data.versions.interpreter_version.clone(),

@@ -40,11 +40,11 @@ fn invalid_data_without_versions() {
     let script = r#"(null)"#;
     let invalid_data = InvalidDataStruct { trace: vec![1, 2, 3] };
 
-    let invalid_data = InterpreterDataRepr.get_format().to_vec(&invalid_data).unwrap();
+    let invalid_data = InterpreterDataEnvRepr.get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
-    let expected_serde_error = InterpreterData::try_from_slice(&invalid_data).unwrap_err();
+    let expected_serde_error = InterpreterDataEnv::try_from_slice(&invalid_data).unwrap_err();
     let expected_error = PreparationError::DataDeFailed {
         data: invalid_data,
         error: expected_serde_error,
@@ -73,11 +73,11 @@ fn invalid_data_with_versions() {
         trace: vec![1, 2, 3],
         versions: versions.clone(),
     };
-    let invalid_data = InterpreterDataRepr.get_format().to_vec(&invalid_data).unwrap();
+    let invalid_data = InterpreterDataEnvRepr.get_format().to_vec(&invalid_data).unwrap();
 
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
-    let expected_serde_error = InterpreterData::try_from_slice(&invalid_data).unwrap_err();
+    let expected_serde_error = InterpreterDataEnv::try_from_slice(&invalid_data).unwrap_err();
     let expected_error = PreparationError::DataDeFailedWithVersions {
         data: invalid_data,
         error: expected_serde_error,
@@ -92,7 +92,7 @@ fn invalid_callresults() {
 
     let air = r#"(null)"#.to_string();
     let client_peer_id = "some_peer_id".to_string();
-    let prev_data = InterpreterData::new(semver::Version::new(1, 1, 1));
+    let prev_data = InterpreterDataEnv::new(semver::Version::new(1, 1, 1));
     let prev_data: Vec<u8> = prev_data.serialize().unwrap();
     let data = Vec::<u8>::new();
     let vec = Vec::<u8>::new();

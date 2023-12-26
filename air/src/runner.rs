@@ -69,7 +69,10 @@ fn execute_air_impl(
     // TODO currently we use particle ID, but it should be changed to signature,
     // as partical ID can be equally replayed
     let salt = params.particle_id.clone();
-    let signature_store = farewell_if_fail!(verify(&prev_data, &current_data, &salt), raw_prev_data);
+    let signature_store = farewell_if_fail!(
+        verify(&prev_data.inner_data, &current_data.inner_data, &salt),
+        raw_prev_data
+    );
 
     let PreparationDescriptor {
         mut exec_ctx,
@@ -77,7 +80,14 @@ fn execute_air_impl(
         air,
         keypair,
     } = farewell_if_fail!(
-        prepare(prev_data, current_data, &air, &call_results, params, signature_store,),
+        prepare(
+            prev_data.inner_data,
+            current_data.inner_data,
+            &air,
+            &call_results,
+            params,
+            signature_store,
+        ),
         raw_prev_data
     );
 

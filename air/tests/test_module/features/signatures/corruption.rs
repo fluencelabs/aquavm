@@ -77,7 +77,7 @@ fn test_attack_replace_value() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -154,7 +154,7 @@ fn test_attack_replace_tetraplet() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -237,7 +237,7 @@ fn test_attack_replace_call_result() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -327,7 +327,7 @@ fn test_attack_replace_canon_value() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -426,7 +426,7 @@ fn test_attack_replace_canon_result_values() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -529,7 +529,7 @@ fn test_attack_replace_canon_result_tetraplet() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnv::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
