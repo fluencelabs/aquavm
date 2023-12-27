@@ -16,7 +16,7 @@
 
 use crate::ToErrorCode;
 
-use air_interpreter_interface::CallResults;
+use air_interpreter_interface::CallServiceResult;
 use fluence_keypair::error::SigningError;
 use strum::EnumCount;
 use strum::IntoEnumIterator;
@@ -24,6 +24,8 @@ use strum_macros::EnumCount as EnumCountMacro;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
+
+use std::collections::HashMap;
 
 /// Errors happened during the interpreter farewell step.
 #[derive(Debug, EnumDiscriminants, EnumCountMacro, ThisError)]
@@ -33,7 +35,7 @@ pub enum FarewellError {
     #[error(
         "after finishing execution of supplied AIR, there are some unprocessed call results: `{0:?}`, probably a wrong call_id used"
     )]
-    UnprocessedCallResult(CallResults),
+    UnprocessedCallResult(HashMap<u32, CallServiceResult>),
 }
 
 impl ToErrorCode for FarewellError {

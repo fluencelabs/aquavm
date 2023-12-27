@@ -28,7 +28,10 @@ use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
 
+use std::num::ParseIntError;
+
 type SerdeDeserializeError = <InterpreterDataRepr as Representation>::DeserializeError;
+
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]
@@ -98,6 +101,9 @@ pub enum PreparationError {
     /// Failed to check peers' signatures.
     #[error(transparent)]
     DataSignatureCheckError(#[from] DataVerifierError),
+
+    #[error("invalid call result ID: {0}")]
+    InvalidCallResultId(ParseIntError),
 }
 
 impl ToErrorCode for PreparationError {

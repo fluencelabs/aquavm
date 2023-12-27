@@ -21,7 +21,9 @@ use crate::execution_step::TraceHandler;
 
 use air_interpreter_data::InterpreterData;
 use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_interface::CallResults;
 use air_interpreter_interface::CallResultsRepr;
+use air_interpreter_interface::CallServiceResult;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
 use air_interpreter_sede::FromSerialized;
@@ -32,6 +34,9 @@ use air_interpreter_signatures::SignatureStore;
 use air_parser::ast::Instruction;
 use air_utils::measure;
 use fluence_keypair::KeyFormat;
+
+use std::collections::HashMap;
+use std::num::ParseIntError;
 
 type PreparationResult<T> = Result<T, PreparationError>;
 
@@ -134,13 +139,15 @@ fn make_exec_ctx(
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    let call_results = measure!(
+    let call_results_js = measure!(
         CallResultsRepr
             .deserialize(call_results)
             .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?,
         tracing::Level::INFO,
         "CallResultsRepr.deserialize",
     );
+
+    let call_results = unjs_call_results(call_results_js).map_err(PreparationError::InvalidCallResultId)?;
 
     let ctx = ExecutionCtx::new(
         prev_ingredients,
@@ -150,6 +157,13 @@ fn make_exec_ctx(
         run_parameters,
     );
     Ok(ctx)
+}
+
+fn unjs_call_results(call_results: CallResults) -> Result<HashMap<u32, CallServiceResult>, ParseIntError> {
+    call_results
+        .into_iter()
+        .map(|(id, res)| id.parse().map(|id| (id, res)))
+        .collect()
 }
 
 pub(crate) fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
