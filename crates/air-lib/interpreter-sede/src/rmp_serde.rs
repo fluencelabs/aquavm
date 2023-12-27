@@ -49,7 +49,9 @@ where
         value: &Value,
         write: &mut W,
     ) -> Result<(), Self::WriteError> {
-        value.serialize(&mut rmp_serde::Serializer::new(write))
+        // named representation (i.e. structs are serialized as maps, not tuples) is important
+        // for JS interop and data compatibility detection
+        rmp_serde::encode::write_named(write, value)
     }
 }
 
