@@ -32,7 +32,6 @@ use std::num::ParseIntError;
 
 type SerdeDeserializeError = <InterpreterDataRepr as Representation>::DeserializeError;
 
-
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]
 #[strum_discriminants(derive(EnumIter))]
