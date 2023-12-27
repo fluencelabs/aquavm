@@ -57,9 +57,10 @@ struct AfterNextCheckMachine<'name> {
     /// stack for the machine.
     stack: Vec<(CheckInstructionKind<'name>, Span)>,
 
-    /// lalrpop effectively parses from right to left thus `next`
-    /// happens before fold. It is impossible to tell whether `next`
-    /// belongs to a scalar fold or not.
+    /// lalrpop parses AIR so that `next`
+    /// is met before `fold``. At the moment when `next` is met
+    /// it is impossible to tell whether it belongs to a stream/map fold or not.
+    /// This field stores iterator name to span mapping to be used when `fold` is met.
     potentially_malformed_spans: HashMap<&'name str, Span>,
 
     /// This vector contains all spans where an instruction after next was met.
