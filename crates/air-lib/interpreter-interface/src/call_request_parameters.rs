@@ -37,9 +37,9 @@ derive_serialized_type!(SerializedCallArguments);
 derive_serialized_type!(SerializedTetraplets);
 derive_serialized_type!(SerializedCallRequests);
 
-pub type CallArgumentsFormat = MsgPackMultiformat;
+pub type CallArgumentsFormat = MsgPackFormat;
 pub type TetrapletsFormat = MsgPackFormat;
-pub type CallRequestsFormat = MsgPackFormat;
+pub type CallRequestsFormat = MsgPackMultiformat;
 
 define_simple_representation! {
     CallArgumentsRepr,
