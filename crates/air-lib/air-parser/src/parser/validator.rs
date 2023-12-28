@@ -133,8 +133,8 @@ impl<'name> AfterNextCheckMachine<'name> {
 
         let child = self.stack.pop();
         match child {
-            Some((PivotalNext(name), ..)) => {
-                self.stack.push((PivotalNext(name), span));
+            Some((pattern_kind @ PivotalNext(_), ..)) => {
+                self.stack.push((pattern_kind, span));
             }
             Some(_) => {
                 self.stack.push((Replacing, span));
@@ -156,9 +156,10 @@ impl<'name> AfterNextCheckMachine<'name> {
                 // to tell which branch should poped up.
                 self.disable();
             }
-            Some(((PivotalNext(iterator), ..), ..)) | Some((_, (PivotalNext(iterator), _))) => {
+            Some(((pattern_kind @ PivotalNext(_), ..), ..))
+            | Some((_, (pattern_kind @ PivotalNext(_), _))) => {
                 // potential failure but need to check when fold pops up.
-                self.stack.push((PivotalNext(iterator), span));
+                self.stack.push((pattern_kind, span));
             }
             Some(_) => {
                 self.stack.push((Xoring, span));
@@ -177,10 +178,11 @@ impl<'name> AfterNextCheckMachine<'name> {
         let left_branch = self.stack.pop();
         let left_right = left_branch.zip(right_branch);
         match left_right {
-            Some(((PivotalNext(left_iterable), ..), (PivotalNext(right_iterable), ..)))
-                if left_iterable == right_iterable =>
-            {
-                self.stack.push((PivotalNext(left_iterable), span));
+            Some((
+                (pattern_kind @ PivotalNext(left_iterable), ..),
+                (PivotalNext(right_iterable), ..),
+            )) if left_iterable == right_iterable => {
+                self.stack.push((pattern_kind, span));
             }
             Some(((PivotalNext(iterator), _), ..)) => {
                 // potential failure but need to check when fold pops up.
@@ -189,8 +191,8 @@ impl<'name> AfterNextCheckMachine<'name> {
                     .entry(iterator)
                     .or_insert(span);
             }
-            Some((_, (PivotalNext(iterable), ..))) => {
-                self.stack.push((PivotalNext(iterable), span));
+            Some((_, (pattern_kind @ PivotalNext(_), ..))) => {
+                self.stack.push((pattern_kind, span));
             }
             Some(_) => {
                 self.stack.push((Merging, span));
@@ -217,10 +219,9 @@ impl<'name> AfterNextCheckMachine<'name> {
     ) {
         let child = self.stack.pop();
         match child {
-            Some((CheckInstructionKind::PivotalNext(checking_iterable), ..)) => {
+            Some((pattern_kind @ CheckInstructionKind::PivotalNext(_), ..)) => {
                 self.after_next_check(iterator_name);
-                self.stack
-                    .push((CheckInstructionKind::PivotalNext(checking_iterable), span));
+                self.stack.push((pattern_kind, span));
             }
             Some(_) => {
                 self.after_next_check(iterator_name);
