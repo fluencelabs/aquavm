@@ -217,9 +217,18 @@ impl<'name> AfterNextCheckMachine<'name> {
         span: Span,
         instr_kind: &CheckInstructionKind<'name>,
     ) {
+        use CheckInstructionKind::*;
+
         let child = self.stack.pop();
         match child {
-            Some((pattern_kind @ CheckInstructionKind::PivotalNext(_), ..)) => {
+            Some((PivotalNext(pivotal_next_iterator_name), ..))
+                if pivotal_next_iterator_name == iterator_name =>
+            {
+                self.after_next_check(iterator_name);
+                self.potentially_malformed_spans.remove(iterator_name);
+                self.stack.push((Simple, span));
+            }
+            Some((pattern_kind @ PivotalNext(_), ..)) => {
                 self.after_next_check(iterator_name);
                 self.stack.push((pattern_kind, span));
             }

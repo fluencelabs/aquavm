@@ -1409,3 +1409,41 @@ fn fold_on_stream_with_xor_and_nested_fold_neg_2() {
         ));
     })
 }
+
+#[test]
+fn fold_on_stream_with_multiple_folds() {
+    let source_code = r#"
+        (new $inner
+            (seq
+                (par
+                    (fold $inner ns
+                        (seq
+                            (ap ns $result)
+                            (next ns)
+                        )
+                    )
+                    (null)
+                )
+                (par
+                    (fold $inner ns
+                        (next ns)
+                    )
+                    (null)
+                )
+            )
+        )
+    "#;
+
+    let lexer = crate::AIRLexer::new(source_code);
+
+    let parser = crate::AIRParser::new();
+    let mut errors = Vec::new();
+    let mut validator = crate::parser::VariableValidator::new();
+    parser
+        .parse(source_code, &mut errors, &mut validator, lexer)
+        .expect("parser shouldn't fail");
+
+    let errors = validator.finalize();
+    dbg!(errors.clone());
+    assert_eq!(errors.len(), 0);
+}
