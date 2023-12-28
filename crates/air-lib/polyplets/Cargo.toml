@@ -15,6 +15,6 @@ name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-marine-call-parameters = { version = "0.10.2", default-features = false }
+marine-call-parameters = { version = "0.10.3", default-features = false }
 
 serde = { version = "1.0.190", features = ["rc", "derive"] }
