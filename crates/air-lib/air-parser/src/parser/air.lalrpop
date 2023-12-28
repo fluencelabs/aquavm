@@ -72,10 +72,30 @@ Instr: Instruction<'input> = {
         Instruction::ApMap(apply.into())
     },
 
-    "(" seq <l:Instr> <r:Instr> ")" => Instruction::Seq(Seq::new(l, r).into()),
-    "(" par <l:Instr> <r:Instr> ")" => Instruction::Par(Par::new(l, r).into()),
-    "(" never ")" => Instruction::Never(Never),
-    "(" null ")" => Instruction::Null(Null),
+    <left: @L> "(" seq <l:Instr> <r:Instr> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_merging_instr(span);
+
+        Instruction::Seq(Seq::new(l, r).into())
+    },
+    <left: @L> "(" par <l:Instr> <r:Instr> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_merging_instr(span);
+
+        Instruction::Par(Par::new(l, r).into())
+    },
+    <left: @L> "(" never ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_simple_instr(span);
+
+        Instruction::Never(Never)
+    },
+    <left: @L> "(" null ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_simple_instr(span);
+
+        Instruction::Null(Null)
+    },
 
     <left: @L> "(" new <argument: NewArgument> <instruction:Instr> ")" <right: @R> => {
         let span = Span::new(left, right);
@@ -132,7 +152,12 @@ Instr: Instruction<'input> = {
         Instruction::Next(next.into())
     },
 
-    "(" xor <l:Instr> <r:Instr> ")" => Instruction::Xor(Xor(l, r).into()),
+    <left: @L> "(" xor <l:Instr> <r:Instr> ")" <right: @R> => {
+        let span = Span::new(left, right);
+        validator.met_xoring_instr(span);
+
+        Instruction::Xor(Xor(l, r).into())
+    },
 
     <left: @L> "(" match_ <l:Value> <r:Value> <i:Instr> ")" <right: @R> => {
         let match_ = Match::new(l, r, i);

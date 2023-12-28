@@ -190,13 +190,13 @@ fn stream_merge() {
     let mut vm2 = create_avm(neighborhood_call_service, "B");
 
     let script = r#"
-        (seq 
+        (seq
             (call "A" ("add_provider" "") [] $void)
-            (seq 
+            (seq
                 (call "A" ("add_provider" "") [] $void)
-                (seq 
+                (seq
                     (call "A" ("get_providers" "") [] $providers)
-                    (seq 
+                    (seq
                         (call "A" ("get_providers" "") [] $providers)
                         (seq
                             (seq
