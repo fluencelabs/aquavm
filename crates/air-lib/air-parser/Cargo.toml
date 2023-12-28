@@ -36,7 +36,7 @@ thiserror = "1.0.50"
 tracing = "0.1.40"
 
 [dev-dependencies]
-criterion = "0.4.0"
+criterion = "0.5.1"
 non-empty-vec = { version = "0.2.3" }
 
 [[bench]]
