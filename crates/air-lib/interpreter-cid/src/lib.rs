@@ -50,7 +50,18 @@ const JSON_CODEC: u64 = 0x0200;
 
 #[derive(Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct CID<T: ?Sized>(Rc<CidRef>, #[serde(skip)] PhantomData<*const T>);
+#[cfg_attr(
+    feature = "rkyv",
+    derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)
+)]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
+#[cfg_attr(feature = "rkyv", omit_bounds)] // TODO look close, may be a misuse
+pub struct CID<T: ?Sized>(
+    Rc<CidRef>,
+    #[serde(skip)]
+    #[cfg_attr(feature = "rkyv", with(::rkyv::with::Skip))]
+    PhantomData<*const T>,
+);
 
 impl<T: ?Sized> CID<T> {
     pub fn new(cid: impl Into<Rc<CidRef>>) -> Self {

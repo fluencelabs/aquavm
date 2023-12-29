@@ -1,6 +1,5 @@
 use air::interpreter_version;
 use air_interpreter_data::ExecutedState;
-use air_interpreter_sede::Representation;
 use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
@@ -111,8 +110,6 @@ pub fn cid_benchmarking_data(
     peer_id: String,
     particle_id: &str,
 ) -> Vec<u8> {
-    use air_interpreter_sede::Format;
-
     let mut curr_data: PreCidInterpeterData = read_data(curr_data_filename);
     let calls: TraceCalls = read_data("src/cid_benchmarking/simple-calls-info.json");
     let mut calls = calls.into_iter();
@@ -162,7 +159,8 @@ pub fn cid_benchmarking_data(
         .unwrap()
         .insert("signatures".to_owned(), json!(ss));
 
-    let inner_data = InterpreterDataRepr.get_format().to_vec(&curr_data).unwrap();
+    let to_value = serde_json::to_value(curr_data).unwrap();
+    let inner_data = serde_json::from_value::<InterpreterData>(to_value).unwrap().serialize().unwrap();
 
     let data_env = InterpreterDataEnv {
         versions: Versions::new(interpreter_version().clone()),

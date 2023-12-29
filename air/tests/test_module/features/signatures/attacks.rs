@@ -452,7 +452,7 @@ fn test_attack_replay() {
     );
     let cids: Vec<Rc<CidRef>> = vec!["bagaaihra7fcndppbd44kltfjcy6ihc4fmxepwt256vswc7x2qqgznazx3j3a".into()];
     let expected = PreparationError::DataSignatureCheckError(verification::DataVerifierError::SignatureMismatch {
-        error: nested_error.into(),
+        error: Box::new(nested_error.into()),
         cids,
         peer_id: alice_peer_id,
     });

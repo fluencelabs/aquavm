@@ -18,17 +18,14 @@ use crate::ToErrorCode;
 use air_interpreter_data::data_version;
 use air_interpreter_data::verification::DataVerifierError;
 use air_interpreter_data::CidStoreVerificationError;
-use air_interpreter_data::InterpreterDataEnvRepr;
+use air_interpreter_data::DataDeserializationError;
 use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsDeserializeError;
 use air_interpreter_interface::SerializedCallResults;
-use air_interpreter_sede::Representation;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
 use thiserror::Error as ThisError;
-
-type SerdeDeserializeError = <InterpreterDataEnvRepr as Representation>::DeserializeError;
 
 /// Errors happened during the interpreter preparation step.
 #[derive(Debug, EnumDiscriminants, ThisError)]
@@ -49,7 +46,7 @@ pub enum PreparationError {
     )]
     DataDeFailed {
         data: Vec<u8>,
-        error: SerdeDeserializeError,
+        error: DataDeserializationError,
     },
 
     /// Errors occurred on executed trace deserialization
@@ -66,7 +63,7 @@ pub enum PreparationError {
     )]
     DataDeFailedWithVersions {
         data: Vec<u8>,
-        error: SerdeDeserializeError,
+        error: DataDeserializationError,
         versions: Versions,
     },
 
@@ -108,11 +105,11 @@ impl ToErrorCode for PreparationError {
 }
 
 impl PreparationError {
-    pub fn data_de_failed(data: Vec<u8>, error: SerdeDeserializeError) -> Self {
+    pub fn data_de_failed(data: Vec<u8>, error: DataDeserializationError) -> Self {
         Self::DataDeFailed { data, error }
     }
 
-    pub fn data_de_failed_with_versions(data: Vec<u8>, error: SerdeDeserializeError, versions: Versions) -> Self {
+    pub fn data_de_failed_with_versions(data: Vec<u8>, error: DataDeserializationError, versions: Versions) -> Self {
         Self::DataDeFailedWithVersions { data, error, versions }
     }
 

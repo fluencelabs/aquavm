@@ -24,10 +24,13 @@ use std::rc::Rc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct RawValue {
     raw: Box<str>,
 
     #[serde(skip)]
+    #[with(::rkyv::with::Skip)]
     parsed: RefCell<Option<Rc<JValue>>>,
 }
 

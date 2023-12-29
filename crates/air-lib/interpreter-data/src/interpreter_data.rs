@@ -20,8 +20,6 @@ pub mod verification;
 
 pub use self::repr::InterpreterDataEnvFormat;
 pub use self::repr::InterpreterDataEnvRepr;
-pub use self::repr::InterpreterDataFormat;
-pub use self::repr::InterpreterDataRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
@@ -34,6 +32,14 @@ use air_utils::measure;
 use serde::Deserialize;
 use serde::Serialize;
 
+#[derive(Debug, thiserror::Error)]
+pub enum DataDeserializationError {
+    #[error("failed to deserialize envelope: {0}")]
+    Envelope(<InterpreterDataEnvRepr as Representation>::DeserializeError),
+    #[error("failed to deserialize data: {0}")]
+    Data(crate::rkyv::RkyvDeserializeError),
+}
+
 /// An envelope for the AIR interpreter data that makes AIR data version info accessible in a stable way.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InterpreterDataEnv {
@@ -41,14 +47,24 @@ pub struct InterpreterDataEnv {
     #[serde(flatten)]
     pub versions: Versions,
     #[serde(with = "serde_bytes")]
-    pub inner_data: <InterpreterDataRepr as Representation>::SerializedValue,
+    pub inner_data: Vec<u8>,
 }
 
 /// The AIR interpreter could be considered as a function
 /// f(prev_data: InterpreterData, current_data: InterpreterData, ... ) -> (result_data: InterpreterData, ...).
 /// This function receives prev and current data and produces a result data. All these data
 /// have the following format.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Default,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub struct InterpreterData {
     /// Trace of AIR execution, which contains executed call, par, fold, and ap states.
     pub trace: ExecutionTrace,
@@ -68,6 +84,19 @@ pub struct InterpreterData {
     pub signatures: SignatureStore,
 }
 
+impl InterpreterData {
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, crate::rkyv::RkyvDeserializeError> {
+        let mut aligned_data = rkyv::AlignedVec::with_capacity(slice.len());
+        aligned_data.extend_from_slice(slice);
+
+        crate::rkyv::from_aligned_slice(&aligned_data)
+    }
+
+    pub fn serialize(&self) -> Result<Vec<u8>, crate::rkyv::RkyvSerializeError> {
+        crate::rkyv::to_vec(self)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Versions {
     /// Version of this data format.
@@ -82,9 +111,8 @@ impl InterpreterDataEnv {
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
-        let inner_data = InterpreterData::default();
-        let inner_data = InterpreterDataRepr
-            .serialize(&inner_data)
+        let inner_data = InterpreterData::default()
+            .serialize()
             .expect("shouldn't fail on empty data");
 
         Self {
@@ -110,10 +138,9 @@ impl InterpreterDataEnv {
             signatures,
         };
 
-        // TODO return the error
-        let inner_data = InterpreterDataRepr
-            .serialize(&inner_data)
-            .expect("shouldn't fail");
+        let inner_data = inner_data
+            .serialize()
+            .expect("shouldn't fail on valid data");
 
         Self {
             versions,
@@ -124,28 +151,26 @@ impl InterpreterDataEnv {
     /// Tries to de InterpreterData from slice according to the data version.
     pub fn try_from_slice(
         slice: &[u8],
-    ) -> Result<
-        (Versions, InterpreterData),
-        <InterpreterDataEnvRepr as Representation>::DeserializeError,
-    > {
+    ) -> Result<(Versions, InterpreterData), DataDeserializationError> {
         let env: InterpreterDataEnv = measure!(
-            InterpreterDataEnvRepr.deserialize(slice),
+            FromSerialized::deserialize(&InterpreterDataEnvRepr, slice),
             tracing::Level::INFO,
             "InterpreterData::try_from_slice"
-        )?;
+        )
+        .map_err(DataDeserializationError::Envelope)?;
 
-        // TODO return error
-        let inner_data = InterpreterDataRepr
-            .deserialize(&env.inner_data)
-            .expect("shouldn't fail");
+        let mut aligned_data = rkyv::AlignedVec::with_capacity(env.inner_data.len());
+        aligned_data.extend_from_slice(&env.inner_data);
+
+        let inner_data = InterpreterData::try_from_slice(&env.inner_data)
+            .map_err(DataDeserializationError::Data)?;
         Ok((env.versions, inner_data))
     }
 
     /// Tries to de only versions part of interpreter data.
-    pub fn try_get_versions(
-        slice: &[u8],
-    ) -> Result<Versions, <InterpreterDataEnvRepr as Representation>::DeserializeError> {
-        InterpreterDataEnvRepr.deserialize(slice)
+    pub fn try_get_versions(slice: &[u8]) -> Result<Versions, DataDeserializationError> {
+        FromSerialized::deserialize(&InterpreterDataEnvRepr, slice)
+            .map_err(DataDeserializationError::Envelope)
     }
 
     pub fn serialize(

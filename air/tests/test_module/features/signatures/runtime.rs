@@ -15,8 +15,6 @@
  */
 
 use air::UncatchableError;
-use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::ToSerialized;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 
@@ -59,12 +57,12 @@ fn test_runtime_executed_call_argument_hash() {
         .unwrap();
     let mut mallory_env = env_from_result(&mallory_res);
 
-    let mut mallory_data = InterpreterDataRepr.deserialize(&mallory_env.inner_data).unwrap();
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
     let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = InterpreterDataRepr.serialize(&mallory_data).unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -115,12 +113,12 @@ fn test_runtime_executed_call_tetraplet() {
         .unwrap();
     let mut mallory_env = env_from_result(&mallory_res);
 
-    let mut mallory_data = InterpreterDataRepr.deserialize(&mallory_env.inner_data).unwrap();
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
     let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = InterpreterDataRepr.serialize(&mallory_data).unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -189,12 +187,12 @@ fn test_runtime_executed_failed_argument_hash() {
         .unwrap();
     let mut mallory_env = env_from_result(&mallory_res);
 
-    let mut mallory_data = InterpreterDataRepr.deserialize(&mallory_env.inner_data).unwrap();
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
     let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = InterpreterDataRepr.serialize(&mallory_data).unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -249,12 +247,12 @@ fn test_runtime_failed_call_tetraplet() {
         .unwrap();
     let mut mallory_env = env_from_result(&mallory_res);
 
-    let mut mallory_data = InterpreterDataRepr.deserialize(&mallory_env.inner_data).unwrap();
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
     let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = InterpreterDataRepr.serialize(&mallory_data).unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -321,12 +319,12 @@ fn test_runtime_canon_tetraplet() {
         .unwrap();
     let mut mallory_env = env_from_result(&mallory_res);
 
-    let mut mallory_data = InterpreterDataRepr.deserialize(&mallory_env.inner_data).unwrap();
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
     let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(2, 3);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = InterpreterDataRepr.serialize(&mallory_data).unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap();
 
     let mallory_data = mallory_env.serialize().unwrap();
 

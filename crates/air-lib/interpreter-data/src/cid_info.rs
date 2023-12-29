@@ -26,7 +26,19 @@ use polyplets::SecurityTetraplet;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Default,
+    Clone,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub struct CidInfo {
     /// Map CID to value.
     pub value_store: CidStore<RawValue>,
