@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2](https://github.com/fluencelabs/aquavm/compare/polyplets-v0.5.1...polyplets-v0.5.2) (2024-01-03)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-call-parameters to 0.10.2 ([#732](https://github.com/fluencelabs/aquavm/issues/732)) ([763bbcb](https://github.com/fluencelabs/aquavm/commit/763bbcb663ba445ed19431929823e7bfcc6d910c))
+* **deps:** update rust crate marine-call-parameters to 0.10.3 ([#781](https://github.com/fluencelabs/aquavm/issues/781)) ([518bb95](https://github.com/fluencelabs/aquavm/commit/518bb95a178ab1508d27b1fa71bd205ef05dea8e))
+
 ## [0.5.1](https://github.com/fluencelabs/aquavm/compare/polyplets-v0.5.0...polyplets-v0.5.1) (2023-09-21)
 
 
