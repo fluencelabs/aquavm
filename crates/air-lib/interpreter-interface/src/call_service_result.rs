@@ -25,7 +25,7 @@ use std::collections::HashMap;
 
 /// This is a map from String to service result for compatiblity with JavaScript.
 /// Binary format implementations like `rmp-serde` do not bother converting keys from strings, unlike `serde_json`.
-/// So, we do it manually for all formats
+/// So, we do it manually for all formats.
 pub type CallResults = HashMap<String, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
