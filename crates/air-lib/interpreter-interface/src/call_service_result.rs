@@ -23,7 +23,7 @@ use serde::Serialize;
 use serde_json::Value as JValue;
 use std::collections::HashMap;
 
-/// This is a map from String to service result for compatiblity with JavaScript.
+/// This is a map from a String to a service result for compatibility with JavaScript.
 /// Binary format implementations like `rmp-serde` do not bother converting keys from strings, unlike `serde_json`.
 /// So, we do it manually for all formats.
 pub type CallResults = HashMap<String, CallServiceResult>;
