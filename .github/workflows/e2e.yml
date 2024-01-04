@@ -126,7 +126,6 @@ jobs:
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      ref: "tmp-monoid-kludge"
 
   js-client:
     needs:
