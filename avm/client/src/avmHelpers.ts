@@ -15,12 +15,12 @@
  */
 
 import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
-import { MulticodecRepr, MsgPackRepr } from './formats'
+import { MulticodecRepr, MsgPackRepr, JsonRepr } from './formats'
 
 // Have to match the air-interpreter-interface.
 const callRequestsRepr = new MulticodecRepr(new MsgPackRepr());
 // Have to match the air-interpreter-interface.
-const argumentRepr = new MsgPackRepr();
+const argumentRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
 const tetrapletRepr = new MsgPackRepr();
 // Have to match the air-interpreter-interface.
