@@ -15,16 +15,16 @@
  */
 
 import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
-import { MulticodecRepr, MsgPackRepr, JsonRepr } from './formats'
+import { JsonRepr } from './formats'
 
 // Have to match the air-interpreter-interface.
-const callRequestsRepr = new MulticodecRepr(new MsgPackRepr());
+const callRequestsRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
 const argumentRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
-const tetrapletRepr = new MsgPackRepr();
+const tetrapletRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
-const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
+const callResultsRepr = new JsonRepr();
 
 /**
  * Encodes arguments into JSON array suitable for marine-js
