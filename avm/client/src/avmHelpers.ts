@@ -24,7 +24,7 @@ const argumentRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
 const tetrapletRepr = new JsonRepr();
 // Have to match the air-interpreter-interface.
-const callResultsRepr = new JsonRepr();
+const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
 
 /**
  * Encodes arguments into JSON array suitable for marine-js
