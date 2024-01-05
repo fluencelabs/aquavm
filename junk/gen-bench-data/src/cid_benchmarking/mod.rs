@@ -160,9 +160,12 @@ pub fn cid_benchmarking_data(
         .insert("signatures".to_owned(), json!(ss));
 
     let to_value = serde_json::to_value(curr_data).unwrap();
-    let inner_data = serde_json::from_value::<InterpreterData>(to_value).unwrap().serialize().unwrap();
+    let inner_data = serde_json::from_value::<InterpreterData>(to_value)
+        .unwrap()
+        .serialize()
+        .unwrap();
 
-    let data_env = InterpreterDataEnv {
+    let data_env = InterpreterDataEnvelope {
         versions: Versions::new(interpreter_version().clone()),
         inner_data,
     };
