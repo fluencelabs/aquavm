@@ -35,7 +35,7 @@ where
 
     #[inline]
     fn to_vec(&self, val: &Value) -> Result<Vec<u8>, Self::SerializationError> {
-        rmp_serde::to_vec(val)
+        rmp_serde::to_vec_named(val)
     }
 
     #[inline]
