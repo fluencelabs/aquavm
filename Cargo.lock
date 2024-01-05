@@ -498,7 +498,7 @@ dependencies = [
  "air-lambda-parser",
  "codespan",
  "codespan-reporting",
- "criterion 0.4.0",
+ "criterion 0.5.1",
  "itertools 0.10.5",
  "lalrpop",
  "lalrpop-util",
@@ -1423,20 +1423,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a0610544180c38b88101fecf2dd634b174a62eef6946f84dfc6a7127512b381c"
 dependencies = [
  "bitflags 1.3.2",
- "textwrap 0.11.0",
+ "textwrap",
  "unicode-width",
-]
-
-[[package]]
-name = "clap"
-version = "3.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ea181bf566f71cb9a5d17a59e1871af638180a18fb0035c92ae62b705207123"
-dependencies = [
- "bitflags 1.3.2",
- "clap_lex 0.2.4",
- "indexmap 1.9.3",
- "textwrap 0.16.0",
 ]
 
 [[package]]
@@ -1457,7 +1445,7 @@ checksum = "a216b506622bb1d316cd51328dce24e07bdff4a6128a47c7e7fad11878d5adbb"
 dependencies = [
  "anstream",
  "anstyle",
- "clap_lex 0.6.0",
+ "clap_lex",
  "strsim",
 ]
 
@@ -1471,15 +1459,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.41",
-]
-
-[[package]]
-name = "clap_lex"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2850f2f5a82cbf437dd5af4d49848fbdfc27c157c3d010345776f952765261c5"
-dependencies = [
- "os_str_bytes",
 ]
 
 [[package]]
@@ -1735,19 +1714,19 @@ dependencies = [
 
 [[package]]
 name = "criterion"
-version = "0.4.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7c76e09c1aae2bc52b3d2f29e13c6572553b30c4aa1b8a49fd70de6412654cb"
+checksum = "f2b12d017a929603d80db1831cd3a24082f8137ce19c69e6447f54f5fc8d692f"
 dependencies = [
  "anes",
- "atty",
  "cast",
  "ciborium",
- "clap 3.2.25",
+ "clap 4.4.11",
  "criterion-plot 0.5.0",
+ "is-terminal",
  "itertools 0.10.5",
- "lazy_static",
  "num-traits",
+ "once_cell",
  "oorandom",
  "plotters",
  "rayon",
@@ -3468,9 +3447,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-call-parameters"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60dfc6d5a00b2d5aadbd60a13bdd6c6d6a5f46b31bf8db9f80ad295032f3bda3"
+checksum = "ef9a7c6ed5fa9052474c1cd76d3b3e67dbc4c455c76263c2c043214e12cce6bd"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -3554,11 +3533,11 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f4bef66ff0a930272053bc622e60ae07a444b6bdd6b2406ee2e85ee93fa34a8"
+checksum = "acdaa50f8239afa104ef8a99d4219288f68169e29c913485bbd094a35fe79113"
 dependencies = [
- "marine-macro-impl 0.10.2",
+ "marine-macro-impl 0.10.3",
  "marine-rs-sdk-main",
 ]
 
@@ -3577,9 +3556,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51866ba9045c01e96a716343c30b2d9302d1451c969ceba8f8e3cb52b78053c8"
+checksum = "460ef42c1bf6dbb88976a00514f8e1b97a7ccb60e3e6009cbb563b0d163166c7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3634,9 +3613,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d189b674dfcebfbb5668ead5335c3ba52fd4f8e8947b6f2d48869765ab403bd9"
+checksum = "034cab8adf708e87db08f093e0c7b8ea49359cc875ed2a778c1bf245b5d9d9f8"
 dependencies = [
  "marine-call-parameters",
  "marine-macro",
@@ -3647,9 +3626,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3b4d597243fa88bf33fe91e080ab155cc1679ac4970e1a20dce6b58df084673"
+checksum = "031eeea016dab58c1ccb0c65b798cb5e47d214b05115c8c06198717d18275756"
 dependencies = [
  "log",
  "serde",
@@ -3686,9 +3665,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1465b4dcc7d85940cf33f8d64fd0bb2f98093cc3a5384e2d224bf6e50069adb"
+checksum = "7f812a03cb13b79ab75e38053a77ecc4b4738a1b485b650d971dec3dbbcb2561"
 dependencies = [
  "chrono",
  "quote",
@@ -4698,12 +4677,6 @@ checksum = "985cc35d832d412224b2cffe2f9194b1b89b6aa5d0bef76d080dce09d90e62bd"
 dependencies = [
  "opentelemetry",
 ]
-
-[[package]]
-name = "os_str_bytes"
-version = "6.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2355d85b9a3786f481747ced0e0ff2ba35213a1f9bd406ed906554d7af805a1"
 
 [[package]]
 name = "output_vt100"
@@ -6459,12 +6432,6 @@ checksum = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 dependencies = [
  "unicode-width",
 ]
-
-[[package]]
-name = "textwrap"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "thiserror"
