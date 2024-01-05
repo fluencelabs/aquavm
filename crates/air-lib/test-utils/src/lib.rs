@@ -83,13 +83,13 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    let (_version, data) = InterpreterDataEnv::try_from_slice(&result.data)
+    let (_version, data) = InterpreterDataEnvelope::try_from_slice(&result.data)
         .expect("default serializer shouldn't fail");
     data
 }
 
-pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnv {
-    InterpreterDataEnvRepr
+pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnvelope {
+    InterpreterDataEnvelopeRepr
         .deserialize(&result.data)
         .expect("default serializer shouldn't fail")
 }
@@ -98,14 +98,14 @@ pub fn raw_data_from_trace(
     trace: impl Into<ExecutionTrace>,
     cid_state: ExecutionCidState,
 ) -> Vec<u8> {
-    let data = InterpreterDataEnv::from_execution_result(
+    let data = InterpreterDataEnvelope::from_execution_result(
         trace.into(),
         cid_state.into(),
         <_>::default(),
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataEnvRepr
+    InterpreterDataEnvelopeRepr
         .serialize(&data)
         .expect("default serializer shouldn't fail")
 }
@@ -114,7 +114,7 @@ pub fn raw_data_from_trace_with_canon(
     trace: impl Into<ExecutionTrace>,
     cid_state: ExecutionCidState,
 ) -> Vec<u8> {
-    let data = InterpreterDataEnv::from_execution_result(
+    let data = InterpreterDataEnvelope::from_execution_result(
         trace.into(),
         CidInfo {
             value_store: cid_state.value_tracker.into(),
@@ -127,7 +127,7 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataEnvRepr
+    InterpreterDataEnvelopeRepr
         .serialize(&data)
         .expect("default serializer shouldn't fail")
 }

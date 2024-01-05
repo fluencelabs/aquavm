@@ -64,7 +64,7 @@ fn test_attack_injection_current_peer_scalar() {
     let mallory_signature = mallory_signature_tracker.gen_signature("", &mallory_keypair).unwrap();
     mallory_signature_store.put(mallory_keypair.public().into(), mallory_signature);
 
-    let alice_data = InterpreterDataEnv::from_execution_result(
+    let alice_data = InterpreterDataEnvelope::from_execution_result(
         alice_trace.into(),
         alice_cid_state.into(),
         alice_signature_store,
@@ -72,7 +72,7 @@ fn test_attack_injection_current_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         mallory_signature_store,
@@ -135,7 +135,7 @@ fn test_attack_injection_current_peer_stream() {
 
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
-    let alice_data = InterpreterDataEnv::from_execution_result(
+    let alice_data = InterpreterDataEnvelope::from_execution_result(
         alice_trace.into(),
         alice_cid_state.into(),
         alice_signature_store,
@@ -143,7 +143,7 @@ fn test_attack_injection_current_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         mallory_signature_store,
@@ -204,7 +204,7 @@ fn test_attack_injection_current_injection_unused() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     alice_signature_store.put(mallory_pk, mallory_signature);
 
-    let alice_data = InterpreterDataEnv::from_execution_result(
+    let alice_data = InterpreterDataEnvelope::from_execution_result(
         alice_trace.into(),
         alice_cid_state.into(),
         alice_signature_store,
@@ -212,7 +212,7 @@ fn test_attack_injection_current_injection_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         mallory_signature_store,
@@ -273,7 +273,7 @@ fn test_attack_injection_other_peer_scalar() {
     mallory_cid_tracker.register(&mallory_peer_id, &extract_service_result_cid(&mallory_trace[1]));
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         signature_store,
@@ -331,7 +331,7 @@ fn test_attack_injection_other_peer_stream() {
 
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         signature_store,
@@ -389,7 +389,7 @@ fn test_attack_injection_other_peer_unused() {
 
     let mallory_trace = vec![alice_call_1, mallory_call_2, fake_call_3];
 
-    let mallory_data = InterpreterDataEnv::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         mallory_cid_state.into(),
         signature_store,

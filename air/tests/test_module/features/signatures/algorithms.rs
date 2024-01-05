@@ -16,7 +16,7 @@
 
 use air::{min_supported_version, PreparationError};
 use air_interpreter_data::verification::DataVerifierError;
-use air_interpreter_data::InterpreterDataEnv;
+use air_interpreter_data::InterpreterDataEnvelope;
 use air_interpreter_signatures::{KeyError, PublicKey};
 use air_test_utils::{
     assert_error_eq,
@@ -50,7 +50,7 @@ fn test_banned_signature() {
 
     let trace = vec![request_sent_by("init_peer_fake_id")];
 
-    let mut data_env = InterpreterDataEnv::from_execution_result(
+    let mut data_env = InterpreterDataEnvelope::from_execution_result(
         trace.into(),
         <_>::default(),
         <_>::default(),

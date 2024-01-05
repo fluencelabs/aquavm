@@ -311,7 +311,7 @@ fn invalid_dst_generations() {
     "#
     );
 
-    let data_env = InterpreterDataEnv::from_execution_result(
+    let data_env = InterpreterDataEnvelope::from_execution_result(
         ExecutionTrace::from(vec![ExecutedState::Ap(ApResult {
             res_generations: vec![42.into(), 42.into()],
         })]),

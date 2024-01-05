@@ -18,8 +18,8 @@ pub(crate) mod errors;
 pub(crate) mod repr;
 pub mod verification;
 
-pub use self::repr::InterpreterDataEnvFormat;
-pub use self::repr::InterpreterDataEnvRepr;
+pub use self::repr::InterpreterDataEnvelopeFormat;
+pub use self::repr::InterpreterDataEnvelopeRepr;
 use crate::CidInfo;
 use crate::ExecutionTrace;
 
@@ -35,14 +35,14 @@ use serde::Serialize;
 #[derive(Debug, thiserror::Error)]
 pub enum DataDeserializationError {
     #[error("failed to deserialize envelope: {0}")]
-    Envelope(<InterpreterDataEnvRepr as Representation>::DeserializeError),
+    Envelope(<InterpreterDataEnvelopeRepr as Representation>::DeserializeError),
     #[error("failed to deserialize data: {0}")]
     Data(crate::rkyv::RkyvDeserializeError),
 }
 
 /// An envelope for the AIR interpreter data that makes AIR data version info accessible in a stable way.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct InterpreterDataEnv {
+pub struct InterpreterDataEnvelope {
     /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
@@ -107,7 +107,7 @@ pub struct Versions {
     pub interpreter_version: semver::Version,
 }
 
-impl InterpreterDataEnv {
+impl InterpreterDataEnvelope {
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
@@ -152,8 +152,8 @@ impl InterpreterDataEnv {
     pub fn try_from_slice(
         slice: &[u8],
     ) -> Result<(Versions, InterpreterData), DataDeserializationError> {
-        let env: InterpreterDataEnv = measure!(
-            FromSerialized::deserialize(&InterpreterDataEnvRepr, slice),
+        let env: InterpreterDataEnvelope = measure!(
+            FromSerialized::deserialize(&InterpreterDataEnvelopeRepr, slice),
             tracing::Level::INFO,
             "InterpreterData::try_from_slice"
         )
@@ -169,14 +169,14 @@ impl InterpreterDataEnv {
 
     /// Tries to de only versions part of interpreter data.
     pub fn try_get_versions(slice: &[u8]) -> Result<Versions, DataDeserializationError> {
-        FromSerialized::deserialize(&InterpreterDataEnvRepr, slice)
+        FromSerialized::deserialize(&InterpreterDataEnvelopeRepr, slice)
             .map_err(DataDeserializationError::Envelope)
     }
 
     pub fn serialize(
         &self,
-    ) -> Result<Vec<u8>, <InterpreterDataEnvRepr as Representation>::SerializeError> {
-        InterpreterDataEnvRepr.serialize(self)
+    ) -> Result<Vec<u8>, <InterpreterDataEnvelopeRepr as Representation>::SerializeError> {
+        InterpreterDataEnvelopeRepr.serialize(self)
     }
 }
 
