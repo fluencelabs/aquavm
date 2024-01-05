@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-use air::{min_supported_version, PreparationError};
-use air_interpreter_data::verification::DataVerifierError;
-use air_interpreter_data::InterpreterDataEnvelope;
-use air_interpreter_signatures::{KeyError, PublicKey};
+use air::PreparationError;
+use air_interpreter_signatures::KeyError;
 use air_test_utils::{
     assert_error_eq,
-    prelude::{request_sent_by, unit_call_service},
-    test_runner::{create_avm, create_avm_with_key, NativeAirRunner, TestRunParameters},
+    prelude::unit_call_service,
+    test_runner::{create_avm_with_key, NativeAirRunner, TestRunParameters},
 };
 use fluence_keypair::KeyFormat;
-use serde_json::json;
 
 /// Checking that other peers' key algorithms are valid.
 #[test]
-// Ignored for a while until we find an easy way to crate "incorrect" rkyv data
-#[ignore]
+// ignored for a while until we find an easy way to create "incorrect" rkyv data;
+//
+// n.b.: cfg(any()) disables compilation
+#[cfg(any())]
 fn test_banned_signature() {
+    use air::min_supported_version;
+    use air_interpreter_data::verification::DataVerifierError;
+    use air_interpreter_data::InterpreterDataEnvelope;
+    use air_interpreter_signatures::PublicKey;
+    use air_test_utils::prelude::request_sent_by;
+    use air_test_utils::test_runner::create_avm;
     use air_test_utils::JValue;
+    use serde_json::json;
 
     let air_script = r#"(call "other_peer_id" ("" "") [])"#;
 
@@ -58,13 +64,13 @@ fn test_banned_signature() {
         min_supported_version().clone(),
     );
 
-    // let mut data: JValue = InterpreterDataRepr
-    //     .get_format()
-    //     .from_slice(&data_env.inner_data)
-    //     .unwrap();
+    let mut data: JValue = InterpreterDataRepr
+        .get_format()
+        .from_slice(&data_env.inner_data)
+        .unwrap();
 
-    // data["signatures"] = bad_signature_store;
-    // data_env.inner_data = InterpreterDataRepr.get_format().to_vec(&data).unwrap();
+    data["signatures"] = bad_signature_store;
+    data_env.inner_data = InterpreterDataRepr.get_format().to_vec(&data).unwrap();
 
     let current_data = data_env.serialize().unwrap();
 

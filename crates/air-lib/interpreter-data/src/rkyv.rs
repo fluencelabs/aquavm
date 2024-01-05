@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-use rkyv::{
-    de::deserializers::{SharedDeserializeMap, SharedDeserializeMapError},
-    ser::{
-        serializers::{
-            AlignedSerializer, AllocScratch, AllocScratchError, CompositeSerializer,
-            CompositeSerializerError, FallbackScratch, HeapScratch, SharedSerializeMap,
-            SharedSerializeMapError, WriteSerializer,
-        },
-        Serializer,
-    },
-    validation::validators::DefaultValidator,
-    AlignedVec,
-};
+use rkyv::de::deserializers::SharedDeserializeMap;
+use rkyv::de::deserializers::SharedDeserializeMapError;
+use rkyv::ser::serializers::AlignedSerializer;
+use rkyv::ser::serializers::AllocScratch;
+use rkyv::ser::serializers::AllocScratchError;
+use rkyv::ser::serializers::CompositeSerializer;
+use rkyv::ser::serializers::CompositeSerializerError;
+use rkyv::ser::serializers::FallbackScratch;
+use rkyv::ser::serializers::HeapScratch;
+use rkyv::ser::serializers::SharedSerializeMap;
+use rkyv::ser::serializers::SharedSerializeMapError;
+use rkyv::ser::serializers::WriteSerializer;
+use rkyv::ser::Serializer;
+use rkyv::validation::validators::DefaultValidator;
+use rkyv::AlignedVec;
 
 const DEFAULT_VALIDATION_CAPACITY: usize = 1024;
 const DEFAULT_DESERIALIZE_CAPACITY: usize = 1024;
