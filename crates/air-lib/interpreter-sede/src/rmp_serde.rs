@@ -35,6 +35,8 @@ where
 
     #[inline]
     fn to_vec(&self, val: &Value) -> Result<Vec<u8>, Self::SerializationError> {
+        // named representation (i.e. structs are serialized as maps, not tuples) is important
+        // for JS interop and data compatibility detection
         rmp_serde::to_vec_named(val)
     }
 
