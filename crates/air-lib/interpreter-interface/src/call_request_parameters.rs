@@ -19,6 +19,7 @@ use air_interpreter_sede::derive_serialized_type;
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::JsonFormat;
+use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::Representation;
 
 use marine_call_parameters::SecurityTetraplet;
@@ -38,7 +39,7 @@ derive_serialized_type!(SerializedCallRequests);
 
 pub type CallArgumentsFormat = JsonFormat;
 pub type TetrapletsFormat = JsonFormat;
-pub type CallRequestsFormat = JsonFormat;
+pub type CallRequestsFormat = MsgPackMultiformat;
 
 define_simple_representation! {
     CallArgumentsRepr,
