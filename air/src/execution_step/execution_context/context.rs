@@ -34,7 +34,6 @@ use air_interpreter_interface::*;
 use air_interpreter_signatures::PeerCidTracker;
 use air_interpreter_signatures::SignatureStore;
 
-use std::collections::HashMap;
 use std::rc::Rc;
 
 /// Contains all necessary state needed to execute AIR script.
@@ -76,7 +75,7 @@ pub(crate) struct ExecutionCtx<'i> {
     pub(crate) last_call_request_id: u32,
 
     /// Contains all executed results from a host side.
-    pub(crate) call_results: HashMap<u32, CallServiceResult>,
+    pub(crate) call_results: CallResults,
 
     /// Tracks all functions that should be called from services.
     pub(crate) call_requests: CallRequests,
@@ -99,7 +98,7 @@ impl<'i> ExecutionCtx<'i> {
     pub(crate) fn new(
         prev_ingredients: ExecCtxIngredients,
         current_ingredients: ExecCtxIngredients,
-        call_results: HashMap<u32, CallServiceResult>,
+        call_results: CallResults,
         signature_store: SignatureStore,
         run_parameters: &RunParameters,
     ) -> Self {

@@ -81,6 +81,7 @@ pub(super) fn handle_prev_state<'i>(
             if peer_id.as_str() == exec_ctx.run_parameters.current_peer_id.as_str() =>
         {
             // call results are identified by call_id that is saved in data
+            let call_id = call_id.to_string();
             match exec_ctx.call_results.remove(&call_id) {
                 Some(call_result) => {
                     update_state_with_service_result(
