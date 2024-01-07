@@ -8026,6 +8026,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "zk-aquavm"
+version = "0.1.0"
+dependencies = [
+ "aquavm-air",
+ "risc0-zkvm",
+ "zk-aquavm-interface",
+]
+
+[[package]]
 name = "zk-aquavm-interface"
 version = "0.1.0"
 dependencies = [
