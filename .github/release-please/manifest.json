@@ -23,7 +23,4 @@
   "crates/air-lib/interpreter-interface": "0.16.0",
   "crates/air-lib/interpreter-signatures": "0.1.6",
   "crates/air-lib/polyplets": "0.5.2",
-  "crates/risc-0/core": "0.1.0",
-  "crates/risc-0/methods": "0.1.0",
-  "crates/risc-0/methods/guest": "0.1.0"
 }
