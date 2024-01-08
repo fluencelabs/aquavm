@@ -159,9 +159,6 @@ impl InterpreterDataEnvelope {
         )
         .map_err(DataDeserializationError::Envelope)?;
 
-        let mut aligned_data = rkyv::AlignedVec::with_capacity(env.inner_data.len());
-        aligned_data.extend_from_slice(&env.inner_data);
-
         let inner_data = InterpreterData::try_from_slice(&env.inner_data)
             .map_err(DataDeserializationError::Data)?;
         Ok((env.versions, inner_data))
