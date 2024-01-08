@@ -1,6 +1,6 @@
 [package]
 name = "avm-data-store"
-version = "0.7.3"
+version = "0.7.4"
 description = "Definition of the AVM DataStore trait"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -15,7 +15,7 @@ name = "avm_data_store"
 path = "src/lib.rs"
 
 [dependencies]
-avm-interface = { version = "0.29.3", path = "../../avm/interface"}
+avm-interface = { version = "0.30.0", path = "../../avm/interface"}
 serde = { version = "1.0.190", features = ["derive"] }
 serde_bytes = "0.11.9"
 

@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-data"
 description = "Data format of the AIR interpreter"
-version = "0.15.0"
+version = "0.16.0"
 authors = ["Fluence Labs"]
 edition = "2021"
 license = "Apache-2.0"
@@ -16,11 +16,11 @@ path = "src/lib.rs"
 
 [dependencies]
 air-utils = { version = "0.2.0", path = "../utils" }
-aquavm-air-parser = { version = "0.11.0", path = "../air-parser" }
-air-interpreter-cid = { version = "0.7.0", path = "../interpreter-cid" }
-air-interpreter-signatures = { version = "0.1.5", path = "../interpreter-signatures" }
+aquavm-air-parser = { version = "0.11.1", path = "../air-parser" }
+air-interpreter-cid = { version = "0.8.0", path = "../interpreter-cid" }
+air-interpreter-signatures = { version = "0.1.6", path = "../interpreter-signatures" }
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["json"] }
-polyplets = { version = "0.5.1", path = "../polyplets" }
+polyplets = { version = "0.5.2", path = "../polyplets" }
 
 fluence-keypair = { version = "0.10.4", default-features = false }
 serde = {version = "1.0.190", features = ["derive", "rc"]}
