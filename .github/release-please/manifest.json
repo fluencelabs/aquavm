@@ -22,5 +22,5 @@
   "crates/air-lib/log-targets": "0.1.0",
   "crates/air-lib/interpreter-interface": "0.16.0",
   "crates/air-lib/interpreter-signatures": "0.1.6",
-  "crates/air-lib/polyplets": "0.5.2",
+  "crates/air-lib/polyplets": "0.5.2"
 }
