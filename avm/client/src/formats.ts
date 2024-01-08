@@ -93,7 +93,7 @@ export class MulticodecRepr implements Representation {
 
     toBinary(obj: object): Uint8Array {
         let bareData = this.serializer.toBinary(obj);
-        let varintCode = multicodec.getVarintFromCode(this.serializer.get_code());
-        return multicodec.addPrefix(varintCode, bareData)
+        let codeName = multicodec.getNameFromCode(this.serializer.get_code());
+        return multicodec.addPrefix(codeName, bareData)
     }
 }

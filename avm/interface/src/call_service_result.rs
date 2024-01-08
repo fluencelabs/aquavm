@@ -63,7 +63,7 @@ impl CallServiceResult {
 pub fn into_raw_result(call_results: CallResults) -> air_interpreter_interface::CallResults {
     call_results
         .into_iter()
-        .map(|(call_id, call_result)| (call_id, call_result.into_raw()))
+        .map(|(call_id, call_result)| (call_id.to_string(), call_result.into_raw()))
         .collect::<_>()
 }
 

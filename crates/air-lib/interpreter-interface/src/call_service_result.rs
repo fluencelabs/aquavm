@@ -16,17 +16,19 @@
 
 use air_interpreter_sede::define_simple_representation;
 use air_interpreter_sede::derive_serialized_type;
-use air_interpreter_sede::JsonFormat;
+use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::Representation;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value as JValue;
 use std::collections::HashMap;
 
-pub type CallResults = HashMap<u32, CallServiceResult>;
+/// This is a map from a String to a service result for compatibility with JavaScript.
+/// Binary format implementations like `rmp-serde` do not convert keys from strings, unlike `serde_json`.
+pub type CallResults = HashMap<String, CallServiceResult>;
 pub const CALL_SERVICE_SUCCESS: i32 = 0;
 
-pub type CallResultsFormat = JsonFormat;
+pub type CallResultsFormat = MsgPackMultiformat;
 
 derive_serialized_type!(SerializedCallResults);
 
@@ -55,6 +57,7 @@ impl CallServiceResult {
     pub fn ok(result: &JValue) -> Self {
         Self {
             ret_code: CALL_SERVICE_SUCCESS,
+            // for compatiblity with JavaScript with binary formats, string IDs are used
             result: result.to_string(),
         }
     }
