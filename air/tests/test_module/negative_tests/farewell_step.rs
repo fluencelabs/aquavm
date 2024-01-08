@@ -35,7 +35,7 @@ fn unprocessed_call_result() {
 
     let expected_call_service_result = air_interpreter_interface::CallServiceResult::ok(&json!("null"));
     let expected_call_results = maplit::hashmap!(
-        70 => expected_call_service_result,
+        "70".to_owned() => expected_call_service_result,
     );
     let expected_error = FarewellError::UnprocessedCallResult(expected_call_results);
     assert!(check_error(&result, expected_error));

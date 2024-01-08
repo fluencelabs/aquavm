@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.56.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.55.0...air-interpreter-v0.56.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.55.0 to 0.56.0
+    * air-interpreter-interface bumped from 0.15.2 to 0.16.0
+
 ## [0.55.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.54.0...air-interpreter-v0.55.0) (2023-12-12)
 
 
