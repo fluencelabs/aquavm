@@ -30,6 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * air-interpreter-interface bumped from 0.15.1 to 0.15.2
 
+## [0.30.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.29.3...avm-interface-v0.30.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.15.2 to 0.16.0
+    * polyplets bumped from 0.5.1 to 0.5.2
+
 ## [0.29.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.28.5...avm-interface-v0.29.0) (2023-08-17)
 
 

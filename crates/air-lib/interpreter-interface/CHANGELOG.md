@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.2...air-interpreter-interface-v0.16.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-call-parameters to 0.10.2 ([#732](https://github.com/fluencelabs/aquavm/issues/732)) ([763bbcb](https://github.com/fluencelabs/aquavm/commit/763bbcb663ba445ed19431929823e7bfcc6d910c))
+* **deps:** update rust crate marine-call-parameters to 0.10.3 ([#781](https://github.com/fluencelabs/aquavm/issues/781)) ([518bb95](https://github.com/fluencelabs/aquavm/commit/518bb95a178ab1508d27b1fa71bd205ef05dea8e))
+
 ## [0.15.2](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.1...air-interpreter-interface-v0.15.2) (2023-12-12)
 
 

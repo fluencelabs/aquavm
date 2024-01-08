@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.0...air-parser-v0.11.1) (2024-01-03)
+
+
+### Features
+
+* **air-parser:** VM-347 After next validator fold check ([#774](https://github.com/fluencelabs/aquavm/issues/774)) ([c6f157a](https://github.com/fluencelabs/aquavm/commit/c6f157a6e3ee10fa9209b1fa4a305040ce876d00))
+
 ## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.10.0...air-parser-v0.11.0) (2023-12-12)
 
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.56.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.55.0...avm-client-v0.56.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **avm-client:** implement pluggable formats in JS ([#776](https://github.com/fluencelabs/aquavm/issues/776)) ([eaa4077](https://github.com/fluencelabs/aquavm/commit/eaa40778c78dd58bb7791f7fcdf966cbd59911ad))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
 ## [0.55.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.54.0...avm-client-v0.55.0) (2023-12-12)
 
 

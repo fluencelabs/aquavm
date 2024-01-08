@@ -7,5 +7,5 @@ edition = "2021"
 license = "Apache-2.0"
 
 [dependencies]
-aquavm-air = { path = "../../../air", version = "0.55.0", default-features = false }
+aquavm-air = { path = "../../../air", version = "0.56.0", default-features = false }
 serde = "1.0"
