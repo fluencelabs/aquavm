@@ -35,7 +35,6 @@ pub mod native_test_runner;
 pub mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-use air_interpreter_sede::{FromSerialized, ToSerialized};
 
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
@@ -83,14 +82,13 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    let (_version, data) = InterpreterDataEnvelope::try_from_slice(&result.data)
+    let env = InterpreterDataEnvelope::try_from_slice(&result.data)
         .expect("default serializer shouldn't fail");
-    data
+    InterpreterData::try_from_slice(&env.inner_data).expect("default serializer shouldn't fail")
 }
 
-pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnvelope {
-    InterpreterDataEnvelopeRepr
-        .deserialize(&result.data)
+pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnvelope<'_> {
+    InterpreterDataEnvelope::try_from_slice(&result.data)
         .expect("default serializer shouldn't fail")
 }
 
@@ -105,9 +103,7 @@ pub fn raw_data_from_trace(
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataEnvelopeRepr
-        .serialize(&data)
-        .expect("default serializer shouldn't fail")
+    data.serialize().expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace_with_canon(
@@ -127,9 +123,7 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataEnvelopeRepr
-        .serialize(&data)
-        .expect("default serializer shouldn't fail")
+    data.serialize().expect("default serializer shouldn't fail")
 }
 
 #[macro_export]

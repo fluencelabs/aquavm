@@ -163,7 +163,8 @@ pub fn cid_benchmarking_data(
     let inner_data = serde_json::from_value::<InterpreterData>(to_value)
         .unwrap()
         .serialize()
-        .unwrap();
+        .unwrap()
+        .into();
 
     let data_env = InterpreterDataEnvelope {
         versions: Versions::new(interpreter_version().clone()),

@@ -14,58 +14,27 @@
  * limitations under the License.
  */
 
-use crate::InterpreterDataEnvelope;
 use crate::Versions;
 
 use air_interpreter_sede::Format;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::MsgPackMultiformat;
+use air_interpreter_sede::MsgPackFormat;
 use air_interpreter_sede::Representation;
-use air_interpreter_sede::ToSerialized;
-use air_interpreter_sede::ToWriter;
 
 #[derive(Default, Debug)]
 pub struct InterpreterDataEnvelopeRepr;
 
-pub type InterpreterDataEnvelopeFormat = MsgPackMultiformat;
+pub type InterpreterDataEnvelopeFormat = MsgPackFormat;
 
 impl Representation for InterpreterDataEnvelopeRepr {
-    type SerializeError =
-        <InterpreterDataEnvelopeFormat as Format<InterpreterDataEnvelope>>::SerializationError;
-    type DeserializeError =
-        <InterpreterDataEnvelopeFormat as Format<InterpreterDataEnvelope>>::DeserializationError;
-    type WriteError =
-        <InterpreterDataEnvelopeFormat as Format<InterpreterDataEnvelope>>::WriteError;
+    type SerializeError = rmp_serde::encode::Error;
+    type DeserializeError = rmp_serde::decode::Error;
+    type WriteError = rmp_serde::encode::Error;
     type Format = InterpreterDataEnvelopeFormat;
     type SerializedValue = Vec<u8>; // TODO a typed wrapper
 
     fn get_format(&self) -> InterpreterDataEnvelopeFormat {
         InterpreterDataEnvelopeFormat::default()
-    }
-}
-
-impl ToSerialized<InterpreterDataEnvelope> for InterpreterDataEnvelopeRepr {
-    #[inline]
-    fn serialize(&self, value: &InterpreterDataEnvelope) -> Result<Vec<u8>, Self::SerializeError> {
-        Self::get_format(self).to_vec(value)
-    }
-}
-
-impl FromSerialized<InterpreterDataEnvelope> for InterpreterDataEnvelopeRepr {
-    #[inline]
-    fn deserialize(&self, repr: &[u8]) -> Result<InterpreterDataEnvelope, Self::DeserializeError> {
-        Self::get_format(self).from_slice(repr)
-    }
-}
-
-impl ToWriter<InterpreterDataEnvelope> for InterpreterDataEnvelopeRepr {
-    #[inline]
-    fn to_writer<W: std::io::Write>(
-        &self,
-        value: &InterpreterDataEnvelope,
-        writer: &mut W,
-    ) -> Result<(), Self::WriteError> {
-        Self::get_format(self).to_writer(value, writer)
     }
 }
 

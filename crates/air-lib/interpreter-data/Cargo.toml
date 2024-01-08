@@ -33,3 +33,4 @@ num-traits = "0.2.17"
 thiserror = "1.0.50"
 serde_bytes = "0.11.13"
 rkyv = { version = "0.7.43", features = ["validation", "strict"] }
+rmp-serde = "1.1.2"

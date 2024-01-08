@@ -62,7 +62,7 @@ fn test_runtime_executed_call_argument_hash() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -118,7 +118,7 @@ fn test_runtime_executed_call_tetraplet() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -192,7 +192,7 @@ fn test_runtime_executed_failed_argument_hash() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -252,7 +252,7 @@ fn test_runtime_failed_call_tetraplet() {
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
 
     let mallory_data = mallory_env.serialize().unwrap();
 
@@ -324,7 +324,7 @@ fn test_runtime_canon_tetraplet() {
     mallory_raw_trace.swap(2, 3);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    mallory_env.inner_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
 
     let mallory_data = mallory_env.serialize().unwrap();
 

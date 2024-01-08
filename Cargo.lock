@@ -191,6 +191,7 @@ dependencies = [
  "once_cell",
  "polyplets",
  "rkyv",
+ "rmp-serde",
  "semver 1.0.20",
  "serde",
  "serde_bytes",

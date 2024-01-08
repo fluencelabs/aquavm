@@ -25,29 +25,29 @@ use crate::ExecutionTrace;
 
 use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::Representation;
-use air_interpreter_sede::ToSerialized;
 use air_interpreter_signatures::SignatureStore;
-use air_utils::measure;
 
 use serde::Deserialize;
 use serde::Serialize;
 
+use std::borrow::Cow;
+
 #[derive(Debug, thiserror::Error)]
 pub enum DataDeserializationError {
     #[error("failed to deserialize envelope: {0}")]
-    Envelope(<InterpreterDataEnvelopeRepr as Representation>::DeserializeError),
+    Envelope(rmp_serde::decode::Error),
     #[error("failed to deserialize data: {0}")]
     Data(crate::rkyv::RkyvDeserializeError),
 }
 
 /// An envelope for the AIR interpreter data that makes AIR data version info accessible in a stable way.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct InterpreterDataEnvelope {
+pub struct InterpreterDataEnvelope<'a> {
     /// Versions of data and an interpreter produced this data.
     #[serde(flatten)]
     pub versions: Versions,
-    #[serde(with = "serde_bytes")]
-    pub inner_data: Vec<u8>,
+    #[serde(with = "serde_bytes", borrow)]
+    pub inner_data: Cow<'a, [u8]>,
 }
 
 /// The AIR interpreter could be considered as a function
@@ -85,13 +85,15 @@ pub struct InterpreterData {
 }
 
 impl InterpreterData {
-    pub fn try_from_slice(slice: &[u8]) -> Result<Self, crate::rkyv::RkyvDeserializeError> {
+    #[tracing::instrument(skip_all, level = "info")]
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, DataDeserializationError> {
         let mut aligned_data = rkyv::AlignedVec::with_capacity(slice.len());
         aligned_data.extend_from_slice(slice);
 
-        crate::rkyv::from_aligned_slice(&aligned_data)
+        crate::rkyv::from_aligned_slice(&aligned_data).map_err(DataDeserializationError::Data)
     }
 
+    #[tracing::instrument(skip_all, level = "info")]
     pub fn serialize(&self) -> Result<Vec<u8>, crate::rkyv::RkyvSerializeError> {
         crate::rkyv::to_vec(self)
     }
@@ -107,13 +109,14 @@ pub struct Versions {
     pub interpreter_version: semver::Version,
 }
 
-impl InterpreterDataEnvelope {
+impl InterpreterDataEnvelope<'_> {
     pub fn new(interpreter_version: semver::Version) -> Self {
         let versions = Versions::new(interpreter_version);
 
         let inner_data = InterpreterData::default()
             .serialize()
-            .expect("shouldn't fail on empty data");
+            .expect("shouldn't fail on empty data")
+            .into();
 
         Self {
             versions,
@@ -140,7 +143,8 @@ impl InterpreterDataEnvelope {
 
         let inner_data = inner_data
             .serialize()
-            .expect("shouldn't fail on valid data");
+            .expect("shouldn't fail on valid data")
+            .into();
 
         Self {
             versions,
@@ -149,21 +153,6 @@ impl InterpreterDataEnvelope {
     }
 
     /// Tries to de InterpreterData from slice according to the data version.
-    pub fn try_from_slice(
-        slice: &[u8],
-    ) -> Result<(Versions, InterpreterData), DataDeserializationError> {
-        let env: InterpreterDataEnvelope = measure!(
-            FromSerialized::deserialize(&InterpreterDataEnvelopeRepr, slice),
-            tracing::Level::INFO,
-            "InterpreterData::try_from_slice"
-        )
-        .map_err(DataDeserializationError::Envelope)?;
-
-        let inner_data = InterpreterData::try_from_slice(&env.inner_data)
-            .map_err(DataDeserializationError::Data)?;
-        Ok((env.versions, inner_data))
-    }
-
     /// Tries to de only versions part of interpreter data.
     pub fn try_get_versions(slice: &[u8]) -> Result<Versions, DataDeserializationError> {
         FromSerialized::deserialize(&InterpreterDataEnvelopeRepr, slice)
@@ -173,7 +162,16 @@ impl InterpreterDataEnvelope {
     pub fn serialize(
         &self,
     ) -> Result<Vec<u8>, <InterpreterDataEnvelopeRepr as Representation>::SerializeError> {
-        InterpreterDataEnvelopeRepr.serialize(self)
+        // use rmp_serde explicitely until interpreter-sede handles types with lifetimes
+        rmp_serde::to_vec_named(self)
+    }
+}
+
+impl<'data> InterpreterDataEnvelope<'data> {
+    #[tracing::instrument(skip_all, level = "info")]
+    pub fn try_from_slice(slice: &'data [u8]) -> Result<Self, DataDeserializationError> {
+        // use rmp_serde explicitely until interpreter-sede handles types with lifetimes
+        rmp_serde::from_slice(slice).map_err(DataDeserializationError::Envelope)
     }
 }
 

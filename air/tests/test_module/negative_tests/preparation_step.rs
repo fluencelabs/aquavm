@@ -45,8 +45,8 @@ fn invalid_data_without_versions() {
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
     let expected_serde_error = InterpreterDataEnvelope::try_from_slice(&invalid_data).unwrap_err();
-    let expected_error = PreparationError::DataDeFailed {
-        data: invalid_data,
+    let expected_error = PreparationError::EnvelopeDeFailed {
+        env_raw_data: invalid_data,
         error: expected_serde_error,
     };
     assert!(check_error(&result, expected_error));
@@ -78,8 +78,8 @@ fn invalid_data_with_versions() {
     let result = call_vm!(vm, <_>::default(), script, "", invalid_data.clone());
 
     let expected_serde_error = InterpreterDataEnvelope::try_from_slice(&invalid_data).unwrap_err();
-    let expected_error = PreparationError::DataDeFailedWithVersions {
-        data: invalid_data,
+    let expected_error = PreparationError::EnvelopeDeFailedWithVersions {
+        env_raw_data: invalid_data,
         error: expected_serde_error,
         versions,
     };
