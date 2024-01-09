@@ -18,7 +18,7 @@ air-interpreter-interface = { version = "0.17.0", path = "../../../crates/air-li
 air-interpreter-sede = { version = "0.1.0", path = "../../../crates/air-lib/interpreter-sede", default-features = false }
 air-test-utils = { version = "0.14.1",path = "../../../crates/air-lib/test-utils", optional = true }
 
-anyhow = "1.0.75"
+anyhow = "1.0.79"
 clap = { version = "4.4.7", features = ["derive", "env"] }
 itertools = "0.10.5"
 serde = { version = "1.0.190", features = ["derive"] }
