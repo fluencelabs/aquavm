@@ -30,6 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * air-interpreter-interface bumped from 0.15.1 to 0.15.2
 
+## [0.31.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.30.0...avm-interface-v0.31.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780))
+
+### Features
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780)) ([325eea7](https://github.com/fluencelabs/aquavm/commit/325eea7e9130e236b4e84ebb883632becffa28b5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.16.0 to 0.17.0
+
 ## [0.30.0](https://github.com/fluencelabs/aquavm/compare/avm-interface-v0.29.3...avm-interface-v0.30.0) (2024-01-03)
 
 

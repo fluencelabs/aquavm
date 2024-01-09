@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air"
-version = "0.56.0"
+version = "0.57.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -22,7 +22,7 @@ air-interpreter-cid = { version = "0.8.0", path = "../crates/air-lib/interpreter
 air-interpreter-data = { version = "0.16.0", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-sede = { version = "0.1.0", path = "../crates/air-lib/interpreter-sede" }
 air-interpreter-signatures = { version = "0.1.6", path = "../crates/air-lib/interpreter-signatures", features = ["rkyv"] }
-air-interpreter-interface = { version = "0.16.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
+air-interpreter-interface = { version = "0.17.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }

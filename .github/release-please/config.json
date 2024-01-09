@@ -16,15 +16,6 @@
         "air-interpreter",
         "avm-client"
       ]
-    },
-    {
-      "type": "linked-versions",
-      "groupName": "risc0",
-      "components": [
-        "zk-aquavm-interface",
-        "zk-aquavm-methods",
-        "zk-aquavm"
-      ]
     }
   ],
   "packages": {
@@ -64,15 +55,6 @@
     },
     "tools/wasm/air-beautify-wasm": {
       "component": "air-beautify-wasm"
-    },
-    "crates/risc-0/core": {
-      "component": "zk-aquavm-interface"
-    },
-    "crates/risc-0/methods": {
-      "component": "zk-aquavm-methods"
-    },
-    "crates/risc-0/methods/guest": {
-      "component": "zk-aquavm"
     }
   }
 }
