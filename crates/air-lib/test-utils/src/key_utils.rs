@@ -36,7 +36,7 @@ pub fn derive_dummy_keypair(seed: &str) -> (KeyPair, String) {
     let keypair = fluence_keypair::KeyPair::Ed25519(keypair_ed25519.into());
     let keypair = KeyPair::try_from(keypair).expect("cannot happen");
 
-    let peer_id = keypair.public().to_peer_id().to_string();
+    let peer_id = keypair.public().to_peer_id().unwrap().to_string();
     (keypair, peer_id)
 }
 

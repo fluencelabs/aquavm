@@ -18,10 +18,10 @@ doctest = false
 [dependencies]
 aquavm-air-parser = { version = "0.11.1", path = "../crates/air-lib/air-parser" }
 air-execution-info-collector = { version = "0.7.12", path = "../crates/air-lib/execution-info-collector" }
-air-interpreter-cid = { version = "0.8.0", path = "../crates/air-lib/interpreter-cid" }
+air-interpreter-cid = { version = "0.8.0", path = "../crates/air-lib/interpreter-cid", features = ["rkyv"] }
 air-interpreter-data = { version = "0.16.0", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-sede = { version = "0.1.0", path = "../crates/air-lib/interpreter-sede" }
-air-interpreter-signatures = { version = "0.1.6", path = "../crates/air-lib/interpreter-signatures" }
+air-interpreter-signatures = { version = "0.1.6", path = "../crates/air-lib/interpreter-signatures", features = ["rkyv"] }
 air-interpreter-interface = { version = "0.17.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
@@ -45,8 +45,9 @@ semver = "1.0.17"
 strum = "0.24"
 strum_macros = "0.24"
 tracing = "0.1.40"
+rkyv = { version = "0.7.43", features = ["strict", "validation", "size_32", "archive_be"] }
 
-[dev_dependencies]
+[dev-dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
 air-testing-framework = { path = "../crates/testing-framework" }
 fluence-app-service = "0.29.0"

@@ -34,7 +34,9 @@ use std::{collections::HashMap, rc::Rc};
 /// Stores CID to Value corresponance.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
-pub struct CidStore<Val>(HashMap<CID<Val>, Rc<Val>>);
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
+pub struct CidStore<Val>(#[with(::rkyv::with::AsVec)] HashMap<CID<Val>, Rc<Val>>);
 
 impl<Val> CidStore<Val> {
     pub fn new() -> Self {

@@ -26,6 +26,8 @@ pub type PosType = u32;
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 #[repr(transparent)]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct TracePos(PosType);
 
 NewtypeFrom! { () pub struct TracePos(PosType); }

@@ -32,6 +32,7 @@ mod executed_state;
 mod generation_idx;
 mod interpreter_data;
 mod raw_value;
+mod rkyv;
 mod trace;
 mod trace_pos;
 

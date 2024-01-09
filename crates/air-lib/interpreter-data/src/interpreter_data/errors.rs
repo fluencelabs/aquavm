@@ -18,11 +18,13 @@ use std::rc::Rc;
 
 use air_interpreter_cid::CidRef;
 use air_interpreter_signatures::KeyError;
+use air_interpreter_signatures::VerificationError;
 use thiserror::Error as ThisError;
+
 #[derive(Debug, ThisError)]
 pub enum DataVerifierError {
-    #[error("malformed key at peer: {peer_id:?}: {error}")]
-    MalformedKey { error: KeyError, peer_id: String },
+    #[error("malformed key: {key:?}: {error}")]
+    MalformedKey { error: KeyError, key: String },
 
     #[error(transparent)]
     MalformedSignature(fluence_keypair::error::DecodingError),
@@ -32,7 +34,7 @@ pub enum DataVerifierError {
 
     #[error("signature mismatch for {peer_id:?}: {error:?}, values: CIDS: {cids:?}")]
     SignatureMismatch {
-        error: Box<fluence_keypair::error::VerificationError>,
+        error: Box<VerificationError>,
         cids: Vec<Rc<CidRef>>,
         peer_id: String,
     },

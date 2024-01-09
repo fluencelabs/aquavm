@@ -19,6 +19,7 @@ borsh = { version = "0.10.3", features = ["rc"]}
 borsh-derive = "0.10.3"
 serde = { version = "1.0.190", features = ["derive"] }
 thiserror = "1.0.49"
+rkyv = { version = "0.7.43", features = ["validation", "strict"], optional = true }
 
 [features]
 default = ["rand"]
