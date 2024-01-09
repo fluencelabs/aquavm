@@ -47,7 +47,9 @@ strum_macros = "0.24"
 tracing = "0.1.40"
 rkyv = { version = "0.7.43", features = ["strict", "validation", "size_32", "archive_be"] }
 
-[dev-dependencies]
+# The old syntax prevents release-please from detecting a circular dependency:
+# aquavm-air -> air-test-utils -> aquavm-air
+[dev_dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
 air-testing-framework = { path = "../crates/testing-framework" }
 fluence-app-service = "0.29.0"
