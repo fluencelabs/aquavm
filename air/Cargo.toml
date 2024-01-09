@@ -50,7 +50,7 @@ rkyv = { version = "0.7.43", features = ["strict", "validation", "size_32", "arc
 [dev-dependencies]
 air-test-utils = { path = "../crates/air-lib/test-utils" }
 air-testing-framework = { path = "../crates/testing-framework" }
-fluence-app-service = "0.29.0"
+fluence-app-service = "0.31.1"
 marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
 
 borsh = "0.10.3"
