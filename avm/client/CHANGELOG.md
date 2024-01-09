@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.57.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.56.0...avm-client-v0.57.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780))
+
+### Features
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780)) ([325eea7](https://github.com/fluencelabs/aquavm/commit/325eea7e9130e236b4e84ebb883632becffa28b5))
+
 ## [0.56.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.55.0...avm-client-v0.56.0) (2024-01-03)
 
 

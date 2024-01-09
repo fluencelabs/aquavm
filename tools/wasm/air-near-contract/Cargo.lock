@@ -84,7 +84,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "air-interpreter-sede",
  "fluence-it-types",
@@ -100,6 +100,7 @@ name = "air-interpreter-sede"
 version = "0.1.0"
 dependencies = [
  "marine-rs-sdk",
+ "rmp-serde",
  "serde",
  "serde_bytes",
  "serde_json",
@@ -148,7 +149,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.56.0"
+version = "0.57.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -196,7 +197,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.56.0"
+version = "0.57.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -1906,6 +1907,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "paste"
+version = "1.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+
+[[package]]
 name = "petgraph"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2225,6 +2232,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd124222d17ad93a644ed9d011a40f4fb64aa54275c08cc216524a9ea82fb09f"
 dependencies = [
  "digest 0.10.7",
+]
+
+[[package]]
+name = "rmp"
+version = "0.8.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f9860a6cc38ed1da53456442089b4dfa35e7cedaa326df63017af88385e6b20"
+dependencies = [
+ "byteorder",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
+name = "rmp-serde"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bffea85eea980d8a74453e5d02a8d93028f3c34725de143085a844ebe953258a"
+dependencies = [
+ "byteorder",
+ "rmp",
+ "serde",
 ]
 
 [[package]]

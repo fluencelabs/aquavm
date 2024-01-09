@@ -1,6 +1,6 @@
 [package]
 name = "air-test-utils"
-version = "0.14.0"
+version = "0.14.1"
 description = "Test utils for the AIR interpreter"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -15,14 +15,14 @@ name = "air_test_utils"
 path = "src/lib.rs"
 
 [dependencies]
-aquavm-air = { version = "0.56.0", path = "../../../air" }
+aquavm-air = { version = "0.57.0", path = "../../../air" }
 air-interpreter-cid = { version = "0.8.0", path = "../interpreter-cid" }
 air-interpreter-data = { version = "0.16.0", path = "../interpreter-data" }
-air-interpreter-interface = { version = "0.16.0", path = "../interpreter-interface" }
+air-interpreter-interface = { version = "0.17.0", path = "../interpreter-interface" }
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede" }
 air-interpreter-signatures = { version = "0.1.6", path = "../interpreter-signatures" }
-avm-interface = { version = "0.30.0", path = "../../../avm/interface" }
-avm-server = { version = "0.34.0", path = "../../../avm/server" }
+avm-interface = { version = "0.31.0", path = "../../../avm/interface" }
+avm-server = { version = "0.34.1", path = "../../../avm/server" }
 marine-rs-sdk = "0.10.2"
 
 object-pool = "0.5.4"
