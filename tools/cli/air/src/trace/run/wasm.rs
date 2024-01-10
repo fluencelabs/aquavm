@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use super::runner::AirRunner;
+
+use super::runner::{AirRunner, DataToHumanReadable};
 use air_test_utils::avm_runner::AVMRunner;
 use fluence_keypair::KeyPair;
+
+use std::error::Error as StdError;
 use std::path::Path;
 
 pub(crate) struct WasmAvmRunner(AVMRunner);
@@ -58,10 +61,16 @@ impl AirRunner for WasmAvmRunner {
     }
 }
 
+impl DataToHumanReadable for WasmAvmRunner {
+    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>> {
+        Ok(self.0.to_human_readable_data(data)?)
+    }
+}
+
 pub(crate) fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<dyn AirRunner>> {
+) -> anyhow::Result<Box<WasmAvmRunner>> {
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
