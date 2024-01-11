@@ -119,6 +119,25 @@
     * air-interpreter-interface bumped from 0.16.0 to 0.17.0
     * air-test-utils bumped from 0.14.0 to 0.14.1
 
+## [0.6.2](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.6.1...aquavm-air-cli-v0.6.2) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.57.0 to 0.58.0
+    * avm-data-store bumped from 0.7.5 to 0.7.6
+    * avm-interface bumped from 0.31.0 to 0.31.1
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * air-interpreter-data bumped from 0.16.0 to 0.17.0
+    * air-test-utils bumped from 0.14.1 to 0.15.0
+
 ## [0.6.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.5.4...aquavm-air-cli-v0.6.0) (2024-01-03)
 
 

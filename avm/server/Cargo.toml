@@ -1,7 +1,7 @@
 [package]
 name = "avm-server"
 description = "Fluence AIR VM"
-version = "0.34.1"
+version = "0.34.2"
 authors = ["Fluence Labs"]
 edition = "2021"
 license = "Apache-2.0"
@@ -15,13 +15,13 @@ name = "avm_server"
 path = "src/lib.rs"
 
 [dependencies]
-air-interpreter-interface = { version = "0.17.0", path = "../../crates/air-lib/interpreter-interface" }
+air-interpreter-interface = { version = "0.17.1", path = "../../crates/air-lib/interpreter-interface" }
 air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpreter-sede" }
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
-avm-data-store = { version = "0.7.5", path = "../../crates/data-store" }
+avm-data-store = { version = "0.7.6", path = "../../crates/data-store" }
 marine-runtime = "0.30.0"
-polyplets = { version = "0.5.2", path = "../../crates/air-lib/polyplets" }
-avm-interface = { version = "0.31.0", path = "../../avm/interface" }
+polyplets = { version = "0.6.0", path = "../../crates/air-lib/polyplets" }
+avm-interface = { version = "0.31.1", path = "../../avm/interface" }
 
 eyre = "0.6.8"
 thiserror = "1.0.50"

@@ -71,6 +71,30 @@
     * avm-interface bumped from 0.30.0 to 0.31.0
     * avm-server bumped from 0.34.0 to 0.34.1
 
+## [0.15.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.14.1...air-test-utils-v0.15.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.57.0 to 0.58.0
+    * air-interpreter-cid bumped from 0.8.0 to 0.9.0
+    * air-interpreter-data bumped from 0.16.0 to 0.17.0
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+    * avm-interface bumped from 0.31.0 to 0.31.1
+    * avm-server bumped from 0.34.1 to 0.34.2
+
 ## [0.14.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.13.0...air-test-utils-v0.14.0) (2024-01-03)
 
 

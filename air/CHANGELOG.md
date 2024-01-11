@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.58.0](https://github.com/fluencelabs/aquavm/compare/air-v0.57.0...air-v0.58.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.8.0 to 0.9.0
+    * air-interpreter-data bumped from 0.16.0 to 0.17.0
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * air-trace-handler bumped from 0.5.9 to 0.5.10
+    * polyplets bumped from 0.5.2 to 0.6.0
+
 ## [0.57.0](https://github.com/fluencelabs/aquavm/compare/air-v0.56.0...air-v0.57.0) (2024-01-09)
 
 
