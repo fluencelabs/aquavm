@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.17.0...air-interpreter-interface-v0.17.1) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
 ## [0.17.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.16.0...air-interpreter-interface-v0.17.0) (2024-01-09)
 
 

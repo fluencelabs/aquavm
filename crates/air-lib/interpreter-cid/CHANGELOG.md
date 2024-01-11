@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.8.0...air-interpreter-cid-v0.9.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-cid-v0.7.0...air-interpreter-cid-v0.8.0) (2024-01-03)
 
 

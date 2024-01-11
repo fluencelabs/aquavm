@@ -25,6 +25,26 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.17.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.16.0...air-interpreter-data-v0.17.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.8.0 to 0.9.0
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+    * polyplets bumped from 0.5.2 to 0.6.0
+
 ## [0.16.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.15.0...air-interpreter-data-v0.16.0) (2024-01-03)
 
 

@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air"
-version = "0.57.0"
+version = "0.58.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -18,17 +18,17 @@ doctest = false
 [dependencies]
 aquavm-air-parser = { version = "0.11.1", path = "../crates/air-lib/air-parser" }
 air-execution-info-collector = { version = "0.7.12", path = "../crates/air-lib/execution-info-collector" }
-air-interpreter-cid = { version = "0.8.0", path = "../crates/air-lib/interpreter-cid", features = ["rkyv"] }
-air-interpreter-data = { version = "0.16.0", path = "../crates/air-lib/interpreter-data" }
+air-interpreter-cid = { version = "0.9.0", path = "../crates/air-lib/interpreter-cid", features = ["rkyv"] }
+air-interpreter-data = { version = "0.17.0", path = "../crates/air-lib/interpreter-data" }
 air-interpreter-sede = { version = "0.1.0", path = "../crates/air-lib/interpreter-sede" }
-air-interpreter-signatures = { version = "0.1.6", path = "../crates/air-lib/interpreter-signatures", features = ["rkyv"] }
-air-interpreter-interface = { version = "0.17.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
+air-interpreter-signatures = { version = "0.1.7", path = "../crates/air-lib/interpreter-signatures", features = ["rkyv"] }
+air-interpreter-interface = { version = "0.17.1", path = "../crates/air-lib/interpreter-interface", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }
-air-trace-handler = { version = "0.5.9", path = "../crates/air-lib/trace-handler" }
+air-trace-handler = { version = "0.5.10", path = "../crates/air-lib/trace-handler" }
 air-utils = { version = "0.2.0", path = "../crates/air-lib/utils" }
-polyplets = { version = "0.5.2", path = "../crates/air-lib/polyplets" }
+polyplets = { version = "0.6.0", path = "../crates/air-lib/polyplets" }
 fluence-keypair = { version = "0.10.4", default-features = false }
 
 serde = { version = "1.0.190", features = [ "derive", "rc" ] }

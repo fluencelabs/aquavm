@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.58.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.57.0...air-interpreter-v0.58.0) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.57.0 to 0.58.0
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+
 ## [0.57.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.56.0...air-interpreter-v0.57.0) (2024-01-09)
 
 

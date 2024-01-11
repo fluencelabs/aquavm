@@ -22,6 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.4 to 0.7.5
     * avm-interface bumped from 0.30.0 to 0.31.0
 
+## [0.34.2](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.34.1...avm-server-v0.34.2) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * avm-data-store bumped from 0.7.5 to 0.7.6
+    * polyplets bumped from 0.5.2 to 0.6.0
+    * avm-interface bumped from 0.31.0 to 0.31.1
+
 ## [0.34.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.4...avm-server-v0.34.0) (2024-01-03)
 
 
