@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2024 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 use crate::preparation_step::check_version_compatibility;
 
-use air_interpreter_data::{InterpreterData, InterpreterDataEnvelope};
+use air_interpreter_data::InterpreterData;
+use air_interpreter_data::InterpreterDataEnvelope;
 use serde_json::json;
 
 use std::error::Error as StdError;

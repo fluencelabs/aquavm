@@ -29,14 +29,14 @@ use self::runner::AirRunner;
 use avm_interface::CallResults;
 
 use anyhow::Context as _;
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
 use fluence_keypair::KeyPair;
 use zeroize::Zeroize;
 
-use std::{
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]

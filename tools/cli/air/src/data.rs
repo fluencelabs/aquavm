@@ -16,7 +16,8 @@
 
 use anyhow::Context;
 use clap::Parser;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 use crate::trace::run::load_data;
 use crate::trace::run::runner::DataToHumanReadable;

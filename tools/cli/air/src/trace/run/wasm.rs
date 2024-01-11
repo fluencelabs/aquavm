@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::runner::{AirRunner, DataToHumanReadable};
+use super::runner::AirRunner;
+use super::runner::DataToHumanReadable;
 use air_test_utils::avm_runner::AVMRunner;
 use fluence_keypair::KeyPair;
 
