@@ -88,3 +88,12 @@ pub fn invoke_tracing(
 pub fn ast(script: String) -> String {
     ast::ast(script)
 }
+
+/// Like ast, this function is intended to be run localy by tools.
+#[marine]
+pub fn to_human_readable_data(data: Vec<u8>) -> String {
+    match air::to_human_readable_data(data) {
+        Ok(text) => text,
+        Err(err) => err.to_string(),
+    }
+}

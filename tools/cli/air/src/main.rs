@@ -27,6 +27,7 @@
 )]
 
 mod beautify;
+mod data;
 mod trace;
 
 use clap::Parser;
@@ -42,17 +43,21 @@ struct Cli {
 enum Subcommand {
     #[clap(alias = "b")]
     Beautify(self::beautify::Args),
+    #[clap(alias = "d")]
+    Data(self::data::Args),
     #[clap(alias = "r")]
     Run(self::trace::run::Args),
     #[clap(alias = "s")]
     Stats(self::trace::stats::Args),
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
     match args.subcommand {
-        Subcommand::Run(args) => self::trace::run::run(args),
-        Subcommand::Stats(args) => self::trace::stats::stats(args),
-        Subcommand::Beautify(args) => self::beautify::beautify(args),
+        Subcommand::Beautify(args) => self::beautify::beautify(args)?,
+        Subcommand::Data(args) => self::data::to_human_readable_data(args)?,
+        Subcommand::Run(args) => self::trace::run::run(args)?,
+        Subcommand::Stats(args) => self::trace::stats::stats(args)?,
     }
+    Ok(())
 }

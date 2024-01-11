@@ -76,4 +76,8 @@ pub enum RunnerError {
     /// Invalid secret key.
     #[error(transparent)]
     KeyError(eyre::Error),
+
+    /// Errors from auxiliary calls.
+    #[error("{0}")]
+    Aux(String),
 }
