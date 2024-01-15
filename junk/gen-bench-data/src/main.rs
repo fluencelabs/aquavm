@@ -21,6 +21,7 @@ use std::path::PathBuf;
 const PARTICLE_ID: &str = "0123456789ABCDEF";
 const MAX_STREAM_SIZE: usize = 1023;
 const MB: usize = 1024 * 1024;
+const SEED: u64 = 123456789;
 
 mod calls;
 mod cid_benchmarking;
@@ -752,24 +753,17 @@ fn big_values_data() -> Data {
 }
 
 fn generate_random_data(random_data_size: usize) -> Vec<u8> {
-    use rand::thread_rng;
+    use rand::rngs::StdRng;
     use rand::Rng;
+    use rand::SeedableRng;
 
     // hex::encode later prints out every byte as 2 bytes sequence.
     let random_data_size = random_data_size / 2 * MB;
 
-    let mut random_data = Vec::<u8>::with_capacity(random_data_size);
-    let mut rng = thread_rng();
+    let mut rng = StdRng::seed_from_u64(SEED);
+    let mut random_data = vec![0u8; random_data_size];
+    rng.fill(random_data.as_mut_slice());
 
-    while random_data.len() < random_data_size {
-        let remaining_space = random_data_size - random_data.len();
-        let chunk_size = std::cmp::min(rng.gen_range(1..=remaining_space), remaining_space);
-        let mut chunk = vec![0u8; chunk_size];
-        rng.fill(&mut chunk[..]);
-        random_data.extend_from_slice(&chunk);
-    }
-
-    random_data.truncate(random_data_size);
     random_data
 }
 
