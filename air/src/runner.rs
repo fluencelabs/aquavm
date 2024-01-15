@@ -66,6 +66,8 @@ fn execute_air_impl(
         current_data,
     } = farewell_if_fail!(parse_data(&raw_prev_data, &raw_current_data), raw_prev_data);
 
+    std::mem::drop(raw_current_data);
+
     // TODO currently we use particle ID, but it should be changed to signature,
     // as partical ID can be equally replayed
     let salt = params.particle_id.clone();
