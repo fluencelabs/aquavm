@@ -1,9 +1,0 @@
-(seq
-    (call "init_peer_id" ("" "init") [] data) ; ok = ["attrib": {data}]
-    (seq
-        (fold data.$.attrib unused
-            (next unused)
-        )
-        (canon "other_peer_id" %map #%canon)
-    )
-)
