@@ -15,7 +15,7 @@ name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk = {version = "0.10.2", optional = true }
+marine-rs-sdk = {version = "0.10.3", optional = true }
 fluence-it-types = { version = "0.4.1", optional = true }
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["msgpack"] }
 
