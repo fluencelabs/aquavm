@@ -1,0 +1,12 @@
+(seq
+    (call "init_peer_id" ("" "init") [] data) ; ok = [{data}]
+    (seq
+        (fold data unused
+            (seq
+                (ap unused.$.attrib $data)
+                (next unused)
+            )
+        )
+        (canon "other_peer_id" $data #$data)
+    )
+)
