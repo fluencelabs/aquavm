@@ -22,7 +22,7 @@ aquavm-air = { version = "0.58.0", path = "../air" }
 air-interpreter-interface = { version = "0.17.1", path = "../crates/air-lib/interpreter-interface" }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 
-marine-rs-sdk = {version = "0.10.2", features = ["logger"] }
+marine-rs-sdk = {version = "0.10.3", features = ["logger"] }
 
 wasm-bindgen = "=0.2.83"
 
