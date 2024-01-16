@@ -17,6 +17,7 @@
 use crate::RunnerError;
 use crate::RunnerResult;
 
+use air_interpreter_interface::try_as_string;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_sede::ToSerialized;
@@ -174,6 +175,20 @@ impl AVMRunner {
             .map_err(RunnerError::InterpreterResultDeError)?;
         let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
+        Ok(outcome)
+    }
+
+    pub fn to_human_readable_data(&mut self, data: Vec<u8>) -> RunnerResult<String> {
+        let args = vec![IValue::ByteArray(data)];
+
+        let result = self.marine.call_with_ivalues(
+            &self.wasm_filename,
+            "to_human_readable_data",
+            &args,
+            <_>::default(),
+        )?;
+        let result = try_as_one_value_vec(result)?;
+        let outcome = try_as_string(result, "result").map_err(RunnerError::Aux)?;
         Ok(outcome)
     }
 

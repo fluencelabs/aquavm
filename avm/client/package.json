@@ -1,7 +1,7 @@
 {
     "name": "@fluencelabs/avm",
     "description": "Aquamarine VM",
-    "version": "0.55.0",
+    "version": "0.58.0",
     "main": "./dist/index.js",
     "repository": "https://github.com/fluencelabs/air",
     "author": "Fluence Labs",
@@ -13,7 +13,10 @@
         "build": "tsc && ./build_wasm.sh"
     },
     "private": false,
-    "dependencies": {},
+    "dependencies": {
+        "msgpack-lite": "^0.1.26",
+        "multicodec": "^3.2.1"
+    },
     "devDependencies": {
         "typescript": "5.2.2"
     }

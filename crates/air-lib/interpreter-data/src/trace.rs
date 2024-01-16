@@ -28,6 +28,8 @@ pub type TraceLen = u32;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct ExecutionTrace(Vec<ExecutedState>);
 
 impl ExecutionTrace {

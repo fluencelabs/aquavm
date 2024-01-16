@@ -111,6 +111,63 @@
     * air-interpreter-interface bumped from 0.15.1 to 0.15.2
     * air-test-utils bumped from 0.12.1 to 0.13.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.56.0 to 0.57.0
+    * avm-data-store bumped from 0.7.4 to 0.7.5
+    * avm-interface bumped from 0.30.0 to 0.31.0
+    * air-interpreter-interface bumped from 0.16.0 to 0.17.0
+    * air-test-utils bumped from 0.14.0 to 0.14.1
+
+## [0.6.2](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.6.1...aquavm-air-cli-v0.6.2) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.57.0 to 0.58.0
+    * avm-data-store bumped from 0.7.5 to 0.7.6
+    * avm-interface bumped from 0.31.0 to 0.31.1
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * air-interpreter-data bumped from 0.16.0 to 0.17.0
+    * air-test-utils bumped from 0.14.1 to 0.15.0
+
+## [0.6.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.5.4...aquavm-air-cli-v0.6.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air-cli:** introduce risc-0 extension ([#681](https://github.com/fluencelabs/aquavm/issues/681))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **air-cli:** introduce risc-0 extension ([#681](https://github.com/fluencelabs/aquavm/issues/681)) ([26429ea](https://github.com/fluencelabs/aquavm/commit/26429eaca2e09cee7cf304fd0dddb4439a44a775))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.4 ([#752](https://github.com/fluencelabs/aquavm/issues/752)) ([c9a0b87](https://github.com/fluencelabs/aquavm/commit/c9a0b87a4cefa3509b040c24d23cca37757fc030))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.55.0 to 0.56.0
+    * air-beautifier bumped from 0.4.0 to 0.4.1
+    * avm-data-store bumped from 0.7.3 to 0.7.4
+    * avm-interface bumped from 0.29.3 to 0.30.0
+    * air-interpreter-interface bumped from 0.15.2 to 0.16.0
+    * air-test-utils bumped from 0.13.0 to 0.14.0
+
 ## [0.5.3](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.5.2...aquavm-air-cli-v0.5.3) (2023-10-26)
 
 

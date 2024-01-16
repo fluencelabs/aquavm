@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.58.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.57.0...avm-client-v0.58.0) (2024-01-11)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.57.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.56.0...avm-client-v0.57.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780))
+
+### Features
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780)) ([325eea7](https://github.com/fluencelabs/aquavm/commit/325eea7e9130e236b4e84ebb883632becffa28b5))
+
+## [0.56.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.55.0...avm-client-v0.56.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **avm-client:** implement pluggable formats in JS ([#776](https://github.com/fluencelabs/aquavm/issues/776)) ([eaa4077](https://github.com/fluencelabs/aquavm/commit/eaa40778c78dd58bb7791f7fcdf966cbd59911ad))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
 ## [0.55.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.54.0...avm-client-v0.55.0) (2023-12-12)
 
 

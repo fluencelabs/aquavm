@@ -56,6 +56,9 @@ pub enum ParserError {
 
     #[error("error code 0 with fail is unsupported")]
     UnsupportedLiteralErrCodes { span: Span },
+
+    #[error("fold can not have instructions after next")]
+    FoldHasInstructionAfterNext(Span),
 }
 
 impl ParserError {
@@ -71,6 +74,7 @@ impl ParserError {
             Self::MultipleNextInFold { span, .. } => *span,
             Self::UnsupportedMapKeyType { span, .. } => *span,
             Self::UnsupportedLiteralErrCodes { span } => *span,
+            Self::FoldHasInstructionAfterNext(span) => *span,
         }
     }
 
@@ -123,6 +127,10 @@ impl ParserError {
 
     pub fn unsupported_literal_errcodes(span: Span) -> Self {
         Self::UnsupportedLiteralErrCodes { span }
+    }
+
+    pub fn fold_has_instruction_after_next(span: Span) -> Self {
+        Self::FoldHasInstructionAfterNext(span)
     }
 }
 

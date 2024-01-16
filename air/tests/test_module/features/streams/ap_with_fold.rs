@@ -48,8 +48,8 @@ fn ap_with_fold() {
                             (next pair)))
                     (fold $inner ns
                         (par
-                            (next ns)
-                            (null))))
+                            (null)
+                            (next ns))))
                 (seq
                     (call "{local_vm_peer_id}" ("op" "noop") [])
                     (seq

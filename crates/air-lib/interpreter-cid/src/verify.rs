@@ -54,6 +54,53 @@ pub fn verify_value<Val: Serialize>(
     }
 }
 
+pub fn verify_raw_value<Val>(
+    cid: &CID<Val>,
+    raw_value: impl AsRef<[u8]>,
+) -> Result<(), CidVerificationError> {
+    use digest::Digest;
+    use multihash_codetable::Code;
+
+    let real_cid: cid::Cid = cid.try_into()?;
+
+    let codec = real_cid.codec();
+    // we insist ATM that raw values should be JSON-encoded, but
+    // we do not validate that it is valid JSON data
+    if codec != JSON_CODEC {
+        return Err(CidVerificationError::UnsupportedCidCodec(codec));
+    }
+
+    let mhash = real_cid.hash();
+    let raw_code = mhash.code();
+
+    let code: Code = raw_code
+        .try_into()
+        .map_err(|_| CidVerificationError::UnsupportedHashCode(raw_code))?;
+
+    let expected_hash = match code {
+        Code::Sha2_256 => {
+            let mut hasher = sha2::Sha256::new();
+            hasher.update(raw_value);
+            hasher.finalize().to_vec()
+        }
+        Code::Blake3_256 => {
+            let mut hasher = blake3::Hasher::new();
+            hasher.update(raw_value.as_ref());
+            hasher.finalize().to_vec()
+        }
+        _ => return Err(CidVerificationError::UnsupportedHashCode(raw_code)),
+    };
+    // actually, multihash may contain less bytes than the full hash; to avoid abuse, we reject such multihashes
+    if expected_hash == mhash.digest() {
+        Ok(())
+    } else {
+        Err(CidVerificationError::ValueMismatch {
+            type_name: std::any::type_name::<Val>(),
+            cid_repr: cid.get_inner(),
+        })
+    }
+}
+
 fn verify_json_value<Val: Serialize>(
     mhash: &multihash_codetable::Multihash,
     value: &Val,

@@ -62,6 +62,31 @@
     * air-test-utils bumped from 0.12.0 to 0.12.1
     * air-interpreter-signatures bumped from 0.1.3 to 0.1.4
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.14.0 to 0.14.1
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.14.1 to 0.15.0
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+
+## [0.8.1](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.8.0...air-testing-framework-v0.8.1) (2024-01-03)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.4 ([#752](https://github.com/fluencelabs/aquavm/issues/752)) ([c9a0b87](https://github.com/fluencelabs/aquavm/commit/c9a0b87a4cefa3509b040c24d23cca37757fc030))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.13.0 to 0.14.0
+    * aquavm-air-parser bumped from 0.11.0 to 0.11.1
+    * air-interpreter-signatures bumped from 0.1.5 to 0.1.6
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.7.3...air-testing-framework-v0.8.0) (2023-12-12)
 
 

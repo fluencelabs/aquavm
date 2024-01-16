@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.17.0...air-interpreter-interface-v0.17.1) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+## [0.17.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.16.0...air-interpreter-interface-v0.17.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780))
+
+### Features
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780)) ([325eea7](https://github.com/fluencelabs/aquavm/commit/325eea7e9130e236b4e84ebb883632becffa28b5))
+
+## [0.16.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.2...air-interpreter-interface-v0.16.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-call-parameters to 0.10.2 ([#732](https://github.com/fluencelabs/aquavm/issues/732)) ([763bbcb](https://github.com/fluencelabs/aquavm/commit/763bbcb663ba445ed19431929823e7bfcc6d910c))
+* **deps:** update rust crate marine-call-parameters to 0.10.3 ([#781](https://github.com/fluencelabs/aquavm/issues/781)) ([518bb95](https://github.com/fluencelabs/aquavm/commit/518bb95a178ab1508d27b1fa71bd205ef05dea8e))
+
 ## [0.15.2](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.15.1...air-interpreter-interface-v0.15.2) (2023-12-12)
 
 

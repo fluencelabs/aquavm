@@ -36,71 +36,85 @@ pub use crate::trackers::*;
 pub use fluence_keypair::KeyFormat;
 
 use borsh::BorshSerialize;
+use fluence_keypair::error::DecodingError;
 use fluence_keypair::error::SigningError;
 use serde::{Deserialize, Serialize};
 
 use std::hash::Hash;
-use std::ops::Deref;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum KeyError {
     #[error("signature algorithm {0:?} not whitelisted")]
     AlgorithmNotWhitelisted(fluence_keypair::KeyFormat),
     #[error("invalid key data: {0}")]
-    InvalidKeyData(#[from] fluence_keypair::error::DecodingError),
+    InvalidKeyData(#[from] DecodingError),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum VerificationError {
+    #[error("incorrect key: {0}")]
+    InvalidKey(DecodingError),
+    #[error("incorrect signature: {0}")]
+    InvalidSignature(DecodingError),
+    #[error(transparent)]
+    Verification(#[from] fluence_keypair::error::VerificationError),
 }
 
 /// An opaque serializable representation of a public key.
 ///
 /// It can be a string or a binary, you shouldn't care about it unless you change serialization format.
 // surrent implementation serializes to string as it is used as a key in a JSON map
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize, Hash)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)
+)]
+#[cfg_attr(feature = "rkyv", archive_attr(derive(PartialEq, Eq, Hash)))]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct PublicKey(
     #[serde(
         deserialize_with = "sede::b58_to_public_key",
         serialize_with = "sede::public_key_to_b58"
     )]
-    fluence_keypair::PublicKey,
+    Box<[u8]>,
 );
 
 impl PublicKey {
     pub fn new(inner: fluence_keypair::PublicKey) -> Self {
-        Self(inner)
+        Self(inner.encode().into())
     }
 
     pub fn verify<T: BorshSerialize + ?Sized>(
         &self,
         value: &T,
         salt: &str,
-        signature: &fluence_keypair::Signature,
-    ) -> Result<(), fluence_keypair::error::VerificationError> {
-        let pk = &**self;
+        signature: &Signature,
+    ) -> Result<(), VerificationError> {
+        let pk =
+            fluence_keypair::PublicKey::decode(&self.0).map_err(VerificationError::InvalidKey)?;
+        let signature = fluence_keypair::Signature::decode(signature.0.to_vec())
+            .map_err(VerificationError::InvalidSignature)?;
 
         let serialized_value = SaltedData::new(&value, salt).serialize();
-        pk.verify(&serialized_value, signature)
+        Ok(pk.verify(&serialized_value, &signature)?)
     }
 
-    pub fn to_peer_id(&self) -> String {
-        self.0.to_peer_id().to_string()
+    pub fn to_peer_id(&self) -> Result<String, KeyError> {
+        // TODO cache the public key, or verify key format in Rkyv verification/deserialization
+        let pk = fluence_keypair::PublicKey::decode(&self.0)?;
+        Ok(pk.to_peer_id().to_string())
     }
 
     pub fn validate(&self) -> Result<(), KeyError> {
-        let key_format = self.get_key_format();
+        let pk = fluence_keypair::PublicKey::decode(&self.0)?;
+        let key_format = pk.get_key_format();
         validate_with_key_format((), key_format)
     }
 }
 
-impl Deref for PublicKey {
-    type Target = fluence_keypair::PublicKey;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl Hash for PublicKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.to_vec().hash(state);
+impl ToString for PublicKey {
+    fn to_string(&self) -> String {
+        bs58::encode(self.0.as_ref()).into_string()
     }
 }
 
@@ -143,13 +157,6 @@ impl KeyPair {
     pub fn as_inner(&self) -> &fluence_keypair::KeyPair {
         &self.0
     }
-
-    #[cfg(feature = "rand")]
-    pub fn generate(key_format: KeyFormat) -> Result<Self, KeyError> {
-        validate_with_key_format((), key_format)?;
-
-        Ok(Self(fluence_keypair::KeyPair::generate(key_format)))
-    }
 }
 
 impl TryFrom<fluence_keypair::KeyPair> for KeyPair {
@@ -167,6 +174,9 @@ impl From<KeyPair> for fluence_keypair::KeyPair {
 }
 
 pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Result<V, KeyError> {
+    // this allow is needed in order to support old versions of the fluence_keypair
+    // repos which is used to build it for RISC-0
+    #[allow(unreachable_patterns)]
     match key_format {
         fluence_keypair::KeyFormat::Ed25519 => Ok(inner),
         _ => Err(KeyError::AlgorithmNotWhitelisted(key_format)),
@@ -179,37 +189,28 @@ pub(crate) fn validate_with_key_format<V>(inner: V, key_format: KeyFormat) -> Re
 // surrent implementation serializes string as more compact in JSON representation than number array
 #[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(transparent)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)
+)]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
 pub struct Signature(
     #[serde(
         deserialize_with = "sede::b58_to_signature",
         serialize_with = "sede::signature_to_b58"
     )]
-    fluence_keypair::Signature,
+    Box<[u8]>,
 );
 
 impl Signature {
     fn new(signature: fluence_keypair::Signature) -> Self {
-        Self(signature)
-    }
-}
-
-impl Deref for Signature {
-    type Target = fluence_keypair::Signature;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+        Self(signature.encode().into())
     }
 }
 
 impl From<fluence_keypair::Signature> for Signature {
     fn from(value: fluence_keypair::Signature) -> Self {
-        Self(value)
-    }
-}
-
-impl From<Signature> for fluence_keypair::Signature {
-    fn from(value: Signature) -> Self {
-        value.0
+        Self(value.encode().into())
     }
 }
 

@@ -18,6 +18,8 @@ use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
 use fluence_keypair::KeyPair;
 
+use std::error::Error as StdError;
+
 pub(crate) trait AirRunner {
     #[allow(clippy::too_many_arguments)]
     fn call_tracing(
@@ -35,4 +37,8 @@ pub(crate) trait AirRunner {
         key_pair: &KeyPair,
         particle_id: String,
     ) -> anyhow::Result<RawAVMOutcome>;
+}
+
+pub(crate) trait DataToHumanReadable {
+    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>>;
 }

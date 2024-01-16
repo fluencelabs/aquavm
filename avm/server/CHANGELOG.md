@@ -16,6 +16,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.1 to 0.7.2
     * avm-interface bumped from 0.29.1 to 0.29.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.16.0 to 0.17.0
+    * avm-data-store bumped from 0.7.4 to 0.7.5
+    * avm-interface bumped from 0.30.0 to 0.31.0
+
+## [0.34.2](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.34.1...avm-server-v0.34.2) (2024-01-11)
+
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * avm-data-store bumped from 0.7.5 to 0.7.6
+    * polyplets bumped from 0.5.2 to 0.6.0
+    * avm-interface bumped from 0.31.0 to 0.31.1
+
+## [0.34.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.4...avm-server-v0.34.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.4 ([#752](https://github.com/fluencelabs/aquavm/issues/752)) ([c9a0b87](https://github.com/fluencelabs/aquavm/commit/c9a0b87a4cefa3509b040c24d23cca37757fc030))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.15.2 to 0.16.0
+    * avm-data-store bumped from 0.7.3 to 0.7.4
+    * polyplets bumped from 0.5.1 to 0.5.2
+    * avm-interface bumped from 0.29.3 to 0.30.0
+
 ## [0.33.4](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.33.3...avm-server-v0.33.4) (2023-12-12)
 
 
