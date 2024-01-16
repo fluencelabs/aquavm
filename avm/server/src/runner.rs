@@ -28,6 +28,7 @@ use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
 use marine::ModuleDescriptor;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use std::path::PathBuf;
 
@@ -35,6 +36,7 @@ pub struct AVMRunner {
     marine: Marine,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
+    pub wasm_backend: WasmtimeWasmBackend,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -48,20 +50,22 @@ pub struct AVMMemoryStats {
 
 impl AVMRunner {
     /// Create AVM with the provided config.
-    pub fn new(
+    pub async fn new(
         air_wasm_path: PathBuf,
         max_heap_size: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
+        let wasm_backend = WasmtimeWasmBackend::default();
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
-        let marine = Marine::with_raw_config(marine_config)?;
+        let marine = Marine::with_raw_config(wasm_backend.clone(), marine_config).await?;
 
         let avm = Self {
             marine,
             wasm_filename,
+            wasm_backend,
         };
 
         Ok(avm)
@@ -69,7 +73,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub fn call(
+    pub async fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -103,7 +107,7 @@ impl AVMRunner {
 
         let result = measure!(
             self.marine
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default()).await?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke",
@@ -119,7 +123,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub fn call_tracing(
+    pub async fn call_tracing(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -157,7 +161,7 @@ impl AVMRunner {
                 "invoke_tracing",
                 &args,
                 <_>::default(),
-            )?,
+            ).await?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke_tracing",
@@ -175,11 +179,11 @@ impl AVMRunner {
         let stats = self.marine.module_memory_stats();
 
         // only the interpreters must be loaded in Marine
-        debug_assert!(stats.len() == 1);
+        debug_assert!(stats.modules.len() == 1);
 
         AVMMemoryStats {
-            memory_size: stats[0].memory_size,
-            max_memory_size: stats[0].max_memory_size,
+            memory_size: stats.modules[0].memory_size,
+            max_memory_size: None
         }
     }
 }
@@ -264,12 +268,10 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
 fn make_marine_config(
     air_wasm_dir: PathBuf,
     air_wasm_file: &str,
-    max_heap_size: Option<u64>,
+    _max_heap_size: Option<u64>,
     logging_mask: i32,
 ) -> MarineConfig {
     let air_module_config = marine::MarineModuleConfig {
-        mem_pages_count: None,
-        max_heap_size,
         logger_enabled: true,
         host_imports: <_>::default(),
         wasi: None,
@@ -277,6 +279,7 @@ fn make_marine_config(
     };
 
     MarineConfig {
+        total_memory_limit: None,
         modules_dir: Some(air_wasm_dir),
         modules_config: vec![ModuleDescriptor {
             load_from: None,

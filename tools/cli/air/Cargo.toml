@@ -39,7 +39,7 @@ tokio = { version = "1", features = ["rt"], optional = true }
 workspaces = { version = "0.7.0", optional = true }
 
 [features]
-default = ["wasm"]
+default = ["wasm", "dep:tokio"]
 wasm = ["air-test-utils"]
 gen_signatures = ["aquavm-air/gen_signatures"]
 check_signatures = ["aquavm-air/check_signatures"]

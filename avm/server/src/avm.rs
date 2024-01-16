@@ -60,7 +60,7 @@ pub struct AVM<E> {
 impl<E> AVM<E> {
     /// Create AVM with provided config.
     #[allow(clippy::result_large_err)]
-    pub fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
+    pub async fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
         let AVMConfig {
             air_wasm_path,
             max_heap_size,
@@ -71,6 +71,7 @@ impl<E> AVM<E> {
         data_store.initialize()?;
 
         let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask)
+            .await
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };
@@ -79,7 +80,7 @@ impl<E> AVM<E> {
     }
 
     #[allow(clippy::result_large_err)]
-    pub fn call(
+    pub async fn call(
         &mut self,
         air: impl Into<String>,
         data: impl Into<Vec<u8>>,
@@ -110,6 +111,7 @@ impl<E> AVM<E> {
                 keypair,
                 particle_parameters.particle_id.to_string(),
             )
+            .await
             .map_err(AVMError::RunnerError)?;
 
         let execution_time = execution_start_time.elapsed();

@@ -21,6 +21,7 @@ use fluence_keypair::KeyPair;
 use once_cell::sync::OnceCell;
 
 use std::path::PathBuf;
+//use object_pool::Reusable;
 
 // 10 Mb
 const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
@@ -32,7 +33,7 @@ pub struct WasmAirRunner {
     runner: object_pool::Reusable<'static, AVMRunner>,
 }
 
-fn make_pooled_avm_runner() -> AVMRunner {
+async fn make_pooled_avm_runner() -> AVMRunner {
     let logging_mask = i32::MAX;
 
     AVMRunner::new(
@@ -40,6 +41,7 @@ fn make_pooled_avm_runner() -> AVMRunner {
         Some(AVM_MAX_HEAP_SIZE),
         logging_mask,
     )
+    .await
     .expect("vm should be created")
 }
 
@@ -55,7 +57,16 @@ impl AirRunner for WasmAirRunner {
             )
         });
 
-        let runner = pool.pull(make_pooled_avm_runner);
+
+        let runner = match pool.try_pull() {
+            Some(runner) => runner,
+            None => {
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                let runner = rt.block_on(make_pooled_avm_runner());
+                pool.attach(runner);
+                pool.try_pull().unwrap()
+            }
+        };
 
         Self {
             current_peer_id: current_peer_id.into(),
@@ -79,7 +90,8 @@ impl AirRunner for WasmAirRunner {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        Ok(self.runner.call(
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        Ok(rt.block_on(self.runner.call(
             air,
             prev_data,
             data,
@@ -90,7 +102,7 @@ impl AirRunner for WasmAirRunner {
             call_results,
             keypair,
             particle_id,
-        )?)
+        ))?)
     }
 
     fn get_current_peer_id(&self) -> &str {
@@ -108,12 +120,13 @@ pub struct ReleaseWasmAirRunner {
 impl AirRunner for ReleaseWasmAirRunner {
     fn new(current_peer_id: impl Into<String>) -> Self {
         let logging_mask = i32::MAX;
+        let rt = tokio::runtime::Runtime::new().unwrap();
 
-        let runner = AVMRunner::new(
+        let runner = rt.block_on(AVMRunner::new(
             PathBuf::from(RELEASE_AIR_WASM_PATH),
             Some(AVM_MAX_HEAP_SIZE),
             logging_mask,
-        )
+        ))
         .expect("vm should be created");
 
         Self {
@@ -138,7 +151,8 @@ impl AirRunner for ReleaseWasmAirRunner {
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        Ok(self.runner.call(
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        Ok(rt.block_on(self.runner.call(
             air,
             prev_data,
             data,
@@ -149,7 +163,7 @@ impl AirRunner for ReleaseWasmAirRunner {
             call_results,
             keypair,
             particle_id,
-        )?)
+        ))?)
     }
 
     fn get_current_peer_id(&self) -> &str {
