@@ -21,7 +21,6 @@ use air_interpreter_data::CidStoreVerificationError;
 use air_interpreter_data::DataDeserializationError;
 use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsDeserializeError;
-use air_interpreter_interface::SerializedCallResults;
 use strum::IntoEnumIterator;
 use strum_macros::EnumDiscriminants;
 use strum_macros::EnumIter;
@@ -39,57 +38,41 @@ pub enum PreparationError {
     #[error(
         "an error occurred while data deserialization: {error:?}.\n\
         AquaVM version is {} and it expect data of {} version,\
-        it's failed to get version of AquaVM produced this data.\n\
-        Data: {raw_data:?}",
+        it's failed to get version of AquaVM produced this data.",
         super::interpreter_version(),
         data_version()
     )]
-    DataDeFailed {
-        raw_data: Vec<u8>,
-        error: DataDeserializationError,
-    },
+    DataDeFailed { error: DataDeserializationError },
 
     /// Errors occurred on executed trace deserialization.
     #[error(
         "an error occurred while envelope deserialization: {error:?}.\n\
         AquaVM version is {} and it expect data of {} version,\
-        it's failed to get version of AquaVM produced this data.\n\
-        Envelope data: {env_raw_data:?}",
+        it's failed to get version of AquaVM produced this data.",
         super::interpreter_version(),
         data_version()
     )]
-    EnvelopeDeFailed {
-        env_raw_data: Vec<u8>,
-        error: DataDeserializationError,
-    },
+    EnvelopeDeFailed { error: DataDeserializationError },
 
     /// Errors occurred on executed trace deserialization
     /// when it was possible to recover versions.
     #[error(
         "an error occurred while data deserialization: {error:?}.\n\
         AquaVM's version is {} and it expects data of {} version.\n\
-        Supplied data version is {}, it's produced by AquaVM of {} version.\n\
-        Envelope data: {env_raw_data:?}",
+        Supplied data version is {}, it's produced by AquaVM of {} version.",
         super::interpreter_version(),
         data_version(),
         versions.data_version,
         versions.interpreter_version,
     )]
     EnvelopeDeFailedWithVersions {
-        env_raw_data: Vec<u8>,
         error: DataDeserializationError,
         versions: Versions,
     },
 
     /// Error occurred on call results deserialization.
-    #[error(
-        "error occurred while deserialize call results: {error:?}.\n\
-    Call results: {call_results:?}"
-    )]
-    CallResultsDeFailed {
-        call_results: SerializedCallResults,
-        error: CallResultsDeserializeError,
-    },
+    #[error("error occurred while deserialize call results: {error:?}.")]
+    CallResultsDeFailed { error: CallResultsDeserializeError },
 
     /// Error occurred when a version of interpreter produced supplied data is less then minimal.
     #[error("supplied data was produced by `{actual_version}` version of interpreter, but minimum `{required_version}` version is required")]
@@ -119,28 +102,20 @@ impl ToErrorCode for PreparationError {
 }
 
 impl PreparationError {
-    pub fn data_de_failed(raw_data: Vec<u8>, error: DataDeserializationError) -> Self {
-        Self::DataDeFailed { raw_data, error }
+    pub fn data_de_failed(error: DataDeserializationError) -> Self {
+        Self::DataDeFailed { error }
     }
 
-    pub fn envelope_de_failed(env_raw_data: Vec<u8>, error: DataDeserializationError) -> Self {
-        Self::EnvelopeDeFailed { env_raw_data, error }
+    pub fn envelope_de_failed(error: DataDeserializationError) -> Self {
+        Self::EnvelopeDeFailed { error }
     }
 
-    pub fn env_de_failed_with_versions(
-        env_raw_data: Vec<u8>,
-        error: DataDeserializationError,
-        versions: Versions,
-    ) -> Self {
-        Self::EnvelopeDeFailedWithVersions {
-            env_raw_data,
-            error,
-            versions,
-        }
+    pub fn env_de_failed_with_versions(error: DataDeserializationError, versions: Versions) -> Self {
+        Self::EnvelopeDeFailedWithVersions { error, versions }
     }
 
-    pub fn call_results_de_failed(call_results: SerializedCallResults, error: CallResultsDeserializeError) -> Self {
-        Self::CallResultsDeFailed { call_results, error }
+    pub fn call_results_de_failed(error: CallResultsDeserializeError) -> Self {
+        Self::CallResultsDeFailed { error }
     }
 
     pub fn unsupported_interpreter_version(actual_version: semver::Version, required_version: semver::Version) -> Self {
