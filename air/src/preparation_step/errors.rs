@@ -109,6 +109,18 @@ pub enum PreparationError {
     /// Failed to check peers' signatures.
     #[error(transparent)]
     DataSignatureCheckError(#[from] DataVerifierError),
+
+    /// AIR script size is bigger than the allowed limit.
+    #[error("air size: {0} bytes is bigger than a limit allowed: {1} bytes")]
+    AIRSizeLimitReached(usize, usize),
+
+    /// Current_data particle size is bigger than the allowed limit.
+    #[error("Current_data particle size: {0} bytes is bigger than a limit allowed: {1} bytes")]
+    ParticleSizeLimitReached(usize, usize),
+
+    /// CallResults cummulative size is bigger than the allowed limit.
+    #[error("Call results cummulative size: {0} bytes is bigger than a limit allowed: {1} bytes")]
+    CallResultsSizeLimitReached(usize, usize),
 }
 
 impl ToErrorCode for PreparationError {
@@ -148,5 +160,17 @@ impl PreparationError {
             actual_version,
             required_version,
         }
+    }
+
+    pub fn air_size_limit(actual_size: usize, limit: usize) -> Self {
+        Self::AIRSizeLimitReached(actual_size, limit)
+    }
+
+    pub fn particle_size_limit(actual_size: usize, limit: usize) -> Self {
+        Self::ParticleSizeLimitReached(actual_size, limit)
+    }
+
+    pub fn call_results_size_limit(actual_size: usize, limit: usize) -> Self {
+        Self::CallResultsSizeLimitReached(actual_size, limit)
     }
 }

@@ -61,6 +61,13 @@ fn execute_air_impl(
     params: RunParameters,
     call_results: SerializedCallResults,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
+    use crate::preparation_step::check_against_size_limits;
+
+    farewell_if_fail!(
+        check_against_size_limits(&air, &raw_current_data, &call_results),
+        raw_prev_data
+    );
+
     let ParsedDataPair {
         prev_data,
         current_data,

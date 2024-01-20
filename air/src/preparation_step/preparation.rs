@@ -34,7 +34,7 @@ use air_parser::ast::Instruction;
 use air_utils::measure;
 use fluence_keypair::KeyFormat;
 
-type PreparationResult<T> = Result<T, PreparationError>;
+pub(crate) type PreparationResult<T> = Result<T, PreparationError>;
 
 /// Represents result of the preparation_step step.
 pub(crate) struct PreparationDescriptor<'ctx, 'i> {

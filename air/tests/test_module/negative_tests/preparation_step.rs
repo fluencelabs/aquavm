@@ -119,3 +119,55 @@ fn invalid_callresults() {
 
     assert!(check_error(&result, expected_error));
 }
+
+#[test]
+fn air_size_limit() {
+    use air::MAX_AIR_SIZE;
+
+    let script = "a".repeat(MAX_AIR_SIZE + 1);
+    let mut vm = create_avm(unit_call_service(), "some_peer_id");
+    let result = vm.call(script, "", "", <_>::default()).unwrap();
+
+    let expected_error = PreparationError::AIRSizeLimitReached(MAX_AIR_SIZE + 1, MAX_AIR_SIZE);
+
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn particle_size_limit() {
+    use air::MAX_PARTICLE_SIZE;
+
+    let script = "(null)";
+    let mut vm = create_avm(unit_call_service(), "some_peer_id");
+    let cur_data = vec![0; MAX_PARTICLE_SIZE + 1];
+    let result = vm.call(script, "", cur_data, <_>::default()).unwrap();
+
+    let expected_error = PreparationError::ParticleSizeLimitReached(MAX_PARTICLE_SIZE + 1, MAX_PARTICLE_SIZE);
+
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn call_results_size_limit() {
+    use maplit::hashmap;
+
+    use air::ToErrorCode;
+    use air::MAX_CALL_RESULTS_SIZE;
+
+    let peer_id = "some_peer_id";
+    let mut vm = create_avm(unit_call_service(), "some_peer_id");
+
+    let script = "(null)";
+    let result_1 = "a".repeat(MAX_CALL_RESULTS_SIZE / 2 + 1);
+    let result_2 = "b".repeat(MAX_CALL_RESULTS_SIZE / 2 + 1);
+    let call_results: CallResults =
+        hashmap! {0 => CallServiceResult::ok(result_1.into()), 1 => CallServiceResult::ok(result_2.into())};
+
+    let result = vm
+        .call_single(script, "", "", peer_id, 0, 64, None, call_results, "particle_id")
+        .unwrap();
+
+    let expected_error =
+        PreparationError::CallResultsSizeLimitReached(MAX_CALL_RESULTS_SIZE + 1, MAX_CALL_RESULTS_SIZE);
+    assert_eq!(result.ret_code, expected_error.to_error_code());
+}
