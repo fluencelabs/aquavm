@@ -16,6 +16,7 @@ on:
   push:
     branches:
       - "master"
+      - "chore/avm-server-0.33.4-tag"
     paths-ignore:
       - "**.md"
       - ".github/**"
