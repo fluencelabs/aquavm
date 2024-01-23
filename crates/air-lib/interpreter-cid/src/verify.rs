@@ -16,6 +16,7 @@
 
 use crate::{value_json_hash, CidRef, CID, JSON_CODEC};
 
+use fluence_blake3 as blake3;
 use serde::Serialize;
 use thiserror::Error as ThisError;
 
