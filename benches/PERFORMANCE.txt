@@ -886,480 +886,499 @@ Machine c1f3ea5950db0a10b44da931c25774d64ab25084f47d504f72f311e694550ff1:
             new: 38.00µs
 Machine d77ebe8481884bc3b2778c8083f1bf459e548e929edd87041beb14f6b868d35f:
   Platform: macOS-14.2.1-arm64-arm-64bit
-  Timestamp: 2024-01-15 13:34:26.190121+00:00
+  Timestamp: 2024-01-23 20:02:08.386625+00:00
   AquaVM version: 0.58.0
   Benches:
   Features: check_signatures,gen_signatures
-    big-values-data (2.86ms; 56.250 MiB, 56.250 MiB): Loading a trace with huge values
-      air::runner::execute_air: 2.86ms
-        preparation_step::preparation::parse_data: 495.00µs
-          serialize: 38.00µs
-          try_from_slice: 364.00µs
-        preparation_step::preparation::prepare: 158.00µs
-          air::preparation_step::preparation::make_exec_ctx: 42.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 32.00µs
-        runner::execute: 9.00µs
-        runner::farewell: 402.00µs
-          from_success_result: 382.00µs
-            populate_outcome_from_contexts: 347.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 59.00µs
-              air_interpreter_data::interpreter_data::serialize: 154.00µs
-        signing_step::sign_produced_cids: 63.00µs
-        verification_step::verify: 1.58ms
-          verify: 1.33ms
-    call-requests500 (19.56ms; 57.375 MiB, 57.438 MiB): multiple call requests
-      air::runner::execute_air: 19.56ms
-        preparation_step::preparation::parse_data: 202.00µs
+    big-values-data (2.38ms; 56.250 MiB, 56.250 MiB): Loading a trace with huge values
+      air::runner::execute_air: 2.38ms
+        preparation_step::preparation::parse_data: 507.00µs
           serialize: 35.00µs
-          try_from_slice: 82.00µs
-        preparation_step::preparation::prepare: 214.00µs
-          air::preparation_step::preparation::make_exec_ctx: 52.00µs
-            CallResultsRepr.deserialize: 21.00µs
-          air_parser::parser::air_parser::parse: 70.00µs
-        runner::execute: 18.06ms
+          try_from_slice: 370.00µs
+        preparation_step::preparation::prepare: 153.00µs
+          air::preparation_step::preparation::make_exec_ctx: 46.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 26.00µs
+        runner::execute: 9.00µs
+        runner::farewell: 409.00µs
+          from_success_result: 389.00µs
+            populate_outcome_from_contexts: 352.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 61.00µs
+              air_interpreter_data::interpreter_data::serialize: 156.00µs
+        signing_step::sign_produced_cids: 68.00µs
+        verification_step::verify: 1.08ms
+          verify: 836.00µs
+    call-requests500 (19.60ms; 57.375 MiB, 57.438 MiB): multiple call requests
+      air::runner::execute_air: 19.60ms
+        preparation_step::preparation::parse_data: 196.00µs
+          serialize: 29.00µs
+          try_from_slice: 72.00µs
+        preparation_step::preparation::prepare: 208.00µs
+          air::preparation_step::preparation::make_exec_ctx: 49.00µs
+            CallResultsRepr.deserialize: 19.00µs
+          air_parser::parser::air_parser::parse: 69.00µs
+        runner::execute: 18.10ms
         runner::farewell: 786.00µs
           from_success_result: 766.00µs
             populate_outcome_from_contexts: 660.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 417.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 20.00µs
-              air_interpreter_data::interpreter_data::serialize: 78.00µs
-        signing_step::sign_produced_cids: 63.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 422.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 18.00µs
+              air_interpreter_data::interpreter_data::serialize: 79.00µs
+        signing_step::sign_produced_cids: 70.00µs
         verification_step::verify: 84.00µs
-          verify: 9.00µs
-    call-result-100mb (328.80ms; 580.375 MiB, 580.375 MiB): benchmarking
-      air::runner::execute_air: 328.80ms
-        preparation_step::preparation::parse_data: 26.52ms
-          serialize: 39.00µs
-          try_from_slice: 26.36ms
-        preparation_step::preparation::prepare: 208.00µs
-          air::preparation_step::preparation::make_exec_ctx: 45.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 72.00µs
-        runner::execute: 137.00ms
-        runner::farewell: 28.10ms
-          from_success_result: 28.08ms
-            populate_outcome_from_contexts: 28.00ms
+          verify: 12.00µs
+    call-result-100mb (263.90ms; 580.375 MiB, 580.375 MiB): benchmarking
+      air::runner::execute_air: 263.90ms
+        preparation_step::preparation::parse_data: 25.52ms
+          serialize: 32.00µs
+          try_from_slice: 25.35ms
+        preparation_step::preparation::prepare: 204.00µs
+          air::preparation_step::preparation::make_exec_ctx: 51.00µs
+            CallResultsRepr.deserialize: 11.00µs
+          air_parser::parser::air_parser::parse: 64.00µs
+        runner::execute: 137.20ms
+        runner::farewell: 24.63ms
+          from_success_result: 24.62ms
+            populate_outcome_from_contexts: 24.58ms
               air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 8.23ms
-              air_interpreter_data::interpreter_data::serialize: 19.63ms
-        signing_step::sign_produced_cids: 77.00µs
-        verification_step::verify: 136.40ms
-          verify: 136.10ms
-    call-results500 (16.11ms; 54.438 MiB, 54.438 MiB): multiple call results
-      air::runner::execute_air: 16.11ms
-        preparation_step::preparation::parse_data: 300.00µs
-          serialize: 35.00µs
-          try_from_slice: 179.00µs
-        preparation_step::preparation::prepare: 366.00µs
-          air::preparation_step::preparation::make_exec_ctx: 204.00µs
-            CallResultsRepr.deserialize: 172.00µs
-          air_parser::parser::air_parser::parse: 71.00µs
-        runner::execute: 13.65ms
-        runner::farewell: 1.31ms
-          from_success_result: 1.29ms
-            populate_outcome_from_contexts: 821.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 7.05ms
+              air_interpreter_data::interpreter_data::serialize: 17.37ms
+        signing_step::sign_produced_cids: 84.00µs
+        verification_step::verify: 76.26ms
+          verify: 75.96ms
+    call-results500 (16.57ms; 54.438 MiB, 54.438 MiB): multiple call results
+      air::runner::execute_air: 16.57ms
+        preparation_step::preparation::parse_data: 304.00µs
+          serialize: 32.00µs
+          try_from_slice: 174.00µs
+        preparation_step::preparation::prepare: 361.00µs
+          air::preparation_step::preparation::make_exec_ctx: 203.00µs
+            CallResultsRepr.deserialize: 171.00µs
+          air_parser::parser::air_parser::parse: 70.00µs
+        runner::execute: 14.06ms
+        runner::farewell: 1.32ms
+          from_success_result: 1.30ms
+            populate_outcome_from_contexts: 824.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 49.00µs
-              air_interpreter_data::interpreter_data::serialize: 330.00µs
-        signing_step::sign_produced_cids: 250.00µs
-        verification_step::verify: 97.00µs
-          verify: 9.00µs
-    canon-map-100mb (661.40ms; 1.305 GiB, 1.305 GiB): benchmarking
-      air::runner::execute_air: 661.40ms
-        preparation_step::preparation::parse_data: 27.02ms
-          serialize: 39.00µs
-          try_from_slice: 26.85ms
-        preparation_step::preparation::prepare: 214.00µs
-          air::preparation_step::preparation::make_exec_ctx: 40.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 47.00µs
+              air_interpreter_data::interpreter_data::serialize: 335.00µs
+        signing_step::sign_produced_cids: 260.00µs
+        verification_step::verify: 100.00µs
+          verify: 13.00µs
+    canon-map-100mb (545.60ms; 1.305 GiB, 1.305 GiB): benchmarking
+      air::runner::execute_air: 545.60ms
+        preparation_step::preparation::parse_data: 25.25ms
+          serialize: 33.00µs
+          try_from_slice: 25.10ms
+        preparation_step::preparation::prepare: 198.00µs
+          air::preparation_step::preparation::make_exec_ctx: 50.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 82.00µs
-        runner::execute: 429.00ms
-        runner::farewell: 68.45ms
-          from_success_result: 68.44ms
-            populate_outcome_from_contexts: 68.38ms
+          air_parser::parser::air_parser::parse: 65.00µs
+        runner::execute: 375.50ms
+        runner::farewell: 68.33ms
+          from_success_result: 68.29ms
+            populate_outcome_from_contexts: 68.24ms
               air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 16.88ms
-              air_interpreter_data::interpreter_data::serialize: 51.32ms
-        signing_step::sign_produced_cids: 74.00µs
-        verification_step::verify: 136.10ms
-          verify: 136.00ms
-    canon-map-key-by-lens (8.57ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 8.57ms
-        preparation_step::preparation::parse_data: 1.66ms
-          serialize: 37.00µs
-          try_from_slice: 1.53ms
-        preparation_step::preparation::prepare: 368.00µs
-          air::preparation_step::preparation::make_exec_ctx: 208.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.50ms
+              air_interpreter_data::interpreter_data::serialize: 50.58ms
+        signing_step::sign_produced_cids: 85.00µs
+        verification_step::verify: 75.84ms
+          verify: 75.56ms
+    canon-map-key-by-lens (9.06ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 9.06ms
+        preparation_step::preparation::parse_data: 1.65ms
+          serialize: 33.00µs
+          try_from_slice: 1.52ms
+        preparation_step::preparation::prepare: 365.00µs
+          air::preparation_step::preparation::make_exec_ctx: 213.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 75.00µs
-        runner::execute: 2.19ms
+          air_parser::parser::air_parser::parse: 70.00µs
+        runner::execute: 2.21ms
         runner::farewell: 1.21ms
           from_success_result: 1.19ms
-            populate_outcome_from_contexts: 872.00µs
+            populate_outcome_from_contexts: 874.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 48.00µs
-              air_interpreter_data::interpreter_data::serialize: 516.00µs
-        signing_step::sign_produced_cids: 60.00µs
-        verification_step::verify: 2.92ms
-          verify: 2.67ms
-    canon-map-key-element-by-lens (8.55ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 8.55ms
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 46.00µs
+              air_interpreter_data::interpreter_data::serialize: 520.00µs
+        signing_step::sign_produced_cids: 66.00µs
+        verification_step::verify: 3.40ms
+          verify: 3.15ms
+    canon-map-key-element-by-lens (9.04ms; 55.312 MiB, 55.312 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 9.04ms
         preparation_step::preparation::parse_data: 1.65ms
-          serialize: 37.00µs
+          serialize: 32.00µs
           try_from_slice: 1.52ms
-        preparation_step::preparation::prepare: 374.00µs
-          air::preparation_step::preparation::make_exec_ctx: 210.00µs
+        preparation_step::preparation::prepare: 367.00µs
+          air::preparation_step::preparation::make_exec_ctx: 215.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 79.00µs
+          air_parser::parser::air_parser::parse: 70.00µs
         runner::execute: 2.20ms
         runner::farewell: 1.19ms
           from_success_result: 1.17ms
-            populate_outcome_from_contexts: 878.00µs
+            populate_outcome_from_contexts: 873.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 49.00µs
-              air_interpreter_data::interpreter_data::serialize: 523.00µs
-        signing_step::sign_produced_cids: 61.00µs
-        verification_step::verify: 2.92ms
-          verify: 2.67ms
-    canon-map-multiple-keys (8.90ms; 54.562 MiB, 54.562 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 8.90ms
-        preparation_step::preparation::parse_data: 272.00µs
-          serialize: 36.00µs
-          try_from_slice: 145.00µs
-        preparation_step::preparation::prepare: 186.00µs
-          air::preparation_step::preparation::make_exec_ctx: 37.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 64.00µs
-        runner::execute: 6.77ms
-        runner::farewell: 1.16ms
-          from_success_result: 1.14ms
-            populate_outcome_from_contexts: 838.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 38.00µs
-              air_interpreter_data::interpreter_data::serialize: 505.00µs
-        signing_step::sign_produced_cids: 62.00µs
-        verification_step::verify: 296.00µs
-          verify: 43.00µs
-    canon-map-scalar-multiple-keys (3.80ms; 53.125 MiB, 53.125 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 3.80ms
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 46.00µs
+              air_interpreter_data::interpreter_data::serialize: 522.00µs
+        signing_step::sign_produced_cids: 66.00µs
+        verification_step::verify: 3.40ms
+          verify: 3.15ms
+    canon-map-multiple-keys (9.55ms; 54.562 MiB, 54.562 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 9.55ms
         preparation_step::preparation::parse_data: 276.00µs
-          serialize: 36.00µs
+          serialize: 31.00µs
           try_from_slice: 147.00µs
-        preparation_step::preparation::prepare: 185.00µs
-          air::preparation_step::preparation::make_exec_ctx: 37.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 62.00µs
-        runner::execute: 2.45ms
-        runner::farewell: 372.00µs
-          from_success_result: 352.00µs
-            populate_outcome_from_contexts: 315.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
-              air_interpreter_data::interpreter_data::serialize: 70.00µs
-        signing_step::sign_produced_cids: 62.00µs
-        verification_step::verify: 295.00µs
-          verify: 43.00µs
-    canon-map-scalar-single-key (2.96ms; 53.062 MiB, 53.062 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 2.96ms
-        preparation_step::preparation::parse_data: 263.00µs
-          serialize: 37.00µs
-          try_from_slice: 134.00µs
-        preparation_step::preparation::prepare: 179.00µs
-          air::preparation_step::preparation::make_exec_ctx: 37.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 58.00µs
-        runner::execute: 1.64ms
-        runner::farewell: 359.00µs
-          from_success_result: 338.00µs
-            populate_outcome_from_contexts: 284.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
-              air_interpreter_data::interpreter_data::serialize: 62.00µs
-        signing_step::sign_produced_cids: 62.00µs
-        verification_step::verify: 300.00µs
-          verify: 54.00µs
-    canon-map-single-key (7.18ms; 54.438 MiB, 54.438 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 7.18ms
-        preparation_step::preparation::parse_data: 261.00µs
-          serialize: 37.00µs
-          try_from_slice: 135.00µs
-        preparation_step::preparation::prepare: 182.00µs
-          air::preparation_step::preparation::make_exec_ctx: 38.00µs
+        preparation_step::preparation::prepare: 188.00µs
+          air::preparation_step::preparation::make_exec_ctx: 45.00µs
             CallResultsRepr.deserialize: 10.00µs
           air_parser::parser::air_parser::parse: 60.00µs
-        runner::execute: 5.11ms
-        runner::farewell: 1.10ms
-          from_success_result: 1.08ms
-            populate_outcome_from_contexts: 830.00µs
+        runner::execute: 7.40ms
+        runner::farewell: 1.17ms
+          from_success_result: 1.15ms
+            populate_outcome_from_contexts: 848.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 38.00µs
+              air_interpreter_data::interpreter_data::serialize: 512.00µs
+        signing_step::sign_produced_cids: 67.00µs
+        verification_step::verify: 286.00µs
+          verify: 37.00µs
+    canon-map-scalar-multiple-keys (3.81ms; 53.125 MiB, 53.125 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 3.81ms
+        preparation_step::preparation::parse_data: 274.00µs
+          serialize: 32.00µs
+          try_from_slice: 145.00µs
+        preparation_step::preparation::prepare: 188.00µs
+          air::preparation_step::preparation::make_exec_ctx: 48.00µs
+            CallResultsRepr.deserialize: 12.00µs
+          air_parser::parser::air_parser::parse: 59.00µs
+        runner::execute: 2.47ms
+        runner::farewell: 371.00µs
+          from_success_result: 350.00µs
+            populate_outcome_from_contexts: 310.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
+              air_interpreter_data::interpreter_data::serialize: 69.00µs
+        signing_step::sign_produced_cids: 67.00µs
+        verification_step::verify: 285.00µs
+          verify: 37.00µs
+    canon-map-scalar-single-key (2.97ms; 53.062 MiB, 53.062 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 2.97ms
+        preparation_step::preparation::parse_data: 265.00µs
+          serialize: 32.00µs
+          try_from_slice: 136.00µs
+        preparation_step::preparation::prepare: 180.00µs
+          air::preparation_step::preparation::make_exec_ctx: 44.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 55.00µs
+        runner::execute: 1.65ms
+        runner::farewell: 359.00µs
+          from_success_result: 339.00µs
+            populate_outcome_from_contexts: 283.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
+              air_interpreter_data::interpreter_data::serialize: 63.00µs
+        signing_step::sign_produced_cids: 67.00µs
+        verification_step::verify: 300.00µs
+          verify: 54.00µs
+    canon-map-single-key (7.67ms; 54.438 MiB, 54.438 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 7.67ms
+        preparation_step::preparation::parse_data: 265.00µs
+          serialize: 33.00µs
+          try_from_slice: 136.00µs
+        preparation_step::preparation::prepare: 182.00µs
+          air::preparation_step::preparation::make_exec_ctx: 44.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 54.00µs
+        runner::execute: 5.58ms
+        runner::farewell: 1.11ms
+          from_success_result: 1.09ms
+            populate_outcome_from_contexts: 838.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
               air::farewell_step::outcome::InterpreterDataEnv::serialize: 44.00µs
-              air_interpreter_data::interpreter_data::serialize: 525.00µs
-        signing_step::sign_produced_cids: 61.00µs
-        verification_step::verify: 302.00µs
-          verify: 54.00µs
-    dashboard (4.07ms; 52.688 MiB, 52.688 MiB): big dashboard test
-      air::runner::execute_air: 4.07ms
-        preparation_step::preparation::parse_data: 442.00µs
-          try_from_slice: 355.00µs
-        preparation_step::preparation::prepare: 310.00µs
-          air::preparation_step::preparation::make_exec_ctx: 54.00µs
+              air_interpreter_data::interpreter_data::serialize: 528.00µs
+        signing_step::sign_produced_cids: 68.00µs
+        verification_step::verify: 303.00µs
+          verify: 57.00µs
+    dashboard (4.09ms; 52.688 MiB, 52.688 MiB): big dashboard test
+      air::runner::execute_air: 4.09ms
+        preparation_step::preparation::parse_data: 449.00µs
+          try_from_slice: 351.00µs
+        preparation_step::preparation::prepare: 302.00µs
+          air::preparation_step::preparation::make_exec_ctx: 56.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 170.00µs
-        runner::execute: 768.00µs
-        runner::farewell: 402.00µs
-          from_success_result: 381.00µs
-            populate_outcome_from_contexts: 335.00µs
+          air_parser::parser::air_parser::parse: 164.00µs
+        runner::execute: 777.00µs
+        runner::farewell: 396.00µs
+          from_success_result: 376.00µs
+            populate_outcome_from_contexts: 330.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 23.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 23.00µs
-              air_interpreter_data::interpreter_data::serialize: 99.00µs
-        signing_step::sign_produced_cids: 62.00µs
-        verification_step::verify: 1.92ms
-          verify: 155.00µs
-    lense-100mb (653.20ms; 1.207 GiB, 1.207 GiB): benchmarking
-      air::runner::execute_air: 653.20ms
-        preparation_step::preparation::parse_data: 25.35ms
-          serialize: 38.00µs
-          try_from_slice: 25.18ms
-        preparation_step::preparation::prepare: 220.00µs
-          air::preparation_step::preparation::make_exec_ctx: 42.00µs
-            CallResultsRepr.deserialize: 11.00µs
-          air_parser::parser::air_parser::parse: 87.00µs
-        runner::execute: 418.80ms
-        runner::farewell: 71.55ms
-          from_success_result: 71.54ms
-            populate_outcome_from_contexts: 71.51ms
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 18.10ms
-              air_interpreter_data::interpreter_data::serialize: 53.21ms
-        signing_step::sign_produced_cids: 76.00µs
-        verification_step::verify: 137.20ms
-          verify: 136.50ms
-    long-data (2.78ms; 53.188 MiB, 53.188 MiB): Long data trace
-      air::runner::execute_air: 2.78ms
-        preparation_step::preparation::parse_data: 773.00µs
-          serialize: 36.00µs
-          try_from_slice: 645.00µs
-        preparation_step::preparation::prepare: 172.00µs
-          air::preparation_step::preparation::make_exec_ctx: 55.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 32.00µs
-        runner::execute: 9.00µs
-        runner::farewell: 372.00µs
-          from_success_result: 351.00µs
-            populate_outcome_from_contexts: 316.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 31.00µs
-              air_interpreter_data::interpreter_data::serialize: 69.00µs
-        signing_step::sign_produced_cids: 61.00µs
-        verification_step::verify: 1.24ms
-          verify: 328.00µs
-    map-100mb (679.40ms; 1.305 GiB, 1.305 GiB): benchmarking
-      air::runner::execute_air: 679.40ms
-        preparation_step::preparation::parse_data: 26.74ms
-          serialize: 38.00µs
-          try_from_slice: 26.59ms
-        preparation_step::preparation::prepare: 206.00µs
-          air::preparation_step::preparation::make_exec_ctx: 41.00µs
-            CallResultsRepr.deserialize: 11.00µs
-          air_parser::parser::air_parser::parse: 76.00µs
-        runner::execute: 444.50ms
-        runner::farewell: 71.21ms
-          from_success_result: 71.20ms
-            populate_outcome_from_contexts: 71.13ms
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.40ms
-              air_interpreter_data::interpreter_data::serialize: 53.56ms
-        signing_step::sign_produced_cids: 75.00µs
-        verification_step::verify: 136.50ms
-          verify: 136.20ms
-    multiple-cids10 (2.16ms; 52.500 MiB, 52.500 MiB): verifying multiple CIDs for single peer
-      air::runner::execute_air: 2.16ms
-        preparation_step::preparation::parse_data: 302.00µs
-          try_from_slice: 219.00µs
-        preparation_step::preparation::prepare: 206.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 21.00µs
+              air_interpreter_data::interpreter_data::serialize: 97.00µs
+        signing_step::sign_produced_cids: 68.00µs
+        verification_step::verify: 1.93ms
+          verify: 170.00µs
+    hybrid-100mb (826.80ms; 2.016 GiB, 2.016 GiB): Memory intensive benchmarking test with mixed workload
+      air::runner::execute_air: 826.80ms
+        preparation_step::preparation::parse_data: 27.81ms
+          serialize: 34.00µs
+          try_from_slice: 27.64ms
+        preparation_step::preparation::prepare: 216.00µs
           air::preparation_step::preparation::make_exec_ctx: 50.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 69.00µs
-        runner::execute: 402.00µs
-        runner::farewell: 342.00µs
-          from_success_result: 322.00µs
-            populate_outcome_from_contexts: 264.00µs
+          air_parser::parser::air_parser::parse: 80.00µs
+        runner::execute: 626.90ms
+        runner::farewell: 93.97ms
+          from_success_result: 93.97ms
+            populate_outcome_from_contexts: 93.93ms
               air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 23.00µs
-              air_interpreter_data::interpreter_data::serialize: 80.00µs
-        signing_step::sign_produced_cids: 61.00µs
-        verification_step::verify: 686.00µs
-          verify: 194.00µs
-    multiple-peers8 (7.22ms; 53.438 MiB, 53.438 MiB): verifying many CIDs for many peers
-      air::runner::execute_air: 7.22ms
-        preparation_step::preparation::parse_data: 815.00µs
-          try_from_slice: 732.00µs
-        preparation_step::preparation::prepare: 243.00µs
-          air::preparation_step::preparation::make_exec_ctx: 88.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 71.00µs
-        runner::execute: 2.52ms
-        runner::farewell: 679.00µs
-          from_success_result: 659.00µs
-            populate_outcome_from_contexts: 553.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 31.00µs
-              air_interpreter_data::interpreter_data::serialize: 268.00µs
-        signing_step::sign_produced_cids: 60.00µs
-        verification_step::verify: 2.75ms
-          verify: 769.00µs
-    multiple-sigs30 (15.27ms; 55.875 MiB, 55.875 MiB): signing multiple CIDs
-      air::runner::execute_air: 15.27ms
-        preparation_step::preparation::parse_data: 2.52ms
-          try_from_slice: 2.43ms
-        preparation_step::preparation::prepare: 342.00µs
-          air::preparation_step::preparation::make_exec_ctx: 183.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 72.00µs
-        runner::execute: 7.08ms
-        runner::farewell: 1.95ms
-          from_success_result: 1.93ms
-            populate_outcome_from_contexts: 1.77ms
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 74.00µs
-              air_interpreter_data::interpreter_data::serialize: 825.00µs
-        signing_step::sign_produced_cids: 403.00µs
-        verification_step::verify: 2.81ms
-          verify: 1.34ms
-    network-explore (2.29ms; 52.438 MiB, 52.438 MiB): 5 peers of network are discovered
-      air::runner::execute_air: 2.29ms
-        preparation_step::preparation::parse_data: 236.00µs
-          try_from_slice: 151.00µs
-        preparation_step::preparation::prepare: 220.00µs
-          air::preparation_step::preparation::make_exec_ctx: 44.00µs
-            CallResultsRepr.deserialize: 12.00µs
-          air_parser::parser::air_parser::parse: 88.00µs
-        runner::execute: 160.00µs
-        runner::farewell: 273.00µs
-          from_success_result: 251.00µs
-            populate_outcome_from_contexts: 205.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 14.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 19.00µs
-              air_interpreter_data::interpreter_data::serialize: 38.00µs
-        signing_step::sign_produced_cids: 65.00µs
-        verification_step::verify: 1.17ms
-          verify: 70.00µs
-    null (840.00µs; 52.375 MiB, 52.375 MiB): Empty data and null script
-      air::runner::execute_air: 840.00µs
-        preparation_step::preparation::parse_data: 178.00µs
-          serialize: 46.00µs
-          try_from_slice: 40.00µs
-        preparation_step::preparation::prepare: 179.00µs
-          air::preparation_step::preparation::make_exec_ctx: 42.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 27.81ms
+              air_interpreter_data::interpreter_data::serialize: 65.96ms
+        signing_step::sign_produced_cids: 86.00µs
+        verification_step::verify: 77.54ms
+          verify: 77.27ms
+    lense-100mb (531.90ms; 1.207 GiB, 1.207 GiB): benchmarking
+      air::runner::execute_air: 531.90ms
+        preparation_step::preparation::parse_data: 27.89ms
+          serialize: 34.00µs
+          try_from_slice: 27.74ms
+        preparation_step::preparation::prepare: 207.00µs
+          air::preparation_step::preparation::make_exec_ctx: 50.00µs
             CallResultsRepr.deserialize: 11.00µs
-          air_parser::parser::air_parser::parse: 36.00µs
+          air_parser::parser::air_parser::parse: 72.00µs
+        runner::execute: 357.70ms
+        runner::farewell: 68.26ms
+          from_success_result: 68.24ms
+            populate_outcome_from_contexts: 68.20ms
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 16.87ms
+              air_interpreter_data::interpreter_data::serialize: 51.15ms
+        signing_step::sign_produced_cids: 85.00µs
+        verification_step::verify: 77.65ms
+          verify: 77.37ms
+    long-data (2.91ms; 53.188 MiB, 53.188 MiB): Long data trace
+      air::runner::execute_air: 2.91ms
+        preparation_step::preparation::parse_data: 787.00µs
+          serialize: 35.00µs
+          try_from_slice: 655.00µs
+        preparation_step::preparation::prepare: 167.00µs
+          air::preparation_step::preparation::make_exec_ctx: 58.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 26.00µs
+        runner::execute: 8.00µs
+        runner::farewell: 371.00µs
+          from_success_result: 351.00µs
+            populate_outcome_from_contexts: 315.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 32.00µs
+              air_interpreter_data::interpreter_data::serialize: 68.00µs
+        signing_step::sign_produced_cids: 68.00µs
+        verification_step::verify: 1.36ms
+          verify: 449.00µs
+    map-100mb (557.10ms; 1.305 GiB, 1.305 GiB): benchmarking
+      air::runner::execute_air: 557.10ms
+        preparation_step::preparation::parse_data: 26.58ms
+          serialize: 33.00µs
+          try_from_slice: 26.40ms
+        preparation_step::preparation::prepare: 203.00µs
+          air::preparation_step::preparation::make_exec_ctx: 51.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 67.00µs
+        runner::execute: 383.90ms
+        runner::farewell: 68.41ms
+          from_success_result: 68.39ms
+            populate_outcome_from_contexts: 68.31ms
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.02ms
+              air_interpreter_data::interpreter_data::serialize: 51.12ms
+        signing_step::sign_produced_cids: 86.00µs
+        verification_step::verify: 77.78ms
+          verify: 77.51ms
+    multiple-cids10 (2.16ms; 52.500 MiB, 52.500 MiB): verifying multiple CIDs for single peer
+      air::runner::execute_air: 2.16ms
+        preparation_step::preparation::parse_data: 318.00µs
+          try_from_slice: 218.00µs
+        preparation_step::preparation::prepare: 192.00µs
+          air::preparation_step::preparation::make_exec_ctx: 51.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 60.00µs
+        runner::execute: 400.00µs
+        runner::farewell: 336.00µs
+          from_success_result: 316.00µs
+            populate_outcome_from_contexts: 260.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 20.00µs
+              air_interpreter_data::interpreter_data::serialize: 79.00µs
+        signing_step::sign_produced_cids: 68.00µs
+        verification_step::verify: 694.00µs
+          verify: 212.00µs
+    multiple-peers8 (7.48ms; 53.438 MiB, 53.438 MiB): verifying many CIDs for many peers
+      air::runner::execute_air: 7.48ms
+        preparation_step::preparation::parse_data: 826.00µs
+          try_from_slice: 731.00µs
+        preparation_step::preparation::prepare: 235.00µs
+          air::preparation_step::preparation::make_exec_ctx: 90.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 64.00µs
+        runner::execute: 2.63ms
+        runner::farewell: 673.00µs
+          from_success_result: 653.00µs
+            populate_outcome_from_contexts: 547.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 28.00µs
+              air_interpreter_data::interpreter_data::serialize: 265.00µs
+        signing_step::sign_produced_cids: 66.00µs
+        verification_step::verify: 2.88ms
+          verify: 905.00µs
+    multiple-sigs30 (15.88ms; 55.500 MiB, 56.000 MiB): signing multiple CIDs
+      air::runner::execute_air: 15.88ms
+        preparation_step::preparation::parse_data: 2.51ms
+          try_from_slice: 2.41ms
+        preparation_step::preparation::prepare: 329.00µs
+          air::preparation_step::preparation::make_exec_ctx: 182.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 64.00µs
+        runner::execute: 7.54ms
+        runner::farewell: 1.91ms
+          from_success_result: 1.89ms
+            populate_outcome_from_contexts: 1.72ms
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 40.00µs
+              air_interpreter_data::interpreter_data::serialize: 820.00µs
+        signing_step::sign_produced_cids: 406.00µs
+        verification_step::verify: 3.01ms
+          verify: 1.56ms
+    network-explore (2.21ms; 52.438 MiB, 52.438 MiB): 5 peers of network are discovered
+      air::runner::execute_air: 2.21ms
+        preparation_step::preparation::parse_data: 242.00µs
+          try_from_slice: 147.00µs
+        preparation_step::preparation::prepare: 207.00µs
+          air::preparation_step::preparation::make_exec_ctx: 45.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 81.00µs
+        runner::execute: 155.00µs
+        runner::farewell: 261.00µs
+          from_success_result: 240.00µs
+            populate_outcome_from_contexts: 196.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 15.00µs
+              air_interpreter_data::interpreter_data::serialize: 35.00µs
+        signing_step::sign_produced_cids: 67.00µs
+        verification_step::verify: 1.12ms
+          verify: 69.00µs
+    null (844.00µs; 52.375 MiB, 52.375 MiB): Empty data and null script
+      air::runner::execute_air: 844.00µs
+        preparation_step::preparation::parse_data: 170.00µs
+          serialize: 43.00µs
+          try_from_slice: 33.00µs
+        preparation_step::preparation::prepare: 177.00µs
+          air::preparation_step::preparation::make_exec_ctx: 44.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 34.00µs
         runner::execute: 9.00µs
-        runner::farewell: 219.00µs
-          from_success_result: 199.00µs
+        runner::farewell: 223.00µs
+          from_success_result: 203.00µs
             populate_outcome_from_contexts: 165.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
               air::farewell_step::outcome::InterpreterDataEnv::serialize: 18.00µs
-              air_interpreter_data::interpreter_data::serialize: 15.00µs
-        signing_step::sign_produced_cids: 70.00µs
-        verification_step::verify: 34.00µs
-          verify: 9.00µs
-    parser-10000-100 (24.77ms; 54.625 MiB, 54.625 MiB): long air script with lot of variable assignments
-      air::runner::execute_air: 24.77ms
-        preparation_step::preparation::parse_data: 179.00µs
-          serialize: 47.00µs
-          try_from_slice: 39.00µs
-        preparation_step::preparation::prepare: 23.16ms
-          air::preparation_step::preparation::make_exec_ctx: 41.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 23.02ms
-        runner::execute: 46.00µs
-        runner::farewell: 219.00µs
-          from_success_result: 200.00µs
-            populate_outcome_from_contexts: 166.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 18.00µs
-              air_interpreter_data::interpreter_data::serialize: 16.00µs
-        signing_step::sign_produced_cids: 67.00µs
-        verification_step::verify: 34.00µs
-          verify: 9.00µs
-    parser-air-100mb (628.80ms; 110.500 MiB, 110.500 MiB): multiple calls parser benchmark
-      air::runner::execute_air: 628.80ms
-        preparation_step::preparation::parse_data: 186.00µs
-          serialize: 47.00µs
-          try_from_slice: 46.00µs
-        preparation_step::preparation::prepare: 597.50ms
-          air::preparation_step::preparation::make_exec_ctx: 54.00µs
-            CallResultsRepr.deserialize: 14.00µs
-          air_parser::parser::air_parser::parse: 597.20ms
-        runner::execute: 59.00µs
-        runner::farewell: 245.00µs
-          from_success_result: 224.00µs
-            populate_outcome_from_contexts: 187.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 21.00µs
-              air_interpreter_data::interpreter_data::serialize: 21.00µs
-        signing_step::sign_produced_cids: 72.00µs
-        verification_step::verify: 35.00µs
-          verify: 9.00µs
-    parser-calls-10000-100 (23.43ms; 54.375 MiB, 54.375 MiB): multiple calls parser benchmark
-      air::runner::execute_air: 23.43ms
-        preparation_step::preparation::parse_data: 181.00µs
-          serialize: 50.00µs
-          try_from_slice: 41.00µs
-        preparation_step::preparation::prepare: 21.62ms
+              air_interpreter_data::interpreter_data::serialize: 14.00µs
+        signing_step::sign_produced_cids: 76.00µs
+        verification_step::verify: 36.00µs
+          verify: 13.00µs
+    parser-10000-100 (25.06ms; 54.625 MiB, 54.625 MiB): long air script with lot of variable assignments
+      air::runner::execute_air: 25.06ms
+        preparation_step::preparation::parse_data: 173.00µs
+          serialize: 41.00µs
+          try_from_slice: 35.00µs
+        preparation_step::preparation::prepare: 23.47ms
           air::preparation_step::preparation::make_exec_ctx: 42.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 21.48ms
-        runner::execute: 46.00µs
-        runner::farewell: 226.00µs
-          from_success_result: 206.00µs
-            populate_outcome_from_contexts: 171.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 19.00µs
-              air_interpreter_data::interpreter_data::serialize: 16.00µs
-        signing_step::sign_produced_cids: 68.00µs
-        verification_step::verify: 36.00µs
-          verify: 9.00µs
-    populate-map-multiple-keys (3.34ms; 53.062 MiB, 53.062 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 3.34ms
-        preparation_step::preparation::parse_data: 213.00µs
-          serialize: 37.00µs
-          try_from_slice: 85.00µs
-        preparation_step::preparation::prepare: 188.00µs
-          air::preparation_step::preparation::make_exec_ctx: 40.00µs
-            CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 64.00µs
-        runner::execute: 2.13ms
-        runner::farewell: 315.00µs
-          from_success_result: 294.00µs
-            populate_outcome_from_contexts: 257.00µs
+          air_parser::parser::air_parser::parse: 23.33ms
+        runner::execute: 36.00µs
+        runner::farewell: 219.00µs
+          from_success_result: 200.00µs
+            populate_outcome_from_contexts: 164.00µs
               air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 20.00µs
-              air_interpreter_data::interpreter_data::serialize: 73.00µs
-        signing_step::sign_produced_cids: 61.00µs
-        verification_step::verify: 279.00µs
-          verify: 42.00µs
-    populate-map-single-key (2.60ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
-      air::runner::execute_air: 2.60ms
-        preparation_step::preparation::parse_data: 212.00µs
-          serialize: 37.00µs
-          try_from_slice: 85.00µs
-        preparation_step::preparation::prepare: 188.00µs
-          air::preparation_step::preparation::make_exec_ctx: 40.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 15.00µs
+              air_interpreter_data::interpreter_data::serialize: 17.00µs
+        signing_step::sign_produced_cids: 75.00µs
+        verification_step::verify: 40.00µs
+          verify: 13.00µs
+    parser-air-100mb (629.30ms; 110.500 MiB, 110.500 MiB): multiple calls parser benchmark
+      air::runner::execute_air: 629.30ms
+        preparation_step::preparation::parse_data: 185.00µs
+          serialize: 45.00µs
+          try_from_slice: 40.00µs
+        preparation_step::preparation::prepare: 598.30ms
+          air::preparation_step::preparation::make_exec_ctx: 52.00µs
+            CallResultsRepr.deserialize: 12.00µs
+          air_parser::parser::air_parser::parse: 598.10ms
+        runner::execute: 49.00µs
+        runner::farewell: 246.00µs
+          from_success_result: 225.00µs
+            populate_outcome_from_contexts: 184.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 22.00µs
+              air_interpreter_data::interpreter_data::serialize: 21.00µs
+        signing_step::sign_produced_cids: 83.00µs
+        verification_step::verify: 38.00µs
+          verify: 15.00µs
+    parser-calls-10000-100 (23.47ms; 54.375 MiB, 54.375 MiB): multiple calls parser benchmark
+      air::runner::execute_air: 23.47ms
+        preparation_step::preparation::parse_data: 175.00µs
+          serialize: 42.00µs
+          try_from_slice: 34.00µs
+        preparation_step::preparation::prepare: 21.72ms
+          air::preparation_step::preparation::make_exec_ctx: 41.00µs
             CallResultsRepr.deserialize: 10.00µs
-          air_parser::parser::air_parser::parse: 64.00µs
+          air_parser::parser::air_parser::parse: 21.60ms
+        runner::execute: 36.00µs
+        runner::farewell: 225.00µs
+          from_success_result: 204.00µs
+            populate_outcome_from_contexts: 168.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 12.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 15.00µs
+              air_interpreter_data::interpreter_data::serialize: 16.00µs
+        signing_step::sign_produced_cids: 76.00µs
+        verification_step::verify: 34.00µs
+          verify: 12.00µs
+    populate-map-multiple-keys (3.37ms; 53.062 MiB, 53.062 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 3.37ms
+        preparation_step::preparation::parse_data: 232.00µs
+          serialize: 39.00µs
+          try_from_slice: 90.00µs
+        preparation_step::preparation::prepare: 190.00µs
+          air::preparation_step::preparation::make_exec_ctx: 45.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 63.00µs
+        runner::execute: 2.13ms
+        runner::farewell: 316.00µs
+          from_success_result: 296.00µs
+            populate_outcome_from_contexts: 259.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
+              air_interpreter_data::interpreter_data::serialize: 73.00µs
+        signing_step::sign_produced_cids: 66.00µs
+        verification_step::verify: 275.00µs
+          verify: 38.00µs
+    populate-map-single-key (2.62ms; 53.000 MiB, 53.000 MiB): benchmarking a map insert operation
+      air::runner::execute_air: 2.62ms
+        preparation_step::preparation::parse_data: 214.00µs
+          serialize: 31.00µs
+          try_from_slice: 87.00µs
+        preparation_step::preparation::prepare: 185.00µs
+          air::preparation_step::preparation::make_exec_ctx: 46.00µs
+            CallResultsRepr.deserialize: 10.00µs
+          air_parser::parser::air_parser::parse: 58.00µs
         runner::execute: 1.37ms
         runner::farewell: 318.00µs
           from_success_result: 297.00µs
-            populate_outcome_from_contexts: 242.00µs
-              air::farewell_step::outcome::CallRequestsRepr.serialize: 14.00µs
-              air::farewell_step::outcome::InterpreterDataEnv::serialize: 20.00µs
-              air_interpreter_data::interpreter_data::serialize: 65.00µs
-        signing_step::sign_produced_cids: 60.00µs
-        verification_step::verify: 292.00µs
-          verify: 54.00µs
+            populate_outcome_from_contexts: 241.00µs
+              air::farewell_step::outcome::CallRequestsRepr.serialize: 13.00µs
+              air::farewell_step::outcome::InterpreterDataEnv::serialize: 17.00µs
+              air_interpreter_data::interpreter_data::serialize: 66.00µs
+        signing_step::sign_produced_cids: 70.00µs
+        verification_step::verify: 298.00µs
+          verify: 56.00µs
 Machine e536f8eaae8c978493a773ba566ae3393e2e6240d6ea8e05b5ca1b8f77e9c441:
   Platform: Linux-5.15.0-76-generic-x86_64-with-glibc2.29
   Timestamp: 2024-01-15 13:48:03.011830+00:00
