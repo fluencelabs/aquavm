@@ -28,9 +28,9 @@ pub(crate) mod runner;
 use self::runner::AirRunner;
 use avm_interface::CallResults;
 
-use anyhow::Context as _;
 use clap::Parser;
 use clap::Subcommand;
+use eyre::Context as _;
 use fluence_keypair::KeyPair;
 use zeroize::Zeroize;
 
@@ -102,7 +102,7 @@ struct Keys {
 }
 
 impl Keys {
-    fn get_keypair(&self) -> anyhow::Result<KeyPair> {
+    fn get_keypair(&self) -> eyre::Result<KeyPair> {
         match (self.random_key, self.ed25519_key.as_ref()) {
             (true, None) => Ok(KeyPair::generate_ed25519()),
             (false, Some(path)) => load_keypair_ed25519(path),
@@ -168,7 +168,7 @@ enum Mode {
     Risc0,
 }
 
-pub(crate) fn run(args: Args) -> anyhow::Result<()> {
+pub(crate) fn run(args: Args) -> eyre::Result<()> {
     let tracing_json = (!args.json) as u8;
     #[cfg(feature = "wasm")]
     let global_tracing_params = if args.mode.wasm {
@@ -235,7 +235,7 @@ fn create_runner(
     _air_interpreter_wasm_path: &Path,
     _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<dyn AirRunner>> {
+) -> eyre::Result<Box<dyn AirRunner>> {
     #[cfg(not(feature = "wasm"))]
     let default_mode = Mode::Native;
     #[cfg(feature = "wasm")]
@@ -274,7 +274,7 @@ pub fn init_tracing(tracing_params: String, trace_mode: u8) {
         builder.init();
     }
 }
-fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallResults> {
+fn read_call_results(call_results_path: Option<&Path>) -> eyre::Result<CallResults> {
     match call_results_path {
         None => Ok(CallResults::default()),
         Some(call_results_path) => {
@@ -291,18 +291,18 @@ fn read_call_results(call_results_path: Option<&Path>) -> anyhow::Result<CallRes
 fn load_data_or_default(
     data_path: Option<impl AsRef<Path>>,
     default: &[u8],
-) -> anyhow::Result<Vec<u8>> {
+) -> eyre::Result<Vec<u8>> {
     match data_path {
         None => Ok(default.to_owned()),
         Some(data_path) => load_data(data_path.as_ref()),
     }
 }
 
-pub(crate) fn load_data(data_path: &Path) -> anyhow::Result<Vec<u8>> {
+pub(crate) fn load_data(data_path: &Path) -> eyre::Result<Vec<u8>> {
     std::fs::read(data_path).with_context(|| data_path.to_string_lossy().into_owned())
 }
 
-fn load_keypair_ed25519(path: &PathBuf) -> Result<KeyPair, anyhow::Error> {
+fn load_keypair_ed25519(path: &PathBuf) -> Result<KeyPair, eyre::Error> {
     use fluence_keypair::KeyFormat;
 
     // It follows rust-peer format

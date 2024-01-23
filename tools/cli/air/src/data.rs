@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use anyhow::Context;
 use clap::Parser;
+use eyre::Context;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -78,7 +78,7 @@ pub(crate) fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std::erro
     let data: Vec<u8> = load_data(&args.input)?;
 
     if data.is_empty() {
-        Err(anyhow::anyhow!("empty input data: {:?}", args.input))?;
+        Err(eyre::eyre!("empty input data: {:?}", args.input))?;
     }
 
     let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path)?;
@@ -98,7 +98,7 @@ fn init_tracing(tracing_params: &str) {
 fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
-) -> anyhow::Result<Box<dyn DataToHumanReadable>> {
+) -> eyre::Result<Box<dyn DataToHumanReadable>> {
     #[cfg(not(feature = "wasm"))]
     let default_mode = Mode::Native;
     #[cfg(feature = "wasm")]

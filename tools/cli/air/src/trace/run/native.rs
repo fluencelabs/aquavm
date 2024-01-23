@@ -41,7 +41,7 @@ impl AirRunner for NativeAvmRunner {
         _tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<RawAVMOutcome> {
+    ) -> eyre::Result<RawAVMOutcome> {
         use air_interpreter_sede::ToSerialized;
         use avm_interface::into_raw_result;
 
@@ -79,6 +79,6 @@ impl DataToHumanReadable for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner() -> anyhow::Result<Box<NativeAvmRunner>> {
+pub(crate) fn create_native_avm_runner() -> eyre::Result<Box<NativeAvmRunner>> {
     Ok(Box::new(NativeAvmRunner {}))
 }

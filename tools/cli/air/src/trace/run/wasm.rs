@@ -39,7 +39,7 @@ impl AirRunner for WasmAvmRunner {
         tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
+    ) -> eyre::Result<avm_interface::raw_outcome::RawAVMOutcome> {
         let call_tracing = self.0.call_tracing(
             air,
             prev_data,
@@ -71,7 +71,7 @@ impl DataToHumanReadable for WasmAvmRunner {
 pub(crate) fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<WasmAvmRunner>> {
+) -> eyre::Result<Box<WasmAvmRunner>> {
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,

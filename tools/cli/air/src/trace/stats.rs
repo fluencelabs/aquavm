@@ -33,7 +33,7 @@ pub(crate) struct Args {
     sort_stats_by_duration: bool,
 }
 
-pub(crate) fn stats(mut args: Args) -> anyhow::Result<()> {
+pub(crate) fn stats(mut args: Args) -> eyre::Result<()> {
     use std::io::Write;
 
     if !args.pretty && !args.stats {
@@ -69,14 +69,14 @@ pub(crate) fn stats(mut args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = anyhow::Result<LogRecord>> {
+fn read_logs<R: std::io::BufRead>(input: R) -> impl Iterator<Item = eyre::Result<LogRecord>> {
     input.lines().filter_map(|r| match r {
         Ok(line) => {
             let line = line.trim();
             if line.is_empty() {
                 None
             } else {
-                Some(serde_json::from_str(line).map_err(anyhow::Error::from))
+                Some(serde_json::from_str(line).map_err(eyre::Error::from))
             }
         }
         Err(err) => Some(Err(err.into())),
