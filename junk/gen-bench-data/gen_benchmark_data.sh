@@ -32,6 +32,7 @@ for bench in multiple-cids10 \
             canon-map-100mb \
             call-result-100mb \
             parser-air-100mb \
+            hybrid-100mb \
             ;
 do
     echo "Generating ${bench} ..." >&2
