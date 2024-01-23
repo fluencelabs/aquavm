@@ -77,6 +77,8 @@ enum Bench {
     CallResult100MB,
     #[command(name = "parser-air-100mb")]
     ParserAir100MB,
+    #[command(name = "hybrid-100mb")]
+    Hybrid100MB,
 }
 
 fn main() {
@@ -113,6 +115,7 @@ fn main() {
         Bench::Map100MB => mem_consumption_w_map_2_scalar_with_size_in_mb(100),
         Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100),
         Bench::ParserAir100MB => mem_consumption_air_100mb(280000, 10),
+        Bench::Hybrid100MB => mem_consumption_hybrid_with_size_in_mb(100),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -802,7 +805,7 @@ fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
         prev_data: vec![],
         cur_data: prev_res.data,
         params_json: hashmap! {
-            "comment".to_owned() => "benchmarking".to_owned(),
+            "comment".to_owned() => "Memory intensive benchmarking test".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
@@ -847,7 +850,7 @@ fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
         prev_data: vec![],
         cur_data: prev_res.data,
         params_json: hashmap! {
-            "comment".to_owned() => "benchmarking".to_owned(),
+            "comment".to_owned() => "Memory intensive benchmarking test with lense".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
@@ -892,7 +895,7 @@ fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
         prev_data: vec![],
         cur_data: prev_res.data,
         params_json: hashmap! {
-            "comment".to_owned() => "benchmarking".to_owned(),
+            "comment".to_owned() => "Memory intensive benchmarking test with map 2 scalar".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
@@ -937,7 +940,52 @@ fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
         prev_data: vec![],
         cur_data: prev_res.data,
         params_json: hashmap! {
-            "comment".to_owned() => "benchmarking".to_owned(),
+            "comment".to_owned() => "Memory intensive benchmarking test with canon map".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => init_peer_id,
+        },
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+    }
+}
+
+fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
+    let random_data = generate_random_data(data_size);
+
+    let air_script = format!(
+        include_str!("mem_consumption_hybrid.air.tmpl"),
+        data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
+    );
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env("other_peer_id")
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+
+    let prev_res = exec.execute_one("init_peer_id").unwrap();
+
+    let peer_id: String = exec.resolve_name("other_peer_id").to_string();
+    let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: prev_res.data,
+        params_json: hashmap! {
+            "comment".to_owned() => "Memory intensive benchmarking test with mixed workload".to_owned(),
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,

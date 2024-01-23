@@ -122,18 +122,18 @@ pub(crate) fn try_to_envelope(raw_env_data: &[u8]) -> PreparationResult<Interpre
 }
 
 pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
-    InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_data_de_error(raw_data.to_vec(), de_error))
+    InterpreterData::try_from_slice(raw_data).map_err(to_data_de_error)
 }
 
 fn to_envelope_de_error(env_raw_data: Vec<u8>, de_error: DataDeserializationError) -> PreparationError {
     match InterpreterDataEnvelope::try_get_versions(&env_raw_data) {
-        Ok(versions) => PreparationError::env_de_failed_with_versions(env_raw_data, de_error, versions),
-        Err(_) => PreparationError::envelope_de_failed(env_raw_data, de_error),
+        Ok(versions) => PreparationError::env_de_failed_with_versions(de_error, versions),
+        Err(_) => PreparationError::envelope_de_failed(de_error),
     }
 }
 
-fn to_data_de_error(env_raw_data: Vec<u8>, de_error: DataDeserializationError) -> PreparationError {
-    PreparationError::data_de_failed(env_raw_data, de_error)
+fn to_data_de_error(de_error: DataDeserializationError) -> PreparationError {
+    PreparationError::data_de_failed(de_error)
 }
 
 #[tracing::instrument(skip_all)]
@@ -147,7 +147,7 @@ fn make_exec_ctx(
     let call_results = measure!(
         CallResultsRepr
             .deserialize(call_results)
-            .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?,
+            .map_err(PreparationError::call_results_de_failed)?,
         tracing::Level::INFO,
         "CallResultsRepr.deserialize",
     );
