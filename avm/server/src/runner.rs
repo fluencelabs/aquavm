@@ -36,6 +36,8 @@ pub struct AVMRunner {
     marine: Marine,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
+    /// The memory limit provided by constructor
+    total_memory_limit: Option<u64>,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -44,25 +46,29 @@ pub struct AVMMemoryStats {
     /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
     pub memory_size: usize,
     /// Possibly set max memory size for AVM server.
-    pub max_memory_size: Option<usize>,
+    pub total_memory_limit: Option<u64>,
+    /// Number of allocations rejected due to memory limit.
+    /// May be not recorded by some backends in Marine.
+    pub allocation_rejects: Option<u32>,
 }
 
 impl AVMRunner {
     /// Create AVM with the provided config.
     pub fn new(
         air_wasm_path: PathBuf,
-        max_heap_size: Option<u64>,
+        total_memory_limit: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let marine_config =
-            make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
+            make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
 
         let avm = Self {
             marine,
             wasm_filename,
+            total_memory_limit,
         };
 
         Ok(avm)
@@ -190,11 +196,12 @@ impl AVMRunner {
         let stats = self.marine.module_memory_stats();
 
         // only the interpreters must be loaded in Marine
-        debug_assert!(stats.len() == 1);
+        debug_assert!(stats.modules.len() == 1);
 
         AVMMemoryStats {
-            memory_size: stats[0].memory_size,
-            max_memory_size: stats[0].max_memory_size,
+            memory_size: stats.modules[0].memory_size,
+            total_memory_limit: self.total_memory_limit,
+            allocation_rejects: stats.allocation_stats.map(|stats| stats.allocation_rejects),
         }
     }
 }
@@ -279,12 +286,10 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
 fn make_marine_config(
     air_wasm_dir: PathBuf,
     air_wasm_file: &str,
-    max_heap_size: Option<u64>,
+    total_memory_limit: Option<u64>,
     logging_mask: i32,
 ) -> MarineConfig {
     let air_module_config = marine::MarineModuleConfig {
-        mem_pages_count: None,
-        max_heap_size,
         logger_enabled: true,
         host_imports: <_>::default(),
         wasi: None,
@@ -293,6 +298,7 @@ fn make_marine_config(
 
     MarineConfig {
         modules_dir: Some(air_wasm_dir),
+        total_memory_limit,
         modules_config: vec![ModuleDescriptor {
             load_from: None,
             file_name: String::from(air_wasm_file),

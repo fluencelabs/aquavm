@@ -19,7 +19,7 @@ air-interpreter-interface = { version = "0.17.1", path = "../../crates/air-lib/i
 air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpreter-sede" }
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.6", path = "../../crates/data-store" }
-marine-runtime = "0.30.0"
+marine-runtime = "0.32.0"
 polyplets = { version = "0.6.0", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.31.1", path = "../../avm/interface" }
 
