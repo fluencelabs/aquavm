@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
  "air-interpreter-sede",
  "fluence-it-types",
@@ -154,7 +154,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.58.0"
+version = "0.59.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -202,7 +202,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.58.0"
+version = "0.59.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
