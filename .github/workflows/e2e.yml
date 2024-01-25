@@ -162,7 +162,6 @@ jobs:
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      fcli-version: "${{ needs.fcli-snapshot.outputs.version }}"
 
   fcli:
     needs:
