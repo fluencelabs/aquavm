@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.59.0](https://github.com/fluencelabs/aquavm/compare/air-v0.58.0...air-v0.59.0) (2024-01-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768))
+
+### Features
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768)) ([3375c7a](https://github.com/fluencelabs/aquavm/commit/3375c7a3b6b029ab5859ff00c1554abc8597542b))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.3 ([#782](https://github.com/fluencelabs/aquavm/issues/782)) ([a33e853](https://github.com/fluencelabs/aquavm/commit/a33e8538123de71ea30f88ee5b40cda88f968707))
+* **performance:** avoiding particle data printout in errors ([6c1cb28](https://github.com/fluencelabs/aquavm/commit/6c1cb289cc8ed7ba380d134cff1aec8b54c092ec))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.1 to 0.17.2
+
 ## [0.58.0](https://github.com/fluencelabs/aquavm/compare/air-v0.57.0...air-v0.58.0) (2024-01-11)
 
 

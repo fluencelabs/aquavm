@@ -317,6 +317,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
 
     let marine_config = MarineConfig {
         modules_dir: Some(PathBuf::from(module_path)),
+        total_memory_limit: None,
         modules_config: vec![module_descriptor],
         default_modules_config: None,
     };
