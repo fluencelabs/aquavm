@@ -15,9 +15,16 @@
  */
 
 import { CallResultsArray, InterpreterResult, CallRequest, RunParameters, JSONArray, JSONObject } from './types';
+import { MulticodecRepr, MsgPackRepr } from './formats'
 
-const decoder = new TextDecoder();
-const encoder = new TextEncoder();
+// Have to match the air-interpreter-interface.
+const callRequestsRepr = new MulticodecRepr(new MsgPackRepr());
+// Have to match the air-interpreter-interface.
+const argumentRepr = new MsgPackRepr();
+// Have to match the air-interpreter-interface.
+const tetrapletRepr = new MsgPackRepr();
+// Have to match the air-interpreter-interface.
+const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
 
 /**
  * Encodes arguments into JSON array suitable for marine-js
@@ -44,7 +51,7 @@ export function serializeAvmArgs(
         };
     }
 
-    const encoded = encoder.encode(JSON.stringify(callResultsToPass));
+    const encodedCallResults = callResultsRepr.toBinary(callResultsToPass)
     const runParamsSnakeCase = {
         init_peer_id: runParams.initPeerId,
         current_peer_id: runParams.currentPeerId,
@@ -55,7 +62,7 @@ export function serializeAvmArgs(
         particle_id: runParams.particleId,
     };
 
-    return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encoded)];
+    return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encodedCallResults)];
 }
 
 /**
@@ -64,16 +71,16 @@ export function serializeAvmArgs(
  * @returns structured InterpreterResult
  */
 export function deserializeAvmResult(result: any): InterpreterResult {
-    const callRequestsStr = decoder.decode(new Uint8Array(result.call_requests));
-    let parsedCallRequests;
+    const callRequestsBuf = new Uint8Array(result.call_requests);
+    let parsedCallRequests: object;
     try {
-        if (callRequestsStr.length === 0) {
+        if (callRequestsBuf.length === 0) {
             parsedCallRequests = {};
         } else {
-            parsedCallRequests = JSON.parse(callRequestsStr);
+            parsedCallRequests = callRequestsRepr.fromBinary(callRequestsBuf);
         }
     } catch (e) {
-        throw "Couldn't parse call requests: " + e + '. Original string is: ' + callRequestsStr;
+        throw "Couldn't parse call requests: " + e + '. Original data is: ' + result.call_requests;
     }
 
     let resultCallRequests: Array<[key: number, callRequest: CallRequest]> = [];
@@ -83,15 +90,15 @@ export function deserializeAvmResult(result: any): InterpreterResult {
         let arguments_;
         let tetraplets;
         try {
-            const argumentsStr = decoder.decode(new Uint8Array(callRequest.arguments));
-            arguments_ = JSON.parse(argumentsStr);
+            let argumentsBuf = new Uint8Array(callRequest.arguments);
+            arguments_ = argumentRepr.fromBinary(argumentsBuf);
         } catch (e) {
             throw "Couldn't parse arguments: " + e + '. Original data is: ' + callRequest.arguments;
         }
 
         try {
-            const tetrapletsStr = decoder.decode(new Uint8Array(callRequest.tetraplets));
-            tetraplets = JSON.parse(tetrapletsStr);
+            let tetrapletBuf = new Uint8Array(callRequest.tetraplets);
+            tetraplets = tetrapletRepr.fromBinary(tetrapletBuf);
         } catch (e) {
             throw "Couldn't parse tetraplets: " + e + '. Original data is: ' + callRequest.tetraplets;
         }

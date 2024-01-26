@@ -19,6 +19,7 @@ mod se_de;
 
 use crate::GenerationIdx;
 use crate::JValue;
+use crate::RawValue;
 use crate::TracePos;
 
 use air_interpreter_cid::CID;
@@ -30,13 +31,35 @@ use serde::Serialize;
 use std::fmt::Formatter;
 use std::rc::Rc;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(
+    Debug,
+    Default,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub struct ParResult {
     pub left_size: u32,
     pub right_size: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub enum Sender {
     PeerId(Rc<String>),
     PeerIdWithCallId { peer_id: Rc<String>, call_id: u32 },
@@ -44,6 +67,8 @@ pub enum Sender {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub enum CallResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     #[serde(rename = "sent_by")]
@@ -81,6 +106,8 @@ pub enum CallResult {
  */
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub enum ValueRef {
     /// The call value is stored to a scalar variable.
     Scalar(CID<ServiceResultCidAggregate>),
@@ -93,7 +120,18 @@ pub enum ValueRef {
     Unused(CID<JValue>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub struct CallServiceFailed {
     pub ret_code: i32,
     /// This field contains a JSON-serialized value, not a plain error message.
@@ -112,9 +150,11 @@ impl CallServiceFailed {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 /// A proof of service result execution result.
 pub struct ServiceResultCidAggregate {
-    pub value_cid: CID<JValue>,
+    pub value_cid: CID<RawValue>,
     /// Hash of the call arguments.
     pub argument_hash: Rc<str>,
     /// The tetraplet of the call result.
@@ -140,6 +180,8 @@ pub struct ServiceResultCidAggregate {
 /// So, this struct describes position inside overall execution_step trace belongs to one fold iteration.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct FoldSubTraceLore {
     /// Position of current value in a trace.
     #[serde(rename = "pos")]
@@ -155,6 +197,8 @@ pub struct FoldSubTraceLore {
 /// Descriptor of a subtrace inside execution trace.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct SubTraceDesc {
     /// Start position in a trace of this subtrace.
     #[serde(rename = "pos")]
@@ -171,6 +215,8 @@ pub type FoldLore = Vec<FoldSubTraceLore>;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct FoldResult {
     pub lore: FoldLore,
 }
@@ -178,6 +224,8 @@ pub struct FoldResult {
 /// Describes result of applying functor `apply` to streams.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct ApResult {
     #[serde(rename = "gens")]
     pub res_generations: Vec<GenerationIdx>,
@@ -186,6 +234,8 @@ pub struct ApResult {
 /// Contains ids of element that were on a stream at the moment of an appropriate canon call.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub enum CanonResult {
     /// Request was sent to a target node by node with such public key and it shouldn't be called again.
     #[serde(rename = "sent_by")]
@@ -195,21 +245,36 @@ pub enum CanonResult {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub struct CanonResultCidAggregate {
     pub tetraplet: CID<SecurityTetraplet>,
     pub values: Vec<CID<CanonCidAggregate>>,
 }
 
 /// The type Canon trace CID refers to.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    ::rkyv::Archive,
+    ::rkyv::Serialize,
+    ::rkyv::Deserialize,
+)]
+#[archive(check_bytes)]
 pub struct CanonCidAggregate {
-    pub value: CID<serde_json::Value>,
+    pub value: CID<RawValue>,
     pub tetraplet: CID<SecurityTetraplet>,
     pub provenance: Provenance,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub enum Provenance {
     Literal,
     ServiceResult {
@@ -224,6 +289,8 @@ pub enum Provenance {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
+#[archive(check_bytes)]
 pub enum ExecutedState {
     #[serde(with = "par_serializer")]
     Par(ParResult),

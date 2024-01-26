@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use super::runner::AirRunner;
+use super::runner::DataToHumanReadable;
 use air_test_utils::avm_runner::AVMRunner;
 use fluence_keypair::KeyPair;
+
+use std::error::Error as StdError;
 use std::path::Path;
 
 pub(crate) struct WasmAvmRunner(AVMRunner);
@@ -36,8 +40,7 @@ impl AirRunner for WasmAvmRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let call_tracing = rt.block_on(self.0.call_tracing(
+        let call_tracing = self.0.call_tracing(
             air,
             prev_data,
             data,
@@ -51,7 +54,7 @@ impl AirRunner for WasmAvmRunner {
             keypair.key_format().into(),
             keypair.secret().expect("Failed to get secret"),
             particle_id,
-        ));
+        );
         let memory_stats = self.0.memory_stats();
         tracing::warn!(memory_size = memory_stats.memory_size);
 
@@ -59,14 +62,19 @@ impl AirRunner for WasmAvmRunner {
     }
 }
 
+impl DataToHumanReadable for WasmAvmRunner {
+    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>> {
+        Ok(self.0.to_human_readable_data(data)?)
+    }
+}
+
 pub(crate) fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<dyn AirRunner>> {
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    Ok(Box::new(WasmAvmRunner(rt.block_on(AVMRunner::new(
+) -> anyhow::Result<Box<WasmAvmRunner>> {
+    Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
         0,
-    ))?)))
+    )?)))
 }

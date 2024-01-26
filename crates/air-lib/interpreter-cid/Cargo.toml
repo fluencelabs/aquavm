@@ -1,7 +1,7 @@
 [package]
 name = "air-interpreter-cid"
 description = "AIR interpreter CID util module"
-version = "0.7.0"
+version = "0.9.0"
 authors = ["Fluence Labs"]
 edition = "2021"
 license = "Apache-2.0"
@@ -22,6 +22,7 @@ digest = "0.10.7"
 sha2 = "0.10.7"
 blake3 = { version = "1.5.0", features = ["traits-preview"] }
 multihash-codetable = { version = "0.1.1", features = ["blake3", "sha2", "digest"] }
+rkyv = { version = "0.7.43", features = ["validation", "strict"], optional = true }
 
 [dev-dependencies]
 multihash-codetable = { version = "0.1.1", features = ["ripemd"] }

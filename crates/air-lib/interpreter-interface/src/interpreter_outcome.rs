@@ -116,7 +116,7 @@ fn try_as_i64(ivalue: IValue, field_name: &str) -> Result<i64, String> {
 }
 
 #[cfg(feature = "marine")]
-fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
+pub fn try_as_string(ivalue: IValue, field_name: &str) -> Result<String, String> {
     match ivalue {
         IValue::String(value) => Ok(value),
         v => Err(format!("expected a string for {field_name}, got {v:?}")),

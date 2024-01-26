@@ -1,0 +1,15 @@
+(seq
+    (call "init_peer_id" ("" "init") [] data) ; ok = [{data}]
+    (seq
+        (seq
+            (fold data unused
+                (seq
+                    (ap ("key" unused) %map)
+                    (next unused)
+                )
+            )
+            (canon "other_peer_id" %map #%new_data)
+        )
+        (canon "init_peer_id" $data #$new_data)
+    )
+)

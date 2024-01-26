@@ -1,5 +1,104 @@
 # Changelog
 
+## [0.59.0](https://github.com/fluencelabs/aquavm/compare/air-v0.58.0...air-v0.59.0) (2024-01-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768))
+
+### Features
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768)) ([3375c7a](https://github.com/fluencelabs/aquavm/commit/3375c7a3b6b029ab5859ff00c1554abc8597542b))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate marine-rs-sdk to 0.10.3 ([#782](https://github.com/fluencelabs/aquavm/issues/782)) ([a33e853](https://github.com/fluencelabs/aquavm/commit/a33e8538123de71ea30f88ee5b40cda88f968707))
+* **performance:** avoiding particle data printout in errors ([6c1cb28](https://github.com/fluencelabs/aquavm/commit/6c1cb289cc8ed7ba380d134cff1aec8b54c092ec))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.1 to 0.17.2
+
+## [0.58.0](https://github.com/fluencelabs/aquavm/compare/air-v0.57.0...air-v0.58.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **air,air-cli:** pretty-printing binary interpreter data ([#794](https://github.com/fluencelabs/aquavm/issues/794)) ([d6b1da9](https://github.com/fluencelabs/aquavm/commit/d6b1da9bdc1197e72ef24051293fd06d3842f318))
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.8.0 to 0.9.0
+    * air-interpreter-data bumped from 0.16.0 to 0.17.0
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+    * air-interpreter-interface bumped from 0.17.0 to 0.17.1
+    * air-trace-handler bumped from 0.5.9 to 0.5.10
+    * polyplets bumped from 0.5.2 to 0.6.0
+
+## [0.57.0](https://github.com/fluencelabs/aquavm/compare/air-v0.56.0...air-v0.57.0) (2024-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780))
+
+### Features
+
+* **interface:** Use MessagePack for calls ([#780](https://github.com/fluencelabs/aquavm/issues/780)) ([325eea7](https://github.com/fluencelabs/aquavm/commit/325eea7e9130e236b4e84ebb883632becffa28b5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.16.0 to 0.17.0
+
+## [0.56.0](https://github.com/fluencelabs/aquavm/compare/air-v0.55.0...air-v0.56.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** values are binary blobs ([#775](https://github.com/fluencelabs/aquavm/issues/775))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **air-parser:** VM-347 After next validator fold check ([#774](https://github.com/fluencelabs/aquavm/issues/774)) ([c6f157a](https://github.com/fluencelabs/aquavm/commit/c6f157a6e3ee10fa9209b1fa4a305040ce876d00))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+* **data:** values are binary blobs ([#775](https://github.com/fluencelabs/aquavm/issues/775)) ([f1c7b43](https://github.com/fluencelabs/aquavm/commit/f1c7b43a1ee5cfd2793eb92a2a00ef1a4b185384))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.4 ([#752](https://github.com/fluencelabs/aquavm/issues/752)) ([c9a0b87](https://github.com/fluencelabs/aquavm/commit/c9a0b87a4cefa3509b040c24d23cca37757fc030))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.0 to 0.11.1
+    * air-execution-info-collector bumped from 0.7.11 to 0.7.12
+    * air-interpreter-cid bumped from 0.7.0 to 0.8.0
+    * air-interpreter-data bumped from 0.15.0 to 0.16.0
+    * air-interpreter-signatures bumped from 0.1.5 to 0.1.6
+    * air-interpreter-interface bumped from 0.15.2 to 0.16.0
+    * air-trace-handler bumped from 0.5.8 to 0.5.9
+    * polyplets bumped from 0.5.1 to 0.5.2
+
 ## [0.55.0](https://github.com/fluencelabs/aquavm/compare/air-v0.54.0...air-v0.55.0) (2023-12-12)
 
 

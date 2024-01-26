@@ -55,12 +55,16 @@ fn test_runtime_executed_call_argument_hash() {
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .unwrap();
-    let mut mallory_data = data_from_result(&mallory_res);
-    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.iter().cloned().collect();
+    let mut mallory_env = env_from_result(&mallory_res);
+
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
+    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
+
+    let mallory_data = mallory_env.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     assert_error_eq!(
@@ -107,12 +111,16 @@ fn test_runtime_executed_call_tetraplet() {
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .unwrap();
-    let mut mallory_data = data_from_result(&mallory_res);
-    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.iter().cloned().collect();
+    let mut mallory_env = env_from_result(&mallory_res);
+
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
+    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
+
+    let mallory_data = mallory_env.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(
@@ -177,12 +185,16 @@ fn test_runtime_executed_failed_argument_hash() {
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .unwrap();
-    let mut mallory_data = data_from_result(&mallory_res);
-    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.iter().cloned().collect();
+    let mut mallory_env = env_from_result(&mallory_res);
+
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
+    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
+
+    let mallory_data = mallory_env.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     assert_error_eq!(
@@ -233,12 +245,16 @@ fn test_runtime_failed_call_tetraplet() {
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .unwrap();
-    let mut mallory_data = data_from_result(&mallory_res);
-    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.iter().cloned().collect();
+    let mut mallory_env = env_from_result(&mallory_res);
+
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
+    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(0, 1);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
+
+    let mallory_data = mallory_env.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(
@@ -301,12 +317,16 @@ fn test_runtime_canon_tetraplet() {
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .unwrap();
-    let mut mallory_data = data_from_result(&mallory_res);
-    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.iter().cloned().collect();
+    let mut mallory_env = env_from_result(&mallory_res);
+
+    let mut mallory_data = InterpreterData::try_from_slice(&mallory_env.inner_data).unwrap();
+    let mut mallory_raw_trace: Vec<_> = mallory_data.trace.to_vec();
     mallory_raw_trace.swap(2, 3);
     mallory_data.trace = ExecutionTrace::from(mallory_raw_trace);
 
-    let mallory_data = mallory_data.serialize().unwrap();
+    mallory_env.inner_data = mallory_data.serialize().unwrap().into();
+
+    let mallory_data = mallory_env.serialize().unwrap();
 
     let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).unwrap();
     let expected_value = format!(

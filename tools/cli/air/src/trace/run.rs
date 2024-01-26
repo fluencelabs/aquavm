@@ -15,25 +15,28 @@
  */
 
 mod data;
-mod native;
+pub(crate) mod native;
 #[cfg(feature = "near")]
 mod near;
-mod runner;
+#[cfg(feature = "risc0")]
+mod risc0;
 #[cfg(feature = "wasm")]
-mod wasm;
+pub(crate) mod wasm;
+
+pub(crate) mod runner;
 
 use self::runner::AirRunner;
 use avm_interface::CallResults;
 
 use anyhow::Context as _;
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
 use fluence_keypair::KeyPair;
 use zeroize::Zeroize;
 
-use std::{
-    io::Read,
-    path::{Path, PathBuf},
-};
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[clap(about = "Run AIR script with AquaVM")]
@@ -121,6 +124,10 @@ struct ModeArgs {
     #[cfg(feature = "near")]
     #[arg(long)]
     near: bool,
+
+    #[cfg(feature = "risc0")]
+    #[arg(long)]
+    risc0: bool,
 }
 
 impl From<ModeArgs> for Option<Mode> {
@@ -139,6 +146,11 @@ impl From<ModeArgs> for Option<Mode> {
             return Some(Mode::Near);
         }
 
+        #[cfg(feature = "risc0")]
+        if value.risc0 {
+            return Some(Mode::Risc0);
+        }
+
         None
     }
 }
@@ -151,6 +163,9 @@ enum Mode {
 
     #[cfg(feature = "near")]
     Near,
+
+    #[cfg(feature = "risc0")]
+    Risc0,
 }
 
 pub(crate) fn run(args: Args) -> anyhow::Result<()> {
@@ -166,7 +181,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
-    let mut runner = get_runner(
+    let mut runner = create_runner(
         args.mode.into(),
         &args.air_interpreter_path,
         &args.air_near_contract_path,
@@ -215,42 +230,33 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "wasm")]
-fn get_runner(
-    mode: Option<Mode>,
-    air_interpreter_wasm_path: &Path,
-    _air_contract_wasm_path: &Path,
-    max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<dyn AirRunner>> {
-    let mode = mode.unwrap_or(Mode::Wasm);
-    match mode {
-        Mode::Native => {
-            self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
-        }
-        Mode::Wasm => self::wasm::create_wasm_avm_runner(air_interpreter_wasm_path, max_heap_size)
-            .context("Failed to instantiate WASM AVM"),
-        #[cfg(feature = "near")]
-        Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
-            .context("Failed to instantiate NEAR AVM"),
-    }
-}
-
-#[cfg(not(feature = "wasm"))]
-fn get_runner(
+fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
     _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<dyn AirRunner>> {
-    let mode = mode.unwrap_or(Mode::Native);
-    match mode {
-        Mode::Native => {
-            self::native::create_native_avm_runner().context("Failed to instantiate a native AVM")
+    #[cfg(not(feature = "wasm"))]
+    let default_mode = Mode::Native;
+    #[cfg(feature = "wasm")]
+    let default_mode = Mode::Wasm;
+
+    let mode = mode.unwrap_or(default_mode);
+    let runner = match mode {
+        Mode::Native => self::native::create_native_avm_runner()
+            .context("Failed to instantiate a native AVM")? as _,
+        #[cfg(feature = "wasm")]
+        Mode::Wasm => {
+            self::wasm::create_wasm_avm_runner(_air_interpreter_wasm_path, _max_heap_size)
+                .context("Failed to instantiate WASM AVM")? as _
         }
         #[cfg(feature = "near")]
         Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
-            .context("Failed to instantiate NEAR AVM"),
-    }
+            .context("Failed to instantiate NEAR AVM")?,
+        #[cfg(feature = "risc0")]
+        Mode::Risc0 => Box::new(self::risc0::Risc0Runner::new()),
+    };
+    Ok(runner)
 }
 
 // TODO This is a copy of function from air_interpreter/marine.rs.  It should be moved to the marine_rs_sdk.
@@ -292,8 +298,8 @@ fn load_data_or_default(
     }
 }
 
-fn load_data(data_path: &Path) -> anyhow::Result<Vec<u8>> {
-    Ok(std::fs::read(data_path)?)
+pub(crate) fn load_data(data_path: &Path) -> anyhow::Result<Vec<u8>> {
+    std::fs::read(data_path).with_context(|| data_path.to_string_lossy().into_owned())
 }
 
 fn load_keypair_ed25519(path: &PathBuf) -> Result<KeyPair, anyhow::Error> {

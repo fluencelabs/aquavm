@@ -15,12 +15,15 @@
  */
 
 use super::runner::AirRunner;
+use super::runner::DataToHumanReadable;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 
-struct NativeAvmRunner {}
+use std::error::Error as StdError;
+
+pub(crate) struct NativeAvmRunner {}
 
 impl AirRunner for NativeAvmRunner {
     fn call_tracing(
@@ -70,6 +73,12 @@ impl AirRunner for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner() -> anyhow::Result<Box<dyn AirRunner>> {
+impl DataToHumanReadable for NativeAvmRunner {
+    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>> {
+        air::to_human_readable_data(data)
+    }
+}
+
+pub(crate) fn create_native_avm_runner() -> anyhow::Result<Box<NativeAvmRunner>> {
     Ok(Box::new(NativeAvmRunner {}))
 }

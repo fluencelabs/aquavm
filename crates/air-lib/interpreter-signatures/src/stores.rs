@@ -25,7 +25,14 @@ use std::hash::Hash;
 
 /// A dictionary-like structure that stores peer public keys and their particle data signatures.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(HashMap<Key, Sign>);
+#[cfg_attr(
+    feature = "rkyv",
+    derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)
+)]
+#[cfg_attr(feature = "rkyv", archive(check_bytes))]
+pub struct SignatureStore<Key: Hash + Eq = PublicKey, Sign = Signature>(
+    #[cfg_attr(feature = "rkyv", with(::rkyv::with::AsVec))] HashMap<Key, Sign>,
+);
 
 impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
     pub fn new() -> Self {
@@ -34,6 +41,10 @@ impl<Key: Hash + Eq, Sign> SignatureStore<Key, Sign> {
 
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 
     pub fn get<Q>(&self, peer_pk: &Q) -> Option<&Sign>

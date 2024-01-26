@@ -22,7 +22,7 @@ use crate::InterpreterOutcome;
 use crate::ToErrorCode;
 use crate::INTERPRETER_SUCCESS;
 
-use air_interpreter_data::InterpreterData;
+use air_interpreter_data::InterpreterDataEnvelope;
 use air_interpreter_interface::CallRequests;
 use air_interpreter_interface::CallRequestsRepr;
 use air_interpreter_sede::ToSerialized;
@@ -105,7 +105,7 @@ fn populate_outcome_from_contexts(
         Err(outcome) => return outcome,
     };
 
-    let data = InterpreterData::from_execution_result(
+    let data = InterpreterDataEnvelope::from_execution_result(
         trace_handler.into_result_trace(),
         exec_ctx.cid_state.into(),
         exec_ctx.signature_store,
@@ -115,7 +115,7 @@ fn populate_outcome_from_contexts(
     let data = measure!(
         data.serialize().expect("default serializer shouldn't fail"),
         tracing::Level::INFO,
-        "InterpreterData::serialize"
+        "InterpreterDataEnv::serialize"
     );
 
     let next_peer_pks = dedup(exec_ctx.next_peer_pks);

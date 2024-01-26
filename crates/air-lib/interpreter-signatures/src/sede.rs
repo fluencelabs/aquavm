@@ -15,15 +15,15 @@
  */
 
 pub(crate) fn public_key_to_b58<S: serde::Serializer>(
-    key: &fluence_keypair::PublicKey,
+    key: &[u8],
     serializer: S,
 ) -> Result<S::Ok, S::Error> {
-    serializer.serialize_str(&bs58::encode(key.encode()).into_string())
+    serializer.serialize_str(&bs58::encode(key).into_string())
 }
 
 pub(crate) fn b58_to_public_key<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<fluence_keypair::PublicKey, D::Error> {
+) -> Result<Box<[u8]>, D::Error> {
     deserializer.deserialize_str(PublicKeyVisitor)
 }
 
@@ -31,7 +31,7 @@ pub(crate) fn b58_to_public_key<'de, D: serde::Deserializer<'de>>(
 struct PublicKeyVisitor;
 
 impl serde::de::Visitor<'_> for PublicKeyVisitor {
-    type Value = fluence_keypair::PublicKey;
+    type Value = Box<[u8]>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         formatter.write_str("a base58-encoded public key string")
@@ -43,21 +43,23 @@ impl serde::de::Visitor<'_> for PublicKeyVisitor {
     {
         use serde::de;
 
-        fluence_keypair::PublicKey::from_base58(v)
+        bs58::decode(v)
+            .into_vec()
+            .map(Into::into)
             .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
     }
 }
 
 pub(crate) fn signature_to_b58<S: serde::Serializer>(
-    signature: &fluence_keypair::Signature,
+    signature: &[u8],
     serializer: S,
 ) -> Result<S::Ok, S::Error> {
-    serializer.serialize_str(&bs58::encode(signature.encode()).into_string())
+    serializer.serialize_str(&bs58::encode(signature).into_string())
 }
 
 pub(crate) fn b58_to_signature<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<fluence_keypair::Signature, D::Error> {
+) -> Result<Box<[u8]>, D::Error> {
     deserializer.deserialize_str(SignatureVisitor)
 }
 
@@ -65,7 +67,7 @@ pub(crate) fn b58_to_signature<'de, D: serde::Deserializer<'de>>(
 struct SignatureVisitor;
 
 impl serde::de::Visitor<'_> for SignatureVisitor {
-    type Value = fluence_keypair::Signature;
+    type Value = Box<[u8]>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         formatter.write_str("expecting a base58-encoded signature string")
@@ -77,10 +79,9 @@ impl serde::de::Visitor<'_> for SignatureVisitor {
     {
         use serde::de;
 
-        let sig_bytes = bs58::decode(v)
+        bs58::decode(v)
             .into_vec()
-            .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))?;
-        fluence_keypair::Signature::decode(sig_bytes)
+            .map(Into::into)
             .map_err(|_| de::Error::invalid_value(de::Unexpected::Str(v), &self))
     }
 }

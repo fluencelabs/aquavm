@@ -58,8 +58,8 @@ fn test_attack_replace_value() {
     let mut mallory_cid_info = serde_json::to_value::<CidInfo>(mallory_cid_state.into()).unwrap();
     let mut cnt = 0;
     for (_cid, val) in mallory_cid_info["value_store"].as_object_mut().unwrap().iter_mut() {
-        if *val == "alice" {
-            *val = "evil".into();
+        if val.as_str().unwrap() == json!("alice").to_string() {
+            *val = json!("evil").to_string().into();
             cnt += 1;
         }
     }
@@ -77,7 +77,7 @@ fn test_attack_replace_value() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -95,7 +95,8 @@ fn test_attack_replace_value() {
         &res,
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
-                type_name: "serde_json::value::Value",
+                // fragile: it is OK if this exact string changes on compiler upgrade
+                type_name: "air_interpreter_data::raw_value::RawValue",
                 cid_repr: "bagaaihrayhxgqijfajraxivb7hxwshhbsdqk4j5zyqypb54zggmn5v7mmwxq".into(),
             }
             .into()
@@ -153,7 +154,7 @@ fn test_attack_replace_tetraplet() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -236,7 +237,7 @@ fn test_attack_replace_call_result() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -326,7 +327,7 @@ fn test_attack_replace_canon_value() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -425,7 +426,7 @@ fn test_attack_replace_canon_result_values() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,
@@ -528,7 +529,7 @@ fn test_attack_replace_canon_result_tetraplet() {
     let mallory_signature = mallory_cid_tracker.gen_signature("", &mallory_keypair).unwrap();
     signature_store.put(mallory_pk, mallory_signature);
 
-    let mallory_data = InterpreterData::from_execution_result(
+    let mallory_data = InterpreterDataEnvelope::from_execution_result(
         mallory_trace.into(),
         serde_json::from_value(mallory_cid_info).unwrap(),
         signature_store,

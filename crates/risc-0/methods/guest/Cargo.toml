@@ -1,0 +1,12 @@
+[package]
+name = "zk-aquavm"
+version = "0.1.0"
+description = "RISC-0 guest wrapper for AquaVM"
+authors = ["Fluence Labs"]
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+risc0-zkvm = { version = "0.19.1", default-features = false, features = [ "std" ] }
+zk-aquavm-interface = { path = "../../core", version = "0.1.0" }
+aquavm-air = { path = "../../../../air", version = "0.56.0" }

@@ -39,7 +39,7 @@ pub struct DataVerifier<'data> {
 }
 
 impl<'data> DataVerifier<'data> {
-    // it can be further optimized if only required parts are passed
+    // it can be further optimized if only required parts are passed;
     // SignatureStore is not used elsewhere
     pub fn new(data: &'data InterpreterData, salt: &'data str) -> Result<Self, DataVerifierError> {
         // validate key algoritms
@@ -48,7 +48,7 @@ impl<'data> DataVerifier<'data> {
                 .validate()
                 .map_err(|error| DataVerifierError::MalformedKey {
                     error,
-                    peer_id: public_key.to_peer_id(),
+                    key: public_key.to_string(),
                 })?;
         }
 
@@ -58,7 +58,11 @@ impl<'data> DataVerifier<'data> {
             .iter()
             .map(|(public_key, signature)| {
                 (
-                    public_key.to_peer_id().to_string().into(),
+                    public_key
+                        .to_peer_id()
+                        .expect("cannot happen, was verifeid before")
+                        .to_string()
+                        .into(),
                     PeerInfo::new(public_key, signature),
                 )
             })
@@ -84,7 +88,11 @@ impl<'data> DataVerifier<'data> {
                 .map_err(|error| DataVerifierError::SignatureMismatch {
                     error: error.into(),
                     cids: peer_info.cids.clone(),
-                    peer_id: peer_info.public_key.to_peer_id().to_string(),
+                    peer_id: peer_info
+                        .public_key
+                        .to_peer_id()
+                        .expect("cannot happen, was verified before")
+                        .to_string(),
                 })?;
         }
         Ok(())
@@ -215,7 +223,11 @@ fn check_cid_multiset_invariant(
     if is_multisubset(larger_count_map, smaller_count_map) {
         Ok(())
     } else {
-        let peer_id = smaller_pair.public_key.to_peer_id().to_string();
+        let peer_id = smaller_pair
+            .public_key
+            .to_peer_id()
+            .expect("cannot happen, was verified before")
+            .to_string();
         Err(DataVerifierError::MergeMismatch {
             peer_id,
             larger_cids: larger_cids.clone(),

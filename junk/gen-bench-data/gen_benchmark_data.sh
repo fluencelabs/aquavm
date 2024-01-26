@@ -27,6 +27,12 @@ for bench in multiple-cids10 \
             parser-10000-100 \
             parser-calls-10000-100 \
             null \
+            lense-100mb \
+            map-100mb \
+            canon-map-100mb \
+            call-result-100mb \
+            parser-air-100mb \
+            hybrid-100mb \
             ;
 do
     echo "Generating ${bench} ..." >&2

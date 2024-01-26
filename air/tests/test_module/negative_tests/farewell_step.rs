@@ -22,7 +22,7 @@ fn unprocessed_call_result() {
     let air = r#"(null)"#;
     let client_peer_id = "some_peer_id";
     let mut client_vm = create_avm(unit_call_service(), client_peer_id);
-    let prev_data = InterpreterData::new(semver::Version::new(1, 1, 1));
+    let prev_data = InterpreterDataEnvelope::new(semver::Version::new(1, 1, 1));
     let prev_data: Vec<u8> = prev_data.serialize().unwrap();
     let call_service_result = air_test_utils::CallServiceResult::ok(json!("null"));
     let call_results_4_call = maplit::hashmap!(
@@ -35,7 +35,7 @@ fn unprocessed_call_result() {
 
     let expected_call_service_result = air_interpreter_interface::CallServiceResult::ok(&json!("null"));
     let expected_call_results = maplit::hashmap!(
-        70 => expected_call_service_result,
+        "70".to_owned() => expected_call_service_result,
     );
     let expected_error = FarewellError::UnprocessedCallResult(expected_call_results);
     assert!(check_error(&result, expected_error));

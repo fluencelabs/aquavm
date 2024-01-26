@@ -15,7 +15,7 @@
  */
 
 use air::ExecutionCidState;
-use air_interpreter_data::{ExecutionTrace, InterpreterData};
+use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
@@ -190,13 +190,13 @@ fn stream_merge() {
     let mut vm2 = create_avm(neighborhood_call_service, "B");
 
     let script = r#"
-        (seq 
+        (seq
             (call "A" ("add_provider" "") [] $void)
-            (seq 
+            (seq
                 (call "A" ("add_provider" "") [] $void)
-                (seq 
+                (seq
                     (call "A" ("get_providers" "") [] $providers)
-                    (seq 
+                    (seq
                         (call "A" ("get_providers" "") [] $providers)
                         (seq
                             (seq
@@ -304,7 +304,8 @@ fn fold_merge() {
         local_vms_results[6].data.clone()
     );
 
-    let data = InterpreterData::try_from_slice(&result_7.data).expect("data should be well-formed");
+    let env = InterpreterDataEnvelope::try_from_slice(&result_7.data).expect("data should be well-formed");
+    let data = InterpreterData::try_from_slice(&env.inner_data).expect("data should be well-formed");
 
     let mut fold_states_count = 0;
     let mut calls_count = HashMap::new();
@@ -329,7 +330,12 @@ fn fold_merge() {
                     };
 
                     let service_result_agg = data.cid_info.service_result_store.get(cid).unwrap();
-                    let value = data.cid_info.value_store.get(&service_result_agg.value_cid).unwrap();
+                    let value = data
+                        .cid_info
+                        .value_store
+                        .get(&service_result_agg.value_cid)
+                        .unwrap()
+                        .get_value();
 
                     if let JValue::String(ref var_name) = &*value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();

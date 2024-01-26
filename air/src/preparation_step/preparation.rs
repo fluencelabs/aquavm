@@ -19,13 +19,14 @@ use crate::execution_step::execution_context::ExecCtxIngredients;
 use crate::execution_step::ExecutionCtx;
 use crate::execution_step::TraceHandler;
 
+use air_interpreter_data::DataDeserializationError;
 use air_interpreter_data::InterpreterData;
-use air_interpreter_data::InterpreterDataRepr;
+use air_interpreter_data::InterpreterDataEnvelope;
+use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
 use air_interpreter_sede::FromSerialized;
-use air_interpreter_sede::Representation;
 use air_interpreter_signatures::KeyError;
 use air_interpreter_signatures::KeyPair;
 use air_interpreter_signatures::SignatureStore;
@@ -51,10 +52,13 @@ pub(crate) struct ParsedDataPair {
 /// Parse data and check its version.
 #[tracing::instrument(skip_all)]
 pub(crate) fn parse_data(prev_data: &[u8], current_data: &[u8]) -> PreparationResult<ParsedDataPair> {
-    let prev_data = try_to_data(prev_data)?;
-    let current_data = try_to_data(current_data)?;
+    let prev_envelope = try_to_envelope(prev_data)?;
+    let current_envelope = try_to_envelope(current_data)?;
 
-    check_version_compatibility(&current_data)?;
+    check_version_compatibility(&current_envelope.versions)?;
+
+    let prev_data = try_to_data(&prev_envelope.inner_data)?;
+    let current_data = try_to_data(&current_envelope.inner_data)?;
 
     Ok(ParsedDataPair {
         prev_data,
@@ -106,24 +110,30 @@ pub(crate) fn prepare<'i>(
     Ok(result)
 }
 
-pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+pub(crate) fn try_to_envelope(raw_env_data: &[u8]) -> PreparationResult<InterpreterDataEnvelope<'_>> {
     // treat empty slice as an empty data,
     // it allows abstracting from an internal format for an empty data
-    if raw_data.is_empty() {
-        return Ok(InterpreterData::new(super::min_supported_version().clone()));
+    if raw_env_data.is_empty() {
+        return Ok(InterpreterDataEnvelope::new(super::min_supported_version().clone()));
     }
 
-    InterpreterData::try_from_slice(raw_data).map_err(|de_error| to_date_de_error(raw_data.to_vec(), de_error))
+    InterpreterDataEnvelope::try_from_slice(raw_env_data)
+        .map_err(|de_error| to_envelope_de_error(raw_env_data.to_vec(), de_error))
 }
 
-fn to_date_de_error(
-    raw_data: Vec<u8>,
-    de_error: <InterpreterDataRepr as Representation>::DeserializeError,
-) -> PreparationError {
-    match InterpreterData::try_get_versions(&raw_data) {
-        Ok(versions) => PreparationError::data_de_failed_with_versions(raw_data, de_error, versions),
-        Err(_) => PreparationError::data_de_failed(raw_data, de_error),
+pub(crate) fn try_to_data(raw_data: &[u8]) -> PreparationResult<InterpreterData> {
+    InterpreterData::try_from_slice(raw_data).map_err(to_data_de_error)
+}
+
+fn to_envelope_de_error(env_raw_data: Vec<u8>, de_error: DataDeserializationError) -> PreparationError {
+    match InterpreterDataEnvelope::try_get_versions(&env_raw_data) {
+        Ok(versions) => PreparationError::env_de_failed_with_versions(de_error, versions),
+        Err(_) => PreparationError::envelope_de_failed(de_error),
     }
+}
+
+fn to_data_de_error(de_error: DataDeserializationError) -> PreparationError {
+    PreparationError::data_de_failed(de_error)
 }
 
 #[tracing::instrument(skip_all)]
@@ -137,7 +147,7 @@ fn make_exec_ctx(
     let call_results = measure!(
         CallResultsRepr
             .deserialize(call_results)
-            .map_err(|e| PreparationError::call_results_de_failed(call_results.clone(), e))?,
+            .map_err(PreparationError::call_results_de_failed)?,
         tracing::Level::INFO,
         "CallResultsRepr.deserialize",
     );
@@ -152,10 +162,10 @@ fn make_exec_ctx(
     Ok(ctx)
 }
 
-pub(crate) fn check_version_compatibility(data: &InterpreterData) -> PreparationResult<()> {
-    if &data.versions.interpreter_version < super::min_supported_version() {
+pub(crate) fn check_version_compatibility(versions: &Versions) -> PreparationResult<()> {
+    if &versions.interpreter_version < super::min_supported_version() {
         return Err(PreparationError::UnsupportedInterpreterVersion {
-            actual_version: data.versions.interpreter_version.clone(),
+            actual_version: versions.interpreter_version.clone(),
             required_version: super::min_supported_version().clone(),
         });
     }

@@ -25,6 +25,54 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.17.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.16.0...air-interpreter-data-v0.17.0) (2024-01-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783))
+
+### Features
+
+* **data:** Rkyv for `InterprerterData` ([#783](https://github.com/fluencelabs/aquavm/issues/783)) ([2e0b54c](https://github.com/fluencelabs/aquavm/commit/2e0b54c2d415a27d2111587b850e981d8a8bcae2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-cid bumped from 0.8.0 to 0.9.0
+    * air-interpreter-signatures bumped from 0.1.6 to 0.1.7
+    * polyplets bumped from 0.5.2 to 0.6.0
+
+## [0.16.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.15.0...air-interpreter-data-v0.16.0) (2024-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **data:** values are binary blobs ([#775](https://github.com/fluencelabs/aquavm/issues/775))
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757))
+
+### Features
+
+* **data:** flexible serialization formats ([#757](https://github.com/fluencelabs/aquavm/issues/757)) ([771d42d](https://github.com/fluencelabs/aquavm/commit/771d42dec43d3081621897edda3735768fd9ff71))
+* **data:** values are binary blobs ([#775](https://github.com/fluencelabs/aquavm/issues/775)) ([f1c7b43](https://github.com/fluencelabs/aquavm/commit/f1c7b43a1ee5cfd2793eb92a2a00ef1a4b185384))
+
+
+### Bug Fixes
+
+* **deps:** update rust crate fluence-keypair to 0.10.4 ([#752](https://github.com/fluencelabs/aquavm/issues/752)) ([c9a0b87](https://github.com/fluencelabs/aquavm/commit/c9a0b87a4cefa3509b040c24d23cca37757fc030))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.0 to 0.11.1
+    * air-interpreter-cid bumped from 0.7.0 to 0.8.0
+    * air-interpreter-signatures bumped from 0.1.5 to 0.1.6
+    * polyplets bumped from 0.5.1 to 0.5.2
+
 ## [0.15.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.14.0...air-interpreter-data-v0.15.0) (2023-12-12)
 
 

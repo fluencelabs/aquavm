@@ -17,6 +17,7 @@
 use crate::RunnerError;
 use crate::RunnerResult;
 
+use air_interpreter_interface::try_as_string;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_sede::ToSerialized;
@@ -28,7 +29,6 @@ use marine::IValue;
 use marine::Marine;
 use marine::MarineConfig;
 use marine::ModuleDescriptor;
-use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use std::path::PathBuf;
 
@@ -36,7 +36,8 @@ pub struct AVMRunner {
     marine: Marine,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
-    pub wasm_backend: WasmtimeWasmBackend,
+    /// The memory limit provided by constructor
+    total_memory_limit: Option<u64>,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -45,27 +46,29 @@ pub struct AVMMemoryStats {
     /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
     pub memory_size: usize,
     /// Possibly set max memory size for AVM server.
-    pub max_memory_size: Option<usize>,
+    pub total_memory_limit: Option<u64>,
+    /// Number of allocations rejected due to memory limit.
+    /// May be not recorded by some backends in Marine.
+    pub allocation_rejects: Option<u32>,
 }
 
 impl AVMRunner {
     /// Create AVM with the provided config.
-    pub async fn new(
+    pub fn new(
         air_wasm_path: PathBuf,
-        max_heap_size: Option<u64>,
+        total_memory_limit: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
-        let wasm_backend = WasmtimeWasmBackend::default();
         let marine_config =
-            make_marine_config(wasm_dir, &wasm_filename, max_heap_size, logging_mask);
-        let marine = Marine::with_raw_config(wasm_backend.clone(), marine_config).await?;
+            make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
+        let marine = Marine::with_raw_config(marine_config)?;
 
         let avm = Self {
             marine,
             wasm_filename,
-            wasm_backend,
+            total_memory_limit,
         };
 
         Ok(avm)
@@ -73,7 +76,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub async fn call(
+    pub fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -107,7 +110,7 @@ impl AVMRunner {
 
         let result = measure!(
             self.marine
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default()).await?,
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke",
@@ -123,7 +126,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub async fn call_tracing(
+    pub fn call_tracing(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -161,7 +164,7 @@ impl AVMRunner {
                 "invoke_tracing",
                 &args,
                 <_>::default(),
-            ).await?,
+            )?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke_tracing",
@@ -175,6 +178,20 @@ impl AVMRunner {
         Ok(outcome)
     }
 
+    pub fn to_human_readable_data(&mut self, data: Vec<u8>) -> RunnerResult<String> {
+        let args = vec![IValue::ByteArray(data)];
+
+        let result = self.marine.call_with_ivalues(
+            &self.wasm_filename,
+            "to_human_readable_data",
+            &args,
+            <_>::default(),
+        )?;
+        let result = try_as_one_value_vec(result)?;
+        let outcome = try_as_string(result, "result").map_err(RunnerError::Aux)?;
+        Ok(outcome)
+    }
+
     pub fn memory_stats(&self) -> AVMMemoryStats {
         let stats = self.marine.module_memory_stats();
 
@@ -183,7 +200,8 @@ impl AVMRunner {
 
         AVMMemoryStats {
             memory_size: stats.modules[0].memory_size,
-            max_memory_size: None
+            total_memory_limit: self.total_memory_limit,
+            allocation_rejects: stats.allocation_stats.map(|stats| stats.allocation_rejects),
         }
     }
 }
@@ -268,7 +286,7 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
 fn make_marine_config(
     air_wasm_dir: PathBuf,
     air_wasm_file: &str,
-    _max_heap_size: Option<u64>,
+    total_memory_limit: Option<u64>,
     logging_mask: i32,
 ) -> MarineConfig {
     let air_module_config = marine::MarineModuleConfig {
@@ -279,8 +297,8 @@ fn make_marine_config(
     };
 
     MarineConfig {
-        total_memory_limit: None,
         modules_dir: Some(air_wasm_dir),
+        total_memory_limit,
         modules_config: vec![ModuleDescriptor {
             load_from: None,
             file_name: String::from(air_wasm_file),

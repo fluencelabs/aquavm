@@ -1,0 +1,11 @@
+[package]
+name = "zk-aquavm-interface"
+version = "0.1.0"
+description = "Interface for RISC-0 AquaVM wrapper"
+authors = ["Fluence Labs"]
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+aquavm-air = { path = "../../../air", version = "0.56.0", default-features = false }
+serde = "1.0"

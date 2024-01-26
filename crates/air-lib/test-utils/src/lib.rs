@@ -35,7 +35,6 @@ pub mod native_test_runner;
 pub mod wasm_test_runner;
 
 pub use air::interpreter_data::*;
-use air_interpreter_sede::ToSerialized;
 
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
@@ -83,30 +82,35 @@ pub fn trace_from_result(result: &RawAVMOutcome) -> ExecutionTrace {
 }
 
 pub fn data_from_result(result: &RawAVMOutcome) -> InterpreterData {
-    InterpreterData::try_from_slice(&result.data).expect("default serializer shouldn't fail")
+    let env = InterpreterDataEnvelope::try_from_slice(&result.data)
+        .expect("default serializer shouldn't fail");
+    InterpreterData::try_from_slice(&env.inner_data).expect("default serializer shouldn't fail")
+}
+
+pub fn env_from_result(result: &RawAVMOutcome) -> InterpreterDataEnvelope<'_> {
+    InterpreterDataEnvelope::try_from_slice(&result.data)
+        .expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace(
     trace: impl Into<ExecutionTrace>,
     cid_state: ExecutionCidState,
 ) -> Vec<u8> {
-    let data = InterpreterData::from_execution_result(
+    let data = InterpreterDataEnvelope::from_execution_result(
         trace.into(),
         cid_state.into(),
         <_>::default(),
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataRepr
-        .serialize(&data)
-        .expect("default serializer shouldn't fail")
+    data.serialize().expect("default serializer shouldn't fail")
 }
 
 pub fn raw_data_from_trace_with_canon(
     trace: impl Into<ExecutionTrace>,
     cid_state: ExecutionCidState,
 ) -> Vec<u8> {
-    let data = InterpreterData::from_execution_result(
+    let data = InterpreterDataEnvelope::from_execution_result(
         trace.into(),
         CidInfo {
             value_store: cid_state.value_tracker.into(),
@@ -119,9 +123,7 @@ pub fn raw_data_from_trace_with_canon(
         0,
         semver::Version::new(1, 1, 1),
     );
-    InterpreterDataRepr
-        .serialize(&data)
-        .expect("default serializer shouldn't fail")
+    data.serialize().expect("default serializer shouldn't fail")
 }
 
 #[macro_export]

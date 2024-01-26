@@ -28,6 +28,7 @@
 
 mod execution_step;
 mod farewell_step;
+mod human_readable_data;
 mod preparation_step;
 mod runner;
 mod signing_step;
@@ -63,6 +64,7 @@ pub use preparation_step::min_supported_version;
 pub use preparation_step::PreparationError;
 pub use utils::ToErrorCode;
 
+pub use crate::human_readable_data::to_human_readable_data;
 pub use crate::runner::execute_air;
 
 pub mod interpreter_data {
