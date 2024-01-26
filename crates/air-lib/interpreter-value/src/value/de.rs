@@ -1,66 +1,59 @@
-use crate::value::Value;
-use crate::Map;
+use crate::value::JValue;
+use crate::{JsonString, Map};
 use core::fmt;
 use serde::de::{self, Deserialize, DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde_json::Number;
-use std::borrow::ToOwned;
-use std::string::String;
 use std::vec::Vec;
 
-impl<'de> Deserialize<'de> for Value {
+impl<'de> Deserialize<'de> for JValue {
     #[inline]
-    fn deserialize<D>(deserializer: D) -> Result<Value, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<JValue, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         struct ValueVisitor;
 
         impl<'de> Visitor<'de> for ValueVisitor {
-            type Value = Value;
+            type Value = JValue;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("any valid JSON value")
             }
 
             #[inline]
-            fn visit_bool<E>(self, value: bool) -> Result<Value, E> {
-                Ok(Value::Bool(value))
+            fn visit_bool<E>(self, value: bool) -> Result<JValue, E> {
+                Ok(JValue::Bool(value))
             }
 
             #[inline]
-            fn visit_i64<E>(self, value: i64) -> Result<Value, E> {
-                Ok(Value::Number(value.into()))
+            fn visit_i64<E>(self, value: i64) -> Result<JValue, E> {
+                Ok(JValue::Number(value.into()))
             }
 
             #[inline]
-            fn visit_u64<E>(self, value: u64) -> Result<Value, E> {
-                Ok(Value::Number(value.into()))
+            fn visit_u64<E>(self, value: u64) -> Result<JValue, E> {
+                Ok(JValue::Number(value.into()))
             }
 
             #[inline]
-            fn visit_f64<E>(self, value: f64) -> Result<Value, E> {
-                Ok(Number::from_f64(value).map_or(Value::Null, Value::Number))
+            fn visit_f64<E>(self, value: f64) -> Result<JValue, E> {
+                Ok(Number::from_f64(value).map_or(JValue::Null, JValue::Number))
             }
 
-            fn visit_str<E>(self, value: &str) -> Result<Value, E>
+            fn visit_str<E>(self, value: &str) -> Result<JValue, E>
             where
                 E: serde::de::Error,
             {
-                self.visit_string(String::from(value))
+                Ok(JValue::String(value.into()))
             }
 
             #[inline]
-            fn visit_string<E>(self, value: String) -> Result<Value, E> {
-                Ok(Value::String(value))
+            fn visit_none<E>(self) -> Result<JValue, E> {
+                Ok(JValue::Null)
             }
 
             #[inline]
-            fn visit_none<E>(self) -> Result<Value, E> {
-                Ok(Value::Null)
-            }
-
-            #[inline]
-            fn visit_some<D>(self, deserializer: D) -> Result<Value, D::Error>
+            fn visit_some<D>(self, deserializer: D) -> Result<JValue, D::Error>
             where
                 D: serde::Deserializer<'de>,
             {
@@ -68,12 +61,12 @@ impl<'de> Deserialize<'de> for Value {
             }
 
             #[inline]
-            fn visit_unit<E>(self) -> Result<Value, E> {
-                Ok(Value::Null)
+            fn visit_unit<E>(self) -> Result<JValue, E> {
+                Ok(JValue::Null)
             }
 
             #[inline]
-            fn visit_seq<V>(self, mut visitor: V) -> Result<Value, V::Error>
+            fn visit_seq<V>(self, mut visitor: V) -> Result<JValue, V::Error>
             where
                 V: SeqAccess<'de>,
             {
@@ -83,25 +76,25 @@ impl<'de> Deserialize<'de> for Value {
                     vec.push(elem);
                 }
 
-                Ok(Value::Array(vec))
+                Ok(JValue::Array(vec.into()))
             }
 
-            fn visit_map<V>(self, mut visitor: V) -> Result<Value, V::Error>
+            fn visit_map<V>(self, mut visitor: V) -> Result<JValue, V::Error>
             where
                 V: MapAccess<'de>,
             {
                 match tri!(visitor.next_key_seed(KeyClassifier)) {
                     Some(KeyClass::Map(first_key)) => {
-                        let mut values = Map::new();
+                        let mut values = Map::<JsonString, JValue>::new();
 
                         values.insert(first_key, tri!(visitor.next_value()));
-                        while let Some((key, value)) = tri!(visitor.next_entry()) {
-                            values.insert(key, value);
+                        while let Some((key, value)) = tri!(visitor.next_entry::<JsonString, _>()) {
+                            values.insert(key.into(), value);
                         }
 
-                        Ok(Value::Object(values))
+                        Ok(JValue::Object(values.into()))
                     }
-                    None => Ok(Value::Object(Map::new())),
+                    None => Ok(JValue::Object(Map::new().into())),
                 }
             }
         }
@@ -113,7 +106,7 @@ impl<'de> Deserialize<'de> for Value {
 struct KeyClassifier;
 
 enum KeyClass {
-    Map(String),
+    Map(JsonString),
 }
 
 impl<'de> DeserializeSeed<'de> for KeyClassifier {
@@ -139,16 +132,7 @@ impl<'de> Visitor<'de> for KeyClassifier {
         E: de::Error,
     {
         match s {
-            _ => Ok(KeyClass::Map(s.to_owned())),
-        }
-    }
-
-    fn visit_string<E>(self, s: String) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {
-        match s.as_str() {
-            _ => Ok(KeyClass::Map(s)),
+            _ => Ok(KeyClass::Map(s.into())),
         }
     }
 }

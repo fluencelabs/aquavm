@@ -1,16 +1,18 @@
-use super::Value;
-use crate::Map;
+use super::JValue;
+use crate::{JsonString, Map};
 use serde_json::Number;
 use std::borrow::Cow;
-use std::string::{String, ToString};
+use std::collections::HashMap;
+use std::rc::Rc;
+use std::string::String;
 use std::vec::Vec;
 
 macro_rules! from_integer {
     ($($ty:ident)*) => {
         $(
-            impl From<$ty> for Value {
+            impl From<$ty> for JValue {
                 fn from(n: $ty) -> Self {
-                    Value::Number(n.into())
+                    JValue::Number(n.into())
                 }
             }
         )*
@@ -22,12 +24,7 @@ from_integer! {
     u8 u16 u32 u64 usize
 }
 
-#[cfg(feature = "arbitrary_precision")]
-from_integer! {
-    i128 u128
-}
-
-impl From<f32> for Value {
+impl From<f32> for JValue {
     /// Convert 32-bit floating point number to `Value::Number`, or
     /// `Value::Null` if infinite or NaN.
     ///
@@ -40,11 +37,11 @@ impl From<f32> for Value {
     /// let x: Value = f.into();
     /// ```
     fn from(f: f32) -> Self {
-        Number::from_f64(f as _).map_or(Value::Null, Value::Number)
+        Number::from_f64(f as _).map_or(JValue::Null, JValue::Number)
     }
 }
 
-impl From<f64> for Value {
+impl From<f64> for JValue {
     /// Convert 64-bit floating point number to `Value::Number`, or
     /// `Value::Null` if infinite or NaN.
     ///
@@ -57,11 +54,11 @@ impl From<f64> for Value {
     /// let x: Value = f.into();
     /// ```
     fn from(f: f64) -> Self {
-        Number::from_f64(f).map_or(Value::Null, Value::Number)
+        Number::from_f64(f).map_or(JValue::Null, JValue::Number)
     }
 }
 
-impl From<bool> for Value {
+impl From<bool> for JValue {
     /// Convert boolean to `Value::Bool`.
     ///
     /// # Examples
@@ -73,11 +70,11 @@ impl From<bool> for Value {
     /// let x: Value = b.into();
     /// ```
     fn from(f: bool) -> Self {
-        Value::Bool(f)
+        JValue::Bool(f)
     }
 }
 
-impl From<String> for Value {
+impl From<String> for JValue {
     /// Convert `String` to `Value::String`.
     ///
     /// # Examples
@@ -89,11 +86,11 @@ impl From<String> for Value {
     /// let x: Value = s.into();
     /// ```
     fn from(f: String) -> Self {
-        Value::String(f)
+        JValue::String(f.into())
     }
 }
 
-impl From<&str> for Value {
+impl From<&str> for JValue {
     /// Convert string slice to `Value::String`.
     ///
     /// # Examples
@@ -105,11 +102,11 @@ impl From<&str> for Value {
     /// let x: Value = s.into();
     /// ```
     fn from(f: &str) -> Self {
-        Value::String(f.to_string())
+        JValue::String(f.into())
     }
 }
 
-impl<'a> From<Cow<'a, str>> for Value {
+impl<'a> From<Cow<'a, str>> for JValue {
     /// Convert copy-on-write string to `Value::String`.
     ///
     /// # Examples
@@ -130,11 +127,11 @@ impl<'a> From<Cow<'a, str>> for Value {
     /// let x: Value = s.into();
     /// ```
     fn from(f: Cow<'a, str>) -> Self {
-        Value::String(f.into_owned())
+        JValue::String(f.into())
     }
 }
 
-impl From<Number> for Value {
+impl From<Number> for JValue {
     /// Convert `Number` to `Value::Number`.
     ///
     /// # Examples
@@ -146,11 +143,11 @@ impl From<Number> for Value {
     /// let x: Value = n.into();
     /// ```
     fn from(f: Number) -> Self {
-        Value::Number(f)
+        JValue::Number(f)
     }
 }
 
-impl From<Map<String, Value>> for Value {
+impl From<Map<JsonString, JValue>> for JValue {
     /// Convert map (with string keys) to `Value::Object`.
     ///
     /// # Examples
@@ -162,12 +159,32 @@ impl From<Map<String, Value>> for Value {
     /// m.insert("Lorem".to_string(), "ipsum".into());
     /// let x: Value = m.into();
     /// ```
-    fn from(f: Map<String, Value>) -> Self {
-        Value::Object(f)
+    fn from(f: Map<JsonString, JValue>) -> Self {
+        JValue::Object(f.into())
     }
 }
 
-impl<T: Into<Value>> From<Vec<T>> for Value {
+impl<K: Into<JsonString>, V: Into<JValue>> From<HashMap<K, V>> for JValue {
+    /// Convert map (with string keys) to `Value::Object`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use serde_json::{Map, Value};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut m = HashMap::<s::new();
+    /// m.insert("Lorem".to_owned(), "ipsum".to_owned());
+    /// let x: Value = m.into();
+    /// ```
+    fn from(f: HashMap<K, V>) -> Self {
+        let map: Map<JsonString, JValue> =
+            f.into_iter().map(|(k, v)| (k.into(), v.into())).collect();
+        JValue::Object(map.into())
+    }
+}
+
+impl<T: Into<JValue>> From<Vec<T>> for JValue {
     /// Convert a `Vec` to `Value::Array`.
     ///
     /// # Examples
@@ -179,11 +196,11 @@ impl<T: Into<Value>> From<Vec<T>> for Value {
     /// let x: Value = v.into();
     /// ```
     fn from(f: Vec<T>) -> Self {
-        Value::Array(f.into_iter().map(Into::into).collect())
+        JValue::Array(f.into_iter().map(Into::into).collect())
     }
 }
 
-impl<T: Clone + Into<Value>> From<&[T]> for Value {
+impl<T: Clone + Into<JValue>> From<&[T]> for JValue {
     /// Convert a slice to `Value::Array`.
     ///
     /// # Examples
@@ -195,11 +212,11 @@ impl<T: Clone + Into<Value>> From<&[T]> for Value {
     /// let x: Value = v.into();
     /// ```
     fn from(f: &[T]) -> Self {
-        Value::Array(f.iter().cloned().map(Into::into).collect())
+        JValue::Array(f.iter().cloned().map(Into::into).collect())
     }
 }
 
-impl<T: Into<Value>> FromIterator<T> for Value {
+impl<T: Into<JValue>> FromIterator<T> for JValue {
     /// Create a `Value::Array` by collecting an iterator of array elements.
     ///
     /// # Examples
@@ -225,11 +242,11 @@ impl<T: Into<Value>> FromIterator<T> for Value {
     /// let x: Value = Value::from_iter(vec!["lorem", "ipsum", "dolor"]);
     /// ```
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        Value::Array(iter.into_iter().map(Into::into).collect())
+        JValue::Array(iter.into_iter().map(Into::into).collect())
     }
 }
 
-impl<K: Into<String>, V: Into<Value>> FromIterator<(K, V)> for Value {
+impl<K: Into<JsonString>, V: Into<JValue>> FromIterator<(K, V)> for JValue {
     /// Create a `Value::Object` by collecting an iterator of key-value pairs.
     ///
     /// # Examples
@@ -241,15 +258,15 @@ impl<K: Into<String>, V: Into<Value>> FromIterator<(K, V)> for Value {
     /// let x: Value = v.into_iter().collect();
     /// ```
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        Value::Object(
+        JValue::Object(Rc::new(
             iter.into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-        )
+        ))
     }
 }
 
-impl From<()> for Value {
+impl From<()> for JValue {
     /// Convert `()` to `Value::Null`.
     ///
     /// # Examples
@@ -261,17 +278,17 @@ impl From<()> for Value {
     /// let x: Value = u.into();
     /// ```
     fn from((): ()) -> Self {
-        Value::Null
+        JValue::Null
     }
 }
 
-impl<T> From<Option<T>> for Value
+impl<T> From<Option<T>> for JValue
 where
-    T: Into<Value>,
+    T: Into<JValue>,
 {
     fn from(opt: Option<T>) -> Self {
         match opt {
-            None => Value::Null,
+            None => JValue::Null,
             Some(value) => Into::into(value),
         }
     }

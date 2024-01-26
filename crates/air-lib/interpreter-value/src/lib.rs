@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 // We only use our own error type; no need for From conversions provided by the
 // standard library's try! macro. This reduces lines of LLVM IR by 4%.
 macro_rules! tri {
@@ -12,3 +14,4 @@ macro_rules! tri {
 mod value;
 
 pub type Map<K, V> = indexmap::IndexMap<K, V>;
+pub type JsonString = Rc<str>;

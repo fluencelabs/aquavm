@@ -94,19 +94,19 @@ use core::fmt::{self, Debug, Display};
 use core::mem;
 use core::str;
 use std::io;
-use std::string::String;
-use std::vec::Vec;
+use std::rc::Rc;
 
 pub use self::index::Index;
-pub use serde::ser::Serializer;
+use crate::JsonString;
 pub use crate::Map;
+pub use serde::ser::Serializer;
 pub use serde_json::Number;
 
 /// Represents any valid JSON value.
 ///
 /// See the [`serde_json::value` module documentation](self) for usage examples.
 #[derive(Clone, Eq, PartialEq)]
-pub enum Value {
+pub enum JValue {
     /// Represents a JSON null value.
     ///
     /// ```
@@ -141,7 +141,7 @@ pub enum Value {
     /// #
     /// let v = json!("a string");
     /// ```
-    String(String),
+    String(JsonString),
 
     /// Represents a JSON array.
     ///
@@ -150,7 +150,7 @@ pub enum Value {
     /// #
     /// let v = json!(["an", "array"]);
     /// ```
-    Array(Vec<Value>),
+    Array(Rc<[JValue]>),
 
     /// Represents a JSON object.
     ///
@@ -165,29 +165,29 @@ pub enum Value {
     /// #
     /// let v = json!({ "an": "object" });
     /// ```
-    Object(Map<String, Value>),
+    Object(Rc<Map<JsonString, JValue>>),
 }
 
-impl Debug for Value {
+impl Debug for JValue {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Value::Null => formatter.write_str("Null"),
-            Value::Bool(boolean) => write!(formatter, "Bool({})", boolean),
-            Value::Number(number) => Debug::fmt(number, formatter),
-            Value::String(string) => write!(formatter, "String({:?})", string),
-            Value::Array(vec) => {
+            JValue::Null => formatter.write_str("Null"),
+            JValue::Bool(boolean) => write!(formatter, "Bool({})", boolean),
+            JValue::Number(number) => Debug::fmt(number, formatter),
+            JValue::String(string) => write!(formatter, "String({:?})", string),
+            JValue::Array(vec) => {
                 tri!(formatter.write_str("Array "));
                 Debug::fmt(vec, formatter)
             }
-            Value::Object(map) => {
+            JValue::Object(map) => {
                 tri!(formatter.write_str("Object "));
-                Debug::fmt(map, formatter)
+                Debug::fmt(&**map, formatter)
             }
         }
     }
 }
 
-impl Display for Value {
+impl Display for JValue {
     /// Display a JSON value as a string.
     ///
     /// ```
@@ -256,7 +256,7 @@ fn parse_index(s: &str) -> Option<usize> {
     s.parse().ok()
 }
 
-impl Value {
+impl JValue {
     /// Index into a JSON array or map. A string index can be used to access a
     /// value in a map, and a usize index can be used to access an element of an
     /// array.
@@ -295,30 +295,8 @@ impl Value {
     /// assert_eq!(object["D"], json!(null));
     /// assert_eq!(object[0]["x"]["y"]["z"], json!(null));
     /// ```
-    pub fn get<I: Index>(&self, index: I) -> Option<&Value> {
+    pub fn get<I: Index>(&self, index: I) -> Option<&JValue> {
         index.index_into(self)
-    }
-
-    /// Mutably index into a JSON array or map. A string index can be used to
-    /// access a value in a map, and a usize index can be used to access an
-    /// element of an array.
-    ///
-    /// Returns `None` if the type of `self` does not match the type of the
-    /// index, for example if the index is a string and `self` is an array or a
-    /// number. Also returns `None` if the given key does not exist in the map
-    /// or the given index is not within the bounds of the array.
-    ///
-    /// ```
-    /// # use serde_json::json;
-    /// #
-    /// let mut object = json!({ "A": 65, "B": 66, "C": 67 });
-    /// *object.get_mut("A").unwrap() = json!(69);
-    ///
-    /// let mut array = json!([ "A", "B", "C" ]);
-    /// *array.get_mut(2).unwrap() = json!("D");
-    /// ```
-    pub fn get_mut<I: Index>(&mut self, index: I) -> Option<&mut Value> {
-        index.index_into_mut(self)
     }
 
     /// Returns true if the `Value` is an Object. Returns false otherwise.
@@ -356,27 +334,9 @@ impl Value {
     /// // The array `["an", "array"]` is not an object.
     /// assert_eq!(v["b"].as_object(), None);
     /// ```
-    pub fn as_object(&self) -> Option<&Map<String, Value>> {
+    pub fn as_object(&self) -> Option<&Map<JsonString, JValue>> {
         match self {
-            Value::Object(map) => Some(map),
-            _ => None,
-        }
-    }
-
-    /// If the `Value` is an Object, returns the associated mutable Map.
-    /// Returns None otherwise.
-    ///
-    /// ```
-    /// # use serde_json::json;
-    /// #
-    /// let mut v = json!({ "a": { "nested": true } });
-    ///
-    /// v["a"].as_object_mut().unwrap().clear();
-    /// assert_eq!(v, json!({ "a": {} }));
-    /// ```
-    pub fn as_object_mut(&mut self) -> Option<&mut Map<String, Value>> {
-        match self {
-            Value::Object(map) => Some(map),
+            JValue::Object(map) => Some(map),
             _ => None,
         }
     }
@@ -415,27 +375,9 @@ impl Value {
     /// // The object `{"an": "object"}` is not an array.
     /// assert_eq!(v["b"].as_array(), None);
     /// ```
-    pub fn as_array(&self) -> Option<&Vec<Value>> {
+    pub fn as_array(&self) -> Option<&[JValue]> {
         match self {
-            Value::Array(array) => Some(array),
-            _ => None,
-        }
-    }
-
-    /// If the `Value` is an Array, returns the associated mutable vector.
-    /// Returns None otherwise.
-    ///
-    /// ```
-    /// # use serde_json::json;
-    /// #
-    /// let mut v = json!({ "a": ["an", "array"] });
-    ///
-    /// v["a"].as_array_mut().unwrap().clear();
-    /// assert_eq!(v, json!({ "a": [] }));
-    /// ```
-    pub fn as_array_mut(&mut self) -> Option<&mut Vec<Value>> {
-        match self {
-            Value::Array(list) => Some(list),
+            JValue::Array(array) => Some(array),
             _ => None,
         }
     }
@@ -482,9 +424,9 @@ impl Value {
     /// //    The value is: some string
     /// println!("The value is: {}", v["a"].as_str().unwrap());
     /// ```
-    pub fn as_str(&self) -> Option<&str> {
+    pub fn as_str(&self) -> Option<&JsonString> {
         match self {
-            Value::String(s) => Some(s),
+            JValue::String(s) => Some(s),
             _ => None,
         }
     }
@@ -503,7 +445,7 @@ impl Value {
     /// ```
     pub fn is_number(&self) -> bool {
         match *self {
-            Value::Number(_) => true,
+            JValue::Number(_) => true,
             _ => false,
         }
     }
@@ -525,7 +467,7 @@ impl Value {
     /// ```
     pub fn as_number(&self) -> Option<&Number> {
         match self {
-            Value::Number(number) => Some(number),
+            JValue::Number(number) => Some(number),
             _ => None,
         }
     }
@@ -552,7 +494,7 @@ impl Value {
     /// ```
     pub fn is_i64(&self) -> bool {
         match self {
-            Value::Number(n) => n.is_i64(),
+            JValue::Number(n) => n.is_i64(),
             _ => false,
         }
     }
@@ -577,7 +519,7 @@ impl Value {
     /// ```
     pub fn is_u64(&self) -> bool {
         match self {
-            Value::Number(n) => n.is_u64(),
+            JValue::Number(n) => n.is_u64(),
             _ => false,
         }
     }
@@ -603,7 +545,7 @@ impl Value {
     /// ```
     pub fn is_f64(&self) -> bool {
         match self {
-            Value::Number(n) => n.is_f64(),
+            JValue::Number(n) => n.is_f64(),
             _ => false,
         }
     }
@@ -623,7 +565,7 @@ impl Value {
     /// ```
     pub fn as_i64(&self) -> Option<i64> {
         match self {
-            Value::Number(n) => n.as_i64(),
+            JValue::Number(n) => n.as_i64(),
             _ => None,
         }
     }
@@ -642,7 +584,7 @@ impl Value {
     /// ```
     pub fn as_u64(&self) -> Option<u64> {
         match self {
-            Value::Number(n) => n.as_u64(),
+            JValue::Number(n) => n.as_u64(),
             _ => None,
         }
     }
@@ -661,7 +603,7 @@ impl Value {
     /// ```
     pub fn as_f64(&self) -> Option<f64> {
         match self {
-            Value::Number(n) => n.as_f64(),
+            JValue::Number(n) => n.as_f64(),
             _ => None,
         }
     }
@@ -700,7 +642,7 @@ impl Value {
     /// ```
     pub fn as_bool(&self) -> Option<bool> {
         match *self {
-            Value::Bool(b) => Some(b),
+            JValue::Bool(b) => Some(b),
             _ => None,
         }
     }
@@ -738,7 +680,7 @@ impl Value {
     /// ```
     pub fn as_null(&self) -> Option<()> {
         match *self {
-            Value::Null => Some(()),
+            JValue::Null => Some(()),
             _ => None,
         }
     }
@@ -769,7 +711,7 @@ impl Value {
     /// assert_eq!(data.pointer("/x/y/1").unwrap(), &json!("zz"));
     /// assert_eq!(data.pointer("/a/b/c"), None);
     /// ```
-    pub fn pointer(&self, pointer: &str) -> Option<&Value> {
+    pub fn pointer(&self, pointer: &str) -> Option<&JValue> {
         if pointer.is_empty() {
             return Some(self);
         }
@@ -781,63 +723,8 @@ impl Value {
             .skip(1)
             .map(|x| x.replace("~1", "/").replace("~0", "~"))
             .try_fold(self, |target, token| match target {
-                Value::Object(map) => map.get(&token),
-                Value::Array(list) => parse_index(&token).and_then(|x| list.get(x)),
-                _ => None,
-            })
-    }
-
-    /// Looks up a value by a JSON Pointer and returns a mutable reference to
-    /// that value.
-    ///
-    /// JSON Pointer defines a string syntax for identifying a specific value
-    /// within a JavaScript Object Notation (JSON) document.
-    ///
-    /// A Pointer is a Unicode string with the reference tokens separated by `/`.
-    /// Inside tokens `/` is replaced by `~1` and `~` is replaced by `~0`. The
-    /// addressed value is returned and if there is no such value `None` is
-    /// returned.
-    ///
-    /// For more information read [RFC6901](https://tools.ietf.org/html/rfc6901).
-    ///
-    /// # Example of Use
-    ///
-    /// ```
-    /// use serde_json::Value;
-    ///
-    /// fn main() {
-    ///     let s = r#"{"x": 1.0, "y": 2.0}"#;
-    ///     let mut value: Value = serde_json::from_str(s).unwrap();
-    ///
-    ///     // Check value using read-only pointer
-    ///     assert_eq!(value.pointer("/x"), Some(&1.0.into()));
-    ///     // Change value with direct assignment
-    ///     *value.pointer_mut("/x").unwrap() = 1.5.into();
-    ///     // Check that new value was written
-    ///     assert_eq!(value.pointer("/x"), Some(&1.5.into()));
-    ///     // Or change the value only if it exists
-    ///     value.pointer_mut("/x").map(|v| *v = 1.5.into());
-    ///
-    ///     // "Steal" ownership of a value. Can replace with any valid Value.
-    ///     let old_x = value.pointer_mut("/x").map(Value::take).unwrap();
-    ///     assert_eq!(old_x, 1.5);
-    ///     assert_eq!(value.pointer("/x").unwrap(), &Value::Null);
-    /// }
-    /// ```
-    pub fn pointer_mut(&mut self, pointer: &str) -> Option<&mut Value> {
-        if pointer.is_empty() {
-            return Some(self);
-        }
-        if !pointer.starts_with('/') {
-            return None;
-        }
-        pointer
-            .split('/')
-            .skip(1)
-            .map(|x| x.replace("~1", "/").replace("~0", "~"))
-            .try_fold(self, |target, token| match target {
-                Value::Object(map) => map.get_mut(&token),
-                Value::Array(list) => parse_index(&token).and_then(move |x| list.get_mut(x)),
+                JValue::Object(map) => map.get(token.as_str()),
+                JValue::Array(list) => parse_index(&token).and_then(|x| list.get(x)),
                 _ => None,
             })
     }
@@ -851,8 +738,8 @@ impl Value {
     /// assert_eq!(v["x"].take(), json!("y"));
     /// assert_eq!(v, json!({ "x": null }));
     /// ```
-    pub fn take(&mut self) -> Value {
-        mem::replace(self, Value::Null)
+    pub fn take(&mut self) -> JValue {
+        mem::replace(self, JValue::Null)
     }
 }
 
@@ -885,9 +772,9 @@ impl Value {
 /// #
 /// # try_main().unwrap()
 /// ```
-impl Default for Value {
-    fn default() -> Value {
-        Value::Null
+impl Default for JValue {
+    fn default() -> JValue {
+        JValue::Null
     }
 }
 
