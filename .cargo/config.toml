@@ -3,7 +3,7 @@ retry = 50                  # network retries
 
 [target.wasm32-wasi]
 rustflags = [
-    "-C", "link-args=-zstack-size=52428800",
+    "-C", "link-args=-zstack-size=8388608",
 ]
 
 [registries]
