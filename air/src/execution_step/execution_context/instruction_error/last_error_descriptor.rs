@@ -23,8 +23,6 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
 
-use std::rc::Rc;
-
 pub(crate) struct LastErrorDescriptor {
     error: InstructionError,
 
@@ -56,7 +54,7 @@ impl LastErrorDescriptor {
 
     pub(crate) fn set_from_error_object(
         &mut self,
-        error: Rc<JValue>,
+        error: JValue,
         tetraplet: Option<RcSecurityTetraplet>,
         provenance: Provenance,
     ) {

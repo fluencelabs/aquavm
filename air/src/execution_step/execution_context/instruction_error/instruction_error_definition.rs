@@ -22,8 +22,6 @@ use crate::JValue;
 use air_interpreter_data::Provenance;
 use serde_json::json;
 
-use std::rc::Rc;
-
 pub const ERROR_CODE_FIELD_NAME: &str = "error_code";
 pub const MESSAGE_FIELD_NAME: &str = "message";
 pub const INSTRUCTION_FIELD_NAME: &str = "instruction";
@@ -39,7 +37,7 @@ pub const NO_ERROR_ERROR_CODE: i64 = 0;
 #[derive(Debug, Clone)]
 pub struct InstructionError {
     /// Error object that represents the last occurred error.
-    pub error: Rc<JValue>,
+    pub error: JValue,
 
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
@@ -64,6 +62,7 @@ pub(crate) fn error_from_raw_fields_w_peerid(
         INSTRUCTION_FIELD_NAME: instruction,
         PEER_ID_FIELD_NAME: peer_id,
     })
+    .into()
 }
 
 pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str) -> JValue {
@@ -72,6 +71,7 @@ pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instru
         MESSAGE_FIELD_NAME: error_message,
         INSTRUCTION_FIELD_NAME: instruction,
     })
+    .into()
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
@@ -142,11 +142,12 @@ pub fn no_error_object() -> JValue {
         ERROR_CODE_FIELD_NAME: NO_ERROR_ERROR_CODE,
         MESSAGE_FIELD_NAME: NO_ERROR_MESSAGE,
     })
+    .into()
 }
 
 pub fn no_error() -> InstructionError {
     InstructionError {
-        error: Rc::new(no_error_object()),
+        error: no_error_object(),
         tetraplet: None,
         provenance: Provenance::literal(),
         orig_catchable: None,

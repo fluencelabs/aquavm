@@ -293,8 +293,7 @@ mod test {
         let mut scalars = ValuesSparseMatrix::new();
 
         let value = json!(1u64);
-        let rc_value = Rc::new(value);
-        let value_aggregate = ValueAggregate::from_literal_result(LiteralAggregate::new(rc_value, "".into(), 1.into()));
+        let value_aggregate = ValueAggregate::from_literal_result(LiteralAggregate::new(value, "".into(), 1.into()));
         let value_1_name = "name_1";
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 

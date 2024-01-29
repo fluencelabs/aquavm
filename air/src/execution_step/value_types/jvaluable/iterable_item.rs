@@ -27,16 +27,13 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-use std::borrow::Cow;
-use std::ops::Deref;
-
 impl<'ctx> JValuable for IterableItem<'ctx> {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<JValue> {
         use super::IterableItem::*;
 
         let jvalue = match self {
             RefValue((jvalue, ..)) => jvalue,
-            RcValue((jvalue, ..)) => jvalue.deref(),
+            RcValue((jvalue, ..)) => jvalue,
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
@@ -48,12 +45,12 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
         _root_provenance: &Provenance,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
+    ) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)> {
         use super::IterableItem::*;
 
         let (jvalue, tetraplet, provenance) = match self {
             RefValue((jvalue, tetraplet, _, provenance)) => (*jvalue, tetraplet, provenance),
-            RcValue((jvalue, tetraplet, _, provenance)) => (jvalue.deref(), tetraplet, provenance),
+            RcValue((jvalue, tetraplet, _, provenance)) => (jvalue, tetraplet, provenance),
         };
 
         let selected_value = select_by_lambda_from_scalar(jvalue, lambda, exec_ctx)?;
@@ -62,12 +59,12 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok((selected_value, tetraplet, provenance.clone()))
     }
 
-    fn as_jvalue(&self) -> Cow<'_, JValue> {
+    fn as_jvalue(&self) -> JValue {
         use super::IterableItem::*;
 
         match self {
-            RefValue((jvalue, ..)) => Cow::Borrowed(jvalue),
-            RcValue((jvalue, ..)) => Cow::Borrowed(jvalue.deref()),
+            RefValue((jvalue, ..)) => (*jvalue).clone(),
+            RcValue((jvalue, ..)) => jvalue.clone(),
         }
     }
 
@@ -76,7 +73,7 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
 
         match *self {
             RefValue((jvalue, ..)) => jvalue.clone(),
-            RcValue((jvalue, ..)) => jvalue.deref().clone(),
+            RcValue((jvalue, ..)) => jvalue.clone(),
         }
     }
 

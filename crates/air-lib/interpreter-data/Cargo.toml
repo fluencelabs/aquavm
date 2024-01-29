@@ -20,6 +20,7 @@ aquavm-air-parser = { version = "0.11.1", path = "../air-parser" }
 air-interpreter-cid = { version = "0.9.0", path = "../interpreter-cid", features = ["rkyv"] }
 air-interpreter-signatures = { version = "0.1.7", path = "../interpreter-signatures", features = ["rkyv"] }
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["msgpack"] }
+air-interpreter-value = { version = "0.1.0", path = "../interpreter-value" }
 polyplets = { version = "0.6.0", path = "../polyplets", features = ["rkyv"] }
 
 fluence-keypair = { version = "0.10.4", default-features = false }

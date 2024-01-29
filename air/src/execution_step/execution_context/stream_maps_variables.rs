@@ -118,7 +118,7 @@ impl StreamMaps {
 
     pub(crate) fn add_stream_map_value(
         &mut self,
-        key: StreamMapKey<'_>,
+        key: StreamMapKey,
         value_descriptor: StreamMapValueDescriptor<'_>,
     ) -> ExecutionResult<()> {
         let StreamMapValueDescriptor {

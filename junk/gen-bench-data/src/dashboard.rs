@@ -20,6 +20,7 @@ use air_interpreter_signatures::KeyPair;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use maplit::hashmap;
+use serde_json::Value as JValue;
 
 use std::cell::RefCell;
 use std::collections::HashSet;

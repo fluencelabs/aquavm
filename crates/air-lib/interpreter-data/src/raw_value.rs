@@ -20,7 +20,6 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
@@ -31,11 +30,11 @@ pub struct RawValue {
 
     #[serde(skip)]
     #[with(::rkyv::with::Skip)]
-    parsed: RefCell<Option<Rc<JValue>>>,
+    parsed: RefCell<Option<JValue>>,
 }
 
 impl RawValue {
-    pub fn from_value(value: impl Into<Rc<JValue>>) -> Self {
+    pub fn from_value(value: impl Into<JValue>) -> Self {
         let value = value.into();
         let raw = value.to_string().into();
         Self {
@@ -44,7 +43,7 @@ impl RawValue {
         }
     }
 
-    pub fn get_value(&self) -> Rc<JValue> {
+    pub fn get_value(&self) -> JValue {
         let mut parsed_guard = self.parsed.borrow_mut();
 
         let parsed_value = parsed_guard

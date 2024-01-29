@@ -27,11 +27,8 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-use std::borrow::Cow;
-use std::ops::Deref;
-
 impl JValuable for ValueAggregate {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<JValue> {
         let selected_value = select_by_lambda_from_scalar(self.get_result(), lambda, exec_ctx)?;
         Ok(selected_value)
     }
@@ -41,19 +38,21 @@ impl JValuable for ValueAggregate {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
         _root_provenane: &Provenance,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
+    ) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)> {
         let selected_value = select_by_lambda_from_scalar(self.get_result(), lambda, exec_ctx)?;
         let tetraplet = populate_tetraplet_with_lambda(self.get_tetraplet().as_ref().clone(), lambda);
 
         Ok((selected_value, tetraplet, self.get_provenance()))
     }
 
-    fn as_jvalue(&self) -> Cow<'_, JValue> {
-        Cow::Borrowed(self.get_result())
+    #[inline]
+    fn as_jvalue(&self) -> JValue {
+        self.get_result().clone()
     }
 
+    #[inline]
     fn into_jvalue(self: Box<Self>) -> JValue {
-        self.get_result().deref().clone()
+        self.get_result().clone()
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {

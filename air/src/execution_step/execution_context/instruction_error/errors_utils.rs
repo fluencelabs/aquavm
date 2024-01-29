@@ -24,8 +24,6 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::JValue;
 use crate::ToErrorCode;
 
-use std::rc::Rc;
-
 pub(crate) fn get_instruction_error_from_exec_error(
     error: &(impl ErrorAffectable + ToErrorCode + ToString),
     instruction: &str,
@@ -57,11 +55,11 @@ pub(crate) fn get_instruction_error_from_ingredients(
         Some(peer_id) => error_from_raw_fields_w_peerid(error_code, error_message, instruction, peer_id),
         None => error_from_raw_fields(error_code, error_message, instruction),
     };
-    get_instruction_error_from_error_object(Rc::new(error_object), tetraplet, provenance)
+    get_instruction_error_from_error_object(error_object, tetraplet, provenance)
 }
 
 pub(crate) fn get_instruction_error_from_error_object(
-    error: Rc<JValue>,
+    error: JValue,
     tetraplet: Option<RcSecurityTetraplet>,
     provenance: Provenance,
 ) -> InstructionError {

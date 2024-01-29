@@ -23,15 +23,17 @@ use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
+use air_interpreter_value::JsonString;
 use air_trace_handler::TraceHandler;
-
-use serde_json::json;
-use std::rc::Rc;
 
 pub(super) static VALUE_FIELD_NAME: &str = "value";
 
-pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
-    Rc::new(json!({ KEY_FIELD_NAME: key, VALUE_FIELD_NAME: value }))
+pub(super) fn from_key_value(key: StreamMapKey, value: &JValue) -> JValue {
+    let map = maplit::hashmap! {
+        VALUE_FIELD_NAME => value.clone(),
+        KEY_FIELD_NAME => key.into(),
+    };
+    map.into()
 }
 
 #[derive(Debug, Default, Clone)]
@@ -46,7 +48,7 @@ impl StreamMap {
 
     pub(crate) fn insert(
         &mut self,
-        key: StreamMapKey<'_>,
+        key: StreamMapKey,
         value: &ValueAggregate,
         generation: Generation,
     ) -> ExecutionResult<()> {
@@ -72,7 +74,7 @@ impl StreamMap {
         self.stream.iter()
     }
 
-    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
+    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (JsonString, JValue)> + '_ {
         use std::collections::HashSet;
         let mut met_keys = HashSet::new();
 
@@ -89,17 +91,11 @@ impl StreamMap {
             let key = object
                 .get(KEY_FIELD_NAME)
                 .and_then(StreamMapKey::from_value_ref)
-                .and_then(|key| {
-                    if met_keys.insert(key.to_string()) {
-                        Some(key)
-                    } else {
-                        None
-                    }
-                })?;
+                .and_then(|key| if met_keys.insert(key.to_key()) { Some(key) } else { None })?;
 
             let value = object.get(VALUE_FIELD_NAME)?.clone();
 
-            Some((key.to_string(), value))
+            Some((key.to_key(), value))
         })
     }
 }
@@ -130,9 +126,8 @@ mod test {
     use serde_json::json;
 
     use std::borrow::Cow;
-    use std::rc::Rc;
 
-    fn create_value_aggregate(value: Rc<JValue>) -> ValueAggregate {
+    fn create_value_aggregate(value: JValue) -> ValueAggregate {
         ValueAggregate::new(
             value,
             <_>::default(),
@@ -143,8 +138,8 @@ mod test {
 
     fn compare_stream_iter<'value>(
         mut iter: impl Iterator<Item = &'value ValueAggregate>,
-        key: StreamMapKey<'_>,
-        value: &Rc<JValue>,
+        key: StreamMapKey,
+        value: &JValue,
     ) -> bool {
         let actual_value = iter.next().map(|e| e.get_result()).unwrap();
         let expected_value = from_key_value(key, value);
@@ -284,9 +279,9 @@ mod test {
         (0..count)
             .map(|id| {
                 let key = id.to_string();
-                let value = json!(id);
+                let value = id.into();
                 let value = ValueAggregate::new(
-                    Rc::new(value),
+                    value,
                     <_>::default(),
                     0.into(),
                     air_interpreter_data::Provenance::literal(),

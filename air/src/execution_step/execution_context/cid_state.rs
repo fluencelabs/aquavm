@@ -69,7 +69,7 @@ impl ExecutionCidState {
 
     pub fn track_service_result(
         &mut self,
-        value: Rc<JValue>,
+        value: JValue,
         tetraplet: RcSecurityTetraplet,
         argument_hash: Rc<str>,
     ) -> Result<CID<ServiceResultCidAggregate>, UncatchableError> {
@@ -97,7 +97,7 @@ impl ExecutionCidState {
             .map_err(UncatchableError::from)
     }
 
-    pub(crate) fn get_value_by_cid(&self, cid: &CID<RawValue>) -> Result<Rc<JValue>, UncatchableError> {
+    pub(crate) fn get_value_by_cid(&self, cid: &CID<RawValue>) -> Result<JValue, UncatchableError> {
         self.value_tracker
             .get(cid)
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("value", cid.get_inner()))
@@ -168,7 +168,7 @@ impl ExecutionCidState {
 }
 
 pub(crate) struct ResolvedServiceInfo {
-    pub(crate) value: Rc<JValue>,
+    pub(crate) value: JValue,
     pub(crate) tetraplet: RcSecurityTetraplet,
     pub(crate) service_result_aggregate: Rc<ServiceResultCidAggregate>,
 }

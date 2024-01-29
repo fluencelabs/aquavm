@@ -114,10 +114,10 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
 
         let value = stream_map
             .iter_unique_key_object()
-            .collect::<serde_json::Map<String, JValue>>();
+            .collect();
 
         let value = ValueAggregate::from_literal_result(LiteralAggregate::new(
-            Rc::new(value.into()),
+            JValue::Object(Rc::new(value)),
             peer_pk.as_str().into(),
             0.into(),
         ));

@@ -68,7 +68,8 @@ pub(super) fn handle_prev_state<'i>(
             )?;
 
             let call_service_failed: CallServiceFailed =
-                serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
+                serde_json::from_value(serde_json::to_value(&err_value).expect("TODO"))
+                    .map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
             exec_ctx.record_call_cid(&tetraplet.peer_pk, failed_cid);
@@ -212,9 +213,9 @@ fn try_to_service_result(
     tetraplet: &RcSecurityTetraplet,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<Rc<JValue>> {
+) -> ExecutionResult<JValue> {
     match serde_json::from_str(&service_result.result) {
-        Ok(result) => Ok(Rc::new(result)),
+        Ok(result) => Ok(result),
         Err(e) => {
             let error_msg = format!(
                 "call_service result '{service_result}' can't be serialized or deserialized with an error: {e}"

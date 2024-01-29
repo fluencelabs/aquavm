@@ -293,3 +293,19 @@ where
         }
     }
 }
+
+impl From<serde_json::Value> for JValue {
+    fn from(value: serde_json::Value) -> Self {
+        match value {
+            serde_json::Value::Null => JValue::Null,
+            serde_json::Value::Bool(b) => JValue::Bool(b),
+            serde_json::Value::Number(n) => JValue::Number(n),
+            serde_json::Value::String(s) => JValue::String(s.into()),
+            serde_json::Value::Array(a) => JValue::Array(a.into_iter().map(Into::into).collect()),
+            serde_json::Value::Object(o) => {
+                let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.into(), v.into())));
+                JValue::Object(oo.into())
+            }
+        }
+    }
+}

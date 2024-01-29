@@ -46,7 +46,7 @@ pub use trace::*;
 pub use trace_pos::*;
 
 use once_cell::sync::Lazy;
-use serde_json::Value as JValue;
+use air_interpreter_value::JValue;
 
 use std::str::FromStr;
 

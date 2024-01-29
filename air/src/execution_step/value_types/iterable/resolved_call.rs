@@ -21,8 +21,6 @@ use crate::foldable_next;
 use crate::foldable_prev;
 use crate::JValue;
 
-use std::ops::Deref;
-
 /// Used for iterating over JValue of array type.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct IterableResolvedCall {
@@ -60,7 +58,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
         let (result, tetraplet, trace_pos) = self.call_result.as_inner_parts();
         let provenance = self.call_result.get_provenance();
 
-        let jvalue = match &result.deref() {
+        let jvalue = match &result {
             JValue::Array(array) => &array[self.cursor],
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         };
@@ -73,7 +71,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
     }
 
     fn len(&self) -> usize {
-        match self.call_result.get_result().deref() {
+        match self.call_result.get_result() {
             JValue::Array(array) => array.len(),
             _ => unimplemented!("this jvalue is set only by fold instruction, so it must have an array type"),
         }

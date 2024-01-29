@@ -27,6 +27,7 @@ use crate::UncatchableError;
 
 use air_interpreter_cid::CID;
 use air_interpreter_data::CanonResultCidAggregate;
+use air_interpreter_value::JsonString;
 use polyplets::SecurityTetraplet;
 
 use std::collections::HashMap;
@@ -36,22 +37,22 @@ use std::rc::Rc;
 /// Canon stream map is a read-only struct that mimics conventional map.
 /// The contents of a map are fixed at a specific peer.
 #[derive(Debug, Clone)]
-pub struct CanonStreamMap<'key> {
+pub struct CanonStreamMap {
     /// Contains all key-value pair objects in this form {"key": key, "value": value}.
     /// There might be multiple pairs with the same key.
     values: Vec<ValueAggregate>,
     /// Index access leverages the map that does key to CanonStream mapping.
-    map: HashMap<StreamMapKey<'key>, CanonStream>,
+    map: HashMap<StreamMapKey, CanonStream>,
     /// ap arg processing leverages this tetraplet
     tetraplet: Rc<SecurityTetraplet>,
 }
 
-impl<'key> CanonStreamMap<'key> {
+impl CanonStreamMap {
     // The argument's tetraplet is used to produce canon streams for keys so
     // that the produced canon streams share tetraplets with the original canon stream
     // rendered by canon instruction.
-    pub(crate) fn from_canon_stream(canon_stream: CanonStream) -> ExecutionResult<CanonStreamMap<'key>> {
-        let mut map: HashMap<StreamMapKey<'_>, CanonStream> = HashMap::new();
+    pub(crate) fn from_canon_stream(canon_stream: CanonStream) -> ExecutionResult<CanonStreamMap> {
+        let mut map: HashMap<StreamMapKey, CanonStream> = HashMap::new();
         let tetraplet = canon_stream.tetraplet().clone();
 
         for kvpair_obj in canon_stream.iter() {
@@ -79,8 +80,8 @@ impl<'key> CanonStreamMap<'key> {
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
-        let json_map: serde_json::Map<String, JValue> =
-            self.map.iter().map(|(k, v)| (k.to_string(), v.as_jvalue())).collect();
+        let json_map: air_interpreter_value::Map<JsonString, JValue> =
+            self.map.iter().map(|(k, v)| (k.to_key(), v.as_jvalue())).collect();
         json_map.into()
     }
 
@@ -92,14 +93,14 @@ impl<'key> CanonStreamMap<'key> {
         &self.tetraplet
     }
 
-    pub(crate) fn index<'self_l>(&'self_l self, stream_map_key: &StreamMapKey<'key>) -> Option<&'self_l CanonStream> {
+    pub(crate) fn index<'self_l>(&'self_l self, stream_map_key: &StreamMapKey) -> Option<&'self_l CanonStream> {
         self.map.get(stream_map_key)
     }
 }
 
 use std::fmt;
 
-impl fmt::Display for CanonStreamMap<'_> {
+impl fmt::Display for CanonStreamMap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for (key, canon_stream) in self.map.iter() {
@@ -110,19 +111,19 @@ impl fmt::Display for CanonStreamMap<'_> {
 }
 
 #[derive(Debug, Clone)]
-pub struct CanonStreamMapWithProvenance<'a> {
-    pub(crate) canon_stream_map: CanonStreamMap<'a>,
+pub struct CanonStreamMapWithProvenance {
+    pub(crate) canon_stream_map: CanonStreamMap,
     pub(crate) cid: CID<CanonResultCidAggregate>,
 }
 
-impl<'a> CanonStreamMapWithProvenance<'a> {
-    pub(crate) fn new(canon_stream_map: CanonStreamMap<'a>, cid: CID<CanonResultCidAggregate>) -> Self {
+impl CanonStreamMapWithProvenance {
+    pub(crate) fn new(canon_stream_map: CanonStreamMap, cid: CID<CanonResultCidAggregate>) -> Self {
         Self { canon_stream_map, cid }
     }
 }
 
-impl<'a> Deref for CanonStreamMapWithProvenance<'a> {
-    type Target = CanonStreamMap<'a>;
+impl<'a> Deref for CanonStreamMapWithProvenance {
+    type Target = CanonStreamMap;
 
     fn deref(&self) -> &Self::Target {
         &self.canon_stream_map
@@ -146,7 +147,7 @@ fn get_value_from_obj(value_aggregate: &ValueAggregate) -> ExecutionResult<Value
             .ok_or(ExecutionError::Uncatchable(UncatchableError::StreamMapKeyError(
                 ValueFieldIsAbsent,
             )))?;
-    let result = Rc::new(value.clone());
+    let result = value.clone();
     Ok(ValueAggregate::new(result, tetraplet, trace_pos, provenance))
 }
 
@@ -164,7 +165,7 @@ mod test {
     use std::borrow::Cow;
     use std::rc::Rc;
 
-    fn create_value_aggregate(value: Rc<JValue>) -> ValueAggregate {
+    fn create_value_aggregate(value: JValue) -> ValueAggregate {
         ValueAggregate::new(
             value,
             <_>::default(),

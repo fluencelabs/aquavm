@@ -51,7 +51,7 @@ pub mod prelude {
 
 pub type CallServiceClosure = Box<dyn Fn(CallRequestParams) -> CallServiceResult + 'static>;
 
-pub type JValue = serde_json::Value;
+use air_interpreter_value::JValue;
 
 #[macro_export]
 macro_rules! checked_call_vm {
