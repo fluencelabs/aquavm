@@ -31,6 +31,7 @@ mod call_service_result;
 mod outcome;
 mod particle_parameters;
 pub mod raw_outcome;
+mod runtime_parameters;
 
 use air_interpreter_interface::CallArgumentsDeserializeError;
 use air_interpreter_interface::CallRequestsDeserializeError;
@@ -81,3 +82,4 @@ pub use call_request_parameters::*;
 pub use call_service_result::*;
 pub use outcome::*;
 pub use particle_parameters::*;
+pub use runtime_parameters::*;
