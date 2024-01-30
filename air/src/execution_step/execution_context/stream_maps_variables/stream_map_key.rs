@@ -99,10 +99,10 @@ impl From<JsonString> for StreamMapKey {
     }
 }
 
-impl Into<JValue> for StreamMapKey {
-    fn into(self) -> JValue {
-        match self {
-            StreamMapKey::Str(s) => JValue::String(s),
+impl From<StreamMapKey> for JValue {
+    fn from(value: StreamMapKey) -> Self {
+        match value {
+            StreamMapKey::Str(s) => JValue::string(s),
             StreamMapKey::U64(n) => n.into(),
             StreamMapKey::I64(n) => n.into(),
         }

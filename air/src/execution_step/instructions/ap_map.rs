@@ -85,7 +85,7 @@ fn resolve_key_if_needed<'ctx>(
     }
 }
 
-fn resolve<'ctx>(
+fn resolve(
     resolvable: &impl Resolvable,
     exec_ctx: &ExecutionCtx<'_>,
     map_name: &str,

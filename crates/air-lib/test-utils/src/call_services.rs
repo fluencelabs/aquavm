@@ -24,7 +24,7 @@ use std::rc::Rc;
 
 pub fn unit_call_service() -> CallServiceClosure {
     Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!("result from unit_call_service").into())
+        CallServiceResult::ok(json!("result from unit_call_service"))
     })
 }
 

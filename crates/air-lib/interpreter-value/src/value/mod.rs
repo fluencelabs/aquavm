@@ -150,6 +150,7 @@ pub enum JValue {
     /// #
     /// let v = json!(["an", "array"]);
     /// ```
+    // Rc<[JValue]> is little slower, but Rc<Vec<JValue>> consumes little more memory
     Array(Rc<[JValue]>),
 
     /// Represents a JSON object.
@@ -257,6 +258,35 @@ fn parse_index(s: &str) -> Option<usize> {
 }
 
 impl JValue {
+    #[inline]
+    pub fn string(s: impl Into<Rc<str>>) -> Self {
+        Self::String(s.into())
+    }
+
+    #[inline]
+    pub fn array(vec: impl Into<Rc<[JValue]>>) -> Self {
+        Self::Array(vec.into())
+    }
+
+    pub fn array_from_iter(into_iter: impl IntoIterator<Item = impl Into<JValue>>) -> Self {
+        Self::Array(into_iter.into_iter().map(Into::into).collect())
+    }
+
+    pub fn object(map: impl Into<Map<JsonString, JValue>>) -> Self {
+        Self::Object(Rc::new(map.into()))
+    }
+
+    pub fn object_from_pairs(
+        into_iter: impl IntoIterator<Item = (impl Into<JsonString>, impl Into<JValue>)>,
+    ) -> Self {
+        Self::Object(Rc::new(
+            into_iter
+                .into_iter()
+                .map(|(k, v)| (k.into(), v.into()))
+                .collect(),
+        ))
+    }
+
     /// Index into a JSON array or map. A string index can be used to access a
     /// value in a map, and a usize index can be used to access an element of an
     /// array.
@@ -316,6 +346,7 @@ impl JValue {
     /// // array, not an object
     /// assert!(!obj["b"].is_object());
     /// ```
+    #[inline]
     pub fn is_object(&self) -> bool {
         self.as_object().is_some()
     }
@@ -334,6 +365,7 @@ impl JValue {
     /// // The array `["an", "array"]` is not an object.
     /// assert_eq!(v["b"].as_object(), None);
     /// ```
+    #[inline]
     pub fn as_object(&self) -> Option<&Map<JsonString, JValue>> {
         match self {
             JValue::Object(map) => Some(map),
@@ -357,6 +389,7 @@ impl JValue {
     /// // an object, not an array
     /// assert!(!obj["b"].is_array());
     /// ```
+    #[inline]
     pub fn is_array(&self) -> bool {
         self.as_array().is_some()
     }
@@ -375,6 +408,7 @@ impl JValue {
     /// // The object `{"an": "object"}` is not an array.
     /// assert_eq!(v["b"].as_array(), None);
     /// ```
+    #[inline]
     pub fn as_array(&self) -> Option<&[JValue]> {
         match self {
             JValue::Array(array) => Some(array),
@@ -397,6 +431,7 @@ impl JValue {
     /// // The boolean `false` is not a string.
     /// assert!(!v["b"].is_string());
     /// ```
+    #[inline]
     pub fn is_string(&self) -> bool {
         self.as_str().is_some()
     }
@@ -424,6 +459,7 @@ impl JValue {
     /// //    The value is: some string
     /// println!("The value is: {}", v["a"].as_str().unwrap());
     /// ```
+    #[inline]
     pub fn as_str(&self) -> Option<&JsonString> {
         match self {
             JValue::String(s) => Some(s),
@@ -443,6 +479,7 @@ impl JValue {
     /// // The string `"2"` is a string, not a number.
     /// assert!(!v["b"].is_number());
     /// ```
+    #[inline]
     pub fn is_number(&self) -> bool {
         match *self {
             JValue::Number(_) => true,
@@ -465,6 +502,7 @@ impl JValue {
     /// // The string `"4"` is not a number.
     /// assert_eq!(v["d"].as_number(), None);
     /// ```
+    #[inline]
     pub fn as_number(&self) -> Option<&Number> {
         match self {
             JValue::Number(number) => Some(number),
@@ -492,6 +530,7 @@ impl JValue {
     /// // Numbers with a decimal point are not considered integers.
     /// assert!(!v["c"].is_i64());
     /// ```
+    #[inline]
     pub fn is_i64(&self) -> bool {
         match self {
             JValue::Number(n) => n.is_i64(),
@@ -517,6 +556,7 @@ impl JValue {
     /// // Numbers with a decimal point are not considered integers.
     /// assert!(!v["c"].is_u64());
     /// ```
+    #[inline]
     pub fn is_u64(&self) -> bool {
         match self {
             JValue::Number(n) => n.is_u64(),
@@ -543,6 +583,7 @@ impl JValue {
     /// assert!(!v["b"].is_f64());
     /// assert!(!v["c"].is_f64());
     /// ```
+    #[inline]
     pub fn is_f64(&self) -> bool {
         match self {
             JValue::Number(n) => n.is_f64(),
@@ -563,6 +604,7 @@ impl JValue {
     /// assert_eq!(v["b"].as_i64(), None);
     /// assert_eq!(v["c"].as_i64(), None);
     /// ```
+    #[inline]
     pub fn as_i64(&self) -> Option<i64> {
         match self {
             JValue::Number(n) => n.as_i64(),
@@ -582,6 +624,7 @@ impl JValue {
     /// assert_eq!(v["b"].as_u64(), None);
     /// assert_eq!(v["c"].as_u64(), None);
     /// ```
+    #[inline]
     pub fn as_u64(&self) -> Option<u64> {
         match self {
             JValue::Number(n) => n.as_u64(),
@@ -601,6 +644,7 @@ impl JValue {
     /// assert_eq!(v["b"].as_f64(), Some(64.0));
     /// assert_eq!(v["c"].as_f64(), Some(-64.0));
     /// ```
+    #[inline]
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             JValue::Number(n) => n.as_f64(),
@@ -623,6 +667,7 @@ impl JValue {
     /// // The string `"false"` is a string, not a boolean.
     /// assert!(!v["b"].is_boolean());
     /// ```
+    #[inline]
     pub fn is_boolean(&self) -> bool {
         self.as_bool().is_some()
     }
@@ -640,6 +685,7 @@ impl JValue {
     /// // The string `"false"` is a string, not a boolean.
     /// assert_eq!(v["b"].as_bool(), None);
     /// ```
+    #[inline]
     pub fn as_bool(&self) -> Option<bool> {
         match *self {
             JValue::Bool(b) => Some(b),
@@ -662,6 +708,7 @@ impl JValue {
     /// // The boolean `false` is not null.
     /// assert!(!v["b"].is_null());
     /// ```
+    #[inline]
     pub fn is_null(&self) -> bool {
         self.as_null().is_some()
     }
@@ -678,6 +725,7 @@ impl JValue {
     /// // The boolean `false` is not null.
     /// assert_eq!(v["b"].as_null(), None);
     /// ```
+    #[inline]
     pub fn as_null(&self) -> Option<()> {
         match *self {
             JValue::Null => Some(()),
@@ -738,6 +786,7 @@ impl JValue {
     /// assert_eq!(v["x"].take(), json!("y"));
     /// assert_eq!(v, json!({ "x": null }));
     /// ```
+    #[inline]
     pub fn take(&mut self) -> JValue {
         mem::replace(self, JValue::Null)
     }
@@ -773,6 +822,7 @@ impl JValue {
 /// # try_main().unwrap()
 /// ```
 impl Default for JValue {
+    #[inline]
     fn default() -> JValue {
         JValue::Null
     }

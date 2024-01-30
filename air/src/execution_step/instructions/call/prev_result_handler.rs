@@ -196,10 +196,9 @@ fn handle_service_error(
     let failed_value = CallServiceFailed::new(service_result.ret_code, error_message).to_value();
 
     let peer_id = tetraplet.peer_pk.clone();
-    let service_result_agg_cid =
-        exec_ctx
-            .cid_state
-            .track_service_result(failed_value.into(), tetraplet, argument_hash)?;
+    let service_result_agg_cid = exec_ctx
+        .cid_state
+        .track_service_result(failed_value, tetraplet, argument_hash)?;
 
     exec_ctx.record_call_cid(&peer_id, &service_result_agg_cid);
     trace_ctx.meet_call_end(Failed(service_result_agg_cid));
@@ -224,11 +223,10 @@ fn try_to_service_result(
 
             let failed_value = CallServiceFailed::new(i32::MAX, error_msg.clone()).to_value();
 
-            let service_result_agg_cid = exec_ctx.cid_state.track_service_result(
-                failed_value.into(),
-                tetraplet.clone(),
-                argument_hash.clone(),
-            )?;
+            let service_result_agg_cid =
+                exec_ctx
+                    .cid_state
+                    .track_service_result(failed_value, tetraplet.clone(), argument_hash.clone())?;
             let error = CallResult::failed(service_result_agg_cid);
 
             trace_ctx.meet_call_end(error);

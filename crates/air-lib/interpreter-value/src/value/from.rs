@@ -178,9 +178,7 @@ impl<K: Into<JsonString>, V: Into<JValue>> From<HashMap<K, V>> for JValue {
     /// let x: Value = m.into();
     /// ```
     fn from(f: HashMap<K, V>) -> Self {
-        let map: Map<JsonString, JValue> =
-            f.into_iter().map(|(k, v)| (k.into(), v.into())).collect();
-        JValue::Object(map.into())
+        JValue::object_from_pairs(f)
     }
 }
 
@@ -277,6 +275,7 @@ impl From<()> for JValue {
     /// let u = ();
     /// let x: Value = u.into();
     /// ```
+    #[inline]
     fn from((): ()) -> Self {
         JValue::Null
     }
@@ -294,18 +293,27 @@ where
     }
 }
 
-impl From<serde_json::Value> for JValue {
-    fn from(value: serde_json::Value) -> Self {
+impl From<&serde_json::Value> for JValue {
+    fn from(value: &serde_json::Value) -> Self {
+        use serde_json::Value;
+
         match value {
-            serde_json::Value::Null => JValue::Null,
-            serde_json::Value::Bool(b) => JValue::Bool(b),
-            serde_json::Value::Number(n) => JValue::Number(n),
-            serde_json::Value::String(s) => JValue::String(s.into()),
-            serde_json::Value::Array(a) => JValue::Array(a.into_iter().map(Into::into).collect()),
-            serde_json::Value::Object(o) => {
-                let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.into(), v.into())));
+            Value::Null => JValue::Null,
+            Value::Bool(b) => JValue::Bool(*b),
+            Value::Number(n) => JValue::Number(n.clone()),
+            Value::String(s) => JValue::String(s.as_str().into()),
+            Value::Array(a) => JValue::Array(a.into_iter().map(Into::into).collect()),
+            Value::Object(o) => {
+                let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.as_str().into(), v.into())));
                 JValue::Object(oo.into())
             }
         }
+    }
+}
+
+impl From<serde_json::Value> for JValue {
+    #[inline]
+    fn from(value: serde_json::Value) -> Self {
+        Self::from(&value)
     }
 }

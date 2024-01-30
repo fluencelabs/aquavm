@@ -227,10 +227,7 @@ impl<'i> ResolvedCall<'i> {
         CheckArgsResult::new(fun_result.map(|values| values.0))
     }
 
-    fn collect_args(
-        &self,
-        exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(Vec<JValue>, Vec<RcSecurityTetraplets>)> {
+    fn collect_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<(Vec<JValue>, Vec<RcSecurityTetraplets>)> {
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::with_capacity(function_args.len());
         let mut tetraplets = Vec::with_capacity(function_args.len());

@@ -44,7 +44,7 @@ pub(crate) fn apply_to_arg(
         TTL => apply_const(exec_ctx.run_parameters.ttl, exec_ctx, trace_ctx),
         Number(value) => apply_const(value, exec_ctx, trace_ctx),
         Boolean(value) => apply_const(*value, exec_ctx, trace_ctx),
-        EmptyArray => apply_const(serde_json::json!([]), exec_ctx, trace_ctx),
+        EmptyArray => apply_const(vec![(); 0], exec_ctx, trace_ctx),
         Scalar(scalar) => apply_scalar(scalar, exec_ctx, trace_ctx, should_touch_trace),
         ScalarWithLambda(scalar) => apply_scalar_wl(scalar, exec_ctx, trace_ctx),
         CanonStream(canon_stream) => apply_canon_stream(canon_stream, exec_ctx, trace_ctx),
@@ -149,12 +149,7 @@ fn apply_canon_stream(
     let value = JValuable::as_jvalue(&&canon_stream.canon_stream);
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = CanonResultAggregate::new(
-        value,
-        tetraplet.peer_pk.as_str().into(),
-        &tetraplet.json_path,
-        position,
-    );
+    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.json_path, position);
     let result = ValueAggregate::from_canon_result(value, canon_stream.cid.clone());
     Ok(result)
 }
@@ -192,12 +187,7 @@ fn apply_canon_stream_map(
     let value = JValuable::as_jvalue(&&canon_stream_map.canon_stream_map);
     let tetraplet = canon_stream_map.tetraplet();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = CanonResultAggregate::new(
-        value,
-        tetraplet.peer_pk.as_str().into(),
-        &tetraplet.json_path,
-        position,
-    );
+    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.json_path, position);
     let result = ValueAggregate::from_canon_result(value, canon_stream_map.cid.clone());
     Ok(result)
 }

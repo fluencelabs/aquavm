@@ -13,7 +13,9 @@ macro_rules! tri {
 
 mod value;
 
-pub type Map<K, V> = indexmap::IndexMap<K, V>;
-pub type JsonString = Rc<str>;
-
 pub use value::JValue;
+
+pub type Map<K, V> = indexmap::IndexMap<K, V>;
+
+// it is memory- and CPU-wise more effective than a string
+pub type JsonString = Rc<str>;

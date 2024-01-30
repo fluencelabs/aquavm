@@ -32,7 +32,6 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies lambda to the internal value, produces JValue.

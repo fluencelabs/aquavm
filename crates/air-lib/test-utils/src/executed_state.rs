@@ -76,7 +76,7 @@ pub fn value_aggregate_cid(
     let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
 
-    let arguments = JValue::Array(args.into());
+    let arguments = JValue::array(args);
     let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
 
     let service_result_agg = ServiceResultCidAggregate {

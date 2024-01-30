@@ -45,8 +45,8 @@ pub use raw_value::*;
 pub use trace::*;
 pub use trace_pos::*;
 
-use once_cell::sync::Lazy;
 use air_interpreter_value::JValue;
+use once_cell::sync::Lazy;
 
 use std::str::FromStr;
 

@@ -55,13 +55,13 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
     }
 
     fn as_jvalue(&self) -> JValue {
-        let jvalue_array = self.iter().map(|r| r.get_result().clone()).collect();
-        JValue::Array(jvalue_array)
+        let jvalue_iter = self.iter().map(|r| r.get_result().clone());
+        JValue::array_from_iter(jvalue_iter)
     }
 
     fn into_jvalue(self: Box<Self>) -> JValue {
-        let jvalue_array = self.iter().map(|r| r.get_result().clone()).collect();
-        JValue::Array(jvalue_array)
+        let jvalue_iter = self.iter().map(|r| r.get_result().clone());
+        JValue::array_from_iter(jvalue_iter)
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {

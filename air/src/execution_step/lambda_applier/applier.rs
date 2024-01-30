@@ -56,8 +56,8 @@ pub(crate) fn select_by_lambda_from_stream<'value>(
     }
 }
 
-pub(crate) fn select_by_lambda_from_canon_map<'value>(
-    canon_map: &'value CanonStreamMap,
+pub(crate) fn select_by_lambda_from_canon_map(
+    canon_map: &CanonStreamMap,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<MapLensResult> {
@@ -67,8 +67,8 @@ pub(crate) fn select_by_lambda_from_canon_map<'value>(
     }
 }
 
-pub(crate) fn select_by_lambda_from_scalar<'value>(
-    value: &'value JValue,
+pub(crate) fn select_by_lambda_from_scalar(
+    value: &JValue,
     lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
 ) -> ExecutionResult<JValue> {
@@ -126,8 +126,8 @@ fn select_by_path_from_canon_map_stream<'value>(
     Ok(select_result)
 }
 
-fn select_by_path_from_canon_map<'value>(
-    canon_map: &'value CanonStreamMap,
+fn select_by_path_from_canon_map(
+    canon_map: &CanonStreamMap,
     lambda: &NonEmpty<ValueAccessor<'_>>,
     original_lambda: &LambdaAST<'_>,
     exec_ctx: &ExecutionCtx<'_>,
@@ -282,7 +282,7 @@ fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> Execution
     }
 }
 
-impl<'value> LambdaResult {
+impl LambdaResult {
     // TODO rename
     fn from_cow(result: JValue, tetraplet_idx: usize) -> Self {
         Self {
@@ -299,7 +299,7 @@ impl<'value> LambdaResult {
     }
 }
 
-impl<'value> MapLensResult {
+impl MapLensResult {
     // TODO rename
     fn from_cow(result: JValue, tetraplet: RcSecurityTetraplet) -> Self {
         Self { result, tetraplet }
@@ -313,9 +313,6 @@ impl<'value> MapLensResult {
             "",
             functor.to_string(),
         ));
-        Self {
-            result,
-            tetraplet,
-        }
+        Self { result, tetraplet }
     }
 }

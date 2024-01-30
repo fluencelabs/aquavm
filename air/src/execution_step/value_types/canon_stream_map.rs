@@ -122,7 +122,7 @@ impl CanonStreamMapWithProvenance {
     }
 }
 
-impl<'a> Deref for CanonStreamMapWithProvenance {
+impl Deref for CanonStreamMapWithProvenance {
     type Target = CanonStreamMap;
 
     fn deref(&self) -> &Self::Target {
@@ -161,9 +161,7 @@ mod test {
     use crate::execution_step::ValueAggregate;
     use crate::JValue;
 
-    use serde_json::json;
     use std::borrow::Cow;
-    use std::rc::Rc;
 
     fn create_value_aggregate(value: JValue) -> ValueAggregate {
         ValueAggregate::new(
@@ -181,10 +179,10 @@ mod test {
             .iter()
             .zip(values)
             .clone()
-            .map(|(key, value)| {
-                let key = StreamMapKey::Str(Cow::Borrowed(*key));
-                let value = Rc::new(json!(value));
-                let kvpair = from_key_value(key.clone(), value.as_ref());
+            .map(|(&key, value)| {
+                let key = StreamMapKey::Str(key.into());
+                let value = JValue::string(value);
+                let kvpair = from_key_value(key.clone(), &value);
                 create_value_aggregate(kvpair)
             })
             .collect();
@@ -233,7 +231,7 @@ mod test {
         let canon_stream = CanonStream::from_values(va_vec, peer_pk.into());
         let canon_stream_map =
             CanonStreamMap::from_canon_stream(canon_stream.clone()).expect("This ctor call must not fail");
-        let key_one = StreamMapKey::Str(Cow::Borrowed("key_one"));
+        let key_one = StreamMapKey::Str("key_one".into());
 
         let result_canon_stream = canon_stream_map
             .index(&key_one)
@@ -242,7 +240,7 @@ mod test {
 
         assert!(result_canon_stream.clone().into_values() == canon_stream_one.clone().into_values());
 
-        let key_two = StreamMapKey::Str(Cow::Borrowed("key_two"));
+        let key_two = StreamMapKey::Str("key_two".into());
         let result_canon_stream = canon_stream_map
             .index(&key_two)
             .expect("There must be a value for this index.");

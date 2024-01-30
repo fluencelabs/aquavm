@@ -28,7 +28,6 @@ use air_lambda_ast::LambdaAST;
 use air_parser::ast;
 
 use air_parser::ast::InstructionErrorAST;
-use serde_json::json;
 use std::rc::Rc;
 
 /// Resolve value to called function arguments.
@@ -45,7 +44,7 @@ impl Resolvable for ast::ImmutableValue<'_> {
             TTL => resolve_const(ctx.run_parameters.ttl, ctx),
             Boolean(value) => resolve_const(*value, ctx),
             Number(value) => resolve_const(value, ctx),
-            EmptyArray => resolve_const(json!([]), ctx),
+            EmptyArray => resolve_const(vec![(); 0], ctx),
             Variable(variable) => variable.resolve(ctx),
             VariableWithLambda(variable) => variable.resolve(ctx),
         }
@@ -121,11 +120,7 @@ impl Resolvable for ast::CanonStream<'_> {
         let canon = ctx.scalars.get_canon_stream(self.name)?;
         let value: &dyn JValuable = &&canon.canon_stream;
         let tetraplets = value.as_tetraplets();
-        Ok((
-            value.as_jvalue(),
-            tetraplets,
-            Provenance::canon(canon.cid.clone()),
-        ))
+        Ok((value.as_jvalue(), tetraplets, Provenance::canon(canon.cid.clone())))
     }
 }
 
