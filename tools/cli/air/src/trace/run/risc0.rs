@@ -53,7 +53,7 @@ impl AirRunner for Risc0Runner {
         _tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<RawAVMOutcome> {
+    ) -> eyre::Result<RawAVMOutcome> {
         let key_format = keypair.key_format().into();
         let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
 
@@ -82,7 +82,7 @@ impl AirRunner for Risc0Runner {
     }
 }
 
-fn execute_on_risc0(arguments: AquaVMProvingParameters) -> anyhow::Result<RawAVMOutcome> {
+fn execute_on_risc0(arguments: AquaVMProvingParameters) -> eyre::Result<RawAVMOutcome> {
     use risc0_zkvm::serde::from_slice;
 
     let env = ExecutorEnv::builder().write(&arguments)?.build()?;

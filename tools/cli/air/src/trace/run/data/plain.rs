@@ -18,7 +18,7 @@ use super::super::super::utils::unix_timestamp_now;
 use super::ExecutionData;
 use avm_interface::ParticleParameters;
 
-use anyhow::Context;
+use eyre::Context;
 
 use std::path::{Path, PathBuf};
 
@@ -46,7 +46,7 @@ pub(crate) struct PlainDataArgs {
     particle_id: Option<String>,
 }
 
-pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
+pub(crate) fn load(args: &PlainDataArgs) -> eyre::Result<ExecutionData<'_>> {
     use super::super::load_data_or_default;
 
     let air_script = read_air_with_prompt(args.air_script_path.as_deref())
@@ -77,7 +77,7 @@ pub(crate) fn load(args: &PlainDataArgs) -> anyhow::Result<ExecutionData<'_>> {
     })
 }
 
-fn read_air_with_prompt(air_input: Option<&Path>) -> anyhow::Result<String> {
+fn read_air_with_prompt(air_input: Option<&Path>) -> eyre::Result<String> {
     use std::io::Read;
 
     let air_script = match air_input {
