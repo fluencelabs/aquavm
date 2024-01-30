@@ -36,7 +36,7 @@ pub(crate) trait AirRunner {
         tracing_output_mode: u8,
         key_pair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<RawAVMOutcome>;
+    ) -> eyre::Result<RawAVMOutcome>;
 }
 
 pub(crate) trait DataToHumanReadable {

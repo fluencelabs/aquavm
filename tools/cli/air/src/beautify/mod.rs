@@ -15,8 +15,8 @@
  */
 
 use air_beautifier::Beautifier;
-use anyhow::{Context, Result};
 use clap::Parser;
+use eyre::{Context, Result};
 
 use std::{io, path::PathBuf};
 
