@@ -50,32 +50,32 @@ fn client_host_function(
     relay_id: String,
 ) -> (CallServiceClosure, Rc<RefCell<String>>) {
     let all_info = Rc::new(RefCell::new(String::new()));
-    let known_peers = JValue::Array(known_peers.iter().cloned().map(JValue::String).collect::<Vec<_>>());
-    let client_id = JValue::String(client_id);
-    let relay_id = JValue::String(relay_id);
+    let known_peers = serde_json::Value::Array(known_peers.iter().cloned().map(Into::into).collect());
+    let client_id = serde_json::Value::String(client_id);
+    let relay_id = serde_json::Value::String(relay_id);
 
     let to_ret_value = Box::new(
-        move |service_name: &str, function_name: &str, arguments: Vec<String>| -> JValue {
+        move |service_name: &str, function_name: &str, arguments: Vec<String>| -> serde_json::Value {
             if !service_name.is_empty() || function_name != "load" || arguments.len() != 1 {
-                return JValue::Null;
+                return serde_json::Value::Null;
             }
 
             match arguments[0].as_str() {
                 "relayId" => relay_id.clone(),
                 "knownPeers" => known_peers.clone(),
                 "clientId" => client_id.clone(),
-                _ => JValue::Null,
+                _ => serde_json::Value::Null,
             }
         },
     );
 
     let all_info_inner = all_info.clone();
     let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
-        let ret_value = match serde_json::from_value(JValue::Array(params.arguments.clone())) {
+        let ret_value = match serde_json::from_value(serde_json::Value::Array(params.arguments.clone())) {
             Ok(args) => to_ret_value(params.service_id.as_str(), params.function_name.as_str(), args),
             Err(_) => {
-                *all_info_inner.borrow_mut() = JValue::Array(params.arguments).to_string();
-                JValue::Null
+                *all_info_inner.borrow_mut() = serde_json::Value::Array(params.arguments).to_string();
+                serde_json::Value::Null
             }
         };
 
@@ -92,15 +92,15 @@ fn peer_host_function(
     interfaces: Vec<String>,
     ident: String,
 ) -> CallServiceClosure {
-    let known_peers = JValue::Array(known_peers.into_iter().map(JValue::String).collect());
-    let blueprints = JValue::Array(blueprints.into_iter().map(JValue::String).collect());
-    let modules = JValue::Array(modules.into_iter().map(JValue::String).collect());
-    let interfaces = JValue::Array(interfaces.into_iter().map(JValue::String).collect());
-    let identify = JValue::String(ident.clone());
-    let ident = JValue::String(ident);
+    let known_peers = serde_json::Value::Array(known_peers.into_iter().map(Into::into).collect());
+    let blueprints = serde_json::Value::Array(blueprints.into_iter().map(Into::into).collect());
+    let modules = serde_json::Value::Array(modules.into_iter().map(Into::into).collect());
+    let interfaces = serde_json::Value::Array(interfaces.into_iter().map(Into::into).collect());
+    let identify = serde_json::Value::String(ident.clone());
+    let ident = serde_json::Value::String(ident);
 
     let to_ret_value = Box::new(
-        move |service_name: &str, function_name: &str, arguments: Vec<&str>| -> JValue {
+        move |service_name: &str, function_name: &str, arguments: Vec<&str>| -> serde_json::Value {
             match (service_name, function_name, arguments.as_slice()) {
                 ("op", "identity", _) => ident.clone(),
                 ("op", "identify", _) => identify.clone(),
@@ -108,13 +108,13 @@ fn peer_host_function(
                 ("dist", "get_modules", _) => modules.clone(),
                 ("srv", "get_interfaces", _) => interfaces.clone(),
                 ("dht", "neighborhood", _) => known_peers.clone(),
-                _ => JValue::Null,
+                _ => serde_json::Value::Null,
             }
         },
     );
 
     Box::new(move |params| -> CallServiceResult {
-        let args: Vec<String> = serde_json::from_value(JValue::Array(params.arguments)).unwrap();
+        let args: Vec<String> = serde_json::from_value(serde_json::Value::Array(params.arguments)).unwrap();
         let t_args = args.iter().map(|s| s.as_str()).collect::<Vec<_>>();
         let ret_value = to_ret_value(params.service_id.as_str(), params.function_name.as_str(), t_args);
 

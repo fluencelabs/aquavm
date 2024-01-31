@@ -32,12 +32,11 @@ use std::rc::Rc;
 type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 
 fn create_check_service_closure(
-    args_to_check: ArgToCheck<JValue>,
+    args_to_check: ArgToCheck<serde_json::Value>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
 ) -> CallServiceClosure {
     Box::new(move |params| -> CallServiceResult {
-        let mut call_args: Vec<JValue> =
-            serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
+        let mut call_args: Vec<serde_json::Value> = params.arguments;
 
         let result = json!(params.tetraplets);
         *args_to_check.borrow_mut() = Some(call_args.remove(0));
@@ -123,8 +122,8 @@ fn not_clear_last_error_in_match() {
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
-    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_object(),);
+    let actual_value: JValue = (*args.borrow()).as_ref().unwrap().clone().into();
+    assert_eq!(actual_value, no_error_object());
 }
 
 #[test]
@@ -158,8 +157,8 @@ fn not_clear_last_error_in_mismatch() {
     let result = checked_call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), &script, "", result.data);
 
-    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
-    assert_eq!(actual_value, no_error_object(),);
+    let actual_value: JValue = (*args.borrow()).as_ref().unwrap().into();
+    assert_eq!(actual_value, no_error_object());
 }
 
 #[test]
@@ -185,7 +184,7 @@ fn track_current_peer_id() {
     let result = checked_call_vm!(fallible_vm, <_>::default(), &script, "", "");
     let _ = checked_call_vm!(local_vm, <_>::default(), script, "", result.data);
 
-    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let actual_value: JValue = (*args.borrow()).as_ref().unwrap().into();
     let last_error = actual_value.as_object().unwrap();
     assert_eq!(last_error.get("peer_id").unwrap(), fallible_peer_id);
 }
@@ -240,7 +239,7 @@ fn non_initialized_last_error() {
     let test_params = TestRunParameters::from_init_peer_id("init_peer_id");
     let _ = checked_call_vm!(vm, test_params.clone(), script, "", "");
 
-    let actual_value = (*args.borrow()).as_ref().unwrap().clone();
+    let actual_value: JValue = (*args.borrow()).as_ref().unwrap().into();
     assert_eq!(actual_value, no_error_object(),);
 
     let actual_tetraplets = (*tetraplets.borrow()).as_ref().unwrap().clone();
@@ -276,7 +275,7 @@ fn access_last_error_by_not_exists_field() {
                 "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
                 "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
                 "peer_id": "fallible_peer_id",
-            }),
+            }).into(),
             field_name: non_exists_field_name.to_string()
         }
     )));
@@ -338,12 +337,12 @@ fn fail_with_scalar_rebubble_error() {
     let result = call_vm!(fallible_vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!({
+        error: json!({
             "error_code": 10000i64,
             "instruction": r#"call "fallible_peer_id" ("fallible_call_service" "") [""] "#,
             "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
             "peer_id": "fallible_peer_id",
-        })),
+        }).into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -368,10 +367,10 @@ fn fail_with_scalar_from_call() {
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!({
+        error: json!({
             "error_code": error_code,
             "message": error_message,
-        })),
+        }).into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -396,10 +395,10 @@ fn fail_with_scalar_with_lambda_from_call() {
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!({
+        error: json!({
             "error_code": error_code,
             "message": error_message,
-        })),
+        }).into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -423,7 +422,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustContainField {
-        scalar: service_result,
+        scalar: service_result.into(),
         field_name: "message",
     });
     assert!(check_error(&result, expected_error));
@@ -446,7 +445,8 @@ fn fail_with_scalar_from_call_not_right_type() {
 
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
-    let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustBeObject(service_result));
+    let expected_error =
+        CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarMustBeObject(service_result.into()));
     assert!(check_error(&result, expected_error));
 }
 
@@ -468,7 +468,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
     let result = call_vm!(vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::InvalidErrorObjectError(ErrorObjectError::ScalarFieldIsWrongType {
-        scalar: service_result,
+        scalar: service_result.into(),
         field_name: "error_code",
         expected_type: "integer",
     });

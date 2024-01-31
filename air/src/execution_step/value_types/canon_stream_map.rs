@@ -161,8 +161,6 @@ mod test {
     use crate::execution_step::ValueAggregate;
     use crate::JValue;
 
-    use std::borrow::Cow;
-
     fn create_value_aggregate(value: JValue) -> ValueAggregate {
         ValueAggregate::new(
             value,

@@ -152,13 +152,10 @@ mod test {
     use crate::JValue;
 
     use air_interpreter_cid::CID;
-    use serde_json::json;
 
-    use std::rc::Rc;
-
-    fn create_value(value: JValue) -> ValueAggregate {
+    fn create_value(value: impl  Into<JValue>) -> ValueAggregate {
         ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(value), <_>::default(), 0.into()),
+            ServiceResultAggregate::new(value.into(), <_>::default(), 0.into()),
             CID::new("some fake cid").into(),
         )
     }
@@ -193,7 +190,7 @@ mod test {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
 
-        let value = create_value(json!("1"));
+        let value = create_value("1");
         stream.add_value(value, Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);
@@ -209,7 +206,7 @@ mod test {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
 
-        let value = create_value(json!("1"));
+        let value = create_value("1");
         stream.add_value(value.clone(), Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);
@@ -232,7 +229,7 @@ mod test {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
 
-        let value = create_value(json!("1"));
+        let value = create_value("1");
         stream.add_value(value.clone(), Generation::current(0)).unwrap();
 
         let cursor_state = recursive_stream.met_fold_start(&mut stream);

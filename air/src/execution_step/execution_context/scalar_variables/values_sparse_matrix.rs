@@ -283,17 +283,15 @@ mod test {
     use super::*;
     use crate::execution_step::{LiteralAggregate, ValueAggregate};
 
-    use serde_json::json;
-
     use std::num::NonZeroUsize;
-    use std::rc::Rc;
 
     #[test]
     fn test_local_cleanup() {
         let mut scalars = ValuesSparseMatrix::new();
 
         let value = 1u64;
-        let value_aggregate = ValueAggregate::from_literal_result(LiteralAggregate::new(value, "".into(), 1.into()));
+        let value_aggregate =
+            ValueAggregate::from_literal_result(LiteralAggregate::new(value.into(), "".into(), 1.into()));
         let value_1_name = "name_1";
         scalars.set_value(value_1_name, value_aggregate.clone()).unwrap();
 

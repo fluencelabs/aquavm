@@ -69,7 +69,7 @@ fn client_host_function(
 
     let all_info_inner = all_info.clone();
     let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
-        let ret_value = match serde_json::from_value(JValue::Array(params.arguments.clone())) {
+        let ret_value = match serde_json::from_value(serde_json::Value::Array(params.arguments.clone())) {
             Ok(args) => to_ret_value(
                 params.service_id.as_str(),
                 params.function_name.as_str(),
@@ -116,7 +116,7 @@ fn peer_host_function(
     );
 
     Box::new(move |params| -> CallServiceResult {
-        let args: Vec<String> = serde_json::from_value(JValue::Array(params.arguments)).unwrap();
+        let args: Vec<String> = serde_json::from_value(serde_json::Value::Array(params.arguments)).unwrap();
         let t_args = args.iter().map(|s| s.as_str()).collect::<Vec<_>>();
         let ret_value = to_ret_value(
             params.service_id.as_str(),

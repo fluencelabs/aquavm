@@ -25,9 +25,10 @@ use std::ops::Deref;
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
         Box::new(move |params| -> CallServiceResult {
-            let actual_call_args: Vec<Vec<JValue>> =
-                serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
-            let expected_call_args: Vec<Vec<JValue>> = vec![vec![]];
+            let actual_call_args: Vec<Vec<serde_json::Value>> =
+                serde_json::from_value(serde_json::Value::Array(params.arguments))
+                    .expect("json deserialization shouldn't fail");
+            let expected_call_args: Vec<Vec<serde_json::Value>> = vec![vec![]];
 
             assert_eq!(actual_call_args, expected_call_args);
 
