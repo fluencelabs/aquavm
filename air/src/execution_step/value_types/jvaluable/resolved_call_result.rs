@@ -50,11 +50,6 @@ impl JValuable for ValueAggregate {
         self.get_result().clone()
     }
 
-    #[inline]
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        self.get_result().clone()
-    }
-
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
         vec![self.get_tetraplet()]
     }

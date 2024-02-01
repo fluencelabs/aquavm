@@ -59,11 +59,6 @@ impl JValuable for std::cell::Ref<'_, Vec<ValueAggregate>> {
         JValue::array_from_iter(jvalue_iter)
     }
 
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        let jvalue_iter = self.iter().map(|r| r.get_result().clone());
-        JValue::array_from_iter(jvalue_iter)
-    }
-
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.iter().map(|r| r.get_tetraplet()).collect::<Vec<_>>()
     }

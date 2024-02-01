@@ -51,11 +51,6 @@ impl JValuable for &CanonStreamMap {
         CanonStreamMap::as_jvalue(self)
     }
 
-    #[inline]
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        CanonStreamMap::as_jvalue(&self)
-    }
-
     fn as_tetraplets(&self) -> RcSecurityTetraplets {
         self.iter().map(|r| r.get_tetraplet()).collect()
     }

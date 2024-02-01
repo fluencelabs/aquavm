@@ -111,7 +111,7 @@ impl Resolvable for ast::Scalar<'_> {
     fn resolve(&self, ctx: &ExecutionCtx<'_>) -> ExecutionResult<(JValue, RcSecurityTetraplets, Provenance)> {
         let (value, provenance) = ctx.scalars.get_value(self.name)?.into_jvaluable();
         let tetraplets = value.as_tetraplets();
-        Ok((value.into_jvalue(), tetraplets, provenance))
+        Ok((value.as_jvalue(), tetraplets, provenance))
     }
 }
 

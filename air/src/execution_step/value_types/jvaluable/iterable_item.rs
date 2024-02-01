@@ -59,20 +59,12 @@ impl<'ctx> JValuable for IterableItem<'ctx> {
         Ok((selected_value, tetraplet, provenance.clone()))
     }
 
+    #[inline]
     fn as_jvalue(&self) -> JValue {
         use super::IterableItem::*;
 
         match self {
             RefValue((jvalue, ..)) => (*jvalue).clone(),
-            RcValue((jvalue, ..)) => jvalue.clone(),
-        }
-    }
-
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        use super::IterableItem::*;
-
-        match *self {
-            RefValue((jvalue, ..)) => jvalue.clone(),
             RcValue((jvalue, ..)) => jvalue.clone(),
         }
     }

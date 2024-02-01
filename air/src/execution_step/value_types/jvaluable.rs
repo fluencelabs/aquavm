@@ -51,9 +51,6 @@ pub(crate) trait JValuable {
     /// Return internal value as borrowed if it's possible, owned otherwise.
     fn as_jvalue(&self) -> JValue;
 
-    /// Convert this boxed value to an owned JValue.
-    fn into_jvalue(self: Box<Self>) -> JValue;
-
     /// Return tetraplets associating with internal value.
     fn as_tetraplets(&self) -> RcSecurityTetraplets;
 }
