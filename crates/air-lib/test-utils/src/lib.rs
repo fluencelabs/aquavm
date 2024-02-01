@@ -46,8 +46,8 @@ pub mod prelude {
     pub use executed_state::*;
     pub use test_runner::*;
 
-    pub use serde_json::json;
     pub use air_interpreter_value::JValue;
+    pub use serde_json::json;
 }
 
 pub type CallServiceClosure = Box<dyn Fn(CallRequestParams) -> CallServiceResult + 'static>;

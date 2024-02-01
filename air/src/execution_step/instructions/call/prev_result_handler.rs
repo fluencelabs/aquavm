@@ -68,7 +68,7 @@ pub(super) fn handle_prev_state<'i>(
             )?;
 
             let call_service_failed: CallServiceFailed =
-                serde_json::from_value(serde_json::to_value(&err_value).expect("TODO"))
+                serde_json::from_value(serde_json::to_value(err_value).expect("serde_json serializer shouldn't fail"))
                     .map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();

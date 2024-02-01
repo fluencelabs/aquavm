@@ -481,10 +481,7 @@ impl JValue {
     /// ```
     #[inline]
     pub fn is_number(&self) -> bool {
-        match *self {
-            JValue::Number(_) => true,
-            _ => false,
-        }
+        matches!(self, JValue::Number(_))
     }
 
     /// If the `Value` is a Number, returns the associated [`Number`]. Returns

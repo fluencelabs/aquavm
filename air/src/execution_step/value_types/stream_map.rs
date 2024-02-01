@@ -32,7 +32,8 @@ pub(super) fn from_key_value(key: StreamMapKey, value: &JValue) -> JValue {
     maplit::hashmap! {
         VALUE_FIELD_NAME => value.clone(),
         KEY_FIELD_NAME => key.into(),
-    }.into()
+    }
+    .into()
 }
 
 #[derive(Debug, Default, Clone)]

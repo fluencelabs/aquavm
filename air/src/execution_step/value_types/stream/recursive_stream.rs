@@ -153,7 +153,7 @@ mod test {
 
     use air_interpreter_cid::CID;
 
-    fn create_value(value: impl  Into<JValue>) -> ValueAggregate {
+    fn create_value(value: impl Into<JValue>) -> ValueAggregate {
         ValueAggregate::from_service_result(
             ServiceResultAggregate::new(value.into(), <_>::default(), 0.into()),
             CID::new("some fake cid").into(),

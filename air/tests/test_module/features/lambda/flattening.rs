@@ -36,8 +36,8 @@ fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServi
         *closure_call_args.service_id_var.deref().borrow_mut() = params.service_id.clone();
         *closure_call_args.function_name_var.deref().borrow_mut() = params.function_name.clone();
 
-        let call_args: Vec<i32> =
-            serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("json deserialization shouldn't fail");
+        let call_args: Vec<i32> = serde_json::from_value(serde_json::Value::Array(params.arguments))
+            .expect("json deserialization shouldn't fail");
         *closure_call_args.args_var.deref().borrow_mut() = call_args;
 
         CallServiceResult::ok(json!(""))

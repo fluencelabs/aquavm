@@ -89,7 +89,7 @@ impl<'de> Deserialize<'de> for JValue {
 
                         values.insert(first_key, tri!(visitor.next_value()));
                         while let Some((key, value)) = tri!(visitor.next_entry::<JsonString, _>()) {
-                            values.insert(key.into(), value);
+                            values.insert(key, value);
                         }
 
                         Ok(JValue::Object(values.into()))
@@ -131,8 +131,6 @@ impl<'de> Visitor<'de> for KeyClassifier {
     where
         E: de::Error,
     {
-        match s {
-            _ => Ok(KeyClass::Map(s.into())),
-        }
+        Ok(KeyClass::Map(s.into()))
     }
 }

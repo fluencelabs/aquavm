@@ -302,7 +302,7 @@ impl From<&serde_json::Value> for JValue {
             Value::Bool(b) => JValue::Bool(*b),
             Value::Number(n) => JValue::Number(n.clone()),
             Value::String(s) => JValue::String(s.as_str().into()),
-            Value::Array(a) => JValue::Array(a.into_iter().map(Into::into).collect()),
+            Value::Array(a) => JValue::Array(a.iter().map(Into::into).collect()),
             Value::Object(o) => {
                 let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.as_str().into(), v.into())));
                 JValue::Object(oo.into())

@@ -144,7 +144,9 @@ impl CallServiceFailed {
     }
 
     pub fn to_value(&self) -> JValue {
-        serde_json::to_value(self).expect("default serializer shouldn't fail").into()
+        serde_json::to_value(self)
+            .expect("serde_json serializer shouldn't fail")
+            .into()
     }
 }
 

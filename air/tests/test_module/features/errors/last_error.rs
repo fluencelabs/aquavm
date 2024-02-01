@@ -370,7 +370,8 @@ fn fail_with_scalar_from_call() {
         error: json!({
             "error_code": error_code,
             "message": error_message,
-        }).into(),
+        })
+        .into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -398,7 +399,8 @@ fn fail_with_scalar_with_lambda_from_call() {
         error: json!({
             "error_code": error_code,
             "message": error_message,
-        }).into(),
+        })
+        .into(),
     };
     assert!(check_error(&result, expected_error));
 }
