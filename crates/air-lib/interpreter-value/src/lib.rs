@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
 // We only use our own error type; no need for From conversions provided by the
@@ -15,7 +16,7 @@ mod value;
 
 pub use value::JValue;
 
-pub type Map<K, V> = indexmap::IndexMap<K, V>;
+pub type Map<K, V> = BTreeMap<K, V>;
 
 // it is memory- and CPU-wise more effective than a string
 pub type JsonString = Rc<str>;

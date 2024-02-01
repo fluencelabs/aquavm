@@ -170,12 +170,12 @@ impl<K: Into<JsonString>, V: Into<JValue>> From<HashMap<K, V>> for JValue {
     /// # Examples
     ///
     /// ```
-    /// use serde_json::{Map, Value};
+    /// use air_interpreter_value::JValue;
     /// use std::collections::HashMap;
     ///
-    /// let mut m = HashMap::<s::new();
-    /// m.insert("Lorem".to_owned(), "ipsum".to_owned());
-    /// let x: Value = m.into();
+    /// let mut m = HashMap::<&str, &str>::new();
+    /// m.insert("Lorem", "ipsum");
+    /// let x: JValue = m.into();
     /// ```
     fn from(f: HashMap<K, V>) -> Self {
         JValue::object_from_pairs(f)
