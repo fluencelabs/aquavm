@@ -16,6 +16,7 @@
 
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
+
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
@@ -42,6 +43,9 @@ impl AirRunner for NativeAvmRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> eyre::Result<RawAVMOutcome> {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
         use air_interpreter_sede::ToSerialized;
         use avm_interface::into_raw_result;
 
@@ -61,6 +65,9 @@ impl AirRunner for NativeAvmRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
+                air_size_limit: MAX_AIR_SIZE,
+                particle_size_limit: MAX_PARTICLE_SIZE,
+                call_result_size_limit: MAX_CALL_RESULT_SIZE,
                 key_format,
                 secret_key_bytes,
                 particle_id,

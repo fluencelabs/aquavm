@@ -33,7 +33,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub trait AirRunner {
-    fn new(current_call_id: impl Into<String>) -> Self;
+    fn new(current_call_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self;
 
     #[allow(clippy::too_many_arguments)]
     fn call(
@@ -66,6 +66,14 @@ pub struct TestRunParameters {
     pub ttl: u32,
     pub override_current_peer_id: Option<String>,
     pub particle_id: String,
+}
+
+/// This struct is used to set limits for the test runner creating AVMRunner.
+#[derive(Debug, Default, Clone)]
+pub struct TestInitParameters {
+    pub air_size_limit: Option<u64>,
+    pub particle_size_limit: Option<u64>,
+    pub call_result_size_limit: Option<u64>,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -169,10 +177,8 @@ pub fn create_custom_avm<R: AirRunner>(
     current_peer_id: impl Into<String>,
 ) -> TestRunner<R> {
     let current_peer_id = current_peer_id.into();
-
     let (keypair, _) = derive_dummy_keypair(&current_peer_id);
-
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id, <_>::default());
 
     TestRunner {
         runner,
@@ -184,10 +190,11 @@ pub fn create_custom_avm<R: AirRunner>(
 pub fn create_avm_with_key<R: AirRunner>(
     keypair: impl Into<KeyPair>,
     call_service: CallServiceClosure,
+    test_init_parameters: TestInitParameters,
 ) -> TestRunner<R> {
     let keypair = keypair.into();
     let current_peer_id = keypair.public().to_peer_id().to_string();
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id, test_init_parameters);
 
     TestRunner {
         runner,
@@ -236,6 +243,35 @@ impl TestRunParameters {
     pub fn with_particle_id(mut self, particle_id: impl Into<String>) -> Self {
         self.particle_id = particle_id.into();
         self
+    }
+}
+
+impl TestInitParameters {
+    pub fn new(air_size_limit: u64, particle_size_limit: u64, call_result_size_limit: u64) -> Self {
+        Self {
+            air_size_limit: Some(air_size_limit),
+            particle_size_limit: Some(particle_size_limit),
+            call_result_size_limit: Some(call_result_size_limit),
+        }
+    }
+
+    pub fn no_limits() -> Self {
+        Self {
+            air_size_limit: Some(u64::MAX),
+            particle_size_limit: Some(u64::MAX),
+            call_result_size_limit: Some(u64::MAX),
+        }
+    }
+
+    pub(crate) fn to_attributes_w_default(&self) -> (u64, u64, u64) {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+
+        let air_size_limit = self.air_size_limit.unwrap_or(MAX_AIR_SIZE);
+        let particle_size_limit: u64 = self.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
+        let call_result_size_limit = self.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
+        (air_size_limit, particle_size_limit, call_result_size_limit)
     }
 }
 

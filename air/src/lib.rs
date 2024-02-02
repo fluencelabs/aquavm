@@ -62,9 +62,6 @@ pub use polyplets::SecurityTetraplet;
 pub use preparation_step::interpreter_version;
 pub use preparation_step::min_supported_version;
 pub use preparation_step::PreparationError;
-pub use preparation_step::MAX_AIR_SIZE;
-pub use preparation_step::MAX_CALL_RESULTS_SIZE;
-pub use preparation_step::MAX_PARTICLE_SIZE;
 
 pub use utils::ToErrorCode;
 

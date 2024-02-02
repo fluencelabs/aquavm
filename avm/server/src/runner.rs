@@ -38,6 +38,12 @@ pub struct AVMRunner {
     wasm_filename: String,
     /// The memory limit provided by constructor
     total_memory_limit: Option<u64>,
+    /// The AIR script size limit.
+    pub air_size_limit: u64,
+    /// The particle data size limit.
+    pub particle_size_limit: u64,
+    // This is the limit for the size of service call result.
+    pub call_result_size_limit: u64,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -57,18 +63,32 @@ impl AVMRunner {
     pub fn new(
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
+        air_size_limit: Option<u64>,
+        particle_size_limit: Option<u64>,
+        call_result_size_limit: Option<u64>,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
 
+        let air_size_limit = air_size_limit.unwrap_or(MAX_AIR_SIZE);
+        let particle_size_limit = particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
+        let call_result_size_limit = call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
+
         let avm = Self {
             marine,
             wasm_filename,
             total_memory_limit,
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
         };
 
         Ok(avm)
@@ -102,6 +122,9 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
+            self.air_size_limit,
+            self.particle_size_limit,
+            self.call_result_size_limit,
             call_results,
             key_format.into(),
             secret_key_bytes,
@@ -150,6 +173,9 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
+            self.air_size_limit,
+            self.particle_size_limit,
+            self.call_result_size_limit,
             call_results,
             key_format,
             secret_key_bytes,
@@ -216,6 +242,9 @@ fn prepare_args(
     init_peer_id: String,
     timestamp: u64,
     ttl: u32,
+    air_size_limit: u64,
+    particle_size_limit: u64,
+    call_result_size_limit: u64,
     call_results: CallResults,
     key_format: u8,
     secret_key_bytes: Vec<u8>,
@@ -229,6 +258,9 @@ fn prepare_args(
         key_format,
         secret_key_bytes,
         particle_id,
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
     )
     .into_ivalue();
 

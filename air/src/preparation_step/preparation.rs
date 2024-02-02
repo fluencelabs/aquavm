@@ -152,6 +152,16 @@ fn make_exec_ctx(
         "CallResultsRepr.deserialize",
     );
 
+    // This is a part of argument size limit check where we check the size of every call results.
+    if call_results
+        .values()
+        .any(|call_result| call_result.result.len() > run_parameters.call_result_size_limit as usize)
+    {
+        return Err(PreparationError::call_result_size_limit(
+            run_parameters.call_result_size_limit,
+        ));
+    }
+
     let ctx = ExecutionCtx::new(
         prev_ingredients,
         current_ingredients,

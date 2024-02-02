@@ -64,7 +64,7 @@ fn execute_air_impl(
     use crate::preparation_step::check_against_size_limits;
 
     farewell_if_fail!(
-        check_against_size_limits(&air, &raw_current_data, &call_results),
+        check_against_size_limits(&params, &air, &raw_current_data),
         raw_prev_data
     );
 

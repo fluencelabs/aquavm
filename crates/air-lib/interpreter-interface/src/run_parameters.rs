@@ -53,6 +53,15 @@ pub struct RunParameters {
 
     /// Unique particle ID.
     pub particle_id: String,
+
+    /// The AIR script size limit.
+    pub air_size_limit: u64,
+
+    /// The particle data size limit.
+    pub particle_size_limit: u64,
+
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: u64,
 }
 
 impl RunParameters {
@@ -64,6 +73,9 @@ impl RunParameters {
         key_format: u8,
         secret_key_bytes: Vec<u8>,
         particle_id: String,
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
     ) -> Self {
         Self {
             init_peer_id,
@@ -73,6 +85,9 @@ impl RunParameters {
             key_format,
             secret_key_bytes,
             particle_id,
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
         }
     }
 
@@ -86,6 +101,9 @@ impl RunParameters {
             IValue::U8(self.key_format),
             IValue::ByteArray(self.secret_key_bytes),
             IValue::String(self.particle_id),
+            IValue::U64(self.air_size_limit),
+            IValue::U64(self.particle_size_limit),
+            IValue::U64(self.call_result_size_limit),
         ];
         // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();

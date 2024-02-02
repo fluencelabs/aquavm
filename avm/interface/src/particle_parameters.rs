@@ -45,25 +45,3 @@ impl<'ctx> ParticleParameters<'ctx> {
         }
     }
 }
-
-/// Represents parameters obtained from a particle.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AquaVMRuntimeParameters {
-    air_size_limit: u32,
-    particle_size_limit: u32,
-    call_results_size_limit: u32,
-}
-
-impl AquaVMRuntimeParameters {
-    pub fn new(
-        air_size_limit: u32,
-        particle_size_limit: u32,
-        call_results_size_limit: u32,
-    ) -> Self {
-        Self {
-            air_size_limit,
-            particle_size_limit,
-            call_results_size_limit,
-        }
-    }
-}

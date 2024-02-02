@@ -14,27 +14,7 @@
  * limitations under the License.
  */
 
-use serde::Deserialize;
-use serde::Serialize;
-
-/// Represents runtime parameters to hand over to AquaVM.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RuntimeParameters {
-    air_size_limit: u32,
-    particle_size_limit: u32,
-    call_results_size_limit: u32,
-}
-
-impl RuntimeParameters {
-    pub fn new(
-        air_size_limit: u32,
-        particle_size_limit: u32,
-        call_results_size_limit: u32,
-    ) -> Self {
-        Self {
-            air_size_limit,
-            particle_size_limit,
-            call_results_size_limit,
-        }
-    }
-}
+const MB: u64 = 1024 * 1024;
+pub static MAX_AIR_SIZE: u64 = 16 * MB;
+pub static MAX_PARTICLE_SIZE: u64 = 64 * MB;
+pub static MAX_CALL_RESULT_SIZE: u64 = 32 * MB;

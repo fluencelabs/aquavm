@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::prelude::TestInitParameters;
 use crate::test_runner::AirRunner;
 
 use avm_server::avm_runner::*;
@@ -32,19 +33,24 @@ pub struct WasmAirRunner {
     runner: object_pool::Reusable<'static, AVMRunner>,
 }
 
-fn make_pooled_avm_runner() -> AVMRunner {
+fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner {
     let logging_mask = i32::MAX;
+    let (air_size_limit, particle_size_limit, call_result_size_limit) =
+        test_init_parameters.to_attributes_w_default();
 
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
         Some(AVM_MAX_HEAP_SIZE),
+        Some(air_size_limit),
+        Some(particle_size_limit),
+        Some(call_result_size_limit),
         logging_mask,
     )
     .expect("vm should be created")
 }
 
 impl AirRunner for WasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> Self {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
 
         let pool = POOL_CELL.get_or_init(|| {
@@ -55,7 +61,7 @@ impl AirRunner for WasmAirRunner {
             )
         });
 
-        let runner = pool.pull(make_pooled_avm_runner);
+        let runner = pool.pull(|| make_pooled_avm_runner(test_init_parameters.clone()));
 
         Self {
             current_peer_id: current_peer_id.into(),
@@ -106,12 +112,17 @@ pub struct ReleaseWasmAirRunner {
 }
 
 impl AirRunner for ReleaseWasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> Self {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         let logging_mask = i32::MAX;
+        let (air_size_limit, particle_size_limit, call_result_size_limit) =
+            test_init_parameters.to_attributes_w_default();
 
         let runner = AVMRunner::new(
             PathBuf::from(RELEASE_AIR_WASM_PATH),
             Some(AVM_MAX_HEAP_SIZE),
+            Some(air_size_limit),
+            Some(particle_size_limit),
+            Some(call_result_size_limit),
             logging_mask,
         )
         .expect("vm should be created");
@@ -135,6 +146,7 @@ impl AirRunner for ReleaseWasmAirRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+        println!("running release wasm runner#####");
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 

@@ -80,7 +80,7 @@ fn test_attack_injection_current_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -151,7 +151,7 @@ fn test_attack_injection_current_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -220,7 +220,7 @@ fn test_attack_injection_current_injection_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -281,7 +281,7 @@ fn test_attack_injection_other_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
@@ -339,7 +339,7 @@ fn test_attack_injection_other_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
@@ -397,7 +397,7 @@ fn test_attack_injection_other_peer_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service(), <_>::default());
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
@@ -420,8 +420,9 @@ fn test_attack_replay() {
              (call "bob" ("" "") [] z))"#
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair.clone(), unit_call_service());
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service());
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair.clone(), unit_call_service(), <_>::default());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service(), <_>::default());
 
     let run_params1 = TestRunParameters::from_init_peer_id(&alice_peer_id).with_particle_id("first_particle");
     let run_params2 = run_params1.clone();

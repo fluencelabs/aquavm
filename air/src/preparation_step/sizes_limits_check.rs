@@ -14,36 +14,27 @@
  * limitations under the License.
  */
 
-use air_interpreter_interface::SerializedCallResults;
-
 use super::preparation::PreparationResult;
 use crate::PreparationError;
 
-const MB: usize = 1024 * 1024;
-pub const MAX_AIR_SIZE: usize = 16 * MB;
-pub const MAX_PARTICLE_SIZE: usize = 64 * MB;
-pub const MAX_CALL_RESULTS_SIZE: usize = 32 * MB;
+use air_interpreter_interface::RunParameters;
 
 pub(crate) fn check_against_size_limits(
+    run_parameters: &RunParameters,
     air: &str,
     raw_current_data: &[u8],
-    call_results: &SerializedCallResults,
 ) -> PreparationResult<()> {
-    if air.len() > MAX_AIR_SIZE {
-        return Err(PreparationError::air_size_limit(air.len(), MAX_AIR_SIZE));
-    }
-
-    if raw_current_data.len() > MAX_PARTICLE_SIZE {
-        return Err(PreparationError::particle_size_limit(
-            raw_current_data.len(),
-            MAX_PARTICLE_SIZE,
+    if air.len() > run_parameters.air_size_limit as usize {
+        return Err(PreparationError::air_size_limit(
+            air.len(),
+            run_parameters.air_size_limit,
         ));
     }
 
-    if call_results.len() > MAX_CALL_RESULTS_SIZE {
-        return Err(PreparationError::call_results_size_limit(
-            call_results.len(),
-            MAX_CALL_RESULTS_SIZE,
+    if raw_current_data.len() > run_parameters.particle_size_limit as usize {
+        return Err(PreparationError::particle_size_limit(
+            raw_current_data.len(),
+            run_parameters.particle_size_limit,
         ));
     }
 

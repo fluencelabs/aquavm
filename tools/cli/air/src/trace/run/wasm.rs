@@ -75,6 +75,9 @@ pub(crate) fn create_wasm_avm_runner(
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
+        None,
+        None,
+        None,
         0,
     )?)))
 }

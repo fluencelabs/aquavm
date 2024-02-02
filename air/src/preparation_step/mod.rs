@@ -22,9 +22,6 @@ mod sizes_limits_check;
 pub use errors::PreparationError;
 pub use interpreter_versions::interpreter_version;
 pub use interpreter_versions::min_supported_version;
-pub use sizes_limits_check::MAX_AIR_SIZE;
-pub use sizes_limits_check::MAX_CALL_RESULTS_SIZE;
-pub use sizes_limits_check::MAX_PARTICLE_SIZE;
 
 pub(crate) use preparation::check_version_compatibility;
 pub(crate) use preparation::parse_data;

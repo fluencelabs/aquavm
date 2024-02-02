@@ -34,7 +34,7 @@ fn issue_310() {
       )
     "#;
 
-    let mut runner = DefaultAirRunner::new(&peer_id);
+    let mut runner = DefaultAirRunner::new(&peer_id, <_>::default());
     let mut call = |prev_data, call_results| {
         runner
             .call(

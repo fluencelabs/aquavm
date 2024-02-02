@@ -778,8 +778,9 @@ fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -823,8 +824,9 @@ fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -868,8 +870,9 @@ fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -913,8 +916,9 @@ fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -958,8 +962,9 @@ fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,

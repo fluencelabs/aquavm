@@ -93,15 +93,15 @@ pub enum PreparationError {
 
     /// AIR script size is bigger than the allowed limit.
     #[error("air size: {0} bytes is bigger than a limit allowed: {1} bytes")]
-    AIRSizeLimitReached(usize, usize),
+    AIRSizeLimitReached(usize, u64),
 
     /// Current_data particle size is bigger than the allowed limit.
     #[error("Current_data particle size: {0} bytes is bigger than a limit allowed: {1} bytes")]
-    ParticleSizeLimitReached(usize, usize),
+    ParticleSizeLimitReached(usize, u64),
 
-    /// CallResults cummulative size is bigger than the allowed limit.
-    #[error("Call results cummulative size: {0} bytes is bigger than a limit allowed: {1} bytes")]
-    CallResultsSizeLimitReached(usize, usize),
+    /// CallResult size is bigger than the allowed limit.
+    #[error("Call result size is bigger than the limit allowed: {0} bytes")]
+    CallResultSizeLimitReached(u64),
 }
 
 impl ToErrorCode for PreparationError {
@@ -135,15 +135,15 @@ impl PreparationError {
         }
     }
 
-    pub fn air_size_limit(actual_size: usize, limit: usize) -> Self {
+    pub fn air_size_limit(actual_size: usize, limit: u64) -> Self {
         Self::AIRSizeLimitReached(actual_size, limit)
     }
 
-    pub fn particle_size_limit(actual_size: usize, limit: usize) -> Self {
+    pub fn particle_size_limit(actual_size: usize, limit: u64) -> Self {
         Self::ParticleSizeLimitReached(actual_size, limit)
     }
 
-    pub fn call_results_size_limit(actual_size: usize, limit: usize) -> Self {
-        Self::CallResultsSizeLimitReached(actual_size, limit)
+    pub fn call_result_size_limit(limit: u64) -> Self {
+        Self::CallResultSizeLimitReached(limit)
     }
 }
