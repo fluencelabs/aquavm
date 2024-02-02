@@ -19,12 +19,17 @@ use super::runner::DataToHumanReadable;
 
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
+use air_test_utils::test_runner::TestInitParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;
 
-pub(crate) struct NativeAvmRunner {}
+pub(crate) struct NativeAvmRunner {
+    pub air_size_limit: u64,
+    pub particle_size_limit: u64,
+    pub call_result_size_limit: u64,
+}
 
 impl AirRunner for NativeAvmRunner {
     fn call_tracing(
@@ -43,9 +48,6 @@ impl AirRunner for NativeAvmRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> eyre::Result<RawAVMOutcome> {
-        use air_interpreter_interface::MAX_AIR_SIZE;
-        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
-        use air_interpreter_interface::MAX_PARTICLE_SIZE;
         use air_interpreter_sede::ToSerialized;
         use avm_interface::into_raw_result;
 
@@ -65,9 +67,9 @@ impl AirRunner for NativeAvmRunner {
                 current_peer_id,
                 timestamp,
                 ttl,
-                air_size_limit: MAX_AIR_SIZE,
-                particle_size_limit: MAX_PARTICLE_SIZE,
-                call_result_size_limit: MAX_CALL_RESULT_SIZE,
+                air_size_limit: self.air_size_limit,
+                particle_size_limit: self.particle_size_limit,
+                call_result_size_limit: self.call_result_size_limit,
                 key_format,
                 secret_key_bytes,
                 particle_id,
@@ -86,6 +88,15 @@ impl DataToHumanReadable for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner() -> eyre::Result<Box<NativeAvmRunner>> {
-    Ok(Box::new(NativeAvmRunner {}))
+pub(crate) fn create_native_avm_runner(
+    test_init_parameters: TestInitParameters,
+) -> eyre::Result<Box<NativeAvmRunner>> {
+    let (air_size_limit, particle_size_limit, call_result_size_limit) =
+        test_init_parameters.to_attributes_w_default();
+
+    Ok(Box::new(NativeAvmRunner {
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+    }))
 }

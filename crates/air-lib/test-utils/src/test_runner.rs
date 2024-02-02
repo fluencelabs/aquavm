@@ -263,7 +263,7 @@ impl TestInitParameters {
         }
     }
 
-    pub(crate) fn to_attributes_w_default(&self) -> (u64, u64, u64) {
+    pub fn to_attributes_w_default(&self) -> (u64, u64, u64) {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
         use air_interpreter_interface::MAX_PARTICLE_SIZE;

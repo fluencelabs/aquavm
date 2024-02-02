@@ -17,6 +17,7 @@
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
 use air_test_utils::avm_runner::AVMRunner;
+use air_test_utils::test_runner::TestInitParameters;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;
@@ -71,13 +72,17 @@ impl DataToHumanReadable for WasmAvmRunner {
 pub(crate) fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
+    test_init_parameters: TestInitParameters,
 ) -> eyre::Result<Box<WasmAvmRunner>> {
+    let (air_size_limit, particle_size_limit, call_result_size_limit) =
+        test_init_parameters.to_attributes_w_default();
+
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
-        None,
-        None,
-        None,
+        Some(air_size_limit),
+        Some(particle_size_limit),
+        Some(call_result_size_limit),
         0,
     )?)))
 }
