@@ -19,8 +19,8 @@ use super::ExecutionData;
 use avm_data_store::AnomalyData;
 use avm_interface::ParticleParameters;
 
-use anyhow::Context;
 use clap::Parser;
+use eyre::Context;
 
 use std::path::PathBuf;
 
@@ -29,7 +29,7 @@ pub(crate) struct AnomalyDataArgs {
     anomaly_data_path: PathBuf,
 }
 
-pub(crate) fn load(args: &AnomalyDataArgs) -> anyhow::Result<super::ExecutionData<'_>> {
+pub(crate) fn load(args: &AnomalyDataArgs) -> eyre::Result<super::ExecutionData<'_>> {
     let anomaly_json = load_data(&args.anomaly_data_path).context("Failed to read anomaly data")?;
     let anomaly_data: AnomalyData<'_> =
         serde_json::from_slice(&anomaly_json).context("Failed to parse anomaly data")?;

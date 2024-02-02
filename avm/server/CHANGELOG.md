@@ -22,6 +22,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.4 to 0.7.5
     * avm-interface bumped from 0.30.0 to 0.31.0
 
+## [0.35.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.34.2...avm-server-v0.35.0) (2024-01-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768))
+
+### Features
+
+* **deps:** update to marine runtime with memory limits and wasmtime  ([#768](https://github.com/fluencelabs/aquavm/issues/768)) ([3375c7a](https://github.com/fluencelabs/aquavm/commit/3375c7a3b6b029ab5859ff00c1554abc8597542b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.1 to 0.17.2
+    * avm-data-store bumped from 0.7.6 to 0.7.7
+    * avm-interface bumped from 0.31.1 to 0.31.2
+
 ## [0.34.2](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.34.1...avm-server-v0.34.2) (2024-01-11)
 
 

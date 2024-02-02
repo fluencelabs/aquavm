@@ -49,7 +49,7 @@ impl StatsReport {
         Ok(())
     }
 
-    pub(crate) fn consider(&mut self, rec: LogRecord) -> anyhow::Result<()> {
+    pub(crate) fn consider(&mut self, rec: LogRecord) -> eyre::Result<()> {
         if let Message::Close(close) = &rec.value.fields {
             let time_busy = parse_tracing_duration(&close.time_busy)?;
             *self.data.entry(rec.get_key()).or_default() += time_busy;

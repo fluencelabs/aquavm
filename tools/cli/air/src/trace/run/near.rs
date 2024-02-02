@@ -18,8 +18,8 @@ use super::runner::AirRunner;
 
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
-use anyhow::Context;
 use avm_interface::raw_outcome::RawAVMOutcome;
+use eyre::Context;
 use fluence_keypair::KeyPair;
 
 use std::path::{Path, PathBuf};
@@ -43,7 +43,7 @@ impl AirRunner for NearRunner {
         _tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<RawAVMOutcome> {
+    ) -> eyre::Result<RawAVMOutcome> {
         let key_format = keypair.key_format().into();
         let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
 
@@ -70,7 +70,7 @@ impl AirRunner for NearRunner {
 
 pub(crate) fn create_near_runner(
     air_contract_wasm_path: &Path,
-) -> anyhow::Result<Box<dyn AirRunner>> {
+) -> eyre::Result<Box<dyn AirRunner>> {
     let air_contract_wasm_path = air_contract_wasm_path.to_owned();
 
     Ok(Box::new(NearRunner {
@@ -85,7 +85,7 @@ fn execute_on_near(
     current_data: Vec<u8>,
     run_parameters: RunParameters,
     call_results: avm_interface::CallResults,
-) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
+) -> eyre::Result<avm_interface::raw_outcome::RawAVMOutcome> {
     use avm_interface::into_raw_result;
 
     let run_parameters = serde_json::to_string(&run_parameters)?;
