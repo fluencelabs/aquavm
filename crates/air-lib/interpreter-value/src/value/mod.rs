@@ -790,34 +790,6 @@ impl JValue {
 }
 
 /// The default value is `Value::Null`.
-///
-/// This is useful for handling omitted `Value` fields when deserializing.
-///
-/// # Examples
-///
-/// ```
-/// # use serde::Deserialize;
-/// use serde_json::Value;
-///
-/// #[derive(Deserialize)]
-/// struct Settings {
-///     level: i32,
-///     #[serde(default)]
-///     extras: Value,
-/// }
-///
-/// # fn try_main() -> Result<(), serde_json::Error> {
-/// let data = r#" { "level": 42 } "#;
-/// let s: Settings = serde_json::from_str(data)?;
-///
-/// assert_eq!(s.level, 42);
-/// assert_eq!(s.extras, Value::Null);
-/// #
-/// #     Ok(())
-/// # }
-/// #
-/// # try_main().unwrap()
-/// ```
 impl Default for JValue {
     #[inline]
     fn default() -> JValue {
