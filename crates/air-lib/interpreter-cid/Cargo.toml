@@ -20,9 +20,12 @@ thiserror = "1.0.49"
 # beware: `digest` version should match one of the used in particular hash crates
 digest = "0.10.7"
 sha2 = "0.10.7"
-blake3 = { version = "1.5.0", features = ["traits-preview"] }
+fluence-blake3 = { version = "1.5.0", features = ["traits-preview"] }
 multihash-codetable = { version = "0.1.1", features = ["blake3", "sha2", "digest"] }
 rkyv = { version = "0.7.43", features = ["validation", "strict"], optional = true }
 
 [dev-dependencies]
 multihash-codetable = { version = "0.1.1", features = ["ripemd"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+fluence-blake3 = { version = "1.5.0", features = ["traits-preview", "wasm32_simd"] }
