@@ -30,6 +30,7 @@ mod verify;
 
 pub use crate::verify::{verify_raw_value, verify_value, CidVerificationError};
 
+use fluence_blake3 as blake3;
 use serde::Deserialize;
 use serde::Serialize;
 use thiserror::Error as ThisError;
