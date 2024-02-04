@@ -39,7 +39,7 @@ pub(crate) fn apply_to_arg(
         InitPeerId => apply_const(exec_ctx.run_parameters.init_peer_id.as_ref(), exec_ctx, trace_ctx),
         Error(instruction_error) => apply_error(instruction_error, exec_ctx, trace_ctx),
         LastError(error_accessor) => apply_last_error(error_accessor, exec_ctx, trace_ctx),
-        Literal(value) => apply_const(*value, exec_ctx, trace_ctx),
+        Literal(value) => apply_const(value.clone(), exec_ctx, trace_ctx),
         Timestamp => apply_const(exec_ctx.run_parameters.timestamp, exec_ctx, trace_ctx),
         TTL => apply_const(exec_ctx.run_parameters.ttl, exec_ctx, trace_ctx),
         Number(value) => apply_const(value, exec_ctx, trace_ctx),

@@ -90,6 +90,22 @@ impl From<String> for JValue {
     }
 }
 
+impl From<JsonString> for JValue {
+    /// Convert `String` to `Value::String`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use serde_json::Value;
+    ///
+    /// let s: String = "lorem".to_string();
+    /// let x: Value = s.into();
+    /// ```
+    fn from(f: JsonString) -> Self {
+        JValue::String(f)
+    }
+}
+
 impl From<&str> for JValue {
     /// Convert string slice to `Value::String`.
     ///

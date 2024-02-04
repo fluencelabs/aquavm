@@ -77,7 +77,7 @@ fn resolve_key_if_needed<'ctx>(
     map_name: &str,
 ) -> Result<StreamMapKey, ExecutionError> {
     match key {
-        &StreamMapKeyClause::Literal(s) => Ok(s.into()),
+        StreamMapKeyClause::Literal(s) => Ok(s.clone().into()),
         StreamMapKeyClause::Int(i) => Ok(i.to_owned().into()),
         StreamMapKeyClause::Scalar(s) => resolve(s, exec_ctx, map_name),
         StreamMapKeyClause::ScalarWithLambda(s) => resolve(s, exec_ctx, map_name),
