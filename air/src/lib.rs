@@ -62,7 +62,6 @@ pub use polyplets::SecurityTetraplet;
 pub use preparation_step::interpreter_version;
 pub use preparation_step::min_supported_version;
 pub use preparation_step::PreparationError;
-
 pub use utils::ToErrorCode;
 
 pub use crate::human_readable_data::to_human_readable_data;
