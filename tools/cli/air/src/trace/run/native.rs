@@ -16,10 +16,10 @@
 
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
+use super::runner::TestInitParameters;
 
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
-use air_test_utils::test_runner::TestInitParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use fluence_keypair::KeyPair;
 

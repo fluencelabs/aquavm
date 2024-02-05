@@ -24,7 +24,7 @@ pub(crate) fn check_against_size_limits(
     air: &str,
     raw_current_data: &[u8],
 ) -> PreparationResult<()> {
-    if air.len() > run_parameters.air_size_limit {
+    if air.len() as u64 > run_parameters.air_size_limit {
         return Err(PreparationError::air_size_limit(
             air.len(),
             run_parameters.air_size_limit,

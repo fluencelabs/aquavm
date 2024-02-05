@@ -16,8 +16,8 @@
 
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
+use crate::trace::run::runner::TestInitParameters;
 use air_test_utils::avm_runner::AVMRunner;
-use air_test_utils::test_runner::TestInitParameters;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;

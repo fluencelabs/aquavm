@@ -65,6 +65,7 @@ pub struct RunParameters {
 }
 
 impl RunParameters {
+    #![allow(clippy::too_many_arguments)]
     pub fn new(
         init_peer_id: String,
         current_peer_id: String,

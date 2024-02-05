@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use air_test_utils::test_runner::TestInitParameters;
 use clap::Parser;
 use eyre::Context;
 use std::path::Path;
@@ -22,6 +21,7 @@ use std::path::PathBuf;
 
 use crate::trace::run::load_data;
 use crate::trace::run::runner::DataToHumanReadable;
+use crate::trace::run::runner::TestInitParameters;
 
 #[derive(clap::Args, Debug, Copy, Clone)]
 #[group(multiple = false)]

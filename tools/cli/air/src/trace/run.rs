@@ -26,7 +26,7 @@ pub(crate) mod wasm;
 pub(crate) mod runner;
 
 use self::runner::AirRunner;
-use air_test_utils::test_runner::TestInitParameters;
+use crate::trace::run::runner::TestInitParameters;
 use avm_interface::CallResults;
 
 use clap::Parser;
