@@ -19,6 +19,7 @@
  * licensed under conditions of MIT License and Apache License, Version 2.0.
  */
 
+#[cfg(not(feature = "preserve_order"))]
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
@@ -37,7 +38,11 @@ mod value;
 
 pub use value::JValue;
 
+#[cfg(not(feature = "preserve_order"))]
 pub type Map<K, V> = BTreeMap<K, V>;
+
+#[cfg(feature = "preserve_order")]
+pub type Map<K, V> = indexmap::IndexMap<K, V>;
 
 // it is memory- and CPU-wise more effective than a string
 pub type JsonString = Rc<str>;

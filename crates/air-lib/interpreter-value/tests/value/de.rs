@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use air_interpreter_value::JValue;
+use air_interpreter_value::{JValue, Map};
 use serde_json::Number;
 
 #[test]
@@ -82,12 +82,14 @@ fn test_deserialize_array() {
 
 #[test]
 fn test_deserialize_object() {
-    let inp = r#"{"a":18,"b":42}"#;
+    let inp = r#"{"b":18,"a":42}"#;
     let val: JValue = serde_json::from_str(inp).unwrap();
-    let expected = JValue::object(maplit::btreemap! {
-        "b".into() => 42.into(),
-        "a".into() => 18.into(),
-    });
+
+    let mut map = Map::new();
+    map.insert("b".into(), 18.into());
+    map.insert("a".into(), 42.into());
+
+    let expected = JValue::object(map);
     assert_eq!(val, expected);
 }
 

@@ -81,6 +81,7 @@ fn test_serialize_array() {
 }
 
 #[test]
+#[cfg(not(feature = "preserve_order"))]
 fn test_serialize_object() {
     let val = JValue::object(maplit::btreemap! {
         "b".into() => 42.into(),
@@ -91,8 +92,31 @@ fn test_serialize_object() {
 }
 
 #[test]
+#[cfg(feature = "preserve_order")]
+fn test_serialize_object() {
+    use air_interpreter_value::Map;
+
+    let mut map = Map::new();
+    map.insert("b".into(), 18.into());
+    map.insert("a".into(), 42.into());
+
+    let val = JValue::object(map);
+    let res = serde_json::to_string(&val).unwrap();
+    assert_eq!(res, r#"{"b":18,"a":42}"#);
+}
+
+#[test]
+#[cfg(not(feature = "preserve_order"))]
 fn test_serialize_object_ordered() {
     let val = JValue::object_from_pairs(vec![("b", 42), ("a", 18)]);
     let res = serde_json::to_string(&val).unwrap();
     assert_eq!(res, r#"{"a":18,"b":42}"#);
+}
+
+#[test]
+#[cfg(feature = "preserve_order")]
+fn test_serialize_object_ordered() {
+    let val = JValue::object_from_pairs(vec![("b", 42), ("a", 18)]);
+    let res = serde_json::to_string(&val).unwrap();
+    assert_eq!(res, r#"{"b":42,"a":18}"#);
 }
