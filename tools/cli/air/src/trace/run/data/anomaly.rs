@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::trace::run::runner::TestInitParameters;
+
 use super::super::load_data;
 use super::ExecutionData;
 use avm_data_store::AnomalyData;
@@ -39,11 +41,13 @@ pub(crate) fn load(args: &AnomalyDataArgs) -> eyre::Result<super::ExecutionData<
     let current_data = anomaly_data.current_data.to_vec();
     let particle: ParticleParameters<'static> = serde_json::from_slice(&anomaly_data.particle)
         .context("Anomaly particle is not a valid JSON")?;
+    let test_init_parameters = TestInitParameters::no_limits();
 
     Ok(ExecutionData {
         air_script,
         prev_data,
         current_data,
         particle,
+        test_init_parameters,
     })
 }

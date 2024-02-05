@@ -16,6 +16,8 @@
 
 use super::super::super::utils::unix_timestamp_now;
 use super::ExecutionData;
+use crate::trace::run::runner::TestInitParameters;
+
 use avm_interface::ParticleParameters;
 
 use eyre::Context;
@@ -44,6 +46,15 @@ pub(crate) struct PlainDataArgs {
 
     #[clap(long = "particle-id")]
     particle_id: Option<String>,
+
+    #[clap(long = "air-size-limit")]
+    air_size_limit: Option<u64>,
+
+    #[clap(long = "particle-size-limit")]
+    particle_size_limit: Option<u64>,
+
+    #[clap(long = "call-result-size-limit")]
+    call_result_size_limit: Option<u64>,
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> eyre::Result<ExecutionData<'_>> {
@@ -69,11 +80,18 @@ pub(crate) fn load(args: &PlainDataArgs) -> eyre::Result<ExecutionData<'_>> {
         current_peer_id.into(),
     );
 
+    let test_init_parameters = TestInitParameters {
+        air_size_limit: args.air_size_limit,
+        particle_size_limit: args.particle_size_limit,
+        call_result_size_limit: args.call_result_size_limit,
+    };
+
     Ok(ExecutionData {
         air_script,
         prev_data,
         current_data,
         particle,
+        test_init_parameters,
     })
 }
 

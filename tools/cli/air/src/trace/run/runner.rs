@@ -62,4 +62,12 @@ impl TestInitParameters {
         let call_result_size_limit = self.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
         (air_size_limit, particle_size_limit, call_result_size_limit)
     }
+
+    pub fn no_limits() -> Self {
+        Self {
+            air_size_limit: Some(u64::MAX),
+            particle_size_limit: Some(u64::MAX),
+            call_result_size_limit: Some(u64::MAX),
+        }
+    }
 }

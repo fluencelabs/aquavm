@@ -48,15 +48,6 @@ pub(crate) struct Args {
     #[clap(long)]
     max_heap_size: Option<u64>,
 
-    #[clap(long, default_value = "92233720368")]
-    air_size_limit: Option<u64>,
-
-    #[clap(long, default_value = "92233720368")]
-    particle_size_limit: Option<u64>,
-
-    #[clap(long, default_value = "92233720368")]
-    call_result_size_limit: Option<u64>,
-
     #[clap(long, default_value = "info")]
     tracing_params: String,
     #[clap(long, default_value = "warn")]
@@ -192,25 +183,20 @@ pub(crate) fn run(args: Args) -> eyre::Result<()> {
     let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
-    let test_init_parameters = TestInitParameters {
-        air_size_limit: args.air_size_limit,
-        particle_size_limit: args.particle_size_limit,
-        call_result_size_limit: args.call_result_size_limit,
+    let execution_data = match &args.source {
+        Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
+        Source::PlainData(raw) => data::plain::load(raw)?,
     };
+
+    let particle = execution_data.particle;
 
     let mut runner = create_runner(
         args.mode.into(),
         &args.air_interpreter_path,
         &args.air_near_contract_path,
         args.max_heap_size,
-        test_init_parameters,
+        execution_data.test_init_parameters,
     )?;
-
-    let execution_data = match &args.source {
-        Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
-        Source::PlainData(raw) => data::plain::load(raw)?,
-    };
-    let particle = execution_data.particle;
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
