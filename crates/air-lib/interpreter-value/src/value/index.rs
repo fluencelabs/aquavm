@@ -24,35 +24,19 @@ use core::fmt::{self, Display};
 use core::ops;
 use std::string::String;
 
-/// A type that can be used to index into a `serde_json::Value`.
+/// A type that can be used to index into a `air_interpreter_value::JValue`.
 ///
-/// The [`get`] and [`get_mut`] methods of `Value` accept any type that
+/// The [`get`] and [`get_mut`] methods of `JValue` accept any type that
 /// implements `Index`, as does the [square-bracket indexing operator]. This
 /// trait is implemented for strings which are used as the index into a JSON
 /// map, and for `usize` which is used as the index into a JSON array.
 ///
-/// [`get`]: ../enum.Value.html#method.get
-/// [`get_mut`]: ../enum.Value.html#method.get_mut
-/// [square-bracket indexing operator]: ../enum.Value.html#impl-Index%3CI%3E
+/// [`get`]: ../enum.JValue.html#method.get
+/// [`get_mut`]: ../enum.JValue.html#method.get_mut
+/// [square-bracket indexing operator]: ../enum.JValue.html#impl-Index%3CI%3E
 ///
 /// This trait is sealed and cannot be implemented for types outside of
-/// `serde_json`.
-///
-/// # Examples
-///
-/// ```
-/// # use serde_json::json;
-/// #
-/// let data = json!({ "inner": [1, 2, 3] });
-///
-/// // Data is a JSON map so it can be indexed with a string.
-/// let inner = &data["inner"];
-///
-/// // Inner is a JSON array so it can be indexed with an integer.
-/// let first = &inner[0];
-///
-/// assert_eq!(first, 1);
-/// ```
+/// `air_interpreter_value`.
 pub trait Index: private::Sealed {
     /// Return None if the key is not already in the array or object.
     #[doc(hidden)]
@@ -120,21 +104,21 @@ impl<'a> Display for Type<'a> {
 // The usual semantics of Index is to panic on invalid indexing.
 //
 // That said, the usual semantics are for things like Vec and BTreeMap which
-// have different use cases than Value. If you are working with a Vec, you know
+// have different use cases than JValue. If you are working with a Vec, you know
 // that you are working with a Vec and you can get the len of the Vec and make
-// sure your indices are within bounds. The Value use cases are more
+// sure your indices are within bounds. The JValue use cases are more
 // loosey-goosey. You got some JSON from an endpoint and you want to pull values
 // out of it. Outside of this Index impl, you already have the option of using
 // value.as_array() and working with the Vec directly, or matching on
-// Value::Array and getting the Vec directly. The Index impl means you can skip
+// JValue::Array and getting the Vec directly. The Index impl means you can skip
 // that and index directly into the thing using a concise syntax. You don't have
 // to check the type, you don't have to check the len, it is all about what you
-// expect the Value to look like.
+// expect the JValue to look like.
 //
 // Basically the use cases that would be well served by panicking here are
 // better served by using one of the other approaches: get and get_mut,
 // as_array, or match. The value of this impl is that it adds a way of working
-// with Value that is not well served by the existing approaches: concise and
+// with JValue that is not well served by the existing approaches: concise and
 // careless and sometimes that is exactly what you want.
 impl<I> ops::Index<I> for JValue
 where
@@ -142,34 +126,16 @@ where
 {
     type Output = JValue;
 
-    /// Index into a `serde_json::Value` using the syntax `value[0]` or
+    /// Index into a `air_interpreter_value::JValue` using the syntax `value[0]` or
     /// `value["k"]`.
     ///
-    /// Returns `Value::Null` if the type of `self` does not match the type of
+    /// Returns `JValue::Null` if the type of `self` does not match the type of
     /// the index, for example if the index is a string and `self` is an array
-    /// or a number. Also returns `Value::Null` if the given key does not exist
+    /// or a number. Also returns `JValue::Null` if the given key does not exist
     /// in the map or the given index is not within the bounds of the array.
     ///
     /// For retrieving deeply nested values, you should have a look at the
-    /// `Value::pointer` method.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use serde_json::json;
-    /// #
-    /// let data = json!({
-    ///     "x": {
-    ///         "y": ["z", "zz"]
-    ///     }
-    /// });
-    ///
-    /// assert_eq!(data["x"]["y"], json!(["z", "zz"]));
-    /// assert_eq!(data["x"]["y"][0], json!("z"));
-    ///
-    /// assert_eq!(data["a"], json!(null)); // returns null for undefined values
-    /// assert_eq!(data["a"]["b"], json!(null)); // does not panic
-    /// ```
+    /// `JValue::pointer` method.
     fn index(&self, index: I) -> &JValue {
         const NULL: JValue = JValue::Null;
         index.index_into(self).unwrap_or(&NULL)
