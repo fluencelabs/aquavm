@@ -43,7 +43,7 @@ fn parse_seq() {
             ResolvableToStringVariable::Literal("service_id"),
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![
-                ImmutableValue::Literal("hello"),
+                ImmutableValue::Literal("hello".into()),
                 ImmutableValue::EmptyArray,
                 ImmutableValue::Variable(ImmutableVariable::scalar("name", 154.into())),
             ]),
@@ -87,7 +87,7 @@ fn parse_seq_seq() {
             ResolvableToStringVariable::Literal("service_id"),
             ResolvableToStringVariable::Literal("function_name"),
             Rc::new(vec![
-                ImmutableValue::Literal("hello"),
+                ImmutableValue::Literal("hello".into()),
                 ImmutableValue::Variable(ImmutableVariable::scalar("name", 236.into())),
             ]),
             CallOutputValue::Stream(Stream::new("$output", 242.into())),

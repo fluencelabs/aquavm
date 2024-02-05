@@ -29,22 +29,20 @@
 //! ```
 //! use serde_json::json;
 //!
-//! fn main() {
-//!     // The type of `john` is `serde_json::Value`
-//!     let john = json!({
-//!         "name": "John Doe",
-//!         "age": 43,
-//!         "phones": [
-//!             "+44 1234567",
-//!             "+44 2345678"
-//!         ]
-//!     });
+//! // The type of `john` is `serde_json::Value`
+//! let john = json!({
+//!     "name": "John Doe",
+//!     "age": 43,
+//!     "phones": [
+//!         "+44 1234567",
+//!         "+44 2345678"
+//!     ]
+//! });
 //!
-//!     println!("first phone number: {}", john["phones"][0]);
+//! println!("first phone number: {}", john["phones"][0]);
 //!
-//!     // Convert to a string of JSON and print it out
-//!     println!("{}", john.to_string());
-//! }
+//! // Convert to a string of JSON and print it out
+//! println!("{}", john.to_string());
 //! ```
 //!
 //! The `Value::to_string()` function converts a `serde_json::Value` into a
