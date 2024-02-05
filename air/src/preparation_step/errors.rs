@@ -92,11 +92,11 @@ pub enum PreparationError {
     DataSignatureCheckError(#[from] DataVerifierError),
 
     /// AIR script size is bigger than the allowed limit.
-    #[error("air size: {0} bytes is bigger than a limit allowed: {1} bytes")]
+    #[error("air size: {0} bytes is bigger than the limit allowed: {1} bytes")]
     AIRSizeLimitReached(usize, u64),
 
     /// Current_data particle size is bigger than the allowed limit.
-    #[error("Current_data particle size: {0} bytes is bigger than a limit allowed: {1} bytes")]
+    #[error("Current_data particle size: {0} bytes is bigger than the limit allowed: {1} bytes")]
     ParticleSizeLimitReached(usize, u64),
 
     /// CallResult size is bigger than the allowed limit.

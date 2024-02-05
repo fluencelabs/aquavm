@@ -148,8 +148,7 @@ pub struct Network<R = DefaultAirRunner> {
 //   extencive test code changes
 impl Network<DefaultAirRunner> {
     pub fn empty() -> Rc<Self> {
-        let test_init_parameters = TestInitParameters::default();
-        Self::new(std::iter::empty::<PeerId>(), vec![], test_init_parameters)
+        Self::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
     }
 }
 

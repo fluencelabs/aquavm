@@ -146,7 +146,6 @@ impl AirRunner for ReleaseWasmAirRunner {
         keypair: &KeyPair,
         particle_id: String,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        println!("running release wasm runner#####");
         let current_peer_id =
             override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
