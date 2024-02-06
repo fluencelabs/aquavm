@@ -92,7 +92,7 @@ fn select_by_path_from_stream<'value>(
         .ok_or(LambdaError::CanonStreamNotHaveEnoughValues { stream_size, idx }))?;
 
     let result = select_by_path_from_scalar(value, body.iter(), exec_ctx)?;
-    let select_result = LambdaResult::from_cow(result, idx);
+    let select_result = LambdaResult::new(result, idx);
     Ok(select_result)
 }
 
@@ -111,7 +111,7 @@ fn select_by_path_from_canon_map_stream<'value>(
 
     let select_result = if body.is_empty() {
         // csm.$.key.[0] case
-        MapLensResult::from_cow(value, tetraplet)
+        MapLensResult::new(value, tetraplet)
     } else {
         // csm.$.key.[0].attribute case
         let result = select_by_path_from_scalar(&value, body.iter(), exec_ctx)?;
@@ -121,7 +121,7 @@ fn select_by_path_from_canon_map_stream<'value>(
         let prefix_with_path = true;
         let updated_tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
 
-        MapLensResult::from_cow(result, updated_tetraplet)
+        MapLensResult::new(result, updated_tetraplet)
     };
     Ok(select_result)
 }
@@ -165,7 +165,7 @@ fn select_by_path_from_canon_map(
             let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
             let value = canon_stream.as_jvalue();
 
-            MapLensResult::from_cow(value, tetraplet)
+            MapLensResult::new(value, tetraplet)
         }
         _ => {
             // csm.$.non_existing_key case
@@ -173,7 +173,7 @@ fn select_by_path_from_canon_map(
             let tetraplet = update_tetraplet_with_path(canon_map.tetraplet(), original_lambda, prefix_with_path);
             let value = CanonStream::new(vec![], tetraplet.clone()).as_jvalue();
 
-            MapLensResult::from_cow(value, tetraplet)
+            MapLensResult::new(value, tetraplet)
         }
     };
     Ok(result)
@@ -239,7 +239,7 @@ fn select_by_functor_from_canon_map(
     match functor {
         Functor::Length => {
             let result = (canon_map.len()).into();
-            MapLensResult::from_value(result, exec_ctx, functor)
+            MapLensResult::with_functor(result, exec_ctx, functor)
         }
     }
 }
@@ -283,8 +283,7 @@ fn select_by_functor_from_scalar(value: &JValue, functor: &Functor) -> Execution
 }
 
 impl LambdaResult {
-    // TODO rename
-    fn from_cow(result: JValue, tetraplet_idx: usize) -> Self {
+    fn new(result: JValue, tetraplet_idx: usize) -> Self {
         Self {
             result,
             tetraplet_idx: Some(tetraplet_idx),
@@ -300,13 +299,11 @@ impl LambdaResult {
 }
 
 impl MapLensResult {
-    // TODO rename
-    fn from_cow(result: JValue, tetraplet: RcSecurityTetraplet) -> Self {
+    fn new(result: JValue, tetraplet: RcSecurityTetraplet) -> Self {
         Self { result, tetraplet }
     }
 
-    // TODO rename
-    fn from_value(result: JValue, exec_ctx: &ExecutionCtx<'_>, functor: &Functor) -> Self {
+    fn with_functor(result: JValue, exec_ctx: &ExecutionCtx<'_>, functor: &Functor) -> Self {
         let tetraplet = Rc::new(SecurityTetraplet::new(
             exec_ctx.run_parameters.current_peer_id.to_string(),
             "",
