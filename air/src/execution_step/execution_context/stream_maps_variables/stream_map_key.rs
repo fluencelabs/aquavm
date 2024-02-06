@@ -36,8 +36,7 @@ impl StreamMapKey {
     pub fn from_value(value: JValue) -> Option<Self> {
         match value {
             JValue::String(s) => Some(StreamMapKey::Str(s)),
-            JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
-            JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
+            JValue::Number(n) => Some(StreamMapKey::I64(n)),
             _ => None,
         }
     }
@@ -45,8 +44,7 @@ impl StreamMapKey {
     pub fn from_value_ref(value: &JValue) -> Option<Self> {
         match value {
             JValue::String(s) => Some(StreamMapKey::Str(s.clone())),
-            JValue::Number(n) if n.is_i64() => Some(StreamMapKey::I64(n.as_i64().unwrap())),
-            JValue::Number(n) if n.is_u64() => Some(StreamMapKey::U64(n.as_u64().unwrap())),
+            JValue::Number(n) => Some(StreamMapKey::I64(*n)),
             _ => None,
         }
     }

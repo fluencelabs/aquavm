@@ -19,40 +19,22 @@ use crate::JValue;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::cell::RefCell;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(transparent)]
 #[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
 #[archive(check_bytes)]
 pub struct RawValue {
-    raw: Box<str>,
-
-    #[serde(skip)]
-    #[with(::rkyv::with::Skip)]
-    parsed: RefCell<Option<JValue>>,
+    value: JValue,
 }
 
 impl RawValue {
     pub fn from_value(value: impl Into<JValue>) -> Self {
         let value = value.into();
-        let raw = value.to_string().into();
-        Self {
-            raw,
-            parsed: Some(value).into(),
-        }
+        Self { value }
     }
 
     pub fn get_value(&self) -> JValue {
-        let mut parsed_guard = self.parsed.borrow_mut();
-
-        let parsed_value = parsed_guard
-            .get_or_insert_with(|| serde_json::from_str(&self.raw).expect("TODO handle error"));
-        parsed_value.clone()
-    }
-
-    pub(crate) fn as_inner(&self) -> &str {
-        &self.raw
+        self.value.clone()
     }
 }
 
@@ -61,12 +43,3 @@ impl From<JValue> for RawValue {
         Self::from_value(value)
     }
 }
-
-impl PartialEq for RawValue {
-    fn eq(&self, other: &Self) -> bool {
-        self.get_value() == other.get_value()
-    }
-}
-
-// TODO is it implemented for JValue?
-impl Eq for RawValue {}

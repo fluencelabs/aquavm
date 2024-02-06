@@ -107,9 +107,7 @@ fn ensure_error_code_correct(
     field_name: &'static str,
 ) -> Result<(), ErrorObjectError> {
     match value {
-        JValue::Number(number) if number.is_i64() | number.is_u64() => {
-            ensure_error_code_is_error(number.as_i64().unwrap())
-        }
+        JValue::Number(number) => ensure_error_code_is_error(*number),
         _ => Err(ErrorObjectError::ScalarFieldIsWrongType {
             scalar: scalar.clone(),
             field_name,

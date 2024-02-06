@@ -33,7 +33,6 @@ use serde::Serialize;
     Serialize,
     Deserialize,
     PartialEq,
-    Eq,
     ::rkyv::Archive,
     ::rkyv::Serialize,
     ::rkyv::Deserialize,
