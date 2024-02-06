@@ -41,7 +41,15 @@ pub use serde::ser::Serializer;
 pub use serde_json::Number;
 
 /// Represents any valid JSON value with a cheap to clone Rc-based representation.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+#[archive(check_bytes)]
+#[archive_attr(check_bytes(
+    bound = "__C: rkyv::validation::ArchiveContext + rkyv::validation::SharedContext, <__C as rkyv::Fallible>::Error: std::error::Error"
+))]
+#[archive(bound(
+    serialize = "__S: rkyv::ser::ScratchSpace + rkyv::ser::Serializer + rkyv::ser::SharedSerializeRegistry",
+    deserialize = "__D: rkyv::de::SharedDeserializeRegistry"
+))]
 pub enum JValue {
     /// Represents a JSON null value.
     Null,
@@ -50,13 +58,17 @@ pub enum JValue {
     Bool(bool),
 
     /// Represents a JSON number, whether integer or floating point.
-    Number(Number),
+    Number(i64),
 
     /// Represents a JSON string.
     String(JsonString),
 
     /// Represents a JSON array.
-    Array(Rc<[JValue]>),
+    Array(
+        #[omit_bounds]
+        #[archive_attr(omit_bounds)]
+        Rc<[JValue]>,
+    ),
 
     /// Represents a JSON object.
     ///
@@ -65,7 +77,11 @@ pub enum JValue {
     /// entries in the order they are inserted into the map. In particular, this
     /// allows JSON data to be deserialized into a JValue and serialized to a
     /// string while retaining the order of map keys in the input.
-    Object(Rc<Map<JsonString, JValue>>),
+    Object(
+        #[omit_bounds]
+        #[archive_attr(omit_bounds)]
+        Rc<Map<JsonString, JValue>>,
+    ),
 }
 
 impl Debug for JValue {
@@ -247,7 +263,7 @@ impl JValue {
     /// If the `JValue` is a Number, returns the associated [`Number`]. Returns
     /// None otherwise.
     #[inline]
-    pub fn as_number(&self) -> Option<&Number> {
+    pub fn as_number(&self) -> Option<&i64> {
         match self {
             JValue::Number(number) => Some(number),
             _ => None,
@@ -261,10 +277,7 @@ impl JValue {
     /// return the integer value.
     #[inline]
     pub fn is_i64(&self) -> bool {
-        match self {
-            JValue::Number(n) => n.is_i64(),
-            _ => false,
-        }
+        matches!(self, JValue::Number(_))
     }
 
     /// Returns true if the `JValue` is an integer between zero and `u64::MAX`.
@@ -273,10 +286,7 @@ impl JValue {
     /// return the integer value.
     #[inline]
     pub fn is_u64(&self) -> bool {
-        match self {
-            JValue::Number(n) => n.is_u64(),
-            _ => false,
-        }
+        false
     }
 
     /// Returns true if the `JValue` is a number that can be represented by f64.
@@ -288,10 +298,7 @@ impl JValue {
     /// `is_u64` return false but this is not a guarantee in the future.
     #[inline]
     pub fn is_f64(&self) -> bool {
-        match self {
-            JValue::Number(n) => n.is_f64(),
-            _ => false,
-        }
+        false
     }
 
     /// If the `JValue` is an integer, represent it as i64 if possible. Returns
@@ -299,7 +306,7 @@ impl JValue {
     #[inline]
     pub fn as_i64(&self) -> Option<i64> {
         match self {
-            JValue::Number(n) => n.as_i64(),
+            JValue::Number(n) => Some(*n),
             _ => None,
         }
     }
@@ -308,20 +315,14 @@ impl JValue {
     /// None otherwise.
     #[inline]
     pub fn as_u64(&self) -> Option<u64> {
-        match self {
-            JValue::Number(n) => n.as_u64(),
-            _ => None,
-        }
+        None
     }
 
     /// If the `JValue` is a number, represent it as f64 if possible. Returns
     /// None otherwise.
     #[inline]
     pub fn as_f64(&self) -> Option<f64> {
-        match self {
-            JValue::Number(n) => n.as_f64(),
-            _ => None,
-        }
+        None
     }
 
     /// Returns true if the `JValue` is a Boolean. Returns false otherwise.

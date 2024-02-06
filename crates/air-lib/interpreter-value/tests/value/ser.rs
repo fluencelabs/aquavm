@@ -15,7 +15,7 @@
  */
 
 use air_interpreter_value::JValue;
-use serde_json::Number;
+// use serde_json::Number;
 
 #[test]
 fn test_serialize_null() {
@@ -52,12 +52,12 @@ fn test_serialize_i64_2() {
     assert_eq!(res, "-42");
 }
 
-#[test]
-fn test_serialize_f64() {
-    let val = JValue::Number(Number::from_f64(-3.14e15).unwrap());
-    let res = serde_json::to_string(&val).unwrap();
-    assert_eq!(res, "-3140000000000000.0");
-}
+// #[test]
+// fn test_serialize_f64() {
+//     let val = JValue::Number(Number::from_f64(-3.14e15).unwrap());
+//     let res = serde_json::to_string(&val).unwrap();
+//     assert_eq!(res, "-3140000000000000.0");
+// }
 
 #[test]
 fn test_serialize_string_simple() {

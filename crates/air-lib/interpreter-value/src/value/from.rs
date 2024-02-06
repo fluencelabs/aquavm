@@ -21,7 +21,6 @@
 
 use super::JValue;
 use crate::{JsonString, Map};
-use serde_json::Number;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -33,7 +32,7 @@ macro_rules! from_integer {
         $(
             impl From<$ty> for JValue {
                 fn from(n: $ty) -> Self {
-                    JValue::Number(n.into())
+                    JValue::Number(n as _)
                 }
             }
         )*
@@ -58,7 +57,7 @@ impl From<f32> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f32) -> Self {
-        Number::from_f64(f as _).map_or(JValue::Null, JValue::Number)
+        JValue::Number(f as _)
     }
 }
 
@@ -75,7 +74,7 @@ impl From<f64> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f64) -> Self {
-        Number::from_f64(f).map_or(JValue::Null, JValue::Number)
+        JValue::Number(f as _)
     }
 }
 
@@ -165,23 +164,6 @@ impl<'a> From<Cow<'a, str>> for JValue {
     /// ```
     fn from(f: Cow<'a, str>) -> Self {
         JValue::String(f.into())
-    }
-}
-
-impl From<Number> for JValue {
-    /// Convert `serde_json::Number` to `JValue::Number`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use serde_json::Number;
-    /// use air_interpreter_value::JValue;
-    ///
-    /// let n = Number::from(7);
-    /// let x: JValue = n.into();
-    /// ```
-    fn from(f: Number) -> Self {
-        JValue::Number(f)
     }
 }
 
@@ -338,7 +320,7 @@ impl From<&serde_json::Value> for JValue {
         match value {
             Value::Null => JValue::Null,
             Value::Bool(b) => JValue::Bool(*b),
-            Value::Number(n) => JValue::Number(n.clone()),
+            Value::Number(n) => JValue::Number(n.as_i64().expect("currently only i64 is supported")),
             Value::String(s) => JValue::String(s.as_str().into()),
             Value::Array(a) => JValue::Array(a.iter().map(Into::into).collect()),
             Value::Object(o) => {

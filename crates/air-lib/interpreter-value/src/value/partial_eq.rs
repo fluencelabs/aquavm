@@ -33,7 +33,7 @@ fn eq_u64(value: &JValue, other: u64) -> bool {
 fn eq_f32(value: &JValue, other: f32) -> bool {
     match value {
         // NB: is not same as the original version
-        JValue::Number(n) => n.as_f64().map_or(false, |i| i == other as f64),
+        JValue::Number(n) => (*n as f32) == other,
         _ => false,
     }
 }

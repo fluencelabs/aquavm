@@ -23,7 +23,6 @@ use crate::value::JValue;
 use crate::{JsonString, Map};
 use core::fmt;
 use serde::de::{self, Deserialize, DeserializeSeed, MapAccess, SeqAccess, Visitor};
-use serde_json::Number;
 use std::vec::Vec;
 
 impl<'de> Deserialize<'de> for JValue {
@@ -53,12 +52,12 @@ impl<'de> Deserialize<'de> for JValue {
 
             #[inline]
             fn visit_u64<E>(self, value: u64) -> Result<JValue, E> {
-                Ok(JValue::Number(value.into()))
+                Ok(JValue::Number(value as _))
             }
 
             #[inline]
             fn visit_f64<E>(self, value: f64) -> Result<JValue, E> {
-                Ok(Number::from_f64(value).map_or(JValue::Null, JValue::Number))
+                Ok(JValue::Number(value as _))
             }
 
             fn visit_str<E>(self, value: &str) -> Result<JValue, E>
