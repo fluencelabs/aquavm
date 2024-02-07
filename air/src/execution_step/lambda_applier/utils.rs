@@ -124,8 +124,11 @@ fn try_jvalue_as_idx(jvalue: &JValue) -> LambdaResult<u32> {
     }
 }
 
-fn try_number_to_u32(accessor: &i64) -> LambdaResult<u32> {
-    (*accessor).try_into().map_err(|_| LambdaError::IndexAccessNotU32 {
-        accessor: accessor.clone().into(),
-    })
+fn try_number_to_u32(accessor: &air_interpreter_value::Number) -> LambdaResult<u32> {
+    accessor
+        .as_u64()
+        .and_then(|v| u32::try_from(v).ok())
+        .ok_or(LambdaError::IndexAccessNotU32 {
+            accessor: accessor.clone().into(),
+        })
 }

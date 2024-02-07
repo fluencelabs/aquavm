@@ -32,7 +32,7 @@ macro_rules! from_integer {
         $(
             impl From<$ty> for JValue {
                 fn from(n: $ty) -> Self {
-                    JValue::Number(n as _)
+                    JValue::Number(n.into())
                 }
             }
         )*
@@ -57,7 +57,7 @@ impl From<f32> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f32) -> Self {
-        JValue::Number(f as _)
+        (f as f64).into()
     }
 }
 
@@ -74,7 +74,8 @@ impl From<f64> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f64) -> Self {
-        JValue::Number(f as _)
+        let f = crate::Number::from_f64(f);
+        f.map_or(JValue::Null, JValue::Number)
     }
 }
 
@@ -320,7 +321,7 @@ impl From<&serde_json::Value> for JValue {
         match value {
             Value::Null => JValue::Null,
             Value::Bool(b) => JValue::Bool(*b),
-            Value::Number(n) => JValue::Number(n.as_i64().expect("currently only i64 is supported")),
+            Value::Number(n) => JValue::Number(n.clone().into()),
             Value::String(s) => JValue::String(s.as_str().into()),
             Value::Array(a) => JValue::Array(a.iter().map(Into::into).collect()),
             Value::Object(o) => {

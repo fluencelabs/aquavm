@@ -35,10 +35,8 @@ use std::io;
 use std::rc::Rc;
 
 pub use self::index::Index;
-use crate::JsonString;
-pub use crate::Map;
-pub use serde::ser::Serializer;
-pub use serde_json::Number;
+use crate::Map;
+use crate::{JsonString, Number};
 
 /// Represents any valid JSON value with a cheap to clone Rc-based representation.
 #[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
@@ -58,7 +56,7 @@ pub enum JValue {
     Bool(bool),
 
     /// Represents a JSON number, whether integer or floating point.
-    Number(i64),
+    Number(Number),
 
     /// Represents a JSON string.
     String(JsonString),
@@ -263,7 +261,7 @@ impl JValue {
     /// If the `JValue` is a Number, returns the associated [`Number`]. Returns
     /// None otherwise.
     #[inline]
-    pub fn as_number(&self) -> Option<&i64> {
+    pub fn as_number(&self) -> Option<&Number> {
         match self {
             JValue::Number(number) => Some(number),
             _ => None,
@@ -306,7 +304,7 @@ impl JValue {
     #[inline]
     pub fn as_i64(&self) -> Option<i64> {
         match self {
-            JValue::Number(n) => Some(*n),
+            JValue::Number(n) => n.as_i64(),
             _ => None,
         }
     }

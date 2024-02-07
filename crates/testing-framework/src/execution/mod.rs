@@ -332,7 +332,8 @@ mod tests {
             assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
 
-            let trace = trace_from_result(outcome2);
+            let data = data_from_result(outcome2);
+            let trace = data.trace;
             assert_eq!(
                 trace,
                 ExecutionTrace::from(vec![
@@ -350,7 +351,9 @@ mod tests {
                         args = vec![json!({"p":peer2_id,"v":2}), json!(1)]
                     ),
                     request_sent_by(peer2_id.clone()),
-                ])
+                ]),
+                "{:#?}",
+                data.cid_info,
             );
         }
 

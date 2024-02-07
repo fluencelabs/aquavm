@@ -1,3 +1,24 @@
+/*
+ * Copyright 2024 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This file is based on serde_json crate by Erick Tryzelaar and David Tolnay
+ * licensed under conditions of MIT License and Apache License, Version 2.0.
+ */
+
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use std::{
@@ -222,11 +243,7 @@ impl Number {
     #[inline]
     pub fn from_f64(f: f64) -> Option<Number> {
         if f.is_finite() {
-            let n = {
-                {
-                    N::Float(f)
-                }
-            };
+            let n = N::Float(f);
             Some(Number { n })
         } else {
             None
@@ -253,16 +270,16 @@ impl From<Number> for serde_json::Number {
 
 impl From<serde_json::Number> for Number {
     fn from(value: serde_json::Number) -> Self {
-        if let Some(f) = value.as_f64() {
-            return Number::from_f64(f).unwrap();
-        }
         if let Some(n) = value.as_u64() {
             return Number { n: N::PosInt(n) };
         }
         if let Some(n) = value.as_i64() {
             return Number { n: N::NegInt(n) };
         }
-        unreachable!()
+        if let Some(f) = value.as_f64() {
+            return Number::from_f64(f).unwrap();
+        }
+        unreachable!("serde_json::Number is either unsigned, signed or float")
     }
 }
 
@@ -296,3 +313,48 @@ impl<'de> Deserialize<'de> for Number {
         Ok(n.into())
     }
 }
+
+macro_rules! impl_from_unsigned {
+    (
+        $($ty:ty),*
+    ) => {
+        $(
+            impl From<$ty> for Number {
+                #[inline]
+                fn from(u: $ty) -> Self {
+                    let n = {
+                        { N::PosInt(u as u64) }
+                    };
+                    Number { n }
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! impl_from_signed {
+    (
+        $($ty:ty),*
+    ) => {
+        $(
+            impl From<$ty> for Number {
+                #[inline]
+                fn from(i: $ty) -> Self {
+                    let n = {
+                        {
+                            if i < 0 {
+                                N::NegInt(i as i64)
+                            } else {
+                                N::PosInt(i as u64)
+                            }
+                        }
+                    };
+                    Number { n }
+                }
+            }
+        )*
+    };
+}
+
+impl_from_unsigned!(u8, u16, u32, u64, usize);
+impl_from_signed!(i8, i16, i32, i64, isize);
