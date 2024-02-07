@@ -34,6 +34,7 @@ macro_rules! tri {
     };
 }
 
+mod number;
 mod value;
 
 pub use value::JValue;
