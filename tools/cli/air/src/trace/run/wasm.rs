@@ -74,15 +74,10 @@ pub(crate) fn create_wasm_avm_runner(
     max_heap_size: Option<u64>,
     test_init_parameters: TestInitParameters,
 ) -> eyre::Result<Box<WasmAvmRunner>> {
-    let (air_size_limit, particle_size_limit, call_result_size_limit) =
-        test_init_parameters.to_attributes_w_default();
-
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
-        Some(air_size_limit),
-        Some(particle_size_limit),
-        Some(call_result_size_limit),
+        test_init_parameters.into(),
         0,
     )?)))
 }

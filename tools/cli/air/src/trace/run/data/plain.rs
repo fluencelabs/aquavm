@@ -55,6 +55,9 @@ pub(crate) struct PlainDataArgs {
 
     #[clap(long = "call-result-size-limit")]
     call_result_size_limit: Option<u64>,
+
+    #[clap(long = "hard-limit-enabled", default_value = "false")]
+    hard_limit_enabled: bool,
 }
 
 pub(crate) fn load(args: &PlainDataArgs) -> eyre::Result<ExecutionData<'_>> {
@@ -80,11 +83,12 @@ pub(crate) fn load(args: &PlainDataArgs) -> eyre::Result<ExecutionData<'_>> {
         current_peer_id.into(),
     );
 
-    let test_init_parameters = TestInitParameters {
-        air_size_limit: args.air_size_limit,
-        particle_size_limit: args.particle_size_limit,
-        call_result_size_limit: args.call_result_size_limit,
-    };
+    let test_init_parameters = TestInitParameters::new(
+        args.air_size_limit,
+        args.particle_size_limit,
+        args.call_result_size_limit,
+        args.hard_limit_enabled,
+    );
 
     Ok(ExecutionData {
         air_script,

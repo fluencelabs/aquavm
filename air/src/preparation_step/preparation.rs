@@ -144,6 +144,8 @@ fn make_exec_ctx(
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
 ) -> PreparationResult<ExecutionCtx<'static>> {
+    use crate::preparation_step::sizes_limits_check::limit_behavior;
+
     let call_results = measure!(
         CallResultsRepr
             .deserialize(call_results)
@@ -157,9 +159,8 @@ fn make_exec_ctx(
         .values()
         .any(|call_result| call_result.result.len() > run_parameters.call_result_size_limit as usize)
     {
-        return Err(PreparationError::call_result_size_limit(
-            run_parameters.call_result_size_limit,
-        ));
+        let error = PreparationError::call_result_size_limit(run_parameters.call_result_size_limit);
+        limit_behavior(run_parameters, error)?;
     }
 
     let ctx = ExecutionCtx::new(

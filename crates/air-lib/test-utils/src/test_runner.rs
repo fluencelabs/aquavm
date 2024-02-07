@@ -27,6 +27,8 @@ pub use crate::wasm_test_runner::WasmAirRunner;
 use super::CallServiceClosure;
 
 use avm_server::avm_runner::*;
+use avm_server::AVMRuntimeLimits;
+use avm_server::RuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
@@ -69,11 +71,12 @@ pub struct TestRunParameters {
 }
 
 /// This struct is used to set limits for the test runner creating AVMRunner.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct TestInitParameters {
     pub air_size_limit: Option<u64>,
     pub particle_size_limit: Option<u64>,
     pub call_result_size_limit: Option<u64>,
+    pub hard_limit_enabled: bool,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -247,11 +250,17 @@ impl TestRunParameters {
 }
 
 impl TestInitParameters {
-    pub fn new(air_size_limit: u64, particle_size_limit: u64, call_result_size_limit: u64) -> Self {
+    pub fn new(
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
+        hard_limit_enabled: bool,
+    ) -> Self {
         Self {
             air_size_limit: Some(air_size_limit),
             particle_size_limit: Some(particle_size_limit),
             call_result_size_limit: Some(call_result_size_limit),
+            hard_limit_enabled,
         }
     }
 
@@ -260,18 +269,37 @@ impl TestInitParameters {
             air_size_limit: Some(u64::MAX),
             particle_size_limit: Some(u64::MAX),
             call_result_size_limit: Some(u64::MAX),
+            hard_limit_enabled: false,
         }
     }
+}
 
-    pub fn to_attributes_w_default(&self) -> (u64, u64, u64) {
+impl From<TestInitParameters> for RuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
+        RuntimeLimits::new(
+            value.air_size_limit,
+            value.particle_size_limit,
+            value.call_result_size_limit,
+            value.hard_limit_enabled,
+        )
+    }
+}
+
+impl From<TestInitParameters> for AVMRuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
         use air_interpreter_interface::MAX_PARTICLE_SIZE;
+        let air_size_limit = value.air_size_limit.unwrap_or(MAX_AIR_SIZE);
+        let particle_size_limit: u64 = value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
+        let call_result_size_limit = value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
 
-        let air_size_limit = self.air_size_limit.unwrap_or(MAX_AIR_SIZE);
-        let particle_size_limit: u64 = self.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
-        let call_result_size_limit = self.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
-        (air_size_limit, particle_size_limit, call_result_size_limit)
+        AVMRuntimeLimits::new(
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            value.hard_limit_enabled,
+        )
     }
 }
 

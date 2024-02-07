@@ -28,11 +28,14 @@ mod avm;
 mod config;
 mod errors;
 mod runner;
+mod runtime_limits;
 
 pub use avm::AVM;
 pub use config::AVMConfig;
 pub use errors::AVMError;
 pub use runner::AVMMemoryStats;
+pub use runner::AVMRuntimeLimits;
+pub use runner::RuntimeLimits;
 
 pub use avm_interface::*;
 

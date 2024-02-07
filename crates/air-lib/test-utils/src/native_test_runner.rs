@@ -21,6 +21,7 @@ use air_interpreter_interface::RunParameters;
 use air_interpreter_sede::ToSerialized;
 use avm_server::avm_runner::*;
 use avm_server::into_raw_result;
+use avm_server::AVMRuntimeLimits;
 use fluence_keypair::KeyPair;
 
 pub struct NativeAirRunner {
@@ -59,8 +60,12 @@ impl AirRunner for NativeAirRunner {
         let key_format = keypair.key_format().into();
         let secret_key_bytes = keypair.secret().unwrap();
 
-        let (air_size_limit, particle_size_limit, call_result_size_limit) =
-            self.test_init_parameters.to_attributes_w_default();
+        let AVMRuntimeLimits {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        } = self.test_init_parameters.into();
 
         let outcome = air::execute_air(
             air.into(),
@@ -77,6 +82,7 @@ impl AirRunner for NativeAirRunner {
                 air_size_limit,
                 particle_size_limit,
                 call_result_size_limit,
+                hard_limit_enabled,
             },
             raw_call_results,
         );

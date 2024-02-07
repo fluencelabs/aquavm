@@ -32,18 +32,36 @@ use marine::ModuleDescriptor;
 
 use std::path::PathBuf;
 
+#[derive(Clone, Copy, Debug)]
+pub struct AVMRuntimeLimits {
+    pub air_size_limit: u64, // WIP remove pub?
+    /// The particle data size limit.
+    pub particle_size_limit: u64,
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: u64,
+    /// This knob controls hard RAM limits behavior for AVMRunner.
+    pub hard_limit_enabled: bool,
+}
+
+pub struct RuntimeLimits {
+    // The AIR script size limit.
+    pub air_size_limit: Option<u64>,
+    /// The particle data size limit.
+    pub particle_size_limit: Option<u64>,
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: Option<u64>,
+    /// This knob controls hard RAM limits behavior for AVMRunner.
+    pub hard_limit_enabled: bool,
+}
+
 pub struct AVMRunner {
     marine: Marine,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
     /// The memory limit provided by constructor
     total_memory_limit: Option<u64>,
-    /// The AIR script size limit.
-    pub air_size_limit: u64,
-    /// The particle data size limit.
-    pub particle_size_limit: u64,
-    // This is the limit for the size of service call result.
-    pub call_result_size_limit: u64,
+    /// This struct contains runtime RAM allowance.
+    avm_runtime_limits: AVMRuntimeLimits,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -63,32 +81,21 @@ impl AVMRunner {
     pub fn new(
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
-        air_size_limit: Option<u64>,
-        particle_size_limit: Option<u64>,
-        call_result_size_limit: Option<u64>,
+        runtime_limits: RuntimeLimits,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
-        use air_interpreter_interface::MAX_AIR_SIZE;
-        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
-        use air_interpreter_interface::MAX_PARTICLE_SIZE;
-
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
-
-        let air_size_limit = air_size_limit.unwrap_or(MAX_AIR_SIZE);
-        let particle_size_limit = particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
-        let call_result_size_limit = call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
+        let avm_runtime_limits = runtime_limits.into();
 
         let avm = Self {
             marine,
             wasm_filename,
             total_memory_limit,
-            air_size_limit,
-            particle_size_limit,
-            call_result_size_limit,
+            avm_runtime_limits,
         };
 
         Ok(avm)
@@ -122,9 +129,7 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
-            self.air_size_limit,
-            self.particle_size_limit,
-            self.call_result_size_limit,
+            self.avm_runtime_limits,
             call_results,
             key_format.into(),
             secret_key_bytes,
@@ -173,9 +178,7 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
-            self.air_size_limit,
-            self.particle_size_limit,
-            self.call_result_size_limit,
+            self.avm_runtime_limits,
             call_results,
             key_format,
             secret_key_bytes,
@@ -242,14 +245,19 @@ fn prepare_args(
     init_peer_id: String,
     timestamp: u64,
     ttl: u32,
-    air_size_limit: u64,
-    particle_size_limit: u64,
-    call_result_size_limit: u64,
+    avm_runtime_limits: AVMRuntimeLimits,
     call_results: CallResults,
     key_format: u8,
     secret_key_bytes: Vec<u8>,
     particle_id: String,
 ) -> Vec<IValue> {
+    let AVMRuntimeLimits {
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enabled,
+    } = avm_runtime_limits;
+
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
         current_peer_id,
@@ -261,6 +269,7 @@ fn prepare_args(
         air_size_limit,
         particle_size_limit,
         call_result_size_limit,
+        hard_limit_enabled,
     )
     .into_ivalue();
 
@@ -349,4 +358,62 @@ fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> RunnerResult<IValue> {
     }
 
     Ok(ivalues.remove(0))
+}
+
+impl AVMRuntimeLimits {
+    pub fn new(
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        }
+    }
+}
+
+impl RuntimeLimits {
+    pub fn new(
+        air_size_limit: Option<u64>,
+        particle_size_limit: Option<u64>,
+        call_result_size_limit: Option<u64>,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        }
+    }
+}
+
+impl Default for RuntimeLimits {
+    fn default() -> Self {
+        Self {
+            air_size_limit: None,
+            particle_size_limit: None,
+            call_result_size_limit: None,
+            hard_limit_enabled: false,
+        }
+    }
+}
+
+impl From<RuntimeLimits> for AVMRuntimeLimits {
+    fn from(value: RuntimeLimits) -> Self {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+
+        AVMRuntimeLimits::new(
+            value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
+            value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
+            value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),
+            value.hard_limit_enabled,
+        )
+    }
 }

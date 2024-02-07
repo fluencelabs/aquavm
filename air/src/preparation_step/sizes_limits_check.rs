@@ -19,23 +19,27 @@ use crate::PreparationError;
 
 use air_interpreter_interface::RunParameters;
 
+pub(crate) fn limit_behavior(run_parameters: &RunParameters, error: PreparationError) -> PreparationResult<()> {
+    if run_parameters.hard_limit_enabled {
+        Err(error)
+    } else {
+        Ok(())
+    }
+}
+
 pub(crate) fn check_against_size_limits(
     run_parameters: &RunParameters,
     air: &str,
     raw_current_data: &[u8],
 ) -> PreparationResult<()> {
     if air.len() as u64 > run_parameters.air_size_limit {
-        return Err(PreparationError::air_size_limit(
-            air.len(),
-            run_parameters.air_size_limit,
-        ));
+        let error = PreparationError::air_size_limit(air.len(), run_parameters.air_size_limit);
+        limit_behavior(run_parameters, error)?;
     }
 
-    if raw_current_data.len() > run_parameters.particle_size_limit as usize {
-        return Err(PreparationError::particle_size_limit(
-            raw_current_data.len(),
-            run_parameters.particle_size_limit,
-        ));
+    if raw_current_data.len() as u64 > run_parameters.particle_size_limit {
+        let error = PreparationError::particle_size_limit(raw_current_data.len(), run_parameters.particle_size_limit);
+        limit_behavior(run_parameters, error)?;
     }
 
     Ok(())

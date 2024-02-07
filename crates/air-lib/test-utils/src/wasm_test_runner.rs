@@ -35,15 +35,11 @@ pub struct WasmAirRunner {
 
 fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner {
     let logging_mask = i32::MAX;
-    let (air_size_limit, particle_size_limit, call_result_size_limit) =
-        test_init_parameters.to_attributes_w_default();
 
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
         Some(AVM_MAX_HEAP_SIZE),
-        Some(air_size_limit),
-        Some(particle_size_limit),
-        Some(call_result_size_limit),
+        test_init_parameters.into(),
         logging_mask,
     )
     .expect("vm should be created")
@@ -114,15 +110,11 @@ pub struct ReleaseWasmAirRunner {
 impl AirRunner for ReleaseWasmAirRunner {
     fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         let logging_mask = i32::MAX;
-        let (air_size_limit, particle_size_limit, call_result_size_limit) =
-            test_init_parameters.to_attributes_w_default();
 
         let runner = AVMRunner::new(
             PathBuf::from(RELEASE_AIR_WASM_PATH),
             Some(AVM_MAX_HEAP_SIZE),
-            Some(air_size_limit),
-            Some(particle_size_limit),
-            Some(call_result_size_limit),
+            test_init_parameters.into(),
             logging_mask,
         )
         .expect("vm should be created");

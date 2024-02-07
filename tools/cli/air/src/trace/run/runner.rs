@@ -16,6 +16,8 @@
 
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
+use avm_server::AVMRuntimeLimits;
+use avm_server::RuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;
@@ -49,25 +51,54 @@ pub struct TestInitParameters {
     pub air_size_limit: Option<u64>,
     pub particle_size_limit: Option<u64>,
     pub call_result_size_limit: Option<u64>,
+    pub hard_limit_enabled: bool,
 }
-
 impl TestInitParameters {
-    pub fn to_attributes_w_default(&self) -> (u64, u64, u64) {
-        use air_interpreter_interface::MAX_AIR_SIZE;
-        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
-        use air_interpreter_interface::MAX_PARTICLE_SIZE;
-
-        let air_size_limit = self.air_size_limit.unwrap_or(MAX_AIR_SIZE);
-        let particle_size_limit: u64 = self.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
-        let call_result_size_limit = self.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
-        (air_size_limit, particle_size_limit, call_result_size_limit)
+    pub fn new(
+        air_size_limit: Option<u64>,
+        particle_size_limit: Option<u64>,
+        call_result_size_limit: Option<u64>,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        }
     }
-
     pub fn no_limits() -> Self {
         Self {
             air_size_limit: Some(u64::MAX),
             particle_size_limit: Some(u64::MAX),
             call_result_size_limit: Some(u64::MAX),
+            hard_limit_enabled: false,
         }
+    }
+}
+
+impl From<TestInitParameters> for RuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
+        RuntimeLimits::new(
+            value.air_size_limit,
+            value.particle_size_limit,
+            value.call_result_size_limit,
+            value.hard_limit_enabled,
+        )
+    }
+}
+
+impl From<TestInitParameters> for AVMRuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+
+        AVMRuntimeLimits::new(
+            value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
+            value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
+            value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),
+            value.hard_limit_enabled,
+        )
     }
 }
