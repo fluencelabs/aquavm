@@ -15,7 +15,6 @@
  */
 
 use crate::JValue;
-use crate::RawValue;
 
 use air_interpreter_cid::value_to_json_cid;
 use air_interpreter_cid::verify_value;
@@ -82,15 +81,6 @@ impl<Val: Serialize> CidStore<Val> {
     }
 }
 
-impl CidStore<RawValue> {
-    pub fn verify_raw_value(&self) -> Result<(), CidStoreVerificationError> {
-        for (cid, value) in &self.0 {
-            verify_value(cid, value)?;
-        }
-        Ok(())
-    }
-}
-
 #[derive(ThisError, Debug)]
 pub enum CidStoreVerificationError {
     #[error(transparent)]
@@ -143,15 +133,6 @@ impl<Val: Serialize> CidTracker<Val> {
         let cid = value_to_json_cid(&*value)?;
         self.cids.insert(cid.clone(), value);
         Ok(cid)
-    }
-}
-
-impl CidTracker<RawValue> {
-    pub fn track_raw_value(&mut self, value: impl Into<Rc<RawValue>>) -> CID<RawValue> {
-        let value = value.into();
-        let cid = value_to_json_cid(&*value).expect("TODO refcator");
-        self.cids.insert(cid.clone(), value);
-        cid
     }
 }
 

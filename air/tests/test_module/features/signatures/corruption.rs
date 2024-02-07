@@ -96,7 +96,7 @@ fn test_attack_replace_value() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 // fragile: it is OK if this exact string changes on compiler upgrade
-                type_name: "air_interpreter_data::raw_value::RawValue",
+                type_name: "air_interpreter_value::JValue",
                 cid_repr: "bagaaihrayhxgqijfajraxivb7hxwshhbsdqk4j5zyqypb54zggmn5v7mmwxq".into(),
             }
             .into()
