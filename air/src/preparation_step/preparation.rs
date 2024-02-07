@@ -26,6 +26,7 @@ use air_interpreter_data::Versions;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
+use air_interpreter_interface::SoftLimitsTriggering;
 use air_interpreter_sede::FromSerialized;
 use air_interpreter_signatures::KeyError;
 use air_interpreter_signatures::KeyPair;
@@ -75,6 +76,7 @@ pub(crate) fn prepare<'i>(
     call_results: &SerializedCallResults,
     run_parameters: RunParameters,
     signature_store: SignatureStore,
+    soft_limits_triggering: &mut SoftLimitsTriggering,
 ) -> PreparationResult<PreparationDescriptor<'static, 'i>> {
     let air: Instruction<'i> = air_parser::parse(raw_air).map_err(PreparationError::AIRParseError)?;
 
@@ -94,6 +96,7 @@ pub(crate) fn prepare<'i>(
         call_results,
         signature_store,
         &run_parameters,
+        soft_limits_triggering,
     )?;
     let trace_handler = TraceHandler::from_trace(prev_data.trace, current_data.trace);
 
@@ -143,6 +146,7 @@ fn make_exec_ctx(
     call_results: &SerializedCallResults,
     signature_store: SignatureStore,
     run_parameters: &RunParameters,
+    soft_limits_triggering: &mut SoftLimitsTriggering,
 ) -> PreparationResult<ExecutionCtx<'static>> {
     use crate::preparation_step::sizes_limits_check::limit_behavior;
 
@@ -159,8 +163,12 @@ fn make_exec_ctx(
         .values()
         .any(|call_result| call_result.result.len() > run_parameters.call_result_size_limit as usize)
     {
-        let error = PreparationError::call_result_size_limit(run_parameters.call_result_size_limit);
-        limit_behavior(run_parameters, error)?;
+        let error: PreparationError = PreparationError::call_result_size_limit(run_parameters.call_result_size_limit);
+        limit_behavior(
+            run_parameters,
+            error,
+            &mut soft_limits_triggering.particle_size_limit_exceeded,
+        )?;
     }
 
     let ctx = ExecutionCtx::new(

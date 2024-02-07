@@ -17,6 +17,7 @@
 use super::CallRequests;
 use crate::raw_outcome::RawAVMOutcome;
 
+use air_interpreter_interface::SoftLimitsTriggering;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -40,6 +41,8 @@ pub struct AVMOutcome {
     /// Time of a particle execution
     /// (it counts only execution time without operations with DataStore and so on)
     pub execution_time: Duration,
+
+    soft_limits_triggering: SoftLimitsTriggering, // WIP
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -56,6 +59,7 @@ impl AVMOutcome {
         next_peer_pks: Vec<String>,
         memory_delta: usize,
         execution_time: Duration,
+        soft_limits_triggering: SoftLimitsTriggering,
     ) -> Self {
         Self {
             data,
@@ -63,6 +67,7 @@ impl AVMOutcome {
             next_peer_pks,
             memory_delta,
             execution_time,
+            soft_limits_triggering,
         }
     }
 
@@ -80,6 +85,7 @@ impl AVMOutcome {
             data,
             call_requests,
             next_peer_pks,
+            soft_limits_triggering,
         } = raw_outcome;
 
         let avm_outcome = AVMOutcome::new(
@@ -88,6 +94,7 @@ impl AVMOutcome {
             next_peer_pks,
             memory_delta,
             execution_time,
+            soft_limits_triggering,
         );
 
         if ret_code == INTERPRETER_SUCCESS {

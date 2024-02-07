@@ -100,7 +100,7 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         annotated_air_script: &str,
     ) -> Result<Self, String> {
         let transformed =
-            TransformedAirScript::new(annotated_air_script, network, test_init_parameters.clone())?;
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters)?;
 
         Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed)
     }
@@ -115,10 +115,10 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         let network = Network::new(
             extra_peers.into_iter(),
             common_services,
-            test_init_parameters.clone(),
+            test_init_parameters,
         );
         let transformed =
-            TransformedAirScript::new(annotated_air_script, network, test_init_parameters.clone())?;
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters)?;
 
         Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed)
     }

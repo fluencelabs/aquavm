@@ -25,6 +25,7 @@ use crate::INTERPRETER_SUCCESS;
 use air_interpreter_data::InterpreterDataEnvelope;
 use air_interpreter_interface::CallRequests;
 use air_interpreter_interface::CallRequestsRepr;
+use air_interpreter_interface::SoftLimitsTriggering;
 use air_interpreter_sede::ToSerialized;
 use air_interpreter_signatures::KeyPair;
 use air_utils::measure;
@@ -41,6 +42,7 @@ pub(crate) fn from_success_result(
     exec_ctx: ExecutionCtx<'_>,
     trace_handler: TraceHandler,
     keypair: &KeyPair,
+    soft_limits_triggering: SoftLimitsTriggering,
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     let (ret_code, error_message) = if exec_ctx.call_results.is_empty() {
         (INTERPRETER_SUCCESS, String::new())
@@ -49,7 +51,14 @@ pub(crate) fn from_success_result(
         (farewell_error.to_error_code(), farewell_error.to_string())
     };
 
-    let outcome = populate_outcome_from_contexts(exec_ctx, trace_handler, ret_code, error_message, keypair);
+    let outcome = populate_outcome_from_contexts(
+        exec_ctx,
+        trace_handler,
+        ret_code,
+        error_message,
+        keypair,
+        soft_limits_triggering,
+    );
     Ok(outcome)
 }
 
@@ -59,6 +68,7 @@ pub(crate) fn from_success_result(
 pub(crate) fn from_uncatchable_error(
     data: impl Into<Vec<u8>> + Debug,
     error: impl ToErrorCode + ToString + Debug,
+    soft_limits_triggering: SoftLimitsTriggering,
 ) -> InterpreterOutcome {
     let ret_code = error.to_error_code();
     let data = data.into();
@@ -66,7 +76,14 @@ pub(crate) fn from_uncatchable_error(
         .serialize(&CallRequests::new())
         .expect("default serializer shouldn't fail");
 
-    InterpreterOutcome::new(ret_code, error.to_string(), data, vec![], call_requests)
+    InterpreterOutcome::new(
+        ret_code,
+        error.to_string(),
+        data,
+        vec![],
+        call_requests,
+        soft_limits_triggering,
+    )
 }
 
 /// Create InterpreterOutcome from supplied execution context, trace handler, and error,
@@ -77,6 +94,7 @@ pub(crate) fn from_execution_error(
     trace_handler: TraceHandler,
     error: impl ToErrorCode + ToString + Debug,
     keypair: &KeyPair,
+    soft_limits_triggering: SoftLimitsTriggering,
 ) -> InterpreterOutcome {
     populate_outcome_from_contexts(
         exec_ctx,
@@ -84,6 +102,7 @@ pub(crate) fn from_execution_error(
         error.to_error_code(),
         error.to_string(),
         keypair,
+        soft_limits_triggering,
     )
 }
 
@@ -94,13 +113,14 @@ fn populate_outcome_from_contexts(
     ret_code: i64,
     error_message: String,
     keypair: &KeyPair,
+    soft_limits_triggering: SoftLimitsTriggering,
 ) -> InterpreterOutcome {
-    match compactify_streams(&mut exec_ctx, &mut trace_handler) {
+    match compactify_streams(&mut exec_ctx, &mut trace_handler, soft_limits_triggering) {
         Ok(()) => {}
         Err(outcome) => return outcome,
     };
 
-    match sign_result(&mut exec_ctx, keypair) {
+    match sign_result(&mut exec_ctx, keypair, soft_limits_triggering) {
         Ok(()) => {}
         Err(outcome) => return outcome,
     };
@@ -126,22 +146,37 @@ fn populate_outcome_from_contexts(
         tracing::Level::INFO,
         "CallRequestsRepr.serialize",
     );
-    InterpreterOutcome::new(ret_code, error_message, data, next_peer_pks, call_requests)
+    InterpreterOutcome::new(
+        ret_code,
+        error_message,
+        data,
+        next_peer_pks,
+        call_requests,
+        soft_limits_triggering,
+    )
 }
 
-fn compactify_streams(exec_ctx: &mut ExecutionCtx<'_>, trace_ctx: &mut TraceHandler) -> Result<(), InterpreterOutcome> {
+fn compactify_streams(
+    exec_ctx: &mut ExecutionCtx<'_>,
+    trace_ctx: &mut TraceHandler,
+    soft_limits_triggering: SoftLimitsTriggering,
+) -> Result<(), InterpreterOutcome> {
     exec_ctx
         .streams
         .compactify(trace_ctx)
         .and_then(|_| exec_ctx.stream_maps.compactify(trace_ctx))
-        .map_err(execution_error_into_outcome)
+        .map_err(|err| execution_error_into_outcome(err, soft_limits_triggering))
 }
 
-fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(), InterpreterOutcome> {
+fn sign_result(
+    exec_ctx: &mut ExecutionCtx<'_>,
+    keypair: &KeyPair,
+    soft_limits_triggering: SoftLimitsTriggering,
+) -> Result<(), InterpreterOutcome> {
     let current_signature = exec_ctx
         .peer_cid_tracker
         .gen_signature(&exec_ctx.run_parameters.salt, keypair)
-        .map_err(signing_error_into_outcome)?;
+        .map_err(|err| signing_error_into_outcome(err, soft_limits_triggering))?;
 
     let current_pubkey = keypair.public();
     exec_ctx.signature_store.put(current_pubkey, current_signature);
@@ -151,12 +186,29 @@ fn sign_result(exec_ctx: &mut ExecutionCtx<'_>, keypair: &KeyPair) -> Result<(),
 
 // these methods are called only if there is an internal error in the interpreter and
 // new execution trace was corrupted
-fn execution_error_into_outcome(error: ExecutionError) -> InterpreterOutcome {
-    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], <_>::default())
+fn execution_error_into_outcome(
+    error: ExecutionError,
+    soft_limits_triggering: SoftLimitsTriggering,
+) -> InterpreterOutcome {
+    InterpreterOutcome::new(
+        error.to_error_code(),
+        error.to_string(),
+        vec![],
+        vec![],
+        <_>::default(),
+        soft_limits_triggering,
+    )
 }
 
-fn signing_error_into_outcome(error: SigningError) -> InterpreterOutcome {
-    InterpreterOutcome::new(error.to_error_code(), error.to_string(), vec![], vec![], <_>::default())
+fn signing_error_into_outcome(error: SigningError, soft_limits_triggering: SoftLimitsTriggering) -> InterpreterOutcome {
+    InterpreterOutcome::new(
+        error.to_error_code(),
+        error.to_string(),
+        vec![],
+        vec![],
+        <_>::default(),
+        soft_limits_triggering,
+    )
 }
 
 /// Deduplicate values in a supplied vector.

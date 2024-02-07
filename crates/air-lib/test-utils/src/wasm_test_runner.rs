@@ -57,7 +57,7 @@ impl AirRunner for WasmAirRunner {
             )
         });
 
-        let runner = pool.pull(|| make_pooled_avm_runner(test_init_parameters.clone()));
+        let runner = pool.pull(|| make_pooled_avm_runner(test_init_parameters));
 
         Self {
             current_peer_id: current_peer_id.into(),

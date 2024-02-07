@@ -63,20 +63,34 @@ fn execute_air_impl(
 ) -> Result<InterpreterOutcome, InterpreterOutcome> {
     use crate::preparation_step::check_against_size_limits;
 
-    farewell_if_fail!(
+    let mut soft_limits_triggering = farewell_if_fail!(
         check_against_size_limits(&params, &air, &raw_current_data),
         raw_prev_data
+    );
+
+    farewell_if_fail!(
+        check_against_size_limits(&params, &air, &raw_current_data),
+        raw_prev_data,
+        soft_limits_triggering
     );
 
     let ParsedDataPair {
         prev_data,
         current_data,
-    } = farewell_if_fail!(parse_data(&raw_prev_data, &raw_current_data), raw_prev_data);
+    } = farewell_if_fail!(
+        parse_data(&raw_prev_data, &raw_current_data),
+        raw_prev_data,
+        soft_limits_triggering
+    );
 
     // TODO currently we use particle ID, but it should be changed to signature,
     // as partical ID can be equally replayed
     let salt = params.particle_id.clone();
-    let signature_store = farewell_if_fail!(verify(&prev_data, &current_data, &salt), raw_prev_data);
+    let signature_store = farewell_if_fail!(
+        verify(&prev_data, &current_data, &salt),
+        raw_prev_data,
+        soft_limits_triggering
+    );
 
     let PreparationDescriptor {
         mut exec_ctx,
@@ -84,8 +98,17 @@ fn execute_air_impl(
         air,
         keypair,
     } = farewell_if_fail!(
-        prepare(prev_data, current_data, &air, &call_results, params, signature_store,),
-        raw_prev_data
+        prepare(
+            prev_data,
+            current_data,
+            &air,
+            &call_results,
+            params,
+            signature_store,
+            &mut soft_limits_triggering
+        ),
+        raw_prev_data,
+        soft_limits_triggering
     );
 
     // match here is used instead of map_err, because the compiler can't determine that
@@ -103,18 +126,29 @@ fn execute_air_impl(
             &salt,
             &keypair,
         ),
-        raw_prev_data
+        raw_prev_data,
+        soft_limits_triggering
     );
 
     measure!(
         match exec_result {
-            Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair),
+            Ok(_) => farewell::from_success_result(exec_ctx, trace_handler, &keypair, soft_limits_triggering),
             // return new collected trace in case of errors
             Err(error) if error.is_catchable() => {
-                Err(farewell::from_execution_error(exec_ctx, trace_handler, error, &keypair))
+                Err(farewell::from_execution_error(
+                    exec_ctx,
+                    trace_handler,
+                    error,
+                    &keypair,
+                    soft_limits_triggering,
+                ))
             }
             // return the prev data in case of any trace errors
-            Err(error) => Err(farewell::from_uncatchable_error(raw_prev_data, error)),
+            Err(error) => Err(farewell::from_uncatchable_error(
+                raw_prev_data,
+                error,
+                soft_limits_triggering
+            )),
         },
         tracing::Level::INFO,
         "farewell",

@@ -83,11 +83,11 @@ struct Transformer<'net, R> {
 impl<R: AirRunner> Transformer<'_, R> {
     pub(crate) fn transform(&self, sexp: &mut Sexp, test_init_parameters: TestInitParameters) {
         match sexp {
-            Sexp::Call(call) => self.handle_call(call, test_init_parameters.clone()),
-            Sexp::Canon(canon) => self.handle_canon(canon, test_init_parameters.clone()),
+            Sexp::Call(call) => self.handle_call(call, test_init_parameters),
+            Sexp::Canon(canon) => self.handle_canon(canon, test_init_parameters),
             Sexp::List(children) => {
                 for child in children.iter_mut().skip(1) {
-                    self.transform(child, test_init_parameters.clone());
+                    self.transform(child, test_init_parameters);
                 }
             }
             Sexp::Symbol(_) | Sexp::String(_) => {}

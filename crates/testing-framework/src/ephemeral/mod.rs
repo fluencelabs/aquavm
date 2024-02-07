@@ -164,7 +164,7 @@ impl<R: AirRunner> Network<R> {
             resolver: Default::default(),
         });
         for peer_name in named_peers {
-            network.ensure_named_peer(peer_name, test_init_params.clone());
+            network.ensure_named_peer(peer_name, test_init_params);
         }
         network
     }

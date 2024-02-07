@@ -128,7 +128,7 @@ impl PreparationError {
     }
 
     pub fn air_size_limit(actual_size: usize, limit: u64) -> Self {
-        Self::SizeLimitsExceded(SizeLimitsExceded::AIR(actual_size, limit))
+        Self::SizeLimitsExceded(SizeLimitsExceded::Air(actual_size, limit))
     }
 
     pub fn particle_size_limit(actual_size: usize, limit: u64) -> Self {
@@ -144,7 +144,7 @@ impl PreparationError {
 pub enum SizeLimitsExceded {
     /// AIR script size is bigger than the allowed limit.
     #[error("air size: {0} bytes is bigger than the limit allowed: {1} bytes")]
-    AIR(usize, u64),
+    Air(usize, u64),
 
     /// Current_data particle size is bigger than the allowed limit.
     #[error("Current_data particle size: {0} bytes is bigger than the limit allowed: {1} bytes")]

@@ -25,6 +25,7 @@ pub struct AVMRuntimeLimits {
     pub hard_limit_enabled: bool,
 }
 
+#[derive(Default)]
 pub struct RuntimeLimits {
     pub air_size_limit: Option<u64>,
     pub particle_size_limit: Option<u64>,
@@ -44,17 +45,6 @@ impl AVMRuntimeLimits {
             particle_size_limit,
             call_result_size_limit,
             hard_limit_enabled,
-        }
-    }
-}
-
-impl Default for RuntimeLimits {
-    fn default() -> Self {
-        Self {
-            air_size_limit: None,
-            particle_size_limit: None,
-            call_result_size_limit: None,
-            hard_limit_enabled: false,
         }
     }
 }
