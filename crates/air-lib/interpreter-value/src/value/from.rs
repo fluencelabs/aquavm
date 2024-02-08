@@ -332,9 +332,36 @@ impl From<&serde_json::Value> for JValue {
     }
 }
 
+// JValue and Value use different child elements, thus conversion from a value cannot be implemented
+// more efficiently than conversion from a reference
 impl From<serde_json::Value> for JValue {
     #[inline]
     fn from(value: serde_json::Value) -> Self {
         Self::from(&value)
+    }
+}
+
+impl From<&JValue> for serde_json::Value {
+    fn from(value: &JValue) -> Self {
+        use serde_json::Value;
+
+        match value {
+            JValue::Null => Value::Null,
+            JValue::Bool(b) => Value::Bool(*b),
+            JValue::Number(n) => Value::Number(n.clone().into()),
+            JValue::String(s) => Value::String(s.to_string()),
+            JValue::Array(a) => Value::Array(a.iter().map(Into::into).collect()),
+            JValue::Object(o) => {
+                Value::Object(o.iter().map(|(k, v)| (k.to_string(), v.into())).collect())
+            }
+        }
+    }
+}
+
+// JValue and Value use different child elements, thus conversion from a value cannot be implemented
+// more efficiently than conversion from a reference
+impl From<JValue> for serde_json::Value {
+    fn from(value: JValue) -> Self {
+        (&value).into()
     }
 }
