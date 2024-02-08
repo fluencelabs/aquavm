@@ -43,7 +43,8 @@ use crate::{JsonString, Number};
 #[derive(Clone, Eq, PartialEq, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 #[archive(check_bytes)]
 #[archive_attr(check_bytes(
-    bound = "__C: rkyv::validation::ArchiveContext + rkyv::validation::SharedContext, <__C as rkyv::Fallible>::Error: std::error::Error"
+    bound = "__C: rkyv::validation::ArchiveContext + rkyv::validation::SharedContext,\
+             <__C as rkyv::Fallible>::Error: std::error::Error"
 ))]
 #[archive(bound(
     serialize = "__S: rkyv::ser::ScratchSpace + rkyv::ser::Serializer + rkyv::ser::SharedSerializeRegistry",
