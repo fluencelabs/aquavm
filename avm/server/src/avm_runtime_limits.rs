@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-pub struct AVMRuntimeLimits {
+pub struct AquaVMRuntimeLimits {
     /// AIR script size limit.
     pub air_size_limit: u64,
     /// Particle data size limit.
@@ -26,14 +26,14 @@ pub struct AVMRuntimeLimits {
 }
 
 #[derive(Default)]
-pub struct RuntimeLimits {
+pub struct AVMRuntimeLimits {
     pub air_size_limit: Option<u64>,
     pub particle_size_limit: Option<u64>,
     pub call_result_size_limit: Option<u64>,
     pub hard_limit_enabled: bool,
 }
 
-impl AVMRuntimeLimits {
+impl AquaVMRuntimeLimits {
     pub fn new(
         air_size_limit: u64,
         particle_size_limit: u64,
@@ -49,13 +49,13 @@ impl AVMRuntimeLimits {
     }
 }
 
-impl From<RuntimeLimits> for AVMRuntimeLimits {
-    fn from(value: RuntimeLimits) -> Self {
+impl From<AVMRuntimeLimits> for AquaVMRuntimeLimits {
+    fn from(value: AVMRuntimeLimits) -> Self {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
         use air_interpreter_interface::MAX_PARTICLE_SIZE;
 
-        AVMRuntimeLimits::new(
+        AquaVMRuntimeLimits::new(
             value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
             value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
             value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),

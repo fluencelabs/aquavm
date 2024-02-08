@@ -28,7 +28,7 @@ use super::CallServiceClosure;
 
 use avm_server::avm_runner::*;
 use avm_server::AVMRuntimeLimits;
-use avm_server::RuntimeLimits;
+use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
@@ -274,9 +274,9 @@ impl TestInitParameters {
     }
 }
 
-impl From<TestInitParameters> for RuntimeLimits {
+impl From<TestInitParameters> for AVMRuntimeLimits {
     fn from(value: TestInitParameters) -> Self {
-        RuntimeLimits::new(
+        AVMRuntimeLimits::new(
             value.air_size_limit,
             value.particle_size_limit,
             value.call_result_size_limit,
@@ -285,7 +285,7 @@ impl From<TestInitParameters> for RuntimeLimits {
     }
 }
 
-impl From<TestInitParameters> for AVMRuntimeLimits {
+impl From<TestInitParameters> for AquaVMRuntimeLimits {
     fn from(value: TestInitParameters) -> Self {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
@@ -294,7 +294,7 @@ impl From<TestInitParameters> for AVMRuntimeLimits {
         let particle_size_limit: u64 = value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
         let call_result_size_limit = value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
 
-        AVMRuntimeLimits::new(
+        AquaVMRuntimeLimits::new(
             air_size_limit,
             particle_size_limit,
             call_result_size_limit,

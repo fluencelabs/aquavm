@@ -52,9 +52,13 @@ pub struct InterpreterOutcome {
     /// Collected parameters of all met call instructions that could be executed on a current peer.
     pub call_requests: Vec<u8>,
 
-    /// WIP
+    /// This flag signals that AIR script size exceeds the limit.
     pub air_size_limit_exceeded: bool,
+
+    /// This flag signals that particle data size exceeds the limit.
     pub particle_size_limit_exceeded: bool,
+
+    /// This flag signals that call result size exceeds the limit.
     pub call_result_size_limit_exceeded: bool,
 }
 

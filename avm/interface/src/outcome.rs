@@ -43,7 +43,7 @@ pub struct AVMOutcome {
     pub execution_time: Duration,
 
     /// To store and convey soft limits triggering flags.
-    soft_limits_triggering: SoftLimitsTriggering,
+    pub soft_limits_triggering: SoftLimitsTriggering,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

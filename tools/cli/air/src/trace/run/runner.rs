@@ -17,7 +17,7 @@
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
 use avm_server::AVMRuntimeLimits;
-use avm_server::RuntimeLimits;
+use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;
@@ -77,9 +77,9 @@ impl TestInitParameters {
     }
 }
 
-impl From<TestInitParameters> for RuntimeLimits {
+impl From<TestInitParameters> for AVMRuntimeLimits {
     fn from(value: TestInitParameters) -> Self {
-        RuntimeLimits::new(
+        AVMRuntimeLimits::new(
             value.air_size_limit,
             value.particle_size_limit,
             value.call_result_size_limit,
@@ -88,13 +88,13 @@ impl From<TestInitParameters> for RuntimeLimits {
     }
 }
 
-impl From<TestInitParameters> for AVMRuntimeLimits {
+impl From<TestInitParameters> for AquaVMRuntimeLimits {
     fn from(value: TestInitParameters) -> Self {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
         use air_interpreter_interface::MAX_PARTICLE_SIZE;
 
-        AVMRuntimeLimits::new(
+        AquaVMRuntimeLimits::new(
             value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
             value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
             value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),

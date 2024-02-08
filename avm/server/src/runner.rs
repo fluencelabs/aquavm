@@ -33,7 +33,7 @@ use marine::ModuleDescriptor;
 use std::path::PathBuf;
 
 #[derive(Clone, Copy, Debug)]
-pub struct AVMRuntimeLimits {
+pub struct AquaVMRuntimeLimits {
     pub air_size_limit: u64, // WIP remove pub?
     /// The particle data size limit.
     pub particle_size_limit: u64,
@@ -44,7 +44,7 @@ pub struct AVMRuntimeLimits {
 }
 
 #[derive(Default)]
-pub struct RuntimeLimits {
+pub struct AVMRuntimeLimits {
     // The AIR script size limit.
     pub air_size_limit: Option<u64>,
     /// The particle data size limit.
@@ -62,7 +62,7 @@ pub struct AVMRunner {
     /// The memory limit provided by constructor
     total_memory_limit: Option<u64>,
     /// This struct contains runtime RAM allowance.
-    avm_runtime_limits: AVMRuntimeLimits,
+    aquavm_runtime_limits: AquaVMRuntimeLimits,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -82,7 +82,7 @@ impl AVMRunner {
     pub fn new(
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
-        runtime_limits: RuntimeLimits,
+        avm_runtime_limits: AVMRuntimeLimits,
         logging_mask: i32,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
@@ -90,13 +90,13 @@ impl AVMRunner {
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
         let marine = Marine::with_raw_config(marine_config)?;
-        let avm_runtime_limits = runtime_limits.into();
+        let aquavm_runtime_limits = avm_runtime_limits.into();
 
         let avm = Self {
             marine,
             wasm_filename,
             total_memory_limit,
-            avm_runtime_limits,
+            aquavm_runtime_limits,
         };
 
         Ok(avm)
@@ -130,7 +130,7 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
-            self.avm_runtime_limits,
+            self.aquavm_runtime_limits,
             call_results,
             key_format.into(),
             secret_key_bytes,
@@ -179,7 +179,7 @@ impl AVMRunner {
             init_peer_id.into(),
             timestamp,
             ttl,
-            self.avm_runtime_limits,
+            self.aquavm_runtime_limits,
             call_results,
             key_format,
             secret_key_bytes,
@@ -246,18 +246,18 @@ fn prepare_args(
     init_peer_id: String,
     timestamp: u64,
     ttl: u32,
-    avm_runtime_limits: AVMRuntimeLimits,
+    aquavm_runtime_limits: AquaVMRuntimeLimits,
     call_results: CallResults,
     key_format: u8,
     secret_key_bytes: Vec<u8>,
     particle_id: String,
 ) -> Vec<IValue> {
-    let AVMRuntimeLimits {
+    let AquaVMRuntimeLimits {
         air_size_limit,
         particle_size_limit,
         call_result_size_limit,
         hard_limit_enabled,
-    } = avm_runtime_limits;
+    } = aquavm_runtime_limits;
 
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
@@ -361,7 +361,7 @@ fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> RunnerResult<IValue> {
     Ok(ivalues.remove(0))
 }
 
-impl AVMRuntimeLimits {
+impl AquaVMRuntimeLimits {
     pub fn new(
         air_size_limit: u64,
         particle_size_limit: u64,
@@ -377,7 +377,7 @@ impl AVMRuntimeLimits {
     }
 }
 
-impl RuntimeLimits {
+impl AVMRuntimeLimits {
     pub fn new(
         air_size_limit: Option<u64>,
         particle_size_limit: Option<u64>,
@@ -393,13 +393,13 @@ impl RuntimeLimits {
     }
 }
 
-impl From<RuntimeLimits> for AVMRuntimeLimits {
-    fn from(value: RuntimeLimits) -> Self {
+impl From<AVMRuntimeLimits> for AquaVMRuntimeLimits {
+    fn from(value: AVMRuntimeLimits) -> Self {
         use air_interpreter_interface::MAX_AIR_SIZE;
         use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
         use air_interpreter_interface::MAX_PARTICLE_SIZE;
 
-        AVMRuntimeLimits::new(
+        AquaVMRuntimeLimits::new(
             value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
             value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
             value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),
