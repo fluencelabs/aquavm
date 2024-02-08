@@ -17,7 +17,8 @@
 use super::preparation::PreparationResult;
 use crate::PreparationError;
 
-use air_interpreter_interface::{RunParameters, SoftLimitsTriggering};
+use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::SoftLimitsTriggering;
 
 pub(crate) fn limit_behavior(
     run_parameters: &RunParameters,
