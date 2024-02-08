@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/300
 fn issue_300() {
     let peer_id_1 = "peer_id_1";

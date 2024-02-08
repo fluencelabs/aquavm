@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 #[ignore]
 // test for github.com/fluencelabs/aquavm/issues/173
 fn issue_173() {

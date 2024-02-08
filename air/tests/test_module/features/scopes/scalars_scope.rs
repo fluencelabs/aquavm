@@ -18,7 +18,7 @@ use air::CatchableError;
 use air::ExecutionError;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn scalars_scope() {
     let peer_1_id = "peer_1_id";
     let array_1_content = json!(["1", "2"]);
@@ -73,7 +73,7 @@ fn scalars_scope() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn before_after_of_next() {
     let set_array_0_peer_id = "set_array_0_peer_id";
     let array_0_content = json!([1, 2, 3]);
@@ -124,7 +124,7 @@ fn before_after_of_next() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn local_and_global_scalars() {
     let set_variable_peer_id = "set_variable_peer_id";
     let iterable_content = json!([1i64, 2]);
@@ -213,7 +213,7 @@ fn local_and_global_scalars() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_randomly_set_scalars_in_fold_1() {
     let test_peer_id_1 = "test_peer_id_1";
     let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
@@ -253,7 +253,7 @@ fn new_with_randomly_set_scalars_in_fold_1() {
     assert_eq!(result.ret_code, 0)
 }
 
-#[test]
+#[tokio::test]
 fn new_with_randomly_set_scalars_in_fold_2() {
     let test_peer_id_1 = "test_peer_id_1";
     let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);

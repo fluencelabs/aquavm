@@ -405,7 +405,7 @@ mod tests {
     use air::ExecutionCidState;
     use serde_json::json;
 
-    #[test]
+    #[tokio::test]
     fn test_scalar() {
         assert_eq!(scalar!(42), scalar!(42));
         assert_eq!(scalar!("test"), scalar!("test"));
@@ -416,7 +416,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_scalar_tracked() {
         let mut store = ExecutionCidState::new();
         assert_eq!(scalar_tracked!(42, store), scalar_tracked!(42, store));

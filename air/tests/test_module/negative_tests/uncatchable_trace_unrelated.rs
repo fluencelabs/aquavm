@@ -22,7 +22,7 @@ use air_interpreter_data::ValueRef;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn fold_state_not_found() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([1, 2,]);
@@ -47,7 +47,7 @@ fn fold_state_not_found() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn iterable_shadowing() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([1, 2,]);
@@ -69,7 +69,7 @@ fn iterable_shadowing() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn call_result_not_correspond_to_instr() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([1, 2,]);
@@ -92,7 +92,7 @@ fn call_result_not_correspond_to_instr() {
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
-#[test]
+#[tokio::test]
 fn shadowing_is_not_allowed() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -111,7 +111,7 @@ fn shadowing_is_not_allowed() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn value_for_cid_not_found() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([1, 2,]);
@@ -133,7 +133,7 @@ fn value_for_cid_not_found() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn malformed_call_service_failed() {
     let peer_id = "init_peer_id";
     let mut cid_state = ExecutionCidState::new();
@@ -166,7 +166,7 @@ fn malformed_call_service_failed() {
     assert_error_eq!(&result, expected_error);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_size_limit() {
     let vm_peer_id_1 = "vm_peer_id_1";
 

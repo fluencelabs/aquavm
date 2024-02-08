@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn join_chat_1() {
     use std::collections::HashSet;
 
@@ -295,7 +295,7 @@ fn join_chat_1() {
     assert!(client_2_result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn join_chat_2() {
     let members_call_service1: CallServiceClosure =
         Box::new(|_| -> CallServiceResult { CallServiceResult::ok(json!([["A"], ["B"]])) });
@@ -386,7 +386,7 @@ fn join_chat_2() {
     assert!(client_1_result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn init_peer_id() {
     let relay_1_peer_id = "relay_1_peer_id";
     let mut relay_1 = create_avm(unit_call_service(), relay_1_peer_id);

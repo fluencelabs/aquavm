@@ -188,7 +188,7 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-    #[test]
+    #[tokio::test]
     fn test_iter() {
         let mut tracker = CidTracker::new();
         tracker.track_value(json!("test")).unwrap();
@@ -230,7 +230,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_store() {
         let mut tracker = CidTracker::new();
         tracker.track_value(json!("test")).unwrap();

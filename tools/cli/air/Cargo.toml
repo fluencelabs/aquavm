@@ -32,12 +32,15 @@ termcolor = "1.2.0"
 fluence-keypair = "0.10.4"
 bs58 = "0.5.0"
 zeroize = "1.6.0"
+marine-wasmtime-backend = {version = "0.5.1", path = "../../../../marine/crates/wasmtime-backend"}
+tokio = { version = "1", features = ["rt", "macros"] }
+futures = "0.3.30"
+
 
 # near
 # alpha version is used because older versions depend on
 # the parity-secp256k1 crate which is yanked
 near-sdk = { version = "5.0.0-alpha.1", optional =  true }
-tokio = { version = "1", features = ["rt"], optional = true }
 workspaces = { version = "0.7.0", optional = true }
 
 # risc-0
@@ -46,11 +49,11 @@ workspaces = { version = "0.7.0", optional = true }
 # zk-aquavm-interface = { path = "../../../crates/risc-0/core", version = "0.1.0", optional = true }
 
 [features]
-default = ["wasm", "dep:tokio"]
+default = ["wasm"]
 wasm = ["air-test-utils"]
 gen_signatures = ["aquavm-air/gen_signatures"]
 check_signatures = ["aquavm-air/check_signatures"]
-near = [ "dep:near-sdk", "dep:tokio", "dep:workspaces" ]
+near = [ "dep:near-sdk", "dep:workspaces" ]
 # risc0 = [ "dep:risc0-zkvm", "dep:zk-aquavm-methods", "dep:zk-aquavm-interface" ]
 
 [[bin]]

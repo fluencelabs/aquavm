@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/241
 fn issue_241() {
     let peer_1_id = "peer_1_id";

@@ -17,7 +17,7 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/304
 fn issue_304() {
     let script = r#"

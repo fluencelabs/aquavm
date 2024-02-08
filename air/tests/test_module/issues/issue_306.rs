@@ -17,7 +17,7 @@
 use air_interpreter_interface::INTERPRETER_SUCCESS;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/306
 fn issue_306() {
     let peer_id_1 = "peer_id_1";

@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 use fluence_keypair::KeyFormat;
 use fluence_keypair::KeyPair;
 
-#[test]
+#[tokio::test]
 fn call_generates_hop() {
     let client_peer_id = "client";
     let mut client_vm = create_avm(unit_call_service(), client_peer_id);
@@ -35,7 +35,7 @@ fn call_generates_hop() {
     assert_next_pks!(&client_result.next_peer_pks, &[test_peer_id]);
 }
 
-#[test]
+#[tokio::test]
 fn call_with_join_behaviour() {
     let relay_peer_id = "relay";
     let mut relay_vm = create_avm(unit_call_service(), relay_peer_id);

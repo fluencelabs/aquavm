@@ -19,7 +19,7 @@ use air::PreparationError;
 use air_interpreter_interface::INTERPRETER_SUCCESS;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn minimal_version_check() {
     let mut vm = create_avm(echo_call_service(), "");
     let script = "(null)";
@@ -37,7 +37,7 @@ fn minimal_version_check() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn publish_version_check() {
     let mut vm = create_avm(echo_call_service(), "");
     let script = "(null)";
@@ -51,7 +51,7 @@ fn publish_version_check() {
     assert_eq!(result.ret_code, INTERPRETER_SUCCESS, "{:?}", result.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn publish_unsupported_version_check() {
     let mut vm = create_avm(echo_call_service(), "");
 

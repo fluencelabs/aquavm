@@ -19,7 +19,7 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::TestRunParameters;
 use air_test_utils::*;
 
-#[test]
+#[tokio::test]
 fn global_streams_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
@@ -52,7 +52,7 @@ fn global_streams_are_compactified() {
     assert_eq!(&actual_trace, &expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn global_stream_maps_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
@@ -89,7 +89,7 @@ fn global_stream_maps_are_compactified() {
     assert_eq!(&actual_trace, &expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn local_streams_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
@@ -124,7 +124,7 @@ fn local_streams_are_compactified() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn local_stream_maps_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";

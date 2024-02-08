@@ -24,7 +24,7 @@ use air_test_utils::prelude::*;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[test]
+#[tokio::test]
 fn invalid_data_without_versions() {
     use air_interpreter_sede::Format;
     use air_interpreter_sede::Representation;
@@ -51,7 +51,7 @@ fn invalid_data_without_versions() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn invalid_data_with_versions() {
     use air_interpreter_sede::Format;
     use air_interpreter_sede::Representation;
@@ -84,7 +84,7 @@ fn invalid_data_with_versions() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn invalid_callresults() {
     use air_interpreter_sede::Format;
 

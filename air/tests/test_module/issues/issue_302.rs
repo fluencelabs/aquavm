@@ -20,7 +20,7 @@ use pretty_assertions::assert_eq;
 
 use std::ops::Deref;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/302
 fn issue_302() {
     let peer_id_1 = "peer_id_1";

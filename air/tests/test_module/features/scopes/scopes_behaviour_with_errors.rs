@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn check_that_scalar_is_visible_only_inside_fold_block() {
     let variable_setter_peer_id = "variable_setter_peer_id";
     let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);
@@ -76,7 +76,7 @@ fn check_that_scalar_is_visible_only_inside_fold_block() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
     let variable_setter_peer_id = "variable_setter_peer_id";
     let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);

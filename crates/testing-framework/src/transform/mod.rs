@@ -130,21 +130,21 @@ mod tests {
 
     use std::str::FromStr;
 
-    #[test]
+    #[tokio::test]
     fn test_parse_fmt_call() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"])"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_fmt_call_var() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"] var)"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_canon() {
         let sexp_str = r#"(canon "my_id" $stream #canon)"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
@@ -158,21 +158,21 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_fmt_symbol() {
         let sexp_str = "symbol";
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_fmt_string() {
         let sexp_str = r#""my_id""#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_fmt_sexp() {
         let sexp_str = r#"(par (ap x y) (fold x y (next)))"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();

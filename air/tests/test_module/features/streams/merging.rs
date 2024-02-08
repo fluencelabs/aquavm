@@ -17,7 +17,7 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::{key_utils::at, prelude::*};
 
-#[test]
+#[tokio::test]
 fn merging_fold_iterations_extensively() {
     let script = r#"
         (seq
@@ -126,7 +126,7 @@ fn merging_fold_iterations_extensively() {
     assert_eq!(last_fold.lore.len(), 18);
 }
 
-#[test]
+#[tokio::test]
 fn merging_fold_iterations_extensively_2() {
     let script = r#"
         (seq

@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 #[ignore]
 fn new_with_global_streams_seq() {
     let set_variable_peer_id = "set_variable_peer_id";
@@ -93,7 +93,7 @@ fn new_with_global_streams_seq() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn several_restrictions() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -129,7 +129,7 @@ fn several_restrictions() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn check_influence_to_not_restricted() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -260,7 +260,7 @@ fn check_influence_to_not_restricted() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_in_fold_with_ap() {
     let set_variable_peer_id = "set_variable_peer_id";
     let vm_peer_id = "vm_peer_id";
@@ -360,7 +360,7 @@ fn new_in_fold_with_ap() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_streams_with_errors() {
     let fallible_peer_id = "fallible_peer_id";
     let mut fallible_vm = create_avm(fallible_call_service("service_id_1"), fallible_peer_id);
@@ -404,7 +404,7 @@ fn new_with_streams_with_errors() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_scalars_with_errors() {
     let set_variable_peer_id = "set_variable_peer_id";
     let variables_mapping = maplit::hashmap! {
@@ -463,7 +463,7 @@ fn new_with_scalars_with_errors() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_global_scalars() {
     let set_variable_peer_id = "set_variable_peer_id";
     let variables_mapping = maplit::hashmap! {
@@ -543,7 +543,7 @@ fn prepare_new_test_call_service() -> CallServiceClosure {
     })
 }
 
-#[test]
+#[tokio::test]
 fn new_with_scalars_in_lfold_with_outside_next() {
     let test_peer_id = "test_peer_id";
 
@@ -602,7 +602,7 @@ fn new_with_scalars_in_lfold_with_outside_next() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_scalars_in_rfold_with_outside_next() {
     let test_peer_id = "test_peer_id";
 
@@ -661,7 +661,7 @@ fn new_with_scalars_in_rfold_with_outside_next() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn new_with_scalars_in_fold_with_inside_next() {
     let test_peer_id = "test_peer_id";
 

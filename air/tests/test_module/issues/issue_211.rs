@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/211
 // On the versions < 0.20.1 it just crashes
 fn issue_211() {

@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/295
 fn issue_295() {
     let vm_peer_id = "vm_peer_id";

@@ -206,7 +206,7 @@ mod test {
         (va_vec, vec![canon_stream_one, canon_stream_two], keys)
     }
 
-    #[test]
+    #[tokio::test]
     fn from_canon_stream() {
         let peer_pk = "some_tetraplet";
         let (va_vec, canon_streams, keys) = create_va_canon_and_keys_vecs(peer_pk);
@@ -225,7 +225,7 @@ mod test {
         assert!(canon_stream_map_key_two.clone().into_values() == canon_stream_two.clone().into_values());
     }
 
-    #[test]
+    #[tokio::test]
     fn test_index_ok() {
         let peer_pk = "some_tetraplet";
         let (va_vec, canon_streams, _) = create_va_canon_and_keys_vecs(peer_pk);

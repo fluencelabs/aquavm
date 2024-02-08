@@ -26,7 +26,7 @@
 
 use crate::{beautify_to_string, Beautifier};
 
-#[test]
+#[tokio::test]
 fn ap_with_literal() {
     let script = r#"(ap "some_string" $stream)"#;
     let output = beautify_to_string(script).unwrap();
@@ -38,7 +38,7 @@ fn ap_with_literal() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_number() {
     let script = "(ap -100 $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -50,7 +50,7 @@ fn ap_with_number() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_bool() {
     let script = "(ap true $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -62,7 +62,7 @@ fn ap_with_bool() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_last_error() {
     let script = "(ap %last_error%.$.message! $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -70,7 +70,7 @@ fn ap_with_last_error() {
     assert_eq!(output, "ap %last_error%.$.message $stream\n");
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_empty_array() {
     let script = "(ap [] $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -78,7 +78,7 @@ fn ap_with_empty_array() {
     assert_eq!(output, "ap [] $stream\n");
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_init_peer_id() {
     let script = "(ap %init_peer_id% $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -86,7 +86,7 @@ fn ap_with_init_peer_id() {
     assert_eq!(output, "ap %init_peer_id% $stream\n");
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_timestamp() {
     let script = "(ap %timestamp% $stream)";
     let output = beautify_to_string(script).unwrap();
@@ -94,7 +94,7 @@ fn ap_with_timestamp() {
     assert_eq!(output, "ap %timestamp% $stream\n");
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_ttl() {
     let script = r#"
         (ap %ttl% $stream)
@@ -104,7 +104,7 @@ fn ap_with_ttl() {
     assert_eq!(output, "ap %ttl% $stream\n");
 }
 
-#[test]
+#[tokio::test]
 fn seq() {
     let script = "(seq (null) (null))";
     let output = beautify_to_string(script).unwrap();
@@ -117,7 +117,7 @@ null
     )
 }
 
-#[test]
+#[tokio::test]
 fn seq_nested_pre() {
     let script = "(seq (seq (null) (null)) (null))";
     let output = beautify_to_string(script).unwrap();
@@ -131,7 +131,7 @@ null
     );
 }
 
-#[test]
+#[tokio::test]
 fn seq_nested_post() {
     let script = "(seq (null) (seq (null) (null)))";
     let output = beautify_to_string(script).unwrap();
@@ -145,7 +145,7 @@ null
     );
 }
 
-#[test]
+#[tokio::test]
 fn par() {
     let script = "(par (null) (null))";
     let output = beautify_to_string(script).unwrap();
@@ -160,7 +160,7 @@ fn par() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn match_() {
     let script = r#"(seq
   (seq
@@ -179,7 +179,7 @@ match a b:
     );
 }
 
-#[test]
+#[tokio::test]
 fn mismatch() {
     let script = r#"(seq
   (seq
@@ -198,7 +198,7 @@ mismatch a b:
     );
 }
 
-#[test]
+#[tokio::test]
 fn fail_last_error() {
     let script = "(fail %last_error%)";
     let output = beautify_to_string(script).unwrap();
@@ -206,7 +206,7 @@ fn fail_last_error() {
     assert_eq!(output, "fail %last_error%\n");
 }
 
-#[test]
+#[tokio::test]
 fn fail_expr() {
     let script = "(fail var)";
     let output = beautify_to_string(script).unwrap();
@@ -214,7 +214,7 @@ fn fail_expr() {
     assert_eq!(output, "fail var\n");
 }
 
-#[test]
+#[tokio::test]
 fn fail_common() {
     let script = r#"(fail 123 "Message")"#;
     let output = beautify_to_string(script).unwrap();
@@ -226,7 +226,7 @@ fn fail_common() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn fold_scalar() {
     let script = r#"(seq (call "it" ("" "") [] var) (fold var i (null)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -240,7 +240,7 @@ fold var i:
     );
 }
 
-#[test]
+#[tokio::test]
 fn fold_scalar_with_last_instruction() {
     let script = r#"(seq (call "it" ("" "") [] var) (fold var i (null) (never)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -256,7 +256,7 @@ last:
     );
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream() {
     let script = r#"(seq (call "it" ("" "") [] $var) (fold $var i (null)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -270,7 +270,7 @@ fold $var i:
     );
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_with_last_instruction() {
     let script = r#"(seq (call "it" ("" "") [] $var) (fold $var i (never) (null)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -286,7 +286,7 @@ last:
     );
 }
 
-#[test]
+#[tokio::test]
 fn call_var() {
     let script = "(call \"{0}\" (\"a\" \"b\") [\"stream_1\" \"stream_2\"] streamvar)";
     let output = beautify_to_string(script).unwrap();
@@ -297,7 +297,7 @@ fn call_var() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn call_novar() {
     let script = r#"(call "{0}" ("a" "b") ["stream_1" "stream_2"])"#;
     let output = beautify_to_string(script).unwrap();
@@ -309,7 +309,7 @@ fn call_novar() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn call_noargs() {
     let script = r#"(call "{0}" ("a" "b") [])"#;
     let output = beautify_to_string(script).unwrap();
@@ -321,7 +321,7 @@ fn call_noargs() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn next() {
     let script = r#"(seq (call "{0}" ("a" "b") ["stream_1"] j) (fold j i (next i)))"#;
     let output = beautify_to_string(script).unwrap();
@@ -335,7 +335,7 @@ fold j i:
     );
 }
 
-#[test]
+#[tokio::test]
 fn new() {
     let script = "(new var (seq (null) (null)))";
     let output = beautify_to_string(script).unwrap();
@@ -349,7 +349,7 @@ fn new() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn null() {
     let script = "(null)";
     let output = beautify_to_string(script).unwrap();
@@ -357,7 +357,7 @@ fn null() {
     assert_eq!(output, "null\n");
 }
 
-#[test]
+#[tokio::test]
 fn custom_indent_step() {
     let mut output = vec![];
     let mut beautifier = Beautifier::new_with_indent(&mut output, 2);
@@ -374,7 +374,7 @@ fn custom_indent_step() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn deeply_nested() {
     let script = include_str!("deeply_nested.air");
     let output = beautify_to_string(script).unwrap();
@@ -382,7 +382,7 @@ fn deeply_nested() {
     assert_eq!(output, expected);
 }
 
-#[test]
+#[tokio::test]
 fn fail_error() {
     let script = r#"(fail :error:)"#;
     let output = beautify_to_string(script).unwrap();

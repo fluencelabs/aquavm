@@ -144,7 +144,7 @@ struct AVMState {
     prev_result: Vec<u8>,
 }
 
-#[test]
+#[tokio::test]
 fn dashboard() {
     let script = include_str!("./scripts/dashboard.air");
 

@@ -17,7 +17,7 @@
 use air::PreparationError;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn invalid_air() {
     let vm_peer_id = "some_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);

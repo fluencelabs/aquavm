@@ -19,7 +19,7 @@ use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn fail_with_rebubble_error() {
     let peer_id = "peer_id";
     let script = r#"
@@ -72,7 +72,7 @@ fn fail_with_rebubble_error() {
     assert_eq!(actual_trace, expected_trace,);
 }
 
-#[test]
+#[tokio::test]
 fn rebubble_error_from_xor_right_branch() {
     let peer_id = "peer_id";
     let script = r#"

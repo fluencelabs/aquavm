@@ -86,7 +86,7 @@ impl Behavior {
 mod tests {
     use super::*;
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_echo() {
         let res = parse_behaviour("echo");
         assert_eq!(
@@ -97,31 +97,31 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_unit() {
         let res = parse_behaviour("unit");
         assert_eq!(res, Ok(("", Behavior::Unit)));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_service() {
         let res = parse_behaviour("service");
         assert_eq!(res, Ok(("", Behavior::Service)));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_function() {
         let res = parse_behaviour("function");
         assert_eq!(res, Ok(("", Behavior::Function)));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_arg() {
         let res = parse_behaviour("arg.42");
         assert_eq!(res, Ok(("", Behavior::Arg(42))));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_parse_behavior_tetraplet() {
         let res = parse_behaviour("tetraplet");
         assert_eq!(res, Ok(("", Behavior::Tetraplet)));

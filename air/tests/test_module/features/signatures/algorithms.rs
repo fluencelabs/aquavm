@@ -24,7 +24,7 @@ use air_test_utils::{
 use fluence_keypair::KeyFormat;
 
 /// Checking that other peers' key algorithms are valid.
-#[test]
+#[tokio::test]
 // ignored for a while until we find an easy way to create "incorrect" rkyv data;
 //
 // n.b.: cfg(any()) disables compilation
@@ -94,7 +94,7 @@ fn test_banned_signature() {
 }
 
 /// Checking that local key is valid.
-#[test]
+#[tokio::test]
 fn test_banned_signing_key() {
     let air_script = "(null)";
     let bad_algo_keypair = fluence_keypair::KeyPair::generate_secp256k1();

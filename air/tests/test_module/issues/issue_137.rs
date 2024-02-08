@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/137
 fn issue_137() {
     let initiator_id = "initiator_id";

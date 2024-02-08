@@ -21,7 +21,7 @@ use pretty_assertions::assert_eq;
 
 use std::ops::Deref;
 
-#[test]
+#[tokio::test]
 fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure {
         Box::new(move |params| -> CallServiceResult {
@@ -55,7 +55,7 @@ fn empty_stream() {
     let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }
 
-#[test]
+#[tokio::test]
 fn stream_merging_v0() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
@@ -207,7 +207,7 @@ fn stream_merging_v0() {
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
-#[test]
+#[tokio::test]
 fn stream_merging_v1() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
@@ -374,7 +374,7 @@ fn stream_merging_v1() {
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
 fn stream_merging_v2() {
     let initiator_id = "initiator_id";

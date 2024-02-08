@@ -21,7 +21,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn recursive_stream_with_early_exit() {
     let vm_peer_id = "vm_peer_id";
     let variable_mappings = maplit::hashmap! {
@@ -73,7 +73,7 @@ fn recursive_stream_with_early_exit() {
     assert_eq!(actual_trace, expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_many_iterations() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -171,7 +171,7 @@ fn recursive_stream_many_iterations() {
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_join() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -255,7 +255,7 @@ fn recursive_stream_join() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_error_handling() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -329,7 +329,7 @@ fn recursive_stream_error_handling() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_inner_fold() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -393,7 +393,7 @@ fn recursive_stream_inner_fold() {
     assert_eq!(actual_last_state, &expected_last_state);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_fold_with_n_service_call() {
     let vm_peer_id = "vm_peer_id_1";
 
@@ -473,7 +473,7 @@ fn recursive_stream_fold_with_n_service_call() {
     assert_eq!(actual_fold_state.lore.len(), expected_fold_lores);
 }
 
-#[test]
+#[tokio::test]
 fn recursive_stream_size_limit() {
     let vm_peer_id_1 = "vm_peer_id_1";
 

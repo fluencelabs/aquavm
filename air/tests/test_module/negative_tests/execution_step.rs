@@ -22,7 +22,7 @@ use air::LambdaError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn local_service_error() {
     let client_peer_id = "some_peer_id";
     let script = format!(
@@ -60,7 +60,7 @@ fn local_service_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fold_iterates_over_non_array_scalar_iterable() {
     let vm_2_peer_id = "vm_2_peer_id";
     let var_name = "outcome".to_string();
@@ -84,7 +84,7 @@ fn fold_iterates_over_non_array_scalar_iterable() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fold_iterates_over_non_array_scalar_lambda_iterable() {
     let vm_2_peer_id = "vm_2_peer_id";
     let var_name = "outcome".to_string();
@@ -109,7 +109,7 @@ fn fold_iterates_over_non_array_scalar_lambda_iterable() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn non_string_value_in_triplet_resolution() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
@@ -170,7 +170,7 @@ fn non_string_value_in_triplet_resolution() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn non_string_value_in_triplet_resolution_module_name() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
@@ -231,7 +231,7 @@ fn non_string_value_in_triplet_resolution_module_name() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn non_string_value_in_triplet_resolution_function_name() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
@@ -292,7 +292,7 @@ fn non_string_value_in_triplet_resolution_function_name() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn value_not_contain_such_array_idx_ap() {
     let vm_1_peer_id = "vm_1_peer_id";
     let idx = 42;
@@ -315,7 +315,7 @@ fn value_not_contain_such_array_idx_ap() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn field_accessor_applied_to_stream() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -337,7 +337,7 @@ fn field_accessor_applied_to_stream() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn array_accessor_not_match_value() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -359,7 +359,7 @@ fn array_accessor_not_match_value() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn value_not_contain_such_array_idx_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([0, 1]);
@@ -380,7 +380,7 @@ fn value_not_contain_such_array_idx_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn value_not_contain_such_field_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!({"a": 1,});
@@ -401,7 +401,7 @@ fn value_not_contain_such_field_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn field_accesssor_not_match_value_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([0, 1]);
@@ -423,7 +423,7 @@ fn field_accesssor_not_match_value_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn index_access_not_u32_i64() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let vm_peer_id_2 = "vm_peer_id_2";
@@ -452,7 +452,7 @@ fn index_access_not_u32_i64() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn scalar_accessor_has_invalid_type_ap() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let obj_arg = json!({"a": 1,});
@@ -485,7 +485,7 @@ fn scalar_accessor_has_invalid_type_ap() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn stream_accessor_has_invalid_type() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let obj_arg = json!({"a": 1,});
@@ -521,7 +521,7 @@ fn stream_accessor_has_invalid_type() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn canon_stream_not_have_enough_values_call_arg() {
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id);
@@ -553,7 +553,7 @@ fn canon_stream_not_have_enough_values_call_arg() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn unsupported_map_keytype() {
     let local_peer_id = "local_peer_id";
     let obj_arg = json!({"a": {"b": 1},});
@@ -574,7 +574,7 @@ fn unsupported_map_keytype() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn undefined_last_error_functor() {
     let local_peer_id = "local_peer_id";
     let script = format!(
@@ -596,7 +596,7 @@ fn undefined_last_error_functor() {
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn undefined_error_functor() {
     let local_peer_id = "local_peer_id";
     let script = format!(
@@ -619,7 +619,7 @@ fn undefined_error_functor() {
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn undefined_error_peerid() {
     let local_peer_id = "local_peer_id";
     let script = format!(
@@ -644,7 +644,7 @@ fn undefined_error_peerid() {
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn undefined_last_error_instruction() {
     let local_peer_id = "local_peer_id";
     let script = format!(
@@ -669,7 +669,7 @@ fn undefined_last_error_instruction() {
     assert!(check_error(&&result.last().unwrap(), expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn undefined_last_error_peer_id() {
     let local_peer_id = "local_peer_id";
     let script = format!(

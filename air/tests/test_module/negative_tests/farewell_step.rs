@@ -17,7 +17,7 @@
 use air::FarewellError;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn unprocessed_call_result() {
     let air = r#"(null)"#;
     let client_peer_id = "some_peer_id";

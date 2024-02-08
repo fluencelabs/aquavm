@@ -20,7 +20,7 @@ use air::ExecutionError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn fail_with_last_error() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
@@ -47,7 +47,7 @@ fn fail_with_last_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_error() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
@@ -68,7 +68,7 @@ fn fail_with_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_literals() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(echo_call_service(), local_peer_id);
@@ -93,7 +93,7 @@ fn fail_with_literals() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_last_error_tetraplets() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
@@ -121,7 +121,7 @@ fn fail_with_last_error_tetraplets() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_error_tetraplets() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
@@ -149,7 +149,7 @@ fn fail_with_error_tetraplets() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_literals_tetraplets() {
     let local_peer_id = "local_peer_id";
     let (host_closure, tetraplet_anchor) = tetraplet_host_function(echo_call_service());
@@ -174,7 +174,7 @@ fn fail_with_literals_tetraplets() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_canon_stream() {
     let vm_peer_id = "local_peer_id";
     let error_code = 1337i64;
@@ -221,7 +221,7 @@ fn fail_to_fail_with_unsupported_errorcode(script: &str) {
     assert!(check_error(&results.last().unwrap(), expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
     let script = r#"
         (seq
@@ -232,7 +232,7 @@ fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
     fail_to_fail_with_unsupported_errorcode(script);
 }
 
-#[test]
+#[tokio::test]
 fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
     let script = r#"
         (seq
@@ -243,7 +243,7 @@ fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
     fail_to_fail_with_unsupported_errorcode(script);
 }
 
-#[test]
+#[tokio::test]
 fn fail_to_fail_with_unsupported_errorcode_in_canon() {
     let script = r#"
         (seq
@@ -254,7 +254,7 @@ fn fail_to_fail_with_unsupported_errorcode_in_canon() {
     fail_to_fail_with_unsupported_errorcode(script);
 }
 
-#[test]
+#[tokio::test]
 fn fail_to_fail_with_unsupported_errorcode_in_error() {
     let script = r#"
         (fail :error:)

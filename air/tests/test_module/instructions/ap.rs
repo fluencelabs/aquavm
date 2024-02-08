@@ -24,7 +24,7 @@ use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[test]
+#[tokio::test]
 fn ap_with_scalars() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
@@ -62,7 +62,7 @@ fn ap_with_scalars() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_string_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -102,7 +102,7 @@ fn ap_with_string_literal() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_bool_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -139,7 +139,7 @@ fn ap_with_bool_literal() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_number_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -176,7 +176,7 @@ fn ap_with_number_literal() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -217,7 +217,7 @@ fn ap_with_last_error() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -258,7 +258,7 @@ fn ap_with_error() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_timestamp() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -285,7 +285,7 @@ fn ap_with_timestamp() {
     assert_eq!(actual_trace, expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_ttl() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -308,7 +308,7 @@ fn ap_with_ttl() {
     assert_eq!(actual_trace, expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
@@ -362,7 +362,7 @@ fn ap_with_dst_stream() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn ap_canon_stream_with_lambda() {
     let vm_1_peer_id = "vm_1_peer_id";
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service());
@@ -449,7 +449,7 @@ fn ap_canon_stream_with_lambda() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
+#[tokio::test]
 fn ap_canon_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -536,7 +536,7 @@ fn ap_canon_stream() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
+#[tokio::test]
 fn ap_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -602,7 +602,7 @@ fn ap_stream_map() {
     assert_eq!(actual_trace, expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn ap_stream_map_with_undefined_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = format!(
@@ -643,7 +643,7 @@ fn ap_stream_map_with_undefined_last_error() {
     assert_eq!(actual_trace, expected_state,);
 }
 
-#[test]
+#[tokio::test]
 fn ap_canon_stream_map_with_string_key_accessor_lambda() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
@@ -699,7 +699,7 @@ fn ap_canon_stream_map_with_string_key_accessor_lambda() {
     assert_eq!(&*actual_trace, expected_trace,);
 }
 
-#[test]
+#[tokio::test]
 fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
@@ -754,7 +754,7 @@ fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     assert_eq!(&*actual_trace, expected_trace,);
 }
 
-#[test]
+#[tokio::test]
 fn ap_map_key_join_behavior() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = r#"
@@ -780,7 +780,7 @@ fn ap_map_key_join_behavior() {
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn ap_map_value_join_behavior() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = r#"

@@ -20,7 +20,7 @@ use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use air_test_utils::test_runner::TestRunParameters;
 
-#[test]
+#[tokio::test]
 fn test_signature_empty() {
     let script = "(null)";
     let init_peer_name = "init_peer_id";
@@ -44,7 +44,7 @@ fn test_signature_empty() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_call_var() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -72,7 +72,7 @@ fn test_signature_call_var() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_call_stream() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
@@ -100,7 +100,7 @@ fn test_signature_call_stream() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_call_unused() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
@@ -124,7 +124,7 @@ fn test_signature_call_unused() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_call_merged() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
@@ -163,7 +163,7 @@ fn test_signature_call_merged() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data2.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_call_twice() {
     // Test that if some CID appears twice in the call result, it is accounted twice.
     let init_peer_name = "init_peer_id";
@@ -205,7 +205,7 @@ fn test_signature_call_twice() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_canon_basic() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -278,7 +278,7 @@ fn test_signature_canon_basic() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_canon_merge() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
@@ -359,7 +359,7 @@ fn test_signature_canon_merge() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
 }
 
-#[test]
+#[tokio::test]
 fn test_signature_canon_result() {
     // this test checks that call result in canon doesn't lead to repeadted accounting of the call result
     let init_peer_name = "init_peer_id";

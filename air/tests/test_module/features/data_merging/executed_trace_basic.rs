@@ -20,7 +20,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn executed_trace_seq_par_call() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = "remote_peer_id";
@@ -87,7 +87,7 @@ fn executed_trace_seq_par_call() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_par_par_call() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = "remote_peer_id";
@@ -160,7 +160,7 @@ fn executed_trace_par_par_call() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_seq_seq() {
     let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
@@ -203,7 +203,7 @@ fn executed_trace_seq_seq() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_create_service() {
     let module = "greeting";
     let module_config = json!(
@@ -302,7 +302,7 @@ fn executed_trace_create_service() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_par_seq_fold_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
@@ -449,7 +449,7 @@ fn executed_trace_par_seq_fold_call() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_par_seq_fold_in_cycle_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
@@ -595,7 +595,7 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn executed_trace_seq_par_seq_seq() {
     let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";

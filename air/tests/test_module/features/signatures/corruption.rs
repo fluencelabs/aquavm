@@ -27,7 +27,7 @@ use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 use semver::Version;
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_value() {
     // Bob gets a trace where call result value is edited by Mallory.
     let alice_peer_id = "alice";
@@ -104,7 +104,7 @@ fn test_attack_replace_value() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_tetraplet() {
     // Bob gets a trace where call result tetraplet is edited by Mallory.
     let alice_peer_id = "alice";
@@ -180,7 +180,7 @@ fn test_attack_replace_tetraplet() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_call_result() {
     // Bob gets a trace where call result is edited by Mallory.
     let alice_peer_id = "alice";
@@ -263,7 +263,7 @@ fn test_attack_replace_call_result() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_canon_value() {
     // Bob gets a trace where canon value is edited by Mallory.
     let alice_peer_id = "alice";
@@ -353,7 +353,7 @@ fn test_attack_replace_canon_value() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_canon_result_values() {
     // Bob gets a trace where canon result is edited by Mallory.
     let alice_peer_id = "alice";
@@ -452,7 +452,7 @@ fn test_attack_replace_canon_result_values() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replace_canon_result_tetraplet() {
     // Bob gets a trace where canon result is edited by Mallory.
     let alice_peer_id = "alice";

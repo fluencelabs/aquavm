@@ -17,7 +17,7 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn issue_356() {
     let script = r#"
         (seq

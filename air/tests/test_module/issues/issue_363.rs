@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 //https://github.com/fluencelabs/aquavm/issues/363
-#[test]
+#[tokio::test]
 fn issue_363() {
     let client_peer_id = "client";
     let mut client_vm = create_avm(

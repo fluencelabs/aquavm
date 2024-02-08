@@ -18,7 +18,7 @@ use air::CatchableError;
 use air::ToErrorCode;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn mismatch_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
     let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
@@ -58,7 +58,7 @@ fn mismatch_equal() {
     assert_eq!(actual_trace[2.into()], expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_not_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
     let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
@@ -98,7 +98,7 @@ fn mismatch_not_equal() {
     assert_eq!(actual_trace[2.into()], expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_with_string() {
     let set_variable_peer_id = "set_variable_peer_id";
     let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
@@ -135,7 +135,7 @@ fn mismatch_with_string() {
     assert_eq!(actual_trace[1.into()], expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_without_xor() {
     let set_variable_peer_id = "set_variable_peer_id";
     let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
@@ -169,7 +169,7 @@ fn mismatch_without_xor() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_with_two_xors() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(set_variable_call_service(serde_json::json!(false)), local_peer_id);
@@ -204,7 +204,7 @@ fn mismatch_with_two_xors() {
     assert_eq!(actual_trace.pop().unwrap(), expected_executed_call_result);
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_with_error() {
     use air::ExecutionCidState;
 

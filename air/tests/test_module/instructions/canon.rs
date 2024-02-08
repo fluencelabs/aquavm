@@ -24,7 +24,7 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-#[test]
+#[tokio::test]
 fn canon_moves_execution_flow() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
@@ -53,7 +53,7 @@ fn canon_moves_execution_flow() {
     )
 }
 
-#[test]
+#[tokio::test]
 fn basic_canon() {
     let mut vm = create_avm(echo_call_service(), "A");
     let data = json!(["1", "2", "3", "4", "5"]);
@@ -108,7 +108,7 @@ fn basic_canon() {
     assert_eq!(actual_state, &expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn canon_fixes_stream_correct() {
     let peer_id_1 = "peer_id_1";
     let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
@@ -201,7 +201,7 @@ fn canon_fixes_stream_correct() {
     assert_eq!(vm_1_result_2_trace.deref(), expected_vm_1_result_2_trace);
 }
 
-#[test]
+#[tokio::test]
 fn canon_stream_can_be_created_from_aps() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
@@ -231,7 +231,7 @@ fn canon_stream_can_be_created_from_aps() {
     let _ = checked_call_vm!(vm_2, <_>::default(), &script, result_1.data, result_2.data);
 }
 
-#[test]
+#[tokio::test]
 fn canon_gates() {
     let peer_id_1 = "peer_id_1";
     let mut vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), peer_id_1);
@@ -289,7 +289,7 @@ fn canon_gates() {
     assert_eq!(fold.lore.len(), stop_len_count);
 }
 
-#[test]
+#[tokio::test]
 fn canon_empty_stream() {
     let peer_id_1 = "peer_id_1";
     let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
@@ -326,7 +326,7 @@ fn canon_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn canon_empty_not_writable_stream() {
     let peer_id = "peer_id";
     let mut vm = create_avm(echo_call_service(), peer_id);
@@ -352,7 +352,7 @@ fn canon_empty_not_writable_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn canon_over_later_defined_stream() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
@@ -391,7 +391,7 @@ fn canon_over_later_defined_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_scalar() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
@@ -461,7 +461,7 @@ fn canon_map_scalar() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_scalar_with_par() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let vm_peer_id_2 = "vm_peer_id_2";
@@ -570,7 +570,7 @@ fn canon_map_scalar_with_par() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn test_extend_by_request_sent_by() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
@@ -604,7 +604,7 @@ fn test_extend_by_request_sent_by() {
     )
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_request_sent_by() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
@@ -639,7 +639,7 @@ fn test_merge_request_sent_by() {
     )
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_executed() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
@@ -694,7 +694,7 @@ fn test_merge_executed() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn canon_stream_map() {
     let vm_peer_id_1_name = "vm_peer_id_1";
     let vm_peer_id_1_id = at(vm_peer_id_1_name);
@@ -747,7 +747,7 @@ fn canon_stream_map() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_single_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -838,7 +838,7 @@ fn canon_map_single_index_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_index_with_element_access_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -936,7 +936,7 @@ fn canon_map_index_with_element_access_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -1062,7 +1062,7 @@ fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_non_existing_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -1129,7 +1129,7 @@ fn canon_map_non_existing_index_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
-#[test]
+#[tokio::test]
 fn canon_map_non_existing_index_and_element_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
@@ -1220,7 +1220,7 @@ fn canon_map_non_existing_index_and_element_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
-#[test]
+#[tokio::test]
 fn canon_map_2_scalar_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -1296,7 +1296,7 @@ fn canon_map_2_scalar_tetraplet_check() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_2_scalar_with_lens_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -1371,7 +1371,7 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_with_lens_by_key_number_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -1451,7 +1451,7 @@ fn canon_map_with_lens_by_key_number_tetraplet_check() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
@@ -1531,7 +1531,7 @@ fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn canon_join_behavoir() {
     let init_peer_name = "init_peer_id";
 
@@ -1554,7 +1554,7 @@ fn canon_join_behavoir() {
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_join_behavoir() {
     let init_peer_name = "init_peer_id";
 
@@ -1577,7 +1577,7 @@ fn canon_map_join_behavoir() {
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn canon_map_var_join_behavoir() {
     let init_peer_name = "init_peer_id";
 

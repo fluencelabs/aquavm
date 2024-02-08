@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn never_not_complete_subgraph() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);

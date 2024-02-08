@@ -26,7 +26,7 @@ use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[test]
+#[tokio::test]
 fn lfold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
@@ -61,7 +61,7 @@ fn lfold() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn rfold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
@@ -96,7 +96,7 @@ fn rfold() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn inner_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
@@ -143,7 +143,7 @@ fn inner_fold() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn inner_fold_with_same_iterator() {
     let mut vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
@@ -175,7 +175,7 @@ fn inner_fold_with_same_iterator() {
     assert_eq!(result.ret_code, expected_error.to_error_code());
 }
 
-#[test]
+#[tokio::test]
 fn empty_iterable_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
@@ -201,7 +201,7 @@ fn empty_iterable_fold() {
     assert_eq!(actual_trace[0.into()], expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn empty_literal_array_fold() {
     let mut vm = create_avm(echo_call_service(), "A");
 
@@ -219,7 +219,7 @@ fn empty_literal_array_fold() {
     assert!(actual_trace.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn empty_fold_json_path() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable");
@@ -245,7 +245,7 @@ fn empty_fold_json_path() {
 }
 
 // Check that fold works with the join behaviour without hanging up.
-#[test]
+#[tokio::test]
 fn fold_with_join() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
@@ -271,7 +271,7 @@ fn fold_with_join() {
     assert_eq!(actual_trace.len(), 4);
 }
 
-#[test]
+#[tokio::test]
 fn lambda() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(
@@ -306,7 +306,7 @@ fn lambda() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn shadowing() {
     use executed_state::*;
 
@@ -369,7 +369,7 @@ fn shadowing() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn shadowing_scope() {
     use executed_state::*;
 
@@ -435,7 +435,7 @@ fn shadowing_scope() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_waits_on_empty_stream() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -458,7 +458,7 @@ fn fold_waits_on_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_seq_next_never_completes() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
@@ -491,7 +491,7 @@ fn fold_stream_seq_next_never_completes() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_seq_next_never_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
@@ -529,7 +529,7 @@ fn fold_stream_seq_next_never_completes_with_never() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
@@ -568,7 +568,7 @@ fn fold_stream_seq_next_completes_with_null() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_scalar_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([1, 2]);
@@ -612,7 +612,7 @@ fn fold_scalar_seq_next_completes_with_null() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_scalar_seq_next_not_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([1, 2]);
@@ -652,7 +652,7 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_seq_next_saves_call_result() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -696,7 +696,7 @@ fn fold_stream_seq_next_saves_call_result() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_par_next_completes() {
     let vm_1_peer_id = "vm_1_peer_id";
     let mut vm_1 = create_avm(set_variable_call_service(json!(1)), vm_1_peer_id);
@@ -795,7 +795,7 @@ fn fold_par_next_completes() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
     let k1 = 42;
@@ -935,7 +935,7 @@ fn fold_stream_map() {
     assert_eq!(&arg_tetraplets.borrow()[tetraplates_len - 4..], &expected_tetraplets);
 }
 
-#[test]
+#[tokio::test]
 fn fold_canon_stream_map() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
@@ -1016,7 +1016,7 @@ fn fold_canon_stream_map() {
 /// the same kvpairs sequences. Please note that call results produced by
 /// the folds mentioned differ in their tetraplets b/c testing framework
 /// increments service name index for each call used.
-#[test]
+#[tokio::test]
 fn fold_map_and_canon_map_orders_are_same() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);

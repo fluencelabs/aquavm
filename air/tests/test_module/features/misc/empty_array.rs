@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn empty_array() {
     let vm_peer_id = "some_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);

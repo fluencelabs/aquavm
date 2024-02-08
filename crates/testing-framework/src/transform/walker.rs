@@ -154,14 +154,14 @@ mod tests {
         }
     }
 
-    #[test]
+    #[tokio::test]
     fn test_translate_null() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let transformed = TransformedAirScript::new("(null)", network).unwrap();
         assert_eq!(&*transformed, "(null)");
     }
 
-    #[test]
+    #[tokio::test]
     fn test_translate_call_no_result() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let script = r#"(call peer_id ("service_id" func) [])"#;
@@ -169,7 +169,7 @@ mod tests {
         assert_eq!(&*transformed, script);
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
     fn test_translate_call_no_string() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
@@ -178,7 +178,7 @@ mod tests {
         assert_eq!(transformed.as_deref(), Ok(script));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_translate_call_result() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
@@ -206,7 +206,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_translate_multiple_calls() {
         let script = r#"(seq
    (call peer_id ("service_id" func) [a 11]) ; ok={"test":"me"}
@@ -243,7 +243,7 @@ mod tests {
         assert!(network.get_peers().collect::<Vec<_>>().is_empty());
     }
 
-    #[test]
+    #[tokio::test]
     fn test_peers() {
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
@@ -288,7 +288,7 @@ mod tests {
         assert_eq!(*t, expected);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_at_transform() {
         let script = r#"(call "peer_id1" ("service_id" "func") [1 @"peer_id3"] x) ; ok={"test":@"peer_id2"}"#;
 

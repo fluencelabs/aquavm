@@ -18,7 +18,7 @@ use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn dont_wait_on_json_path() {
     let status = json!({
         "err_msg": "",
@@ -66,7 +66,7 @@ fn dont_wait_on_json_path() {
     assert_eq!(result.next_peer_pks, vec![test_params.init_peer_id]);
 }
 
-#[test]
+#[tokio::test]
 fn dont_wait_on_json_path_on_scalars() {
     let array = json!([1u32, 2u32, 3u32, 4u32, 5u32]);
 
@@ -128,7 +128,7 @@ fn dont_wait_on_json_path_on_scalars() {
     assert!(check_error(&object_result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn ap_scalar_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
@@ -152,7 +152,7 @@ fn ap_scalar_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
+#[tokio::test]
 fn ap_stream_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
@@ -176,7 +176,7 @@ fn ap_stream_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
+#[tokio::test]
 fn match_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
@@ -202,7 +202,7 @@ fn match_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
+#[tokio::test]
 fn mismatch_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
@@ -228,7 +228,7 @@ fn mismatch_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
+#[tokio::test]
 fn fold_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
@@ -254,7 +254,7 @@ fn fold_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
+#[tokio::test]
 fn canon_with_empty_behaviour() {
     let peer_id = "peer_id";
 

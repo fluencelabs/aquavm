@@ -24,7 +24,7 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn test_missing_cid() {
     let peer_id = "peer_id";
     let mut vm = create_avm(echo_call_service(), peer_id);
@@ -48,7 +48,7 @@ fn test_missing_cid() {
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
-#[test]
+#[tokio::test]
 fn test_correct_cid() {
     let peer_id = "peer_id";
     let mut vm = create_avm(echo_call_service(), peer_id);
@@ -68,7 +68,7 @@ fn test_correct_cid() {
     assert_eq!(result.ret_code, 0, "{:?}", result);
 }
 
-#[test]
+#[tokio::test]
 fn test_scalar_cid() {
     let vm_peer_name = "vm_peer_id";
 
@@ -115,7 +115,7 @@ fn test_scalar_cid() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_stream_cid() {
     let vm_peer_name = "vm_peer_id";
 
@@ -164,7 +164,7 @@ fn test_stream_cid() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_unused_cid() {
     let vm_peer_id = "vm_peer_id";
 

@@ -28,39 +28,41 @@ use avm_interface::CallResults;
 use avm_interface::ParticleParameters;
 use fluence_keypair::KeyPair;
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
 use std::time::Instant;
 
 /// A newtype needed to mark it as `unsafe impl Send`
-struct SendSafeRunner(AVMRunner);
+struct SendSafeRunner<WB: WasmBackend>(AVMRunner<WB>);
 
 /// Mark runtime as Send, so libp2p on the node (use-site) is happy
-unsafe impl Send for SendSafeRunner {}
+unsafe impl<WB: WasmBackend> Send for SendSafeRunner<WB> {}
 
-impl Deref for SendSafeRunner {
-    type Target = AVMRunner;
+impl<WB: WasmBackend> Deref for SendSafeRunner<WB> {
+    type Target = AVMRunner<WB>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
-impl DerefMut for SendSafeRunner {
+impl<WB: WasmBackend> DerefMut for SendSafeRunner<WB> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-pub struct AVM<E> {
-    runner: SendSafeRunner,
+pub struct AVM<E, WB: WasmBackend> {
+    runner: SendSafeRunner<WB>,
     data_store: AVMDataStore<E>,
 }
 
-impl<E> AVM<E> {
+impl<E, WB: WasmBackend> AVM<E, WB> {
     /// Create AVM with provided config.
     #[allow(clippy::result_large_err)]
-    pub async fn new(config: AVMConfig<E>) -> AVMResult<Self, E> {
+    pub async fn new(config: AVMConfig<E>, wasm_backend: WB) -> AVMResult<Self, E> {
         let AVMConfig {
             air_wasm_path,
             max_heap_size,
@@ -70,7 +72,7 @@ impl<E> AVM<E> {
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask)
+        let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask, wasm_backend)
             .await
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);

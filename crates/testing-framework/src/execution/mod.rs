@@ -172,7 +172,7 @@ mod tests {
 
     use std::cell::RefCell;
 
-    #[test]
+    #[tokio::test]
     fn test_execution() {
         let peer1_name = "peer1";
         let peer2_name = "peer2";
@@ -211,7 +211,7 @@ mod tests {
         assert_eq!(outcome2.ret_code, 0);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_call_result_success() {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
@@ -240,7 +240,7 @@ mod tests {
         assert!(exec.execution_iter("peer1").unwrap().next().is_none());
     }
 
-    #[test]
+    #[tokio::test]
     fn test_call_result_error() {
         let script = r#"
         (seq
@@ -280,7 +280,7 @@ mod tests {
         assert_eq!(results2.len(), 0);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_seq_ok() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
@@ -384,7 +384,7 @@ mod tests {
         }
     }
 
-    #[test]
+    #[tokio::test]
     fn test_map() {
         let peer1_name = "peer1";
         let peer2_name = "peer2";
@@ -461,7 +461,7 @@ mod tests {
         }
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
     fn test_map_no_arg() {
         let peer1_name = "peer1";
@@ -480,7 +480,7 @@ mod tests {
         let _result_init: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect();
     }
 
-    #[test]
+    #[tokio::test]
     fn test_seq_error() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
@@ -587,7 +587,7 @@ mod tests {
         }
     }
 
-    #[test]
+    #[tokio::test]
     fn test_echo() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
@@ -637,7 +637,7 @@ mod tests {
         )
     }
 
-    #[test]
+    #[tokio::test]
     fn test_transformed_distinct() {
         let peer_name = "peer1";
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
@@ -687,7 +687,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_transformed_shared() {
         struct Service {
             state: RefCell<std::vec::IntoIter<JValue>>,
@@ -746,7 +746,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_invalid_air() {
         let res = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
@@ -799,7 +799,7 @@ mod tests {
         )
     }
 
-    #[test]
+    #[tokio::test]
     fn test_behaviour_service() {
         let peer_name = "peer1";
         let air_script =
@@ -807,7 +807,7 @@ mod tests {
         run_behaviour_service(peer_name, air_script)
     }
 
-    #[test]
+    #[tokio::test]
     fn test_dbg_behaviour_service() {
         let peer_name = "peer1";
         let air_script = &format!(
@@ -844,7 +844,7 @@ mod tests {
         )
     }
 
-    #[test]
+    #[tokio::test]
     fn test_behaviour_function() {
         let peer_name = "peer1";
         let air_script =
@@ -852,7 +852,7 @@ mod tests {
         run_behaviour_function(peer_name, air_script)
     }
 
-    #[test]
+    #[tokio::test]
     fn test_dbg_behaviour_function() {
         let peer_name = "peer1";
         let air_script = &format!(
@@ -889,7 +889,7 @@ mod tests {
         )
     }
 
-    #[test]
+    #[tokio::test]
     fn test_behaviour_arg() {
         let peer_name = "peer1";
         let air_script =
@@ -898,7 +898,7 @@ mod tests {
         run_behaviour_arg(peer_name, air_script)
     }
 
-    #[test]
+    #[tokio::test]
     fn test_dbg_behaviour_arg() {
         let peer_name = "peer1";
         let air_script =
@@ -947,7 +947,7 @@ mod tests {
         )
     }
 
-    #[test]
+    #[tokio::test]
     fn test_behaviour_tetraplet() {
         let peer_name = "peer1";
         let air_script =
@@ -955,7 +955,7 @@ mod tests {
         run_behaviour_tetraplet(peer_name, air_script)
     }
 
-    #[test]
+    #[tokio::test]
     fn test_dbg_behaviour_tetraplet() {
         let peer_name = "peer1";
         let air_script = &format!(

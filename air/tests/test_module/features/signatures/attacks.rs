@@ -27,7 +27,7 @@ use std::rc::Rc;
 ///
 /// CID store manipulations are checked in the `corruption` module.
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_current_peer_scalar() {
     // injecting a value that arrives to peer who does the next step
     let (alice_keypair, alice_peer_id) = derive_dummy_keypair("alice_peer");
@@ -90,7 +90,7 @@ fn test_attack_injection_current_peer_scalar() {
     assert_ne!(res.ret_code, 0);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_current_peer_stream() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
@@ -161,7 +161,7 @@ fn test_attack_injection_current_peer_stream() {
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_current_injection_unused() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
@@ -231,7 +231,7 @@ fn test_attack_injection_current_injection_unused() {
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_other_peer_scalar() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
@@ -289,7 +289,7 @@ fn test_attack_injection_other_peer_scalar() {
     assert_ne!(res.ret_code, 0);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_other_peer_stream() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
@@ -347,7 +347,7 @@ fn test_attack_injection_other_peer_stream() {
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_injection_other_peer_unused() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
@@ -407,7 +407,7 @@ fn test_attack_injection_other_peer_unused() {
     assert_eq!(res.ret_code, 0, "{}", res.error_message);
 }
 
-#[test]
+#[tokio::test]
 fn test_attack_replay() {
     let alice_name = "alice_peer_id";
     let bob_name = "bob_peer_id";

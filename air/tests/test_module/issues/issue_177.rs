@@ -19,7 +19,7 @@ use std::collections::HashMap;
 
 use serde_json::json;
 
-#[test]
+#[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/177
 fn issue_177() {
     let client_peer_id = "12D3KooWMMcNVt5AsiisAHbkfyZWKHufB2dkHCY5pUqZ6AQgEVK6";

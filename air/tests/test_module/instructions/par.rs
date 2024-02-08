@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn par_remote_remote() {
     use std::collections::HashSet;
 
@@ -37,7 +37,7 @@ fn par_remote_remote() {
     assert_eq!(actual_peers, expected_peers);
 }
 
-#[test]
+#[tokio::test]
 fn par_local_remote() {
     let local_peer_id = "local_peer_id";
     let mut vm = create_avm(unit_call_service(), local_peer_id);

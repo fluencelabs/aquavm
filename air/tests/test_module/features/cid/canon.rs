@@ -23,7 +23,7 @@ use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 fn test_canon_ok() {
     let init_peer_name = "init_peer_id";
 
@@ -99,7 +99,7 @@ fn test_canon_ok() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_canon_ok_multi() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
@@ -190,7 +190,7 @@ fn test_canon_ok_multi() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_canon_value_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
@@ -238,7 +238,7 @@ fn test_canon_value_not_found() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn test_canon_root_tetraplet_not_found() {
     let init_peer_id = "vm_peer_id";
     let other_peer_id = "other_peer_id";
@@ -293,7 +293,7 @@ fn test_canon_root_tetraplet_not_found() {
     assert_error_eq!(&result, expected_error);
 }
 
-#[test]
+#[tokio::test]
 fn test_canon_tetraplet_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);
@@ -352,7 +352,7 @@ fn test_canon_tetraplet_not_found() {
     assert_error_eq!(&result, expected_error);
 }
 
-#[test]
+#[tokio::test]
 fn test_canon_agg_not_found() {
     let init_peer_id = "vm_peer_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id);

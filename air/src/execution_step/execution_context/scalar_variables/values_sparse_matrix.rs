@@ -288,7 +288,7 @@ mod test {
     use std::num::NonZeroUsize;
     use std::rc::Rc;
 
-    #[test]
+    #[tokio::test]
     fn test_local_cleanup() {
         let mut scalars = ValuesSparseMatrix::new();
 

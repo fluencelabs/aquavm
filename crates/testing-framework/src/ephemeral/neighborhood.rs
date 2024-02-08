@@ -235,7 +235,7 @@ mod tests {
 
     use std::{iter::FromIterator, rc::Rc};
 
-    #[test]
+    #[tokio::test]
     fn test_empty_neighborhood() {
         let peer_name = "someone";
         let other_name = "other1";
@@ -250,7 +250,7 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_no_self_disconnect() {
         let peer_name = "someone";
         let other_name = "other1";
@@ -276,7 +276,7 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_set_neighborhood() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -299,7 +299,7 @@ mod tests {
         assert_eq!(penv.iter().collect::<PeerSet>(), expected_neighborhood);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_insert() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -322,7 +322,7 @@ mod tests {
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_ensure() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -346,7 +346,7 @@ mod tests {
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_insert_insert() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -368,7 +368,7 @@ mod tests {
         assert_eq!(penv.iter().collect::<Vec<_>>(), expected_neighborhood);
     }
 
-    #[test]
+    #[tokio::test]
     fn test_extend_neighborhood() {
         let peer_name = "peer";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
@@ -386,7 +386,7 @@ mod tests {
         );
     }
 
-    #[test]
+    #[tokio::test]
     fn test_remove_from_neiborhood() {
         let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
         let (peer_pk, _peer_id) = derive_dummy_keypair("someone");
@@ -404,7 +404,7 @@ mod tests {
             },
         );
     }
-    #[test]
+    #[tokio::test]
     fn test_fail() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -423,7 +423,7 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_fail_remove() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -448,7 +448,7 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_fail_unfail() {
         let peer_name = "someone";
         let other_name1 = "other1";
@@ -468,7 +468,7 @@ mod tests {
         assert!(penv.is_reachable(&other_id));
     }
 
-    #[test]
+    #[tokio::test]
     fn test_failed() {
         let peer_name = "someone";
         let other_name = "other1";

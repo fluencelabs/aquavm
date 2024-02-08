@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/178
 fn par_ap_behaviour() {
     let client_name = "client_id";

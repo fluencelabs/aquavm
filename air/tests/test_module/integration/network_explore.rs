@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // TODO: adjust test
 #[ignore]
 fn network_explore() {

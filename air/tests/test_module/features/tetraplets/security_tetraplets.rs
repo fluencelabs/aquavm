@@ -38,7 +38,7 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
     (host_function, arg_tetraplets)
 }
 
-#[test]
+#[tokio::test]
 fn fold_with_inner_call() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
@@ -97,7 +97,7 @@ fn fold_with_inner_call() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn fold_stream_with_inner_call() {
     let init_peer_name = "init_peer_id";
     let air_script = r#"
@@ -143,7 +143,7 @@ fn fold_stream_with_inner_call() {
     assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
 }
 
-#[test]
+#[tokio::test]
 fn fold_canon_with_inner_call() {
     let init_peer_name = "init_peer_id";
     let air_script = r#"
@@ -191,7 +191,7 @@ fn fold_canon_with_inner_call() {
     assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
 }
 
-#[test]
+#[tokio::test]
 fn fold_json_path() {
     let variable_numbers = json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]});
 
@@ -249,7 +249,7 @@ fn fold_json_path() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
-#[test]
+#[tokio::test]
 fn check_tetraplet_works_correctly() {
     let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
         CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
@@ -331,7 +331,7 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
     }
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
 fn tetraplet_with_wasm_modules() {
     use marine_rs_sdk::CallParameters;

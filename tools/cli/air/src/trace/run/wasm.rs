@@ -18,15 +18,20 @@ use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
 use air_test_utils::avm_runner::AVMRunner;
 use fluence_keypair::KeyPair;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasmtime_backend::WasmtimeConfig;
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
 
 use std::error::Error as StdError;
 use std::path::Path;
+use anyhow::anyhow;
 
-pub(crate) struct WasmAvmRunner(AVMRunner);
+pub(crate) struct WasmAvmRunner(AVMRunner<WasmtimeWasmBackend>);
 
 impl AirRunner for WasmAvmRunner {
-    fn call_tracing(
-        &mut self,
+    fn call_tracing<'this>(
+        &'this mut self,
         air: String,
         prev_data: Vec<u8>,
         data: Vec<u8>,
@@ -39,42 +44,55 @@ impl AirRunner for WasmAvmRunner {
         tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome> {
-        let call_tracing = self.0.call_tracing(
-            air,
-            prev_data,
-            data,
-            init_peer_id,
-            timestamp,
-            ttl,
-            current_peer_id,
-            call_results,
-            tracing_params,
-            tracing_output_mode,
-            keypair.key_format().into(),
-            keypair.secret().expect("Failed to get secret"),
-            particle_id,
-        );
-        let memory_stats = self.0.memory_stats();
-        tracing::warn!(memory_size = memory_stats.memory_size);
+    ) -> LocalBoxFuture<'this, anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome>> {
+        let keypair = keypair.clone();
+        async move {
+            let call_tracing = self.0.call_tracing(
+                air,
+                prev_data,
+                data,
+                init_peer_id,
+                timestamp,
+                ttl,
+                current_peer_id,
+                call_results,
+                tracing_params,
+                tracing_output_mode,
+                keypair.key_format().into(),
+                keypair.secret().expect("Failed to get secret"),
+                particle_id,
+            ).await;
+            let memory_stats = self.0.memory_stats();
+            tracing::warn!(memory_size = memory_stats.memory_size);
 
-        Ok(call_tracing?)
+            Ok(call_tracing?)
+        }.boxed_local()
     }
 }
 
 impl DataToHumanReadable for WasmAvmRunner {
-    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>> {
-        Ok(self.0.to_human_readable_data(data)?)
+    fn to_human_readable<'this>(&'this mut self, data: Vec<u8>) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>> {
+        async {
+            self.0.to_human_readable_data(data).await
+                .map_err(|e| Box::new(e) as Box<dyn StdError>)
+        }.boxed_local()
     }
 }
 
-pub(crate) fn create_wasm_avm_runner(
+pub(crate) async fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> anyhow::Result<Box<WasmAvmRunner>> {
+    let mut config = WasmtimeConfig::new();
+    config
+        .debug_info(true)
+        .wasm_backtrace(true)
+        .epoch_interruption(false);
+    let wasm_backend = WasmtimeWasmBackend::new(config).map_err(|e| anyhow!(e))?;
     Ok(Box::new(WasmAvmRunner(AVMRunner::new(
         air_interpreter_wasm_path.to_owned(),
         max_heap_size,
         0,
-    )?)))
+        wasm_backend
+    ).await?)))
 }

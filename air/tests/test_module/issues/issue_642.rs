@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn issue_642() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";

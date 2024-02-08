@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use std::collections::HashMap;
 use std::ops::Deref;
 
-#[test]
+#[tokio::test]
 fn merge_streams_in_two_fold() {
     use executed_state::*;
 
@@ -176,7 +176,7 @@ fn merge_streams_in_two_fold() {
     assert!(result_4.next_peer_pks.is_empty());
 }
 
-#[test]
+#[tokio::test]
 fn stream_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
         let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
@@ -218,7 +218,7 @@ fn stream_merge() {
     checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 }
 
-#[test]
+#[tokio::test]
 fn fold_merge() {
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
@@ -359,7 +359,7 @@ fn fold_merge() {
     }
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_scalar_match() {
     let air = r#"(call "peer" ("" "") [] var)"#;
 
@@ -371,7 +371,7 @@ fn test_merge_scalar_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_scalar_mismatch() {
     let air = r#"(call "peer" ("" "") [] var)"#;
     let mut avm = create_avm(echo_call_service(), "peer");
@@ -401,7 +401,7 @@ fn test_merge_scalar_mismatch() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_stream_match() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
 
@@ -413,7 +413,7 @@ fn test_merge_stream_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_stream_match_gen() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
     let mut avm = create_avm(echo_call_service(), "peer");
@@ -427,7 +427,7 @@ fn test_merge_stream_match_gen() {
     checked_call_vm!(avm, <_>::default(), air, data1, data2);
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_stream_mismatch() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
     let mut avm = create_avm(echo_call_service(), "peer");
@@ -457,7 +457,7 @@ fn test_merge_stream_mismatch() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_unused_match() {
     let air = r#"(call "peer" ("" "") [])"#;
 
@@ -469,7 +469,7 @@ fn test_merge_unused_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
+#[tokio::test]
 fn test_merge_unused_mismatch() {
     let air = r#"(call "peer" ("" "") [])"#;
     let mut avm = create_avm(echo_call_service(), "peer");

@@ -21,7 +21,7 @@ use air_test_utils::prelude::*;
 /// This test module asserts various runtime safety checks, for example,
 /// that actual calls' tetraplets are compared to stored one.
 
-#[test]
+#[tokio::test]
 fn test_runtime_executed_call_argument_hash() {
     // Mallory gets a trace where there are two calls that differ only by argument_hash.
     // Can it swap them successfully?
@@ -77,7 +77,7 @@ fn test_runtime_executed_call_argument_hash() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_runtime_executed_call_tetraplet() {
     // Mallory gets a trace where there are two calls that differ only by argument_hash.
     // Can it swap them successfully?
@@ -149,7 +149,7 @@ fn test_runtime_executed_call_tetraplet() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_runtime_executed_failed_argument_hash() {
     // Mallory gets a trace where there are two calls that differ only by argument_hash.
     // Can it swap them successfully?
@@ -209,7 +209,7 @@ fn test_runtime_executed_failed_argument_hash() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_runtime_failed_call_tetraplet() {
     // Mallory gets a trace where there are two calls that differ only by argument_hash.
     // Can it swap them successfully?
@@ -283,7 +283,7 @@ fn test_runtime_failed_call_tetraplet() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn test_runtime_canon_tetraplet() {
     let alice_name = "alice";
     let bob_name = "bob";

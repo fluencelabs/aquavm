@@ -47,7 +47,7 @@ fn create_check_service_closure(
     })
 }
 
-#[test]
+#[tokio::test]
 fn last_error_tetraplets() {
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
@@ -92,7 +92,7 @@ fn last_error_tetraplets() {
     assert_eq!(&(*tetraplets.borrow()).as_ref().unwrap()[0][0].json_path, "");
 }
 
-#[test]
+#[tokio::test]
 fn not_clear_last_error_in_match() {
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
@@ -127,7 +127,7 @@ fn not_clear_last_error_in_match() {
     assert_eq!(actual_value, no_error_object(),);
 }
 
-#[test]
+#[tokio::test]
 fn not_clear_last_error_in_mismatch() {
     let set_variable_peer_id = "set_variable";
     let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
@@ -162,7 +162,7 @@ fn not_clear_last_error_in_mismatch() {
     assert_eq!(actual_value, no_error_object(),);
 }
 
-#[test]
+#[tokio::test]
 fn track_current_peer_id() {
     let fallible_peer_id = "fallible_peer_id";
     let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
@@ -190,7 +190,7 @@ fn track_current_peer_id() {
     assert_eq!(last_error.get("peer_id").unwrap(), fallible_peer_id);
 }
 
-#[test]
+#[tokio::test]
 fn variable_names_shown_in_error() {
     let set_variable_vm_peer_id = "set_variable_vm_peer_id";
     let mut set_variable_vm = create_avm(set_variable_call_service(json!(1u32)), set_variable_vm_peer_id);
@@ -218,7 +218,7 @@ fn variable_names_shown_in_error() {
     assert_eq!(trace[1.into()], unused!(msg, peer = echo_vm_peer_id, args = vec![msg]));
 }
 
-#[test]
+#[tokio::test]
 fn non_initialized_last_error() {
     let vm_peer_id = "vm_peer_id";
     let args = Rc::new(RefCell::new(None));
@@ -250,7 +250,7 @@ fn non_initialized_last_error() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn access_last_error_by_not_exists_field() {
     let fallible_peer_id = "fallible_peer_id";
     let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
@@ -283,7 +283,7 @@ fn access_last_error_by_not_exists_field() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn last_error_with_par_one_subgraph_failed() {
     let fallible_peer_id = "fallible_peer_id";
     let fallible_call_service_name = "fallible_call_service";
@@ -318,7 +318,7 @@ fn last_error_with_par_one_subgraph_failed() {
     assert_eq!(actual_value, expected_value);
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_rebubble_error() {
     let fallible_peer_id = "fallible_peer_id";
     let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
@@ -348,7 +348,7 @@ fn fail_with_scalar_rebubble_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_from_call() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
@@ -376,7 +376,7 @@ fn fail_with_scalar_from_call() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_with_lambda_from_call() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
@@ -404,7 +404,7 @@ fn fail_with_scalar_with_lambda_from_call() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_from_call_not_enough_fields() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
@@ -429,7 +429,7 @@ fn fail_with_scalar_from_call_not_enough_fields() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_from_call_not_right_type() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([]);
@@ -450,7 +450,7 @@ fn fail_with_scalar_from_call_not_right_type() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fail_with_scalar_from_call_field_not_right_type() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!({"error_code": "error_code", "message": "error message"});
@@ -475,7 +475,7 @@ fn fail_with_scalar_from_call_field_not_right_type() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn last_error_with_match() {
     let vm_peer_id = "vm_peer_id";
     let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
@@ -497,7 +497,7 @@ fn last_error_with_match() {
     assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
 }
 
-#[test]
+#[tokio::test]
 fn undefined_last_error_errcode() {
     let local_peer_id = "local_peer_id";
     let script = format!(
@@ -525,7 +525,7 @@ fn undefined_last_error_errcode() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn undefined_last_error_msg_errcode() {
     let local_peer_id = "local_peer_id";
     let script = format!(

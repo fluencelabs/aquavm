@@ -72,7 +72,7 @@ pub(crate) struct Args {
     input: PathBuf,
 }
 
-pub(crate) fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std::error::Error>> {
+pub(crate) async fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     init_tracing("warn");
 
     let data: Vec<u8> = load_data(&args.input)?;
@@ -81,8 +81,11 @@ pub(crate) fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std::erro
         Err(anyhow::anyhow!("empty input data: {:?}", args.input))?;
     }
 
-    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path)?;
-    let out = runner.to_human_readable(data)?;
+    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path)
+        .await?;
+    let out = {
+        runner.to_human_readable(data).await?
+    };
     println!("{out}");
 
     Ok(())
@@ -95,7 +98,7 @@ fn init_tracing(tracing_params: &str) {
     builder.init();
 }
 
-fn create_runner(
+async fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
 ) -> anyhow::Result<Box<dyn DataToHumanReadable>> {
@@ -111,6 +114,7 @@ fn create_runner(
         #[cfg(feature = "wasm")]
         Mode::Wasm => {
             crate::trace::run::wasm::create_wasm_avm_runner(_air_interpreter_wasm_path, None)
+                .await
                 .context("Failed to instantiate WASM AVM")? as _
         }
     };

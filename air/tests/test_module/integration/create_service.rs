@@ -16,7 +16,7 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn create_service() {
     let module = "greeting";
     let module_config = json!(

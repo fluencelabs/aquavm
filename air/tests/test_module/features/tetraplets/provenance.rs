@@ -17,7 +17,7 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::{key_utils::at, prelude::*};
 
-#[test]
+#[tokio::test]
 fn call_result() {
     let init_peer_name = "B";
 
@@ -67,7 +67,7 @@ fn call_result() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn call_result_iteration() {
     let init_peer_name = "A";
 
@@ -140,7 +140,7 @@ fn call_result_iteration() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn literal() {
     let init_peer_name = "B";
 
@@ -182,7 +182,7 @@ fn literal() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn canon_in_canon() {
     let init_peer_name = "B";
 
@@ -256,7 +256,7 @@ fn canon_in_canon() {
     assert_eq!(last_state, &expected_state,);
 }
 
-#[test]
+#[tokio::test]
 fn lambda_result_iteration() {
     let init_peer_name = "A";
 

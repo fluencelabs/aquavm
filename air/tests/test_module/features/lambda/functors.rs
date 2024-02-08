@@ -21,7 +21,7 @@ use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 
-#[test]
+#[tokio::test]
 fn length_functor_for_array_scalar() {
     let script = r#"
         (seq
@@ -44,7 +44,7 @@ fn length_functor_for_array_scalar() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn length_functor_for_non_array_scalar() {
     let result_jvalue = "string_jvalue";
     let script = format!(
@@ -67,7 +67,7 @@ fn length_functor_for_non_array_scalar() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn length_functor_for_stream() {
     let script = r#"
         (seq
@@ -113,7 +113,7 @@ fn length_functor_for_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn length_functor_for_empty_stream() {
     let script = r#"
         (new $stream
@@ -143,7 +143,7 @@ fn length_functor_for_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn length_functor_for_canon_stream() {
     let script = r#"
         (seq
@@ -180,7 +180,7 @@ fn length_functor_for_canon_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn length_functor_for_empty_canon_stream() {
     let script = r#"
         (new $stream
@@ -209,7 +209,7 @@ fn length_functor_for_empty_canon_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn functor_dont_influence_tetraplet() {
     let set_variable_peer_id = "set_variable_peer_id";
     let set_variable_peer_result = json!({"field": [1,2,3]});

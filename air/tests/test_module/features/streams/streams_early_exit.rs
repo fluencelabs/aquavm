@@ -27,7 +27,7 @@ use pretty_assertions::assert_eq;
 
 use std::convert::TryInto;
 
-#[test]
+#[tokio::test]
 fn par_early_exit() {
     let init_peer_id = "init_peer_id";
     let setter_1_id = "setter_1";
@@ -248,7 +248,7 @@ fn par_early_exit() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn fold_early_exit() {
     let fold_executor_id = "fold_executor_id";
     let error_trigger_id = "error_trigger_id";
@@ -301,7 +301,7 @@ fn fold_early_exit() {
     );
 }
 
-#[test]
+#[tokio::test]
 fn fold_par_early_exit() {
     let variables_setter_id = "set_variable_id";
     let stream_setter_id = "stream_setter_id";

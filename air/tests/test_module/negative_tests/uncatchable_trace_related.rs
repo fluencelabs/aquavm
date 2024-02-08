@@ -35,7 +35,7 @@ use air_trace_handler::TraceHandlerError::MergeError;
 use air_trace_handler::TraceHandlerError::StateFSMError;
 use maplit::hashmap;
 
-#[test]
+#[tokio::test]
 fn par_len_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -67,7 +67,7 @@ fn par_len_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn par_pos_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -99,7 +99,7 @@ fn par_pos_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn par_len_underflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -126,7 +126,7 @@ fn par_len_underflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn set_subtrace_len_and_pos_failed() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
@@ -166,7 +166,7 @@ fn set_subtrace_len_and_pos_failed() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn no_element_at_position() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -204,7 +204,7 @@ fn no_element_at_position() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn no_stream_state() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
@@ -241,7 +241,7 @@ fn no_stream_state() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn incompatible_executed_states() {
     let vm_peer_id = "vm_peer_id";
     let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id);
@@ -273,7 +273,7 @@ fn incompatible_executed_states() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn different_executed_state_expected() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
@@ -301,7 +301,7 @@ fn different_executed_state_expected() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn invalid_dst_generations() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -335,7 +335,7 @@ fn invalid_dst_generations() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn incorrect_call_result() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -376,7 +376,7 @@ fn incorrect_call_result() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn canon_result_error() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
@@ -425,7 +425,7 @@ fn canon_result_error() {
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
-#[test]
+#[tokio::test]
 fn several_records_with_same_pos() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -478,7 +478,7 @@ fn several_records_with_same_pos() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn values_not_equal() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
@@ -521,7 +521,7 @@ fn values_not_equal() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fold_pos_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -571,7 +571,7 @@ fn fold_pos_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn subtrace_len_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
@@ -625,7 +625,7 @@ fn subtrace_len_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
+#[tokio::test]
 fn fold_incorrect_subtraces_count() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);

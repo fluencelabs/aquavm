@@ -168,7 +168,7 @@ enum Mode {
     Risc0,
 }
 
-pub(crate) fn run(args: Args) -> anyhow::Result<()> {
+pub(crate) async fn run(args: Args) -> anyhow::Result<()> {
     let tracing_json = (!args.json) as u8;
     #[cfg(feature = "wasm")]
     let global_tracing_params = if args.mode.wasm {
@@ -186,7 +186,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
         &args.air_interpreter_path,
         &args.air_near_contract_path,
         args.max_heap_size,
-    )?;
+    ).await?;
 
     let execution_data = match &args.source {
         Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
@@ -218,6 +218,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
                 &key_pair,
                 particle.particle_id.clone().into_owned(),
             )
+            .await
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {
             println!("{result:?}");
@@ -230,7 +231,7 @@ pub(crate) fn run(args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn create_runner(
+async fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
     _air_contract_wasm_path: &Path,
@@ -248,6 +249,7 @@ fn create_runner(
         #[cfg(feature = "wasm")]
         Mode::Wasm => {
             self::wasm::create_wasm_avm_runner(_air_interpreter_wasm_path, _max_heap_size)
+                .await
                 .context("Failed to instantiate WASM AVM")? as _
         }
         #[cfg(feature = "near")]

@@ -44,7 +44,7 @@ fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServi
     })
 }
 
-#[test]
+#[tokio::test]
 fn flattening_scalar_arrays() {
     let scalar_array = json!({"iterable": [
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]},
@@ -87,7 +87,7 @@ fn flattening_scalar_arrays() {
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![2, 3])));
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
 fn flattening_streams() {
     let stream_value = json!(
@@ -136,7 +136,7 @@ fn flattening_streams() {
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![0, 1])));
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
 fn test_handling_non_flattening_values() {
     let stream_value = json!(

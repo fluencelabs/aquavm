@@ -16,7 +16,7 @@
 
 use air_test_utils::{key_utils::derive_dummy_keypair, prelude::*};
 
-#[test]
+#[tokio::test]
 fn issue_310() {
     let (key_pair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";

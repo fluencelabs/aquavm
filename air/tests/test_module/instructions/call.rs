@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
-#[test]
+#[tokio::test]
 fn current_peer_id_call() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(unit_call_service(), vm_peer_id);
@@ -63,7 +63,7 @@ fn current_peer_id_call() {
     assert_eq!(result_with_empty_string, result);
 }
 
-#[test]
+#[tokio::test]
 fn call_with_timestamp() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -83,7 +83,7 @@ fn call_with_timestamp() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
+#[tokio::test]
 fn call_with_ttl() {
     let vm_peer_id = "test_peer_id";
     let mut vm = create_avm(echo_call_service(), vm_peer_id);
@@ -100,7 +100,7 @@ fn call_with_ttl() {
 }
 
 // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
-#[test]
+#[tokio::test]
 fn remote_peer_id_call() {
     let some_local_peer_id = String::from("some_local_peer_id");
     let mut vm = create_avm(echo_call_service(), &some_local_peer_id);
@@ -119,7 +119,7 @@ fn remote_peer_id_call() {
 }
 
 // Check that setting variables works as expected.
-#[test]
+#[tokio::test]
 fn variables() {
     let mut vm = create_avm(unit_call_service(), "remote_peer_id");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!("remote_peer_id")), "set_variable");
@@ -138,7 +138,7 @@ fn variables() {
 }
 
 // Check that duplicate variables are impossible.
-#[test]
+#[tokio::test]
 fn duplicate_variables() {
     let peer_id = "peer_id";
     let mut vm = create_avm(unit_call_service(), peer_id);
@@ -161,7 +161,7 @@ fn duplicate_variables() {
 }
 
 // Check that string literals can be used as call parameters.
-#[test]
+#[tokio::test]
 fn string_parameters() {
     let call_service: CallServiceClosure =
         Box::new(|mut params| -> CallServiceResult { CallServiceResult::ok(params.arguments.remove(0)) });
@@ -199,7 +199,7 @@ fn string_parameters() {
     assert_eq!(actual_trace[1.into()], expected_state);
 }
 
-#[test]
+#[tokio::test]
 fn call_canon_stream_map_arg() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
@@ -268,7 +268,7 @@ fn call_canon_stream_map_arg() {
 }
 
 // WIP add negative
-#[test]
+#[tokio::test]
 fn call_peer_id_from_canon_stream_map() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
@@ -334,7 +334,7 @@ fn call_peer_id_from_canon_stream_map() {
     assert_eq!(&*actual_trace, expected_trace,);
 }
 
-#[test]
+#[tokio::test]
 fn call_module_func_from_canon_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
     // There is a bug in testing framework that disallows lenses to be a source of a module name in

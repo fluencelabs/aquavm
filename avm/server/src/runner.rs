@@ -26,14 +26,15 @@ use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
 use fluence_keypair::KeyPair;
 use marine::IValue;
-use marine::Marine;
-use marine::MarineConfig;
-use marine::ModuleDescriptor;
+use marine::generic::Marine;
+use marine::generic::MarineConfig;
+use marine::generic::ModuleDescriptor;
+use marine_wasm_backend_traits::WasmBackend;
 
 use std::path::PathBuf;
 
-pub struct AVMRunner {
-    marine: Marine,
+pub struct AVMRunner<WB: WasmBackend> {
+    marine: Marine<WB>,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
     /// The memory limit provided by constructor
@@ -52,18 +53,19 @@ pub struct AVMMemoryStats {
     pub allocation_rejects: Option<u32>,
 }
 
-impl AVMRunner {
+impl<WB: WasmBackend> AVMRunner<WB> {
     /// Create AVM with the provided config.
-    pub fn new(
+    pub async fn new(
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
         logging_mask: i32,
+        wasm_backend: WB
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
-        let marine = Marine::with_raw_config(marine_config)?;
+        let marine = Marine::with_raw_config(wasm_backend, marine_config).await?;
 
         let avm = Self {
             marine,
@@ -76,7 +78,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub fn call(
+    pub async fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -110,7 +112,8 @@ impl AVMRunner {
 
         let result = measure!(
             self.marine
-                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?,
+                .call_with_ivalues_async(&self.wasm_filename, "invoke", &args, <_>::default())
+                .await?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke",
@@ -126,7 +129,7 @@ impl AVMRunner {
 
     #[allow(clippy::too_many_arguments)]
     #[tracing::instrument(skip_all)]
-    pub fn call_tracing(
+    pub async fn call_tracing(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -159,12 +162,12 @@ impl AVMRunner {
         args.push(IValue::U8(tracing_output_mode));
 
         let result = measure!(
-            self.marine.call_with_ivalues(
+            self.marine.call_with_ivalues_async(
                 &self.wasm_filename,
                 "invoke_tracing",
                 &args,
                 <_>::default(),
-            )?,
+            ).await?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke_tracing",
@@ -178,15 +181,15 @@ impl AVMRunner {
         Ok(outcome)
     }
 
-    pub fn to_human_readable_data(&mut self, data: Vec<u8>) -> RunnerResult<String> {
+    pub async fn to_human_readable_data<'this>(&'this mut self, data: Vec<u8>) -> RunnerResult<String> {
         let args = vec![IValue::ByteArray(data)];
 
-        let result = self.marine.call_with_ivalues(
+        let result = self.marine.call_with_ivalues_async(
             &self.wasm_filename,
             "to_human_readable_data",
             &args,
             <_>::default(),
-        )?;
+        ).await?;
         let result = try_as_one_value_vec(result)?;
         let outcome = try_as_string(result, "result").map_err(RunnerError::Aux)?;
         Ok(outcome)
@@ -283,13 +286,13 @@ fn split_dirname(path: PathBuf) -> RunnerResult<(PathBuf, String)> {
     Ok((path, file_name))
 }
 
-fn make_marine_config(
+fn make_marine_config<WB: WasmBackend>(
     air_wasm_dir: PathBuf,
     air_wasm_file: &str,
     total_memory_limit: Option<u64>,
     logging_mask: i32,
-) -> MarineConfig {
-    let air_module_config = marine::MarineModuleConfig {
+) -> MarineConfig<WB> {
+    let air_module_config = marine::generic::MarineModuleConfig::<WB> {
         logger_enabled: true,
         host_imports: <_>::default(),
         wasi: None,

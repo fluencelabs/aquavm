@@ -17,7 +17,7 @@
 use air::ExecutionCidState;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 fn seq_remote_remote() {
     let mut vm = create_avm(unit_call_service(), "");
     let mut cid_state = ExecutionCidState::new();
@@ -45,7 +45,7 @@ fn seq_remote_remote() {
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id_2")]);
 }
 
-#[test]
+#[tokio::test]
 fn seq_local_remote() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = String::from("remote_peer_id");

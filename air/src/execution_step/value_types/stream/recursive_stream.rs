@@ -170,7 +170,7 @@ mod test {
         }
     }
 
-    #[test]
+    #[tokio::test]
     fn fold_started_empty_if_no_values() {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
@@ -179,7 +179,7 @@ mod test {
         assert!(!cursor_state.should_continue())
     }
 
-    #[test]
+    #[tokio::test]
     fn next_iteration_empty_if_no_values() {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
@@ -188,7 +188,7 @@ mod test {
         assert!(!cursor_state.should_continue())
     }
 
-    #[test]
+    #[tokio::test]
     fn next_iteration_empty_if_no_values_added() {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
@@ -204,7 +204,7 @@ mod test {
         assert!(!cursor_state.should_continue());
     }
 
-    #[test]
+    #[tokio::test]
     fn one_recursive_iteration() {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();
@@ -227,7 +227,7 @@ mod test {
         assert!(!cursor_state.should_continue());
     }
 
-    #[test]
+    #[tokio::test]
     fn add_value_into_prev_and_current() {
         let mut stream = Stream::new();
         let mut recursive_stream = RecursiveStreamCursor::new();

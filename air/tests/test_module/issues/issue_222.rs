@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/222
 fn issue_222() {
     let other_id = "other_id";

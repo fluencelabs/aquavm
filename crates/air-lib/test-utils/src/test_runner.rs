@@ -28,16 +28,17 @@ use super::CallServiceClosure;
 
 use avm_server::avm_runner::*;
 use fluence_keypair::KeyPair;
+use futures::future::LocalBoxFuture;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub trait AirRunner {
-    fn new(current_call_id: impl Into<String>) -> Self;
+    fn new(current_call_id: impl Into<String>) -> LocalBoxFuture<'static, Self>;
 
     #[allow(clippy::too_many_arguments)]
-    fn call(
-        &mut self,
+    fn call<'this>(
+        &'this mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
@@ -48,7 +49,7 @@ pub trait AirRunner {
         call_results: avm_server::CallResults,
         key_pair: &KeyPair,
         particle_id: String,
-    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>>;
+    ) -> LocalBoxFuture<'this, Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>>>;
 
     fn get_current_peer_id(&self) -> &str;
 }
@@ -69,7 +70,7 @@ pub struct TestRunParameters {
 }
 
 impl<R: AirRunner> TestRunner<R> {
-    pub fn call(
+    pub async fn call(
         &mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
@@ -106,6 +107,7 @@ impl<R: AirRunner> TestRunner<R> {
                     &self.keypair,
                     particle_id.clone(),
                 )
+                .await
                 .map_err(|e| e.to_string())?;
 
             next_peer_pks.extend(outcome.next_peer_pks);
@@ -130,8 +132,8 @@ impl<R: AirRunner> TestRunner<R> {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn call_single(
-        &mut self,
+    pub async fn call_single<'this>(
+        &'this mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
@@ -141,7 +143,7 @@ impl<R: AirRunner> TestRunner<R> {
         override_current_peer_id: Option<String>,
         call_results: avm_server::CallResults,
         particle_id: impl Into<String>,
-    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
+    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>> {
         self.runner.call(
             air,
             prev_data,
@@ -153,18 +155,18 @@ impl<R: AirRunner> TestRunner<R> {
             call_results,
             &self.keypair,
             particle_id.into(),
-        )
+        ).await
     }
 }
 
-pub fn create_avm(
+pub async fn create_avm(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
-    create_custom_avm(call_service, current_peer_id)
+    create_custom_avm(call_service, current_peer_id).await
 }
 
-pub fn create_custom_avm<R: AirRunner>(
+pub async fn create_custom_avm<R: AirRunner>(
     call_service: CallServiceClosure,
     current_peer_id: impl Into<String>,
 ) -> TestRunner<R> {
@@ -172,7 +174,7 @@ pub fn create_custom_avm<R: AirRunner>(
 
     let (keypair, _) = derive_dummy_keypair(&current_peer_id);
 
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id).await;
 
     TestRunner {
         runner,
@@ -181,13 +183,13 @@ pub fn create_custom_avm<R: AirRunner>(
     }
 }
 
-pub fn create_avm_with_key<R: AirRunner>(
+pub async fn create_avm_with_key<R: AirRunner>(
     keypair: impl Into<KeyPair>,
     call_service: CallServiceClosure,
 ) -> TestRunner<R> {
     let keypair = keypair.into();
     let current_peer_id = keypair.public().to_peer_id().to_string();
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id).await;
 
     TestRunner {
         runner,
@@ -247,7 +249,7 @@ mod tests {
     use avm_interface::CallRequestParams;
     use serde_json::json;
 
-    #[test]
+    #[tokio::test]
     fn test_override_current_peer_id() {
         let spell_id = "spell_id";
         let host_peer_id = "host_peer_id";
