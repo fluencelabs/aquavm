@@ -24,10 +24,11 @@ pub(crate) fn limit_behavior(
     error: PreparationError,
     soft_limit_flag: &mut bool,
 ) -> PreparationResult<()> {
+    *soft_limit_flag = true;
+
     if run_parameters.hard_limit_enabled {
         Err(error)
     } else {
-        *soft_limit_flag = true;
         Ok(())
     }
 }

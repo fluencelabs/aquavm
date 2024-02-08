@@ -26,6 +26,7 @@ use crate::verification_step::verify;
 use air_interpreter_interface::InterpreterOutcome;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SerializedCallResults;
+use air_interpreter_interface::SoftLimitsTriggering;
 use air_log_targets::RUN_PARAMS;
 use air_utils::farewell_if_fail;
 use air_utils::measure;
@@ -65,7 +66,8 @@ fn execute_air_impl(
 
     let mut soft_limits_triggering = farewell_if_fail!(
         check_against_size_limits(&params, &air, &raw_current_data),
-        raw_prev_data
+        raw_prev_data,
+        SoftLimitsTriggering::default()
     );
 
     farewell_if_fail!(

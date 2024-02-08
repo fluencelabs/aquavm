@@ -42,7 +42,8 @@ pub struct AVMOutcome {
     /// (it counts only execution time without operations with DataStore and so on)
     pub execution_time: Duration,
 
-    soft_limits_triggering: SoftLimitsTriggering, // WIP
+    /// To store and convey soft limits triggering flags.
+    soft_limits_triggering: SoftLimitsTriggering,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

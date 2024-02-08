@@ -64,13 +64,4 @@ macro_rules! farewell_if_fail {
             }
         };
     };
-    ($cmd:expr, $raw_prev_data:expr) => {
-        match $cmd {
-            Ok(result) => result,
-            // return the prev data in case of errors
-            Err(error) => {
-                farewell_if_fail!($cmd, $raw_prev_data, <_>::default())
-            }
-        };
-    };
 }

@@ -24,6 +24,7 @@ use serde::Serialize;
 
 pub const INTERPRETER_SUCCESS: i64 = 0;
 
+/// This stores soft limits triggering flags.
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SoftLimitsTriggering {
     pub air_size_limit_exceeded: bool,
