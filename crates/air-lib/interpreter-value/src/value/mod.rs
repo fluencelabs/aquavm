@@ -32,6 +32,7 @@ use core::fmt::{self, Debug, Display};
 use core::mem;
 use core::str;
 use std::io;
+use std::ops::Deref;
 use std::rc::Rc;
 
 pub use self::index::Index;
@@ -78,9 +79,24 @@ pub enum JValue {
     Object(
         #[omit_bounds]
         #[archive_attr(omit_bounds)]
-        Rc<Map<JsonString, JValue>>,
+        Rc<Object>,
     ),
 }
+
+#[derive(Clone, Debug, Eq, PartialEq, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+#[archive(check_bytes)]
+#[archive_attr(check_bytes(
+    bound = "__C: rkyv::validation::ArchiveContext + rkyv::validation::SharedContext, <__C as rkyv::Fallible>::Error: std::error::Error"
+))]
+#[archive(bound(
+    serialize = "__S: rkyv::ser::ScratchSpace + rkyv::ser::Serializer + rkyv::ser::SharedSerializeRegistry",
+    deserialize = "__D: rkyv::de::SharedDeserializeRegistry"
+))]
+/// A wrapper type for better rkyv support.
+///
+/// Please note that this type doens't need to implement serde types as JValue serde implementations
+/// works with its contents directly.
+pub struct Object(#[with(rkyv::with::AsVec)] Map<JsonString, JValue>);
 
 impl Debug for JValue {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -98,6 +114,14 @@ impl Debug for JValue {
                 Debug::fmt(&**map, formatter)
             }
         }
+    }
+}
+
+impl Deref for Object {
+    type Target = Map<JsonString, JValue>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -163,18 +187,18 @@ impl JValue {
     }
 
     pub fn object(map: impl Into<Map<JsonString, JValue>>) -> Self {
-        Self::Object(Rc::new(map.into()))
+        Self::Object(Rc::new(Object(map.into())))
     }
 
     pub fn object_from_pairs(
         into_iter: impl IntoIterator<Item = (impl Into<JsonString>, impl Into<JValue>)>,
     ) -> Self {
-        Self::Object(Rc::new(
+        Self::Object(Rc::new(Object(
             into_iter
                 .into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-        ))
+        )))
     }
 
     /// Index into a JSON array or map. A string index can be used to access a

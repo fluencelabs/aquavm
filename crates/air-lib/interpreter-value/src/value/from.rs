@@ -19,7 +19,7 @@
  * licensed under conditions of MIT License and Apache License, Version 2.0.
  */
 
-use super::JValue;
+use super::{JValue, Object};
 use crate::{JsonString, Map};
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -181,7 +181,7 @@ impl From<Map<JsonString, JValue>> for JValue {
     /// let x: JValue = m.into();
     /// ```
     fn from(f: Map<JsonString, JValue>) -> Self {
-        JValue::Object(f.into())
+        JValue::Object(Object(f).into())
     }
 }
 
@@ -277,11 +277,11 @@ impl<K: Into<JsonString>, V: Into<JValue>> FromIterator<(K, V)> for JValue {
     /// let x: JValue = v.into_iter().collect();
     /// ```
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        JValue::Object(Rc::new(
+        JValue::Object(Rc::new(Object(
             iter.into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-        ))
+        )))
     }
 }
 
@@ -326,7 +326,7 @@ impl From<&serde_json::Value> for JValue {
             Value::Array(a) => JValue::Array(a.iter().map(Into::into).collect()),
             Value::Object(o) => {
                 let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.as_str().into(), v.into())));
-                JValue::Object(oo.into())
+                JValue::Object(Object(oo).into())
             }
         }
     }
