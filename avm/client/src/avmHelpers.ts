@@ -34,6 +34,7 @@ const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
  * @param prevData - particle's prev data as raw byte array
  * @param data - particle's data as raw byte array
  * @param callResults - array of tuples [callResultKey, callResult]
+ * @param runParams - a struct that sets AquaVM runtime general and particle-specifc parameters
  * @returns AVM call arguments suitable for marine-js
  */
 export function serializeAvmArgs(
@@ -60,6 +61,10 @@ export function serializeAvmArgs(
         timestamp: runParams.timestamp,
         ttl: runParams.ttl,
         particle_id: runParams.particleId,
+        air_size_limit: Number("4294967296"),
+        particle_size_limit: Number("4294967296"),
+        call_result_size_limit: Number("4294967296"),
+        hard_limit_enabled: Number("4294967296"),
     };
 
     return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encodedCallResults)];
@@ -124,7 +129,9 @@ export function deserializeAvmResult(result: any): InterpreterResult {
 
 type CallToAvm = ((args: JSONArray | JSONObject) => Promise<unknown>) | ((args: JSONArray | JSONObject) => unknown);
 
+
 /**
+ * TODO this f() is unused and to be removed.
  * Utility function which serializes AVM args and passed them into AVM returning interpreter result.
  * Call to AVM is delegated to a function which must be provided by user.
  * It might be either synchronous or asynchronous (returning a promise)
