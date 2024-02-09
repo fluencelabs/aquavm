@@ -25,7 +25,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[tokio::test]
-fn invalid_data_without_versions() {
+async fn invalid_data_without_versions() {
     use air_interpreter_sede::Format;
     use air_interpreter_sede::Representation;
 
@@ -35,7 +35,7 @@ fn invalid_data_without_versions() {
     }
 
     let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let script = r#"(null)"#;
     let invalid_data = InvalidDataStruct { trace: vec![1, 2, 3] };
@@ -52,7 +52,7 @@ fn invalid_data_without_versions() {
 }
 
 #[tokio::test]
-fn invalid_data_with_versions() {
+async fn invalid_data_with_versions() {
     use air_interpreter_sede::Format;
     use air_interpreter_sede::Representation;
 
@@ -64,7 +64,7 @@ fn invalid_data_with_versions() {
     }
 
     let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let script = r#"(null)"#;
     let versions = Versions::new(semver::Version::new(1, 1, 1));
@@ -85,7 +85,7 @@ fn invalid_data_with_versions() {
 }
 
 #[tokio::test]
-fn invalid_callresults() {
+async fn invalid_callresults() {
     use air_interpreter_sede::Format;
 
     let air = r#"(null)"#.to_string();

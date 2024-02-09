@@ -17,10 +17,10 @@
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn par_remote_remote() {
+async fn par_remote_remote() {
     use std::collections::HashSet;
 
-    let mut vm = create_avm(unit_call_service(), "");
+    let mut vm = create_avm(unit_call_service(), "").await;
 
     let script = r#"
             (par
@@ -38,9 +38,9 @@ fn par_remote_remote() {
 }
 
 #[tokio::test]
-fn par_local_remote() {
+async fn par_local_remote() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"

@@ -20,7 +20,7 @@ use air_test_utils::prelude::TestRunParameters;
 use air_test_utils::*;
 
 #[tokio::test]
-fn global_streams_are_compactified() {
+async fn global_streams_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
@@ -32,8 +32,8 @@ fn global_streams_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
-    let result = executor.execute_all(peer_name).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -53,7 +53,7 @@ fn global_streams_are_compactified() {
 }
 
 #[tokio::test]
-fn global_stream_maps_are_compactified() {
+async fn global_stream_maps_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
@@ -68,8 +68,8 @@ fn global_stream_maps_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
-    let result = executor.execute_all(peer_name).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -90,7 +90,7 @@ fn global_stream_maps_are_compactified() {
 }
 
 #[tokio::test]
-fn local_streams_are_compactified() {
+async fn local_streams_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
@@ -104,8 +104,8 @@ fn local_streams_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
-    let result = executor.execute_all(peer_name).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();
@@ -125,7 +125,7 @@ fn local_streams_are_compactified() {
 }
 
 #[tokio::test]
-fn local_stream_maps_are_compactified() {
+async fn local_stream_maps_are_compactified() {
     let peer_name = "peer_id";
     let service_result = "service_result";
     let script = format!(
@@ -142,8 +142,8 @@ fn local_stream_maps_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).unwrap();
-    let result = executor.execute_all(peer_name).unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
     let mut cid_state = ExecutionCidState::new();

@@ -19,9 +19,9 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/346
-fn issue_346() {
+async fn issue_346() {
     let vm_peer_id = "peer_id_1";
-    let mut peer_vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut peer_vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"

@@ -18,10 +18,10 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/180
-fn issue_180() {
+async fn issue_180() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"

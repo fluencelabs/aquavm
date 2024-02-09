@@ -257,7 +257,7 @@ mod test {
         )
     }
 
-    #[tokio::test]
+    #[test]
     fn test_iter() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -273,7 +273,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_slice_iter_prev() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -294,7 +294,7 @@ mod test {
         assert_eq!(slice_iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_slice_iter_current() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -315,7 +315,7 @@ mod test {
         assert_eq!(slice_iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_slice_iter_new() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -336,7 +336,7 @@ mod test {
         assert_eq!(slice_iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_iter_on_empty_stream() {
         let stream = Stream::new();
 
@@ -344,7 +344,7 @@ mod test {
         assert_eq!(slice.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_slice_on_empty_stream() {
         let stream = Stream::new();
 
@@ -352,7 +352,7 @@ mod test {
         assert_eq!(slice.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn generation_from_current_data_after_previous() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -367,7 +367,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn generation_from_new_data_after_current_and_previous() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -385,7 +385,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn empty_generations_skipped_in_slice_iter_prev() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -403,7 +403,7 @@ mod test {
         assert_eq!(slice_iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn empty_generations_skipped_in_slice_iter_current() {
         let value_1 = create_value(json!("value_1"));
         let value_2 = create_value(json!("value_2"));
@@ -421,7 +421,7 @@ mod test {
         assert_eq!(slice_iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_with_previous_new_generation() {
         let value_1 = create_value_with_pos(json!("value_1"), 0.into());
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
@@ -449,7 +449,7 @@ mod test {
         assert_eq!(actual_trace, expected_trace);
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_with_current_generation() {
         let value_1 = create_value_with_pos(json!("value_1"), 0.into());
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
@@ -481,7 +481,7 @@ mod test {
         assert_eq!(actual_trace, expected_trace);
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_works_with_mixed_generations() {
         let value_1 = create_value_with_pos(json!("value_1"), 0.into());
         let value_2 = create_value_with_pos(json!("value_2"), 1.into());
@@ -525,7 +525,7 @@ mod test {
         assert_eq!(actual_trace, expected_trace);
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_invalid_state_error() {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
@@ -550,7 +550,7 @@ mod test {
         ));
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_points_to_nowhere_error() {
         let value_1 = create_value(json!("value_1"));
         let mut stream = Stream::new();
@@ -571,7 +571,7 @@ mod test {
         ));
     }
 
-    #[tokio::test]
+    #[test]
     fn stream_size_limit() {
         use super::STREAM_MAX_SIZE;
         use crate::UncatchableError;

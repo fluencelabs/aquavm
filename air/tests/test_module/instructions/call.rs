@@ -24,9 +24,9 @@ use pretty_assertions::assert_eq;
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
 #[tokio::test]
-fn current_peer_id_call() {
+async fn current_peer_id_call() {
     let vm_peer_id = "test_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let service_id = "local_service_id";
     let function_name = "local_fn_name";
@@ -64,9 +64,9 @@ fn current_peer_id_call() {
 }
 
 #[tokio::test]
-fn call_with_timestamp() {
+async fn call_with_timestamp() {
     let vm_peer_id = "test_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = r#"(call %init_peer_id% ("" "") [%timestamp%] result_name)"#;
 
@@ -84,9 +84,9 @@ fn call_with_timestamp() {
 }
 
 #[tokio::test]
-fn call_with_ttl() {
+async fn call_with_ttl() {
     let vm_peer_id = "test_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(r#"(call "{vm_peer_id}" ("" "") [%ttl%] result_name)"#);
 
@@ -101,9 +101,9 @@ fn call_with_ttl() {
 
 // Check that specifying remote peer id in call will result its appearing in next_peer_pks.
 #[tokio::test]
-fn remote_peer_id_call() {
+async fn remote_peer_id_call() {
     let some_local_peer_id = String::from("some_local_peer_id");
-    let mut vm = create_avm(echo_call_service(), &some_local_peer_id);
+    let mut vm = create_avm(echo_call_service(), &some_local_peer_id).await;
 
     let remote_peer_id = String::from("some_remote_peer_id");
     let script = format!(r#"(call "{remote_peer_id}" ("local_service_id" "local_fn_name") ["arg"] result_name)"#);
@@ -120,9 +120,9 @@ fn remote_peer_id_call() {
 
 // Check that setting variables works as expected.
 #[tokio::test]
-fn variables() {
-    let mut vm = create_avm(unit_call_service(), "remote_peer_id");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!("remote_peer_id")), "set_variable");
+async fn variables() {
+    let mut vm = create_avm(unit_call_service(), "remote_peer_id").await;
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!("remote_peer_id")), "set_variable").await;
 
     let script = r#"
             (seq
@@ -139,9 +139,9 @@ fn variables() {
 
 // Check that duplicate variables are impossible.
 #[tokio::test]
-fn duplicate_variables() {
+async fn duplicate_variables() {
     let peer_id = "peer_id";
-    let mut vm = create_avm(unit_call_service(), peer_id);
+    let mut vm = create_avm(unit_call_service(), peer_id).await;
 
     let variable_name = "modules";
     let script = format!(
@@ -162,15 +162,15 @@ fn duplicate_variables() {
 
 // Check that string literals can be used as call parameters.
 #[tokio::test]
-fn string_parameters() {
+async fn string_parameters() {
     let call_service: CallServiceClosure =
         Box::new(|mut params| -> CallServiceResult { CallServiceResult::ok(params.arguments.remove(0)) });
 
     let vm_peer_id = "A";
-    let mut vm = create_avm(call_service, vm_peer_id);
+    let mut vm = create_avm(call_service, vm_peer_id).await;
 
     let set_variable_vm_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!("arg3_value")), set_variable_vm_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!("arg3_value")), set_variable_vm_peer_id).await;
 
     let service_id = "some_service_id";
     let function_name = "local_fn_name";
@@ -200,7 +200,7 @@ fn string_parameters() {
 }
 
 #[tokio::test]
-fn call_canon_stream_map_arg() {
+async fn call_canon_stream_map_arg() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
 
@@ -220,8 +220,9 @@ fn call_canon_stream_map_arg() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -269,7 +270,7 @@ fn call_canon_stream_map_arg() {
 
 // WIP add negative
 #[tokio::test]
-fn call_peer_id_from_canon_stream_map() {
+async fn call_peer_id_from_canon_stream_map() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
     let script = format!(
@@ -288,8 +289,9 @@ fn call_peer_id_from_canon_stream_map() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -335,11 +337,11 @@ fn call_peer_id_from_canon_stream_map() {
 }
 
 #[tokio::test]
-fn call_module_func_from_canon_stream_map() {
+async fn call_module_func_from_canon_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
     // There is a bug in testing framework that disallows lenses to be a source of a module name in
     // a call triplet.
-    let mut vm = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"

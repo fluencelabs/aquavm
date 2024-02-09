@@ -22,16 +22,16 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub fn unit_call_service() -> CallServiceClosure {
-    Box::new(|_| -> CallServiceResult {
+pub fn unit_call_service() -> CallServiceClosure<'_> {
+    Box::new(|_| async {
         CallServiceResult::ok(json!("result from unit_call_service"))
-    })
+    }.boxed_local())
 }
 
-pub fn echo_call_service() -> CallServiceClosure {
-    Box::new(|mut params| -> CallServiceResult {
+pub fn echo_call_service() -> CallServiceClosure<'_> {
+    Box::new(|mut params| async {
         CallServiceResult::ok(params.arguments.remove(0))
-    })
+    }.boxed_local())
 }
 
 pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {

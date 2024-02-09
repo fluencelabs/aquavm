@@ -18,10 +18,10 @@ use air::UncatchableError;
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn xor() {
+async fn xor() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
-    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -70,9 +70,9 @@ fn xor() {
 }
 
 #[tokio::test]
-fn xor_var_not_found() {
+async fn xor_var_not_found() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -93,9 +93,9 @@ fn xor_var_not_found() {
 }
 
 #[tokio::test]
-fn xor_multiple_variables_found() {
+async fn xor_multiple_variables_found() {
     let set_variables_peer_id = "set_variables_peer_id";
-    let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id);
+    let mut set_variables_vm = create_avm(echo_call_service(), set_variables_peer_id).await;
 
     let local_peer_id = "local_peer_id";
     let some_string = "some_string";
@@ -119,12 +119,12 @@ fn xor_multiple_variables_found() {
 }
 
 #[tokio::test]
-fn xor_par() {
+async fn xor_par() {
     use executed_state::*;
 
     let fallible_service_id = String::from("service_id_1");
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -206,11 +206,11 @@ fn xor_par() {
 }
 
 #[tokio::test]
-fn last_error_with_xor() {
+async fn last_error_with_xor() {
     let faillible_peer_id = "failible_peer_id";
-    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
+    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id).await;
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -237,11 +237,11 @@ fn last_error_with_xor() {
 }
 
 #[tokio::test]
-fn error_with_xor() {
+async fn error_with_xor() {
     let faillible_peer_id = "failible_peer_id";
-    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id);
+    let mut faillible_vm = create_avm(fallible_call_service("service_id_1"), faillible_peer_id).await;
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"

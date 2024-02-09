@@ -25,13 +25,13 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[tokio::test]
-fn ap_with_scalars() {
+async fn ap_with_scalars() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
-    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id);
+    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id).await;
 
     let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
 
     let script = format!(
         r#"
@@ -63,9 +63,9 @@ fn ap_with_scalars() {
 }
 
 #[tokio::test]
-fn ap_with_string_literal() {
+async fn ap_with_string_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let some_string = "some_string";
     let script = format!(
@@ -103,9 +103,9 @@ fn ap_with_string_literal() {
 }
 
 #[tokio::test]
-fn ap_with_bool_literal() {
+async fn ap_with_bool_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -140,9 +140,9 @@ fn ap_with_bool_literal() {
 }
 
 #[tokio::test]
-fn ap_with_number_literal() {
+async fn ap_with_number_literal() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -177,9 +177,9 @@ fn ap_with_number_literal() {
 }
 
 #[tokio::test]
-fn ap_with_last_error() {
+async fn ap_with_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -218,9 +218,9 @@ fn ap_with_last_error() {
 }
 
 #[tokio::test]
-fn ap_with_error() {
+async fn ap_with_error() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -259,9 +259,9 @@ fn ap_with_error() {
 }
 
 #[tokio::test]
-fn ap_with_timestamp() {
+async fn ap_with_timestamp() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -286,9 +286,9 @@ fn ap_with_timestamp() {
 }
 
 #[tokio::test]
-fn ap_with_ttl() {
+async fn ap_with_ttl() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -309,13 +309,13 @@ fn ap_with_ttl() {
 }
 
 #[tokio::test]
-fn ap_with_dst_stream() {
+async fn ap_with_dst_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let test_value = "scalar_2";
-    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id);
+    let mut vm_1 = create_avm(set_variable_call_service(json!({ "field": test_value })), vm_1_peer_id).await;
 
     let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
 
     let script = format!(
         r#"
@@ -363,10 +363,10 @@ fn ap_with_dst_stream() {
 }
 
 #[tokio::test]
-fn ap_canon_stream_with_lambda() {
+async fn ap_canon_stream_with_lambda() {
     let vm_1_peer_id = "vm_1_peer_id";
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service());
-    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id).await;
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
@@ -450,7 +450,7 @@ fn ap_canon_stream_with_lambda() {
 }
 
 #[tokio::test]
-fn ap_canon_stream() {
+async fn ap_canon_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
@@ -461,7 +461,7 @@ fn ap_canon_stream() {
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service, vm_1_peer_id).await;
 
     let service_name = "some_service_name";
     let function_name = "some_function_name";
@@ -537,9 +537,9 @@ fn ap_canon_stream() {
 }
 
 #[tokio::test]
-fn ap_stream_map() {
+async fn ap_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let service_name1 = "serv1";
     let service_name2 = "serv2";
@@ -603,7 +603,7 @@ fn ap_stream_map() {
 }
 
 #[tokio::test]
-fn ap_stream_map_with_undefined_last_error() {
+async fn ap_stream_map_with_undefined_last_error() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = format!(
         r#"
@@ -620,8 +620,9 @@ fn ap_stream_map_with_undefined_last_error() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_id).unwrap();
+    let result = executor.execute_all(vm_1_peer_id).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let expected_state = vec![
@@ -644,7 +645,7 @@ fn ap_stream_map_with_undefined_last_error() {
 }
 
 #[tokio::test]
-fn ap_canon_stream_map_with_string_key_accessor_lambda() {
+async fn ap_canon_stream_map_with_string_key_accessor_lambda() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
 
@@ -664,8 +665,9 @@ fn ap_canon_stream_map_with_string_key_accessor_lambda() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -700,7 +702,7 @@ fn ap_canon_stream_map_with_string_key_accessor_lambda() {
 }
 
 #[tokio::test]
-fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
+async fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
 
@@ -720,8 +722,9 @@ fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -755,7 +758,7 @@ fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
 }
 
 #[tokio::test]
-fn ap_map_key_join_behavior() {
+async fn ap_map_key_join_behavior() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = r#"
         (seq
@@ -774,14 +777,15 @@ fn ap_map_key_join_behavior() {
     "#;
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_one(vm_1_peer_id).unwrap();
+    let result = executor.execute_one(vm_1_peer_id).await.unwrap();
 
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
 #[tokio::test]
-fn ap_map_value_join_behavior() {
+async fn ap_map_value_join_behavior() {
     let vm_1_peer_id = "vm_1_peer_id";
     let script = r#"
         (seq
@@ -797,8 +801,9 @@ fn ap_map_value_join_behavior() {
     "#;
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_one(vm_1_peer_id).unwrap();
+    let result = executor.execute_one(vm_1_peer_id).await.unwrap();
 
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }

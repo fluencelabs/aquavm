@@ -119,19 +119,19 @@ mod tests {
     use pretty_assertions::assert_eq;
     use serde_json::json;
 
-    #[tokio::test]
+    #[test]
     fn test_parse_empty() {
         let res = ServiceDefinition::from_str("");
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_parse_garbage0() {
         let res = ServiceDefinition::from_str("garbage");
         assert!(res.is_err(), "{}", "{res:?}");
     }
 
-    #[tokio::test]
+    #[test]
     fn test_result_service() {
         use serde_json::json;
 
@@ -142,13 +142,13 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[test]
     fn test_result_service_malformed() {
         let res = ServiceDefinition::from_str(r#"ok={"this":["is","value"]"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_call_result() {
         use serde_json::json;
 
@@ -161,19 +161,19 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[test]
     fn test_call_result_malformed() {
         let res = ServiceDefinition::from_str(r#"err={"retcode": 0, "result": [1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_call_result_invalid() {
         let res = ServiceDefinition::from_str(r#"err={"ret_code": 0, "result": 1, 2, 3]}"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_ok() {
         use serde_json::json;
 
@@ -188,20 +188,20 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_ok_malformed() {
         let res = ServiceDefinition::from_str(r#"seq_ok={"default": 42, "1": true, "3": ]}"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_ok_invalid() {
         // TODO perhaps, we should support both arrays and maps
         let res = ServiceDefinition::from_str(r#"seq_ok=[42, 43]"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_error() {
         use serde_json::json;
 
@@ -218,32 +218,32 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_error_malformed() {
         let res = ServiceDefinition::from_str(r#"seq_error={"default": 42, "1": true]}"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_seq_error_invalid() {
         // TODO perhaps, we should support both arrays and maps
         let res = ServiceDefinition::from_str(r#"seq_error=[42, 43]"#);
         assert!(res.is_err());
     }
 
-    #[tokio::test]
+    #[test]
     fn test_behaviour() {
         let res = ServiceDefinition::from_str(r#"behaviour=echo"#);
         assert_eq!(res, Ok(ServiceDefinition::Behaviour(Behavior::Echo)),);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_dbg_behaviour() {
         let res = ServiceDefinition::from_str(r#"dbg_behaviour=echo"#);
         assert_eq!(res, Ok(ServiceDefinition::DbgBehaviour(Behavior::Echo)),);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_map() {
         let res = ServiceDefinition::from_str(r#"map = {"42": [], "a": 2}"#);
         assert_eq!(
@@ -255,7 +255,7 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[test]
     fn test_composable() {
         use nom::bytes::complete::tag;
         use nom::multi::separated_list1;

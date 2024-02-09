@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/178
-fn par_ap_behaviour() {
+async fn par_ap_behaviour() {
     let client_name = "client_id";
     let relay_name = "relay_id";
     let variable_setter_name = "variable_setter_id";
@@ -44,20 +44,21 @@ fn par_ap_behaviour() {
 
     let engine =
         air_test_framework::AirScriptExecutor::from_annotated(TestRunParameters::new(client_name, 0, 1, ""), &script)
+            .await
             .expect("invalid test executor config");
 
     let relay_id = engine.resolve_name(relay_name).to_string();
     let variable_setter_id = engine.resolve_name(variable_setter_name).to_string();
 
-    let client_result_1 = engine.execute_one(client_name).unwrap();
+    let client_result_1 = engine.execute_one(client_name).await.unwrap();
     assert_next_pks!(
         &client_result_1.next_peer_pks,
         &[relay_id.as_str(), variable_setter_id.as_str()]
     );
 
-    let setter_result = engine.execute_one(variable_setter_name).unwrap();
+    let setter_result = engine.execute_one(variable_setter_name).await.unwrap();
     assert!(setter_result.next_peer_pks.is_empty());
 
-    let relay_result = engine.execute_one(relay_name).unwrap();
+    let relay_result = engine.execute_one(relay_name).await.unwrap();
     assert!(relay_result.next_peer_pks.is_empty());
 }

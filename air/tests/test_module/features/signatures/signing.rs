@@ -20,8 +20,10 @@ use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use air_test_utils::test_runner::TestRunParameters;
 
+use futures::stream::StreamExt;
+
 #[tokio::test]
-fn test_signature_empty() {
+async fn test_signature_empty() {
     let script = "(null)";
     let init_peer_name = "init_peer_id";
     let (keypair, _) = derive_dummy_keypair(init_peer_name);
@@ -32,8 +34,9 @@ fn test_signature_empty() {
         vec![PeerId::from(init_peer_name)].into_iter(),
         script,
     )
+        .await
     .unwrap();
-    let res = exec.execute_one(init_peer_name).unwrap();
+    let res = exec.execute_one(init_peer_name).await.unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
 
     let data = borsh::to_vec(&(vec![""; 0], "")).unwrap();
@@ -45,7 +48,7 @@ fn test_signature_empty() {
 }
 
 #[tokio::test]
-fn test_signature_call_var() {
+async fn test_signature_call_var() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
 
@@ -55,9 +58,9 @@ fn test_signature_call_var() {
         "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
+    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -73,7 +76,7 @@ fn test_signature_call_var() {
 }
 
 #[tokio::test]
-fn test_signature_call_stream() {
+async fn test_signature_call_stream() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
         r#"
@@ -81,9 +84,9 @@ fn test_signature_call_stream() {
         "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let res = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -101,7 +104,7 @@ fn test_signature_call_stream() {
 }
 
 #[tokio::test]
-fn test_signature_call_unused() {
+async fn test_signature_call_unused() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
         r#"
@@ -109,9 +112,9 @@ fn test_signature_call_unused() {
         "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let res = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -125,7 +128,7 @@ fn test_signature_call_unused() {
 }
 
 #[tokio::test]
-fn test_signature_call_merged() {
+async fn test_signature_call_merged() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
 
@@ -141,10 +144,10 @@ fn test_signature_call_merged() {
     );
 
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
-    let _ = exec.execute_one(init_peer_name).unwrap();
-    let _ = exec.execute_one(other_peer_name).unwrap();
-    let res2 = exec.execute_one(init_peer_name).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
+    let _ = exec.execute_one(init_peer_name).await.unwrap();
+    let _ = exec.execute_one(other_peer_name).await.unwrap();
+    let res2 = exec.execute_one(init_peer_name).await.unwrap();
     let data2 = data_from_result(&res2);
 
     let expected_call_state0 = scalar!("res0", peer_name = init_peer_name, service = "..0");
@@ -164,7 +167,7 @@ fn test_signature_call_merged() {
 }
 
 #[tokio::test]
-fn test_signature_call_twice() {
+async fn test_signature_call_twice() {
     // Test that if some CID appears twice in the call result, it is accounted twice.
     let init_peer_name = "init_peer_id";
 
@@ -181,9 +184,9 @@ fn test_signature_call_twice() {
         "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
+    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -206,7 +209,7 @@ fn test_signature_call_twice() {
 }
 
 #[tokio::test]
-fn test_signature_canon_basic() {
+async fn test_signature_canon_basic() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
 
@@ -223,9 +226,9 @@ fn test_signature_canon_basic() {
     "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
     let last_data = data_from_result(&last_result);
 
     let expected_call_result = scalar!(
@@ -279,7 +282,7 @@ fn test_signature_canon_basic() {
 }
 
 #[tokio::test]
-fn test_signature_canon_merge() {
+async fn test_signature_canon_merge() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -301,12 +304,12 @@ fn test_signature_canon_merge() {
     "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
     exec.execute_all(init_peer_name);
     exec.execute_one(other_peer_name);
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
     let last_data = data_from_result(&last_result);
 
     let expected_call_result = scalar!(
@@ -360,7 +363,7 @@ fn test_signature_canon_merge() {
 }
 
 #[tokio::test]
-fn test_signature_canon_result() {
+async fn test_signature_canon_result() {
     // this test checks that call result in canon doesn't lead to repeadted accounting of the call result
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -380,9 +383,9 @@ fn test_signature_canon_result() {
     "#
     );
     let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
     let last_data = data_from_result(&last_result);
 
     let expected_call_result1 = scalar!(

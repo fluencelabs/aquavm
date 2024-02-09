@@ -28,7 +28,7 @@ use std::rc::Rc;
 /// CID store manipulations are checked in the `corruption` module.
 
 #[tokio::test]
-fn test_attack_injection_current_peer_scalar() {
+async fn test_attack_injection_current_peer_scalar() {
     // injecting a value that arrives to peer who does the next step
     let (alice_keypair, alice_peer_id) = derive_dummy_keypair("alice_peer");
     let (mallory_keypair, mallory_peer_id) = derive_dummy_keypair("mallory_peer");
@@ -80,18 +80,18 @@ fn test_attack_injection_current_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
-        .unwrap();
+        .await.unwrap();
     assert_ne!(res.ret_code, 0);
 }
 
 #[tokio::test]
-fn test_attack_injection_current_peer_stream() {
+async fn test_attack_injection_current_peer_stream() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
     let mallory_peer_id = "mallory_peer";
@@ -151,18 +151,19 @@ fn test_attack_injection_current_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
         .unwrap();
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
 #[tokio::test]
-fn test_attack_injection_current_injection_unused() {
+async fn test_attack_injection_current_injection_unused() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
     let mallory_peer_id = "mallory_peer";
@@ -220,19 +221,19 @@ fn test_attack_injection_current_injection_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
-        .unwrap();
+        .await.unwrap();
 
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
 #[tokio::test]
-fn test_attack_injection_other_peer_scalar() {
+async fn test_attack_injection_other_peer_scalar() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
     let bob_peer_id = "bob_peer";
@@ -281,16 +282,16 @@ fn test_attack_injection_other_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
     assert_ne!(res.ret_code, 0);
 }
 
 #[tokio::test]
-fn test_attack_injection_other_peer_stream() {
+async fn test_attack_injection_other_peer_stream() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
     let bob_peer_id = "bob_peer";
@@ -339,16 +340,16 @@ fn test_attack_injection_other_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
 #[tokio::test]
-fn test_attack_injection_other_peer_unused() {
+async fn test_attack_injection_other_peer_unused() {
     // injecting a value that arrives to peer who does the next step
     let alice_peer_id = "alice_peer";
     let bob_peer_id = "bob_peer";
@@ -397,18 +398,18 @@ fn test_attack_injection_other_peer_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service());
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, unit_call_service()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     // please not that such injection is not caught
     assert_eq!(res.ret_code, 0, "{}", res.error_message);
 }
 
 #[tokio::test]
-fn test_attack_replay() {
+async fn test_attack_replay() {
     let alice_name = "alice_peer_id";
     let bob_name = "bob_peer_id";
     let (alice_keypair, alice_peer_id) = derive_dummy_keypair(alice_name);
@@ -420,19 +421,19 @@ fn test_attack_replay() {
              (call "bob" ("" "") [] z))"#
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair.clone(), unit_call_service());
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service());
+    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair.clone(), unit_call_service()).await;
+    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service()).await;
 
     let run_params1 = TestRunParameters::from_init_peer_id(&alice_peer_id).with_particle_id("first_particle");
     let run_params2 = run_params1.clone();
 
-    let res1 = alice_avm.call(&air_script, "", "", run_params1.clone()).unwrap();
-    let res2 = alice_avm.call(&air_script, "", "", run_params2).unwrap();
+    let res1 = alice_avm.call(&air_script, "", "", run_params1.clone()).await.unwrap();
+    let res2 = alice_avm.call(&air_script, "", "", run_params2).await.unwrap();
 
     assert_eq!(res1.ret_code, 0, "test validity check failed: {}", res1.error_message);
     assert_eq!(res1, res2, "test validity check failed");
 
-    let res_bob = bob_avm.call(&air_script, "", res1.data.clone(), run_params1).unwrap();
+    let res_bob = bob_avm.call(&air_script, "", res1.data.clone(), run_params1).await.unwrap();
     assert_eq!(
         res_bob.ret_code, 0,
         "test validity check failed: {}",
@@ -441,7 +442,7 @@ fn test_attack_replay() {
 
     let mallory_run_params = TestRunParameters::from_init_peer_id(&alice_peer_id).with_particle_id("second_particle");
 
-    let res_replay = bob_avm.call(&air_script, "", res1.data, mallory_run_params).unwrap();
+    let res_replay = bob_avm.call(&air_script, "", res1.data, mallory_run_params).await.unwrap();
 
     let dalek_error = ed25519_dalek::ed25519::Error::from_source("Verification equation was not satisfied");
     let nested_error = fluence_keypair::error::VerificationError::Ed25519(

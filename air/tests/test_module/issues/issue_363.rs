@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 
 //https://github.com/fluencelabs/aquavm/issues/363
 #[tokio::test]
-fn issue_363() {
+async fn issue_363() {
     let client_peer_id = "client";
     let mut client_vm = create_avm(
         set_variable_call_service(json!([
@@ -26,12 +26,12 @@ fn issue_363() {
             ["p2", [[["p2", 13], ["p1", 14]], [["p2", 16], ["p1", 18]]]]
         ])),
         client_peer_id,
-    );
+    ).await;
 
     let p1_peer_id = "p1";
-    let mut p1_vm = create_avm(set_variable_call_service(json!("p1")), p1_peer_id);
+    let mut p1_vm = create_avm(set_variable_call_service(json!("p1")), p1_peer_id).await;
     let p2_peer_id = "p2";
-    let mut p2_vm = create_avm(set_variable_call_service(json!("p2")), p2_peer_id);
+    let mut p2_vm = create_avm(set_variable_call_service(json!("p2")), p2_peer_id).await;
 
     let script = r#"
         (seq

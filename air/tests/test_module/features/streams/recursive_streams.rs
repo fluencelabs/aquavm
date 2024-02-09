@@ -22,7 +22,7 @@ use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-fn recursive_stream_with_early_exit() {
+async fn recursive_stream_with_early_exit() {
     let vm_peer_id = "vm_peer_id";
     let variable_mappings = maplit::hashmap! {
         "stream_value".to_string() => json!(1),
@@ -31,7 +31,7 @@ fn recursive_stream_with_early_exit() {
     let mut vm = create_avm(
         set_variables_call_service(variable_mappings, VariableOptionSource::FunctionName),
         vm_peer_id,
-    );
+    ).await;
 
     let script = format!(
         r#"
@@ -74,7 +74,7 @@ fn recursive_stream_with_early_exit() {
 }
 
 #[tokio::test]
-fn recursive_stream_many_iterations() {
+async fn recursive_stream_many_iterations() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let request_id = std::cell::Cell::new(0);
@@ -92,10 +92,10 @@ fn recursive_stream_many_iterations() {
         result
     });
 
-    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
 
     let vm_peer_id_2 = "vm_peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
 
     let result_value = "result_value";
     let script = format!(
@@ -172,7 +172,7 @@ fn recursive_stream_many_iterations() {
 }
 
 #[tokio::test]
-fn recursive_stream_join() {
+async fn recursive_stream_join() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let request_id = std::cell::Cell::new(0);
@@ -190,12 +190,12 @@ fn recursive_stream_join() {
         result
     });
 
-    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
 
     let vm_peer_id_2 = "vm_peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
     let vm_peer_id_3 = "vm_peer_id_3";
-    let mut vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
+    let mut vm_3 = create_avm(echo_call_service(), vm_peer_id_3).await;
 
     let result_value = "result_value";
     let script = format!(
@@ -256,7 +256,7 @@ fn recursive_stream_join() {
 }
 
 #[tokio::test]
-fn recursive_stream_error_handling() {
+async fn recursive_stream_error_handling() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let request_id = std::cell::Cell::new(0);
@@ -274,7 +274,7 @@ fn recursive_stream_error_handling() {
         result
     });
 
-    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
 
     let result_value = "result_value";
     let vm_peer_id_2 = "vm_peer_id_2";
@@ -330,7 +330,7 @@ fn recursive_stream_error_handling() {
 }
 
 #[tokio::test]
-fn recursive_stream_inner_fold() {
+async fn recursive_stream_inner_fold() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let request_id = std::cell::Cell::new(0);
@@ -348,10 +348,10 @@ fn recursive_stream_inner_fold() {
         result
     });
 
-    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1);
+    let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
 
     let vm_peer_id_2 = "vm_peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
 
     let result_value = "result_value";
     let script = format!(
@@ -394,7 +394,7 @@ fn recursive_stream_inner_fold() {
 }
 
 #[tokio::test]
-fn recursive_stream_fold_with_n_service_call() {
+async fn recursive_stream_fold_with_n_service_call() {
     let vm_peer_id = "vm_peer_id_1";
 
     let request_id = std::cell::Cell::new(0);
@@ -412,7 +412,7 @@ fn recursive_stream_fold_with_n_service_call() {
         result
     });
 
-    let mut vm = create_avm(give_n_results_and_then_stop, vm_peer_id);
+    let mut vm = create_avm(give_n_results_and_then_stop, vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -474,7 +474,7 @@ fn recursive_stream_fold_with_n_service_call() {
 }
 
 #[tokio::test]
-fn recursive_stream_size_limit() {
+async fn recursive_stream_size_limit() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let script = format!(
@@ -491,8 +491,9 @@ fn recursive_stream_size_limit() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_peer_id_1).unwrap();
+    let result = executor.execute_all(vm_peer_id_1).await.unwrap();
     let result = result.last().unwrap();
 
     let expected_error = StreamSizeLimitExceeded;

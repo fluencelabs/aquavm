@@ -86,10 +86,10 @@ pub struct Peer<R> {
 }
 
 impl<R: AirRunner> Peer<R> {
-    pub fn new(keypair: impl Into<KeyPair>, services: Rc<[MarineServiceHandle]>) -> Self {
+    pub async fn new(keypair: impl Into<KeyPair>, services: Rc<[MarineServiceHandle]>) -> Self {
         let call_service = services_to_call_service_closure(services);
 
-        let runner = create_avm_with_key::<R>(keypair, call_service);
+        let runner = create_avm_with_key::<R>(keypair, call_service).await;
         let peer_id = runner.runner.get_current_peer_id().into();
 
         Self { peer_id, runner }
@@ -99,7 +99,7 @@ impl<R: AirRunner> Peer<R> {
         &self.peer_id
     }
 
-    pub(crate) fn invoke(
+    pub(crate) async fn invoke(
         &mut self,
         air: impl Into<String>,
         data: Data,
@@ -107,7 +107,7 @@ impl<R: AirRunner> Peer<R> {
         queue_cell: &PeerQueueCell,
     ) -> Result<RawAVMOutcome, String> {
         let prev_data = queue_cell.take_prev_data();
-        let res = self.runner.call(air, prev_data, data, test_run_params);
+        let res = self.runner.call(air, prev_data, data, test_run_params).await;
         if let Ok(outcome) = &res {
             queue_cell.set_prev_data(outcome.data.clone());
         }
@@ -183,7 +183,7 @@ impl<R: AirRunner> Network<R> {
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    pub fn ensure_named_peer(self: &Rc<Self>, name: impl Into<PeerId>) -> PeerId {
+    pub async fn ensure_named_peer(self: &Rc<Self>, name: impl Into<PeerId>) -> PeerId {
         use std::collections::hash_map::Entry;
 
         let name = name.into();
@@ -192,7 +192,7 @@ impl<R: AirRunner> Network<R> {
             Entry::Occupied(entry) => entry.get().clone(),
             Entry::Vacant(empty) => {
                 let (keypair, _) = derive_dummy_keypair(&name);
-                let peer = Peer::new(keypair, self.services.get_services());
+                let peer = Peer::new(keypair, self.services.get_services()).await;
                 let peer_id = peer.get_peer_id().clone();
                 self.add_peer(peer);
 

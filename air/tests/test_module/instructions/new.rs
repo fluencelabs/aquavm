@@ -21,13 +21,13 @@ use pretty_assertions::assert_eq;
 
 #[tokio::test]
 #[ignore]
-fn new_with_global_streams_seq() {
+async fn new_with_global_streams_seq() {
     let set_variable_peer_id = "set_variable_peer_id";
     let local_vm_peer_id_1 = "local_vm_peer_id_1";
     let local_vm_peer_id_2 = "local_vm_peer_id_2";
 
-    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1);
-    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2);
+    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1).await;
+    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2).await;
 
     let variables_mapping = maplit::hashmap! {
         "1".to_string() => json!(1),
@@ -36,7 +36,7 @@ fn new_with_global_streams_seq() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    );
+    ).await;
 
     let script = format!(
         r#"
@@ -94,9 +94,9 @@ fn new_with_global_streams_seq() {
 }
 
 #[tokio::test]
-fn several_restrictions() {
+async fn several_restrictions() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -130,9 +130,9 @@ fn several_restrictions() {
 }
 
 #[tokio::test]
-fn check_influence_to_not_restricted() {
+async fn check_influence_to_not_restricted() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -261,12 +261,12 @@ fn check_influence_to_not_restricted() {
 }
 
 #[tokio::test]
-fn new_in_fold_with_ap() {
+async fn new_in_fold_with_ap() {
     let set_variable_peer_id = "set_variable_peer_id";
     let vm_peer_id = "vm_peer_id";
 
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), set_variable_peer_id);
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), set_variable_peer_id).await;
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -361,12 +361,12 @@ fn new_in_fold_with_ap() {
 }
 
 #[tokio::test]
-fn new_with_streams_with_errors() {
+async fn new_with_streams_with_errors() {
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_avm(fallible_call_service("service_id_1"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("service_id_1"), fallible_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -405,7 +405,7 @@ fn new_with_streams_with_errors() {
 }
 
 #[tokio::test]
-fn new_with_scalars_with_errors() {
+async fn new_with_scalars_with_errors() {
     let set_variable_peer_id = "set_variable_peer_id";
     let variables_mapping = maplit::hashmap! {
         "global".to_string() => json!(1),
@@ -414,14 +414,14 @@ fn new_with_scalars_with_errors() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    );
+    ).await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
-    let mut variable_receiver_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+    let mut variable_receiver_vm = create_avm(echo_call_service(), variable_receiver_peer_id).await;
 
     let fallible_peer_id = "fallible_peer_id";
     let fallible_service_id = "fallible_service_id";
-    let mut fallible_peer_vm = create_avm(fallible_call_service(fallible_service_id), fallible_peer_id);
+    let mut fallible_peer_vm = create_avm(fallible_call_service(fallible_service_id), fallible_peer_id).await;
 
     let script = format!(
         r#"
@@ -464,7 +464,7 @@ fn new_with_scalars_with_errors() {
 }
 
 #[tokio::test]
-fn new_with_global_scalars() {
+async fn new_with_global_scalars() {
     let set_variable_peer_id = "set_variable_peer_id";
     let variables_mapping = maplit::hashmap! {
         "global".to_string() => json!(1),
@@ -473,10 +473,10 @@ fn new_with_global_scalars() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    );
+    ).await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
-    let mut variable_receiver = create_avm(echo_call_service(), variable_receiver_peer_id);
+    let mut variable_receiver = create_avm(echo_call_service(), variable_receiver_peer_id).await;
 
     let script = format!(
         r#"
@@ -544,11 +544,11 @@ fn prepare_new_test_call_service() -> CallServiceClosure {
 }
 
 #[tokio::test]
-fn new_with_scalars_in_lfold_with_outside_next() {
+async fn new_with_scalars_in_lfold_with_outside_next() {
     let test_peer_id = "test_peer_id";
 
     let test_call_service = prepare_new_test_call_service();
-    let mut test_vm = create_avm(test_call_service, test_peer_id);
+    let mut test_vm = create_avm(test_call_service, test_peer_id).await;
 
     let script = format!(
         r#"
@@ -603,11 +603,11 @@ fn new_with_scalars_in_lfold_with_outside_next() {
 }
 
 #[tokio::test]
-fn new_with_scalars_in_rfold_with_outside_next() {
+async fn new_with_scalars_in_rfold_with_outside_next() {
     let test_peer_id = "test_peer_id";
 
     let test_call_service = prepare_new_test_call_service();
-    let mut test_vm = create_avm(test_call_service, test_peer_id);
+    let mut test_vm = create_avm(test_call_service, test_peer_id).await;
 
     let script = format!(
         r#"
@@ -662,11 +662,11 @@ fn new_with_scalars_in_rfold_with_outside_next() {
 }
 
 #[tokio::test]
-fn new_with_scalars_in_fold_with_inside_next() {
+async fn new_with_scalars_in_fold_with_inside_next() {
     let test_peer_id = "test_peer_id";
 
     let test_call_service = prepare_new_test_call_service();
-    let mut test_vm = create_avm(test_call_service, test_peer_id);
+    let mut test_vm = create_avm(test_call_service, test_peer_id).await;
 
     let script = format!(
         r#"

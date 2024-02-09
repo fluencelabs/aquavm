@@ -28,16 +28,16 @@ use pretty_assertions::assert_eq;
 use std::convert::TryInto;
 
 #[tokio::test]
-fn par_early_exit() {
+async fn par_early_exit() {
     let init_peer_id = "init_peer_id";
     let setter_1_id = "setter_1";
     let setter_2_id = "setter_2";
     let setter_3_id = "setter_3";
 
-    let mut init = create_avm(unit_call_service(), init_peer_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
-    let mut setter_3 = create_avm(fallible_call_service("error"), setter_3_id);
+    let mut init = create_avm(unit_call_service(), init_peer_id).await;
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id).await;
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id).await;
+    let mut setter_3 = create_avm(fallible_call_service("error"), setter_3_id).await;
 
     let script = format!(
         include_str!("scripts/par_early_exit.air"),
@@ -249,15 +249,15 @@ fn par_early_exit() {
 }
 
 #[tokio::test]
-fn fold_early_exit() {
+async fn fold_early_exit() {
     let fold_executor_id = "fold_executor_id";
     let error_trigger_id = "error_trigger_id";
     let last_error_receiver_id = "last_error_receiver_id";
     let last_peer_checker_id = "last_peer_checker_id";
 
-    let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
-    let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
-    let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id);
+    let mut fold_executor = create_avm(unit_call_service(), fold_executor_id).await;
+    let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id).await;
+    let mut last_peer_checker = create_avm(echo_call_service(), last_peer_checker_id).await;
 
     let script = format!(
         include_str!("scripts/fold_early_exit.air"),
@@ -302,7 +302,7 @@ fn fold_early_exit() {
 }
 
 #[tokio::test]
-fn fold_par_early_exit() {
+async fn fold_par_early_exit() {
     let variables_setter_id = "set_variable_id";
     let stream_setter_id = "stream_setter_id";
     let fold_executor_id = "fold_executor_id";
@@ -320,12 +320,12 @@ fn fold_par_early_exit() {
     let mut variables_setter = create_avm(
         set_variables_call_service(variables, VariableOptionSource::Argument(0)),
         variables_setter_id,
-    );
-    let mut stream_setter = create_avm(echo_call_service(), stream_setter_id);
-    let mut fold_executor = create_avm(unit_call_service(), fold_executor_id);
-    let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id);
-    let mut last_error_receiver = create_avm(unit_call_service(), last_error_receiver_id);
-    let mut last_peer_checker = create_avm(unit_call_service(), last_peer_checker_id);
+    ).await;
+    let mut stream_setter = create_avm(echo_call_service(), stream_setter_id).await;
+    let mut fold_executor = create_avm(unit_call_service(), fold_executor_id).await;
+    let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id).await;
+    let mut last_error_receiver = create_avm(unit_call_service(), last_error_receiver_id).await;
+    let mut last_peer_checker = create_avm(unit_call_service(), last_peer_checker_id).await;
 
     let script = format!(
         include_str!("scripts/fold_par_early_exit.air"),

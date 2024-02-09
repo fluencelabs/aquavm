@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn ap_with_fold() {
+async fn ap_with_fold() {
     let nums: Vec<String> = (1..10).map(|i| i.to_string()).collect();
     let vec = vec![nums.clone(), nums.clone(), nums];
     let elems: Vec<(String, Vec<Vec<String>>)> = vec![
@@ -28,10 +28,10 @@ fn ap_with_fold() {
         ("a".into(), vec),
     ];
     let set_variable_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!(elems)), set_variable_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(elems)), set_variable_id).await;
 
     let local_vm_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(unit_call_service(), local_vm_peer_id);
+    let mut local_vm = create_avm(unit_call_service(), local_vm_peer_id).await;
 
     let script = format!(
         r#"

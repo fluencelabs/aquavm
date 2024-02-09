@@ -19,7 +19,7 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/304
-fn issue_304() {
+async fn issue_304() {
     let script = r#"
         (par
            (seq
@@ -34,8 +34,9 @@ fn issue_304() {
 
     let init_peer_id = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_id), script)
+        .await
         .expect("invalid test AIR script");
 
-    let res = executor.execute_one(init_peer_id).unwrap();
+    let res = executor.execute_one(init_peer_id).await.unwrap();
     assert_eq!(res.ret_code, air_interpreter_interface::INTERPRETER_SUCCESS);
 }

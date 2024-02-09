@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use futures::StreamExt;
+
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -145,7 +147,7 @@ struct AVMState {
 }
 
 #[tokio::test]
-fn dashboard() {
+async fn dashboard() {
     let script = include_str!("./scripts/dashboard.air");
 
     let known_peer_ids = parse_peers();
@@ -154,27 +156,27 @@ fn dashboard() {
 
     let (host_function, all_info) = client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
-    let mut client = create_avm(host_function, client_id.clone());
+    let mut client = create_avm(host_function, client_id.clone()).await;
     let mut relay = create_avm(
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
         relay_id.clone(),
-    );
+    ).await;
 
-    let mut known_peers = known_peer_ids
-        .iter()
-        .cloned()
-        .map(|peer_id| {
+    let mut known_peers =
+        futures::stream::iter(known_peer_ids.iter().cloned())
+        .then(|peer_id| async {
             let vm = create_avm(
                 create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
                 peer_id.clone(),
-            );
+            ).await;
             AVMState {
                 vm,
                 peer_id,
                 prev_result: vec![],
             }
         })
-        .collect::<Vec<_>>();
+        .collect::<Vec<_>>()
+        .await;
 
     let test_params = TestRunParameters::from_init_peer_id(client_id.clone());
 

@@ -18,13 +18,13 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/348
-fn issue_348() {
+async fn issue_348() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1).await;
     let vm_peer_id_2 = "vm_peer_id_2";
-    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
     let vm_peer_id_3 = "vm_peer_id_3";
-    let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
+    let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3).await;
 
     let script = format!(
         r#"

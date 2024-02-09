@@ -21,18 +21,18 @@ use pretty_assertions::assert_eq;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/241
-fn issue_241() {
+async fn issue_241() {
     let peer_1_id = "peer_1_id";
     let array_1_content = json!(["1", "2"]);
-    let mut peer_1_vm = create_avm(set_variable_call_service(array_1_content.clone()), peer_1_id);
+    let mut peer_1_vm = create_avm(set_variable_call_service(array_1_content.clone()), peer_1_id).await;
 
     let some_peer_id = "some_peer_id";
-    let mut some_peer_vm = create_avm(unit_call_service(), some_peer_id);
+    let mut some_peer_vm = create_avm(unit_call_service(), some_peer_id).await;
 
     let set_array_0_peer_id = "set_array_0_peer_id";
     let peer_2_id = "peer_2_id";
     let peers = json!([peer_1_id, peer_2_id]);
-    let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id);
+    let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id).await;
 
     let script = format!(
         r#"

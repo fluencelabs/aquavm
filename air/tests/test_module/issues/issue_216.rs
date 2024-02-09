@@ -18,7 +18,7 @@ use air_test_utils::prelude::*;
 
 #[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/216
-fn issue_216() {
+async fn issue_216() {
     let some_peer_id = "relay_peer_id";
     let variables_mapping = maplit::hashmap! {
         "value".to_string() => json!([]),
@@ -27,10 +27,10 @@ fn issue_216() {
     let mut some_peer = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
         some_peer_id,
-    );
+    ).await;
 
     let client_id = "client_peer_id";
-    let mut client = create_avm(echo_call_service(), client_id);
+    let mut client = create_avm(echo_call_service(), client_id).await;
 
     let error_message = "error message";
     let script = format!(

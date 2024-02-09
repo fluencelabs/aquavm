@@ -45,18 +45,18 @@ fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServi
 }
 
 #[tokio::test]
-fn flattening_scalar_arrays() {
+async fn flattening_scalar_arrays() {
     let scalar_array = json!({"iterable": [
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]},
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [2, 3]},
     ]});
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -89,17 +89,17 @@ fn flattening_scalar_arrays() {
 
 #[tokio::test]
 #[ignore]
-fn flattening_streams() {
+async fn flattening_streams() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -138,17 +138,17 @@ fn flattening_streams() {
 
 #[tokio::test]
 #[ignore]
-fn test_handling_non_flattening_values() {
+async fn test_handling_non_flattening_values() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id).await;
 
     let script = format!(
         r#"

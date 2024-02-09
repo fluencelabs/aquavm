@@ -17,7 +17,7 @@
 use air_test_utils::{key_utils::derive_dummy_keypair, prelude::*};
 
 #[tokio::test]
-fn issue_310() {
+async fn issue_310() {
     let (key_pair, peer_id) = derive_dummy_keypair("init_peer_id");
     let particle_id = "particle_id";
 
@@ -34,8 +34,8 @@ fn issue_310() {
       )
     "#;
 
-    let mut runner = DefaultAirRunner::new(&peer_id);
-    let mut call = |prev_data, call_results| {
+    let mut runner = DefaultAirRunner::new(&peer_id).await;
+    let mut call = |prev_data, call_results| async {
         runner
             .call(
                 air_script,
@@ -49,10 +49,11 @@ fn issue_310() {
                 key_pair.as_inner(),
                 particle_id.to_owned(),
             )
+            .await
             .unwrap()
     };
 
-    let res1 = call(&b""[..], <_>::default());
+    let res1 = call(&b""[..], <_>::default()).await;
     assert_eq!(res1.ret_code, 0);
     assert_eq!(res1.call_requests.len(), 2, "test invalid");
 
@@ -61,7 +62,7 @@ fn issue_310() {
         maplit::hashmap! {
             1u32 => CallServiceResult::ok(json!(0)),
         },
-    );
+    ).await;
     assert_eq!(res2.ret_code, 0);
     // in the version without ap join behavior, it was 1.
     assert_eq!(res2.call_requests.len(), 0);
@@ -71,7 +72,7 @@ fn issue_310() {
         maplit::hashmap! {
             2u32 => CallServiceResult::ok(json!(0)),
         },
-    );
+    ).await;
 
     // previously was an error:
     //   on instruction 'ap x $y' trace handler encountered an error: state from previous `Call(..)`

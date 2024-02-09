@@ -21,7 +21,7 @@ use serde_json::json;
 
 #[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/177
-fn issue_177() {
+async fn issue_177() {
     let client_peer_id = "12D3KooWMMcNVt5AsiisAHbkfyZWKHufB2dkHCY5pUqZ6AQgEVK6";
     let relay_peer_id = "12D3KooWSD5PToNiLQwKDXsu8JSysCwUt8BVUJEqCHcDe7P5h45e";
     let variables = maplit::hashmap! {
@@ -57,17 +57,18 @@ fn issue_177() {
     let mut client = create_avm(
         set_variables_call_service(variables.clone(), VariableOptionSource::FunctionName),
         client_peer_id,
-    );
+    ).await;
     let mut relay = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         relay_peer_id,
-    );
+    ).await;
 
     let script = include_str!("scripts/issue_177.air");
 
     // client 1: demand result for (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
     let client_result_1 = client
         .call_single(script, "", "", client_peer_id, 0, 0, None, HashMap::new(), "")
+        .await
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         1 => CallRequestParams::new("getDataSrv", "-relay-", vec![], vec![]),
@@ -91,6 +92,7 @@ fn issue_177() {
             call_results,
             "",
         )
+        .await
         .expect("call should be success");
     assert!(client_result_2.call_requests.is_empty());
     assert_eq!(client_result_2.next_peer_pks, vec![relay_peer_id.to_string()]);
@@ -108,6 +110,7 @@ fn issue_177() {
             HashMap::new(),
             "",
         )
+        .await
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         1 => CallRequestParams::new("op", "noop", vec![], vec![]),
@@ -131,6 +134,7 @@ fn issue_177() {
             call_results,
             "",
         )
+        .await
         .expect("call should be success");
     assert!(relay_result_2.next_peer_pks.is_empty());
 
@@ -150,6 +154,7 @@ fn issue_177() {
             call_results,
             "",
         )
+        .await
         .expect("call should be success");
     assert!(relay_result_3.next_peer_pks.is_empty());
 
@@ -169,6 +174,7 @@ fn issue_177() {
             call_results,
             "",
         )
+        .await
         .expect("call should be success");
 
     // client 4: receive result from the relay
@@ -185,6 +191,7 @@ fn issue_177() {
             HashMap::new(),
             "",
         )
+        .await
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         2 => CallRequestParams::new("op", "noop", vec![], vec![])
@@ -209,6 +216,7 @@ fn issue_177() {
             call_results,
             "",
         )
+        .await
         .expect("call should be success");
     let expected_call_requests = maplit::hashmap! {
         3 => CallRequestParams::new("peer", "timeout", vec![json!(1000u64), json!("timeout")], vec![
@@ -233,7 +241,7 @@ fn issue_177() {
         None,
         call_results,
         "",
-    );
+    ).await;
     // before patch the interpreter crashed here
     assert!(client_result_5.is_ok());
 }

@@ -34,11 +34,14 @@ pub mod test_runner;
 pub mod native_test_runner;
 pub mod wasm_test_runner;
 
+use std::future::Future;
 pub use air::interpreter_data::*;
 
 use air::ExecutionCidState;
 pub use avm_interface::raw_outcome::*;
 pub use avm_server::*;
+
+use futures::future::LocalBoxFuture;
 
 pub mod prelude {
     pub use super::*;
@@ -49,14 +52,14 @@ pub mod prelude {
     pub use serde_json::json;
 }
 
-pub type CallServiceClosure = Box<dyn Fn(CallRequestParams) -> CallServiceResult + 'static>;
+pub type CallServiceClosure<'x> = Box<dyn Fn(CallRequestParams) -> LocalBoxFuture<'x, CallServiceResult> + 'static>;
 
 pub type JValue = serde_json::Value;
 
 #[macro_export]
 macro_rules! checked_call_vm {
     ($vm:expr, $test_run_parameters:expr, $script:expr, $prev_data:expr, $data:expr) => {{
-        match $vm.call($script, $prev_data, $data, $test_run_parameters) {
+        match $vm.call($script, $prev_data, $data, $test_run_parameters).await {
             Ok(v) if v.ret_code != 0 => {
                 panic!("VM returns a error: {} {}", v.ret_code, v.error_message)
             }
@@ -69,7 +72,7 @@ macro_rules! checked_call_vm {
 #[macro_export]
 macro_rules! call_vm {
     ($vm:expr, $test_run_parameters:expr, $script:expr, $prev_data:expr, $data:expr) => {
-        match $vm.call($script, $prev_data, $data, $test_run_parameters) {
+        match $vm.call($script, $prev_data, $data, $test_run_parameters) .await{
             Ok(v) => v,
             Err(err) => panic!("VM call failed: {}", err),
         }

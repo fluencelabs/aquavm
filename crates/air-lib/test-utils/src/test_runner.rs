@@ -250,7 +250,7 @@ mod tests {
     use serde_json::json;
 
     #[tokio::test]
-    fn test_override_current_peer_id() {
+    async fn test_override_current_peer_id() {
         let spell_id = "spell_id";
         let host_peer_id = "host_peer_id";
         let script = format!(r#"(call "{spell_id}" ("service" "func") [])"#);
@@ -266,7 +266,7 @@ mod tests {
         let mut client = create_custom_avm::<NativeAirRunner>(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),
             host_peer_id,
-        );
+        ).await;
 
         let current_result_1 = client
             .runner
@@ -282,6 +282,7 @@ mod tests {
                 &keypair,
                 "".to_owned(),
             )
+            .await
             .expect("call should be success");
 
         assert_eq!(
@@ -316,6 +317,7 @@ mod tests {
                 &keypair2,
                 "".to_owned(),
             )
+            .await
             .expect("call should be success");
 
         let expected_spell_call_requests = maplit::hashmap! {

@@ -18,9 +18,9 @@ use air::PreparationError;
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn invalid_air() {
+async fn invalid_air() {
     let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let script = r#"(seq )"#;
 

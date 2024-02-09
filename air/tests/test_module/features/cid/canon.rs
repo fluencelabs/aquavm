@@ -24,7 +24,7 @@ use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-fn test_canon_ok() {
+async fn test_canon_ok() {
     let init_peer_name = "init_peer_id";
 
     let script = format!(
@@ -37,8 +37,8 @@ fn test_canon_ok() {
     );
 
     let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
-    let result = executor.execute_one(init_peer_name).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).await.unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let data = data_from_result(&result);
 
     let mut cid_state = ExecutionCidState::new();
@@ -100,7 +100,7 @@ fn test_canon_ok() {
 }
 
 #[tokio::test]
-fn test_canon_ok_multi() {
+async fn test_canon_ok_multi() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
 
@@ -115,10 +115,10 @@ fn test_canon_ok_multi() {
     );
 
     let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).unwrap();
-    let _result1 = executor.execute_one(init_peer_name).unwrap();
-    let _result2 = executor.execute_one(other_peer_name).unwrap();
-    let result3 = executor.execute_one(init_peer_name).unwrap();
+        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).await.unwrap();
+    let _result1 = executor.execute_one(init_peer_name).await.unwrap();
+    let _result2 = executor.execute_one(other_peer_name).await.unwrap();
+    let result3 = executor.execute_one(init_peer_name).await.unwrap();
     let data = data_from_result(&result3);
 
     let init_peer_id = at(init_peer_name);
@@ -191,9 +191,9 @@ fn test_canon_ok_multi() {
 }
 
 #[tokio::test]
-fn test_canon_value_not_found() {
+async fn test_canon_value_not_found() {
     let init_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
     let mut cid_state = ExecutionCidState::new();
 
@@ -239,10 +239,10 @@ fn test_canon_value_not_found() {
 }
 
 #[tokio::test]
-fn test_canon_root_tetraplet_not_found() {
+async fn test_canon_root_tetraplet_not_found() {
     let init_peer_id = "vm_peer_id";
     let other_peer_id = "other_peer_id";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
     let mut cid_state = ExecutionCidState::new();
 
@@ -294,9 +294,9 @@ fn test_canon_root_tetraplet_not_found() {
 }
 
 #[tokio::test]
-fn test_canon_tetraplet_not_found() {
+async fn test_canon_tetraplet_not_found() {
     let init_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
     let mut cid_state = ExecutionCidState::new();
 
@@ -353,9 +353,9 @@ fn test_canon_tetraplet_not_found() {
 }
 
 #[tokio::test]
-fn test_canon_agg_not_found() {
+async fn test_canon_agg_not_found() {
     let init_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
     let mut cid_state = ExecutionCidState::new();
 

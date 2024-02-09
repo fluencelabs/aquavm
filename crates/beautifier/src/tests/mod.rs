@@ -28,7 +28,7 @@ mod beautifier;
 
 use crate::{beautify, beautify_to_string, BeautifyError};
 
-#[tokio::test]
+#[test]
 fn beautify_valid() {
     let air_script = "(seq (null) (null))";
     let mut buffer = vec![];
@@ -37,7 +37,7 @@ fn beautify_valid() {
     assert_eq!(std::str::from_utf8(&buffer).unwrap(), "null\nnull\n");
 }
 
-#[tokio::test]
+#[test]
 fn beautify_invalid() {
     let air_script = "(seq (null))";
     let mut buffer = vec![];
@@ -45,14 +45,14 @@ fn beautify_invalid() {
     assert!(matches!(res, Err(BeautifyError::Parse(_))));
 }
 
-#[tokio::test]
+#[test]
 fn beautify_to_string_valid() {
     let air_script = "(seq (null) (null))";
     let res = beautify_to_string(air_script).unwrap();
     assert_eq!(res, "null\nnull\n");
 }
 
-#[tokio::test]
+#[test]
 fn beautify_to_string_invalid() {
     let air_script = "(seq (null))";
     let res = beautify_to_string(air_script);

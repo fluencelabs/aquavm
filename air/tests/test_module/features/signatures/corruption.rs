@@ -28,7 +28,7 @@ use pretty_assertions::assert_eq;
 use semver::Version;
 
 #[tokio::test]
-fn test_attack_replace_value() {
+async fn test_attack_replace_value() {
     // Bob gets a trace where call result value is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -85,11 +85,11 @@ fn test_attack_replace_value() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,
@@ -105,7 +105,7 @@ fn test_attack_replace_value() {
 }
 
 #[tokio::test]
-fn test_attack_replace_tetraplet() {
+async fn test_attack_replace_tetraplet() {
     // Bob gets a trace where call result tetraplet is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -162,11 +162,11 @@ fn test_attack_replace_tetraplet() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,
@@ -181,7 +181,7 @@ fn test_attack_replace_tetraplet() {
 }
 
 #[tokio::test]
-fn test_attack_replace_call_result() {
+async fn test_attack_replace_call_result() {
     // Bob gets a trace where call result is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -245,11 +245,11 @@ fn test_attack_replace_call_result() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,
@@ -264,7 +264,7 @@ fn test_attack_replace_call_result() {
 }
 
 #[tokio::test]
-fn test_attack_replace_canon_value() {
+async fn test_attack_replace_canon_value() {
     // Bob gets a trace where canon value is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -335,11 +335,11 @@ fn test_attack_replace_canon_value() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,
@@ -354,7 +354,7 @@ fn test_attack_replace_canon_value() {
 }
 
 #[tokio::test]
-fn test_attack_replace_canon_result_values() {
+async fn test_attack_replace_canon_result_values() {
     // Bob gets a trace where canon result is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -434,11 +434,11 @@ fn test_attack_replace_canon_result_values() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,
@@ -453,7 +453,7 @@ fn test_attack_replace_canon_result_values() {
 }
 
 #[tokio::test]
-fn test_attack_replace_canon_result_tetraplet() {
+async fn test_attack_replace_canon_result_tetraplet() {
     // Bob gets a trace where canon result is edited by Mallory.
     let alice_peer_id = "alice";
     let bob_peer_id = "bob";
@@ -537,11 +537,11 @@ fn test_attack_replace_canon_result_tetraplet() {
         Version::new(1, 1, 1),
     );
 
-    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id);
+    let mut bob_avm = create_avm(unit_call_service(), bob_peer_id).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).unwrap();
+    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
 
     assert_error_eq!(
         &res,

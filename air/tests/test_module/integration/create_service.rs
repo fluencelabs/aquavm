@@ -17,7 +17,7 @@
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn create_service() {
+async fn create_service() {
     let module = "greeting";
     let module_config = json!(
         {
@@ -44,7 +44,7 @@ fn create_service() {
     let mut set_variables_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         "set_variables",
-    );
+    ).await;
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";
@@ -61,7 +61,7 @@ fn create_service() {
         CallServiceResult::ok(json!(response))
     });
 
-    let mut vm = create_avm(call_service, "A");
+    let mut vm = create_avm(call_service, "A").await;
 
     let script = include_str!("./scripts/create_service.air");
 

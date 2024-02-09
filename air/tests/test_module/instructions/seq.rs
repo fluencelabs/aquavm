@@ -18,8 +18,8 @@ use air::ExecutionCidState;
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-fn seq_remote_remote() {
-    let mut vm = create_avm(unit_call_service(), "");
+async fn seq_remote_remote() {
+    let mut vm = create_avm(unit_call_service(), "").await;
     let mut cid_state = ExecutionCidState::new();
 
     let script = r#"
@@ -46,10 +46,10 @@ fn seq_remote_remote() {
 }
 
 #[tokio::test]
-fn seq_local_remote() {
+async fn seq_local_remote() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = String::from("remote_peer_id");
-    let mut vm = create_avm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"

@@ -19,13 +19,13 @@ use air_test_utils::prelude::*;
 #[tokio::test]
 #[ignore]
 // test for github.com/fluencelabs/aquavm/issues/173
-fn issue_173() {
+async fn issue_173() {
     let set_variable_peer_id = "set_variable_peer_id";
     let local_vm_peer_id_1 = "local_vm_peer_id_1";
     let local_vm_peer_id_2 = "local_vm_peer_id_2";
 
-    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1);
-    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2);
+    let mut local_vm_1 = create_avm(echo_call_service(), local_vm_peer_id_1).await;
+    let mut local_vm_2 = create_avm(echo_call_service(), local_vm_peer_id_2).await;
 
     let variables_mapping = maplit::hashmap! {
         "1".to_string() => json!(1),
@@ -34,7 +34,7 @@ fn issue_173() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    );
+    ).await;
 
     let script = format!(
         r#"

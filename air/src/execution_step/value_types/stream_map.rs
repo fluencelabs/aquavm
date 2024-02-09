@@ -152,7 +152,7 @@ mod test {
         actual_value == &expected_value
     }
 
-    #[tokio::test]
+    #[test]
     fn test_from_value_key_str() {
         let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
         let value = Rc::new(json!("1"));
@@ -168,7 +168,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_from_value_key_int() {
         let key = StreamMapKey::I64(42.into());
         let value = Rc::new(json!("1"));
@@ -184,7 +184,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn test_insert() {
         let key_1_2 = StreamMapKey::Str(Cow::Borrowed("some_key"));
         let value_1 = Rc::new(json!("1"));
@@ -224,7 +224,7 @@ mod test {
         assert_eq!(iter.next(), None);
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_invalid_state_error() {
         use air_interpreter_data::CanonResult;
 
@@ -255,7 +255,7 @@ mod test {
         ));
     }
 
-    #[tokio::test]
+    #[test]
     fn compactification_points_to_nowhere_error() {
         let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
         let value = Rc::new(json!("1"));
@@ -317,7 +317,7 @@ mod test {
             });
     }
 
-    #[tokio::test]
+    #[test]
     fn test_iter_unique_key_object() {
         const TEST_DATA_SIZE: usize = 5;
         let key_values = generate_key_values(TEST_DATA_SIZE);
