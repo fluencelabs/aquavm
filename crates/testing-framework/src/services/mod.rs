@@ -18,6 +18,9 @@ pub(crate) mod results;
 
 use self::results::{MarineServiceWrapper, ResultStore};
 
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
+
 use air_test_utils::{CallRequestParams, CallServiceClosure, CallServiceResult};
 
 use std::{cell::RefCell, rc::Rc, time::Duration};
@@ -45,7 +48,7 @@ impl FunctionOutcome {
 
 /// A mocked Marine service.
 pub trait MarineService {
-    fn call(&self, params: CallRequestParams) -> FunctionOutcome;
+    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome>;
 
     fn to_handle(self) -> MarineServiceHandle
     where
@@ -59,25 +62,30 @@ pub trait MarineService {
 pub struct MarineServiceHandle(Rc<RefCell<Box<dyn MarineService>>>);
 
 impl MarineService for MarineServiceHandle {
-    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
-        let mut guard = self.0.borrow_mut();
-        MarineService::call(guard.as_mut(), params)
+    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
+        async {
+            let mut guard = self.0.borrow_mut();
+            MarineService::call(guard.as_mut(), params).await
+        }.boxed_local()
     }
 }
 
 pub(crate) fn services_to_call_service_closure(
     services: Rc<[MarineServiceHandle]>,
-) -> CallServiceClosure {
-    Box::new(move |params: CallRequestParams| -> CallServiceResult {
-        for service_handler in services.as_ref() {
-            let outcome = service_handler.call(params.clone());
-            match outcome {
-                FunctionOutcome::ServiceResult(result, _) => return result,
-                FunctionOutcome::NotDefined => continue,
-                FunctionOutcome::Empty => return CallServiceResult::ok(serde_json::Value::Null),
+) -> CallServiceClosure<'static> {
+    Box::new(move |params: CallRequestParams| {
+        let services = services.clone();
+        async move {
+            for service_handler in services.as_ref() {
+                let outcome = service_handler.call(params.clone()).await;
+                match outcome {
+                    FunctionOutcome::ServiceResult(result, _) => return result,
+                    FunctionOutcome::NotDefined => continue,
+                    FunctionOutcome::Empty => return CallServiceResult::ok(serde_json::Value::Null),
+                }
             }
-        }
-        panic!("No function found for params {:?}", params)
+            panic!("No function found for params {:?}", params)
+        }.boxed_local()
     })
 }
 

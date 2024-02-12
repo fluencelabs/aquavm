@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+use std::cell::RefCell;
 use air_test_utils::{key_utils::derive_dummy_keypair, prelude::*};
+
+use std::rc::Rc;
 
 #[tokio::test]
 async fn issue_310() {
@@ -34,23 +37,30 @@ async fn issue_310() {
       )
     "#;
 
-    let mut runner = DefaultAirRunner::new(&peer_id).await;
-    let mut call = |prev_data, call_results| async {
-        runner
-            .call(
-                air_script,
-                prev_data,
-                "",
-                peer_id.clone(),
-                0,
-                0,
-                None,
-                call_results,
-                key_pair.as_inner(),
-                particle_id.to_owned(),
-            )
-            .await
-            .unwrap()
+    let runner = Rc::new(RefCell::new(DefaultAirRunner::new(&peer_id).await));
+    let call = |prev_data, call_results| {
+        let runner = runner.clone();
+        let peer_id = peer_id.clone();
+        let key_pair = key_pair.as_inner();
+        let particle_id = particle_id.to_owned();
+        async move {
+            runner
+                .borrow_mut()
+                .call(
+                    air_script,
+                    prev_data,
+                    "",
+                    peer_id,
+                    0,
+                    0,
+                    None,
+                    call_results,
+                    key_pair,
+                    particle_id,
+                )
+                .await
+                .unwrap()
+        }
     };
 
     let res1 = call(&b""[..], <_>::default()).await;

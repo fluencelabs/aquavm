@@ -26,6 +26,8 @@ use air::NO_ERROR_MESSAGE;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -34,16 +36,20 @@ type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 fn create_check_service_closure(
     args_to_check: ArgToCheck<JValue>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
-) -> CallServiceClosure {
-    Box::new(move |params| -> CallServiceResult {
-        let mut call_args: Vec<JValue> =
-            serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
+) -> CallServiceClosure<'static> {
+    Box::new(move |params| {
+        let args_to_check = args_to_check.clone();
+        let tetraplets_to_check = tetraplets_to_check.clone();
+        async move {
+            let mut call_args: Vec<JValue> =
+                serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
 
-        let result = json!(params.tetraplets);
-        *args_to_check.borrow_mut() = Some(call_args.remove(0));
-        *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
+            let result = json!(params.tetraplets);
+            *args_to_check.borrow_mut() = Some(call_args.remove(0));
+            *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
 
-        CallServiceResult::ok(result)
+            CallServiceResult::ok(result)
+        }.boxed_local()
     })
 }
 

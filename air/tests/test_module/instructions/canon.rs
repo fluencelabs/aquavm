@@ -19,6 +19,7 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::ops::Deref;
@@ -241,13 +242,15 @@ async fn canon_gates() {
 
     let peer_id_3 = "peer_id_3";
     let stop_len_count = 2;
-    let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| -> CallServiceResult {
+    let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| {
         let value = params.arguments[0].as_array().unwrap().len();
-        if value >= stop_len_count {
+       let result = if value >= stop_len_count {
             CallServiceResult::ok(json!(true))
         } else {
             CallServiceResult::ok(json!(false))
-        }
+        };
+
+        async move { result }.boxed_local()
     });
     let mut vm_3 = create_avm(vm_3_call_service, peer_id_3).await;
 
@@ -753,10 +756,11 @@ async fn canon_map_single_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
@@ -844,10 +848,11 @@ async fn canon_map_index_with_element_access_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
@@ -942,10 +947,11 @@ async fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
@@ -1068,10 +1074,11 @@ async fn canon_map_non_existing_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
@@ -1135,10 +1142,11 @@ async fn canon_map_non_existing_index_and_element_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
@@ -1227,10 +1235,11 @@ async fn canon_map_2_scalar_tetraplet_check() {
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
@@ -1303,10 +1312,11 @@ async fn canon_map_2_scalar_with_lens_tetraplet_check() {
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
@@ -1378,10 +1388,11 @@ async fn canon_map_with_lens_by_key_number_tetraplet_check() {
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
@@ -1458,10 +1469,11 @@ async fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);

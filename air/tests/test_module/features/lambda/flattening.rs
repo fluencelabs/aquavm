@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -29,8 +31,8 @@ struct ClosureCallArgs {
     tetraplets: ClosureSettableVar<Vec<Vec<String>>>,
 }
 
-fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure {
-    Box::new(move |params| -> CallServiceResult {
+fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure<'static> {
+    Box::new(move |params| {
         use std::ops::Deref;
 
         *closure_call_args.service_id_var.deref().borrow_mut() = params.service_id.clone();
@@ -40,7 +42,8 @@ fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServi
             serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
         *closure_call_args.args_var.deref().borrow_mut() = call_args;
 
-        CallServiceResult::ok(json!(""))
+        let result = CallServiceResult::ok(json!(""));
+        async move { result }.boxed_local()
     })
 }
 

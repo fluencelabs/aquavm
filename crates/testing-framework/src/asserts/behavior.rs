@@ -62,12 +62,12 @@ pub(crate) fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parse
 }
 
 impl Behavior {
-    pub(crate) fn call(&self, params: air_test_utils::CallRequestParams) -> CallServiceResult {
+    pub(crate) async fn call(&self, params: air_test_utils::CallRequestParams) -> CallServiceResult {
         use Behavior::*;
 
         match self {
-            Echo => echo_call_service()(params),
-            Unit => unit_call_service()(params),
+            Echo => echo_call_service()(params).await,
+            Unit => unit_call_service()(params).await,
             Function => CallServiceResult::ok(params.function_name.into()),
             Service => CallServiceResult::ok(params.service_id.into()),
             Arg(n) => match params.arguments.get(*n) {

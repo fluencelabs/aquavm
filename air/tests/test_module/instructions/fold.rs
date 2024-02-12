@@ -23,6 +23,7 @@ use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -803,9 +804,10 @@ async fn fold_stream_map() {
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
     let arg_tetraplets_inner = arg_tetraplets.clone();
 
-    let set_variable_call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let set_variable_call_service: CallServiceClosure = Box::new(move |params| {
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(json!({"keyo": k1, "keyu": k2}))
+        let result = CallServiceResult::ok(json!({"keyo": k1, "keyu": k2}));
+        async move { result }.boxed_local()
     });
 
     let mut vm_1 = create_avm(set_variable_call_service, vm_1_peer_id).await;

@@ -18,6 +18,8 @@ use air::CatchableError;
 use air::ExecutionError;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
+
 #[tokio::test]
 async fn scalars_scope() {
     let peer_1_id = "peer_1_id";
@@ -81,11 +83,11 @@ async fn before_after_of_next() {
 
     let vm_peer_0_id = "vm_peer_0_id";
     let counter = std::cell::Cell::new(0);
-    let vm_peer_0_call_service: CallServiceClosure = Box::new(move |_params| {
+    let vm_peer_0_call_service: CallServiceClosure = Box::new(move |_params|  {
         let uncelled_request_id = counter.get();
         counter.set(uncelled_request_id + 1);
-        CallServiceResult::ok(json!(uncelled_request_id))
-    });
+        async move { CallServiceResult::ok(json!(uncelled_request_id))}
+    }.boxed_local());
     let mut peer_0_vm = create_avm(vm_peer_0_call_service, vm_peer_0_id).await;
 
     let vm_peer_1_id = "vm_peer_1_id";
@@ -138,7 +140,7 @@ async fn local_and_global_scalars() {
     let local_setter_call_service: CallServiceClosure = Box::new(move |_params| {
         let uncelled_request_id = counter.get();
         counter.set(uncelled_request_id + 1);
-        CallServiceResult::ok(json!(uncelled_request_id))
+        async move { CallServiceResult::ok(json!(uncelled_request_id)) }.boxed_local()
     });
     let mut local_setter_vm = create_avm(local_setter_call_service, local_setter_peer_id).await;
 

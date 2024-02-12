@@ -29,6 +29,7 @@ use super::CallServiceClosure;
 use avm_server::avm_runner::*;
 use fluence_keypair::KeyPair;
 use futures::future::LocalBoxFuture;
+use futures::StreamExt;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -56,7 +57,7 @@ pub trait AirRunner {
 
 pub struct TestRunner<R = DefaultAirRunner> {
     pub runner: R,
-    call_service: CallServiceClosure,
+    call_service: CallServiceClosure<'static>,
     pub keypair: KeyPair,
 }
 
@@ -117,14 +118,17 @@ impl<R: AirRunner> TestRunner<R> {
                 return Ok(outcome);
             }
 
-            call_results = outcome
+            call_results =
+                futures::stream::iter(outcome
                 .call_requests
                 .into_iter()
-                .map(|(id, call_parameters)| {
+            )
+                .then(|(id, call_parameters)| {
                     let service_result = (self.call_service)(call_parameters);
-                    (id, service_result)
-                })
-                .collect::<HashMap<_, _>>();
+                    async move {
+                        (id, service_result.await)
+                }})
+                .collect::<HashMap<_, _>>().await;
 
             prev_data = outcome.data;
             data = vec![];
@@ -160,14 +164,14 @@ impl<R: AirRunner> TestRunner<R> {
 }
 
 pub async fn create_avm(
-    call_service: CallServiceClosure,
+    call_service: CallServiceClosure<'static>,
     current_peer_id: impl Into<String>,
 ) -> TestRunner {
     create_custom_avm(call_service, current_peer_id).await
 }
 
 pub async fn create_custom_avm<R: AirRunner>(
-    call_service: CallServiceClosure,
+    call_service: CallServiceClosure<'static>,
     current_peer_id: impl Into<String>,
 ) -> TestRunner<R> {
     let current_peer_id = current_peer_id.into();
@@ -185,7 +189,7 @@ pub async fn create_custom_avm<R: AirRunner>(
 
 pub async fn create_avm_with_key<R: AirRunner>(
     keypair: impl Into<KeyPair>,
-    call_service: CallServiceClosure,
+    call_service: CallServiceClosure<'static>,
 ) -> TestRunner<R> {
     let keypair = keypair.into();
     let current_peer_id = keypair.public().to_peer_id().to_string();

@@ -230,7 +230,7 @@ async fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
             (fail scalar)
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
 #[tokio::test]
@@ -241,7 +241,7 @@ async fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
             (fail scalar.$.key)
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
 #[tokio::test]
@@ -252,7 +252,7 @@ async fn fail_to_fail_with_unsupported_errorcode_in_canon() {
             (fail scalar.$.[0])
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
 #[tokio::test]
@@ -260,5 +260,5 @@ async fn fail_to_fail_with_unsupported_errorcode_in_error() {
     let script = r#"
         (fail :error:)
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }

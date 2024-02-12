@@ -34,7 +34,6 @@ pub mod test_runner;
 pub mod native_test_runner;
 pub mod wasm_test_runner;
 
-use std::future::Future;
 pub use air::interpreter_data::*;
 
 use air::ExecutionCidState;

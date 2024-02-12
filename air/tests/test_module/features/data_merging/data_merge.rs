@@ -19,6 +19,7 @@ use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -178,13 +179,13 @@ async fn merge_streams_in_two_fold() {
 
 #[tokio::test]
 async fn stream_merge() {
-    let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
+    let neighborhood_call_service: CallServiceClosure = Box::new(|params| async move {
         let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
         let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
         assert_eq!(args[0].len(), args_count);
 
         CallServiceResult::ok(json!(args))
-    });
+    }.boxed_local());
 
     let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A").await;
     let mut vm2 = create_avm(neighborhood_call_service, "B").await;

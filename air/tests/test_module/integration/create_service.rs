@@ -15,6 +15,7 @@
  */
 
 use air_test_utils::prelude::*;
+use futures::FutureExt;
 
 #[tokio::test]
 async fn create_service() {
@@ -50,7 +51,7 @@ async fn create_service() {
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |params| {
         let response = match params.service_id.as_str() {
             "add_module" => add_module_response,
             "add_blueprint" => add_blueprint_response,
@@ -58,7 +59,8 @@ async fn create_service() {
             _ => "unknown response",
         };
 
-        CallServiceResult::ok(json!(response))
+        let result = CallServiceResult::ok(json!(response));
+        async move { result }.boxed_local()
     });
 
     let mut vm = create_avm(call_service, "A").await;

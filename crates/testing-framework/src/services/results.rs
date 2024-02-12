@@ -17,6 +17,9 @@
 use super::{FunctionOutcome, MarineService};
 use crate::asserts::ServiceDefinition;
 
+use futures::FutureExt;
+use futures::future::LocalBoxFuture;
+
 use air_test_utils::CallRequestParams;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
@@ -36,25 +39,26 @@ impl ResultStore {
 }
 
 impl MarineService for ResultStore {
-    fn call(&self, mut params: CallRequestParams) -> FunctionOutcome {
-        let results = self.results.borrow();
+    fn call<'this>(&'this self, mut params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
+        async {
+            let results = self.results.borrow();
+            let (real_service_id, suffix) = match params.service_id.rsplit_once("..") {
+                Some(split) => split,
+                None => return FunctionOutcome::NotDefined,
+            };
 
-        let (real_service_id, suffix) = match params.service_id.rsplit_once("..") {
-            Some(split) => split,
-            None => return FunctionOutcome::NotDefined,
-        };
-
-        if let Ok(result_id) = suffix.parse::<usize>() {
-            let service_desc = results
-                .get(&result_id)
-                .unwrap_or_else(|| panic!("failed to parse service name {:?}", params.service_id));
-            // hide the artificial service_id
-            params.service_id = real_service_id.to_owned();
-            FunctionOutcome::from_service_result(service_desc.call(params))
-        } else {
-            // Pass malformed service names further in a chain
-            FunctionOutcome::NotDefined
-        }
+            if let Ok(result_id) = suffix.parse::<usize>() {
+                let service_desc = results
+                    .get(&result_id)
+                    .unwrap_or_else(|| panic!("failed to parse service name {:?}", params.service_id));
+                // hide the artificial service_id
+                params.service_id = real_service_id.to_owned();
+                FunctionOutcome::from_service_result(service_desc.call(params).await)
+            } else {
+                // Pass malformed service names further in a chain
+                FunctionOutcome::NotDefined
+            }
+        }.boxed_local()
     }
 }
 
@@ -69,7 +73,7 @@ impl<T> MarineServiceWrapper<T> {
 }
 
 impl<T: MarineService> MarineService for MarineServiceWrapper<T> {
-    fn call(&self, params: CallRequestParams) -> FunctionOutcome {
+    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
         self.wrapped.call(params)
     }
 }

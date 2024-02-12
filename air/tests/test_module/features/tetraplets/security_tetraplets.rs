@@ -18,21 +18,23 @@ use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
 type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
 
-fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
+fn arg_host_function() -> (CallServiceClosure<'static>, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_function: CallServiceClosure = Box::new(move |params| {
         let result = json!(params.tetraplets);
         *arg_tetraplets_inner.borrow_mut() = params.tetraplets;
 
-        CallServiceResult::ok(result)
+        let result = CallServiceResult::ok(result);
+        async move { result }.boxed_local()
     });
 
     (host_function, arg_tetraplets)
@@ -40,9 +42,9 @@ fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
 
 #[tokio::test]
 async fn fold_with_inner_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
         CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
-    });
+    }.boxed_local());
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
     let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
@@ -253,9 +255,9 @@ async fn fold_json_path() {
 
 #[tokio::test]
 async fn check_tetraplet_works_correctly() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
         CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
-    });
+    }.boxed_local());
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
     let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
@@ -306,7 +308,6 @@ use fluence_app_service::ModuleDescriptor;
 
 use air_test_utils::trace_from_result;
 use std::path::PathBuf;
-use tracing::instrument::WithSubscriber;
 
 fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig {
     let module_name = module_name.into();
@@ -360,9 +361,9 @@ async fn tetraplet_with_wasm_modules() {
     );
     let services = Rc::new(RefCell::new(services));
 
-    let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_func: CallServiceClosure = Box::new(move |params| {
+        let services_inner = services.clone();
         let tetraplets = serde_json::to_vec(&params.tetraplets).expect("default serializer shouldn't fail");
         let tetraplets: Vec<Vec<SDKTetraplet>> =
             serde_json::from_slice(&tetraplets).expect("default deserializer shouldn't fail");
@@ -371,19 +372,21 @@ async fn tetraplet_with_wasm_modules() {
         call_parameters.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
-        let mut service = services_inner.borrow_mut();
-        let service = service.get_mut(params.service_id.as_str()).unwrap();
+        async move {
+            let mut service = services_inner.borrow_mut();
+            let service = service.get_mut(params.service_id.as_str()).unwrap();
 
-        let result = service
-            .call_async(
-                params.function_name,
-                JValue::Array(params.arguments),
-                to_app_service_call_parameters(call_parameters),
-            )
-            .await
-            .unwrap();
+            let result = service
+                .call_async(
+                    params.function_name,
+                    JValue::Array(params.arguments),
+                    to_app_service_call_parameters(call_parameters),
+                )
+                .await
+                .unwrap();
 
-        CallServiceResult::ok(result)
+            CallServiceResult::ok(result)
+        }.boxed_local()
     });
 
     let local_peer_id = "local_peer_id";

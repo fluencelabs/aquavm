@@ -17,6 +17,7 @@
 use air_test_utils::prelude::*;
 
 use futures::StreamExt;
+use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -50,7 +51,7 @@ fn client_host_function(
     known_peers: Vec<String>,
     client_id: String,
     relay_id: String,
-) -> (CallServiceClosure, Rc<RefCell<String>>) {
+) -> (CallServiceClosure<'static>, Rc<RefCell<String>>) {
     let all_info = Rc::new(RefCell::new(String::new()));
     let known_peers = JValue::Array(known_peers.iter().cloned().map(JValue::String).collect::<Vec<_>>());
     let client_id = JValue::String(client_id);
@@ -72,7 +73,7 @@ fn client_host_function(
     );
 
     let all_info_inner = all_info.clone();
-    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_function: CallServiceClosure = Box::new(move |params| {
         let ret_value = match serde_json::from_value(JValue::Array(params.arguments.clone())) {
             Ok(args) => to_ret_value(params.service_id.as_str(), params.function_name.as_str(), args),
             Err(_) => {
@@ -81,7 +82,8 @@ fn client_host_function(
             }
         };
 
-        CallServiceResult::ok(ret_value)
+        let result = CallServiceResult::ok(ret_value);
+        async move { result }.boxed_local()
     });
 
     (host_function, all_info)
@@ -93,7 +95,7 @@ fn peer_host_function(
     modules: Vec<String>,
     interfaces: Vec<String>,
     ident: String,
-) -> CallServiceClosure {
+) -> CallServiceClosure<'static> {
     let known_peers = JValue::Array(known_peers.into_iter().map(JValue::String).collect());
     let blueprints = JValue::Array(blueprints.into_iter().map(JValue::String).collect());
     let modules = JValue::Array(modules.into_iter().map(JValue::String).collect());
@@ -115,17 +117,18 @@ fn peer_host_function(
         },
     );
 
-    Box::new(move |params| -> CallServiceResult {
+    Box::new(move |params| {
         let args: Vec<String> = serde_json::from_value(JValue::Array(params.arguments)).unwrap();
         let t_args = args.iter().map(|s| s.as_str()).collect::<Vec<_>>();
         let ret_value = to_ret_value(params.service_id.as_str(), params.function_name.as_str(), t_args);
 
-        CallServiceResult::ok(ret_value)
+        let result = CallServiceResult::ok(ret_value);
+        async move { result }.boxed_local()
     })
 }
 
 #[rustfmt::skip]
-fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure {
+fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure<'static> {
     let relay_blueprints = (0..=2).map(|id| format!("{peer_id}_blueprint_{id}")).collect::<Vec<_>>();
     let relay_modules = (0..=2).map(|id| format!("{peer_id}_module_{id}")).collect::<Vec<_>>();
     let relay_interfaces = (0..=2).map(|id| format!("{peer_id}_interface_{id}")).collect::<Vec<_>>();

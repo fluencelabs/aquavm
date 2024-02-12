@@ -20,6 +20,7 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 #[tokio::test]
 async fn recursive_stream_with_early_exit() {
@@ -89,7 +90,7 @@ async fn recursive_stream_many_iterations() {
         };
 
         request_id.set(uncelled_request_id + 1);
-        result
+        async move { result }.boxed_local()
     });
 
     let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
@@ -187,7 +188,7 @@ async fn recursive_stream_join() {
         };
 
         request_id.set(uncelled_request_id + 1);
-        result
+        async move { result }.boxed_local()
     });
 
     let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
@@ -271,7 +272,7 @@ async fn recursive_stream_error_handling() {
         };
 
         request_id.set(uncelled_request_id + 1);
-        result
+        async move { result }.boxed_local()
     });
 
     let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
@@ -345,7 +346,7 @@ async fn recursive_stream_inner_fold() {
         };
 
         request_id.set(uncelled_request_id + 1);
-        result
+        async move { result }.boxed_local()
     });
 
     let mut vm_1 = create_avm(give_n_results_and_then_stop, vm_peer_id_1).await;
@@ -409,7 +410,7 @@ async fn recursive_stream_fold_with_n_service_call() {
         };
 
         request_id.set(uncelled_request_id + 1);
-        result
+        async move { result }.boxed_local()
     });
 
     let mut vm = create_avm(give_n_results_and_then_stop, vm_peer_id).await;

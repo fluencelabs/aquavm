@@ -18,6 +18,7 @@ use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 #[tokio::test]
 #[ignore]
@@ -512,14 +513,14 @@ const OUTSIDE_ACTION_NAME: &str = "outside_new";
 const INSIDE_ACTION_NAME: &str = "inside_new";
 const OUTPUT_ACTION_NAME: &str = "output";
 
-fn prepare_new_test_call_service() -> CallServiceClosure {
+fn prepare_new_test_call_service() -> CallServiceClosure<'static> {
     let outside_new_id = std::cell::Cell::new(0u32);
     let inside_new_id = std::cell::Cell::new(10u32);
 
     Box::new(move |mut params| {
         let action = params.arguments.remove(0);
         let action = action.as_str().unwrap();
-        match action {
+        let result = match action {
             GET_ITERABLE_ACTION_NAME => CallServiceResult::ok(json!([1, 2, 3])),
             OUTSIDE_ACTION_NAME => {
                 let outside_result = outside_new_id.get();
@@ -539,7 +540,8 @@ fn prepare_new_test_call_service() -> CallServiceClosure {
                 println!("unknown action: {action_name:?}");
                 CallServiceResult::err(1, json!("no such action"))
             }
-        }
+        };
+        async move { result }.boxed_local()
     })
 }
 

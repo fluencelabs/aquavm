@@ -20,6 +20,7 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
+use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -454,10 +455,11 @@ async fn ap_canon_stream() {
     let vm_1_peer_id = "vm_1_peer_id";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);

@@ -26,8 +26,13 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
-use futures::stream::StreamExt;
+use futures::StreamExt;
 use futures::future::OptionFuture;
+
+#[allow(unused)] // compiler gives warning, but it is used
+use futures::future::LocalBoxFuture;
+#[allow(unused)] // compiler gives warning, but it is used
+use futures::FutureExt;
 
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
@@ -88,8 +93,8 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let network = Network::new(extra_peers.into_iter(), common_services);
-        let transformed = TransformedAirScript::new(annotated_air_script, network)?;
+        let network = Network::new(extra_peers.into_iter(), common_services).await;
+        let transformed = TransformedAirScript::new(annotated_air_script, network).await?;
 
         Self::from_transformed_air_script(test_parameters, transformed).await
     }
@@ -99,7 +104,7 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         network: Rc<Network<R>>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let transformed = TransformedAirScript::new(annotated_air_script, network)?;
+        let transformed = TransformedAirScript::new(annotated_air_script, network).await?;
 
         Self::from_transformed_air_script(test_parameters, transformed).await
     }
@@ -655,12 +660,13 @@ mod tests {
     #[tokio::test]
     async fn test_transformed_distinct() {
         let peer_name = "peer1";
-        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]);
+        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]).await;
 
         let transformed1 = TransformedAirScript::new(
             &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 42"#),
             network.clone(),
         )
+        .await
         .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
@@ -673,6 +679,7 @@ mod tests {
             &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 24"#,),
             network,
         )
+        .await
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
@@ -711,9 +718,11 @@ mod tests {
         }
 
         impl MarineService for Service {
-            fn call(&self, _params: CallRequestParams) -> crate::services::FunctionOutcome {
-                let mut cell = self.state.borrow_mut();
-                crate::services::FunctionOutcome::from_value(cell.next().unwrap())
+            fn call<'this>(&'this self, _params: CallRequestParams) -> LocalBoxFuture<'this, crate::services::FunctionOutcome> {
+                async {
+                    let mut cell = self.state.borrow_mut();
+                    crate::services::FunctionOutcome::from_value(cell.next().unwrap())
+                }.boxed_local()
             }
         }
         let service = Service {
@@ -722,11 +731,11 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(
             std::iter::empty::<PeerId>(),
             vec![service.to_handle()],
-        );
+        ).await;
 
         let peer_name = "peer1";
         let air_script = format!(r#"(call "{peer_name}" ("service" "function") [])"#);
-        let transformed1 = TransformedAirScript::new(&air_script, network.clone()).unwrap();
+        let transformed1 = TransformedAirScript::new(&air_script, network.clone()).await.unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             transformed1,
@@ -734,7 +743,7 @@ mod tests {
         .await
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network).unwrap();
+        let transformed2 = TransformedAirScript::new(&air_script, network).await.unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             transformed2,

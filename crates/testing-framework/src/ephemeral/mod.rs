@@ -142,13 +142,13 @@ pub struct Network<R = DefaultAirRunner> {
 // Rust fails to deduce type for `Network::empty()` without
 //   extencive test code changes
 impl Network<DefaultAirRunner> {
-    pub fn empty() -> Rc<Self> {
-        Self::new(std::iter::empty::<PeerId>(), vec![])
+    pub async fn empty() -> Rc<Self> {
+        Self::new(std::iter::empty::<PeerId>(), vec![]).await
     }
 }
 
 impl<R: AirRunner> Network<R> {
-    pub fn new(
+    pub async fn new(
         named_peers: impl Iterator<Item = impl Into<PeerId>>,
         common_services: Vec<MarineServiceHandle>,
     ) -> Rc<Self> {
@@ -158,13 +158,13 @@ impl<R: AirRunner> Network<R> {
             resolver: Default::default(),
         });
         for peer_name in named_peers {
-            network.ensure_named_peer(peer_name);
+            network.ensure_named_peer(peer_name).await;
         }
         network
     }
 
-    pub fn from_peers(nodes: Vec<Peer<R>>) -> Rc<Self> {
-        let network = Self::new(std::iter::empty::<PeerId>(), vec![]);
+    pub async fn from_peers(nodes: Vec<Peer<R>>) -> Rc<Self> {
+        let network = Self::new(std::iter::empty::<PeerId>(), vec![]).await;
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             network.add_peer_env(peer, neighborhood.iter().cloned());

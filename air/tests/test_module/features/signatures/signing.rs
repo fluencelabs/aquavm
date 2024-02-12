@@ -60,7 +60,9 @@ async fn test_signature_call_var() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await.last().unwrap();
+
+    let exec_results = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -86,7 +88,8 @@ async fn test_signature_call_stream() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -114,7 +117,8 @@ async fn test_signature_call_unused() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -186,7 +190,8 @@ async fn test_signature_call_twice() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await.last().unwrap();
+    let exec_results = exec.execution_iter(init_peer_id.as_str()).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -228,8 +233,9 @@ async fn test_signature_canon_basic() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result = scalar!(
         json!([1, 2, 3]),
@@ -306,11 +312,12 @@ async fn test_signature_canon_merge() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    exec.execute_all(init_peer_name);
-    exec.execute_one(other_peer_name);
+    exec.execute_all(init_peer_name).await;
+    exec.execute_one(other_peer_name).await;
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result = scalar!(
         json!([1, 2, 3]),
@@ -385,8 +392,9 @@ async fn test_signature_canon_result() {
     let exec =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).await.unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await.last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result1 = scalar!(
         json!([1, 2, 3]),
