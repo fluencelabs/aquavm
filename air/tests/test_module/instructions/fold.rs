@@ -22,8 +22,8 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -33,7 +33,8 @@ async fn lfold() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    ).await;
+    )
+    .await;
 
     let lfold = r#"
             (seq
@@ -68,7 +69,8 @@ async fn rfold() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    ).await;
+    )
+    .await;
 
     let rfold = r#"
             (seq
@@ -103,7 +105,8 @@ async fn inner_fold() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    ).await;
+    )
+    .await;
 
     let script = r#"
             (seq
@@ -149,7 +152,8 @@ async fn inner_fold_with_same_iterator() {
     let mut vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    ).await;
+    )
+    .await;
 
     let script = r#"
             (seq
@@ -278,7 +282,8 @@ async fn lambda() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!({ "array": ["1","2","3","4","5"] })),
         "set_variable",
-    ).await;
+    )
+    .await;
 
     let script = r#"
             (seq

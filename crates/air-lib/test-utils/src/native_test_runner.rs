@@ -38,9 +38,7 @@ impl NativeAirRunner {
 impl AirRunner for NativeAirRunner {
     fn new(current_peer_id: impl Into<String>) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
-        async move {
-            Self::new(current_peer_id)
-        }.boxed_local()
+        async move { Self::new(current_peer_id) }.boxed_local()
     }
 
     fn call<'this>(
@@ -90,7 +88,8 @@ impl AirRunner for NativeAirRunner {
             let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
             Ok(outcome)
-        }.boxed_local()
+        }
+        .boxed_local()
     }
 
     fn get_current_peer_id(&self) -> &str {

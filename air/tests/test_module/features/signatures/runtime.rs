@@ -51,7 +51,10 @@ async fn test_runtime_executed_call_argument_hash() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service()).await;
     let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service()).await;
 
-    let alice_res = alice_avm.call(&air_script, "", "", test_run_params.clone()).await.unwrap();
+    let alice_res = alice_avm
+        .call(&air_script, "", "", test_run_params.clone())
+        .await
+        .unwrap();
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .await
@@ -67,7 +70,10 @@ async fn test_runtime_executed_call_argument_hash() {
 
     let mallory_data = mallory_env.serialize().unwrap();
 
-    let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).await.unwrap();
+    let bob_res = bob_avm
+        .call(air_script, "", mallory_data, test_run_params)
+        .await
+        .unwrap();
     assert_error_eq!(
         &bob_res,
         UncatchableError::InstructionParametersMismatch {
@@ -108,7 +114,10 @@ async fn test_runtime_executed_call_tetraplet() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service()).await;
     let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service()).await;
 
-    let alice_res = alice_avm.call(&air_script, "", "", test_run_params.clone()).await.unwrap();
+    let alice_res = alice_avm
+        .call(&air_script, "", "", test_run_params.clone())
+        .await
+        .unwrap();
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .await
@@ -124,7 +133,10 @@ async fn test_runtime_executed_call_tetraplet() {
 
     let mallory_data = mallory_env.serialize().unwrap();
 
-    let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).await.unwrap();
+    let bob_res = bob_avm
+        .call(air_script, "", mallory_data, test_run_params)
+        .await
+        .unwrap();
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
@@ -183,7 +195,10 @@ async fn test_runtime_executed_failed_argument_hash() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service()).await;
     let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service()).await;
 
-    let alice_res = alice_avm.call(&air_script, "", "", test_run_params.clone()).await.unwrap();
+    let alice_res = alice_avm
+        .call(&air_script, "", "", test_run_params.clone())
+        .await
+        .unwrap();
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .await
@@ -199,7 +214,10 @@ async fn test_runtime_executed_failed_argument_hash() {
 
     let mallory_data = mallory_env.serialize().unwrap();
 
-    let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).await.unwrap();
+    let bob_res = bob_avm
+        .call(air_script, "", mallory_data, test_run_params)
+        .await
+        .unwrap();
     assert_error_eq!(
         &bob_res,
         UncatchableError::InstructionParametersMismatch {
@@ -244,7 +262,10 @@ async fn test_runtime_failed_call_tetraplet() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service()).await;
     let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service()).await;
 
-    let alice_res = alice_avm.call(&air_script, "", "", test_run_params.clone()).await.unwrap();
+    let alice_res = alice_avm
+        .call(&air_script, "", "", test_run_params.clone())
+        .await
+        .unwrap();
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .await
@@ -260,7 +281,10 @@ async fn test_runtime_failed_call_tetraplet() {
 
     let mallory_data = mallory_env.serialize().unwrap();
 
-    let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).await.unwrap();
+    let bob_res = bob_avm
+        .call(air_script, "", mallory_data, test_run_params)
+        .await
+        .unwrap();
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
@@ -317,7 +341,10 @@ async fn test_runtime_canon_tetraplet() {
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service()).await;
     let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service()).await;
 
-    let alice_res = alice_avm.call(&air_script, "", "", test_run_params.clone()).await.unwrap();
+    let alice_res = alice_avm
+        .call(&air_script, "", "", test_run_params.clone())
+        .await
+        .unwrap();
     let mallory_res = mallory_avm
         .call(&air_script, "", alice_res.data, test_run_params.clone())
         .await
@@ -333,7 +360,10 @@ async fn test_runtime_canon_tetraplet() {
 
     let mallory_data = mallory_env.serialize().unwrap();
 
-    let bob_res = bob_avm.call(air_script, "", mallory_data, test_run_params).await.unwrap();
+    let bob_res = bob_avm
+        .call(air_script, "", mallory_data, test_run_params)
+        .await
+        .unwrap();
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,

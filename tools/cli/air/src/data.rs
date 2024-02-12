@@ -81,11 +81,8 @@ pub(crate) async fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std
         Err(anyhow::anyhow!("empty input data: {:?}", args.input))?;
     }
 
-    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path)
-        .await?;
-    let out = {
-        runner.to_human_readable(data).await?
-    };
+    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path).await?;
+    let out = { runner.to_human_readable(data).await? };
     println!("{out}");
 
     Ok(())

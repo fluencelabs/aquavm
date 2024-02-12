@@ -107,7 +107,10 @@ impl<R: AirRunner> Peer<R> {
         queue_cell: &PeerQueueCell,
     ) -> Result<RawAVMOutcome, String> {
         let prev_data = queue_cell.take_prev_data();
-        let res = self.runner.call(air, prev_data, data, test_run_params).await;
+        let res = self
+            .runner
+            .call(air, prev_data, data, test_run_params)
+            .await;
         if let Ok(outcome) = &res {
             queue_cell.set_prev_data(outcome.data.clone());
         }

@@ -32,7 +32,9 @@ async fn global_streams_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script)
+        .await
+        .unwrap();
     let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
@@ -68,7 +70,9 @@ async fn global_stream_maps_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script)
+        .await
+        .unwrap();
     let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
@@ -104,7 +108,9 @@ async fn local_streams_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script)
+        .await
+        .unwrap();
     let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 
@@ -142,7 +148,9 @@ async fn local_stream_maps_are_compactified() {
     "#
     );
 
-    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_name), &script)
+        .await
+        .unwrap();
     let result = executor.execute_all(peer_name).await.unwrap();
     let actual_trace = trace_from_result(result.last().unwrap());
 

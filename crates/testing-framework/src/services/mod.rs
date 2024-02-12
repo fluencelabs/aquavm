@@ -48,7 +48,10 @@ impl FunctionOutcome {
 
 /// A mocked Marine service.
 pub trait MarineService {
-    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome>;
+    fn call<'this>(
+        &'this self,
+        params: CallRequestParams,
+    ) -> LocalBoxFuture<'this, FunctionOutcome>;
 
     fn to_handle(self) -> MarineServiceHandle
     where
@@ -62,11 +65,15 @@ pub trait MarineService {
 pub struct MarineServiceHandle(Rc<RefCell<Box<dyn MarineService>>>);
 
 impl MarineService for MarineServiceHandle {
-    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
+    fn call<'this>(
+        &'this self,
+        params: CallRequestParams,
+    ) -> LocalBoxFuture<'this, FunctionOutcome> {
         async {
             let mut guard = self.0.borrow_mut();
             MarineService::call(guard.as_mut(), params).await
-        }.boxed_local()
+        }
+        .boxed_local()
     }
 }
 
@@ -81,11 +88,14 @@ pub(crate) fn services_to_call_service_closure(
                 match outcome {
                     FunctionOutcome::ServiceResult(result, _) => return result,
                     FunctionOutcome::NotDefined => continue,
-                    FunctionOutcome::Empty => return CallServiceResult::ok(serde_json::Value::Null),
+                    FunctionOutcome::Empty => {
+                        return CallServiceResult::ok(serde_json::Value::Null)
+                    }
                 }
             }
             panic!("No function found for params {:?}", params)
-        }.boxed_local()
+        }
+        .boxed_local()
     })
 }
 

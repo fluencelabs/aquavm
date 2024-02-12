@@ -25,10 +25,10 @@ use air_utils::measure;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_interface::CallResults;
 use fluence_keypair::KeyPair;
-use marine::IValue;
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
 use marine::generic::ModuleDescriptor;
+use marine::IValue;
 use marine_wasm_backend_traits::WasmBackend;
 
 use std::path::PathBuf;
@@ -59,7 +59,7 @@ impl<WB: WasmBackend> AVMRunner<WB> {
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
         logging_mask: i32,
-        wasm_backend: WB
+        wasm_backend: WB,
     ) -> RunnerResult<Self> {
         let (wasm_dir, wasm_filename) = split_dirname(air_wasm_path)?;
 
@@ -162,12 +162,14 @@ impl<WB: WasmBackend> AVMRunner<WB> {
         args.push(IValue::U8(tracing_output_mode));
 
         let result = measure!(
-            self.marine.call_with_ivalues_async(
-                &self.wasm_filename,
-                "invoke_tracing",
-                &args,
-                <_>::default(),
-            ).await?,
+            self.marine
+                .call_with_ivalues_async(
+                    &self.wasm_filename,
+                    "invoke_tracing",
+                    &args,
+                    <_>::default(),
+                )
+                .await?,
             tracing::Level::INFO,
             "marine.call_with_ivalues",
             method = "invoke_tracing",
@@ -181,15 +183,21 @@ impl<WB: WasmBackend> AVMRunner<WB> {
         Ok(outcome)
     }
 
-    pub async fn to_human_readable_data<'this>(&'this mut self, data: Vec<u8>) -> RunnerResult<String> {
+    pub async fn to_human_readable_data<'this>(
+        &'this mut self,
+        data: Vec<u8>,
+    ) -> RunnerResult<String> {
         let args = vec![IValue::ByteArray(data)];
 
-        let result = self.marine.call_with_ivalues_async(
-            &self.wasm_filename,
-            "to_human_readable_data",
-            &args,
-            <_>::default(),
-        ).await?;
+        let result = self
+            .marine
+            .call_with_ivalues_async(
+                &self.wasm_filename,
+                "to_human_readable_data",
+                &args,
+                <_>::default(),
+            )
+            .await?;
         let result = try_as_one_value_vec(result)?;
         let outcome = try_as_string(result, "result").map_err(RunnerError::Aux)?;
         Ok(outcome)

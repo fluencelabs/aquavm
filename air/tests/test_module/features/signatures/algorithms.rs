@@ -82,7 +82,8 @@ fn test_banned_signature() {
             current_data,
             TestRunParameters::from_init_peer_id("init_peer_fake_id"),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,

@@ -90,7 +90,7 @@ async fn merging_fold_iterations_extensively() {
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         script,
     )
-        .await
+    .await
     .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();
@@ -228,7 +228,7 @@ async fn merging_fold_iterations_extensively_2() {
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         script,
     )
-        .await
+    .await
     .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();

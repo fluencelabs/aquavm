@@ -199,18 +199,20 @@ impl<R: AirRunner> PeerEnv<R> {
         let queue_cell = queue.get_peer_queue_cell(self.peer.peer_id.clone());
         let maybe_data = queue_cell.pop_data();
 
-        let maybe_data: futures::future::OptionFuture<_> = maybe_data.map(|data| async {
-            let res = self
-                .peer
-                .invoke(air, data, test_parameters.clone(), &queue_cell)
-                .await;
+        let maybe_data: futures::future::OptionFuture<_> = maybe_data
+            .map(|data| async {
+                let res = self
+                    .peer
+                    .invoke(air, data, test_parameters.clone(), &queue_cell)
+                    .await;
 
-            if let Ok(outcome) = &res {
-                queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
-            }
+                if let Ok(outcome) = &res {
+                    queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
+                }
 
-            res
-        }).into();
+                res
+            })
+            .into();
 
         maybe_data.await
     }

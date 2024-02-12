@@ -182,7 +182,8 @@ async fn fail_with_canon_stream() {
     let mut vm = create_avm(
         set_variable_call_service(json!({"error_code": error_code, "message": error_message})),
         vm_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"

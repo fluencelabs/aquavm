@@ -18,8 +18,8 @@ use air::ExecutionCidState;
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -35,7 +35,8 @@ async fn merge_streams_in_two_fold() {
     let mut set_variable = create_avm(
         set_variable_call_service(json!([vm_1_peer_id, vm_2_peer_id])),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
     let mut vm1 = create_avm(return_string_call_service(vm_1_peer_id), vm_1_peer_id).await;
     let mut vm2 = create_avm(return_string_call_service(vm_2_peer_id), vm_2_peer_id).await;
 
@@ -179,13 +180,16 @@ async fn merge_streams_in_two_fold() {
 
 #[tokio::test]
 async fn stream_merge() {
-    let neighborhood_call_service: CallServiceClosure = Box::new(|params| async move {
-        let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
-        let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
-        assert_eq!(args[0].len(), args_count);
+    let neighborhood_call_service: CallServiceClosure = Box::new(|params| {
+        async move {
+            let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
+            let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
+            assert_eq!(args[0].len(), args_count);
 
-        CallServiceResult::ok(json!(args))
-    }.boxed_local());
+            CallServiceResult::ok(json!(args))
+        }
+        .boxed_local()
+    });
 
     let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A").await;
     let mut vm2 = create_avm(neighborhood_call_service, "B").await;
@@ -231,7 +235,8 @@ async fn fold_merge() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::Argument(0)),
         set_variable_vm_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         include_str!("./scripts/inner_folds_v1.air"),

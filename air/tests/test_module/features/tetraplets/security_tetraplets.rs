@@ -16,9 +16,9 @@
 
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
+use futures::FutureExt;
 use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
-use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -42,9 +42,9 @@ fn arg_host_function() -> (CallServiceClosure<'static>, Rc<RefCell<ArgTetraplets
 
 #[tokio::test]
 async fn fold_with_inner_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
-    }.boxed_local());
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
+    });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
     let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
@@ -118,7 +118,7 @@ async fn fold_stream_with_inner_call() {
         TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
-        .await
+    .await
     .unwrap();
 
     let result = executor.execute_one(init_peer_name).await.unwrap();
@@ -167,7 +167,7 @@ async fn fold_canon_with_inner_call() {
         TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
-        .await
+    .await
     .unwrap();
 
     let result = executor.execute_one(init_peer_name).await.unwrap();
@@ -203,7 +203,8 @@ async fn fold_json_path() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(variable_numbers),
         set_variable_vm_peer_id.clone(),
-    ).await;
+    )
+    .await;
 
     let (arg_host_func, arg_tetraplets) = arg_host_function();
     let client_peer_id = String::from("client_id");
@@ -255,9 +256,10 @@ async fn fold_json_path() {
 
 #[tokio::test]
 async fn check_tetraplet_works_correctly() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
-        CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
-    }.boxed_local());
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]})) }
+            .boxed_local()
+    });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
     let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
@@ -301,10 +303,10 @@ async fn check_tetraplet_works_correctly() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
-use fluence_app_service::{AppService, MarineModuleConfig};
 use fluence_app_service::AppServiceConfig;
 use fluence_app_service::MarineConfig;
 use fluence_app_service::ModuleDescriptor;
+use fluence_app_service::{AppService, MarineModuleConfig};
 
 use air_test_utils::trace_from_result;
 use std::path::PathBuf;
@@ -349,11 +351,15 @@ async fn tetraplet_with_wasm_modules() {
 
     let auth_module_name = String::from("auth_module");
     let auth_service_config = construct_service_config(auth_module_name.clone());
-    let auth_service = AppService::new(auth_service_config, auth_module_name, <_>::default()).await.unwrap();
+    let auth_service = AppService::new(auth_service_config, auth_module_name, <_>::default())
+        .await
+        .unwrap();
 
     let log_module_name = String::from("log_storage");
     let log_service_config = construct_service_config(log_module_name.clone());
-    let log_service = AppService::new(log_service_config, log_module_name, <_>::default()).await.unwrap();
+    let log_service = AppService::new(log_service_config, log_module_name, <_>::default())
+        .await
+        .unwrap();
 
     let services = maplit::hashmap!(
       "auth" => auth_service,
@@ -386,7 +392,8 @@ async fn tetraplet_with_wasm_modules() {
                 .unwrap();
 
             CallServiceResult::ok(result)
-        }.boxed_local()
+        }
+        .boxed_local()
     });
 
     let local_peer_id = "local_peer_id";

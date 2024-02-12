@@ -62,7 +62,10 @@ pub(crate) fn parse_behaviour(inp: &str) -> IResult<&str, Behavior, super::parse
 }
 
 impl Behavior {
-    pub(crate) async fn call(&self, params: air_test_utils::CallRequestParams) -> CallServiceResult {
+    pub(crate) async fn call(
+        &self,
+        params: air_test_utils::CallRequestParams,
+    ) -> CallServiceResult {
         use Behavior::*;
 
         match self {

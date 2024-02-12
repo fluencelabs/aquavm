@@ -19,8 +19,8 @@ use air_interpreter_data::ExecutionTrace;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn recursive_stream_with_early_exit() {
@@ -32,7 +32,8 @@ async fn recursive_stream_with_early_exit() {
     let mut vm = create_avm(
         set_variables_call_service(variable_mappings, VariableOptionSource::FunctionName),
         vm_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"

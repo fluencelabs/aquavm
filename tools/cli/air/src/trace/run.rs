@@ -186,7 +186,8 @@ pub(crate) async fn run(args: Args) -> anyhow::Result<()> {
         &args.air_interpreter_path,
         &args.air_near_contract_path,
         args.max_heap_size,
-    ).await?;
+    )
+    .await?;
 
     let execution_data = match &args.source {
         Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,

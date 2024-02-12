@@ -17,8 +17,8 @@
 use super::{FunctionOutcome, MarineService};
 use crate::asserts::ServiceDefinition;
 
-use futures::FutureExt;
 use futures::future::LocalBoxFuture;
+use futures::FutureExt;
 
 use air_test_utils::CallRequestParams;
 
@@ -39,7 +39,10 @@ impl ResultStore {
 }
 
 impl MarineService for ResultStore {
-    fn call<'this>(&'this self, mut params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
+    fn call<'this>(
+        &'this self,
+        mut params: CallRequestParams,
+    ) -> LocalBoxFuture<'this, FunctionOutcome> {
         async {
             let results = self.results.borrow();
             let (real_service_id, suffix) = match params.service_id.rsplit_once("..") {
@@ -48,9 +51,9 @@ impl MarineService for ResultStore {
             };
 
             if let Ok(result_id) = suffix.parse::<usize>() {
-                let service_desc = results
-                    .get(&result_id)
-                    .unwrap_or_else(|| panic!("failed to parse service name {:?}", params.service_id));
+                let service_desc = results.get(&result_id).unwrap_or_else(|| {
+                    panic!("failed to parse service name {:?}", params.service_id)
+                });
                 // hide the artificial service_id
                 params.service_id = real_service_id.to_owned();
                 FunctionOutcome::from_service_result(service_desc.call(params).await)
@@ -58,7 +61,8 @@ impl MarineService for ResultStore {
                 // Pass malformed service names further in a chain
                 FunctionOutcome::NotDefined
             }
-        }.boxed_local()
+        }
+        .boxed_local()
     }
 }
 
@@ -73,7 +77,10 @@ impl<T> MarineServiceWrapper<T> {
 }
 
 impl<T: MarineService> MarineService for MarineServiceWrapper<T> {
-    fn call<'this>(&'this self, params: CallRequestParams) -> LocalBoxFuture<'this, FunctionOutcome> {
+    fn call<'this>(
+        &'this self,
+        params: CallRequestParams,
+    ) -> LocalBoxFuture<'this, FunctionOutcome> {
         self.wrapped.call(params)
     }
 }

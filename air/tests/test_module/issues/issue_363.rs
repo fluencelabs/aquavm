@@ -26,7 +26,8 @@ async fn issue_363() {
             ["p2", [[["p2", 13], ["p1", 14]], [["p2", 16], ["p1", 18]]]]
         ])),
         client_peer_id,
-    ).await;
+    )
+    .await;
 
     let p1_peer_id = "p1";
     let mut p1_vm = create_avm(set_variable_call_service(json!("p1")), p1_peer_id).await;

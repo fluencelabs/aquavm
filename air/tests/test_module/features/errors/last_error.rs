@@ -49,7 +49,8 @@ fn create_check_service_closure(
             *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
 
             CallServiceResult::ok(result)
-        }.boxed_local()
+        }
+        .boxed_local()
     })
 }
 
@@ -68,7 +69,8 @@ async fn last_error_tetraplets() {
     let mut local_vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         local_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         include_str!("scripts/create_service_with_xor.air"),
@@ -232,7 +234,8 @@ async fn non_initialized_last_error() {
     let mut vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         vm_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"

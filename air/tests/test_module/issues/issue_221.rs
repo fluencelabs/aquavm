@@ -77,7 +77,7 @@ async fn issue_221() {
         vec![peer_1_name, peer_2_name].into_iter().map(Into::into),
         &script,
     )
-        .await
+    .await
     .expect("Invalid annotated AIR script");
 
     let peer_1_id = at(peer_1_name);

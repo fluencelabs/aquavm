@@ -26,8 +26,8 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
-use futures::StreamExt;
 use futures::future::OptionFuture;
+use futures::StreamExt;
 
 #[allow(unused)] // compiler gives warning, but it is used
 use futures::future::LocalBoxFuture;
@@ -58,7 +58,8 @@ impl AirScriptExecutor<DefaultAirRunner> {
             vec![],
             std::iter::empty(),
             annotated_air_script,
-        ).await
+        )
+        .await
     }
 }
 
@@ -133,10 +134,7 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
     {
-        let exec_iter: OptionFuture<_> = self
-            .execution_iter(peer_id)
-            .map(|it| it.collect())
-            .into();
+        let exec_iter: OptionFuture<_> = self.execution_iter(peer_id).map(|it| it.collect()).into();
         exec_iter.await
     }
 
@@ -213,12 +211,22 @@ mod tests {
         let outcome = &result_init[0];
         assert_eq!(outcome.next_peer_pks, vec![peer1_id.clone()]);
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().await.is_none());
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
         let results1: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect().await;
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 0);
-        assert!(exec.execution_iter(peer1_name).unwrap().next().await.is_none());
+        assert!(exec
+            .execution_iter(peer1_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
 
         let outcome2 = exec.execute_one(peer2_name).await.unwrap();
         assert_eq!(outcome2.ret_code, 0);
@@ -330,13 +338,23 @@ mod tests {
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().await.is_none());
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
         {
             let results1 = exec.execute_all(peer1_name).await.unwrap();
             assert_eq!(results1.len(), 1);
             let outcome1 = &results1[0];
             assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-            assert!(exec.execution_iter(peer1_name).unwrap().next().await.is_none());
+            assert!(exec
+                .execution_iter(peer1_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome1.next_peer_pks, [peer2_id.as_str()]);
         }
 
@@ -345,7 +363,12 @@ mod tests {
             assert_eq!(results2.len(), 1);
             let outcome2 = &results2[0];
             assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
-            assert!(exec.execution_iter(peer2_name).unwrap().next().await.is_none());
+            assert!(exec
+                .execution_iter(peer2_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
 
             let trace = trace_from_result(outcome2);
@@ -375,7 +398,12 @@ mod tests {
             assert_eq!(results3.len(), 1);
             let outcome3 = &results3[0];
             assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
-            assert!(exec.execution_iter(peer3_name).unwrap().next().await.is_none());
+            assert!(exec
+                .execution_iter(peer3_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
 
             let trace = trace_from_result(outcome3);
             assert_eq!(
@@ -535,13 +563,23 @@ mod tests {
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().await.is_none());
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
         {
             let results1 = exec.execute_all(peer1_name).await.unwrap();
             assert_eq!(results1.len(), 1);
             let outcome1 = &results1[0];
             assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-            assert!(exec.execution_iter(peer1_name).unwrap().next().await.is_none());
+            assert!(exec
+                .execution_iter(peer1_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome1.next_peer_pks, [peer2_id.as_str()]);
         }
 
@@ -550,7 +588,12 @@ mod tests {
             assert_eq!(results2.len(), 1);
             let outcome2 = &results2[0];
             assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
-            assert!(exec.execution_iter(peer2_name).unwrap().next().await.is_none());
+            assert!(exec
+                .execution_iter(peer2_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
 
             let trace = trace_from_result(outcome2);
@@ -718,11 +761,15 @@ mod tests {
         }
 
         impl MarineService for Service {
-            fn call<'this>(&'this self, _params: CallRequestParams) -> LocalBoxFuture<'this, crate::services::FunctionOutcome> {
+            fn call<'this>(
+                &'this self,
+                _params: CallRequestParams,
+            ) -> LocalBoxFuture<'this, crate::services::FunctionOutcome> {
                 async {
                     let mut cell = self.state.borrow_mut();
                     crate::services::FunctionOutcome::from_value(cell.next().unwrap())
-                }.boxed_local()
+                }
+                .boxed_local()
             }
         }
         let service = Service {
@@ -731,11 +778,14 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(
             std::iter::empty::<PeerId>(),
             vec![service.to_handle()],
-        ).await;
+        )
+        .await;
 
         let peer_name = "peer1";
         let air_script = format!(r#"(call "{peer_name}" ("service" "function") [])"#);
-        let transformed1 = TransformedAirScript::new(&air_script, network.clone()).await.unwrap();
+        let transformed1 = TransformedAirScript::new(&air_script, network.clone())
+            .await
+            .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             transformed1,
@@ -743,7 +793,9 @@ mod tests {
         .await
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network).await.unwrap();
+        let transformed2 = TransformedAirScript::new(&air_script, network)
+            .await
+            .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             transformed2,
@@ -784,7 +836,8 @@ mod tests {
 (call "peer1" ("service" "func") [1 22] arg) ; behaviour=echo
 )
 "#,
-        ).await;
+        )
+        .await;
 
         match &res {
             Ok(_) => {
@@ -852,7 +905,7 @@ mod tests {
             std::iter::empty(),
             air_script,
         )
-            .await
+        .await
         .unwrap();
 
         let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;
@@ -947,7 +1000,7 @@ mod tests {
             std::iter::empty(),
             air_script,
         )
-            .await
+        .await
         .unwrap();
 
         let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;

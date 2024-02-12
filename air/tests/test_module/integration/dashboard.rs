@@ -16,8 +16,8 @@
 
 use air_test_utils::prelude::*;
 
-use futures::StreamExt;
 use futures::FutureExt;
+use futures::StreamExt;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -163,15 +163,16 @@ async fn dashboard() {
     let mut relay = create_avm(
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
         relay_id.clone(),
-    ).await;
+    )
+    .await;
 
-    let mut known_peers =
-        futures::stream::iter(known_peer_ids.iter().cloned())
+    let mut known_peers = futures::stream::iter(known_peer_ids.iter().cloned())
         .then(|peer_id| async {
             let vm = create_avm(
                 create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
                 peer_id.clone(),
-            ).await;
+            )
+            .await;
             AVMState {
                 vm,
                 peer_id,

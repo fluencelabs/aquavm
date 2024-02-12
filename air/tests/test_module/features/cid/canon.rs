@@ -36,8 +36,9 @@ async fn test_canon_ok() {
     )"#
     );
 
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
+        .unwrap();
     let result = executor.execute_one(init_peer_name).await.unwrap();
     let data = data_from_result(&result);
 
@@ -114,8 +115,9 @@ async fn test_canon_ok_multi() {
     )"#
     );
 
-    let executor =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script).await.unwrap();
+    let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
+        .unwrap();
     let _result1 = executor.execute_one(init_peer_name).await.unwrap();
     let _result2 = executor.execute_one(other_peer_name).await.unwrap();
     let result3 = executor.execute_one(init_peer_name).await.unwrap();

@@ -74,15 +74,17 @@ impl AirRunner for NativeAvmRunner {
             let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
 
             Ok(outcome)
-        }.boxed_local()
+        }
+        .boxed_local()
     }
 }
 
 impl DataToHumanReadable for NativeAvmRunner {
-    fn to_human_readable<'this>(&'this mut self, data: Vec<u8>) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>> {
-        async move {
-            air::to_human_readable_data(data)
-        }.boxed_local()
+    fn to_human_readable<'this>(
+        &'this mut self,
+        data: Vec<u8>,
+    ) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>> {
+        async move { air::to_human_readable_data(data) }.boxed_local()
     }
 }
 

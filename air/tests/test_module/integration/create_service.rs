@@ -45,7 +45,8 @@ async fn create_service() {
     let mut set_variables_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         "set_variables",
-    ).await;
+    )
+    .await;
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";

@@ -19,8 +19,8 @@ use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
 use std::rc::Rc;

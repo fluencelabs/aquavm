@@ -222,7 +222,8 @@ async fn functor_dont_influence_tetraplet() {
     let mut set_variable_vm = create_avm(
         set_variable_call_service(set_variable_peer_result.clone()),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let tetraplet_catcher_peer_id = "tetraplet_catcher_peer_id";
     let (call_service, actual_tetraplet) = tetraplet_host_function(echo_call_service());

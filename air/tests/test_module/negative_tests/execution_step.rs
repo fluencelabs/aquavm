@@ -448,7 +448,10 @@ async fn index_access_not_u32_i64() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
-    let result = peer_vm_2.call(script.clone(), "", result.data, <_>::default()).await.unwrap();
+    let result = peer_vm_2
+        .call(script.clone(), "", result.data, <_>::default())
+        .await
+        .unwrap();
     let expected_error =
         air::CatchableError::LambdaApplierError(air::LambdaError::IndexAccessNotU32 { accessor: number });
     assert!(check_error(&result, expected_error));
@@ -547,7 +550,10 @@ async fn canon_stream_not_have_enough_values_call_arg() {
      )"#
     );
 
-    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).await.unwrap();
+    let result = local_vm
+        .call(&join_stream_script, "", "", <_>::default())
+        .await
+        .unwrap();
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
     let expected_error =
@@ -571,7 +577,10 @@ async fn unsupported_map_keytype() {
      "#
     );
 
-    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).await.unwrap();
+    let result = local_vm
+        .call(&join_stream_script, "", "", <_>::default())
+        .await
+        .unwrap();
     let expected_error = CatchableError::StreamMapError(unsupported_map_key_type(map_name));
     assert!(check_error(&result, expected_error));
 }

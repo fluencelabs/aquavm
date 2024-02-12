@@ -320,7 +320,8 @@ async fn fold_par_early_exit() {
     let mut variables_setter = create_avm(
         set_variables_call_service(variables, VariableOptionSource::Argument(0)),
         variables_setter_id,
-    ).await;
+    )
+    .await;
     let mut stream_setter = create_avm(echo_call_service(), stream_setter_id).await;
     let mut fold_executor = create_avm(unit_call_service(), fold_executor_id).await;
     let mut error_trigger = create_avm(fallible_call_service("error"), error_trigger_id).await;

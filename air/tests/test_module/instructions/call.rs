@@ -19,8 +19,8 @@ use air::UncatchableError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 // Check that %init_peer_id% alias works correctly (by comparing result with it and explicit peer id).
 // Additionally, check that empty string for data does the same as empty call path.
@@ -164,11 +164,10 @@ async fn duplicate_variables() {
 // Check that string literals can be used as call parameters.
 #[tokio::test]
 async fn string_parameters() {
-    let call_service: CallServiceClosure =
-        Box::new(|mut params|  {
-            let result = CallServiceResult::ok(params.arguments.remove(0));
-            async move { result }.boxed_local()
-        });
+    let call_service: CallServiceClosure = Box::new(|mut params| {
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
+    });
 
     let vm_peer_id = "A";
     let mut vm = create_avm(call_service, vm_peer_id).await;

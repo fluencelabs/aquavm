@@ -18,8 +18,8 @@ use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
 use std::ops::Deref;
@@ -244,7 +244,7 @@ async fn canon_gates() {
     let stop_len_count = 2;
     let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| {
         let value = params.arguments[0].as_array().unwrap().len();
-       let result = if value >= stop_len_count {
+        let result = if value >= stop_len_count {
             CallServiceResult::ok(json!(true))
         } else {
             CallServiceResult::ok(json!(false))

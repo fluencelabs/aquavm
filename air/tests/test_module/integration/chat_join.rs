@@ -17,8 +17,8 @@
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn join_chat_1() {
@@ -38,11 +38,10 @@ async fn join_chat_1() {
 
     let remote_peer_id = "remote_peer_id";
     let members = json!([[client_1_peer_id, relay_1_peer_id], [client_2_peer_id, relay_2_peer_id]]);
-    let members_call_service: CallServiceClosure =
-        Box::new(move |_| {
-            let result = CallServiceResult::ok(members.clone());
-            async move { result }.boxed_local()
-        });
+    let members_call_service: CallServiceClosure = Box::new(move |_| {
+        let result = CallServiceResult::ok(members.clone());
+        async move { result }.boxed_local()
+    });
     let mut remote = create_avm(members_call_service, remote_peer_id).await;
 
     let script = format!(
@@ -301,11 +300,10 @@ async fn join_chat_1() {
 
 #[tokio::test]
 async fn join_chat_2() {
-    let members_call_service1: CallServiceClosure =
-        Box::new(|_| {
-            let result = CallServiceResult::ok(json!([["A"], ["B"]]));
-            async move { result }.boxed_local()
-        });
+    let members_call_service1: CallServiceClosure = Box::new(|_| {
+        let result = CallServiceResult::ok(json!([["A"], ["B"]]));
+        async move { result }.boxed_local()
+    });
 
     let relay_1_peer_id = "relay_1_peer_id";
     let mut relay_1 = create_avm(unit_call_service(), relay_1_peer_id).await;
@@ -406,11 +404,10 @@ async fn init_peer_id() {
 
     let remote_peer_id = "remote_peer_id";
     let members = json!([[client_1_peer_id], ["B"]]);
-    let members_call_service: CallServiceClosure =
-        Box::new(move |_| {
-            let result = CallServiceResult::ok(members.clone());
-            async move { result }.boxed_local()
-        });
+    let members_call_service: CallServiceClosure = Box::new(move |_| {
+        let result = CallServiceResult::ok(members.clone());
+        async move { result }.boxed_local()
+    });
     let mut remote = create_avm(members_call_service, remote_peer_id).await;
 
     let script = format!(

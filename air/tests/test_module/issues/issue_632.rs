@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use std::cell::RefCell;
 use air_test_utils::{key_utils::derive_dummy_keypair, prelude::*};
+use std::cell::RefCell;
 
 use std::rc::Rc;
 
@@ -72,7 +72,8 @@ async fn issue_310() {
         maplit::hashmap! {
             1u32 => CallServiceResult::ok(json!(0)),
         },
-    ).await;
+    )
+    .await;
     assert_eq!(res2.ret_code, 0);
     // in the version without ap join behavior, it was 1.
     assert_eq!(res2.call_requests.len(), 0);
@@ -82,7 +83,8 @@ async fn issue_310() {
         maplit::hashmap! {
             2u32 => CallServiceResult::ok(json!(0)),
         },
-    ).await;
+    )
+    .await;
 
     // previously was an error:
     //   on instruction 'ap x $y' trace handler encountered an error: state from previous `Call(..)`

@@ -35,7 +35,8 @@ async fn issue_214() {
     let mut client = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
         client_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"

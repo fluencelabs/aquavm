@@ -17,23 +17,26 @@
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 use std::ops::Deref;
 
 #[tokio::test]
 async fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure<'static> {
-        Box::new(move |params| async move {
-            let actual_call_args: Vec<Vec<JValue>> =
-                serde_json::from_value(JValue::Array(params.arguments)).expect("json deserialization shouldn't fail");
-            let expected_call_args: Vec<Vec<JValue>> = vec![vec![]];
+        Box::new(move |params| {
+            async move {
+                let actual_call_args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments))
+                    .expect("json deserialization shouldn't fail");
+                let expected_call_args: Vec<Vec<JValue>> = vec![vec![]];
 
-            assert_eq!(actual_call_args, expected_call_args);
+                assert_eq!(actual_call_args, expected_call_args);
 
-            CallServiceResult::ok(json!(""))
-        }.boxed_local())
+                CallServiceResult::ok(json!(""))
+            }
+            .boxed_local()
+        })
     }
 
     let vm_peer_id = "vm_peer_id";

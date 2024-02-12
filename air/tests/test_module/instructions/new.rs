@@ -17,8 +17,8 @@
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 #[ignore]
@@ -37,7 +37,8 @@ async fn new_with_global_streams_seq() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"
@@ -415,7 +416,8 @@ async fn new_with_scalars_with_errors() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
     let mut variable_receiver_vm = create_avm(echo_call_service(), variable_receiver_peer_id).await;
@@ -474,7 +476,8 @@ async fn new_with_global_scalars() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
     let mut variable_receiver = create_avm(echo_call_service(), variable_receiver_peer_id).await;

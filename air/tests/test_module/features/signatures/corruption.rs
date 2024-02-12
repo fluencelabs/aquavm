@@ -89,7 +89,10 @@ async fn test_attack_replace_value() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,
@@ -166,7 +169,10 @@ async fn test_attack_replace_tetraplet() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,
@@ -249,7 +255,10 @@ async fn test_attack_replace_call_result() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,
@@ -339,7 +348,10 @@ async fn test_attack_replace_canon_value() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,
@@ -438,7 +450,10 @@ async fn test_attack_replace_canon_result_values() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,
@@ -541,7 +556,10 @@ async fn test_attack_replace_canon_result_tetraplet() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     assert_error_eq!(
         &res,

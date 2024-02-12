@@ -349,7 +349,8 @@ async fn issue_165() {
     let mut result_setter = create_avm(
         set_variable_call_service(serde_json::json!({"success": true})),
         result_setter_peer_id,
-    ).await;
+    )
+    .await;
 
     let echo_peer_id = "echo_peer_id";
     let mut echo_peer = create_avm(echo_call_service(), echo_peer_id).await;

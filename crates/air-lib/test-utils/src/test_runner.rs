@@ -118,17 +118,13 @@ impl<R: AirRunner> TestRunner<R> {
                 return Ok(outcome);
             }
 
-            call_results =
-                futures::stream::iter(outcome
-                .call_requests
-                .into_iter()
-            )
+            call_results = futures::stream::iter(outcome.call_requests.into_iter())
                 .then(|(id, call_parameters)| {
                     let service_result = (self.call_service)(call_parameters);
-                    async move {
-                        (id, service_result.await)
-                }})
-                .collect::<HashMap<_, _>>().await;
+                    async move { (id, service_result.await) }
+                })
+                .collect::<HashMap<_, _>>()
+                .await;
 
             prev_data = outcome.data;
             data = vec![];
@@ -148,18 +144,20 @@ impl<R: AirRunner> TestRunner<R> {
         call_results: avm_server::CallResults,
         particle_id: impl Into<String>,
     ) -> Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>> {
-        self.runner.call(
-            air,
-            prev_data,
-            data,
-            init_peer_id,
-            timestamp,
-            ttl,
-            override_current_peer_id,
-            call_results,
-            &self.keypair,
-            particle_id.into(),
-        ).await
+        self.runner
+            .call(
+                air,
+                prev_data,
+                data,
+                init_peer_id,
+                timestamp,
+                ttl,
+                override_current_peer_id,
+                call_results,
+                &self.keypair,
+                particle_id.into(),
+            )
+            .await
     }
 }
 
@@ -270,7 +268,8 @@ mod tests {
         let mut client = create_custom_avm::<NativeAirRunner>(
             set_variables_call_service(variables, VariableOptionSource::FunctionName),
             host_peer_id,
-        ).await;
+        )
+        .await;
 
         let current_result_1 = client
             .runner

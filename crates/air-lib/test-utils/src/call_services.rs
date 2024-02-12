@@ -25,24 +25,25 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 pub fn unit_call_service() -> CallServiceClosure<'static> {
-    Box::new(|_| async {
-        CallServiceResult::ok(json!("result from unit_call_service"))
-    }.boxed_local())
+    Box::new(|_| {
+        async { CallServiceResult::ok(json!("result from unit_call_service")) }.boxed_local()
+    })
 }
 
 pub fn echo_call_service() -> CallServiceClosure<'static> {
-    Box::new(|mut params| async move {
-        CallServiceResult::ok(params.arguments.remove(0))
-    }.boxed_local())
+    Box::new(|mut params| {
+        async move { CallServiceResult::ok(params.arguments.remove(0)) }.boxed_local()
+    })
 }
 
 pub fn set_variable_call_service(json: JValue) -> CallServiceClosure<'static> {
     Box::new(move |_| {
-        let json = json.clone();
-        async move {
-            CallServiceResult::ok(json)
+        {
+            let json = json.clone();
+            async move { CallServiceResult::ok(json) }
         }
-    }.boxed_local())
+        .boxed_local()
+    })
 }
 
 /// Manages which source will be used to choose a variable.
@@ -79,7 +80,8 @@ pub fn set_variables_call_service(
                 || CallServiceResult::ok(json!("default result from set_variables_call_service")),
                 |var| CallServiceResult::ok(var.clone()),
             )
-        }.boxed_local()
+        }
+        .boxed_local()
     })
 }
 
@@ -88,13 +90,13 @@ pub fn return_string_call_service(ret_str: impl Into<String>) -> CallServiceClos
 
     Box::new(move |_| {
         let ret_str = ret_str.clone();
-        async move {
-            CallServiceResult::ok(json!(ret_str.to_string()))
-        }.boxed_local()
+        async move { CallServiceResult::ok(json!(ret_str.to_string())) }.boxed_local()
     })
 }
 
-pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServiceClosure<'static> {
+pub fn fallible_call_service(
+    fallible_service_id: impl Into<String>,
+) -> CallServiceClosure<'static> {
     let fallible_service_id = Rc::new(fallible_service_id.into());
 
     Box::new(move |params| {
@@ -107,7 +109,8 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
                 // return success for services with other service id
                 CallServiceResult::ok(json!("success result from fallible_call_service"))
             }
-        }.boxed_local()
+        }
+        .boxed_local()
     })
 }
 
@@ -124,7 +127,8 @@ pub fn fallible_call_service_by_arg(arg: impl Into<JValue>) -> CallServiceClosur
                 // return success for services with other arg
                 CallServiceResult::ok(json!("success result from fallible_call_service_by_arg"))
             }
-        }.boxed_local()
+        }
+        .boxed_local()
     })
 }
 
@@ -139,12 +143,13 @@ pub fn tetraplet_host_function(
     let arg_tetraplets_inner = arg_tetraplets.clone();
 
     let host_function: CallServiceClosure<'_> = Box::new(move |params| {
-        let arg_tetraplets_inner= arg_tetraplets_inner.clone();
+        let arg_tetraplets_inner = arg_tetraplets_inner.clone();
         let closure = closure.clone();
         async move {
             *arg_tetraplets_inner.borrow_mut() = params.tetraplets.clone();
             closure(params).await
-        }.boxed_local()
+        }
+        .boxed_local()
     });
 
     (host_function, arg_tetraplets)

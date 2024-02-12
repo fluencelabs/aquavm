@@ -57,11 +57,13 @@ async fn issue_177() {
     let mut client = create_avm(
         set_variables_call_service(variables.clone(), VariableOptionSource::FunctionName),
         client_peer_id,
-    ).await;
+    )
+    .await;
     let mut relay = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         relay_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = include_str!("scripts/issue_177.air");
 
@@ -231,17 +233,19 @@ async fn issue_177() {
     };
 
     // timeout requests provided
-    let client_result_5 = client.call_single(
-        script,
-        client_result_4.data,
-        "",
-        client_peer_id,
-        0,
-        0,
-        None,
-        call_results,
-        "",
-    ).await;
+    let client_result_5 = client
+        .call_single(
+            script,
+            client_result_4.data,
+            "",
+            client_peer_id,
+            0,
+            0,
+            None,
+            call_results,
+            "",
+        )
+        .await;
     // before patch the interpreter crashed here
     assert!(client_result_5.is_ok());
 }

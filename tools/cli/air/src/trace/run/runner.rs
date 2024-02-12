@@ -41,5 +41,8 @@ pub(crate) trait AirRunner {
 }
 
 pub(crate) trait DataToHumanReadable {
-    fn to_human_readable<'this>(&'this mut self, data: Vec<u8>) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>>;
+    fn to_human_readable<'this>(
+        &'this mut self,
+        data: Vec<u8>,
+    ) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>>;
 }

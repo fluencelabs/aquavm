@@ -18,8 +18,8 @@ use air::ExecutionCidState;
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
-use pretty_assertions::assert_eq;
 use futures::FutureExt;
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn executed_trace_seq_par_call() {
@@ -227,15 +227,18 @@ async fn executed_trace_create_service() {
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |params| async move {
-        let response = match params.service_id.as_str() {
-            "add_module" => add_module_response,
-            "add_blueprint" => add_blueprint_response,
-            "create" => create_response,
-            _ => "unknown response",
-        };
-        CallServiceResult::ok(json!(response))
-    }.boxed_local());
+    let call_service: CallServiceClosure = Box::new(move |params| {
+        async move {
+            let response = match params.service_id.as_str() {
+                "add_module" => add_module_response,
+                "add_blueprint" => add_blueprint_response,
+                "create" => create_response,
+                _ => "unknown response",
+            };
+            CallServiceResult::ok(json!(response))
+        }
+        .boxed_local()
+    });
 
     let init_peer_id = "A";
     let set_variables_id = "set_variables";
@@ -305,9 +308,9 @@ async fn executed_trace_create_service() {
 
 #[tokio::test]
 async fn executed_trace_par_seq_fold_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
-    }.boxed_local());
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
+    });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1").await;
     let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2").await;
@@ -452,9 +455,9 @@ async fn executed_trace_par_seq_fold_call() {
 
 #[tokio::test]
 async fn executed_trace_par_seq_fold_in_cycle_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| async move {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
-    }.boxed_local());
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
+    });
 
     let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1").await;
     let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2").await;

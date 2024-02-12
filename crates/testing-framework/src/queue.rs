@@ -21,10 +21,9 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
-use futures::{
-    stream::StreamExt
-};
+use futures::stream::StreamExt;
 
+use std::pin::pin;
 use std::{
     borrow::Borrow,
     cell::RefCell,
@@ -34,7 +33,6 @@ use std::{
     ops::Deref,
     rc::Rc,
 };
-use std::pin::pin;
 
 #[derive(Debug, Default)]
 pub(crate) struct PeerQueueCell {
@@ -99,11 +97,10 @@ impl ExecutionQueue {
         peer_env.map(|peer_env_cell| {
             futures::stream::poll_fn(move |ctx| {
                 let mut peer_env = peer_env_cell.borrow_mut();
-                let x = pin!(peer_env
-                    .execute_once(air, &network, self, test_parameters))
-                    .poll(ctx);
+                let x = pin!(peer_env.execute_once(air, &network, self, test_parameters)).poll(ctx);
                 x
-            }).map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
+            })
+            .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
         })
     }
 

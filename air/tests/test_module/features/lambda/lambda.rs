@@ -54,7 +54,8 @@ async fn lambda_with_string_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
@@ -88,7 +89,8 @@ async fn lambda_with_number_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
@@ -122,7 +124,8 @@ async fn lambda_with_number_stream() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
@@ -172,7 +175,8 @@ async fn lambda_with_number_stream_and_followed_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
@@ -223,7 +227,8 @@ async fn lambda_with_scalar_join() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
@@ -260,7 +265,8 @@ async fn lambda_with_canon_stream_join() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
     let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;

@@ -34,7 +34,8 @@ async fn issue_173() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         set_variable_peer_id,
-    ).await;
+    )
+    .await;
 
     let script = format!(
         r#"

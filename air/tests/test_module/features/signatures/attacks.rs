@@ -86,7 +86,8 @@ async fn test_attack_injection_current_peer_scalar() {
     let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
-        .await.unwrap();
+        .await
+        .unwrap();
     assert_ne!(res.ret_code, 0);
 }
 
@@ -227,7 +228,8 @@ async fn test_attack_injection_current_injection_unused() {
     let cur_data = mallory_data.serialize().unwrap();
     let res = alice_avm
         .call(&air_script, prev_data, cur_data, test_run_params)
-        .await.unwrap();
+        .await
+        .unwrap();
 
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
@@ -286,7 +288,10 @@ async fn test_attack_injection_other_peer_scalar() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
     assert_ne!(res.ret_code, 0);
 }
 
@@ -344,7 +349,10 @@ async fn test_attack_injection_other_peer_stream() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
     assert_ne!(res.ret_code, 0, "{}", res.error_message);
 }
 
@@ -402,7 +410,10 @@ async fn test_attack_injection_other_peer_unused() {
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = "";
     let cur_data = mallory_data.serialize().unwrap();
-    let res = bob_avm.call(&air_script, prev_data, cur_data, test_run_params).await.unwrap();
+    let res = bob_avm
+        .call(&air_script, prev_data, cur_data, test_run_params)
+        .await
+        .unwrap();
 
     // please not that such injection is not caught
     assert_eq!(res.ret_code, 0, "{}", res.error_message);
@@ -433,7 +444,10 @@ async fn test_attack_replay() {
     assert_eq!(res1.ret_code, 0, "test validity check failed: {}", res1.error_message);
     assert_eq!(res1, res2, "test validity check failed");
 
-    let res_bob = bob_avm.call(&air_script, "", res1.data.clone(), run_params1).await.unwrap();
+    let res_bob = bob_avm
+        .call(&air_script, "", res1.data.clone(), run_params1)
+        .await
+        .unwrap();
     assert_eq!(
         res_bob.ret_code, 0,
         "test validity check failed: {}",
@@ -442,7 +456,10 @@ async fn test_attack_replay() {
 
     let mallory_run_params = TestRunParameters::from_init_peer_id(&alice_peer_id).with_particle_id("second_particle");
 
-    let res_replay = bob_avm.call(&air_script, "", res1.data, mallory_run_params).await.unwrap();
+    let res_replay = bob_avm
+        .call(&air_script, "", res1.data, mallory_run_params)
+        .await
+        .unwrap();
 
     let dalek_error = ed25519_dalek::ed25519::Error::from_source("Verification equation was not satisfied");
     let nested_error = fluence_keypair::error::VerificationError::Ed25519(

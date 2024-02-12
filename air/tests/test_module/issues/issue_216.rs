@@ -27,7 +27,8 @@ async fn issue_216() {
     let mut some_peer = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
         some_peer_id,
-    ).await;
+    )
+    .await;
 
     let client_id = "client_peer_id";
     let mut client = create_avm(echo_call_service(), client_id).await;
