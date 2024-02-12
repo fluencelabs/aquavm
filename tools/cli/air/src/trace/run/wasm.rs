@@ -44,7 +44,7 @@ impl AirRunner for WasmAvmRunner {
         tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> LocalBoxFuture<'this, anyhow::Result<avm_interface::raw_outcome::RawAVMOutcome>> {
+    ) -> LocalBoxFuture<'this, eyre::Result<avm_interface::raw_outcome::RawAVMOutcome>> {
         let keypair = keypair.clone();
         async move {
             let call_tracing = self
@@ -92,7 +92,7 @@ impl DataToHumanReadable for WasmAvmRunner {
 pub(crate) async fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
-) -> anyhow::Result<Box<WasmAvmRunner>> {
+) -> eyre::Result<Box<WasmAvmRunner>> {
     let mut config = WasmtimeConfig::new();
     config
         .debug_info(true)

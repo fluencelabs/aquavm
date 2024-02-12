@@ -43,7 +43,7 @@ impl AirRunner for NativeAvmRunner {
         _tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> LocalBoxFuture<'this, anyhow::Result<RawAVMOutcome>> {
+    ) -> LocalBoxFuture<'this, eyre::Result<RawAVMOutcome>> {
         let keypair = keypair.clone();
         async move {
             use air_interpreter_sede::ToSerialized;
@@ -88,6 +88,6 @@ impl DataToHumanReadable for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner() -> anyhow::Result<Box<NativeAvmRunner>> {
+pub(crate) fn create_native_avm_runner() -> eyre::Result<Box<NativeAvmRunner>> {
     Ok(Box::new(NativeAvmRunner {}))
 }

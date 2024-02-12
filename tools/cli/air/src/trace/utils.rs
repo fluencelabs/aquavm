@@ -17,7 +17,7 @@ use std::time::Duration;
 
 // unfortunately, external crates don't seem to provide required functionality:
 // some do not handle floats, others do not handle suffixes
-pub(crate) fn parse_tracing_duration(input: &str) -> Result<Duration, anyhow::Error> {
+pub(crate) fn parse_tracing_duration(input: &str) -> Result<Duration, eyre::Error> {
     for (suffix, scale) in [("ns", 1e-9), ("µs", 1e-6), ("ms", 1e-3), ("s", 1e0)] {
         if let Some(num_str) = input.strip_suffix(suffix) {
             if let Ok(num) = num_str.parse::<f64>() {
@@ -28,7 +28,7 @@ pub(crate) fn parse_tracing_duration(input: &str) -> Result<Duration, anyhow::Er
         }
     }
 
-    Err(anyhow::anyhow!("malformed duration {:?}", input))
+    Err(eyre::eyre!("malformed duration {:?}", input))
 }
 
 pub(crate) fn unix_timestamp_now() -> u64 {
