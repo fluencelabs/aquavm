@@ -20,7 +20,7 @@
  */
 
 use super::{JValue, Object};
-use crate::{JsonString, Map};
+use crate::{JsonString, Map, Number};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -165,6 +165,22 @@ impl<'a> From<Cow<'a, str>> for JValue {
     /// ```
     fn from(f: Cow<'a, str>) -> Self {
         JValue::String(f.into())
+    }
+}
+
+impl From<Number> for JValue {
+    /// Convert `Number` to `JValue::Number`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use air_interpreter_value::{JValue, Number};
+    ///
+    /// let n = Number::from(7);
+    /// let x: JValue = n.into();
+    /// ```
+    fn from(f: Number) -> Self {
+        JValue::Number(f)
     }
 }
 

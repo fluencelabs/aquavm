@@ -85,7 +85,8 @@ impl ExecutionCidState {
         &mut self,
         canon_value: &ValueAggregate,
     ) -> Result<CID<CanonCidAggregate>, UncatchableError> {
-        let value_cid = self.value_tracker.track_value(canon_value.get_result().clone())?;
+        let value = canon_value.get_result().clone();
+        let value_cid = self.value_tracker.track_value(value)?;
         let tetraplet = self.tetraplet_tracker.track_value(canon_value.get_tetraplet())?;
 
         let canon_value_aggregate = CanonCidAggregate::new(value_cid, tetraplet, canon_value.get_provenance());
@@ -97,8 +98,8 @@ impl ExecutionCidState {
     pub(crate) fn get_value_by_cid(&self, cid: &CID<JValue>) -> Result<JValue, UncatchableError> {
         self.value_tracker
             .get(cid)
-            .map(|v| (*v).clone())
             .ok_or_else(|| UncatchableError::ValueForCidNotFound("value", cid.get_inner()))
+            .map(|rc_value| (*rc_value).clone())
     }
 
     pub(crate) fn get_tetraplet_by_cid(

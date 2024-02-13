@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use air_interpreter_value::{JValue, Map};
-// use serde_json::Number;
+use air_interpreter_value::{JValue, Map, Number};
 
 #[test]
 fn test_deserialize_null() {
@@ -52,12 +51,12 @@ fn test_deserialize_i64_2() {
     assert_eq!(val, JValue::Number((-42).into()));
 }
 
-// #[test]
-// fn test_deserialize_f64() {
-//     let inp = "-3140000000000000.0";
-//     let val: JValue = serde_json::from_str(inp).unwrap();
-//     assert_eq!(val, JValue::Number(Number::from_f64(-3.14e15).unwrap()));
-// }
+#[test]
+fn test_deserialize_f64() {
+    let inp = "-3140000000000000.0";
+    let val: JValue = serde_json::from_str(inp).unwrap();
+    assert_eq!(val, JValue::Number(Number::from_f64(-3.14e15).unwrap()));
+}
 
 #[test]
 fn test_deserialize_string_simple() {
