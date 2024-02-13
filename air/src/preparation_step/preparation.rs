@@ -167,7 +167,7 @@ fn make_exec_ctx(
         limit_behavior(
             run_parameters,
             error,
-            &mut soft_limits_triggering.particle_size_limit_exceeded,
+            &mut soft_limits_triggering.call_result_size_limit_exceeded,
         )?;
     }
 
