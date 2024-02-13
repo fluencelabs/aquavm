@@ -23,7 +23,6 @@ use futures::FutureExt;
 use marine_wasmtime_backend::WasmtimeConfig;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
 
-use anyhow::anyhow;
 use std::error::Error as StdError;
 use std::path::Path;
 
@@ -98,7 +97,7 @@ pub(crate) async fn create_wasm_avm_runner(
         .debug_info(true)
         .wasm_backtrace(true)
         .epoch_interruption(false);
-    let wasm_backend = WasmtimeWasmBackend::new(config).map_err(|e| anyhow!(e))?;
+    let wasm_backend = WasmtimeWasmBackend::new(config) ?;
     Ok(Box::new(WasmAvmRunner(
         AVMRunner::new(
             air_interpreter_wasm_path.to_owned(),
