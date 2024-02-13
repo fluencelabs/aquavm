@@ -15,11 +15,8 @@
  */
 
 use crate::JValue;
-use crate::RawValue;
 
-use air_interpreter_cid::raw_value_to_json_cid;
 use air_interpreter_cid::value_to_json_cid;
-use air_interpreter_cid::verify_raw_value;
 use air_interpreter_cid::verify_value;
 use air_interpreter_cid::CidCalculationError;
 use air_interpreter_cid::CidRef;
@@ -32,7 +29,7 @@ use thiserror::Error as ThisError;
 use std::{collections::HashMap, rc::Rc};
 
 /// Stores CID to Value corresponance.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(transparent)]
 #[derive(::rkyv::Archive, ::rkyv::Serialize, ::rkyv::Deserialize)]
 #[archive(check_bytes)]
@@ -79,15 +76,6 @@ impl<Val: Serialize> CidStore<Val> {
     pub fn verify(&self) -> Result<(), CidStoreVerificationError> {
         for (cid, value) in &self.0 {
             verify_value(cid, value)?;
-        }
-        Ok(())
-    }
-}
-
-impl CidStore<RawValue> {
-    pub fn verify_raw_value(&self) -> Result<(), CidStoreVerificationError> {
-        for (cid, value) in &self.0 {
-            verify_raw_value(cid, value.as_inner())?;
         }
         Ok(())
     }
@@ -145,15 +133,6 @@ impl<Val: Serialize> CidTracker<Val> {
         let cid = value_to_json_cid(&*value)?;
         self.cids.insert(cid.clone(), value);
         Ok(cid)
-    }
-}
-
-impl CidTracker<RawValue> {
-    pub fn track_raw_value(&mut self, value: impl Into<Rc<RawValue>>) -> CID<RawValue> {
-        let value = value.into();
-        let cid = raw_value_to_json_cid(value.as_inner());
-        self.cids.insert(cid.clone(), value);
-        cid
     }
 }
 

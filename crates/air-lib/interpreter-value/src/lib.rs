@@ -34,8 +34,10 @@ macro_rules! tri {
     };
 }
 
+mod number;
 mod value;
 
+pub use number::Number;
 pub use value::JValue;
 
 #[cfg(not(feature = "preserve_order"))]

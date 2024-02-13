@@ -17,7 +17,6 @@
 use air::interpreter_data::ExecutedState;
 use air::ExecutionCidState;
 use air::UncatchableError::*;
-use air_interpreter_data::RawValue;
 use air_interpreter_data::ValueRef;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
@@ -139,10 +138,8 @@ fn malformed_call_service_failed() {
     let mut cid_state = ExecutionCidState::new();
 
     // Craft an artificial incorrect error result
-    let value = json!("error");
-    let value_cid = cid_state
-        .value_tracker
-        .track_raw_value(RawValue::from_value(value.clone()));
+    let value: JValue = "error".into();
+    let value_cid = cid_state.value_tracker.track_value(value.clone()).unwrap();
     let tetraplet = SecurityTetraplet::literal_tetraplet(peer_id);
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
     let service_result_agg = ServiceResultCidAggregate {
@@ -161,7 +158,7 @@ fn malformed_call_service_failed() {
     let mut vm = create_avm(unit_call_service(), peer_id);
     let air = format!(r#"(call "{peer_id}" ("" "") [] var)"#);
     let result = vm.call(&air, vec![], data, TestRunParameters::default()).unwrap();
-    let expected_serde_error = serde_json::from_value::<CallServiceFailed>(value).unwrap_err();
+    let expected_serde_error = serde_json::from_value::<CallServiceFailed>(value.into()).unwrap_err();
     let expected_error = MalformedCallServiceFailed(expected_serde_error);
     assert_error_eq!(&result, expected_error);
 }

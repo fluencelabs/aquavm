@@ -19,11 +19,10 @@
  * licensed under conditions of MIT License and Apache License, Version 2.0.
  */
 
-use crate::value::JValue;
-use crate::{JsonString, Map};
+use crate::value::Object;
+use crate::{JValue, JsonString, Map, Number};
 use core::fmt;
 use serde::de::{self, Deserialize, DeserializeSeed, MapAccess, SeqAccess, Visitor};
-use serde_json::Number;
 use std::vec::Vec;
 
 impl<'de> Deserialize<'de> for JValue {
@@ -113,9 +112,9 @@ impl<'de> Deserialize<'de> for JValue {
                             values.insert(key, value);
                         }
 
-                        Ok(JValue::Object(values.into()))
+                        Ok(JValue::Object(Object(values).into()))
                     }
-                    None => Ok(JValue::Object(Map::new().into())),
+                    None => Ok(JValue::Object(Object(Map::default()).into())),
                 }
             }
         }

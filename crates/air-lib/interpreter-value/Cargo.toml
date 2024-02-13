@@ -15,9 +15,10 @@ serde = { version = "1.0.195", features = ["rc"] }
 serde_json = "1.0.108"
 
 indexmap = { version = "2.1.0", optional = true }
+rkyv = { version = "0.7.44", default-features = false, features = ["validation", "size_32", "strict"] }
 
 [dev-dependencies]
 maplit = "1.0.2"
 
 [features]
-preserve_order = ["indexmap"]
+preserve_order = ["indexmap", "rkyv/indexmap"]

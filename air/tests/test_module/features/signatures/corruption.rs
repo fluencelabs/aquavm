@@ -58,7 +58,7 @@ fn test_attack_replace_value() {
     let mut mallory_cid_info = serde_json::to_value::<CidInfo>(mallory_cid_state.into()).unwrap();
     let mut cnt = 0;
     for (_cid, val) in mallory_cid_info["value_store"].as_object_mut().unwrap().iter_mut() {
-        if val.as_str().unwrap() == json!("alice").to_string() {
+        if val.as_str().unwrap() == json!("alice") {
             *val = json!("evil").to_string().into();
             cnt += 1;
         }
@@ -96,7 +96,7 @@ fn test_attack_replace_value() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 // fragile: it is OK if this exact string changes on compiler upgrade
-                type_name: "air_interpreter_data::raw_value::RawValue",
+                type_name: "air_interpreter_value::value::JValue",
                 cid_repr: "bagaaihrayhxgqijfajraxivb7hxwshhbsdqk4j5zyqypb54zggmn5v7mmwxq".into(),
             }
             .into()

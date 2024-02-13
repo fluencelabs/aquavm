@@ -15,7 +15,6 @@
  */
 
 use super::*;
-use crate::RawValue;
 
 impl ParResult {
     pub fn new(left_size: u32, right_size: u32) -> Self {
@@ -123,7 +122,7 @@ impl CanonResultCidAggregate {
 
 impl CanonCidAggregate {
     pub fn new(
-        value: CID<RawValue>,
+        value: CID<JValue>,
         tetraplet: CID<SecurityTetraplet>,
         provenance: Provenance,
     ) -> Self {
@@ -137,7 +136,7 @@ impl CanonCidAggregate {
 
 impl ServiceResultCidAggregate {
     pub fn new(
-        value_cid: CID<RawValue>,
+        value_cid: CID<JValue>,
         argument_hash: Rc<str>,
         tetraplet_cid: CID<SecurityTetraplet>,
     ) -> Self {

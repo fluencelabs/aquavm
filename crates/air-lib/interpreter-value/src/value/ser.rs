@@ -38,7 +38,7 @@ impl Serialize for JValue {
             JValue::Object(m) => {
                 use serde::ser::SerializeMap;
                 let mut map = tri!(serializer.serialize_map(Some(m.len())));
-                for (k, v) in &**m {
+                for (k, v) in &***m {
                     tri!(map.serialize_entry(k, v));
                 }
                 map.end()

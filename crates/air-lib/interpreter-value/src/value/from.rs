@@ -19,9 +19,8 @@
  * licensed under conditions of MIT License and Apache License, Version 2.0.
  */
 
-use super::JValue;
-use crate::{JsonString, Map};
-use serde_json::Number;
+use super::{JValue, Object};
+use crate::{JsonString, Map, Number};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -58,7 +57,7 @@ impl From<f32> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f32) -> Self {
-        Number::from_f64(f as _).map_or(JValue::Null, JValue::Number)
+        (f as f64).into()
     }
 }
 
@@ -75,7 +74,8 @@ impl From<f64> for JValue {
     /// let x: JValue = f.into();
     /// ```
     fn from(f: f64) -> Self {
-        Number::from_f64(f).map_or(JValue::Null, JValue::Number)
+        let f = crate::Number::from_f64(f);
+        f.map_or(JValue::Null, JValue::Number)
     }
 }
 
@@ -169,13 +169,12 @@ impl<'a> From<Cow<'a, str>> for JValue {
 }
 
 impl From<Number> for JValue {
-    /// Convert `serde_json::Number` to `JValue::Number`.
+    /// Convert `Number` to `JValue::Number`.
     ///
     /// # Examples
     ///
     /// ```
-    /// use serde_json::Number;
-    /// use air_interpreter_value::JValue;
+    /// use air_interpreter_value::{JValue, Number};
     ///
     /// let n = Number::from(7);
     /// let x: JValue = n.into();
@@ -198,7 +197,7 @@ impl From<Map<JsonString, JValue>> for JValue {
     /// let x: JValue = m.into();
     /// ```
     fn from(f: Map<JsonString, JValue>) -> Self {
-        JValue::Object(f.into())
+        JValue::Object(Object(f).into())
     }
 }
 
@@ -294,11 +293,11 @@ impl<K: Into<JsonString>, V: Into<JValue>> FromIterator<(K, V)> for JValue {
     /// let x: JValue = v.into_iter().collect();
     /// ```
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        JValue::Object(Rc::new(
+        JValue::Object(Rc::new(Object(
             iter.into_iter()
                 .map(|(k, v)| (k.into(), v.into()))
                 .collect(),
-        ))
+        )))
     }
 }
 
@@ -338,20 +337,47 @@ impl From<&serde_json::Value> for JValue {
         match value {
             Value::Null => JValue::Null,
             Value::Bool(b) => JValue::Bool(*b),
-            Value::Number(n) => JValue::Number(n.clone()),
+            Value::Number(n) => JValue::Number(n.clone().into()),
             Value::String(s) => JValue::String(s.as_str().into()),
             Value::Array(a) => JValue::Array(a.iter().map(Into::into).collect()),
             Value::Object(o) => {
                 let oo = Map::from_iter(o.into_iter().map(|(k, v)| (k.as_str().into(), v.into())));
-                JValue::Object(oo.into())
+                JValue::Object(Object(oo).into())
             }
         }
     }
 }
 
+// JValue and Value use different child elements, thus conversion from a value cannot be implemented
+// more efficiently than conversion from a reference
 impl From<serde_json::Value> for JValue {
     #[inline]
     fn from(value: serde_json::Value) -> Self {
         Self::from(&value)
+    }
+}
+
+impl From<&JValue> for serde_json::Value {
+    fn from(value: &JValue) -> Self {
+        use serde_json::Value;
+
+        match value {
+            JValue::Null => Value::Null,
+            JValue::Bool(b) => Value::Bool(*b),
+            JValue::Number(n) => Value::Number(n.clone().into()),
+            JValue::String(s) => Value::String(s.to_string()),
+            JValue::Array(a) => Value::Array(a.iter().map(Into::into).collect()),
+            JValue::Object(o) => {
+                Value::Object(o.iter().map(|(k, v)| (k.to_string(), v.into())).collect())
+            }
+        }
+    }
+}
+
+// JValue and Value use different child elements, thus conversion from a value cannot be implemented
+// more efficiently than conversion from a reference
+impl From<JValue> for serde_json::Value {
+    fn from(value: JValue) -> Self {
+        (&value).into()
     }
 }

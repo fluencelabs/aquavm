@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use air_interpreter_value::{JValue, Map};
-use serde_json::Number;
+use air_interpreter_value::{JValue, Map, Number};
 
 #[test]
 fn test_deserialize_null() {

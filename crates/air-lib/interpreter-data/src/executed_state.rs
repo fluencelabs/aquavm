@@ -19,7 +19,6 @@ mod se_de;
 
 use crate::GenerationIdx;
 use crate::JValue;
-use crate::RawValue;
 use crate::TracePos;
 
 use air_interpreter_cid::CID;
@@ -156,7 +155,7 @@ impl CallServiceFailed {
 #[archive(check_bytes)]
 /// A proof of service result execution result.
 pub struct ServiceResultCidAggregate {
-    pub value_cid: CID<RawValue>,
+    pub value_cid: CID<JValue>,
     /// Hash of the call arguments.
     pub argument_hash: Rc<str>,
     /// The tetraplet of the call result.
@@ -268,7 +267,7 @@ pub struct CanonResultCidAggregate {
 )]
 #[archive(check_bytes)]
 pub struct CanonCidAggregate {
-    pub value: CID<RawValue>,
+    pub value: CID<JValue>,
     pub tetraplet: CID<SecurityTetraplet>,
     pub provenance: Provenance,
 }
