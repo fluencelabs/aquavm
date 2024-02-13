@@ -26,12 +26,11 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-use std::borrow::Cow;
 use std::ops::Deref;
 
 impl JValuable for &CanonStream {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
-        let iter = self.iter().map(|v| v.get_result().deref());
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<JValue> {
+        let iter = self.iter().map(|v| v.get_result());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         Ok(select_result.result)
@@ -42,8 +41,8 @@ impl JValuable for &CanonStream {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
-        let iter = self.iter().map(|v| v.get_result().deref());
+    ) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)> {
+        let iter = self.iter().map(|v| v.get_result());
         let select_result = select_by_lambda_from_stream(iter, lambda, exec_ctx)?;
 
         let (tetraplet, provenance) = match select_result.tetraplet_idx {
@@ -69,13 +68,9 @@ impl JValuable for &CanonStream {
         Ok((select_result.result, tetraplet, provenance))
     }
 
-    fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue = CanonStream::as_jvalue(self);
-        Cow::Owned(jvalue)
-    }
-
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        CanonStream::as_jvalue(&self)
+    #[inline]
+    fn as_jvalue(&self) -> JValue {
+        CanonStream::as_jvalue(self)
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {

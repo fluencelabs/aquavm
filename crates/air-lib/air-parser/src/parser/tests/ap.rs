@@ -28,7 +28,7 @@ fn ap_with_literal() {
 
     let actual = parse(source_code);
     let expected = ap(
-        ApArgument::Literal("some_string"),
+        ApArgument::Literal("some_string".into()),
         ApResult::Stream(Stream::new("$stream", 27.into())),
     );
 
@@ -200,8 +200,8 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        StreamMapKeyClause::Literal(key_name),
-        ApArgument::Literal(value),
+        StreamMapKeyClause::Literal(key_name.into()),
+        ApArgument::Literal(value.into()),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
@@ -219,7 +219,7 @@ fn ap_with_stream_map() {
             key_name,
             source_code.find(key_name).unwrap().into(),
         )),
-        ApArgument::Literal(value),
+        ApArgument::Literal(value.into()),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );
     assert_eq!(actual, expected);
@@ -231,7 +231,7 @@ fn ap_with_stream_map() {
     );
     let actual = parse(source_code.as_str());
     let expected = ap_with_map(
-        StreamMapKeyClause::Literal(key_name),
+        StreamMapKeyClause::Literal(key_name.into()),
         ApArgument::Scalar(Scalar::new(value, source_code.find(value).unwrap().into())),
         StreamMap::new(var_name, source_code.find(var_name).unwrap().into()),
     );

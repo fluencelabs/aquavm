@@ -32,7 +32,6 @@ use crate::JValue;
 
 use air_interpreter_data::Provenance;
 use air_interpreter_data::TracePos;
-use std::rc::Rc;
 
 /// This trait represent bidirectional iterator and
 /// is used to abstract values used in fold as iterables.
@@ -62,7 +61,7 @@ pub(crate) trait Iterable<'ctx> {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum IterableItem<'ctx> {
     RefValue((&'ctx JValue, RcSecurityTetraplet, TracePos, Provenance)),
-    RcValue((Rc<JValue>, RcSecurityTetraplet, TracePos, Provenance)),
+    RcValue((JValue, RcSecurityTetraplet, TracePos, Provenance)),
 }
 
 impl IterableItem<'_> {
@@ -91,7 +90,7 @@ impl IterableItem<'_> {
         use IterableItem::*;
 
         let (value, tetraplet, pos, provenance) = match self {
-            RefValue((value, tetraplet, pos, prov)) => (Rc::new(value.clone()), tetraplet, pos, prov),
+            RefValue((value, tetraplet, pos, prov)) => (value.clone(), tetraplet, pos, prov),
             RcValue(ingredients) => ingredients,
         };
 

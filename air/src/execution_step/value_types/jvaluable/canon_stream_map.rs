@@ -27,10 +27,9 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-use std::borrow::Cow;
-
-impl JValuable for &CanonStreamMap<'_> {
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>> {
+impl JValuable for &CanonStreamMap {
+    #[inline]
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<JValue> {
         let select_result = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
         Ok(select_result.result)
     }
@@ -40,20 +39,16 @@ impl JValuable for &CanonStreamMap<'_> {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)> {
+    ) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)> {
         let MapLensResult { result, tetraplet } = select_by_lambda_from_canon_map(self, lambda, exec_ctx)?;
 
         // Provenance is borrowed from the map.
         Ok((result, tetraplet.as_ref().clone(), root_provenance.clone()))
     }
 
-    fn as_jvalue(&self) -> Cow<'_, JValue> {
-        let jvalue = CanonStreamMap::as_jvalue(self);
-        Cow::Owned(jvalue)
-    }
-
-    fn into_jvalue(self: Box<Self>) -> JValue {
-        CanonStreamMap::as_jvalue(&self)
+    #[inline]
+    fn as_jvalue(&self) -> JValue {
+        CanonStreamMap::as_jvalue(self)
     }
 
     fn as_tetraplets(&self) -> RcSecurityTetraplets {

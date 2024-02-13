@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: b4049ff6155302933d751e17dbfc78a894d367bd199f13197d81af0b8de556e2
+// sha3: 074d8a0fdc394c3f63b6ccce743bbf683f56b3746be671af5294a676960dc2ac
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -6009,7 +6009,7 @@ fn __action26<
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> StreamMapKeyClause<'input>
 {
-    StreamMapKeyClause::Literal(l)
+    StreamMapKeyClause::Literal(l.into())
 }
 
 #[allow(unused_variables)]
@@ -6758,7 +6758,7 @@ fn __action72<
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> ImmutableValue<'input>
 {
-    ImmutableValue::Literal(l)
+    ImmutableValue::Literal(l.into())
 }
 
 #[allow(unused_variables)]
@@ -7063,7 +7063,7 @@ fn __action91<
     (_, l, _): (AirPos, &'input str, AirPos),
 ) -> ApArgument<'input>
 {
-    ApArgument::Literal(l)
+    ApArgument::Literal(l.into())
 }
 
 #[allow(unused_variables)]

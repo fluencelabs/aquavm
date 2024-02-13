@@ -68,7 +68,8 @@ pub(super) fn handle_prev_state<'i>(
             )?;
 
             let call_service_failed: CallServiceFailed =
-                serde_json::from_value((*err_value).clone()).map_err(UncatchableError::MalformedCallServiceFailed)?;
+                serde_json::from_value(serde_json::to_value(err_value).expect("serde_json serializer shouldn't fail"))
+                    .map_err(UncatchableError::MalformedCallServiceFailed)?;
 
             exec_ctx.make_subgraph_incomplete();
             exec_ctx.record_call_cid(&tetraplet.peer_pk, failed_cid);
@@ -195,10 +196,9 @@ fn handle_service_error(
     let failed_value = CallServiceFailed::new(service_result.ret_code, error_message).to_value();
 
     let peer_id = tetraplet.peer_pk.clone();
-    let service_result_agg_cid =
-        exec_ctx
-            .cid_state
-            .track_service_result(failed_value.into(), tetraplet, argument_hash)?;
+    let service_result_agg_cid = exec_ctx
+        .cid_state
+        .track_service_result(failed_value, tetraplet, argument_hash)?;
 
     exec_ctx.record_call_cid(&peer_id, &service_result_agg_cid);
     trace_ctx.meet_call_end(Failed(service_result_agg_cid));
@@ -212,9 +212,9 @@ fn try_to_service_result(
     tetraplet: &RcSecurityTetraplet,
     exec_ctx: &mut ExecutionCtx<'_>,
     trace_ctx: &mut TraceHandler,
-) -> ExecutionResult<Rc<JValue>> {
+) -> ExecutionResult<JValue> {
     match serde_json::from_str(&service_result.result) {
-        Ok(result) => Ok(Rc::new(result)),
+        Ok(result) => Ok(result),
         Err(e) => {
             let error_msg = format!(
                 "call_service result '{service_result}' can't be serialized or deserialized with an error: {e}"
@@ -223,11 +223,10 @@ fn try_to_service_result(
 
             let failed_value = CallServiceFailed::new(i32::MAX, error_msg.clone()).to_value();
 
-            let service_result_agg_cid = exec_ctx.cid_state.track_service_result(
-                failed_value.into(),
-                tetraplet.clone(),
-                argument_hash.clone(),
-            )?;
+            let service_result_agg_cid =
+                exec_ctx
+                    .cid_state
+                    .track_service_result(failed_value, tetraplet.clone(), argument_hash.clone())?;
             let error = CallResult::failed(service_result_agg_cid);
 
             trace_ctx.meet_call_end(error);

@@ -57,13 +57,8 @@ impl CanonStream {
     }
 
     pub(crate) fn as_jvalue(&self) -> JValue {
-        // TODO: this clone will be removed after boxed values
-        let jvalue_array = self
-            .values
-            .iter()
-            .map(|r| r.get_result().deref().clone())
-            .collect::<Vec<_>>();
-        JValue::Array(jvalue_array)
+        let jvalue_iter = self.values.iter().map(|r| r.get_result().clone());
+        JValue::array_from_iter(jvalue_iter)
     }
 
     pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {

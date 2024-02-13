@@ -34,8 +34,6 @@ use air_interpreter_data::TracePos;
 use serde::Deserialize;
 use serde::Serialize;
 
-use std::rc::Rc;
-
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum ValueAggregate {
@@ -76,7 +74,7 @@ impl<'i> ScalarRef<'i> {
 
 impl ValueAggregate {
     pub(crate) fn new(
-        result: Rc<JValue>,
+        result: JValue,
         tetraplet: RcSecurityTetraplet,
         trace_pos: TracePos,
         provenance: Provenance,
@@ -127,7 +125,7 @@ impl ValueAggregate {
         }
     }
 
-    pub(crate) fn as_inner_parts(&self) -> (&Rc<JValue>, RcSecurityTetraplet, TracePos) {
+    pub(crate) fn as_inner_parts(&self) -> (&JValue, RcSecurityTetraplet, TracePos) {
         match self {
             ValueAggregate::Literal(ref literal) => (&literal.result, literal.get_tetraplet(), literal.trace_pos),
             ValueAggregate::ServiceResult {
@@ -149,7 +147,7 @@ impl ValueAggregate {
         }
     }
 
-    pub fn get_result(&self) -> &Rc<JValue> {
+    pub fn get_result(&self) -> &JValue {
         match self {
             ValueAggregate::Literal(literal) => &literal.result,
             ValueAggregate::ServiceResult {

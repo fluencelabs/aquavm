@@ -38,7 +38,7 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::FieldAccessorNotMatchValue {
-        value: json!(some_string),
+        value: some_string.into(),
         field_name: "some_lambda".to_string(),
     });
     assert!(check_error(&result, expected_error));

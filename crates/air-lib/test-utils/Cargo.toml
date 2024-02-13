@@ -34,6 +34,7 @@ fluence-keypair = "0.10.4"
 ed25519-dalek = "2.1.0"
 rand_chacha = "0.3.1"
 sha2 = "0.10.6"
+air-interpreter-value = { version = "0.1.0", path = "../interpreter-value" }
 
 [dev-dependencies]
 maplit = "1.0.2"

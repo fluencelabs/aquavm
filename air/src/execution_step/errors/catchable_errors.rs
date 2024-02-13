@@ -69,7 +69,7 @@ pub enum CatchableError {
 
     /// This error type is produced by a fail instruction.
     #[error("fail with '{error}' is used without corresponding xor")]
-    UserError { error: Rc<JValue> },
+    UserError { error: JValue },
 
     /// An error occurred while trying to apply lambda to a value.
     #[error(transparent)]

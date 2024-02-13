@@ -37,7 +37,7 @@ fn local_service_error() {
         .unwrap();
 
     let err_msg = "some error".to_string();
-    let call_service_result = air_test_utils::CallServiceResult::err(10000, json!(err_msg));
+    let call_service_result = air_test_utils::CallServiceResult::err(10000, json!(err_msg).into());
     let call_results_4_call = maplit::hashmap!(
         1 => call_service_result,
     );
@@ -80,7 +80,7 @@ fn fold_iterates_over_non_array_scalar_iterable() {
     let unsupported_jvalue = json!({"attr": 42, });
     let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id);
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
-    let expected_error = CatchableError::FoldIteratesOverNonArray(unsupported_jvalue, var_name);
+    let expected_error = CatchableError::FoldIteratesOverNonArray(unsupported_jvalue.into(), var_name);
     assert!(check_error(&result, expected_error));
 }
 
@@ -105,7 +105,7 @@ fn fold_iterates_over_non_array_scalar_lambda_iterable() {
     let unsupported_jvalue = json!({"int": scalar_int, });
     let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id);
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
-    let expected_error = CatchableError::FoldIteratesOverNonArray(json!(scalar_int), ".$.int".to_string());
+    let expected_error = CatchableError::FoldIteratesOverNonArray(scalar_int.into(), ".$.int".to_string());
     assert!(check_error(&result, expected_error));
 }
 
@@ -126,7 +126,7 @@ fn non_string_value_in_triplet_resolution() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 
@@ -145,7 +145,7 @@ fn non_string_value_in_triplet_resolution() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 
@@ -165,9 +165,9 @@ fn non_string_value_in_triplet_resolution() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
-    assert!(check_error(&result, expected_error));
+    assert_error_eq!(&result, expected_error);
 }
 
 #[test]
@@ -187,7 +187,7 @@ fn non_string_value_in_triplet_resolution_module_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
 
     assert!(check_error(&result, expected_error));
@@ -206,7 +206,7 @@ fn non_string_value_in_triplet_resolution_module_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 
@@ -226,7 +226,7 @@ fn non_string_value_in_triplet_resolution_module_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -248,7 +248,7 @@ fn non_string_value_in_triplet_resolution_function_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
 
     assert!(check_error(&result, expected_error));
@@ -267,7 +267,7 @@ fn non_string_value_in_triplet_resolution_function_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 
@@ -287,7 +287,7 @@ fn non_string_value_in_triplet_resolution_function_name() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
-        actual_value: json!(scalar_int),
+        actual_value: scalar_int.into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -309,7 +309,7 @@ fn value_not_contain_such_array_idx_ap() {
     let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx {
-        value: wrong_jvalue,
+        value: wrong_jvalue.into(),
         idx,
     });
     assert!(check_error(&result, expected_error));
@@ -354,8 +354,10 @@ fn array_accessor_not_match_value() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ArrayAccessorNotMatchValue { value: arg, idx });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ArrayAccessorNotMatchValue {
+        value: arg.into(),
+        idx,
+    });
     assert!(check_error(&result, expected_error));
 }
 
@@ -375,8 +377,10 @@ fn value_not_contain_such_array_idx_call_arg_lambda() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchArrayIdx { value: arg, idx });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchArrayIdx {
+        value: arg.into(),
+        idx,
+    });
     assert!(check_error(&result, expected_error));
 }
 
@@ -396,8 +400,10 @@ fn value_not_contain_such_field_call_arg_lambda() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField { value: arg, field_name });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField {
+        value: arg.into(),
+        field_name,
+    });
     assert!(check_error(&result, expected_error));
 }
 
@@ -417,7 +423,7 @@ fn field_accesssor_not_match_value_call_arg_lambda() {
     );
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::FieldAccessorNotMatchValue {
-        value: arg,
+        value: arg.into(),
         field_name: "b".to_string(),
     });
     assert!(check_error(&result, expected_error));
@@ -472,7 +478,7 @@ fn scalar_accessor_has_invalid_type_ap() {
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ScalarAccessorHasInvalidType {
-        scalar_accessor: obj_arg,
+        scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 
@@ -480,7 +486,7 @@ fn scalar_accessor_has_invalid_type_ap() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ScalarAccessorHasInvalidType {
-        scalar_accessor: obj_arg,
+        scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 }
@@ -508,7 +514,7 @@ fn stream_accessor_has_invalid_type() {
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::StreamAccessorHasInvalidType {
-        scalar_accessor: obj_arg,
+        scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 
@@ -516,7 +522,7 @@ fn stream_accessor_has_invalid_type() {
     let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::StreamAccessorHasInvalidType {
-        scalar_accessor: obj_arg,
+        scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 }
@@ -615,7 +621,7 @@ fn undefined_error_functor() {
     let result = executor.execute_all(local_peer_id).unwrap();
 
     let error_object = json!({"error_code":10001, "instruction":"match 1 2","message":"compared values do not match"});
-    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(error_object);
+    let expected_error = CatchableError::LengthFunctorAppliedToNotArray(error_object.into());
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
@@ -637,7 +643,12 @@ fn undefined_error_peerid() {
         .expect("invalid test AIR script");
     let result = executor.execute_all(local_peer_id).unwrap();
 
-    let value = json!({"error_code":10001, "instruction":"match 1 2", "message":"compared values do not match"});
+    let value = json!({
+        "error_code":10001,
+        "instruction":"match 1 2",
+        "message":"compared values do not match",
+    })
+    .into();
     let field_name = "peerid".into();
     let expected_error =
         air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField { value, field_name });

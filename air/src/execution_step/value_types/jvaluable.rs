@@ -32,12 +32,10 @@ use crate::SecurityTetraplet;
 
 use air_interpreter_data::Provenance;
 
-use std::borrow::Cow;
-
 /// Represent a value that could be transform to a JValue with or without tetraplets.
 pub(crate) trait JValuable {
     /// Applies lambda to the internal value, produces JValue.
-    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<Cow<'_, JValue>>;
+    fn apply_lambda(&self, lambda: &LambdaAST<'_>, exec_ctx: &ExecutionCtx<'_>) -> ExecutionResult<JValue>;
 
     /// Applies lambda to the internal value, produces JValue with tetraplet.
     // TODO self should know about own provenance, but it will require
@@ -48,13 +46,10 @@ pub(crate) trait JValuable {
         lambda: &LambdaAST<'_>,
         exec_ctx: &ExecutionCtx<'_>,
         root_provenance: &Provenance,
-    ) -> ExecutionResult<(Cow<'_, JValue>, SecurityTetraplet, Provenance)>;
+    ) -> ExecutionResult<(JValue, SecurityTetraplet, Provenance)>;
 
     /// Return internal value as borrowed if it's possible, owned otherwise.
-    fn as_jvalue(&self) -> Cow<'_, JValue>;
-
-    /// Convert this boxed value to an owned JValue.
-    fn into_jvalue(self: Box<Self>) -> JValue;
+    fn as_jvalue(&self) -> JValue;
 
     /// Return tetraplets associating with internal value.
     fn as_tetraplets(&self) -> RcSecurityTetraplets;

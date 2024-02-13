@@ -104,8 +104,10 @@ fn dont_wait_on_json_path_on_scalars() {
     let result = call_vm!(set_variable_vm, <_>::default(), &script, "", "");
     let array_result = call_vm!(array_consumer, <_>::default(), &script, "", result.data);
 
-    let expected_error =
-        CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx { value: array, idx: 5 });
+    let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx {
+        value: array.into(),
+        idx: 5,
+    });
     assert!(check_error(&array_result, expected_error));
 
     let script = format!(
@@ -121,7 +123,7 @@ fn dont_wait_on_json_path_on_scalars() {
     let object_result = call_vm!(object_consumer, <_>::default(), script, "", result.data);
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
-        value: object,
+        value: object.into(),
         field_name: "non_exist_path".to_string(),
     });
 

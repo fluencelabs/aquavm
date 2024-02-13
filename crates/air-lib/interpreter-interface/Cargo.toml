@@ -23,6 +23,7 @@ marine-call-parameters = { version = "0.10.3", default-features = false }
 serde = "1.0.190"
 serde_json = "1.0.108"
 serde_bytes = "0.11.12"
+air-interpreter-value = { version = "0.1.0", path = "../interpreter-value" }
 
 [features]
 default = ["marine"]

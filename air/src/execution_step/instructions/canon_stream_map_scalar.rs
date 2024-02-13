@@ -38,7 +38,6 @@ use air_parser::AirPos;
 use air_trace_handler::merger::MergerCanonResult;
 
 use std::borrow::Cow;
-use std::rc::Rc;
 
 impl<'i> super::ExecutableInstruction<'i> for ast::CanonStreamMapScalar<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
@@ -112,12 +111,10 @@ fn create_canon_stream_producer<'closure, 'name: 'closure>(
             .map(|stream_map| Cow::Borrowed(stream_map))
             .unwrap_or_default();
 
-        let value = stream_map
-            .iter_unique_key_object()
-            .collect::<serde_json::Map<String, JValue>>();
+        let value_iter = stream_map.iter_unique_key_object();
 
         let value = ValueAggregate::from_literal_result(LiteralAggregate::new(
-            Rc::new(value.into()),
+            JValue::object_from_pairs(value_iter),
             peer_pk.as_str().into(),
             0.into(),
         ));

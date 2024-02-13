@@ -45,8 +45,8 @@ pub use raw_value::*;
 pub use trace::*;
 pub use trace_pos::*;
 
+use air_interpreter_value::JValue;
 use once_cell::sync::Lazy;
-use serde_json::Value as JValue;
 
 use std::str::FromStr;
 

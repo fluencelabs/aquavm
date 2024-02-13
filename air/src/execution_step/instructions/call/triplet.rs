@@ -85,7 +85,7 @@ pub(crate) fn resolve_to_string<'i>(
 
 fn try_jvalue_to_string(jvalue: JValue, variable_name: impl Into<String>) -> ExecutionResult<String> {
     match jvalue {
-        JValue::String(s) => Ok(s),
+        JValue::String(s) => Ok(s.to_string()),
         _ => Err(CatchableError::NonStringValueInTripletResolution {
             variable_name: variable_name.into(),
             actual_value: jvalue,

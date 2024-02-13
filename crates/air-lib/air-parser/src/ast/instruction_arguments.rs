@@ -29,6 +29,7 @@ use super::ScalarWithLambda;
 use super::Stream;
 use super::StreamMap;
 
+use air_interpreter_value::JsonString;
 use air_lambda_ast::LambdaAST;
 
 use serde::Deserialize;
@@ -73,11 +74,11 @@ pub struct Triplet<'i> {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ImmutableValue<'i> {
     InitPeerId,
-    Error(InstructionErrorAST<'i>),
+    Error(#[serde(borrow)] InstructionErrorAST<'i>),
     LastError(Option<LambdaAST<'i>>),
     Timestamp,
     TTL,
-    Literal(&'i str),
+    Literal(JsonString),
     Number(Number),
     Boolean(bool),
     EmptyArray, // only empty arrays are allowed now
@@ -99,9 +100,9 @@ pub enum ApArgument<'i> {
     InitPeerId,
     Timestamp,
     TTL,
-    Error(InstructionErrorAST<'i>),
+    Error(#[serde(borrow)] InstructionErrorAST<'i>),
     LastError(Option<LambdaAST<'i>>),
-    Literal(&'i str),
+    Literal(JsonString),
     Number(Number),
     Boolean(bool),
     EmptyArray,
@@ -123,9 +124,9 @@ pub enum ApResult<'i> {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum StreamMapKeyClause<'i> {
-    Literal(&'i str),
+    Literal(JsonString),
     Int(i64),
-    Scalar(Scalar<'i>),
+    Scalar(#[serde(borrow)] Scalar<'i>),
     ScalarWithLambda(ScalarWithLambda<'i>),
     CanonStreamWithLambda(CanonStreamWithLambda<'i>),
 }

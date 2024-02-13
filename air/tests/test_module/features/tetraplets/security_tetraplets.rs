@@ -368,7 +368,7 @@ fn tetraplet_with_wasm_modules() {
         let result = service
             .call(
                 params.function_name,
-                JValue::Array(params.arguments),
+                json!(params.arguments),
                 to_app_service_call_parameters(call_parameters),
             )
             .unwrap();

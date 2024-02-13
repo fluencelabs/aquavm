@@ -191,6 +191,15 @@ impl From<&Number> for serde_json::Value {
     }
 }
 
+impl From<&Number> for air_interpreter_value::JValue {
+    fn from(number: &Number) -> Self {
+        match number {
+            Number::Int(value) => (*value).into(),
+            Number::Float(value) => (*value).into(),
+        }
+    }
+}
+
 fn display_last_error(f: &mut fmt::Formatter, lambda_ast: &Option<LambdaAST>) -> fmt::Result {
     use crate::parser::LAST_ERROR;
 

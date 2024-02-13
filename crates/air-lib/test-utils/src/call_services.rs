@@ -34,7 +34,7 @@ pub fn echo_call_service() -> CallServiceClosure {
     })
 }
 
-pub fn set_variable_call_service(json: JValue) -> CallServiceClosure {
+pub fn set_variable_call_service(json: serde_json::Value) -> CallServiceClosure {
     Box::new(move |_| -> CallServiceResult { CallServiceResult::ok(json.clone()) })
 }
 
@@ -47,7 +47,7 @@ pub enum VariableOptionSource {
 }
 
 pub fn set_variables_call_service(
-    variables_mapping: HashMap<String, JValue>,
+    variables_mapping: HashMap<String, serde_json::Value>,
     variable_source: VariableOptionSource,
 ) -> CallServiceClosure {
     use VariableOptionSource::*;
@@ -55,7 +55,7 @@ pub fn set_variables_call_service(
     Box::new(move |params| -> CallServiceResult {
         let var_name = match variable_source {
             Argument(id) => match params.arguments.get(id) {
-                Some(JValue::String(name)) => name.to_string(),
+                Some(serde_json::Value::String(name)) => name.to_string(),
                 _ => "default".to_string(),
             },
             FunctionName => params.function_name,
@@ -89,7 +89,7 @@ pub fn fallible_call_service(fallible_service_id: impl Into<String>) -> CallServ
     })
 }
 
-pub fn fallible_call_service_by_arg(arg: impl Into<JValue>) -> CallServiceClosure {
+pub fn fallible_call_service_by_arg(arg: impl Into<serde_json::Value>) -> CallServiceClosure {
     let arg = arg.into();
 
     Box::new(move |params| -> CallServiceResult {
