@@ -39,7 +39,7 @@ pub struct WasmAirRunner {
 }
 
 fn create_wasm_backend() -> WasmtimeWasmBackend {
-    let mut config = WasmtimeConfig::new();
+    let mut config = WasmtimeConfig::default();
     config
         .debug_info(true)
         .epoch_interruption(false)

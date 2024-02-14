@@ -13,7 +13,7 @@ static AIR_SCRIPT: &str = r#"
           (next i))))
 "#;
 
-pub(crate) fn call_requests(size: usize) -> Data {
+pub(crate) async fn call_requests(size: usize) -> Data {
     let values: Vec<_> = (0..size).map(|n| format!("{n}")).collect();
     let data = json!(values);
     let init_peer_name = "peer_id";
@@ -24,7 +24,7 @@ pub(crate) fn call_requests(size: usize) -> Data {
         init_peer_keypair.clone(),
         // actually, is not used
         set_variable_call_service(data.clone()),
-    );
+    ).await;
 
     let init_call_results: CallResults = <_>::default();
 
@@ -40,6 +40,7 @@ pub(crate) fn call_requests(size: usize) -> Data {
             init_call_results,
             particle_id,
         )
+        .await
         .unwrap();
 
     // initialization call requests
@@ -64,7 +65,7 @@ pub(crate) fn call_requests(size: usize) -> Data {
     }
 }
 
-pub(crate) fn call_results(size: usize) -> Data {
+pub(crate) async fn call_results(size: usize) -> Data {
     let values: Vec<_> = (0..size).map(|n| format!("{n}")).collect();
     let data = json!(values);
     let init_peer_name = "peer_id";
@@ -75,7 +76,7 @@ pub(crate) fn call_results(size: usize) -> Data {
         init_peer_keypair.clone(),
         // actually, is not used
         set_variable_call_service(data.clone()),
-    );
+    ).await;
 
     let call_results: CallResults = <_>::default();
 
@@ -91,6 +92,7 @@ pub(crate) fn call_results(size: usize) -> Data {
             call_results,
             particle_id,
         )
+        .await
         .unwrap();
 
     // initialization call requests
@@ -112,6 +114,7 @@ pub(crate) fn call_results(size: usize) -> Data {
             init_call_results,
             particle_id,
         )
+        .await
         .unwrap();
 
     let call_results: CallResults = res

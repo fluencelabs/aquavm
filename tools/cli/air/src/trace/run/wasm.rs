@@ -92,7 +92,7 @@ pub(crate) async fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
 ) -> eyre::Result<Box<WasmAvmRunner>> {
-    let mut config = WasmtimeConfig::new();
+    let mut config = WasmtimeConfig::default();
     config
         .debug_info(true)
         .wasm_backtrace(true)
