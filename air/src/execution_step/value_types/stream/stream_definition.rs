@@ -239,20 +239,18 @@ mod test {
     use air_trace_handler::GenerationCompactificationError;
     use serde_json::json;
 
-    use std::rc::Rc;
-
     type Stream = super::Stream<ValueAggregate>;
 
-    fn create_value(value: JValue) -> ValueAggregate {
+    fn create_value(value: impl Into<JValue>) -> ValueAggregate {
         ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(value), <_>::default(), 1.into()),
+            ServiceResultAggregate::new(value.into(), <_>::default(), 1.into()),
             CID::new("some fake cid").into(),
         )
     }
 
-    fn create_value_with_pos(value: JValue, trace_pos: TracePos) -> ValueAggregate {
+    fn create_value_with_pos(value: impl Into<JValue>, trace_pos: TracePos) -> ValueAggregate {
         ValueAggregate::from_service_result(
-            ServiceResultAggregate::new(Rc::new(value), <_>::default(), trace_pos),
+            ServiceResultAggregate::new(value.into(), <_>::default(), trace_pos),
             CID::new("some fake cid").into(),
         )
     }

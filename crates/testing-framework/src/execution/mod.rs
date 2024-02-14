@@ -757,7 +757,7 @@ mod tests {
     #[tokio::test]
     async fn test_transformed_shared() {
         struct Service {
-            state: RefCell<std::vec::IntoIter<JValue>>,
+            state: RefCell<std::vec::IntoIter<serde_json::Value>>,
         }
 
         impl MarineService for Service {

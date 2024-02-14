@@ -23,15 +23,17 @@ use crate::execution_step::value_types::TracePosOperate;
 use crate::execution_step::ExecutionResult;
 use crate::JValue;
 
+use air_interpreter_value::JsonString;
 use air_trace_handler::TraceHandler;
-
-use serde_json::json;
-use std::rc::Rc;
 
 pub(super) static VALUE_FIELD_NAME: &str = "value";
 
-pub(super) fn from_key_value(key: StreamMapKey<'_>, value: &JValue) -> Rc<JValue> {
-    Rc::new(json!({ KEY_FIELD_NAME: key, VALUE_FIELD_NAME: value }))
+pub(super) fn from_key_value(key: StreamMapKey, value: &JValue) -> JValue {
+    maplit::hashmap! {
+        VALUE_FIELD_NAME => value.clone(),
+        KEY_FIELD_NAME => key.into(),
+    }
+    .into()
 }
 
 #[derive(Debug, Default, Clone)]
@@ -46,7 +48,7 @@ impl StreamMap {
 
     pub(crate) fn insert(
         &mut self,
-        key: StreamMapKey<'_>,
+        key: StreamMapKey,
         value: &ValueAggregate,
         generation: Generation,
     ) -> ExecutionResult<()> {
@@ -72,7 +74,7 @@ impl StreamMap {
         self.stream.iter()
     }
 
-    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (String, JValue)> + '_ {
+    pub(crate) fn iter_unique_key_object(&self) -> impl Iterator<Item = (JsonString, JValue)> + '_ {
         use std::collections::HashSet;
         let mut met_keys = HashSet::new();
 
@@ -89,17 +91,11 @@ impl StreamMap {
             let key = object
                 .get(KEY_FIELD_NAME)
                 .and_then(StreamMapKey::from_value_ref)
-                .and_then(|key| {
-                    if met_keys.insert(key.to_string()) {
-                        Some(key)
-                    } else {
-                        None
-                    }
-                })?;
+                .and_then(|key| if met_keys.insert(key.to_key()) { Some(key) } else { None })?;
 
             let value = object.get(VALUE_FIELD_NAME)?.clone();
 
-            Some((key.to_string(), value))
+            Some((key.to_key(), value))
         })
     }
 }
@@ -127,14 +123,10 @@ mod test {
     use air_interpreter_data::ExecutionTrace;
     use air_trace_handler::GenerationCompactificationError;
     use air_trace_handler::TraceHandler;
-    use serde_json::json;
 
-    use std::borrow::Cow;
-    use std::rc::Rc;
-
-    fn create_value_aggregate(value: Rc<JValue>) -> ValueAggregate {
+    fn create_value_aggregate(value: impl Into<JValue>) -> ValueAggregate {
         ValueAggregate::new(
-            value,
+            value.into(),
             <_>::default(),
             0.into(),
             air_interpreter_data::Provenance::literal(),
@@ -143,20 +135,21 @@ mod test {
 
     fn compare_stream_iter<'value>(
         mut iter: impl Iterator<Item = &'value ValueAggregate>,
-        key: StreamMapKey<'_>,
-        value: &Rc<JValue>,
+        key: StreamMapKey,
+        value: impl Into<JValue>,
     ) -> bool {
+        let value = value.into();
         let actual_value = iter.next().map(|e| e.get_result()).unwrap();
-        let expected_value = from_key_value(key, value);
+        let expected_value = from_key_value(key, &value);
 
         actual_value == &expected_value
     }
 
     #[test]
     fn test_from_value_key_str() {
-        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
-        let value = Rc::new(json!("1"));
-        let value_aggregate = create_value_aggregate(value.clone());
+        let key = StreamMapKey::Str("some_key".into());
+        let value = "1";
+        let value_aggregate = create_value_aggregate(value);
 
         let mut stream_map = StreamMap::new();
         stream_map
@@ -164,15 +157,15 @@ mod test {
             .unwrap();
         let mut iter = stream_map.stream.iter();
 
-        assert!(compare_stream_iter(&mut iter, key, &value));
+        assert!(compare_stream_iter(&mut iter, key, value));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn test_from_value_key_int() {
         let key = StreamMapKey::I64(42.into());
-        let value = Rc::new(json!("1"));
-        let value_aggregate = create_value_aggregate(value.clone());
+        let value = "1";
+        let value_aggregate = create_value_aggregate(value);
 
         let mut stream_map = StreamMap::new();
         stream_map
@@ -180,18 +173,18 @@ mod test {
             .unwrap();
         let mut iter = stream_map.stream.iter();
 
-        assert!(compare_stream_iter(&mut iter, key, &value));
+        assert!(compare_stream_iter(&mut iter, key, value));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn test_insert() {
-        let key_1_2 = StreamMapKey::Str(Cow::Borrowed("some_key"));
-        let value_1 = Rc::new(json!("1"));
-        let value_aggregate_1 = create_value_aggregate(value_1.clone());
+        let key_1_2 = StreamMapKey::Str("some_key".into());
+        let value_1 = "1";
+        let value_aggregate_1 = create_value_aggregate(value_1);
 
-        let value_2 = Rc::new(json!("2"));
-        let value_aggregate_2 = create_value_aggregate(value_2.clone());
+        let value_2 = "2";
+        let value_aggregate_2 = create_value_aggregate(value_2);
 
         let mut stream_map = StreamMap::new();
         stream_map
@@ -201,26 +194,26 @@ mod test {
             .insert(key_1_2.clone(), &value_aggregate_2, Generation::current(0))
             .unwrap();
 
-        let key_3 = StreamMapKey::Str(Cow::Borrowed("other_key"));
-        let value_3 = Rc::new(json!("3"));
-        let value_aggregate_3 = create_value_aggregate(value_3.clone());
+        let key_3 = StreamMapKey::Str("other_key".into());
+        let value_3 = "3";
+        let value_aggregate_3 = create_value_aggregate(value_3);
         stream_map
             .insert(key_3.clone(), &value_aggregate_3, Generation::current(0))
             .unwrap();
 
         let key_4 = StreamMapKey::I64(42.into());
-        let value_4 = Rc::new(json!("4"));
-        let value_aggregate_4 = create_value_aggregate(value_4.clone());
+        let value_4 = "4";
+        let value_aggregate_4 = create_value_aggregate(value_4);
         stream_map
             .insert(key_4.clone(), &value_aggregate_4, Generation::current(0))
             .unwrap();
 
         let mut iter = stream_map.stream.iter();
 
-        assert!(compare_stream_iter(&mut iter, key_1_2.clone(), &value_2));
-        assert!(compare_stream_iter(&mut iter, key_3, &value_3));
-        assert!(compare_stream_iter(&mut iter, key_4, &value_4));
-        assert!(compare_stream_iter(&mut iter, key_1_2, &value_1));
+        assert!(compare_stream_iter(&mut iter, key_1_2.clone(), value_2));
+        assert!(compare_stream_iter(&mut iter, key_3, value_3));
+        assert!(compare_stream_iter(&mut iter, key_4, value_4));
+        assert!(compare_stream_iter(&mut iter, key_1_2, value_1));
         assert_eq!(iter.next(), None);
     }
 
@@ -228,9 +221,9 @@ mod test {
     fn compactification_invalid_state_error() {
         use air_interpreter_data::CanonResult;
 
-        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
-        let value = Rc::new(json!("1"));
-        let value_aggregate = create_value_aggregate(value.clone());
+        let key = StreamMapKey::Str("some_key".into());
+        let value = "1";
+        let value_aggregate = create_value_aggregate(value);
         let mut stream_map = StreamMap::new();
 
         stream_map
@@ -257,9 +250,9 @@ mod test {
 
     #[test]
     fn compactification_points_to_nowhere_error() {
-        let key = StreamMapKey::Str(Cow::Borrowed("some_key"));
-        let value = Rc::new(json!("1"));
-        let value_aggregate = create_value_aggregate(value.clone());
+        let key = StreamMapKey::Str("some_key".into());
+        let value = "1";
+        let value_aggregate = create_value_aggregate(value);
         let mut stream_map = StreamMap::new();
 
         stream_map
@@ -284,9 +277,9 @@ mod test {
         (0..count)
             .map(|id| {
                 let key = id.to_string();
-                let value = json!(id);
+                let value = id.into();
                 let value = ValueAggregate::new(
-                    Rc::new(value),
+                    value,
                     <_>::default(),
                     0.into(),
                     air_interpreter_data::Provenance::literal(),
@@ -323,9 +316,9 @@ mod test {
         let key_values = generate_key_values(TEST_DATA_SIZE);
 
         let key: u32 = 2;
-        let value = json!(2);
+        let value = 2;
         let value = ValueAggregate::new(
-            Rc::new(value),
+            value.into(),
             <_>::default(),
             0.into(),
             air_interpreter_data::Provenance::literal(),
@@ -342,10 +335,10 @@ mod test {
         );
         let mut iter = stream_map_json_kvpairs.iter_unique_key_object();
 
-        assert_eq!(("2".into(), json!(2)), iter.next().unwrap());
-        assert_eq!(("0".into(), json!(0)), iter.next().unwrap());
-        assert_eq!(("3".into(), json!(3)), iter.next().unwrap());
-        assert_eq!(("1".into(), json!(1)), iter.next().unwrap());
+        assert_eq!(("2".into(), 2.into()), iter.next().unwrap());
+        assert_eq!(("0".into(), 0.into()), iter.next().unwrap());
+        assert_eq!(("3".into(), 3.into()), iter.next().unwrap());
+        assert_eq!(("1".into(), 1.into()), iter.next().unwrap());
         assert_eq!(iter.next(), None);
     }
 }

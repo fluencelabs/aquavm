@@ -57,7 +57,7 @@ fn fail_with_scalar<'i>(scalar: &ast::Scalar<'i>, exec_ctx: &mut ExecutionCtx<'i
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
+    fail_with_error_object(exec_ctx, value, Some(tetraplet), provenance)
 }
 
 fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut ExecutionCtx<'i>) -> ExecutionResult<()> {
@@ -66,7 +66,7 @@ fn fail_with_scalar_wl<'i>(scalar: &ast::ScalarWithLambda<'i>, exec_ctx: &mut Ex
     let tetraplet = tetraplet.remove(0);
     check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplet), provenance)
+    fail_with_error_object(exec_ctx, value, Some(tetraplet), provenance)
 }
 
 fn fail_with_literals(
@@ -87,7 +87,7 @@ fn fail_with_literals(
     // in (fail x y), x and y are always literals
     let provenance = Provenance::literal();
 
-    fail_with_error_object(exec_ctx, Rc::new(error_object), Some(literal_tetraplet), provenance)
+    fail_with_error_object(exec_ctx, error_object, Some(literal_tetraplet), provenance)
 }
 
 fn fail_with_canon_stream(
@@ -99,7 +99,7 @@ fn fail_with_canon_stream(
     // tetraplets always have one element here and it'll be refactored after boxed value
     check_error_object(&value).map_err(CatchableError::InvalidErrorObjectError)?;
 
-    fail_with_error_object(exec_ctx, Rc::new(value), Some(tetraplets.remove(0)), provenance)
+    fail_with_error_object(exec_ctx, value, Some(tetraplets.remove(0)), provenance)
 }
 
 fn fail_with_last_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
@@ -147,7 +147,7 @@ fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
 
 fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
-    error: Rc<JValue>,
+    error: JValue,
     tetraplet: Option<RcSecurityTetraplet>,
     provenance: Provenance,
 ) -> ExecutionResult<()> {

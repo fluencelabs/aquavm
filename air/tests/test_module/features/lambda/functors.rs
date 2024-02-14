@@ -65,7 +65,7 @@ async fn length_functor_for_non_array_scalar() {
     let result = executor.execute_one(init_peer_name).await.unwrap();
     check_error(
         &result,
-        CatchableError::LengthFunctorAppliedToNotArray(json!(result_jvalue)),
+        CatchableError::LengthFunctorAppliedToNotArray(result_jvalue.into()),
     );
 }
 

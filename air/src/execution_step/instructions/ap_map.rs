@@ -61,7 +61,7 @@ fn to_merger_ap_map_result(instr: &impl ToString, trace_ctx: &mut TraceHandler) 
 }
 
 fn populate_context<'ctx>(
-    key: StreamMapKey<'ctx>,
+    key: StreamMapKey,
     ap_map_result: &StreamMap<'ctx>,
     merger_ap_result: &MergerApResult,
     result: ValueAggregate,
@@ -75,9 +75,9 @@ fn resolve_key_if_needed<'ctx>(
     key: &StreamMapKeyClause<'ctx>,
     exec_ctx: &ExecutionCtx<'ctx>,
     map_name: &str,
-) -> Result<StreamMapKey<'ctx>, ExecutionError> {
+) -> Result<StreamMapKey, ExecutionError> {
     match key {
-        &StreamMapKeyClause::Literal(s) => Ok(s.into()),
+        StreamMapKeyClause::Literal(s) => Ok(s.clone().into()),
         StreamMapKeyClause::Int(i) => Ok(i.to_owned().into()),
         StreamMapKeyClause::Scalar(s) => resolve(s, exec_ctx, map_name),
         StreamMapKeyClause::ScalarWithLambda(s) => resolve(s, exec_ctx, map_name),
@@ -85,11 +85,11 @@ fn resolve_key_if_needed<'ctx>(
     }
 }
 
-fn resolve<'ctx>(
+fn resolve(
     resolvable: &impl Resolvable,
     exec_ctx: &ExecutionCtx<'_>,
     map_name: &str,
-) -> Result<StreamMapKey<'ctx>, ExecutionError> {
+) -> Result<StreamMapKey, ExecutionError> {
     let (value, _, _) = resolvable.resolve(exec_ctx)?;
     StreamMapKey::from_value(value).ok_or(CatchableError::StreamMapError(unsupported_map_key_type(map_name)).into())
 }

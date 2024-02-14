@@ -27,7 +27,7 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 // no lambda here are literal + lambda is literal
 pub struct LiteralAggregate {
-    pub result: Rc<JValue>,
+    pub result: JValue,
     // this Rc is not really shared ATM, as execution passes through the Resolvable needle
     pub init_peer_id: Rc<str>,
     // TODO #[serde(skip)]
@@ -36,7 +36,7 @@ pub struct LiteralAggregate {
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ServiceResultAggregate {
-    pub result: Rc<JValue>,
+    pub result: JValue,
     pub tetraplet: RcSecurityTetraplet,
     // TODO #[serde(skip)]
     pub trace_pos: TracePos,
@@ -44,7 +44,7 @@ pub struct ServiceResultAggregate {
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CanonResultAggregate {
-    pub result: Rc<JValue>,
+    pub result: JValue,
     pub peer_id: Rc<str>,
     pub lambda: Rc<str>,
     // TODO #[serde(skip)]
@@ -52,7 +52,7 @@ pub struct CanonResultAggregate {
 }
 
 impl LiteralAggregate {
-    pub(crate) fn new(result: Rc<JValue>, init_peer_id: Rc<str>, trace_pos: TracePos) -> Self {
+    pub(crate) fn new(result: JValue, init_peer_id: Rc<str>, trace_pos: TracePos) -> Self {
         Self {
             result,
             init_peer_id,
@@ -66,7 +66,7 @@ impl LiteralAggregate {
 }
 
 impl ServiceResultAggregate {
-    pub(crate) fn new(result: Rc<JValue>, tetraplet: RcSecurityTetraplet, trace_pos: TracePos) -> Self {
+    pub(crate) fn new(result: JValue, tetraplet: RcSecurityTetraplet, trace_pos: TracePos) -> Self {
         Self {
             result,
             tetraplet,
@@ -76,7 +76,7 @@ impl ServiceResultAggregate {
 }
 
 impl CanonResultAggregate {
-    pub(crate) fn new(result: Rc<JValue>, peer_id: Rc<str>, lambda: &str, trace_pos: TracePos) -> Self {
+    pub(crate) fn new(result: JValue, peer_id: Rc<str>, lambda: &str, trace_pos: TracePos) -> Self {
         Self {
             result,
             peer_id,

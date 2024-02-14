@@ -48,13 +48,14 @@ pub mod prelude {
     pub use executed_state::*;
     pub use test_runner::*;
 
+    pub use air_interpreter_value::JValue;
     pub use serde_json::json;
 }
 
 pub type CallServiceClosure<'x> =
     Box<dyn Fn(CallRequestParams) -> LocalBoxFuture<'x, CallServiceResult> + 'static>;
 
-pub type JValue = serde_json::Value;
+use air_interpreter_value::JValue;
 
 #[macro_export]
 macro_rules! checked_call_vm {

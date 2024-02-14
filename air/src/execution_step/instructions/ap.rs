@@ -34,8 +34,6 @@ use air_parser::ast;
 use air_parser::ast::Ap;
 use air_trace_handler::merger::MergerApResult;
 
-use std::rc::Rc;
-
 impl<'i> super::ExecutableInstruction<'i> for Ap<'i> {
     #[tracing::instrument(level = "debug", skip(exec_ctx, trace_ctx))]
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {

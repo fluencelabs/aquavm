@@ -21,6 +21,7 @@ use air_interpreter_sede::FromSerialized;
 use air_interpreter_sede::MsgPackFormat;
 use air_interpreter_sede::MsgPackMultiformat;
 use air_interpreter_sede::Representation;
+use air_interpreter_value::JValue;
 
 use marine_call_parameters::SecurityTetraplet;
 #[cfg(feature = "marine")]
@@ -43,12 +44,18 @@ pub type CallRequestsFormat = MsgPackMultiformat;
 
 define_simple_representation! {
     CallArgumentsRepr,
-    Vec<serde_json::Value>,
+    Vec<JValue>,
     CallArgumentsFormat,
     SerializedCallArguments
 }
 
 pub type CallArgumentsDeserializeError = <CallArgumentsRepr as Representation>::DeserializeError;
+
+impl FromSerialized<Vec<serde_json::Value>> for CallArgumentsRepr {
+    fn deserialize(&self, repr: &[u8]) -> Result<Vec<serde_json::Value>, Self::DeserializeError> {
+        Self.get_format().from_slice(repr)
+    }
+}
 
 define_simple_representation! {
     TetrapletsRepr,

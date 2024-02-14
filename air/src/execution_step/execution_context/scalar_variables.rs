@@ -89,7 +89,7 @@ pub(crate) struct Scalars<'i> {
 
     pub(crate) canon_streams: ValuesSparseMatrix<CanonStreamWithProvenance>,
 
-    pub(crate) canon_maps: ValuesSparseMatrix<CanonStreamMapWithProvenance<'i>>,
+    pub(crate) canon_maps: ValuesSparseMatrix<CanonStreamMapWithProvenance>,
 
     pub(crate) iterable_variables: HashMap<String, FoldState<'i>>,
 }
@@ -122,10 +122,10 @@ impl<'i> Scalars<'i> {
 
     /// Returns true if there was a previous value for the provided key on the same
     /// fold block.
-    pub(crate) fn set_canon_map_value<'k: 'i>(
+    pub(crate) fn set_canon_map_value(
         &mut self,
         name: impl Into<String>,
-        value: CanonStreamMapWithProvenance<'k>,
+        value: CanonStreamMapWithProvenance,
     ) -> ExecutionResult<bool> {
         self.canon_maps.set_value(name, value)
     }
@@ -172,7 +172,7 @@ impl<'i> Scalars<'i> {
             .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())
     }
 
-    pub(crate) fn get_canon_map(&'i self, name: &str) -> ExecutionResult<&'i CanonStreamMapWithProvenance<'i>> {
+    pub(crate) fn get_canon_map(&'i self, name: &str) -> ExecutionResult<&'i CanonStreamMapWithProvenance> {
         self.canon_maps
             .get_value(name)?
             .ok_or_else(|| CatchableError::VariableWasNotInitializedAfterNew(name.to_string()).into())

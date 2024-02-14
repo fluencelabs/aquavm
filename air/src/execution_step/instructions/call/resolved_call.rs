@@ -25,6 +25,7 @@ use crate::execution_step::RcSecurityTetraplet;
 use crate::execution_step::RcSecurityTetraplets;
 use crate::execution_step::UncatchableError;
 use crate::trace_to_exec_err;
+use crate::JValue;
 use crate::SecurityTetraplet;
 
 use air_interpreter_cid::value_to_json_cid;
@@ -220,16 +221,13 @@ impl<'i> ResolvedCall<'i> {
     }
 
     /// A version of `resolve_args` that supresses joinable errors.
-    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<CheckArgsResult<Vec<serde_json::Value>>> {
+    fn check_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<CheckArgsResult<Vec<JValue>>> {
         let fun_result = self.collect_args(exec_ctx);
 
         CheckArgsResult::new(fun_result.map(|values| values.0))
     }
 
-    fn collect_args(
-        &self,
-        exec_ctx: &ExecutionCtx<'i>,
-    ) -> ExecutionResult<(Vec<serde_json::Value>, Vec<RcSecurityTetraplets>)> {
+    fn collect_args(&self, exec_ctx: &ExecutionCtx<'i>) -> ExecutionResult<(Vec<JValue>, Vec<RcSecurityTetraplets>)> {
         let function_args = self.function_arg_paths.iter();
         let mut call_arguments = Vec::with_capacity(function_args.len());
         let mut tetraplets = Vec::with_capacity(function_args.len());

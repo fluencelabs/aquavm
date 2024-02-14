@@ -26,7 +26,6 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::Provenance;
 use air_parser::ast;
 
-use std::borrow::Cow;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -65,7 +64,7 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
         ScalarRef::Value(variable) => {
             let jvalues = select_by_lambda_from_scalar(variable.get_result(), lambda, exec_ctx)?;
             let tetraplet = variable.get_tetraplet().deref().clone();
-            from_jvalue(jvalues, tetraplet, variable.get_provenance(), lambda)
+            from_jvalue(&jvalues, tetraplet, variable.get_provenance(), lambda)
         }
         ScalarRef::IterableValue(fold_state) => {
             let iterable_value = fold_state.iterable.peek().unwrap();
@@ -73,7 +72,7 @@ pub(crate) fn create_scalar_wl_iterable<'ctx>(
             let tetraplet = to_tetraplet(&iterable_value);
             let provenance = to_provenance(&iterable_value);
 
-            from_jvalue(jvalue, tetraplet, provenance, lambda)
+            from_jvalue(&jvalue, tetraplet, provenance, lambda)
         }
     }
 }
@@ -132,12 +131,12 @@ pub(crate) fn create_canon_stream_map_wl_iterable_value(
     // Source canon map tetraplet is used here similar with a scalar with lens processing path.
     let jvalues = JValuable::apply_lambda(&canon_stream_map, lambda, exec_ctx)?;
 
-    from_jvalue(jvalues, tetraplet, provenance, lambda)
+    from_jvalue(&jvalues, tetraplet, provenance, lambda)
 }
 
 /// Constructs iterable value from resolved call result.
 fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResult<FoldIterableScalar> {
-    let len = match call_result.get_result().deref() {
+    let len = match call_result.get_result() {
         JValue::Array(array) => {
             if array.is_empty() {
                 // skip fold if array is empty
@@ -159,7 +158,7 @@ fn from_value(call_result: ValueAggregate, variable_name: &str) -> ExecutionResu
 
 /// Construct IterableValue from the result and given triplet.
 fn from_jvalue(
-    jvalue: Cow<'_, JValue>,
+    jvalue: &JValue,
     tetraplet: SecurityTetraplet,
     provenance: Provenance,
     lambda: &LambdaAST<'_>,
@@ -167,10 +166,10 @@ fn from_jvalue(
     let tetraplet = populate_tetraplet_with_lambda(tetraplet, lambda);
     let tetraplet = Rc::new(tetraplet);
 
-    let iterable = match jvalue.as_ref() {
+    let iterable = match jvalue {
         JValue::Array(array) => array,
         _ => {
-            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.into_owned(), lambda.to_string()).into());
+            return Err(CatchableError::FoldIteratesOverNonArray(jvalue.clone(), lambda.to_string()).into());
         }
     };
 

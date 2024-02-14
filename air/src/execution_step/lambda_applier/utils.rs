@@ -87,16 +87,16 @@ pub(super) fn try_scalar_ref_as_idx(scalar: ScalarRef<'_>) -> LambdaResult<u32> 
     }
 }
 
-pub(super) fn try_scalar_ref_as_stream_map_key(scalar: ScalarRef<'_>) -> LambdaResult<StreamMapKey<'static>> {
+pub(super) fn try_scalar_ref_as_stream_map_key(scalar: ScalarRef<'_>) -> LambdaResult<StreamMapKey> {
     match scalar {
         ScalarRef::Value(map_accessor) => {
-            let map_accessor = map_accessor.get_result().as_ref();
+            let map_accessor = map_accessor.get_result();
             let map_key = StreamMapKey::from_value_ref(map_accessor).ok_or(
                 LambdaError::CanonStreamMapAccessorHasInvalidType {
                     map_accessor: map_accessor.clone(),
                 },
             )?;
-            Ok(map_key.into_owned())
+            Ok(map_key)
         }
         ScalarRef::IterableValue(_map_accessor) => Err(LambdaError::CanonStreamMapAccessorMustNotBeIterable),
     }

@@ -20,9 +20,7 @@ use crate::CatchableError;
 use crate::JValue;
 
 use air_interpreter_data::Provenance;
-use serde_json::json;
-
-use std::rc::Rc;
+use maplit::hashmap;
 
 pub const ERROR_CODE_FIELD_NAME: &str = "error_code";
 pub const MESSAGE_FIELD_NAME: &str = "message";
@@ -39,7 +37,7 @@ pub const NO_ERROR_ERROR_CODE: i64 = 0;
 #[derive(Debug, Clone)]
 pub struct InstructionError {
     /// Error object that represents the last occurred error.
-    pub error: Rc<JValue>,
+    pub error: JValue,
 
     /// Tetraplet that identify host where the error occurred.
     pub tetraplet: Option<RcSecurityTetraplet>,
@@ -58,20 +56,22 @@ pub(crate) fn error_from_raw_fields_w_peerid(
     instruction: &str,
     peer_id: &str,
 ) -> JValue {
-    serde_json::json!({
-        ERROR_CODE_FIELD_NAME: error_code,
-        MESSAGE_FIELD_NAME: error_message,
-        INSTRUCTION_FIELD_NAME: instruction,
-        PEER_ID_FIELD_NAME: peer_id,
-    })
+    hashmap! {
+        ERROR_CODE_FIELD_NAME => JValue::from(error_code),
+        MESSAGE_FIELD_NAME => error_message.into(),
+        INSTRUCTION_FIELD_NAME => instruction.into(),
+        PEER_ID_FIELD_NAME => peer_id.into(),
+    }
+    .into()
 }
 
 pub(crate) fn error_from_raw_fields(error_code: i64, error_message: &str, instruction: &str) -> JValue {
-    serde_json::json!({
-        ERROR_CODE_FIELD_NAME: error_code,
-        MESSAGE_FIELD_NAME: error_message,
-        INSTRUCTION_FIELD_NAME: instruction,
-    })
+    hashmap! {
+        ERROR_CODE_FIELD_NAME => JValue::from(error_code),
+        MESSAGE_FIELD_NAME => error_message.into(),
+        INSTRUCTION_FIELD_NAME => instruction.into(),
+    }
+    .into()
 }
 
 /// Checks that a scalar is a value of an object types that contains at least two fields:
@@ -127,9 +127,9 @@ fn ensure_error_code_is_error(number: i64) -> Result<(), ErrorObjectError> {
 }
 
 fn ensure_jvalue_is_string(scalar: &JValue, value: &JValue, field_name: &'static str) -> Result<(), ErrorObjectError> {
-    match value {
-        JValue::String(_) => Ok(()),
-        _ => Err(ErrorObjectError::ScalarFieldIsWrongType {
+    match value.as_str() {
+        Some(_) => Ok(()),
+        None => Err(ErrorObjectError::ScalarFieldIsWrongType {
             scalar: scalar.clone(),
             field_name,
             expected_type: "string",
@@ -138,15 +138,16 @@ fn ensure_jvalue_is_string(scalar: &JValue, value: &JValue, field_name: &'static
 }
 
 pub fn no_error_object() -> JValue {
-    json!({
-        ERROR_CODE_FIELD_NAME: NO_ERROR_ERROR_CODE,
-        MESSAGE_FIELD_NAME: NO_ERROR_MESSAGE,
-    })
+    hashmap! {
+        ERROR_CODE_FIELD_NAME => JValue::from(NO_ERROR_ERROR_CODE),
+        MESSAGE_FIELD_NAME => NO_ERROR_MESSAGE.into(),
+    }
+    .into()
 }
 
 pub fn no_error() -> InstructionError {
     InstructionError {
-        error: Rc::new(no_error_object()),
+        error: no_error_object(),
         tetraplet: None,
         provenance: Provenance::literal(),
         orig_catchable: None,

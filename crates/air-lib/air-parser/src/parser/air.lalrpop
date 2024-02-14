@@ -196,7 +196,7 @@ ApResult: ApResult<'input> = {
 };
 
 StreamMapKeyClause: StreamMapKeyClause<'input> = {
-    <l:Literal> => StreamMapKeyClause::Literal(l),
+    <l:Literal> => StreamMapKeyClause::Literal(l.into()),
     <integer:I64> => StreamMapKeyClause::Int(integer),
     <scalar:Scalar> => StreamMapKeyClause::Scalar(Scalar::new(scalar.0, scalar.1)),
     <scalar:ScalarWithLambda> => StreamMapKeyClause::ScalarWithLambda(ScalarWithLambda::new(scalar.0, scalar.1, scalar.2)),
@@ -276,7 +276,7 @@ Value: ImmutableValue<'input> = {
     <le:LastErrorWithLambda> => ImmutableValue::LastError(Some(le)),
     <Error> => ImmutableValue::Error(InstructionErrorAST::new(None)),
     <le:ErrorWithLambda> => ImmutableValue::Error(InstructionErrorAST::new(Some(le))),
-    <l:Literal> => ImmutableValue::Literal(l),
+    <l:Literal> => ImmutableValue::Literal(l.into()),
     Timestamp => ImmutableValue::Timestamp,
     TTL => ImmutableValue::TTL,
     <n:Number> => ImmutableValue::Number(n),
@@ -298,7 +298,7 @@ ApArgument: ApArgument<'input> = {
     <le:ErrorWithLambda> => ApArgument::Error(InstructionErrorAST::new(Some(le))),
     Timestamp => ApArgument::Timestamp,
     TTL => ApArgument::TTL,
-    <l:Literal> => ApArgument::Literal(l),
+    <l:Literal> => ApArgument::Literal(l.into()),
     <n:Number> => ApArgument::Number(n),
     <b:Boolean> => ApArgument::Boolean(b),
     "[" "]" => ApArgument::EmptyArray,

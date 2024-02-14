@@ -37,12 +37,12 @@ async fn fail_with_last_error() {
     let result = call_vm!(vm, <_>::default(), script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!({
+        error: json!({
             "error_code": 10000i64,
             "instruction": r#"call "local_peer_id" ("service_id_1" "local_fn_name") [] result_1"#,
             "message": r#"Local service error, ret_code is 1, error message is '"failed result from fallible_call_service"'"#,
             "peer_id": "local_peer_id",
-        })),
+        }).into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -83,12 +83,13 @@ async fn fail_with_literals() {
     let result = call_vm!(vm, test_params.clone(), script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!( {
+        error: json!( {
         "error_code": 1337i64,
         "instruction": r#"fail 1337 "error message""#,
         "message": "error message",
         "peer_id": test_params.init_peer_id,
-        })),
+        })
+        .into(),
     };
     assert!(check_error(&result, expected_error));
 }
@@ -200,10 +201,11 @@ async fn fail_with_canon_stream() {
     let result = call_vm!(vm, test_params, script, "", "");
 
     let expected_error = CatchableError::UserError {
-        error: rc!(json!( {
-        "error_code": error_code,
-        "message": error_message,
-        })),
+        error: json!({
+            "error_code": error_code,
+            "message": error_message,
+        })
+        .into(),
     };
     assert!(check_error(&result, expected_error));
 }

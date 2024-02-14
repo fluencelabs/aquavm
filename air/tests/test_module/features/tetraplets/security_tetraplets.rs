@@ -385,7 +385,7 @@ async fn tetraplet_with_wasm_modules() {
             let result = service
                 .call_async(
                     params.function_name,
-                    JValue::Array(params.arguments),
+                    json!(params.arguments),
                     to_app_service_call_parameters(call_parameters),
                 )
                 .await

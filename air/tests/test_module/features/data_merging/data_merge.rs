@@ -183,7 +183,7 @@ async fn stream_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| {
         async move {
             let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
-            let args: Vec<Vec<JValue>> = serde_json::from_value(JValue::Array(params.arguments)).expect("valid json");
+            let args: Vec<Vec<serde_json::Value>> = serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("valid json");
             assert_eq!(args[0].len(), args_count);
 
             CallServiceResult::ok(json!(args))
@@ -343,7 +343,7 @@ async fn fold_merge() {
                         .unwrap()
                         .get_value();
 
-                    if let JValue::String(ref var_name) = &*value {
+                    if let JValue::String(ref var_name) = value {
                         let current_count: usize = calls_count.get(var_name).copied().unwrap_or_default();
                         calls_count.insert(var_name.to_owned(), current_count + 1);
                     }
@@ -357,7 +357,7 @@ async fn fold_merge() {
     assert_eq!(fold_states_count, 2 * 4 + 1);
 
     for (call_result, call_count) in calls_count {
-        if call_result.as_str() < "peer_4" {
+        if &*call_result < "peer_4" {
             assert_eq!(call_count, 2);
         } else {
             assert_eq!(call_count, 16);

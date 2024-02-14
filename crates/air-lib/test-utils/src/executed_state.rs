@@ -45,7 +45,7 @@ use serde::Serialize;
 use std::rc::Rc;
 
 pub fn simple_value_aggregate_cid(
-    result: impl Into<serde_json::Value>,
+    result: impl Into<JValue>,
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
     let value = result.into();
@@ -66,9 +66,9 @@ pub fn simple_value_aggregate_cid(
 }
 
 pub fn value_aggregate_cid(
-    result: impl Into<serde_json::Value>,
+    result: impl Into<JValue>,
     tetraplet: SecurityTetraplet,
-    args: Vec<serde_json::Value>,
+    args: Vec<JValue>,
     cid_state: &mut ExecutionCidState,
 ) -> CID<ServiceResultCidAggregate> {
     let value = result.into();
@@ -76,7 +76,7 @@ pub fn value_aggregate_cid(
     let value_cid = cid_state.value_tracker.track_raw_value(vm_value);
     let tetraplet_cid = cid_state.tetraplet_tracker.track_value(tetraplet).unwrap();
 
-    let arguments = serde_json::Value::Array(args);
+    let arguments = JValue::array(args);
     let argument_hash = value_to_json_cid(&arguments).unwrap().get_inner();
 
     let service_result_agg = ServiceResultCidAggregate {
@@ -136,7 +136,7 @@ pub fn ap(generation: impl Into<GenerationIdx>) -> ExecutedState {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValueAggregateAlike {
-    pub result: Rc<JValue>,
+    pub result: JValue,
     pub tetraplet: Rc<SecurityTetraplet>,
     // TODO convert data and remove Provenance
     pub provenance: Option<Provenance>,
@@ -150,14 +150,14 @@ pub struct CanonResultAlike {
 
 /// This function takes a JSON DSL-like struct for compatibility and test writer
 /// convenience.
-pub fn canon(canonicalized_element: JValue) -> ExecutedState {
+pub fn canon(canonicalized_element: serde_json::Value) -> ExecutedState {
     let mut cid_state = ExecutionCidState::new();
 
     canon_tracked(canonicalized_element, &mut cid_state)
 }
 
 pub fn canon_tracked(
-    canonicalized_element: JValue,
+    canonicalized_element: serde_json::Value,
     cid_state: &mut ExecutionCidState,
 ) -> ExecutedState {
     let canon_input = serde_json::from_value::<CanonResultAlike>(canonicalized_element)

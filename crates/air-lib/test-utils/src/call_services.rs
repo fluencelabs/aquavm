@@ -36,7 +36,7 @@ pub fn echo_call_service() -> CallServiceClosure<'static> {
     })
 }
 
-pub fn set_variable_call_service(json: JValue) -> CallServiceClosure<'static> {
+pub fn set_variable_call_service(json: serde_json::Value) -> CallServiceClosure<'static> {
     Box::new(move |_| {
         {
             let json = json.clone();
@@ -55,7 +55,7 @@ pub enum VariableOptionSource {
 }
 
 pub fn set_variables_call_service(
-    variables_mapping: HashMap<String, JValue>,
+    variables_mapping: HashMap<String, serde_json::Value>,
     variable_source: VariableOptionSource,
 ) -> CallServiceClosure<'static> {
     use VariableOptionSource::*;
@@ -69,7 +69,7 @@ pub fn set_variables_call_service(
         async move {
             let var_name = match variable_source.as_ref() {
                 Argument(id) => match params.arguments.get(*id) {
-                    Some(JValue::String(name)) => name.to_string(),
+                    Some(serde_json::Value::String(name)) => name.to_string(),
                     _ => "default".to_string(),
                 },
                 FunctionName => params.function_name,
@@ -114,7 +114,7 @@ pub fn fallible_call_service(
     })
 }
 
-pub fn fallible_call_service_by_arg(arg: impl Into<JValue>) -> CallServiceClosure<'static> {
+pub fn fallible_call_service_by_arg(arg: impl Into<serde_json::Value>) -> CallServiceClosure<'static> {
     let arg = Rc::new(arg.into());
 
     Box::new(move |params| {
