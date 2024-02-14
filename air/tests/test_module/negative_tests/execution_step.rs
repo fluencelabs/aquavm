@@ -356,8 +356,10 @@ async fn array_accessor_not_match_value() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ArrayAccessorNotMatchValue { value: arg.into(), idx });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ArrayAccessorNotMatchValue {
+        value: arg.into(),
+        idx,
+    });
     assert!(check_error(&result, expected_error));
 }
 
@@ -377,8 +379,10 @@ async fn value_not_contain_such_array_idx_call_arg_lambda() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchArrayIdx { value: arg.into(), idx });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchArrayIdx {
+        value: arg.into(),
+        idx,
+    });
     assert!(check_error(&result, expected_error));
 }
 
@@ -398,8 +402,10 @@ async fn value_not_contain_such_field_call_arg_lambda() {
     );
 
     let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
-    let expected_error =
-        air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField { value: arg.into(), field_name });
+    let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField {
+        value: arg.into(),
+        field_name,
+    });
     assert!(check_error(&result, expected_error));
 }
 

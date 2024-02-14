@@ -97,7 +97,7 @@ pub(crate) async fn create_wasm_avm_runner(
         .debug_info(true)
         .wasm_backtrace(true)
         .epoch_interruption(false);
-    let wasm_backend = WasmtimeWasmBackend::new(config) ?;
+    let wasm_backend = WasmtimeWasmBackend::new(config)?;
     Ok(Box::new(WasmAvmRunner(
         AVMRunner::new(
             air_interpreter_wasm_path.to_owned(),

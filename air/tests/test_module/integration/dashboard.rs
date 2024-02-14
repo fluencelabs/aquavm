@@ -96,10 +96,10 @@ fn peer_host_function(
     interfaces: Vec<String>,
     ident: String,
 ) -> CallServiceClosure<'static> {
-    let known_peers = serde_json::Value::Array(known_peers.into_iter().map(JValue::String).collect());
-    let blueprints = serde_json::Value::Array(blueprints.into_iter().map(JValue::String).collect());
-    let modules = serde_json::Value::Array(modules.into_iter().map(JValue::String).collect());
-    let interfaces = serde_json::Value::Array(interfaces.into_iter().map(JValue::String).collect());
+    let known_peers = serde_json::Value::Array(known_peers.into_iter().map(serde_json::Value::String).collect());
+    let blueprints = serde_json::Value::Array(blueprints.into_iter().map(serde_json::Value::String).collect());
+    let modules = serde_json::Value::Array(modules.into_iter().map(serde_json::Value::String).collect());
+    let interfaces = serde_json::Value::Array(interfaces.into_iter().map(serde_json::Value::String).collect());
     let identify = serde_json::Value::String(ident.clone());
     let ident = serde_json::Value::String(ident);
 

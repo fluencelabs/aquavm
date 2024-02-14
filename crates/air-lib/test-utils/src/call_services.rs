@@ -114,7 +114,9 @@ pub fn fallible_call_service(
     })
 }
 
-pub fn fallible_call_service_by_arg(arg: impl Into<serde_json::Value>) -> CallServiceClosure<'static> {
+pub fn fallible_call_service_by_arg(
+    arg: impl Into<serde_json::Value>,
+) -> CallServiceClosure<'static> {
     let arg = Rc::new(arg.into());
 
     Box::new(move |params| {

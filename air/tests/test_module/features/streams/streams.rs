@@ -27,8 +27,9 @@ async fn empty_stream() {
     fn arg_type_check_closure() -> CallServiceClosure<'static> {
         Box::new(move |params| {
             async move {
-                let actual_call_args: Vec<Vec<serde_json::Value>> = serde_json::from_value(serde_json::Value::Array(params.arguments))
-                    .expect("json deserialization shouldn't fail");
+                let actual_call_args: Vec<Vec<serde_json::Value>> =
+                    serde_json::from_value(serde_json::Value::Array(params.arguments))
+                        .expect("json deserialization shouldn't fail");
                 let expected_call_args: Vec<Vec<serde_json::Value>> = vec![vec![]];
 
                 assert_eq!(actual_call_args, expected_call_args);

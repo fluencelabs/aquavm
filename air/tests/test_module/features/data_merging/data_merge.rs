@@ -183,7 +183,8 @@ async fn stream_merge() {
     let neighborhood_call_service: CallServiceClosure = Box::new(|params| {
         async move {
             let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
-            let args: Vec<Vec<serde_json::Value>> = serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("valid json");
+            let args: Vec<Vec<serde_json::Value>> =
+                serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("valid json");
             assert_eq!(args[0].len(), args_count);
 
             CallServiceResult::ok(json!(args))
