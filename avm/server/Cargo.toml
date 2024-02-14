@@ -19,9 +19,9 @@ air-interpreter-interface = { version = "0.17.2", path = "../../crates/air-lib/i
 air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpreter-sede" }
 air-utils = { version = "0.2.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.7", path = "../../crates/data-store" }
-marine-runtime = {version = "0.33.0", path = "../../../marine/marine"}
-marine-wasmtime-backend = {version = "0.5.1", path = "../../../marine/crates/wasmtime-backend"}
-marine-wasm-backend-traits = {version = "0.5.1", path = "../../../marine/crates/wasm-backend-traits"}
+marine-runtime = {version = "0.33.0", git = "https://github.com/fluencelabs/marine", branch = "feat/async-call"}
+marine-wasmtime-backend = {version = "0.5.1", git = "https://github.com/fluencelabs/marine", branch = "feat/async-call"}
+marine-wasm-backend-traits = {version = "0.5.1", git = "https://github.com/fluencelabs/marine", branch = "feat/async-call"}
 polyplets = { version = "0.6.0", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.31.2", path = "../../avm/interface" }
 

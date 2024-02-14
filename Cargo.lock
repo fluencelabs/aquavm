@@ -2445,6 +2445,7 @@ dependencies = [
 [[package]]
 name = "fluence-app-service"
 version = "0.32.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "log",
  "maplit",
@@ -3139,6 +3140,7 @@ dependencies = [
 [[package]]
 name = "it-json-serde"
 version = "0.5.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "serde",
  "serde_derive",
@@ -3460,6 +3462,7 @@ dependencies = [
 [[package]]
 name = "marine-core"
 version = "0.27.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "bytesize",
@@ -3488,6 +3491,7 @@ dependencies = [
 [[package]]
 name = "marine-it-generator"
 version = "0.14.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -3503,6 +3507,7 @@ dependencies = [
 [[package]]
 name = "marine-it-interfaces"
 version = "0.9.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "multimap 0.8.3",
  "wasmer-interface-types-fl",
@@ -3511,6 +3516,7 @@ dependencies = [
 [[package]]
 name = "marine-it-parser"
 version = "0.15.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "itertools",
@@ -3574,6 +3580,7 @@ dependencies = [
 [[package]]
 name = "marine-min-it-version"
 version = "0.3.2"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "once_cell",
  "semver 1.0.21",
@@ -3582,6 +3589,7 @@ dependencies = [
 [[package]]
 name = "marine-module-info-parser"
 version = "0.12.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3597,6 +3605,7 @@ dependencies = [
 [[package]]
 name = "marine-module-interface"
 version = "0.8.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "itertools",
@@ -3645,6 +3654,7 @@ dependencies = [
 [[package]]
 name = "marine-runtime"
 version = "0.33.0"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "bytesize",
  "it-json-serde",
@@ -3683,10 +3693,12 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.5.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 
 [[package]]
 name = "marine-wasm-backend-traits"
 version = "0.5.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "futures",
@@ -3701,6 +3713,7 @@ dependencies = [
 [[package]]
 name = "marine-wasmtime-backend"
 version = "0.5.1"
+source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
 dependencies = [
  "anyhow",
  "futures",

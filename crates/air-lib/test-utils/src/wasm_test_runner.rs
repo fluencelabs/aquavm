@@ -28,8 +28,8 @@ use once_cell::sync::OnceCell;
 
 use std::path::PathBuf;
 
-// 10 Mb
-const AVM_MAX_HEAP_SIZE: u64 = 10 * 1024 * 1024;
+// 100 Mb
+const AVM_MAX_HEAP_SIZE: u64 = 100 * 1024 * 1024;
 const AIR_WASM_PATH: &str = "../target/wasm32-wasi/debug/air_interpreter_server.wasm";
 const RELEASE_AIR_WASM_PATH: &str = "../target/wasm32-wasi/release/air_interpreter_server.wasm";
 
