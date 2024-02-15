@@ -79,6 +79,7 @@ dependencies = [
  "air-interpreter-cid",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-value",
  "air-utils",
  "aquavm-air-parser",
  "fluence-keypair",
@@ -101,6 +102,7 @@ name = "air-interpreter-interface"
 version = "0.17.2"
 dependencies = [
  "air-interpreter-sede",
+ "air-interpreter-value",
  "fluence-it-types",
  "marine-call-parameters",
  "marine-rs-sdk",
@@ -134,6 +136,14 @@ dependencies = [
  "rkyv",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "air-interpreter-value"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -171,6 +181,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-value",
  "aquavm-air",
  "avm-interface",
  "avm-server",
@@ -308,6 +319,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-value",
  "air-lambda-ast",
  "air-lambda-parser",
  "air-log-targets",
@@ -336,6 +348,7 @@ dependencies = [
 name = "aquavm-air-parser"
 version = "0.11.1"
 dependencies = [
+ "air-interpreter-value",
  "air-lambda-ast",
  "air-lambda-parser",
  "codespan",
