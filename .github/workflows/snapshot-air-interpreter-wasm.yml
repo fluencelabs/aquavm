@@ -58,7 +58,7 @@ jobs:
         working-directory: air-interpreter
 
       - name: Upload air-interpreter-wasm binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: air-interpreter-wasm
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
