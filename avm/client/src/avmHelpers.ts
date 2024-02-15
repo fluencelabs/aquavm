@@ -25,6 +25,8 @@ const argumentRepr = new MsgPackRepr();
 const tetrapletRepr = new MsgPackRepr();
 // Have to match the air-interpreter-interface.
 const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
+//
+const defaultAquaVMRuntimeMemoryLimit = Number("4294967296");
 
 /**
  * Encodes arguments into JSON array suitable for marine-js
@@ -61,10 +63,10 @@ export function serializeAvmArgs(
         timestamp: runParams.timestamp,
         ttl: runParams.ttl,
         particle_id: runParams.particleId,
-        air_size_limit: Number("4294967296"),
-        particle_size_limit: Number("4294967296"),
-        call_result_size_limit: Number("4294967296"),
-        hard_limit_enabled: Number("4294967296"),
+        air_size_limit: defaultAquaVMRuntimeMemoryLimit,
+        particle_size_limit: defaultAquaVMRuntimeMemoryLimit,
+        call_result_size_limit: defaultAquaVMRuntimeMemoryLimit,
+        hard_limit_enabled: defaultAquaVMRuntimeMemoryLimit,
     };
 
     return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encodedCallResults)];

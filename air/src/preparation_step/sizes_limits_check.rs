@@ -20,7 +20,7 @@ use crate::PreparationError;
 use air_interpreter_interface::RunParameters;
 use air_interpreter_interface::SoftLimitsTriggering;
 
-pub(crate) fn limit_behavior(
+pub(crate) fn handle_limit_exceeding(
     run_parameters: &RunParameters,
     error: PreparationError,
     soft_limit_flag: &mut bool,
@@ -43,7 +43,7 @@ pub(crate) fn check_against_size_limits(
 
     if air.len() as u64 > run_parameters.air_size_limit {
         let error = PreparationError::air_size_limit(air.len(), run_parameters.air_size_limit);
-        limit_behavior(
+        handle_limit_exceeding(
             run_parameters,
             error,
             &mut soft_limits_triggering.air_size_limit_exceeded,
@@ -52,7 +52,7 @@ pub(crate) fn check_against_size_limits(
 
     if raw_current_data.len() as u64 > run_parameters.particle_size_limit {
         let error = PreparationError::particle_size_limit(raw_current_data.len(), run_parameters.particle_size_limit);
-        limit_behavior(
+        handle_limit_exceeding(
             run_parameters,
             error,
             &mut soft_limits_triggering.particle_size_limit_exceeded,

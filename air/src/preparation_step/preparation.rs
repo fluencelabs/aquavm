@@ -148,7 +148,7 @@ fn make_exec_ctx(
     run_parameters: &RunParameters,
     soft_limits_triggering: &mut SoftLimitsTriggering,
 ) -> PreparationResult<ExecutionCtx<'static>> {
-    use crate::preparation_step::sizes_limits_check::limit_behavior;
+    use crate::preparation_step::sizes_limits_check::handle_limit_exceeding;
 
     let call_results = measure!(
         CallResultsRepr
@@ -161,10 +161,10 @@ fn make_exec_ctx(
     // This is a part of argument size limit check where we check the size of every call result.
     if call_results
         .values()
-        .any(|call_result| call_result.result.len() > run_parameters.call_result_size_limit as usize)
+        .any(|call_result| call_result.result.len() as u64 > run_parameters.call_result_size_limit)
     {
         let error: PreparationError = PreparationError::call_result_size_limit(run_parameters.call_result_size_limit);
-        limit_behavior(
+        handle_limit_exceeding(
             run_parameters,
             error,
             &mut soft_limits_triggering.call_result_size_limit_exceeded,
