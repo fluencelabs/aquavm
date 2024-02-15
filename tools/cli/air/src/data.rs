@@ -21,6 +21,7 @@ use std::path::PathBuf;
 
 use crate::trace::run::load_data;
 use crate::trace::run::runner::DataToHumanReadable;
+use crate::trace::run::runner::TestInitParameters;
 
 #[derive(clap::Args, Debug, Copy, Clone)]
 #[group(multiple = false)]
@@ -81,7 +82,7 @@ pub(crate) fn to_human_readable_data(args: Args) -> Result<(), Box<dyn std::erro
         Err(eyre::eyre!("empty input data: {:?}", args.input))?;
     }
 
-    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path)?;
+    let mut runner = create_runner(args.mode.into(), &args.air_interpreter_path, <_>::default())?;
     let out = runner.to_human_readable(data)?;
     println!("{out}");
 
@@ -98,6 +99,7 @@ fn init_tracing(tracing_params: &str) {
 fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
+    _test_init_parameters: TestInitParameters,
 ) -> eyre::Result<Box<dyn DataToHumanReadable>> {
     #[cfg(not(feature = "wasm"))]
     let default_mode = Mode::Native;
@@ -106,13 +108,15 @@ fn create_runner(
 
     let mode = mode.unwrap_or(default_mode);
     let runner = match mode {
-        Mode::Native => crate::trace::run::native::create_native_avm_runner()
+        Mode::Native => crate::trace::run::native::create_native_avm_runner(_test_init_parameters)
             .context("Failed to instantiate a native AVM")? as _,
         #[cfg(feature = "wasm")]
-        Mode::Wasm => {
-            crate::trace::run::wasm::create_wasm_avm_runner(_air_interpreter_wasm_path, None)
-                .context("Failed to instantiate WASM AVM")? as _
-        }
+        Mode::Wasm => crate::trace::run::wasm::create_wasm_avm_runner(
+            _air_interpreter_wasm_path,
+            None,
+            <_>::default(),
+        )
+        .context("Failed to instantiate WASM AVM")? as _,
     };
 
     Ok(runner)

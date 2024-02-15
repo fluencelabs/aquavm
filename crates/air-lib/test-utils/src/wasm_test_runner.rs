@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::prelude::TestInitParameters;
 use crate::test_runner::AirRunner;
 
 use avm_server::avm_runner::*;
@@ -32,19 +33,20 @@ pub struct WasmAirRunner {
     runner: object_pool::Reusable<'static, AVMRunner>,
 }
 
-fn make_pooled_avm_runner() -> AVMRunner {
+fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner {
     let logging_mask = i32::MAX;
 
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
         Some(AVM_MAX_HEAP_SIZE),
+        test_init_parameters.into(),
         logging_mask,
     )
     .expect("vm should be created")
 }
 
 impl AirRunner for WasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> Self {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
 
         let pool = POOL_CELL.get_or_init(|| {
@@ -55,7 +57,7 @@ impl AirRunner for WasmAirRunner {
             )
         });
 
-        let runner = pool.pull(make_pooled_avm_runner);
+        let runner = pool.pull(|| make_pooled_avm_runner(test_init_parameters));
 
         Self {
             current_peer_id: current_peer_id.into(),
@@ -106,12 +108,13 @@ pub struct ReleaseWasmAirRunner {
 }
 
 impl AirRunner for ReleaseWasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> Self {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         let logging_mask = i32::MAX;
 
         let runner = AVMRunner::new(
             PathBuf::from(RELEASE_AIR_WASM_PATH),
             Some(AVM_MAX_HEAP_SIZE),
+            test_init_parameters.into(),
             logging_mask,
         )
         .expect("vm should be created");

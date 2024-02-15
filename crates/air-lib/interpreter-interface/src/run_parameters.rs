@@ -53,9 +53,22 @@ pub struct RunParameters {
 
     /// Unique particle ID.
     pub particle_id: String,
+
+    /// The AIR script size limit.
+    pub air_size_limit: u64,
+
+    /// The particle data size limit.
+    pub particle_size_limit: u64,
+
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: u64,
+
+    /// This knob controls hard RAM limits behavior for AVMRunner.
+    pub hard_limit_enabled: bool,
 }
 
 impl RunParameters {
+    #![allow(clippy::too_many_arguments)]
     pub fn new(
         init_peer_id: String,
         current_peer_id: String,
@@ -64,6 +77,10 @@ impl RunParameters {
         key_format: u8,
         secret_key_bytes: Vec<u8>,
         particle_id: String,
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
+        hard_limit_enabled: bool,
     ) -> Self {
         Self {
             init_peer_id,
@@ -73,6 +90,10 @@ impl RunParameters {
             key_format,
             secret_key_bytes,
             particle_id,
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
         }
     }
 
@@ -86,6 +107,10 @@ impl RunParameters {
             IValue::U8(self.key_format),
             IValue::ByteArray(self.secret_key_bytes),
             IValue::String(self.particle_id),
+            IValue::U64(self.air_size_limit),
+            IValue::U64(self.particle_size_limit),
+            IValue::U64(self.call_result_size_limit),
+            IValue::Boolean(self.hard_limit_enabled),
         ];
         // unwrap is safe here because run_parameters is non-empty array
         let run_parameters = NEVec::new(run_parameters).unwrap();

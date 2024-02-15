@@ -20,6 +20,7 @@ use super::CallRequests;
 
 use air_interpreter_interface::InterpreterOutcome;
 
+use air_interpreter_interface::SoftLimitsTriggering;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -31,6 +32,7 @@ pub struct RawAVMOutcome {
     pub data: Vec<u8>,
     pub call_requests: CallRequests,
     pub next_peer_pks: Vec<String>,
+    pub soft_limits_triggering: SoftLimitsTriggering,
 }
 
 impl RawAVMOutcome {
@@ -41,9 +43,17 @@ impl RawAVMOutcome {
             data,
             call_requests,
             next_peer_pks,
+            air_size_limit_exceeded,
+            particle_size_limit_exceeded,
+            call_result_size_limit_exceeded,
         } = outcome;
 
         let call_requests = crate::from_raw_call_requests(call_requests.into())?;
+        let soft_limits_triggering = SoftLimitsTriggering::new(
+            air_size_limit_exceeded,
+            particle_size_limit_exceeded,
+            call_result_size_limit_exceeded,
+        );
 
         let raw_avm_outcome = Self {
             ret_code,
@@ -51,6 +61,7 @@ impl RawAVMOutcome {
             data,
             call_requests,
             next_peer_pks,
+            soft_limits_triggering,
         };
 
         Ok(raw_avm_outcome)

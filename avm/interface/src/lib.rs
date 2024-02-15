@@ -77,6 +77,7 @@ pub enum CallSeDeErrors {
 
 type JValue = serde_json::Value;
 
+pub use air_interpreter_interface::SoftLimitsTriggering;
 pub use call_request_parameters::*;
 pub use call_service_result::*;
 pub use outcome::*;

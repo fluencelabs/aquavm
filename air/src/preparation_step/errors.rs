@@ -90,6 +90,10 @@ pub enum PreparationError {
     /// Failed to check peers' signatures.
     #[error(transparent)]
     DataSignatureCheckError(#[from] DataVerifierError),
+
+    /// RAM limits are excedeed.
+    #[error(transparent)]
+    SizeLimitsExceded(#[from] SizeLimitsExceded),
 }
 
 impl ToErrorCode for PreparationError {
@@ -122,4 +126,31 @@ impl PreparationError {
             required_version,
         }
     }
+
+    pub fn air_size_limit(actual_size: usize, limit: u64) -> Self {
+        Self::SizeLimitsExceded(SizeLimitsExceded::Air(actual_size, limit))
+    }
+
+    pub fn particle_size_limit(actual_size: usize, limit: u64) -> Self {
+        Self::SizeLimitsExceded(SizeLimitsExceded::Particle(actual_size, limit))
+    }
+
+    pub fn call_result_size_limit(limit: u64) -> Self {
+        Self::SizeLimitsExceded(SizeLimitsExceded::CallResult(limit))
+    }
+}
+
+#[derive(Debug, ThisError)]
+pub enum SizeLimitsExceded {
+    /// AIR script size is bigger than the allowed limit.
+    #[error("air size: {0} bytes is bigger than the limit allowed: {1} bytes")]
+    Air(usize, u64),
+
+    /// Current_data particle size is bigger than the allowed limit.
+    #[error("Current_data particle size: {0} bytes is bigger than the limit allowed: {1} bytes")]
+    Particle(usize, u64),
+
+    /// CallResult size is bigger than the allowed limit.
+    #[error("Call result size is bigger than the limit allowed: {0} bytes")]
+    CallResult(u64),
 }

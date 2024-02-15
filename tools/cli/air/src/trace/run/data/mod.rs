@@ -19,9 +19,12 @@ pub(crate) mod plain;
 
 use avm_interface::ParticleParameters;
 
+use super::runner::TestInitParameters;
+
 pub(crate) struct ExecutionData<'ctx> {
     pub(crate) air_script: String,
     pub(crate) current_data: Vec<u8>,
     pub(crate) prev_data: Vec<u8>,
     pub(crate) particle: ParticleParameters<'ctx>,
+    pub(crate) test_init_parameters: TestInitParameters,
 }

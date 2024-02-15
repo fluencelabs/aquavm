@@ -29,9 +29,11 @@
 mod call_request_parameters;
 mod call_service_result;
 mod interpreter_outcome;
+mod run_args_memory_limits;
 mod run_parameters;
 
 pub use call_request_parameters::*;
 pub use call_service_result::*;
 pub use interpreter_outcome::*;
+pub use run_args_memory_limits::*;
 pub use run_parameters::*;

@@ -41,23 +41,31 @@ pub(crate) fn network_explore() -> Data {
 
     let client_call_service =
         set_variables_call_service(set_variables_state, VariableOptionSource::Argument(0));
-    let mut client = create_avm_with_key::<NativeAirRunner>(client_key, client_call_service);
+    let mut client =
+        create_avm_with_key::<NativeAirRunner>(client_key, client_call_service, <_>::default());
 
     let relay_call_service =
         set_variable_call_service(json!([&client_1_id, &client_2_id, &client_3_id, &relay_id]));
-    let mut relay = create_avm_with_key::<NativeAirRunner>(relay_key.clone(), relay_call_service);
+    let mut relay = create_avm_with_key::<NativeAirRunner>(
+        relay_key.clone(),
+        relay_call_service,
+        <_>::default(),
+    );
 
     let client_1_call_service =
         set_variable_call_service(json!([&client_1_id, &client_3_id, &relay_id, &client_2_id]));
-    let mut client_1 = create_avm_with_key::<NativeAirRunner>(client_1_key, client_1_call_service);
+    let mut client_1 =
+        create_avm_with_key::<NativeAirRunner>(client_1_key, client_1_call_service, <_>::default());
 
     let client_2_call_service =
         set_variable_call_service(json!([&relay_id, &client_3_id, &client_1_id, &client_2_id]));
-    let mut client_2 = create_avm_with_key::<NativeAirRunner>(client_2_key, client_2_call_service);
+    let mut client_2 =
+        create_avm_with_key::<NativeAirRunner>(client_2_key, client_2_call_service, <_>::default());
 
     let client_3_call_service =
         set_variable_call_service(json!([&relay_id, &client_3_id, &client_1_id, &client_2_id]));
-    let mut client_3 = create_avm_with_key::<NativeAirRunner>(client_3_key, client_3_call_service);
+    let mut client_3 =
+        create_avm_with_key::<NativeAirRunner>(client_3_key, client_3_call_service, <_>::default());
 
     let raw_script = include_str!("network_explore.air");
 
@@ -66,9 +74,11 @@ pub(crate) fn network_explore() -> Data {
         let network = air_test_framework::Network::<NativeAirRunner>::new(
             std::iter::empty::<air_test_framework::ephemeral::PeerId>(),
             vec![],
+            <_>::default(),
         );
         let transformed_script =
-            air_test_framework::TransformedAirScript::new(raw_script, network).unwrap();
+            air_test_framework::TransformedAirScript::new(raw_script, network, <_>::default())
+                .unwrap();
         &(*transformed_script).to_string()
     };
 

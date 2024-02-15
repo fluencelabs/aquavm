@@ -18,6 +18,9 @@ use air::PreparationError;
 use air_interpreter_interface::CallResultsFormat;
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
+use air_interpreter_interface::MAX_AIR_SIZE;
+use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+use air_interpreter_interface::MAX_PARTICLE_SIZE;
 use air_interpreter_sede::FromSerialized;
 use air_test_utils::prelude::*;
 
@@ -96,6 +99,11 @@ fn invalid_callresults() {
     let vec = Vec::<u8>::new();
     let wrong_call_results = CallResultsFormat::default().to_vec(&vec).unwrap();
     let keypair = fluence_keypair::KeyPair::generate_ed25519();
+    let air_size_limit = MAX_AIR_SIZE;
+    let particle_size_limit = MAX_PARTICLE_SIZE;
+    let call_result_size_limit = MAX_CALL_RESULT_SIZE;
+    let hard_limit_enable = false;
+
     let run_parameters = RunParameters::new(
         client_peer_id.clone(),
         client_peer_id.clone(),
@@ -104,6 +112,10 @@ fn invalid_callresults() {
         keypair.key_format().into(),
         keypair.secret().unwrap(),
         "".to_owned(),
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enable,
     );
 
     let result = air::execute_air(air, prev_data, data, run_parameters, wrong_call_results.clone().into());
@@ -115,4 +127,114 @@ fn invalid_callresults() {
     };
 
     assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn air_size_hard_limit() {
+    let script = "a".repeat((MAX_AIR_SIZE + 1) as usize);
+
+    let peer_id = "some_peer_id".to_owned();
+    let air_size_limit = MAX_AIR_SIZE;
+    let particle_size_limit = MAX_PARTICLE_SIZE;
+    let call_result_size_limit = MAX_CALL_RESULT_SIZE;
+    let hard_limit_enable = true;
+
+    let run_parameters = RunParameters::new(
+        peer_id.clone(),
+        peer_id,
+        0,
+        0,
+        <_>::default(),
+        <_>::default(),
+        "".to_owned(),
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enable,
+    );
+
+    let result = air::execute_air(script, vec![], vec![], run_parameters, <_>::default());
+    let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
+
+    let expected_error = PreparationError::air_size_limit((MAX_AIR_SIZE + 1) as usize, MAX_AIR_SIZE);
+
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn particle_size_hard_limit() {
+    let script = "(null)".to_owned();
+    let cur_data = vec![0; (MAX_PARTICLE_SIZE + 1) as usize];
+
+    let peer_id = "some_peer_id".to_owned();
+    let air_size_limit = MAX_AIR_SIZE;
+    let particle_size_limit = MAX_PARTICLE_SIZE;
+    let call_result_size_limit = MAX_CALL_RESULT_SIZE;
+    let hard_limit_enable = true;
+
+    let run_parameters = RunParameters::new(
+        peer_id.clone(),
+        peer_id,
+        0,
+        0,
+        <_>::default(),
+        <_>::default(),
+        "".to_owned(),
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enable,
+    );
+
+    let result = air::execute_air(script, vec![], cur_data, run_parameters, <_>::default());
+    let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
+
+    let expected_error = PreparationError::particle_size_limit((MAX_PARTICLE_SIZE + 1) as usize, MAX_PARTICLE_SIZE);
+
+    assert!(check_error(&result, expected_error));
+}
+
+#[test]
+fn call_result_size_hard_limit() {
+    use maplit::hashmap;
+
+    use air::ToErrorCode;
+    use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+    use air_interpreter_sede::ToSerialized;
+
+    let script = "(null)".to_owned();
+    let result_1 = "a".repeat((MAX_CALL_RESULT_SIZE / 2 + 1) as usize);
+    let result_2 = "b".repeat((MAX_CALL_RESULT_SIZE + 1) as usize);
+    let call_results: CallResults =
+        hashmap! {0 => CallServiceResult::ok(result_1.into()), 1 => CallServiceResult::ok(result_2.into())};
+
+    let raw_call_results = into_raw_result(call_results);
+    let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
+
+    let peer_id = "some_peer_id".to_owned();
+    let air_size_limit = MAX_AIR_SIZE;
+    let particle_size_limit = MAX_PARTICLE_SIZE;
+    let call_result_size_limit = MAX_CALL_RESULT_SIZE;
+    let hard_limit_enable = true;
+
+    let run_parameters = RunParameters::new(
+        peer_id.clone(),
+        peer_id,
+        0,
+        0,
+        <_>::default(),
+        <_>::default(),
+        "".to_owned(),
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enable,
+    );
+
+    let result = air::execute_air(script, vec![], vec![], run_parameters, raw_call_results);
+    let result = RawAVMOutcome::from_interpreter_outcome(result).unwrap();
+
+    let expected_error = PreparationError::call_result_size_limit(MAX_CALL_RESULT_SIZE);
+
+    assert_eq!(result.ret_code, expected_error.to_error_code());
 }

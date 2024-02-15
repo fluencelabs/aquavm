@@ -16,14 +16,19 @@
 
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
+use super::runner::TestInitParameters;
+
 use air_interpreter_interface::CallResultsRepr;
 use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
+use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::error::Error as StdError;
 
-pub(crate) struct NativeAvmRunner {}
+pub(crate) struct NativeAvmRunner {
+    pub aquavm_runtime_limits: AquaVMRuntimeLimits,
+}
 
 impl AirRunner for NativeAvmRunner {
     fn call_tracing(
@@ -51,6 +56,12 @@ impl AirRunner for NativeAvmRunner {
 
         let key_format = keypair.key_format().into();
         let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
+        let AquaVMRuntimeLimits {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        } = self.aquavm_runtime_limits;
 
         let outcome = air::execute_air(
             air,
@@ -64,6 +75,10 @@ impl AirRunner for NativeAvmRunner {
                 key_format,
                 secret_key_bytes,
                 particle_id,
+                air_size_limit,
+                particle_size_limit,
+                call_result_size_limit,
+                hard_limit_enabled,
             },
             raw_call_results,
         );
@@ -79,6 +94,12 @@ impl DataToHumanReadable for NativeAvmRunner {
     }
 }
 
-pub(crate) fn create_native_avm_runner() -> eyre::Result<Box<NativeAvmRunner>> {
-    Ok(Box::new(NativeAvmRunner {}))
+pub(crate) fn create_native_avm_runner(
+    test_init_parameters: TestInitParameters,
+) -> eyre::Result<Box<NativeAvmRunner>> {
+    let aquavm_runtime_limits: AquaVMRuntimeLimits = test_init_parameters.into();
+
+    Ok(Box::new(NativeAvmRunner {
+        aquavm_runtime_limits,
+    }))
 }

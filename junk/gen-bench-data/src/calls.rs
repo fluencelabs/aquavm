@@ -24,6 +24,7 @@ pub(crate) fn call_requests(size: usize) -> Data {
         init_peer_keypair.clone(),
         // actually, is not used
         set_variable_call_service(data.clone()),
+        <_>::default(),
     );
 
     let init_call_results: CallResults = <_>::default();
@@ -75,6 +76,7 @@ pub(crate) fn call_results(size: usize) -> Data {
         init_peer_keypair.clone(),
         // actually, is not used
         set_variable_call_service(data.clone()),
+        <_>::default(),
     );
 
     let call_results: CallResults = <_>::default();

@@ -70,7 +70,7 @@ impl<E> AVM<E> {
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask)
+        let runner = AVMRunner::new(air_wasm_path, max_heap_size, <_>::default(), logging_mask)
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);
         let avm = Self { runner, data_store };

@@ -24,6 +24,14 @@ use serde::Serialize;
 
 pub const INTERPRETER_SUCCESS: i64 = 0;
 
+/// This stores soft limits triggering flags.
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SoftLimitsTriggering {
+    pub air_size_limit_exceeded: bool,
+    pub particle_size_limit_exceeded: bool,
+    pub call_result_size_limit_exceeded: bool,
+}
+
 /// Describes a result returned at the end of the interpreter execution_step.
 #[cfg_attr(feature = "marine", marine)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -43,6 +51,29 @@ pub struct InterpreterOutcome {
 
     /// Collected parameters of all met call instructions that could be executed on a current peer.
     pub call_requests: Vec<u8>,
+
+    /// This flag signals that AIR script size exceeds the limit.
+    pub air_size_limit_exceeded: bool,
+
+    /// This flag signals that particle data size exceeds the limit.
+    pub particle_size_limit_exceeded: bool,
+
+    /// This flag signals that call result size exceeds the limit.
+    pub call_result_size_limit_exceeded: bool,
+}
+
+impl SoftLimitsTriggering {
+    pub fn new(
+        air_size_limit_exceeded: bool,
+        particle_size_limit_exceeded: bool,
+        call_result_size_limit_exceeded: bool,
+    ) -> Self {
+        Self {
+            air_size_limit_exceeded,
+            particle_size_limit_exceeded,
+            call_result_size_limit_exceeded,
+        }
+    }
 }
 
 impl InterpreterOutcome {
@@ -52,6 +83,7 @@ impl InterpreterOutcome {
         data: Vec<u8>,
         next_peer_pks: Vec<String>,
         call_requests: SerializedCallRequests,
+        soft_limits_triggering: SoftLimitsTriggering,
     ) -> Self {
         let call_requests = call_requests.into();
         Self {
@@ -60,6 +92,9 @@ impl InterpreterOutcome {
             data,
             next_peer_pks,
             call_requests,
+            air_size_limit_exceeded: soft_limits_triggering.air_size_limit_exceeded,
+            particle_size_limit_exceeded: soft_limits_triggering.particle_size_limit_exceeded,
+            call_result_size_limit_exceeded: soft_limits_triggering.call_result_size_limit_exceeded,
         }
     }
 }
@@ -67,7 +102,7 @@ impl InterpreterOutcome {
 #[cfg(feature = "marine")]
 impl InterpreterOutcome {
     pub fn from_ivalue(ivalue: IValue) -> Result<Self, String> {
-        const OUTCOME_FIELDS_COUNT: usize = 5;
+        const OUTCOME_FIELDS_COUNT: usize = 8;
 
         let mut record_values = try_as_record(ivalue)?.into_vec();
         if record_values.len() != OUTCOME_FIELDS_COUNT {
@@ -76,11 +111,24 @@ impl InterpreterOutcome {
             ));
         }
 
+        let air_size_limit_exceeded =
+            try_as_boolean(record_values.pop().unwrap(), "air_size_limit_exceeded")?;
+        let particle_size_limit_exceeded =
+            try_as_boolean(record_values.pop().unwrap(), "particle_size_limit_exceeded")?;
+        let call_result_size_limit_exceeded = try_as_boolean(
+            record_values.pop().unwrap(),
+            "call_result_size_limit_exceeded",
+        )?;
         let call_requests = try_as_byte_vec(record_values.pop().unwrap(), "call_requests")?;
         let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
         let error_message = try_as_string(record_values.pop().unwrap(), "error_message")?;
         let ret_code = try_as_i64(record_values.pop().unwrap(), "ret_code")?;
+        let soft_limits_triggering = SoftLimitsTriggering::new(
+            air_size_limit_exceeded,
+            particle_size_limit_exceeded,
+            call_result_size_limit_exceeded,
+        );
 
         let outcome = Self::new(
             ret_code,
@@ -88,6 +136,7 @@ impl InterpreterOutcome {
             data,
             next_peer_pks,
             call_requests.into(),
+            soft_limits_triggering,
         );
 
         Ok(outcome)
@@ -158,5 +207,13 @@ fn try_as_string_vec(ivalue: IValue, field_name: &str) -> Result<Vec<String>, St
             Ok(array)
         }
         v => Err(format!("expected an array for {field_name}, got {v:?}")),
+    }
+}
+
+#[cfg(feature = "marine")]
+fn try_as_boolean(ivalue: IValue, field_name: &str) -> Result<bool, String> {
+    match ivalue {
+        IValue::Boolean(value) => Ok(value),
+        v => Err(format!("expected a bool for {field_name}, got {v:?}")),
     }
 }

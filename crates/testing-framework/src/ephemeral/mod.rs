@@ -25,7 +25,8 @@ use crate::{
 use air_test_utils::{
     key_utils::derive_dummy_keypair,
     test_runner::{
-        create_avm_with_key, AirRunner, DefaultAirRunner, TestRunParameters, TestRunner,
+        create_avm_with_key, AirRunner, DefaultAirRunner, TestInitParameters, TestRunParameters,
+        TestRunner,
     },
     RawAVMOutcome,
 };
@@ -86,10 +87,14 @@ pub struct Peer<R> {
 }
 
 impl<R: AirRunner> Peer<R> {
-    pub fn new(keypair: impl Into<KeyPair>, services: Rc<[MarineServiceHandle]>) -> Self {
+    pub fn new(
+        keypair: impl Into<KeyPair>,
+        services: Rc<[MarineServiceHandle]>,
+        test_init_parameters: TestInitParameters,
+    ) -> Self {
         let call_service = services_to_call_service_closure(services);
 
-        let runner = create_avm_with_key::<R>(keypair, call_service);
+        let runner = create_avm_with_key::<R>(keypair, call_service, test_init_parameters);
         let peer_id = runner.runner.get_current_peer_id().into();
 
         Self { peer_id, runner }
@@ -143,7 +148,7 @@ pub struct Network<R = DefaultAirRunner> {
 //   extencive test code changes
 impl Network<DefaultAirRunner> {
     pub fn empty() -> Rc<Self> {
-        Self::new(std::iter::empty::<PeerId>(), vec![])
+        Self::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
     }
 }
 
@@ -151,6 +156,7 @@ impl<R: AirRunner> Network<R> {
     pub fn new(
         named_peers: impl Iterator<Item = impl Into<PeerId>>,
         common_services: Vec<MarineServiceHandle>,
+        test_init_params: TestInitParameters,
     ) -> Rc<Self> {
         let network = Rc::new(Self {
             peers: Default::default(),
@@ -158,13 +164,13 @@ impl<R: AirRunner> Network<R> {
             resolver: Default::default(),
         });
         for peer_name in named_peers {
-            network.ensure_named_peer(peer_name);
+            network.ensure_named_peer(peer_name, test_init_params);
         }
         network
     }
 
-    pub fn from_peers(nodes: Vec<Peer<R>>) -> Rc<Self> {
-        let network = Self::new(std::iter::empty::<PeerId>(), vec![]);
+    pub fn from_peers(nodes: Vec<Peer<R>>, test_init_params: TestInitParameters) -> Rc<Self> {
+        let network = Self::new(std::iter::empty::<PeerId>(), vec![], test_init_params);
         let neighborhood: PeerSet = nodes.iter().map(|peer| peer.peer_id.clone()).collect();
         for peer in nodes {
             network.add_peer_env(peer, neighborhood.iter().cloned());
@@ -183,7 +189,11 @@ impl<R: AirRunner> Network<R> {
         self.insert_peer_env_entry(peer_id, peer_env);
     }
 
-    pub fn ensure_named_peer(self: &Rc<Self>, name: impl Into<PeerId>) -> PeerId {
+    pub fn ensure_named_peer(
+        self: &Rc<Self>,
+        name: impl Into<PeerId>,
+        test_init_params: TestInitParameters,
+    ) -> PeerId {
         use std::collections::hash_map::Entry;
 
         let name = name.into();
@@ -192,7 +202,7 @@ impl<R: AirRunner> Network<R> {
             Entry::Occupied(entry) => entry.get().clone(),
             Entry::Vacant(empty) => {
                 let (keypair, _) = derive_dummy_keypair(&name);
-                let peer = Peer::new(keypair, self.services.get_services());
+                let peer = Peer::new(keypair, self.services.get_services(), test_init_params);
                 let peer_id = peer.get_peer_id().clone();
                 self.add_peer(peer);
 

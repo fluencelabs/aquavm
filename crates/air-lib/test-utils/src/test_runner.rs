@@ -27,13 +27,15 @@ pub use crate::wasm_test_runner::WasmAirRunner;
 use super::CallServiceClosure;
 
 use avm_server::avm_runner::*;
+use avm_server::AVMRuntimeLimits;
+use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub trait AirRunner {
-    fn new(current_call_id: impl Into<String>) -> Self;
+    fn new(current_call_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self;
 
     #[allow(clippy::too_many_arguments)]
     fn call(
@@ -66,6 +68,15 @@ pub struct TestRunParameters {
     pub ttl: u32,
     pub override_current_peer_id: Option<String>,
     pub particle_id: String,
+}
+
+/// This struct is used to set limits for the test runner creating AVMRunner.
+#[derive(Debug, Default, Clone, Copy)]
+pub struct TestInitParameters {
+    pub air_size_limit: Option<u64>,
+    pub particle_size_limit: Option<u64>,
+    pub call_result_size_limit: Option<u64>,
+    pub hard_limit_enabled: bool,
 }
 
 impl<R: AirRunner> TestRunner<R> {
@@ -169,10 +180,8 @@ pub fn create_custom_avm<R: AirRunner>(
     current_peer_id: impl Into<String>,
 ) -> TestRunner<R> {
     let current_peer_id = current_peer_id.into();
-
     let (keypair, _) = derive_dummy_keypair(&current_peer_id);
-
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id, <_>::default());
 
     TestRunner {
         runner,
@@ -184,10 +193,11 @@ pub fn create_custom_avm<R: AirRunner>(
 pub fn create_avm_with_key<R: AirRunner>(
     keypair: impl Into<KeyPair>,
     call_service: CallServiceClosure,
+    test_init_parameters: TestInitParameters,
 ) -> TestRunner<R> {
     let keypair = keypair.into();
     let current_peer_id = keypair.public().to_peer_id().to_string();
-    let runner = R::new(current_peer_id);
+    let runner = R::new(current_peer_id, test_init_parameters);
 
     TestRunner {
         runner,
@@ -236,6 +246,60 @@ impl TestRunParameters {
     pub fn with_particle_id(mut self, particle_id: impl Into<String>) -> Self {
         self.particle_id = particle_id.into();
         self
+    }
+}
+
+impl TestInitParameters {
+    pub fn new(
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit: Some(air_size_limit),
+            particle_size_limit: Some(particle_size_limit),
+            call_result_size_limit: Some(call_result_size_limit),
+            hard_limit_enabled,
+        }
+    }
+
+    pub fn no_limits() -> Self {
+        Self {
+            air_size_limit: Some(u64::MAX),
+            particle_size_limit: Some(u64::MAX),
+            call_result_size_limit: Some(u64::MAX),
+            hard_limit_enabled: false,
+        }
+    }
+}
+
+impl From<TestInitParameters> for AVMRuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
+        AVMRuntimeLimits::new(
+            value.air_size_limit,
+            value.particle_size_limit,
+            value.call_result_size_limit,
+            value.hard_limit_enabled,
+        )
+    }
+}
+
+impl From<TestInitParameters> for AquaVMRuntimeLimits {
+    fn from(value: TestInitParameters) -> Self {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+        let air_size_limit = value.air_size_limit.unwrap_or(MAX_AIR_SIZE);
+        let particle_size_limit: u64 = value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE);
+        let call_result_size_limit = value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE);
+
+        AquaVMRuntimeLimits::new(
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            value.hard_limit_enabled,
+        )
     }
 }
 
