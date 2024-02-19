@@ -74,6 +74,12 @@ impl SoftLimitsTriggering {
             call_result_size_limit_exceeded,
         }
     }
+
+    pub fn is_triggered(&self) -> bool {
+        self.air_size_limit_exceeded
+            || self.particle_size_limit_exceeded
+            || self.call_result_size_limit_exceeded
+    }
 }
 
 impl InterpreterOutcome {
