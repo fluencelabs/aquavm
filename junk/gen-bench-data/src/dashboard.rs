@@ -166,10 +166,12 @@ pub(crate) async fn dashboard() -> super::Data {
     let (host_function, all_info) =
         client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
-    let mut client = create_avm_with_key::<NativeAirRunner>(client_key, host_function).await;
+    let mut client =
+        create_avm_with_key::<NativeAirRunner>(client_key, host_function, <_>::default()).await;
     let mut relay = create_avm_with_key::<NativeAirRunner>(
         relay_key.clone(),
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
+        <_>::default(),
     ).await;
 
     let mut known_peers = Vec::<_>::new();
@@ -177,6 +179,7 @@ pub(crate) async fn dashboard() -> super::Data {
         let vm = create_avm_with_key::<NativeAirRunner>(
             peer_key,
             create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
+            <_>::default()
         ).await;
         known_peers.push(AVMState {
             vm,

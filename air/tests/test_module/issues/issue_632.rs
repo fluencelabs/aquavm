@@ -37,7 +37,7 @@ async fn issue_310() {
       )
     "#;
 
-    let runner = Rc::new(RefCell::new(DefaultAirRunner::new(&peer_id).await));
+    let runner = Rc::new(RefCell::new(DefaultAirRunner::new(&peer_id, <_>::default().await));
     let call = |prev_data, call_results| {
         let runner = runner.clone();
         let peer_id = peer_id.clone();

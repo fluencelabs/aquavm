@@ -17,6 +17,7 @@ avm-interface = { version = "0.31.2", path = "../../../avm/interface" }
 air-interpreter-interface = { version = "0.17.2", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
 air-interpreter-data = { version = "0.17.0", path = "../../../crates/air-lib/interpreter-data" }
 air-interpreter-sede = { version = "0.1.0", path = "../../../crates/air-lib/interpreter-sede", default-features = false }
+avm-server = { version = "0.35.0", path = "../../../avm/server" }
 air-test-utils = { version = "0.15.1",path = "../../../crates/air-lib/test-utils", optional = true }
 
 clap = { version = "4.4.7", features = ["derive", "env"] }

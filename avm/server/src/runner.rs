@@ -33,12 +33,37 @@ use marine_wasm_backend_traits::WasmBackend;
 
 use std::path::PathBuf;
 
+#[derive(Clone, Copy, Debug)]
+pub struct AquaVMRuntimeLimits {
+    pub air_size_limit: u64, // WIP remove pub?
+    /// The particle data size limit.
+    pub particle_size_limit: u64,
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: u64,
+    /// This knob controls hard RAM limits behavior for AVMRunner.
+    pub hard_limit_enabled: bool,
+}
+
+#[derive(Default)]
+pub struct AVMRuntimeLimits {
+    // The AIR script size limit.
+    pub air_size_limit: Option<u64>,
+    /// The particle data size limit.
+    pub particle_size_limit: Option<u64>,
+    /// This is the limit for the size of service call result.
+    pub call_result_size_limit: Option<u64>,
+    /// This knob controls hard RAM limits behavior for AVMRunner.
+    pub hard_limit_enabled: bool,
+}
+
 pub struct AVMRunner<WB: WasmBackend> {
     marine: Marine<WB>,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
     /// The memory limit provided by constructor
     total_memory_limit: Option<u64>,
+    /// This struct contains runtime RAM allowance.
+    aquavm_runtime_limits: AquaVMRuntimeLimits,
 }
 
 /// Return statistic of AVM server Wasm module heap footprint.
@@ -58,6 +83,7 @@ impl<WB: WasmBackend> AVMRunner<WB> {
     pub async fn new(
         air_wasm_path: PathBuf,
         total_memory_limit: Option<u64>,
+        avm_runtime_limits: AVMRuntimeLimits,
         logging_mask: i32,
         wasm_backend: WB,
     ) -> RunnerResult<Self> {
@@ -66,11 +92,13 @@ impl<WB: WasmBackend> AVMRunner<WB> {
         let marine_config =
             make_marine_config(wasm_dir, &wasm_filename, total_memory_limit, logging_mask);
         let marine = Marine::with_raw_config(wasm_backend, marine_config).await?;
+        let aquavm_runtime_limits = avm_runtime_limits.into();
 
         let avm = Self {
             marine,
             wasm_filename,
             total_memory_limit,
+            aquavm_runtime_limits,
         };
 
         Ok(avm)
@@ -104,6 +132,7 @@ impl<WB: WasmBackend> AVMRunner<WB> {
             init_peer_id.into(),
             timestamp,
             ttl,
+            self.aquavm_runtime_limits,
             call_results,
             key_format.into(),
             secret_key_bytes,
@@ -153,6 +182,7 @@ impl<WB: WasmBackend> AVMRunner<WB> {
             init_peer_id.into(),
             timestamp,
             ttl,
+            self.aquavm_runtime_limits,
             call_results,
             key_format,
             secret_key_bytes,
@@ -227,11 +257,19 @@ fn prepare_args(
     init_peer_id: String,
     timestamp: u64,
     ttl: u32,
+    aquavm_runtime_limits: AquaVMRuntimeLimits,
     call_results: CallResults,
     key_format: u8,
     secret_key_bytes: Vec<u8>,
     particle_id: String,
 ) -> Vec<IValue> {
+    let AquaVMRuntimeLimits {
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enabled,
+    } = aquavm_runtime_limits;
+
     let run_parameters = air_interpreter_interface::RunParameters::new(
         init_peer_id,
         current_peer_id,
@@ -240,6 +278,10 @@ fn prepare_args(
         key_format,
         secret_key_bytes,
         particle_id,
+        air_size_limit,
+        particle_size_limit,
+        call_result_size_limit,
+        hard_limit_enabled,
     )
     .into_ivalue();
 
@@ -328,4 +370,51 @@ fn try_as_one_value_vec(mut ivalues: Vec<IValue>) -> RunnerResult<IValue> {
     }
 
     Ok(ivalues.remove(0))
+}
+
+impl AquaVMRuntimeLimits {
+    pub fn new(
+        air_size_limit: u64,
+        particle_size_limit: u64,
+        call_result_size_limit: u64,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        }
+    }
+}
+
+impl AVMRuntimeLimits {
+    pub fn new(
+        air_size_limit: Option<u64>,
+        particle_size_limit: Option<u64>,
+        call_result_size_limit: Option<u64>,
+        hard_limit_enabled: bool,
+    ) -> Self {
+        Self {
+            air_size_limit,
+            particle_size_limit,
+            call_result_size_limit,
+            hard_limit_enabled,
+        }
+    }
+}
+
+impl From<AVMRuntimeLimits> for AquaVMRuntimeLimits {
+    fn from(value: AVMRuntimeLimits) -> Self {
+        use air_interpreter_interface::MAX_AIR_SIZE;
+        use air_interpreter_interface::MAX_CALL_RESULT_SIZE;
+        use air_interpreter_interface::MAX_PARTICLE_SIZE;
+
+        AquaVMRuntimeLimits::new(
+            value.air_size_limit.unwrap_or(MAX_AIR_SIZE),
+            value.particle_size_limit.unwrap_or(MAX_PARTICLE_SIZE),
+            value.call_result_size_limit.unwrap_or(MAX_CALL_RESULT_SIZE),
+            value.hard_limit_enabled,
+        )
+    }
 }

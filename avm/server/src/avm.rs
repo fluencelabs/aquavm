@@ -72,7 +72,7 @@ impl<E, WB: WasmBackend> AVM<E, WB> {
 
         data_store.initialize()?;
 
-        let runner = AVMRunner::new(air_wasm_path, max_heap_size, logging_mask, wasm_backend)
+        let runner = AVMRunner::new(air_wasm_path, max_heap_size, <_>::default(), logging_mask)
             .await
             .map_err(AVMError::RunnerError)?;
         let runner = SendSafeRunner(runner);

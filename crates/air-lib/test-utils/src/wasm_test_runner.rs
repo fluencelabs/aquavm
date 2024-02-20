@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::prelude::TestInitParameters;
 use crate::test_runner::AirRunner;
 
 use avm_server::avm_runner::*;
@@ -48,12 +49,13 @@ fn create_wasm_backend() -> WasmtimeWasmBackend {
     WasmtimeWasmBackend::new(config).unwrap()
 }
 
-async fn make_pooled_avm_runner() -> AVMRunner<WasmtimeWasmBackend> {
+async fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner<WasmtimeWasmBackend> {
     let logging_mask = i32::MAX;
     let wasm_backend = create_wasm_backend();
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
         Some(AVM_MAX_HEAP_SIZE),
+        test_init_parameters.into(),
         logging_mask,
         wasm_backend,
     )
@@ -62,7 +64,7 @@ async fn make_pooled_avm_runner() -> AVMRunner<WasmtimeWasmBackend> {
 }
 
 impl AirRunner for WasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> LocalBoxFuture<'static, Self> {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
         async move {
             static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner<WasmtimeWasmBackend>>> =
@@ -77,7 +79,7 @@ impl AirRunner for WasmAirRunner {
 
             let runner = match pool.try_pull() {
                 Some(runner) => runner,
-                None => Reusable::new(pool, make_pooled_avm_runner().await),
+                None => Reusable::new(pool, make_pooled_avm_runner(test_init_parameters).await),
             };
 
             Self {
@@ -142,7 +144,7 @@ pub struct ReleaseWasmAirRunner {
 }
 
 impl AirRunner for ReleaseWasmAirRunner {
-    fn new(current_peer_id: impl Into<String>) -> LocalBoxFuture<'static, Self> {
+    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
         async {
             let logging_mask = i32::MAX;
@@ -151,6 +153,7 @@ impl AirRunner for ReleaseWasmAirRunner {
             let runner = AVMRunner::new(
                 PathBuf::from(RELEASE_AIR_WASM_PATH),
                 Some(AVM_MAX_HEAP_SIZE),
+                test_init_parameters.into(),
                 logging_mask,
                 wasm_backend,
             )

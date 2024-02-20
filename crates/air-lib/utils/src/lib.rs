@@ -51,11 +51,17 @@ macro_rules! auto_checked_add {
 
 #[macro_export]
 macro_rules! farewell_if_fail {
-    ($cmd:expr, $raw_prev_data:expr) => {
+    ($cmd:expr, $raw_prev_data:expr, $soft_limits_triggering:expr) => {
         match $cmd {
             Ok(result) => result,
             // return the prev data in case of errors
-            Err(error) => return Err(farewell::from_uncatchable_error($raw_prev_data, error)),
+            Err(error) => {
+                return Err(farewell::from_uncatchable_error(
+                    $raw_prev_data,
+                    error,
+                    $soft_limits_triggering,
+                ))
+            }
         };
     };
 }

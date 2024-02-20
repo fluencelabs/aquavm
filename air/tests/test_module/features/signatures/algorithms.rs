@@ -100,7 +100,7 @@ async fn test_banned_signing_key() {
     let air_script = "(null)";
     let bad_algo_keypair = fluence_keypair::KeyPair::generate_secp256k1();
 
-    let mut avm = create_avm_with_key::<NativeAirRunner>(bad_algo_keypair, unit_call_service()).await;
+    let mut avm = create_avm_with_key::<NativeAirRunner>(bad_algo_keypair, unit_call_service(), <_>::default()).await;
     let res = avm
         .call(air_script, "", "", TestRunParameters::from_init_peer_id("init_peer_id"))
         .await

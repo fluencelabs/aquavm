@@ -22,7 +22,7 @@ use crate::{
 };
 
 use air_test_utils::{
-    test_runner::{AirRunner, DefaultAirRunner, TestRunParameters},
+    test_runner::{AirRunner, DefaultAirRunner, TestInitParameters, TestRunParameters},
     RawAVMOutcome,
 };
 
@@ -66,11 +66,13 @@ impl AirScriptExecutor<DefaultAirRunner> {
 impl<R: AirRunner> AirScriptExecutor<R> {
     pub async fn from_transformed_air_script(
         mut test_parameters: TestRunParameters,
+        test_init_parameters: TestInitParameters,
         transformed_air_script: TransformedAirScript<R>,
     ) -> Result<Self, String> {
         let network = transformed_air_script.get_network();
         let init_peer_id = test_parameters.init_peer_id.clone();
-        let real_init_peer_id = network.ensure_named_peer(init_peer_id.as_str()).await;
+        let real_init_peer_id =
+            network.ensure_named_peer(init_peer_id.as_str(), test_init_parameters).await;
         test_parameters.init_peer_id = real_init_peer_id.to_string();
 
         let queue = ExecutionQueue::new();
@@ -94,21 +96,39 @@ impl<R: AirRunner> AirScriptExecutor<R> {
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let network = Network::new(extra_peers.into_iter(), common_services).await;
-        let transformed = TransformedAirScript::new(annotated_air_script, network).await?;
+        let network = Network::new(extra_peers.into_iter(), common_services, <_>::default()).await;
+        let transformed = TransformedAirScript::new(annotated_air_script, network, <_>::default()).await?;
 
-        Self::from_transformed_air_script(test_parameters, transformed).await
+        Self::from_transformed_air_script(test_parameters, <_>::default(), transformed).await
     }
 
     pub async fn from_network(
         test_parameters: TestRunParameters,
+        test_init_parameters: TestInitParameters,
         network: Rc<Network<R>>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let transformed = TransformedAirScript::new(annotated_air_script, network).await?;
+        let transformed =
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters).await?;
 
-        Self::from_transformed_air_script(test_parameters, transformed).await
+        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed).await
     }
+    pub async fn new_with_init_parameters(
+        test_parameters: TestRunParameters,
+        test_init_parameters: TestInitParameters,
+        common_services: Vec<MarineServiceHandle>,
+        extra_peers: impl IntoIterator<Item = PeerId>,
+        annotated_air_script: &str,
+    ) -> Result<Self, String> {
+        let network = Network::new(
+            extra_peers.into_iter(),
+            common_services,
+            test_init_parameters,
+        );
+        let transformed =
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters).await?;
+
+        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed).await
 
     /// Return Iterator for handling all the queued datas
     /// for particular peer_id.
@@ -703,16 +723,19 @@ mod tests {
     #[tokio::test]
     async fn test_transformed_distinct() {
         let peer_name = "peer1";
-        let network = Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![]).await;
+        let network =
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default()).await;
 
         let transformed1 = TransformedAirScript::new(
             &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 42"#),
             network.clone(),
+            <_>::default(),
         )
         .await
         .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
+            <_>::default(),
             transformed1,
         )
         .await
@@ -721,11 +744,13 @@ mod tests {
         let transformed2 = TransformedAirScript::new(
             &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 24"#,),
             network,
+            <_>::default(),
         )
         .await
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
+            <_>::default(),
             transformed2,
         )
         .await
@@ -778,26 +803,30 @@ mod tests {
         let network = Network::<NativeAirRunner>::new(
             std::iter::empty::<PeerId>(),
             vec![service.to_handle()],
+            <_>::default(),
         )
         .await;
 
         let peer_name = "peer1";
         let air_script = format!(r#"(call "{peer_name}" ("service" "function") [])"#);
-        let transformed1 = TransformedAirScript::new(&air_script, network.clone())
+        let transformed1 =
+            TransformedAirScript::new(&air_script, network.clone(), <_>::default())
             .await
             .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
+            <_>::default(),
             transformed1,
         )
         .await
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network)
+        let transformed2 = TransformedAirScript::new(&air_script, network, <_>::default())
             .await
             .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
+            <_>::default(),
             transformed2,
         )
         .await

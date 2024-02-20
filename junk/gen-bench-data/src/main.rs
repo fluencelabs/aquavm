@@ -115,7 +115,7 @@ async fn main() {
         Bench::Lense100MB => mem_consumption_w_lense_with_size_in_mb(100).await,
         Bench::Map100MB => mem_consumption_w_map_2_scalar_with_size_in_mb(100).await,
         Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100).await,
-        Bench::ParserAir100MB => mem_consumption_air_100mb(280000, 10),
+        Bench::ParserAir100MB => mem_consumption_air_100mb(2800000, 10),
         Bench::Hybrid100MB => mem_consumption_hybrid_with_size_in_mb(100).await,
     };
 
@@ -790,8 +790,9 @@ async fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -822,6 +823,7 @@ async fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+            "particle-size-limit".to_owned() => "92233720367".to_owned(),
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -836,8 +838,9 @@ async fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -868,6 +871,7 @@ async fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+            "particle-size-limit".to_owned() => "92233720367".to_owned(),
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -882,8 +886,9 @@ async fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Dat
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -914,6 +919,7 @@ async fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Dat
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+            "particle-size-limit".to_owned() => "92233720367".to_owned(),
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -928,8 +934,9 @@ async fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("\"{}\"", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -960,6 +967,7 @@ async fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+            "particle-size-limit".to_owned() => "92233720367".to_owned(),
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -974,8 +982,9 @@ async fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
         data = format_args!("{{\"attrib\": \"{}\"}}", hex::encode(random_data))
     );
 
-    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+    let exec = AirScriptExecutor::<NativeAirRunner>::new_with_init_parameters(
         TestRunParameters::from_init_peer_id("init_peer_id").with_particle_id(PARTICLE_ID),
+        TestInitParameters::no_limits(),
         vec![],
         vec![],
         &air_script,
@@ -1006,6 +1015,7 @@ async fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
             "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => init_peer_id,
+            "particle-size-limit".to_owned() => "92233720367".to_owned(),
         },
         call_results: None,
         keypair: bs58::encode(keypair.to_vec()).into_string(),
@@ -1057,6 +1067,7 @@ fn mem_consumption_air_100mb(calls: usize, vars: usize) -> Data {
             "particle-id".to_owned() => particle_id.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
+            "air-size-limit".to_owned() => "92233720367".to_owned(),
         },
     }
 }

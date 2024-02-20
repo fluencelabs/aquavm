@@ -16,6 +16,7 @@
 
 use super::runner::AirRunner;
 use super::runner::DataToHumanReadable;
+use crate::trace::run::runner::TestInitParameters;
 use air_test_utils::avm_runner::AVMRunner;
 use fluence_keypair::KeyPair;
 use futures::future::LocalBoxFuture;
@@ -91,6 +92,7 @@ impl DataToHumanReadable for WasmAvmRunner {
 pub(crate) async fn create_wasm_avm_runner(
     air_interpreter_wasm_path: &Path,
     max_heap_size: Option<u64>,
+    test_init_parameters: TestInitParameters,
 ) -> eyre::Result<Box<WasmAvmRunner>> {
     let mut config = WasmtimeConfig::default();
     config
@@ -102,6 +104,7 @@ pub(crate) async fn create_wasm_avm_runner(
         AVMRunner::new(
             air_interpreter_wasm_path.to_owned(),
             max_heap_size,
+            test_init_parameters.into(),
             0,
             wasm_backend,
         )

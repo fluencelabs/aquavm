@@ -26,6 +26,7 @@ pub(crate) mod wasm;
 pub(crate) mod runner;
 
 use self::runner::AirRunner;
+use crate::trace::run::runner::TestInitParameters;
 use avm_interface::CallResults;
 
 use clap::Parser;
@@ -46,6 +47,7 @@ pub(crate) struct Args {
 
     #[clap(long)]
     max_heap_size: Option<u64>,
+
     #[clap(long, default_value = "info")]
     tracing_params: String,
     #[clap(long, default_value = "warn")]
@@ -181,19 +183,21 @@ pub(crate) async fn run(args: Args) -> eyre::Result<()> {
     let global_tracing_params = args.tracing_params.clone();
     init_tracing(global_tracing_params, tracing_json);
 
+    let execution_data = match &args.source {
+        Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
+        Source::PlainData(raw) => data::plain::load(raw)?,
+    };
+
+    let particle = execution_data.particle;
+
     let mut runner = create_runner(
         args.mode.into(),
         &args.air_interpreter_path,
         &args.air_near_contract_path,
         args.max_heap_size,
+        execution_data.test_init_parameters,
     )
     .await?;
-
-    let execution_data = match &args.source {
-        Source::Anomaly(anomaly) => data::anomaly::load(anomaly)?,
-        Source::PlainData(raw) => data::plain::load(raw)?,
-    };
-    let particle = execution_data.particle;
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
@@ -237,6 +241,7 @@ async fn create_runner(
     _air_interpreter_wasm_path: &Path,
     _air_contract_wasm_path: &Path,
     _max_heap_size: Option<u64>,
+    _test_init_parameters: TestInitParameters,
 ) -> eyre::Result<Box<dyn AirRunner>> {
     #[cfg(not(feature = "wasm"))]
     let default_mode = Mode::Native;
@@ -244,15 +249,18 @@ async fn create_runner(
     let default_mode = Mode::Wasm;
 
     let mode = mode.unwrap_or(default_mode);
+
     let runner = match mode {
-        Mode::Native => self::native::create_native_avm_runner()
+        Mode::Native => self::native::create_native_avm_runner(_test_init_parameters)
             .context("Failed to instantiate a native AVM")? as _,
         #[cfg(feature = "wasm")]
-        Mode::Wasm => {
-            self::wasm::create_wasm_avm_runner(_air_interpreter_wasm_path, _max_heap_size)
-                .await
-                .context("Failed to instantiate WASM AVM")? as _
-        }
+        Mode::Wasm => self::wasm::create_wasm_avm_runner(
+            _air_interpreter_wasm_path,
+            _max_heap_size,
+            _test_init_parameters,
+        )
+        .await
+        .context("Failed to instantiate WASM AVM")? as _,
         #[cfg(feature = "near")]
         Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)
             .context("Failed to instantiate NEAR AVM")?,
