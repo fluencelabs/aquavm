@@ -87,7 +87,7 @@ fn epilog_closure<'closure, 'name: 'closure>(scalar_name: &'name str) -> Box<Can
 
             let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
 
-            let value = CanonResultAggregate::new(value, peer_pk, &tetraplet.json_path, position);
+            let value = CanonResultAggregate::new(value, peer_pk, &tetraplet.lambda, position);
             let result = ValueAggregate::from_canon_result(value, canon_result_cid.clone());
 
             exec_ctx.scalars.set_scalar_value(scalar_name, result)?;

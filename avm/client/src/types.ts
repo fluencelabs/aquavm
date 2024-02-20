@@ -167,9 +167,9 @@ export interface ResolvedTriplet {
  */
 export interface SecurityTetraplet extends ResolvedTriplet {
     /**
-     * Value was produced by applying this `json_path` to the output from `call_service`.
+     * Value was produced by applying this `lambda` to the output from `call_service`.
      */
-    json_path: string;
+    lambda: string;
 }
 
 export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;

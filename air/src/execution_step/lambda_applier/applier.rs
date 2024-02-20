@@ -117,9 +117,9 @@ fn select_by_path_from_canon_map_stream<'value>(
         let result = select_by_path_from_scalar(&value, body.iter(), exec_ctx)?;
 
         let joined = body.iter().map(ToString::to_string).collect::<Vec<_>>().join(".");
-        let json_path_suffix = format!(".{}", joined);
+        let lambda_suffix = format!(".{}", joined);
         let prefix_with_path = true;
-        let updated_tetraplet = update_tetraplet_with_path(&tetraplet, &json_path_suffix, prefix_with_path);
+        let updated_tetraplet = update_tetraplet_with_path(&tetraplet, &lambda_suffix, prefix_with_path);
 
         MapLensResult::new(result, updated_tetraplet)
     };
@@ -206,14 +206,14 @@ fn update_tetraplet_with_path(
     original_path: &impl ToString,
     prefix_with_path: bool,
 ) -> RcSecurityTetraplet {
-    let json_path_updated = if prefix_with_path {
-        original_tetraplet.json_path.to_string() + &original_path.to_string()
+    let lambda_updated = if prefix_with_path {
+        original_tetraplet.lambda.to_string() + &original_path.to_string()
     } else {
         original_path.to_string()
     };
 
     SecurityTetraplet {
-        json_path: json_path_updated,
+        lambda: lambda_updated,
         ..original_tetraplet.clone()
     }
     .into()

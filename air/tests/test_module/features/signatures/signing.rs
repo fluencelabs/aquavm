@@ -237,14 +237,14 @@ fn test_signature_canon_basic() {
     let expected_call_result_cid = extract_service_result_cid(&expected_call_result);
 
     let expected_canon_state = canon(json!({
-        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "lambda": ""},
         "values": [{
             "result": 1,
             "tetraplet": {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[0]",
+                "lambda": ".$.[0]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }, {
@@ -253,7 +253,7 @@ fn test_signature_canon_basic() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[1]",
+                "lambda": ".$.[1]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }, {
@@ -262,7 +262,7 @@ fn test_signature_canon_basic() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[2]",
+                "lambda": ".$.[2]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }]
@@ -318,14 +318,14 @@ fn test_signature_canon_merge() {
     let expected_call_result_cid = extract_service_result_cid(&expected_call_result);
 
     let expected_canon_state = canon(json!({
-        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "lambda": ""},
         "values": [{
             "result": 1,
             "tetraplet": {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[0]",
+                "lambda": ".$.[0]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }, {
@@ -334,7 +334,7 @@ fn test_signature_canon_merge() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[1]",
+                "lambda": ".$.[1]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }, {
@@ -343,7 +343,7 @@ fn test_signature_canon_merge() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[2]",
+                "lambda": ".$.[2]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid.clone()),
         }]
@@ -403,14 +403,14 @@ fn test_signature_canon_result() {
     let expected_call_result_cid2 = extract_service_result_cid(&expected_call_result2);
 
     let expected_canon_state = canon(json!({
-        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+        "tetraplet": {"peer_pk": init_peer_id, "service_id": "", "function_name": "", "lambda": ""},
         "values": [{
             "result": 1,
             "tetraplet": {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[0]",
+                "lambda": ".$.[0]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
         }, {
@@ -419,7 +419,7 @@ fn test_signature_canon_result() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[1]",
+                "lambda": ".$.[1]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
         }, {
@@ -428,7 +428,7 @@ fn test_signature_canon_result() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..0",
                 "function_name": "func",
-                "json_path": ".$.[2]",
+                "lambda": ".$.[2]",
             },
             "provenance": Provenance::service_result(expected_call_result_cid1.clone()),
         }, {
@@ -437,7 +437,7 @@ fn test_signature_canon_result() {
                 "peer_pk": init_peer_id,
                 "service_id": "serv..1",
                 "function_name": "func2",
-                "json_path": "",
+                "lambda": "",
             },
             "provenance": Provenance::service_result(expected_call_result_cid2.clone()),
         }]

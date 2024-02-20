@@ -61,12 +61,12 @@ fn test_canon_ok() {
         stream_exec_state,
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
@@ -75,7 +75,7 @@ fn test_canon_ok() {
                     "result": "to canon",
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
@@ -151,12 +151,12 @@ fn test_canon_ok_multi() {
         stream_state_2,
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": "to canon",
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
@@ -165,7 +165,7 @@ fn test_canon_ok_multi() {
                     "result": "other",
                     "tetraplet": {
                         "function_name": "other_func",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": other_peer_id,
                         "service_id": "other_serv..1",
                     },
@@ -207,12 +207,12 @@ fn test_canon_value_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
@@ -256,12 +256,12 @@ fn test_canon_root_tetraplet_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": other_peer_id,
                         "service_id": "",
                     },
@@ -317,12 +317,12 @@ fn test_canon_tetraplet_not_found() {
         ),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": "peer_1",
                         "service_id": "serv..0",
                     },
@@ -369,12 +369,12 @@ fn test_canon_agg_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "other_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "other_peer_id", "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lambda": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },

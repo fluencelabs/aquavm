@@ -96,21 +96,21 @@ fn issue_211() {
         executed_state::par(1, 0),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_1_id, "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": peer_1_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
             ]
@@ -123,21 +123,21 @@ fn issue_211() {
             args = vec![json!(3), json!([1, 2, 3])]
         ),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_1_id, "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": peer_1_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[0]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 2,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[1]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2.clone()),
                 },
                 {
                     "result": 3,
-                    "tetraplet": {"function_name": "nodes", "json_path": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
+                    "tetraplet": {"function_name": "nodes", "lambda": ".$.[2]", "peer_pk": peer_1_id, "service_id": "getdatasrv..1"},
                     "provenance": Provenance::service_result(cid_2),
                 },
             ]

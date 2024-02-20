@@ -82,26 +82,26 @@ fn basic_canon() {
         .collect();
 
     let expected_state = executed_state::canon(
-        json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+        json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
         "values": [{
             "result": "1",
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
             "provenance": Provenance::service_result(cids[0].clone()),
         }, {
             "result": "2",
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
             "provenance": Provenance::service_result(cids[1].clone()),
         }, {
             "result": "3",
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
             "provenance": Provenance::service_result(cids[2].clone()),
         }, {
             "result": "4",
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
             "provenance": Provenance::service_result(cids[3].clone()),
         }, {
             "result": "5",
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "A", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "A", "service_id": ""},
             "provenance": Provenance::service_result(cids[4].clone()),
         }]}),
     );
@@ -157,14 +157,14 @@ fn canon_fixes_stream_correct() {
         val_3,
         unused!(4, peer = peer_id_4, args = [4]),
         executed_state::canon(json!({
-        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+        "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_3", "service_id": ""},
         "values": [{
             "result": 2,
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_2", "service_id": ""},
             "provenance": Provenance::service_result(cid_2.clone()),
         }, {
             "result": 3,
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_3", "service_id": ""},
             "provenance": Provenance::service_result(cid_3.clone()),
         }]})),
         executed_state::par(1, 1),
@@ -183,14 +183,14 @@ fn canon_fixes_stream_correct() {
         stream!(3, 2, peer = peer_id_3, args = [3]),
         unused!(4, peer = peer_id_4, args = [4]),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_3", "service_id": ""},
             "values": [{
                 "result": 2,
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_2", "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_2", "service_id": ""},
                 "provenance": Provenance::service_result(cid_2),
             }, {
                 "result": 3,
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_3", "service_id": ""},
+                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_3", "service_id": ""},
                 "provenance": Provenance::service_result(cid_3),
             }]
         })),
@@ -309,7 +309,7 @@ fn canon_empty_stream() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []}),
+            json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []}),
         ),
         unused!(json!([]), peer = peer_id_1, args = [json!([])]),
     ];
@@ -319,7 +319,7 @@ fn canon_empty_stream() {
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []} ),
+            json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_1", "service_id": ""}, "values": []} ),
         ),
         unused!(json!([]), peer = peer_id_1, args = [json!([])]),
     ];
@@ -346,7 +346,7 @@ fn canon_empty_not_writable_stream() {
         executed_state::par(1, 1),
         executed_state::request_sent_by(peer_id),
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []} ),
+            json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id", "service_id": ""}, "values": []} ),
         ),
     ];
     assert_eq!(actual_trace, expected_trace);
@@ -384,7 +384,7 @@ fn canon_over_later_defined_stream() {
         executed_state::par(1, 2),
         stream!(1, 0, peer = vm_peer_id_2, args = [1]),
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},"values": []}),
+            json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},"values": []}),
         ),
         unused!(json!([]), peer = vm_peer_id_3, args = [json!([])]),
     ];
@@ -429,7 +429,7 @@ fn canon_map_scalar() {
 
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let value1 = json!({"k": "v1", "42": "v3", "-42": "v5"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
 
     let expected_trace = ExecutionTrace::from(vec![
         executed_state::ap(0),
@@ -439,7 +439,7 @@ fn canon_map_scalar() {
         executed_state::ap(0),
         executed_state::ap(0),
         canon_tracked(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
+            json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
             "values": [
                 {
                     "result": value1,
@@ -501,7 +501,7 @@ fn canon_map_scalar_with_par() {
 
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let value_1 = json!({"k": "v1", "-42": "v2"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
     let mut states_vec = vec![
         executed_state::par(4, 3),
         executed_state::ap(0),
@@ -542,7 +542,7 @@ fn canon_map_scalar_with_par() {
     // remove last state to be replaced
     let can_req = states_vec.pop();
     assert_eq!(can_req, Some(canon_request(vm_peer_id_1)), "test invalid");
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_2", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_2", "service_id": ""});
 
     states_vec.extend(vec![
         canon_tracked(
@@ -681,10 +681,10 @@ fn test_merge_executed() {
             s1,
             stream!(1, 1, peer = peer_id_2, args = [1]),
             executed_state::canon(
-                json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": other_peer_id, "service_id": ""},
+                json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": other_peer_id, "service_id": ""},
                 "values": [{
                     "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": peer_id_1, "service_id": ""},
+                    "tetraplet": {"function_name": "", "lambda": "", "peer_pk": peer_id_1, "service_id": ""},
                     "provenance": Provenance::service_result(cid1),
                 }]}),
             ),
@@ -720,7 +720,7 @@ fn canon_stream_map() {
     let mut cid_state: ExecutionCidState = ExecutionCidState::new();
     let map_value1 = json!({"key": 42, "value": "value2"});
     let map_value2 = json!({"key": "key", "value": "value1"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1_id, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": vm_peer_id_1_id, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -788,8 +788,8 @@ fn canon_map_single_index_tetraplet_check() {
     let map_value3 = json!({"key": 42, "value": "value1"});
     let call_result = json!(["value2", "value1"]);
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
-    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let empty_tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "", "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -880,9 +880,9 @@ fn canon_map_index_with_element_access_tetraplet_check() {
     let map_value2 = json!({"key": 42, "value": "value1"});
     let call_result = json!("value2");
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
-    let map_value1_tetraplet = json!({"function_name": f1, "json_path": "", "peer_pk": vm_peer_id_1, "service_id": m1});
-    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": vm_peer_id_1, "service_id": ""});
+    let map_value1_tetraplet = json!({"function_name": f1, "lambda": "", "peer_pk": vm_peer_id_1, "service_id": m1});
+    let empty_tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "", "service_id": ""});
 
     let service_result = scalar_tracked!(
         call_result.clone(),
@@ -988,9 +988,9 @@ fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     let map_value1 = json!({"key": 42, "value": call_result1});
     let map_value2 = json!({"key": 42, "value": "value1"});
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
-    let map_value1_tetraplet = json!({"function_name": f1, "json_path": "", "peer_pk": vm_peer_id_1, "service_id": m1});
-    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": vm_peer_id_1, "service_id": ""});
+    let map_value1_tetraplet = json!({"function_name": f1, "lambda": "", "peer_pk": vm_peer_id_1, "service_id": m1});
+    let empty_tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "", "service_id": ""});
 
     let service_result = scalar_tracked!(
         call_result1.clone(),
@@ -1096,8 +1096,8 @@ fn canon_map_non_existing_index_tetraplet_check() {
     let map_value1 = json!({"key": 42, "value": "value2"});
     let call_result = json!([]);
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
-    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let empty_tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "", "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1170,8 +1170,8 @@ fn canon_map_non_existing_index_and_element_tetraplet_check() {
     let map_value3 = json!({"key": 42, "value": "value1"});
     let call_result = json!([]);
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
-    let empty_tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let empty_tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "", "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1261,7 +1261,7 @@ fn canon_map_2_scalar_tetraplet_check() {
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = map_value1.clone();
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": vm_peer_id_1, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1336,7 +1336,7 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = json!("value1");
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_peer_id_1, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": vm_peer_id_1, "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1412,7 +1412,7 @@ fn canon_map_with_lens_by_key_number_tetraplet_check() {
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = map_value1.clone();
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),
@@ -1492,7 +1492,7 @@ fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
     let map_value1 = json!({"42": "value1", "key": "value1"});
     let call_result = map_value1.clone();
 
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""});
 
     let states_vec = vec![
         executed_state::ap(0),

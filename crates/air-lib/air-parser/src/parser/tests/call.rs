@@ -25,7 +25,7 @@ use lalrpop_util::ParseError;
 use std::rc::Rc;
 
 #[test]
-fn parse_json_path() {
+fn parse_lambda() {
     let source_code = r#"
         (call peer_id.$.a! ("service_id" "function_name") ["hello" name] $void)
         "#;
@@ -125,7 +125,7 @@ fn parse_undefined_variable() {
 }
 
 #[test]
-fn parse_undefined_stream_without_json_path() {
+fn parse_undefined_stream_without_lambda() {
     let source_code = r#"
         (call "" ("" "") [$stream])
         "#;
@@ -247,7 +247,7 @@ fn parse_lambda_with_scalars_complex() {
 }
 
 #[test]
-fn json_path_square_braces() {
+fn lambda_square_braces() {
     let source_code = r#"
         (call u.$.peer_id! ("return" "") [u.$[1].cde[0][0].abc u.$.name] $void)
         "#;

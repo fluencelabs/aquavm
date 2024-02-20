@@ -93,7 +93,7 @@ impl ValueAggregate {
                 result: CanonResultAggregate::new(
                     result,
                     tetraplet.peer_pk.as_str().into(),
-                    &tetraplet.json_path,
+                    &tetraplet.lambda,
                     trace_pos,
                 ),
                 provenance_cid: cid,

@@ -10,6 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 aquavm-air = { path = "../../../../../../../air" }
-marine-rs-sdk = "0.10.3"
+marine-rs-sdk = "0.13.0"
 
 [workspace]
