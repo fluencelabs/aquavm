@@ -58,14 +58,14 @@ impl AirRunner for NativeAvmRunner {
             let raw_call_results = into_raw_result(call_results);
             let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
 
-        let key_format = keypair.key_format().into();
-        let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
-        let AquaVMRuntimeLimits {
-            air_size_limit,
-            particle_size_limit,
-            call_result_size_limit,
-            hard_limit_enabled,
-        } = self.aquavm_runtime_limits;
+            let key_format = keypair.key_format().into();
+            let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
+            let AquaVMRuntimeLimits {
+                air_size_limit,
+                particle_size_limit,
+                call_result_size_limit,
+                hard_limit_enabled,
+            } = self.aquavm_runtime_limits;
 
             let outcome = air::execute_air(
                 air,

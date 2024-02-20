@@ -80,7 +80,8 @@ async fn test_attack_injection_current_peer_scalar() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -152,7 +153,8 @@ async fn test_attack_injection_current_peer_stream() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -222,7 +224,8 @@ async fn test_attack_injection_current_injection_unused() {
         Version::new(1, 1, 1),
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair, unit_call_service(), <_>::default()).await;
     let test_run_params = TestRunParameters::from_init_peer_id(alice_peer_id);
     let prev_data = alice_data.serialize().unwrap();
     let cur_data = mallory_data.serialize().unwrap();
@@ -434,7 +437,8 @@ async fn test_attack_replay() {
 
     let mut alice_avm =
         create_avm_with_key::<NativeAirRunner>(alice_keypair.clone(), unit_call_service(), <_>::default()).await;
-    let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service(), <_>::default()).await;
+    let mut bob_avm =
+        create_avm_with_key::<NativeAirRunner>(bob_keypair.clone(), unit_call_service(), <_>::default()).await;
 
     let run_params1 = TestRunParameters::from_init_peer_id(&alice_peer_id).with_particle_id("first_particle");
     let run_params2 = run_params1.clone();

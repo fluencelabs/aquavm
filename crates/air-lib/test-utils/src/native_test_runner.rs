@@ -40,7 +40,10 @@ impl NativeAirRunner {
     }
 }
 impl AirRunner for NativeAirRunner {
-    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self> {
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
         async move { Self::new(current_peer_id, test_init_parameters) }.boxed_local()
     }

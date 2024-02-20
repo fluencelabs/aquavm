@@ -47,9 +47,11 @@ async fn test_runtime_executed_call_argument_hash() {
         "#
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, echo_call_service(), <_>::default()).await;
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair, echo_call_service(), <_>::default()).await;
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service(), <_>::default()).await;
-    let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
+    let mut mallory_avm =
+        create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
 
     let alice_res = alice_avm
         .call(&air_script, "", "", test_run_params.clone())
@@ -110,9 +112,11 @@ async fn test_runtime_executed_call_tetraplet() {
         "#
     );
 
-    let mut alice_avm = create_avm_with_key::<NativeAirRunner>(alice_keypair, echo_call_service(), <_>::default()).await;
+    let mut alice_avm =
+        create_avm_with_key::<NativeAirRunner>(alice_keypair, echo_call_service(), <_>::default()).await;
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service(), <_>::default()).await;
-    let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
+    let mut mallory_avm =
+        create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
 
     let alice_res = alice_avm
         .call(&air_script, "", "", test_run_params.clone())
@@ -194,7 +198,8 @@ async fn test_runtime_executed_failed_argument_hash() {
     let mut alice_avm =
         create_avm_with_key::<NativeAirRunner>(alice_keypair, fallible_call_service_by_arg(43), <_>::default()).await;
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service(), <_>::default()).await;
-    let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
+    let mut mallory_avm =
+        create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
 
     let alice_res = alice_avm
         .call(&air_script, "", "", test_run_params.clone())
@@ -262,7 +267,8 @@ async fn test_runtime_failed_call_tetraplet() {
     let mut alice_avm =
         create_avm_with_key::<NativeAirRunner>(alice_keypair, fallible_call_service("service1"), <_>::default()).await;
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service(), <_>::default()).await;
-    let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
+    let mut mallory_avm =
+        create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
 
     let alice_res = alice_avm
         .call(&air_script, "", "", test_run_params.clone())
@@ -342,7 +348,8 @@ async fn test_runtime_canon_tetraplet() {
     let mut alice_avm =
         create_avm_with_key::<NativeAirRunner>(alice_keypair, fallible_call_service("service1"), <_>::default()).await;
     let mut bob_avm = create_avm_with_key::<NativeAirRunner>(bob_keypair, echo_call_service(), <_>::default()).await;
-    let mut mallory_avm = create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
+    let mut mallory_avm =
+        create_avm_with_key::<NativeAirRunner>(mallory_keypair, echo_call_service(), <_>::default()).await;
 
     let alice_res = alice_avm
         .call(&air_script, "", "", test_run_params.clone())

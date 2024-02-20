@@ -49,7 +49,9 @@ fn create_wasm_backend() -> WasmtimeWasmBackend {
     WasmtimeWasmBackend::new(config).unwrap()
 }
 
-async fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner<WasmtimeWasmBackend> {
+async fn make_pooled_avm_runner(
+    test_init_parameters: TestInitParameters,
+) -> AVMRunner<WasmtimeWasmBackend> {
     let logging_mask = i32::MAX;
     let wasm_backend = create_wasm_backend();
     AVMRunner::new(
@@ -64,7 +66,10 @@ async fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVM
 }
 
 impl AirRunner for WasmAirRunner {
-    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self> {
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
         async move {
             static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner<WasmtimeWasmBackend>>> =
@@ -144,9 +149,12 @@ pub struct ReleaseWasmAirRunner {
 }
 
 impl AirRunner for ReleaseWasmAirRunner {
-    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self> {
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
         let current_peer_id = current_peer_id.into();
-        async {
+        async move {
             let logging_mask = i32::MAX;
 
             let wasm_backend = create_wasm_backend();

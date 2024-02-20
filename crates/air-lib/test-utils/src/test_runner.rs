@@ -37,7 +37,10 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub trait AirRunner {
-    fn new(current_call_id: impl Into<String>, test_init_parameters: TestInitParameters) -> LocalBoxFuture<'static, Self>;
+    fn new(
+        current_call_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self>;
 
     #[allow(clippy::too_many_arguments)]
     fn call<'this>(
