@@ -74,6 +74,12 @@ impl SoftLimitsTriggering {
             call_result_size_limit_exceeded,
         }
     }
+
+    pub fn are_limits_exceeded(&self) -> bool {
+        self.air_size_limit_exceeded
+            || self.particle_size_limit_exceeded
+            || self.call_result_size_limit_exceeded
+    }
 }
 
 impl InterpreterOutcome {
@@ -111,14 +117,15 @@ impl InterpreterOutcome {
             ));
         }
 
-        let air_size_limit_exceeded =
-            try_as_boolean(record_values.pop().unwrap(), "air_size_limit_exceeded")?;
-        let particle_size_limit_exceeded =
-            try_as_boolean(record_values.pop().unwrap(), "particle_size_limit_exceeded")?;
         let call_result_size_limit_exceeded = try_as_boolean(
             record_values.pop().unwrap(),
             "call_result_size_limit_exceeded",
         )?;
+        let particle_size_limit_exceeded =
+            try_as_boolean(record_values.pop().unwrap(), "particle_size_limit_exceeded")?;
+        let air_size_limit_exceeded =
+            try_as_boolean(record_values.pop().unwrap(), "air_size_limit_exceeded")?;
+
         let call_requests = try_as_byte_vec(record_values.pop().unwrap(), "call_requests")?;
         let next_peer_pks = try_as_string_vec(record_values.pop().unwrap(), "next_peer_pks")?;
         let data = try_as_byte_vec(record_values.pop().unwrap(), "data")?;
