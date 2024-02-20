@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.60.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.59.0...avm-client-v0.60.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
 ## [0.59.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.58.0...avm-client-v0.59.0) (2024-01-24)
 
 

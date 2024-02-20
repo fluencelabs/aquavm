@@ -59,6 +59,11 @@
     * air-interpreter-data bumped from 0.16.0 to 0.17.0
     * polyplets bumped from 0.5.2 to 0.6.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-data bumped from 0.17.0 to 0.17.1
+    * aquavm-air-parser bumped from 0.11.1 to 0.11.2
+
 ## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-trace-handler-v0.4.0...air-trace-handler-v0.5.0) (2023-08-31)
 
 

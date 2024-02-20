@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.60.0](https://github.com/fluencelabs/aquavm/compare/air-v0.59.0...air-v0.60.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.1 to 0.11.2
+    * air-execution-info-collector bumped from 0.7.12 to 0.7.13
+    * air-interpreter-data bumped from 0.17.0 to 0.17.1
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+    * air-trace-handler bumped from 0.5.10 to 0.5.11
+    * air-utils bumped from 0.2.0 to 0.3.0
+
 ## [0.59.0](https://github.com/fluencelabs/aquavm/compare/air-v0.58.0...air-v0.59.0) (2024-01-24)
 
 

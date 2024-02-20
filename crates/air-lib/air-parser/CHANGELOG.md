@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.1...air-parser-v0.11.2) (2024-02-20)
+
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+
 ## [0.11.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.0...air-parser-v0.11.1) (2024-01-03)
 
 
