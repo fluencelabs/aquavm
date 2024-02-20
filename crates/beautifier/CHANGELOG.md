@@ -12,6 +12,10 @@
   * dependencies
     * aquavm-air-parser bumped from 0.11.0 to 0.11.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.1 to 0.11.2
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.3.1...air-beautifier-v0.4.0) (2023-12-12)
 
 
