@@ -25,6 +25,21 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+## [0.17.1](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.17.0...air-interpreter-data-v0.17.1) (2024-02-20)
+
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-utils bumped from 0.2.0 to 0.3.0
+    * aquavm-air-parser bumped from 0.11.1 to 0.11.2
+
 ## [0.17.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.16.0...air-interpreter-data-v0.17.0) (2024-01-11)
 
 

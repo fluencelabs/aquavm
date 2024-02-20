@@ -127,6 +127,32 @@
     * air-interpreter-interface bumped from 0.17.1 to 0.17.2
     * air-test-utils bumped from 0.15.0 to 0.15.1
 
+## [0.7.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.6.3...aquavm-air-cli-v0.7.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **cli:** use eyre in air-cli ([#808](https://github.com/fluencelabs/aquavm/issues/808)) ([4742072](https://github.com/fluencelabs/aquavm/commit/47420723bc6c489f0019f172428a8deb18d069b7))
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.59.0 to 0.60.0
+    * air-beautifier bumped from 0.4.1 to 0.4.2
+    * avm-data-store bumped from 0.7.7 to 0.7.8
+    * avm-interface bumped from 0.31.2 to 0.32.0
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+    * air-interpreter-data bumped from 0.17.0 to 0.17.1
+    * avm-server bumped from 0.35.0 to 0.36.0
+    * air-test-utils bumped from 0.15.1 to 0.16.0
+
 ## [0.6.2](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.6.1...aquavm-air-cli-v0.6.2) (2024-01-11)
 
 

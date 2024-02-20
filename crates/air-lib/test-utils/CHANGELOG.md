@@ -71,6 +71,29 @@
     * avm-interface bumped from 0.30.0 to 0.31.0
     * avm-server bumped from 0.34.0 to 0.34.1
 
+## [0.16.0](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.15.1...air-test-utils-v0.16.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.59.0 to 0.60.0
+    * air-interpreter-data bumped from 0.17.0 to 0.17.1
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+    * avm-interface bumped from 0.31.2 to 0.32.0
+    * avm-server bumped from 0.35.0 to 0.36.0
+
 ## [0.15.1](https://github.com/fluencelabs/aquavm/compare/air-test-utils-v0.15.0...air-test-utils-v0.15.1) (2024-01-24)
 
 
