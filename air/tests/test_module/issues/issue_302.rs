@@ -70,18 +70,18 @@ fn issue_302() {
         val_1,
         val_0,
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_2", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id_2", "service_id": ""},
             "values": [{
                 "result": 1,
-                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_2", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id_2", "service_id": ""},
                 "provenance": Provenance::service_result(cid_1),
             }, {
                 "result": 2,
-                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_1", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id_1", "service_id": ""},
                 "provenance": Provenance::service_result(cid_2),
             }, {
                 "result": 0,
-                "tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id_3", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id_3", "service_id": ""},
                 "provenance": Provenance::service_result(cid_0),
             }],
         })),

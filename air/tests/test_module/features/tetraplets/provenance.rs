@@ -50,7 +50,7 @@ fn call_result() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": "some_data",
@@ -58,7 +58,7 @@ fn call_result() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": "",
+                "lens": "",
             },
             "provenance": Provenance::service_result(val_cid.clone()),
         }]
@@ -105,7 +105,7 @@ fn call_result_iteration() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": 10,
@@ -113,7 +113,7 @@ fn call_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[0]",
+                "lens": ".$.[0]",
             },
             "provenance": Provenance::service_result(val_cid.clone()),
         }, {
@@ -122,7 +122,7 @@ fn call_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[1]",
+                "lens": ".$.[1]",
             },
             "provenance": Provenance::service_result(val_cid.clone()),
         }, {
@@ -131,7 +131,7 @@ fn call_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[2]",
+                "lens": ".$.[2]",
             },
             "provenance": Provenance::service_result(val_cid),
         }]
@@ -165,7 +165,7 @@ fn literal() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": 1,
@@ -173,7 +173,7 @@ fn literal() {
                 "peer_pk": init_peer_id,
                 "service_id": "",
                 "function_name": "",
-                "lambda": "",
+                "lens": "",
             },
             "provenance": Provenance::literal(),
         }]
@@ -212,7 +212,7 @@ fn canon_in_canon() {
         "peer_pk": init_peer_id,
         "service_id": "service..0",
         "function_name": "func",
-        "lambda": "",
+        "lens": "",
     });
 
     let canon_val = canon(json!({
@@ -220,7 +220,7 @@ fn canon_in_canon() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": 1,
@@ -235,7 +235,7 @@ fn canon_in_canon() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": 1,
@@ -247,7 +247,7 @@ fn canon_in_canon() {
                 "peer_pk": init_peer_id,
                 "service_id": "",
                 "function_name": "",
-                "lambda": "",
+                "lens": "",
             },
             "provenance": Provenance::canon(canon_cid),
         }]
@@ -297,7 +297,7 @@ fn lambda_result_iteration() {
             "peer_pk": init_peer_id,
             "service_id": "",
             "function_name": "",
-            "lambda": "",
+            "lens": "",
         },
         "values": [{
             "result": 10,
@@ -305,7 +305,7 @@ fn lambda_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[0].$.field.$.[0]",
+                "lens": ".$.[0].$.field.$.[0]",
             },
             "provenance": Provenance::service_result(val_cid.clone()),
         }, {
@@ -314,7 +314,7 @@ fn lambda_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[0].$.field.$.[1]",
+                "lens": ".$.[0].$.field.$.[1]",
             },
             "provenance": Provenance::service_result(val_cid.clone()),
         }, {
@@ -323,7 +323,7 @@ fn lambda_result_iteration() {
                 "peer_pk": init_peer_id,
                 "service_id": "service..0",
                 "function_name": "func",
-                "lambda": ".$.[0].$.field.$.[2]",
+                "lens": ".$.[0].$.field.$.[2]",
             },
             "provenance": Provenance::service_result(val_cid),
         }]

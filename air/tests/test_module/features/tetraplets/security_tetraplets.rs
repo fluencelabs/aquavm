@@ -126,14 +126,14 @@ fn fold_stream_with_inner_call() {
 
     let expected_trace = vec![
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lambda": ""}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lens": ""}]]),
             0,
             peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lambda": ".$.field"}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lens": ".$.field"}]]),
             0,
             peer = init_peer_id,
             service = "..2",
@@ -174,14 +174,14 @@ fn fold_canon_with_inner_call() {
 
     let expected_trace = vec![
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lambda": ""}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lens": ""}]]),
             0,
             peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lambda": ".$.field"}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lens": ".$.field"}]]),
             1,
             peer = init_peer_id,
             service = "..2",

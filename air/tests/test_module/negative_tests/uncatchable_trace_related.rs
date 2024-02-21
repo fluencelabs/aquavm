@@ -387,11 +387,11 @@ fn canon_result_error() {
     "#
     );
     let prev_tetraplet = json!({
-        "tetraplet": {"function_name": "s", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
+        "tetraplet": {"function_name": "s", "lens": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
         "values": [
             {
                 "result": 42,
-                "tetraplet": {"function_name": "s", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
+                "tetraplet": {"function_name": "s", "lens": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
             },
         ]
     });
@@ -399,11 +399,11 @@ fn canon_result_error() {
     let prev_cid = extract_canon_result_cid(&prev_trace[0]);
     let prev_data = raw_data_from_trace(prev_trace, <_>::default());
     let curr_tetraplet = json!({
-        "tetraplet": {"function_name": "s", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
+        "tetraplet": {"function_name": "s", "lens": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
         "values": [
             {
                 "result": 43,
-                "tetraplet": {"function_name": "s", "lambda": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
+                "tetraplet": {"function_name": "s", "lens": "", "peer_pk": "vm_peer_id_1", "service_id": ""},
             },
         ]
     });

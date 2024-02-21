@@ -290,9 +290,9 @@ fn test_attack_replace_canon_value() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+            "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+                "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }]
@@ -382,13 +382,13 @@ fn test_attack_replace_canon_result_values() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }, {
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 2,
                 "provenance": Provenance::literal(),
             }]
@@ -481,13 +481,13 @@ fn test_attack_replace_canon_result_tetraplet() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }, {
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lambda": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 2,
                 "provenance": Provenance::literal(),
             }]

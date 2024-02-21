@@ -271,7 +271,7 @@ fn canon_with_empty_behaviour() {
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::canon(
-        json!({"tetraplet": {"function_name": "", "lambda": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
+        json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
     )];
 
     assert_eq!(actual_trace, expected_trace);
