@@ -961,12 +961,12 @@ mod tests {
             ExecutionTrace::from(vec![scalar!(
                 json!([[{
                     "function_name": "",
-                    "lambda": "",
+                    "lens": "",
                     "peer_pk": &peer_id,
                     "service_id": "",
                 }], [{
                     "function_name": "",
-                    "lambda": "",
+                    "lens": "",
                     "peer_pk": &peer_id,
                     "service_id": "",
                 }]]),
