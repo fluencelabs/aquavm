@@ -24,7 +24,7 @@ fn delete(is_authorized: bool, _record_id: String) -> String {
     let tetraplets = call_parameters.tetraplets;
     let tetraplet = &tetraplets[0];
 
-    if tetraplet[0].lambda != "$.is_authorized" {
+    if tetraplet[0].lens != "$.is_authorized" {
         return String::from("invalid lambda in tetraplet");
     }
 
