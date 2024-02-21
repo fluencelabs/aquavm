@@ -34,4 +34,4 @@ pub use token::Token;
 pub(super) type LexerResult<T> = std::result::Result<T, LexerError>;
 
 use utils::is_air_alphanumeric;
-use utils::is_lambda_allowed_char;
+use utils::is_lens_allowed_char;

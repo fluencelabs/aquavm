@@ -220,7 +220,7 @@ fn empty_literal_array_fold() {
 }
 
 #[test]
-fn empty_fold_lambda() {
+fn empty_fold_lens() {
     let mut vm = create_avm(echo_call_service(), "A");
     let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable");
 

@@ -176,11 +176,11 @@ impl<'input> CallVariableParser<'input> {
     fn try_parse_as_variable(&mut self) -> LexerResult<()> {
         if self.try_parse_as_canon()?
             || self.try_parse_as_stream()?
-            || self.try_parse_as_lambda_start()?
+            || self.try_parse_as_lens_start()?
         {
             return Ok(());
-        } else if self.is_lambda_started() {
-            self.try_parse_as_lambda()?;
+        } else if self.is_lens_started() {
+            self.try_parse_as_lens()?;
         } else {
             self.try_parse_as_alphanumeric()?;
         }
@@ -219,7 +219,7 @@ impl<'input> CallVariableParser<'input> {
         Ok(false)
     }
 
-    fn try_parse_as_lambda_start(&mut self) -> LexerResult<bool> {
+    fn try_parse_as_lens_start(&mut self) -> LexerResult<bool> {
         self.try_parse_first_met_dot()
     }
 
@@ -232,8 +232,8 @@ impl<'input> CallVariableParser<'input> {
         Ok(())
     }
 
-    fn try_parse_as_lambda(&mut self) -> LexerResult<()> {
-        if !self.lambda_allowed_char() && !self.try_parse_as_flattening() {
+    fn try_parse_as_lens(&mut self) -> LexerResult<()> {
+        if !self.lens_allowed_char() && !self.try_parse_as_flattening() {
             let error_pos = self.pos_in_string_to_parse();
             return Err(LexerError::invalid_lambda(error_pos..error_pos));
         }
@@ -267,7 +267,7 @@ impl<'input> CallVariableParser<'input> {
         Ok(false)
     }
 
-    fn is_lambda_started(&self) -> bool {
+    fn is_lens_started(&self) -> bool {
         self.dot_met()
     }
 
@@ -279,8 +279,8 @@ impl<'input> CallVariableParser<'input> {
         super::is_air_alphanumeric(self.current_char())
     }
 
-    fn lambda_allowed_char(&self) -> bool {
-        super::is_lambda_allowed_char(self.current_char())
+    fn lens_allowed_char(&self) -> bool {
+        super::is_lens_allowed_char(self.current_char())
     }
 
     fn pos_in_string_to_parse(&self) -> AirPos {
