@@ -324,7 +324,7 @@ impl ExecutedCallBuilder {
     }
 
     pub fn lambda(mut self, lambda: impl Into<String>) -> Self {
-        self.tetraplet.lambda = lambda.into();
+        self.tetraplet.lens = lambda.into();
         self
     }
 

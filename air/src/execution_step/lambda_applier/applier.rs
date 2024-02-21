@@ -206,14 +206,14 @@ fn update_tetraplet_with_path(
     original_path: &impl ToString,
     prefix_with_path: bool,
 ) -> RcSecurityTetraplet {
-    let lambda_updated = if prefix_with_path {
-        original_tetraplet.lambda.to_string() + &original_path.to_string()
+    let lens_updated = if prefix_with_path {
+        original_tetraplet.lens.to_string() + &original_path.to_string()
     } else {
         original_path.to_string()
     };
 
     SecurityTetraplet {
-        lambda: lambda_updated,
+        lens: lens_updated,
         ..original_tetraplet.clone()
     }
     .into()

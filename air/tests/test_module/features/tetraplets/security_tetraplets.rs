@@ -87,7 +87,7 @@ fn fold_with_inner_call() {
             peer_pk: set_variable_vm_peer_id.clone(),
             service_id: service_id.clone(),
             function_name: function_name.clone(),
-            lambda: format!(".$.[{}]", i),
+            lens: format!(".$.[{}]", i),
         };
 
         let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet.clone()]];
@@ -233,14 +233,14 @@ fn fold_lambda() {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        lambda: String::from(".$.args.$.[9]"),
+        lens: String::from(".$.args.$.[9]"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: test_params.init_peer_id.clone(),
         service_id: String::new(),
         function_name: String::new(),
-        lambda: String::new(),
+        lens: String::new(),
     };
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
@@ -281,14 +281,14 @@ fn check_tetraplet_works_correctly() {
         peer_pk: set_variable_vm_peer_id.clone(),
         service_id: service_id.clone(),
         function_name: function_name.clone(),
-        lambda: String::from(".$.args"),
+        lens: String::from(".$.args"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        lambda: String::from(".$.args.[0]"),
+        lens: String::from(".$.args.[0]"),
     };
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
@@ -438,6 +438,6 @@ fn to_app_service_tetraplet(tetraplet: marine_rs_sdk::SecurityTetraplet) -> flue
         peer_pk: tetraplet.peer_pk,
         service_id: tetraplet.service_id,
         function_name: tetraplet.function_name,
-        lambda: tetraplet.lambda,
+        lens: tetraplet.lens,
     }
 }

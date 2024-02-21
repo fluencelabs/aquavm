@@ -15,11 +15,11 @@ name = "air_interpreter_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk = {version = "0.13.0", optional = true }
+marine-rs-sdk = {version = "0.14.0", optional = true }
 fluence-it-types = { version = "0.4.1", optional = true }
 air-interpreter-sede = { version = "0.1.0", path = "../interpreter-sede", features = ["msgpack"] }
 
-marine-call-parameters = { version = "0.13.0", default-features = false }
+marine-call-parameters = { version = "0.14.0", default-features = false }
 serde = "1.0.190"
 serde_json = "1.0.108"
 serde_bytes = "0.11.12"

@@ -149,7 +149,7 @@ fn apply_canon_stream(
     let value = JValuable::as_jvalue(&&canon_stream.canon_stream);
     let tetraplet = canon_stream.tetraplet().clone();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.lambda, position);
+    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.lens, position);
     let result = ValueAggregate::from_canon_result(value, canon_stream.cid.clone());
     Ok(result)
 }
@@ -187,7 +187,7 @@ fn apply_canon_stream_map(
     let value = JValuable::as_jvalue(&&canon_stream_map.canon_stream_map);
     let tetraplet = canon_stream_map.tetraplet();
     let position = trace_ctx.trace_pos().map_err(UncatchableError::from)?;
-    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.lambda, position);
+    let value = CanonResultAggregate::new(value, tetraplet.peer_pk.as_str().into(), &tetraplet.lens, position);
     let result = ValueAggregate::from_canon_result(value, canon_stream_map.cid.clone());
     Ok(result)
 }
