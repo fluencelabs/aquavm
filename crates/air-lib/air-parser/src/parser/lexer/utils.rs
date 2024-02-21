@@ -18,7 +18,7 @@ pub(super) fn is_air_alphanumeric(ch: char) -> bool {
     ch.is_alphanumeric() || ch == '_' || ch == '-'
 }
 
-pub(super) fn is_lambda_allowed_char(ch: char) -> bool {
+pub(super) fn is_lens_allowed_char(ch: char) -> bool {
     // good old switch faster here than hash set
     match ch {
         '$' => true,
