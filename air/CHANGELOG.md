@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.62.0](https://github.com/fluencelabs/aquavm/compare/air-v0.61.0...air-v0.62.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* Rust channel update dedicated to ENIAC Day
+
+### Features
+
+* Rust channel update dedicated to ENIAC Day ([bab0c00](https://github.com/fluencelabs/aquavm/commit/bab0c002f5200099ab07a8fccf12f8ca7a260b87))
+
 ## [0.61.0](https://github.com/fluencelabs/aquavm/compare/air-v0.60.0...air-v0.61.0) (2024-02-22)
 
 
