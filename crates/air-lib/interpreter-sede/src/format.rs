@@ -35,9 +35,11 @@ pub trait Format<Value> {
 }
 
 pub trait BorrowFormat<'data, Value: 'data>: Format<Value> {
+    #[allow(dead_code)]
     fn borrow_from_slice(&self, slice: &'data [u8]) -> Result<Value, Self::DeserializationError>;
 }
 
+#[allow(dead_code)]
 pub trait ArchivedFormat<Value>: Format<Value> {
     type Archived;
     type ValidationError;
