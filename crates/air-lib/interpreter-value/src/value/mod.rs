@@ -37,7 +37,6 @@ use std::rc::Rc;
 pub use self::index::Index;
 use crate::JsonString;
 pub use crate::Map;
-pub use serde::ser::Serializer;
 pub use serde_json::Number;
 
 /// Represents any valid JSON value with a cheap to clone Rc-based representation.
