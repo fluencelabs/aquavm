@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.61.0...avm-client-v0.62.0) (2024-02-22)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
 ## [0.61.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.60.0...avm-client-v0.61.0) (2024-02-22)
 
 
