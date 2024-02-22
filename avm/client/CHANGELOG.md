@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.61.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.60.0...avm-client-v0.61.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
 ## [0.60.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.59.0...avm-client-v0.60.0) (2024-02-20)
 
 
