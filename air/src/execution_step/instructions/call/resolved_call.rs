@@ -58,7 +58,7 @@ struct ResolvedArguments {
 #[derive(Debug)]
 enum CheckArgsResult<T> {
     Ok(T),
-    Joinable(ExecutionError),
+    Joinable(#[allow(dead_code)] ExecutionError),
 }
 
 impl<T> CheckArgsResult<T> {
