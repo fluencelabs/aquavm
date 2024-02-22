@@ -323,8 +323,8 @@ impl ExecutedCallBuilder {
         self
     }
 
-    pub fn json_path(mut self, json_path: impl Into<String>) -> Self {
-        self.tetraplet.json_path = json_path.into();
+    pub fn lens(mut self, lens: impl Into<String>) -> Self {
+        self.tetraplet.lens = lens.into();
         self
     }
 

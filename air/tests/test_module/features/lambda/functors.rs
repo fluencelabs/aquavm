@@ -94,16 +94,16 @@ fn length_functor_for_stream() {
         executed_state::ap(0),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
             "values": [
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                     "trace_pos": 0,
                 },
                 {
                     "result": 1,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                     "trace_pos": 1,
                 },
             ]
@@ -135,7 +135,7 @@ fn length_functor_for_empty_stream() {
 
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+            json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": []} ),
         ),
         unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
@@ -170,9 +170,9 @@ fn length_functor_for_canon_stream() {
         executed_state::ap(0),
         executed_state::ap(0),
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
-                "values": [{"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 0},
-                           {"result": 1, "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 1}
+            json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
+                "values": [{"result": 1, "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 0},
+                           {"result": 1, "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""}, "trace_pos": 1}
                 ]} ),
         ),
         unused!(2, peer = init_peer_id, service = "..0", args = vec![2]),
@@ -202,7 +202,7 @@ fn length_functor_for_empty_canon_stream() {
 
     let expected_trace = vec![
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""}, "values": []} ),
+            json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""}, "values": []} ),
         ),
         unused!(0, peer = init_peer_id, service = "..0", args = vec![0]),
     ];

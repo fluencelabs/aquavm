@@ -64,7 +64,7 @@ impl<'ctx> Iterable<'ctx> for IterableResolvedCall {
         };
 
         let mut tetraplet = (*tetraplet).clone();
-        tetraplet.add_lambda(&format!(".$.[{}]", self.cursor));
+        tetraplet.add_lens(&format!(".$.[{}]", self.cursor));
 
         let result = IterableItem::RefValue((jvalue, tetraplet.into(), trace_pos, provenance));
         Some(result)

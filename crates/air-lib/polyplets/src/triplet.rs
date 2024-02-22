@@ -36,7 +36,7 @@ impl From<ResolvedTriplet> for SecurityTetraplet {
             peer_pk: triplet.peer_pk,
             service_id: triplet.service_id,
             function_name: triplet.function_name,
-            json_path: String::new(),
+            lens: String::new(),
         }
     }
 }

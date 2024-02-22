@@ -173,7 +173,7 @@ fn test_attack_replace_tetraplet() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 type_name: "marine_call_parameters::SecurityTetraplet",
-                cid_repr: "bagaaihraqlxlbr5q54odmlqwrzpw4smuxzzqbrfas6c7ajhb73samtrjkkva".into(),
+                cid_repr: "bagaaihraxnms7hna6c27qhgfzhyayz62y2q2dxc4dwriq33tdilonmq4ruoq".into(),
             }
             .into()
         )
@@ -256,7 +256,7 @@ fn test_attack_replace_call_result() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 type_name: "air_interpreter_data::executed_state::ServiceResultCidAggregate",
-                cid_repr: "bagaaihrai3ii6rephch2kv2efkbolmhfjvpj2w3fyr2tj6lavd4yiloy2ybq".into(),
+                cid_repr: "bagaaihradr2m7mlsvqhtnzszpuifqgiytee6zpyxyfzxbuqcmf23fgmbemqq".into(),
             }
             .into()
         )
@@ -290,9 +290,9 @@ fn test_attack_replace_canon_value() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+            "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+                "tetraplet": {"peer_pk": &alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }]
@@ -346,7 +346,7 @@ fn test_attack_replace_canon_value() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 type_name: "air_interpreter_data::executed_state::CanonCidAggregate",
-                cid_repr: "bagaaihram3i44lmbxmukumwohtp2dkocgdqjwzixddzxjmzlvhea7aid5l7q".into(),
+                cid_repr: "bagaaihracce5ggyu3cbxm4xh35mjlmb7qb3xltlwoqqas62e2yftii4x4msq".into(),
             }
             .into()
         )
@@ -382,13 +382,13 @@ fn test_attack_replace_canon_result_values() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }, {
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 2,
                 "provenance": Provenance::literal(),
             }]
@@ -445,7 +445,7 @@ fn test_attack_replace_canon_result_values() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-                cid_repr: "bagaaihrar7xfyl5usjhn5s6xisvwkh55zyq5lvjnwr6j5j3yjutf55aowqea".into(),
+                cid_repr: "bagaaihraxsxqmnfevwk6briizagprfikpm4x73mdf626mm5xju2f33vp7c7q".into(),
             }
             .into()
         )
@@ -481,13 +481,13 @@ fn test_attack_replace_canon_result_tetraplet() {
     let mut mallory_cid_state = ExecutionCidState::new();
     let alice_canon_cid = canon_tracked(
         json!({
-            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+            "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
             "values": [{
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 1,
                 "provenance": Provenance::literal(),
             }, {
-                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "json_path": ""},
+                "tetraplet": {"peer_pk": alice_peer_id, "service_id": "", "function_name": "", "lens": ""},
                 "result": 2,
                 "provenance": Provenance::literal(),
             }]
@@ -548,7 +548,7 @@ fn test_attack_replace_canon_result_tetraplet() {
         PreparationError::CidStoreVerificationError(
             CidVerificationError::ValueMismatch {
                 type_name: "air_interpreter_data::executed_state::CanonResultCidAggregate",
-                cid_repr: "bagaaihrar7xfyl5usjhn5s6xisvwkh55zyq5lvjnwr6j5j3yjutf55aowqea".into(),
+                cid_repr: "bagaaihraxsxqmnfevwk6briizagprfikpm4x73mdf626mm5xju2f33vp7c7q".into(),
             }
             .into()
         )

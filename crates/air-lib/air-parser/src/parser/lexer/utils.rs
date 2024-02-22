@@ -18,10 +18,7 @@ pub(super) fn is_air_alphanumeric(ch: char) -> bool {
     ch.is_alphanumeric() || ch == '_' || ch == '-'
 }
 
-pub(super) fn is_json_path_allowed_char(ch: char) -> bool {
-    // we don't have spec for json path now, but some possible example could be found here
-    // https://packagist.org/packages/softcreatr/jsonpath
-
+pub(super) fn is_lens_allowed_char(ch: char) -> bool {
     // good old switch faster here than hash set
     match ch {
         '$' => true,

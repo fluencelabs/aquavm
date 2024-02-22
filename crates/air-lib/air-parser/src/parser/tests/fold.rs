@@ -299,7 +299,7 @@ fn fold_with_scalar_and_last_instruction() {
 }
 
 #[test]
-fn fold_json_path() {
+fn fold_lambda() {
     let source_code = r#"
         ; comment
         (fold members.$.[123321] m (null)) ;;; comment
