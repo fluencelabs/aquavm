@@ -1,6 +1,6 @@
 [package]
 name = "aquavm-air-cli"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 description = "AIR execution and printing tool"
 authors = ["Fluence Labs"]
@@ -10,15 +10,15 @@ documentation = "https://docs.rs/aquavm-air-cli"
 keywords = ["fluence", "air", "tracing"]
 
 [dependencies]
-aquavm-air = { version = "0.60.0", path = "../../../air" }
-air-beautifier = { version = "0.4.2", path = "../../../crates/beautifier" }
-avm-data-store = { version = "0.7.8", path = "../../../crates/data-store" }
-avm-interface = { version = "0.32.0", path = "../../../avm/interface" }
-air-interpreter-interface = { version = "0.18.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
-air-interpreter-data = { version = "0.17.1", path = "../../../crates/air-lib/interpreter-data" }
+aquavm-air = { version = "0.61.0", path = "../../../air" }
+air-beautifier = { version = "0.4.3", path = "../../../crates/beautifier" }
+avm-data-store = { version = "0.7.9", path = "../../../crates/data-store" }
+avm-interface = { version = "0.32.1", path = "../../../avm/interface" }
+air-interpreter-interface = { version = "0.19.0", path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+air-interpreter-data = { version = "0.17.2", path = "../../../crates/air-lib/interpreter-data" }
 air-interpreter-sede = { version = "0.1.0", path = "../../../crates/air-lib/interpreter-sede", default-features = false }
-avm-server = { version = "0.36.0", path = "../../../avm/server" }
-air-test-utils = { version = "0.16.0",path = "../../../crates/air-lib/test-utils", optional = true }
+avm-server = { version = "0.37.0", path = "../../../avm/server" }
+air-test-utils = { version = "0.17.0",path = "../../../crates/air-lib/test-utils", optional = true }
 
 clap = { version = "4.4.7", features = ["derive", "env"] }
 eyre = "0.6.11"

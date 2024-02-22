@@ -25,6 +25,11 @@
   * dependencies
     * air-utils bumped from 0.1.1 to 0.2.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.2 to 0.12.0
+    * polyplets bumped from 0.6.0 to 0.7.0
+
 ## [0.17.1](https://github.com/fluencelabs/aquavm/compare/air-interpreter-data-v0.17.0...air-interpreter-data-v0.17.1) (2024-02-20)
 
 

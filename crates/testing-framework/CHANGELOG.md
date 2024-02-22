@@ -75,6 +75,25 @@
   * dependencies
     * air-test-utils bumped from 0.15.0 to 0.15.1
 
+## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.9.0...air-testing-framework-v0.10.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.16.0 to 0.17.0
+    * aquavm-air-parser bumped from 0.11.2 to 0.12.0
+
 ## [0.9.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.8.4...air-testing-framework-v0.9.0) (2024-02-20)
 
 
