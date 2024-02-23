@@ -27,6 +27,7 @@ const tetrapletRepr = new MsgPackRepr();
 const callResultsRepr = new MulticodecRepr(new MsgPackRepr());
 //
 const defaultAquaVMRuntimeMemoryLimit = Number("4294967296");
+const aquaVMRuntimeHardLimitsAreDisabled = Boolean(false);
 
 /**
  * Encodes arguments into JSON array suitable for marine-js
@@ -66,7 +67,7 @@ export function serializeAvmArgs(
         air_size_limit: defaultAquaVMRuntimeMemoryLimit,
         particle_size_limit: defaultAquaVMRuntimeMemoryLimit,
         call_result_size_limit: defaultAquaVMRuntimeMemoryLimit,
-        hard_limit_enabled: defaultAquaVMRuntimeMemoryLimit,
+        hard_limit_enabled: aquaVMRuntimeHardLimitsAreDisabled,
     };
 
     return [air, Array.from(prevData), Array.from(data), runParamsSnakeCase, Array.from(encodedCallResults)];
