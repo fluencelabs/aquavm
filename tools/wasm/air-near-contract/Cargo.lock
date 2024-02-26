@@ -164,7 +164,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-near-contract"
-version = "0.62.0"
+version = "0.63.0"
 dependencies = [
  "air-interpreter-interface",
  "aquavm-air",
@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.62.0"
+version = "0.63.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",

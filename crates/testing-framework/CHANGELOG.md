@@ -79,6 +79,10 @@
   * dependencies
     * air-test-utils bumped from 0.17.0 to 0.17.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.17.1 to 0.17.2
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.9.0...air-testing-framework-v0.10.0) (2024-02-22)
 
 
