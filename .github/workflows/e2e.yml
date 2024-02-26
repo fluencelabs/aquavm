@@ -122,7 +122,7 @@ jobs:
       - avm
       - nox-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@main
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
@@ -131,7 +131,7 @@ jobs:
     needs:
       - avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@main
     with:
       avm-version: "${{ needs.avm.outputs.version }}"
 
