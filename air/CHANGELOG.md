@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.0](https://github.com/fluencelabs/aquavm/compare/air-v0.62.0...air-v0.63.0) (2024-02-26)
+
+
+### Miscellaneous Chores
+
+* **air:** Synchronize air-interpreter versions
+
 ## [0.62.0](https://github.com/fluencelabs/aquavm/compare/air-v0.61.0...air-v0.62.0) (2024-02-22)
 
 
