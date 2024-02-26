@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["init_logger","json_output_mode"]};
