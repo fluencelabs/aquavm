@@ -334,11 +334,10 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
         default_modules_config: None,
     };
 
-    let service_base_dir = std::env::temp_dir();
+    let service_working_dir = std::env::temp_dir();
 
     AppServiceConfig {
-        service_working_dir: service_base_dir.clone(),
-        service_base_dir,
+        service_working_dir,
         marine_config,
     }
 }
@@ -425,7 +424,6 @@ fn to_app_service_call_parameters(
         service_creator_peer_id: call_parameters.service_creator_peer_id,
         host_id: call_parameters.host_id,
         worker_id: call_parameters.worker_id,
-        particle_id: call_parameters.particle_id,
         tetraplets: call_parameters
             .tetraplets
             .into_iter()
