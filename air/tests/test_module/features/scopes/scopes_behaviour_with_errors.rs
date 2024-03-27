@@ -19,16 +19,16 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
-fn check_that_scalar_is_visible_only_inside_fold_block() {
+#[tokio::test]
+async fn check_that_scalar_is_visible_only_inside_fold_block() {
     let variable_setter_peer_id = "variable_setter_peer_id";
-    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);
+    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id).await;
 
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id);
+    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id).await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
-    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id).await;
 
     let script = format!(
         r#"
@@ -76,16 +76,16 @@ fn check_that_scalar_is_visible_only_inside_fold_block() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
+#[tokio::test]
+async fn scopes_check_that_scalar_not_overwritten_by_fold_end() {
     let variable_setter_peer_id = "variable_setter_peer_id";
-    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id);
+    let mut variable_setter_vm = create_avm(set_variable_call_service(json!([1, 2, 3])), variable_setter_peer_id).await;
 
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id);
+    let mut fallible_peer_vm = create_avm(fallible_call_service("fail"), fallible_peer_id).await;
 
     let variable_receiver_peer_id = "variable_receiver_peer_id";
-    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id);
+    let mut variable_receiver_peer_vm = create_avm(echo_call_service(), variable_receiver_peer_id).await;
 
     let script = format!(
         r#"

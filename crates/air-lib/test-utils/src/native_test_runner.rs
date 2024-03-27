@@ -23,22 +23,33 @@ use avm_server::avm_runner::*;
 use avm_server::into_raw_result;
 use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
 
 pub struct NativeAirRunner {
     current_peer_id: String,
     test_init_parameters: TestInitParameters,
 }
 
-impl AirRunner for NativeAirRunner {
+impl NativeAirRunner {
     fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
         Self {
             current_peer_id: current_peer_id.into(),
             test_init_parameters,
         }
     }
+}
+impl AirRunner for NativeAirRunner {
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
+        let current_peer_id = current_peer_id.into();
+        async move { Self::new(current_peer_id, test_init_parameters) }.boxed_local()
+    }
 
-    fn call(
-        &mut self,
+    fn call<'this>(
+        &'this mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
@@ -49,46 +60,54 @@ impl AirRunner for NativeAirRunner {
         call_results: avm_server::CallResults,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        // some inner parts transformations
-        let raw_call_results = into_raw_result(call_results);
-        let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
+    ) -> LocalBoxFuture<'this, Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>>> {
+        let air = air.into();
+        let prev_data = prev_data.into();
+        let data = data.into();
+        let init_peer_id = init_peer_id.into();
+        let keypair = keypair.clone();
+        async move {
+            // some inner parts transformations
+            let raw_call_results = into_raw_result(call_results);
+            let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
 
-        let current_peer_id =
-            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+            let current_peer_id =
+                override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        let key_format = keypair.key_format().into();
-        let secret_key_bytes = keypair.secret().unwrap();
+            let key_format = keypair.key_format().into();
+            let secret_key_bytes = keypair.secret().unwrap();
 
-        let AquaVMRuntimeLimits {
-            air_size_limit,
-            particle_size_limit,
-            call_result_size_limit,
-            hard_limit_enabled,
-        } = self.test_init_parameters.into();
-
-        let outcome = air::execute_air(
-            air.into(),
-            prev_data.into(),
-            data.into(),
-            RunParameters {
-                init_peer_id: init_peer_id.into(),
-                current_peer_id,
-                timestamp,
-                ttl,
-                key_format,
-                secret_key_bytes,
-                particle_id,
+            let AquaVMRuntimeLimits {
                 air_size_limit,
                 particle_size_limit,
                 call_result_size_limit,
                 hard_limit_enabled,
-            },
-            raw_call_results,
-        );
-        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+            } = self.test_init_parameters.into();
 
-        Ok(outcome)
+            let outcome = air::execute_air(
+                air.into(),
+                prev_data.into(),
+                data.into(),
+                RunParameters {
+                    init_peer_id: init_peer_id.into(),
+                    current_peer_id,
+                    timestamp,
+                    ttl,
+                    key_format,
+                    secret_key_bytes,
+                    particle_id,
+                    air_size_limit,
+                    particle_size_limit,
+                    call_result_size_limit,
+                    hard_limit_enabled,
+                },
+                raw_call_results,
+            );
+            let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+
+            Ok(outcome)
+        }
+        .boxed_local()
     }
 
     fn get_current_peer_id(&self) -> &str {

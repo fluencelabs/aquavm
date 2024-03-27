@@ -18,7 +18,13 @@ use crate::prelude::TestInitParameters;
 use crate::test_runner::AirRunner;
 
 use avm_server::avm_runner::*;
+
 use fluence_keypair::KeyPair;
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
+use marine_wasmtime_backend::WasmtimeConfig;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
+use object_pool::Reusable;
 use once_cell::sync::OnceCell;
 
 use std::path::PathBuf;
@@ -30,43 +36,67 @@ const RELEASE_AIR_WASM_PATH: &str = "../target/wasm32-wasi/release/air_interpret
 
 pub struct WasmAirRunner {
     current_peer_id: String,
-    runner: object_pool::Reusable<'static, AVMRunner>,
+    runner: Reusable<'static, AVMRunner<WasmtimeWasmBackend>>,
 }
 
-fn make_pooled_avm_runner(test_init_parameters: TestInitParameters) -> AVMRunner {
-    let logging_mask = i32::MAX;
+fn create_wasm_backend() -> WasmtimeWasmBackend {
+    let mut config = WasmtimeConfig::default();
+    config
+        .debug_info(true)
+        .epoch_interruption(false)
+        .wasm_backtrace(true);
 
+    WasmtimeWasmBackend::new(config).unwrap()
+}
+
+async fn make_pooled_avm_runner(
+    test_init_parameters: TestInitParameters,
+) -> AVMRunner<WasmtimeWasmBackend> {
+    let logging_mask = i32::MAX;
+    let wasm_backend = create_wasm_backend();
     AVMRunner::new(
         PathBuf::from(AIR_WASM_PATH),
         Some(AVM_MAX_HEAP_SIZE),
         test_init_parameters.into(),
         logging_mask,
+        wasm_backend,
     )
+    .await
     .expect("vm should be created")
 }
 
 impl AirRunner for WasmAirRunner {
-    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
-        static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner>> = OnceCell::new();
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
+        let current_peer_id = current_peer_id.into();
+        async move {
+            static POOL_CELL: OnceCell<object_pool::Pool<AVMRunner<WasmtimeWasmBackend>>> =
+                OnceCell::new();
+            let pool = POOL_CELL.get_or_init(|| {
+                object_pool::Pool::new(
+                    // we create an empty pool and let it fill on demand
+                    0,
+                    || unreachable!(),
+                )
+            });
 
-        let pool = POOL_CELL.get_or_init(|| {
-            object_pool::Pool::new(
-                // we create an empty pool and let it fill on demand
-                0,
-                || unreachable!(),
-            )
-        });
+            let runner = match pool.try_pull() {
+                Some(runner) => runner,
+                None => Reusable::new(pool, make_pooled_avm_runner(test_init_parameters).await),
+            };
 
-        let runner = pool.pull(|| make_pooled_avm_runner(test_init_parameters));
-
-        Self {
-            current_peer_id: current_peer_id.into(),
-            runner,
+            Self {
+                current_peer_id: current_peer_id.into(),
+                runner,
+            }
         }
+        .boxed_local()
     }
 
-    fn call(
-        &mut self,
+    fn call<'this>(
+        &'this mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
@@ -77,22 +107,33 @@ impl AirRunner for WasmAirRunner {
         call_results: avm_server::CallResults,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        let current_peer_id =
-            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+    ) -> LocalBoxFuture<'this, Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>>> {
+        let air = air.into();
+        let prev_data = prev_data.into();
+        let data = data.into();
+        let init_peer_id = init_peer_id.into();
+        let keypair = keypair.clone();
+        async move {
+            let current_peer_id =
+                override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        Ok(self.runner.call(
-            air,
-            prev_data,
-            data,
-            init_peer_id,
-            timestamp,
-            ttl,
-            current_peer_id,
-            call_results,
-            keypair,
-            particle_id,
-        )?)
+            Ok(self
+                .runner
+                .call(
+                    air,
+                    prev_data,
+                    data,
+                    init_peer_id,
+                    timestamp,
+                    ttl,
+                    current_peer_id,
+                    call_results,
+                    &keypair,
+                    particle_id,
+                )
+                .await?)
+        }
+        .boxed_local()
     }
 
     fn get_current_peer_id(&self) -> &str {
@@ -104,29 +145,39 @@ impl AirRunner for WasmAirRunner {
 pub struct ReleaseWasmAirRunner {
     current_peer_id: String,
     // these instances are not cached, as benches create relatively small number of instances
-    runner: AVMRunner,
+    runner: AVMRunner<WasmtimeWasmBackend>,
 }
 
 impl AirRunner for ReleaseWasmAirRunner {
-    fn new(current_peer_id: impl Into<String>, test_init_parameters: TestInitParameters) -> Self {
-        let logging_mask = i32::MAX;
+    fn new(
+        current_peer_id: impl Into<String>,
+        test_init_parameters: TestInitParameters,
+    ) -> LocalBoxFuture<'static, Self> {
+        let current_peer_id = current_peer_id.into();
+        async move {
+            let logging_mask = i32::MAX;
 
-        let runner = AVMRunner::new(
-            PathBuf::from(RELEASE_AIR_WASM_PATH),
-            Some(AVM_MAX_HEAP_SIZE),
-            test_init_parameters.into(),
-            logging_mask,
-        )
-        .expect("vm should be created");
+            let wasm_backend = create_wasm_backend();
+            let runner = AVMRunner::new(
+                PathBuf::from(RELEASE_AIR_WASM_PATH),
+                Some(AVM_MAX_HEAP_SIZE),
+                test_init_parameters.into(),
+                logging_mask,
+                wasm_backend,
+            )
+            .await
+            .expect("vm should be created");
 
-        Self {
-            current_peer_id: current_peer_id.into(),
-            runner,
+            Self {
+                current_peer_id: current_peer_id.into(),
+                runner,
+            }
         }
+        .boxed_local()
     }
 
-    fn call(
-        &mut self,
+    fn call<'this>(
+        &'this mut self,
         air: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
@@ -137,22 +188,33 @@ impl AirRunner for ReleaseWasmAirRunner {
         call_results: avm_server::CallResults,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> Result<RawAVMOutcome, Box<dyn std::error::Error>> {
-        let current_peer_id =
-            override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
+    ) -> LocalBoxFuture<'this, Result<RawAVMOutcome, Box<dyn std::error::Error + 'this>>> {
+        let air = air.into();
+        let prev_data = prev_data.into();
+        let data = data.into();
+        let init_peer_id = init_peer_id.into();
+        let keypair = keypair.clone();
+        async move {
+            let current_peer_id =
+                override_current_peer_id.unwrap_or_else(|| self.current_peer_id.clone());
 
-        Ok(self.runner.call(
-            air,
-            prev_data,
-            data,
-            init_peer_id,
-            timestamp,
-            ttl,
-            current_peer_id,
-            call_results,
-            keypair,
-            particle_id,
-        )?)
+            Ok(self
+                .runner
+                .call(
+                    air,
+                    prev_data,
+                    data,
+                    init_peer_id,
+                    timestamp,
+                    ttl,
+                    current_peer_id,
+                    call_results,
+                    &keypair,
+                    particle_id,
+                )
+                .await?)
+        }
+        .boxed_local()
     }
 
     fn get_current_peer_id(&self) -> &str {

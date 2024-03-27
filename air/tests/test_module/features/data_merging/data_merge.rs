@@ -18,13 +18,14 @@ use air::ExecutionCidState;
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
 use pretty_assertions::assert_eq;
 
 use std::collections::HashMap;
 use std::ops::Deref;
 
-#[test]
-fn merge_streams_in_two_fold() {
+#[tokio::test]
+async fn merge_streams_in_two_fold() {
     use executed_state::*;
 
     let set_variable_peer_id = "set_variable_peer_id";
@@ -34,9 +35,10 @@ fn merge_streams_in_two_fold() {
     let mut set_variable = create_avm(
         set_variable_call_service(json!([vm_1_peer_id, vm_2_peer_id])),
         set_variable_peer_id,
-    );
-    let mut vm1 = create_avm(return_string_call_service(vm_1_peer_id), vm_1_peer_id);
-    let mut vm2 = create_avm(return_string_call_service(vm_2_peer_id), vm_2_peer_id);
+    )
+    .await;
+    let mut vm1 = create_avm(return_string_call_service(vm_1_peer_id), vm_1_peer_id).await;
+    let mut vm2 = create_avm(return_string_call_service(vm_2_peer_id), vm_2_peer_id).await;
 
     let script = format!(
         r#"
@@ -176,19 +178,22 @@ fn merge_streams_in_two_fold() {
     assert!(result_4.next_peer_pks.is_empty());
 }
 
-#[test]
-fn stream_merge() {
-    let neighborhood_call_service: CallServiceClosure = Box::new(|params| -> CallServiceResult {
-        let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
-        let args: Vec<Vec<JValue>> =
-            serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("valid json");
-        assert_eq!(args[0].len(), args_count);
+#[tokio::test]
+async fn stream_merge() {
+    let neighborhood_call_service: CallServiceClosure = Box::new(|params| {
+        async move {
+            let args_count = (params.function_name.as_bytes()[0] - b'0') as usize;
+            let args: Vec<Vec<serde_json::Value>> =
+                serde_json::from_value(serde_json::Value::Array(params.arguments)).expect("valid json");
+            assert_eq!(args[0].len(), args_count);
 
-        CallServiceResult::ok(json!(args))
+            CallServiceResult::ok(json!(args))
+        }
+        .boxed_local()
     });
 
-    let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A");
-    let mut vm2 = create_avm(neighborhood_call_service, "B");
+    let mut vm1 = create_avm(set_variable_call_service(json!("peer_id")), "A").await;
+    let mut vm2 = create_avm(neighborhood_call_service, "B").await;
 
     let script = r#"
         (seq
@@ -219,8 +224,8 @@ fn stream_merge() {
     checked_call_vm!(vm2, <_>::default(), script, "", result.data);
 }
 
-#[test]
-fn fold_merge() {
+#[tokio::test]
+async fn fold_merge() {
     let set_variable_vm_id = "set_variable";
     let local_vm_id = "local_vm";
 
@@ -231,7 +236,8 @@ fn fold_merge() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::Argument(0)),
         set_variable_vm_id,
-    );
+    )
+    .await;
 
     let script = format!(
         include_str!("./scripts/inner_folds_v1.air"),
@@ -244,7 +250,7 @@ fn fold_merge() {
     let mut local_vms_results = Vec::with_capacity(7);
     for vm_id in 0..7 {
         let peer_id = format!("peer_{vm_id}");
-        let mut vm = create_avm(echo_call_service(), peer_id);
+        let mut vm = create_avm(echo_call_service(), peer_id).await;
         let result = checked_call_vm!(
             vm,
             <_>::default(),
@@ -257,7 +263,7 @@ fn fold_merge() {
         local_vms_results.push(result);
     }
 
-    let mut local_vm = create_avm(echo_call_service(), local_vm_id);
+    let mut local_vm = create_avm(echo_call_service(), local_vm_id).await;
     let result_1 = checked_call_vm!(local_vm, <_>::default(), &script, "", local_vms_results[0].data.clone());
     let result_2 = checked_call_vm!(
         local_vm,
@@ -360,11 +366,11 @@ fn fold_merge() {
     }
 }
 
-#[test]
-fn test_merge_scalar_match() {
+#[tokio::test]
+async fn test_merge_scalar_match() {
     let air = r#"(call "peer" ("" "") [] var)"#;
 
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
     let mut cid_store = ExecutionCidState::new();
 
     let trace = ExecutionTrace::from(vec![scalar_tracked!(42, cid_store, peer = "peer")]);
@@ -372,10 +378,10 @@ fn test_merge_scalar_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
-fn test_merge_scalar_mismatch() {
+#[tokio::test]
+async fn test_merge_scalar_mismatch() {
     let air = r#"(call "peer" ("" "") [] var)"#;
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
 
     let mut cid_state1 = ExecutionCidState::default();
     let mut cid_state2 = ExecutionCidState::default();
@@ -386,7 +392,7 @@ fn test_merge_scalar_mismatch() {
     let data1 = raw_data_from_trace(trace1, cid_state1);
     let data2 = raw_data_from_trace(trace2, cid_state2);
 
-    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).await.unwrap();
     assert_eq!(result.ret_code, 20000);
     assert_eq!(
         result.error_message,
@@ -402,11 +408,11 @@ fn test_merge_scalar_mismatch() {
     );
 }
 
-#[test]
-fn test_merge_stream_match() {
+#[tokio::test]
+async fn test_merge_stream_match() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
 
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
     let mut cid_store = ExecutionCidState::new();
 
     let trace = ExecutionTrace::from(vec![stream_tracked!(42, 0, cid_store, peer = "peer")]);
@@ -414,10 +420,10 @@ fn test_merge_stream_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
-fn test_merge_stream_match_gen() {
+#[tokio::test]
+async fn test_merge_stream_match_gen() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
 
     let mut cid_state1 = ExecutionCidState::default();
     let mut cid_state2 = ExecutionCidState::default();
@@ -428,10 +434,10 @@ fn test_merge_stream_match_gen() {
     checked_call_vm!(avm, <_>::default(), air, data1, data2);
 }
 
-#[test]
-fn test_merge_stream_mismatch() {
+#[tokio::test]
+async fn test_merge_stream_mismatch() {
     let air = r#"(call "peer" ("" "") [] $var)"#;
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
 
     let mut cid_state1 = ExecutionCidState::default();
     let mut cid_state2 = ExecutionCidState::default();
@@ -442,7 +448,7 @@ fn test_merge_stream_mismatch() {
     let data1 = raw_data_from_trace(trace1, cid_state1);
     let data2 = raw_data_from_trace(trace2, cid_state2);
 
-    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).await.unwrap();
     assert_eq!(result.ret_code, 20000);
     assert_eq!(
         result.error_message,
@@ -458,11 +464,11 @@ fn test_merge_stream_mismatch() {
     );
 }
 
-#[test]
-fn test_merge_unused_match() {
+#[tokio::test]
+async fn test_merge_unused_match() {
     let air = r#"(call "peer" ("" "") [])"#;
 
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
 
     let trace = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
     let data = raw_data_from_trace(trace, <_>::default());
@@ -470,17 +476,17 @@ fn test_merge_unused_match() {
     checked_call_vm!(avm, <_>::default(), air, data.clone(), data);
 }
 
-#[test]
-fn test_merge_unused_mismatch() {
+#[tokio::test]
+async fn test_merge_unused_mismatch() {
     let air = r#"(call "peer" ("" "") [])"#;
-    let mut avm = create_avm(echo_call_service(), "peer");
+    let mut avm = create_avm(echo_call_service(), "peer").await;
 
     let trace1 = ExecutionTrace::from(vec![unused!(42, peer = "peer")]);
     let trace2 = ExecutionTrace::from(vec![unused!(43, peer = "peer")]);
     let data1 = raw_data_from_trace(trace1, <_>::default());
     let data2 = raw_data_from_trace(trace2, <_>::default());
 
-    let result = avm.call(air, data1, data2, <_>::default()).unwrap();
+    let result = avm.call(air, data1, data2, <_>::default()).await.unwrap();
     // TODO rewrite here and above with assert_error_eq
     assert_eq!(result.ret_code, 20000);
     assert_eq!(

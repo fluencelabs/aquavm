@@ -17,8 +17,10 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::{key_utils::at, prelude::*};
 
-#[test]
-fn merging_fold_iterations_extensively() {
+use futures::stream::StreamExt;
+
+#[tokio::test]
+async fn merging_fold_iterations_extensively() {
     let script = r#"
         (seq
             (seq
@@ -88,6 +90,7 @@ fn merging_fold_iterations_extensively() {
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         script,
     )
+    .await
     .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();
@@ -96,7 +99,7 @@ fn merging_fold_iterations_extensively() {
     while !queue.is_empty() {
         let peer = queue.pop_front().unwrap();
         if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
-            for outcome in outcomes {
+            for outcome in outcomes.collect::<Vec<_>>().await {
                 assert_eq!(outcome.ret_code, 0, "{outcome:?}");
 
                 for peer in &outcome.next_peer_pks {
@@ -126,8 +129,8 @@ fn merging_fold_iterations_extensively() {
     assert_eq!(last_fold.lore.len(), 18);
 }
 
-#[test]
-fn merging_fold_iterations_extensively_2() {
+#[tokio::test]
+async fn merging_fold_iterations_extensively_2() {
     let script = r#"
         (seq
             (seq
@@ -225,6 +228,7 @@ fn merging_fold_iterations_extensively_2() {
         vec!["relay", "p1", "p2", "p3"].into_iter().map(Into::into),
         script,
     )
+    .await
     .unwrap();
 
     let mut queue = std::collections::vec_deque::VecDeque::new();
@@ -234,7 +238,7 @@ fn merging_fold_iterations_extensively_2() {
     while !queue.is_empty() {
         let peer = queue.pop_front().unwrap();
         if let Some(outcomes) = engine.execution_iter(peer.as_str()) {
-            for outcome in outcomes {
+            for outcome in outcomes.collect::<Vec<_>>().await {
                 assert_eq!(outcome.ret_code, 0, "{outcome:?}");
 
                 for peer in &outcome.next_peer_pks {

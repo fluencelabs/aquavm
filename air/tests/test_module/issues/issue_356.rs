@@ -17,8 +17,10 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
-fn issue_356() {
+use futures::StreamExt;
+
+#[tokio::test]
+async fn issue_356() {
     let script = r#"
         (seq
             (seq
@@ -57,11 +59,12 @@ fn issue_356() {
         vec!["p1", "p2", "p3"].into_iter().map(Into::into),
         script,
     )
+    .await
     .unwrap();
 
     for _ in 0..7 {
         for peer in ["client", "relay", "p1", "p2"] {
-            for outcome in engine.execution_iter(peer).unwrap() {
+            for outcome in engine.execution_iter(peer).unwrap().collect::<Vec<_>>().await {
                 assert_eq!(outcome.ret_code, 0, "{outcome:?}");
             }
         }

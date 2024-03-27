@@ -15,9 +15,10 @@
  */
 
 use air_test_utils::prelude::*;
+use futures::FutureExt;
 
-#[test]
-fn create_service() {
+#[tokio::test]
+async fn create_service() {
     let module = "greeting";
     let module_config = json!(
         {
@@ -44,13 +45,14 @@ fn create_service() {
     let mut set_variables_vm = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::Argument(0)),
         "set_variables",
-    );
+    )
+    .await;
 
     let add_module_response = "add_module response";
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |params| {
         let response = match params.service_id.as_str() {
             "add_module" => add_module_response,
             "add_blueprint" => add_blueprint_response,
@@ -58,10 +60,11 @@ fn create_service() {
             _ => "unknown response",
         };
 
-        CallServiceResult::ok(json!(response))
+        let result = CallServiceResult::ok(json!(response));
+        async move { result }.boxed_local()
     });
 
-    let mut vm = create_avm(call_service, "A");
+    let mut vm = create_avm(call_service, "A").await;
 
     let script = include_str!("./scripts/create_service.air");
 

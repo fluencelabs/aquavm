@@ -16,15 +16,15 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
-fn issue_642() {
+#[tokio::test]
+async fn issue_642() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
     let peer_id_3 = "peer_id_3";
 
-    let mut vm_1 = create_avm(unit_call_service(), peer_id_1);
-    let mut vm_2 = create_avm(unit_call_service(), peer_id_2);
-    let mut vm_3 = create_avm(unit_call_service(), peer_id_3);
+    let mut vm_1 = create_avm(unit_call_service(), peer_id_1).await;
+    let mut vm_2 = create_avm(unit_call_service(), peer_id_2).await;
+    let mut vm_3 = create_avm(unit_call_service(), peer_id_3).await;
 
     let script = format!(
         r#"

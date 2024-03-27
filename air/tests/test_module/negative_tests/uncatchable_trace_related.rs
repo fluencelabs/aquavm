@@ -35,10 +35,10 @@ use air_trace_handler::TraceHandlerError::MergeError;
 use air_trace_handler::TraceHandlerError::StateFSMError;
 use maplit::hashmap;
 
-#[test]
-fn par_len_overflow() {
+#[tokio::test]
+async fn par_len_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -67,10 +67,10 @@ fn par_len_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn par_pos_overflow() {
+#[tokio::test]
+async fn par_pos_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -99,10 +99,10 @@ fn par_pos_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn par_len_underflow() {
+#[tokio::test]
+async fn par_len_underflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -126,11 +126,11 @@ fn par_len_underflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn set_subtrace_len_and_pos_failed() {
+#[tokio::test]
+async fn set_subtrace_len_and_pos_failed() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -166,10 +166,10 @@ fn set_subtrace_len_and_pos_failed() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn no_element_at_position() {
+#[tokio::test]
+async fn no_element_at_position() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -204,11 +204,11 @@ fn no_element_at_position() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn no_stream_state() {
+#[tokio::test]
+async fn no_stream_state() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -241,10 +241,10 @@ fn no_stream_state() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn incompatible_executed_states() {
+#[tokio::test]
+async fn incompatible_executed_states() {
     let vm_peer_id = "vm_peer_id";
-    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id);
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id).await;
     let script = format!(
         r#"
         (seq
@@ -273,11 +273,11 @@ fn incompatible_executed_states() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn different_executed_state_expected() {
+#[tokio::test]
+async fn different_executed_state_expected() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1).await;
     let script = format!(
         r#"
         (seq
@@ -301,10 +301,10 @@ fn different_executed_state_expected() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn invalid_dst_generations() {
+#[tokio::test]
+async fn invalid_dst_generations() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (ap "a" $s)
@@ -322,7 +322,7 @@ fn invalid_dst_generations() {
     );
 
     let data = data_env.serialize().unwrap();
-    // let result = peer_vm_1.call(script, "", data, <_>::default()).unwrap();
+    // let result = peer_vm_1.call(script, "", data, <_>::default()).await.unwrap();
     let result = call_vm!(peer_vm_1, <_>::default(), &script, "", data);
     let expected_error = UncatchableError::TraceError {
         trace_error: MergeError(air_trace_handler::MergeError::IncorrectApResult(
@@ -335,10 +335,10 @@ fn invalid_dst_generations() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn incorrect_call_result() {
+#[tokio::test]
+async fn incorrect_call_result() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (call "vm_peer_id_1" ("" "") [] v)
@@ -376,11 +376,11 @@ fn incorrect_call_result() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn canon_result_error() {
+#[tokio::test]
+async fn canon_result_error() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
     let script = format!(
         r#"
         (canon "vm_peer_id_1" $stream #canon)
@@ -425,10 +425,10 @@ fn canon_result_error() {
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
-#[test]
-fn several_records_with_same_pos() {
+#[tokio::test]
+async fn several_records_with_same_pos() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -478,11 +478,11 @@ fn several_records_with_same_pos() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn values_not_equal() {
+#[tokio::test]
+async fn values_not_equal() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([42, 43]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1).await;
     let script = format!(
         r#"
         (call "vm_peer_id_1" ("" "") [] $s)
@@ -521,10 +521,10 @@ fn values_not_equal() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fold_pos_overflow() {
+#[tokio::test]
+async fn fold_pos_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -571,10 +571,10 @@ fn fold_pos_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn subtrace_len_overflow() {
+#[tokio::test]
+async fn subtrace_len_overflow() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par
@@ -625,10 +625,10 @@ fn subtrace_len_overflow() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fold_incorrect_subtraces_count() {
+#[tokio::test]
+async fn fold_incorrect_subtraces_count() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(unit_call_service(), vm_peer_id_1).await;
     let script = format!(
         r#"
         (par

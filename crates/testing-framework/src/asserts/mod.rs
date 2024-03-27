@@ -93,7 +93,7 @@ impl ServiceDefinition {
         Self::Map(map)
     }
 
-    pub fn call(&self, params: CallRequestParams) -> CallServiceResult {
+    pub async fn call(&self, params: CallRequestParams) -> CallServiceResult {
         match self {
             ServiceDefinition::Ok(ok) => CallServiceResult::ok(ok.clone()),
             ServiceDefinition::Error(call_result) => call_result.clone(),
@@ -105,8 +105,8 @@ impl ServiceDefinition {
                 ref call_number_seq,
                 call_map,
             } => call_seq_error(call_number_seq, call_map),
-            ServiceDefinition::Behaviour(name) => name.call(params),
-            ServiceDefinition::DbgBehaviour(name) => dbg!(name.call(dbg!(params))),
+            ServiceDefinition::Behaviour(name) => name.call(params).await,
+            ServiceDefinition::DbgBehaviour(name) => dbg!(name.call(dbg!(params)).await),
             ServiceDefinition::Map(map) => call_map_service(map, params),
         }
     }

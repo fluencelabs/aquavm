@@ -16,6 +16,7 @@
 
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
+use futures::FutureExt;
 use polyplets::SecurityTetraplet;
 use pretty_assertions::assert_eq;
 
@@ -24,33 +25,34 @@ use std::rc::Rc;
 
 type ArgTetraplets = Vec<Vec<SecurityTetraplet>>;
 
-fn arg_host_function() -> (CallServiceClosure, Rc<RefCell<ArgTetraplets>>) {
+fn arg_host_function() -> (CallServiceClosure<'static>, Rc<RefCell<ArgTetraplets>>) {
     let arg_tetraplets = Rc::new(RefCell::new(ArgTetraplets::new()));
 
     let arg_tetraplets_inner = arg_tetraplets.clone();
-    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_function: CallServiceClosure = Box::new(move |params| {
         let result = json!(params.tetraplets);
         *arg_tetraplets_inner.borrow_mut() = params.tetraplets;
 
-        CallServiceResult::ok(result)
+        let result = CallServiceResult::ok(result);
+        async move { result }.boxed_local()
     });
 
     (host_function, arg_tetraplets)
 }
 
-#[test]
-fn fold_with_inner_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+#[tokio::test]
+async fn fold_with_inner_call() {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
-    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
 
     let mut client_vms = Vec::new();
     for i in 1..=10 {
         let (arg_host_func, arg_tetraplets) = arg_host_function();
-        let vm = create_avm(arg_host_func, i.to_string());
+        let vm = create_avm(arg_host_func, i.to_string()).await;
         client_vms.push((vm, arg_tetraplets))
     }
 
@@ -97,8 +99,8 @@ fn fold_with_inner_call() {
     }
 }
 
-#[test]
-fn fold_stream_with_inner_call() {
+#[tokio::test]
+async fn fold_stream_with_inner_call() {
     let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
@@ -116,9 +118,10 @@ fn fold_stream_with_inner_call() {
         TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
+    .await
     .unwrap();
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
 
@@ -143,8 +146,8 @@ fn fold_stream_with_inner_call() {
     assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
 }
 
-#[test]
-fn fold_canon_with_inner_call() {
+#[tokio::test]
+async fn fold_canon_with_inner_call() {
     let init_peer_name = "init_peer_id";
     let air_script = r#"
       (seq
@@ -164,9 +167,10 @@ fn fold_canon_with_inner_call() {
         TestRunParameters::from_init_peer_id(init_peer_name),
         &air_script,
     )
+    .await
     .unwrap();
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{}", result.error_message);
     let data = data_from_result(&result);
 
@@ -191,19 +195,20 @@ fn fold_canon_with_inner_call() {
     assert_eq!(&(*data.trace)[4..], &expected_trace, "{:?}", data.cid_info);
 }
 
-#[test]
-fn fold_lambda() {
+#[tokio::test]
+async fn fold_lens() {
     let variable_numbers = json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]});
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
     let mut set_variable_vm = create_avm(
         set_variable_call_service(variable_numbers),
         set_variable_vm_peer_id.clone(),
-    );
+    )
+    .await;
 
     let (arg_host_func, arg_tetraplets) = arg_host_function();
     let client_peer_id = String::from("client_id");
-    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone());
+    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone()).await;
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
@@ -249,18 +254,19 @@ fn fold_lambda() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
-#[test]
-fn check_tetraplet_works_correctly() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}))
+#[tokio::test]
+async fn check_tetraplet_works_correctly() {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]})) }
+            .boxed_local()
     });
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
-    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone());
+    let mut set_variable_vm = create_avm(return_numbers_call_service, set_variable_vm_peer_id.clone()).await;
 
     let (arg_host_func, arg_tetraplets) = arg_host_function();
     let client_peer_id = String::from("client_id");
-    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone());
+    let mut client_vm = create_avm(arg_host_func, client_peer_id.clone()).await;
 
     let service_id = String::from("some_service_id");
     let function_name = String::from("some_function_name");
@@ -297,10 +303,10 @@ fn check_tetraplet_works_correctly() {
     assert_eq!(arg_tetraplets, expected_tetraplets);
 }
 
-use fluence_app_service::AppService;
 use fluence_app_service::AppServiceConfig;
 use fluence_app_service::MarineConfig;
 use fluence_app_service::ModuleDescriptor;
+use fluence_app_service::{AppService, MarineModuleConfig};
 
 use air_test_utils::trace_from_result;
 use std::path::PathBuf;
@@ -310,9 +316,15 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
     let module_path = format!("./tests/security_tetraplets/{module_name}/target/wasm32-wasi/debug/");
 
     let module_descriptor = ModuleDescriptor {
+        load_from: None,
         file_name: module_name.clone() + ".wasm",
         import_name: module_name,
-        ..<_>::default()
+        config: MarineModuleConfig {
+            logger_enabled: Default::default(),
+            host_imports: Default::default(),
+            wasi: Default::default(),
+            logging_mask: Default::default(),
+        },
     };
 
     let marine_config = MarineConfig {
@@ -322,28 +334,31 @@ fn construct_service_config(module_name: impl Into<String>) -> AppServiceConfig 
         default_modules_config: None,
     };
 
-    let service_base_dir = std::env::temp_dir();
+    let service_working_dir = std::env::temp_dir();
 
     AppServiceConfig {
-        service_working_dir: service_base_dir.clone(),
-        service_base_dir,
+        service_working_dir,
         marine_config,
     }
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
-fn tetraplet_with_wasm_modules() {
+async fn tetraplet_with_wasm_modules() {
     use marine_rs_sdk::CallParameters;
     use marine_rs_sdk::SecurityTetraplet as SDKTetraplet;
 
     let auth_module_name = String::from("auth_module");
     let auth_service_config = construct_service_config(auth_module_name.clone());
-    let auth_service = AppService::new(auth_service_config, auth_module_name, <_>::default()).unwrap();
+    let auth_service = AppService::new(auth_service_config, auth_module_name, <_>::default())
+        .await
+        .unwrap();
 
     let log_module_name = String::from("log_storage");
     let log_service_config = construct_service_config(log_module_name.clone());
-    let log_service = AppService::new(log_service_config, log_module_name, <_>::default()).unwrap();
+    let log_service = AppService::new(log_service_config, log_module_name, <_>::default())
+        .await
+        .unwrap();
 
     let services = maplit::hashmap!(
       "auth" => auth_service,
@@ -351,9 +366,9 @@ fn tetraplet_with_wasm_modules() {
     );
     let services = Rc::new(RefCell::new(services));
 
-    let services_inner = services.clone();
     const ADMIN_PEER_PK: &str = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE1";
-    let host_func: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_func: CallServiceClosure = Box::new(move |params| {
+        let services_inner = services.clone();
         let tetraplets = serde_json::to_vec(&params.tetraplets).expect("default serializer shouldn't fail");
         let tetraplets: Vec<Vec<SDKTetraplet>> =
             serde_json::from_slice(&tetraplets).expect("default deserializer shouldn't fail");
@@ -362,18 +377,22 @@ fn tetraplet_with_wasm_modules() {
         call_parameters.particle.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
-        let mut service = services_inner.borrow_mut();
-        let service = service.get_mut(params.service_id.as_str()).unwrap();
+        async move {
+            let mut service = services_inner.borrow_mut();
+            let service = service.get_mut(params.service_id.as_str()).unwrap();
 
-        let result = service
-            .call(
-                params.function_name,
-                json!(params.arguments),
-                to_app_service_call_parameters(call_parameters),
-            )
-            .unwrap();
+            let result = service
+                .call_async(
+                    params.function_name,
+                    json!(params.arguments),
+                    to_app_service_call_parameters(call_parameters),
+                )
+                .await
+                .unwrap();
 
-        CallServiceResult::ok(result)
+            CallServiceResult::ok(result)
+        }
+        .boxed_local()
     });
 
     let local_peer_id = "local_peer_id";
@@ -386,7 +405,7 @@ fn tetraplet_with_wasm_modules() {
     "#
     );
 
-    let mut vm = create_avm(host_func, local_peer_id);
+    let mut vm = create_avm(host_func, local_peer_id).await;
 
     let test_params = TestRunParameters::from_init_peer_id(ADMIN_PEER_PK);
     let result = checked_call_vm!(vm, test_params, script, "", "");

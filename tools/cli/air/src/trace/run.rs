@@ -170,7 +170,7 @@ enum Mode {
     Risc0,
 }
 
-pub(crate) fn run(args: Args) -> eyre::Result<()> {
+pub(crate) async fn run(args: Args) -> eyre::Result<()> {
     let tracing_json = (!args.json) as u8;
     #[cfg(feature = "wasm")]
     let global_tracing_params = if args.mode.wasm {
@@ -196,7 +196,8 @@ pub(crate) fn run(args: Args) -> eyre::Result<()> {
         &args.air_near_contract_path,
         args.max_heap_size,
         execution_data.test_init_parameters,
-    )?;
+    )
+    .await?;
 
     let call_results = read_call_results(args.call_results_path.as_deref())?;
 
@@ -222,6 +223,7 @@ pub(crate) fn run(args: Args) -> eyre::Result<()> {
                 &key_pair,
                 particle.particle_id.clone().into_owned(),
             )
+            .await
             .context("Failed to execute the script")?;
         if args.repeat.is_none() {
             println!("{result:?}");
@@ -234,7 +236,7 @@ pub(crate) fn run(args: Args) -> eyre::Result<()> {
     Ok(())
 }
 
-fn create_runner(
+async fn create_runner(
     mode: Option<Mode>,
     _air_interpreter_wasm_path: &Path,
     _air_contract_wasm_path: &Path,
@@ -257,6 +259,7 @@ fn create_runner(
             _max_heap_size,
             _test_init_parameters,
         )
+        .await
         .context("Failed to instantiate WASM AVM")? as _,
         #[cfg(feature = "near")]
         Mode::Near => self::near::create_near_runner(_air_contract_wasm_path)

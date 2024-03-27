@@ -26,6 +26,14 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
+use futures::future::OptionFuture;
+use futures::StreamExt;
+
+#[allow(unused)] // compiler gives warning, but it is used
+use futures::future::LocalBoxFuture;
+#[allow(unused)] // compiler gives warning, but it is used
+use futures::FutureExt;
+
 use std::{borrow::Borrow, hash::Hash, rc::Rc};
 
 /// A executor for an AIR script. Several executors may share same TransformedAirScript
@@ -41,7 +49,7 @@ pub struct AirScriptExecutor<R = DefaultAirRunner> {
 //   extencive test code changes
 impl AirScriptExecutor<DefaultAirRunner> {
     /// Simple constructor where everything is generated from the annotated_air_script.
-    pub fn from_annotated(
+    pub async fn from_annotated(
         test_parameters: TestRunParameters,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
@@ -51,19 +59,21 @@ impl AirScriptExecutor<DefaultAirRunner> {
             std::iter::empty(),
             annotated_air_script,
         )
+        .await
     }
 }
 
 impl<R: AirRunner> AirScriptExecutor<R> {
-    pub fn from_transformed_air_script(
+    pub async fn from_transformed_air_script(
         mut test_parameters: TestRunParameters,
         test_init_parameters: TestInitParameters,
         transformed_air_script: TransformedAirScript<R>,
     ) -> Result<Self, String> {
         let network = transformed_air_script.get_network();
         let init_peer_id = test_parameters.init_peer_id.clone();
-        let real_init_peer_id =
-            network.ensure_named_peer(init_peer_id.as_str(), test_init_parameters);
+        let real_init_peer_id = network
+            .ensure_named_peer(init_peer_id.as_str(), test_init_parameters)
+            .await;
         test_parameters.init_peer_id = real_init_peer_id.to_string();
 
         let queue = ExecutionQueue::new();
@@ -81,31 +91,32 @@ impl<R: AirRunner> AirScriptExecutor<R> {
     ///
     /// `extra_peers` allows you to define peers that are not mentioned in the annotated script
     /// explicitly, but are used, e.g. if their names are returned from a call.
-    pub fn new(
+    pub async fn new(
         test_parameters: TestRunParameters,
         common_services: Vec<MarineServiceHandle>,
         extra_peers: impl IntoIterator<Item = PeerId>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
-        let network = Network::new(extra_peers.into_iter(), common_services, <_>::default());
-        let transformed = TransformedAirScript::new(annotated_air_script, network, <_>::default())?;
+        let network = Network::new(extra_peers.into_iter(), common_services, <_>::default()).await;
+        let transformed =
+            TransformedAirScript::new(annotated_air_script, network, <_>::default()).await?;
 
-        Self::from_transformed_air_script(test_parameters, <_>::default(), transformed)
+        Self::from_transformed_air_script(test_parameters, <_>::default(), transformed).await
     }
 
-    pub fn from_network(
+    pub async fn from_network(
         test_parameters: TestRunParameters,
         test_init_parameters: TestInitParameters,
         network: Rc<Network<R>>,
         annotated_air_script: &str,
     ) -> Result<Self, String> {
         let transformed =
-            TransformedAirScript::new(annotated_air_script, network, test_init_parameters)?;
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters).await?;
 
-        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed)
+        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed).await
     }
 
-    pub fn new_with_init_parameters(
+    pub async fn new_with_init_parameters(
         test_parameters: TestRunParameters,
         test_init_parameters: TestInitParameters,
         common_services: Vec<MarineServiceHandle>,
@@ -116,11 +127,12 @@ impl<R: AirRunner> AirScriptExecutor<R> {
             extra_peers.into_iter(),
             common_services,
             test_init_parameters,
-        );
+        )
+        .await;
         let transformed =
-            TransformedAirScript::new(annotated_air_script, network, test_init_parameters)?;
+            TransformedAirScript::new(annotated_air_script, network, test_init_parameters).await?;
 
-        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed)
+        Self::from_transformed_air_script(test_parameters, test_init_parameters, transformed).await
     }
 
     /// Return Iterator for handling all the queued datas
@@ -128,7 +140,7 @@ impl<R: AirRunner> AirScriptExecutor<R> {
     pub fn execution_iter<'s, Id>(
         &'s self,
         peer_id: &Id,
-    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 's>
+    ) -> Option<impl futures::stream::Stream<Item = RawAVMOutcome> + 's>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
@@ -142,22 +154,23 @@ impl<R: AirRunner> AirScriptExecutor<R> {
     }
 
     /// Process all queued datas, panicing on error.
-    pub fn execute_all<Id>(&self, peer_id: &Id) -> Option<Vec<RawAVMOutcome>>
+    pub async fn execute_all<Id>(&self, peer_id: &Id) -> Option<Vec<RawAVMOutcome>>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.execution_iter(peer_id).map(|it| it.collect())
+        let exec_iter: OptionFuture<_> = self.execution_iter(peer_id).map(|it| it.collect()).into();
+        exec_iter.await
     }
 
     /// Process one queued data, panicing if it is unavalable or on error.
-    pub fn execute_one<Id>(&self, peer_id: &Id) -> Option<RawAVMOutcome>
+    pub async fn execute_one<Id>(&self, peer_id: &Id) -> Option<RawAVMOutcome>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
     {
-        self.execution_iter(peer_id)
-            .map(|mut it| it.next().expect("Nothing to execute"))
+        let mut it = self.execution_iter(peer_id)?;
+        it.next().await
     }
 
     /// Push data into peer's queue.
@@ -194,8 +207,8 @@ mod tests {
 
     use std::cell::RefCell;
 
-    #[test]
-    fn test_execution() {
+    #[tokio::test]
+    async fn test_execution() {
         let peer1_name = "peer1";
         let peer2_name = "peer2";
         let init_peer_name = "init_peer_id";
@@ -212,29 +225,40 @@ mod tests {
 "#
             ),
         )
+        .await
         .unwrap();
 
         let peer1_id = exec.resolve_name(peer1_name).to_string();
 
-        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
         assert_eq!(outcome.next_peer_pks, vec![peer1_id.clone()]);
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
-        let results1: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect();
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
+        let results1: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect().await;
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 0);
-        assert!(exec.execution_iter(peer1_name).unwrap().next().is_none());
+        assert!(exec
+            .execution_iter(peer1_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
 
-        let outcome2 = exec.execute_one(peer2_name).unwrap();
+        let outcome2 = exec.execute_one(peer2_name).await.unwrap();
         assert_eq!(outcome2.ret_code, 0);
     }
 
-    #[test]
-    fn test_call_result_success() {
+    #[tokio::test]
+    async fn test_call_result_success() {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
@@ -245,25 +269,26 @@ mod tests {
 )
 "#,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
-        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        assert!(exec.execution_iter("peer2").unwrap().next().await.is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect().await;
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+        assert!(exec.execution_iter("peer1").unwrap().next().await.is_none());
     }
 
-    #[test]
-    fn test_call_result_error() {
+    #[tokio::test]
+    async fn test_call_result_error() {
         let script = r#"
         (seq
             (call "peer1" ("service" "func") [] arg) ; err = {"ret_code":12,"result":"ERROR MESSAGE"}
@@ -276,17 +301,18 @@ mod tests {
             std::iter::empty(),
             script,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
-        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        assert!(exec.execution_iter("peer2").unwrap().next().await.is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect().await;
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 10000, "{:?}", outcome1);
@@ -296,14 +322,14 @@ mod tests {
             "{:?}",
             outcome1
         );
-        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+        assert!(exec.execution_iter("peer1").unwrap().next().await.is_none());
 
-        let results2: Vec<_> = exec.execution_iter("peer2").unwrap().collect();
+        let results2: Vec<_> = exec.execution_iter("peer2").unwrap().collect().await;
         assert_eq!(results2.len(), 0);
     }
 
-    #[test]
-    fn test_seq_ok() {
+    #[tokio::test]
+    async fn test_seq_ok() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
         let peer2_name = "peer2";
@@ -327,31 +353,47 @@ mod tests {
   (call "init_peer_id" ("a" "b") []) ; ok = 0
 )"#),
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
         {
-            let results1 = exec.execute_all(peer1_name).unwrap();
+            let results1 = exec.execute_all(peer1_name).await.unwrap();
             assert_eq!(results1.len(), 1);
             let outcome1 = &results1[0];
             assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-            assert!(exec.execution_iter(peer1_name).unwrap().next().is_none());
+            assert!(exec
+                .execution_iter(peer1_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome1.next_peer_pks, [peer2_id.as_str()]);
         }
 
         {
-            let results2: Vec<_> = exec.execute_all(peer2_name).unwrap();
+            let results2: Vec<_> = exec.execute_all(peer2_name).await.unwrap();
             assert_eq!(results2.len(), 1);
             let outcome2 = &results2[0];
             assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
-            assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
+            assert!(exec
+                .execution_iter(peer2_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
 
             let trace = trace_from_result(outcome2);
@@ -377,11 +419,16 @@ mod tests {
         }
 
         {
-            let results3: Vec<_> = exec.execute_all(peer3_name).unwrap();
+            let results3: Vec<_> = exec.execute_all(peer3_name).await.unwrap();
             assert_eq!(results3.len(), 1);
             let outcome3 = &results3[0];
             assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
-            assert!(exec.execution_iter(peer3_name).unwrap().next().is_none());
+            assert!(exec
+                .execution_iter(peer3_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
 
             let trace = trace_from_result(outcome3);
             assert_eq!(
@@ -406,8 +453,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_map() {
+    #[tokio::test]
+    async fn test_map() {
         let peer1_name = "peer1";
         let peer2_name = "peer2";
         let peer3_name = "peer3";
@@ -430,9 +477,10 @@ mod tests {
 "#
             ),
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("peer1").unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
@@ -441,16 +489,16 @@ mod tests {
         assert_next_pks!(&outcome1.next_peer_pks, [peer2_id.as_str()]);
 
         {
-            let results2 = exec.execute_all("peer2").unwrap();
+            let results2 = exec.execute_all("peer2").await.unwrap();
             assert_eq!(results2.len(), 1);
             let outcome2 = &results2[0];
             assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
-            assert!(exec.execution_iter("peer2").unwrap().next().is_none());
+            assert!(exec.execution_iter("peer2").unwrap().next().await.is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
         }
 
         {
-            let results3 = exec.execute_all("peer3").unwrap();
+            let results3 = exec.execute_all("peer3").await.unwrap();
             assert_eq!(results3.len(), 1);
             let outcome3 = &results3[0];
             assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
@@ -483,9 +531,9 @@ mod tests {
         }
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_map_no_arg() {
+    async fn test_map_no_arg() {
         let peer1_name = "peer1";
 
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
@@ -498,12 +546,13 @@ mod tests {
 "#
             ),
         )
+        .await
         .unwrap();
-        let _result_init: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect();
+        let _result_init: Vec<_> = exec.execution_iter(peer1_name).unwrap().collect().await;
     }
 
-    #[test]
-    fn test_seq_error() {
+    #[tokio::test]
+    async fn test_seq_error() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
         let peer2_name = "peer2";
@@ -529,31 +578,47 @@ mod tests {
   (call "init_peer_id" ("a" "b") []) ; ok = 0
 )"#),
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(init_peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome1 = &result_init[0];
         assert_eq!(outcome1.ret_code, 0);
         assert_eq!(outcome1.error_message, "");
 
-        assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
+        assert!(exec
+            .execution_iter(peer2_name)
+            .unwrap()
+            .next()
+            .await
+            .is_none());
         {
-            let results1 = exec.execute_all(peer1_name).unwrap();
+            let results1 = exec.execute_all(peer1_name).await.unwrap();
             assert_eq!(results1.len(), 1);
             let outcome1 = &results1[0];
             assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-            assert!(exec.execution_iter(peer1_name).unwrap().next().is_none());
+            assert!(exec
+                .execution_iter(peer1_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome1.next_peer_pks, [peer2_id.as_str()]);
         }
 
         {
-            let results2: Vec<_> = exec.execute_all(peer2_name).unwrap();
+            let results2: Vec<_> = exec.execute_all(peer2_name).await.unwrap();
             assert_eq!(results2.len(), 1);
             let outcome2 = &results2[0];
             assert_eq!(outcome2.ret_code, 0, "{:?}", outcome2);
-            assert!(exec.execution_iter(peer2_name).unwrap().next().is_none());
+            assert!(exec
+                .execution_iter(peer2_name)
+                .unwrap()
+                .next()
+                .await
+                .is_none());
             assert_next_pks!(&outcome2.next_peer_pks, [peer3_id.as_str()]);
 
             let trace = trace_from_result(outcome2);
@@ -579,12 +644,12 @@ mod tests {
         }
 
         {
-            let results3: Vec<_> = exec.execute_all("peer3").unwrap();
+            let results3: Vec<_> = exec.execute_all("peer3").await.unwrap();
             assert_eq!(results3.len(), 1);
             // TODO why doesn't it fail?
             let outcome3 = &results3[0];
             assert_eq!(outcome3.ret_code, 0, "{:?}", outcome3);
-            assert!(exec.execution_iter("peer3").unwrap().next().is_none());
+            assert!(exec.execution_iter("peer3").unwrap().next().await.is_none());
 
             let trace = trace_from_result(outcome3);
             assert_eq!(
@@ -609,8 +674,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_echo() {
+    #[tokio::test]
+    async fn test_echo() {
         let init_peer_name = "init_peer_id";
         let peer1_name = "peer1";
         let peer2_name = "peer2";
@@ -627,21 +692,22 @@ mod tests {
 "#
             ),
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter("init_peer_id").unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome0 = &result_init[0];
         assert_eq!(outcome0.ret_code, 0);
         assert_eq!(outcome0.error_message, "");
 
-        assert!(exec.execution_iter("peer2").unwrap().next().is_none());
-        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect();
+        assert!(exec.execution_iter("peer2").unwrap().next().await.is_none());
+        let results1: Vec<_> = exec.execution_iter("peer1").unwrap().collect().await;
         assert_eq!(results1.len(), 1);
         let outcome1 = &results1[0];
         assert_eq!(outcome1.ret_code, 0, "{:?}", outcome1);
-        assert!(exec.execution_iter("peer1").unwrap().next().is_none());
+        assert!(exec.execution_iter("peer1").unwrap().next().await.is_none());
 
         let peer1_id = exec.resolve_name(peer1_name).to_string();
         assert_eq!(
@@ -659,23 +725,26 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_transformed_distinct() {
+    #[tokio::test]
+    async fn test_transformed_distinct() {
         let peer_name = "peer1";
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let transformed1 = TransformedAirScript::new(
             &format!(r#"(call "{peer_name}" ("service" "function") []) ; ok = 42"#),
             network.clone(),
             <_>::default(),
         )
+        .await
         .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             <_>::default(),
             transformed1,
         )
+        .await
         .unwrap();
 
         let transformed2 = TransformedAirScript::new(
@@ -683,16 +752,18 @@ mod tests {
             network,
             <_>::default(),
         )
+        .await
         .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             <_>::default(),
             transformed2,
         )
+        .await
         .unwrap();
 
-        let trace1 = exectution1.execute_one(peer_name).unwrap();
-        let trace2 = exectution2.execute_one(peer_name).unwrap();
+        let trace1 = exectution1.execute_one(peer_name).await.unwrap();
+        let trace2 = exectution2.execute_one(peer_name).await.unwrap();
 
         assert_eq!(
             trace_from_result(&trace1),
@@ -714,16 +785,22 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_transformed_shared() {
+    #[tokio::test]
+    async fn test_transformed_shared() {
         struct Service {
             state: RefCell<std::vec::IntoIter<serde_json::Value>>,
         }
 
         impl MarineService for Service {
-            fn call(&self, _params: CallRequestParams) -> crate::services::FunctionOutcome {
-                let mut cell = self.state.borrow_mut();
-                crate::services::FunctionOutcome::from_value(cell.next().unwrap())
+            fn call<'this>(
+                &'this self,
+                _params: CallRequestParams,
+            ) -> LocalBoxFuture<'this, crate::services::FunctionOutcome> {
+                async {
+                    let mut cell = self.state.borrow_mut();
+                    crate::services::FunctionOutcome::from_value(cell.next().unwrap())
+                }
+                .boxed_local()
             }
         }
         let service = Service {
@@ -733,29 +810,35 @@ mod tests {
             std::iter::empty::<PeerId>(),
             vec![service.to_handle()],
             <_>::default(),
-        );
+        )
+        .await;
 
         let peer_name = "peer1";
         let air_script = format!(r#"(call "{peer_name}" ("service" "function") [])"#);
-        let transformed1 =
-            TransformedAirScript::new(&air_script, network.clone(), <_>::default()).unwrap();
+        let transformed1 = TransformedAirScript::new(&air_script, network.clone(), <_>::default())
+            .await
+            .unwrap();
         let exectution1 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             <_>::default(),
             transformed1,
         )
+        .await
         .unwrap();
 
-        let transformed2 = TransformedAirScript::new(&air_script, network, <_>::default()).unwrap();
+        let transformed2 = TransformedAirScript::new(&air_script, network, <_>::default())
+            .await
+            .unwrap();
         let exectution2 = AirScriptExecutor::from_transformed_air_script(
             TestRunParameters::from_init_peer_id(peer_name),
             <_>::default(),
             transformed2,
         )
+        .await
         .unwrap();
 
-        let trace1 = exectution1.execute_one(peer_name).unwrap();
-        let trace2 = exectution2.execute_one(peer_name).unwrap();
+        let trace1 = exectution1.execute_one(peer_name).await.unwrap();
+        let trace2 = exectution2.execute_one(peer_name).await.unwrap();
 
         assert_eq!(
             trace_from_result(&trace1),
@@ -777,8 +860,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_invalid_air() {
+    #[tokio::test]
+    async fn test_invalid_air() {
         let res = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id("init_peer_id"),
             vec![],
@@ -787,7 +870,8 @@ mod tests {
 (call "peer1" ("service" "func") [1 22] arg) ; behaviour=echo
 )
 "#,
-        );
+        )
+        .await;
 
         match &res {
             Ok(_) => {
@@ -802,16 +886,17 @@ mod tests {
         }
     }
 
-    fn run_behaviour_service(peer_name: &str, air_script: &str) {
+    async fn run_behaviour_service(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
             air_script,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
@@ -830,33 +915,34 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_behaviour_service() {
+    #[tokio::test]
+    async fn test_behaviour_service() {
         let peer_name = "peer1";
         let air_script =
             &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=service"#);
-        run_behaviour_service(peer_name, air_script)
+        run_behaviour_service(peer_name, air_script).await
     }
 
-    #[test]
-    fn test_dbg_behaviour_service() {
+    #[tokio::test]
+    async fn test_dbg_behaviour_service() {
         let peer_name = "peer1";
         let air_script = &format!(
             r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=service"#
         );
-        run_behaviour_service(peer_name, air_script)
+        run_behaviour_service(peer_name, air_script).await
     }
 
-    fn run_behaviour_function(peer_name: &str, air_script: &str) {
+    async fn run_behaviour_function(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
             air_script,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
@@ -875,33 +961,34 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_behaviour_function() {
+    #[tokio::test]
+    async fn test_behaviour_function() {
         let peer_name = "peer1";
         let air_script =
             &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=function"#);
-        run_behaviour_function(peer_name, air_script)
+        run_behaviour_function(peer_name, air_script).await
     }
 
-    #[test]
-    fn test_dbg_behaviour_function() {
+    #[tokio::test]
+    async fn test_dbg_behaviour_function() {
         let peer_name = "peer1";
         let air_script = &format!(
             r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=function"#
         );
-        run_behaviour_function(peer_name, air_script)
+        run_behaviour_function(peer_name, air_script).await
     }
 
-    fn run_behaviour_arg(peer_name: &str, air_script: &str) {
+    async fn run_behaviour_arg(peer_name: &str, air_script: &str) {
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
             TestRunParameters::from_init_peer_id(peer_name),
             vec![],
             std::iter::empty(),
             air_script,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
@@ -920,25 +1007,25 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_behaviour_arg() {
+    #[tokio::test]
+    async fn test_behaviour_arg() {
         let peer_name = "peer1";
         let air_script =
             &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=arg.1"#);
 
-        run_behaviour_arg(peer_name, air_script)
+        run_behaviour_arg(peer_name, air_script).await
     }
 
-    #[test]
-    fn test_dbg_behaviour_arg() {
+    #[tokio::test]
+    async fn test_dbg_behaviour_arg() {
         let peer_name = "peer1";
         let air_script =
             &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=arg.1"#);
 
-        run_behaviour_arg(peer_name, air_script)
+        run_behaviour_arg(peer_name, air_script).await
     }
 
-    fn run_behaviour_tetraplet(peer_name: &str, air_script: &str) {
+    async fn run_behaviour_tetraplet(peer_name: &str, air_script: &str) {
         let (_peer_pk, peer_id) = derive_dummy_keypair(peer_name);
 
         let exec = AirScriptExecutor::<NativeAirRunner>::new(
@@ -947,9 +1034,10 @@ mod tests {
             std::iter::empty(),
             air_script,
         )
+        .await
         .unwrap();
 
-        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect();
+        let result_init: Vec<_> = exec.execution_iter(peer_name).unwrap().collect().await;
 
         assert_eq!(result_init.len(), 1);
         let outcome = &result_init[0];
@@ -978,20 +1066,20 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_behaviour_tetraplet() {
+    #[tokio::test]
+    async fn test_behaviour_tetraplet() {
         let peer_name = "peer1";
         let air_script =
             &format!(r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; behaviour=tetraplet"#);
-        run_behaviour_tetraplet(peer_name, air_script)
+        run_behaviour_tetraplet(peer_name, air_script).await
     }
 
-    #[test]
-    fn test_dbg_behaviour_tetraplet() {
+    #[tokio::test]
+    async fn test_dbg_behaviour_tetraplet() {
         let peer_name = "peer1";
         let air_script = &format!(
             r#"(call "{peer_name}" ("service" "func") [1 22] arg) ; dbg_behaviour=tetraplet"#
         );
-        run_behaviour_tetraplet(peer_name, air_script)
+        run_behaviour_tetraplet(peer_name, air_script).await
     }
 }

@@ -18,18 +18,19 @@ use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
+use futures::FutureExt;
 use pretty_assertions::assert_eq;
 
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-#[test]
-fn canon_moves_execution_flow() {
+#[tokio::test]
+async fn canon_moves_execution_flow() {
     let peer_id_1 = "peer_id_1";
     let peer_id_2 = "peer_id_2";
     let init_peer_id = "A";
-    let mut vm = create_avm(echo_call_service(), init_peer_id);
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
     let script = format!(
         r#"
@@ -53,11 +54,11 @@ fn canon_moves_execution_flow() {
     )
 }
 
-#[test]
-fn basic_canon() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn basic_canon() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
     let data = json!(["1", "2", "3", "4", "5"]);
-    let mut set_variable_vm = create_avm(set_variable_call_service(data.clone()), "set_variable");
+    let mut set_variable_vm = create_avm(set_variable_call_service(data.clone()), "set_variable").await;
 
     let script = r#"
             (seq
@@ -108,16 +109,16 @@ fn basic_canon() {
     assert_eq!(actual_state, &expected_state);
 }
 
-#[test]
-fn canon_fixes_stream_correct() {
+#[tokio::test]
+async fn canon_fixes_stream_correct() {
     let peer_id_1 = "peer_id_1";
-    let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service(), peer_id_1).await;
     let peer_id_2 = "peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2).await;
     let peer_id_3 = "peer_id_3";
-    let mut vm_3 = create_avm(echo_call_service(), peer_id_3);
+    let mut vm_3 = create_avm(echo_call_service(), peer_id_3).await;
     let peer_id_4 = "peer_id_4";
-    let mut vm_4 = create_avm(echo_call_service(), peer_id_4);
+    let mut vm_4 = create_avm(echo_call_service(), peer_id_4).await;
 
     let script = format!(
         r#"
@@ -201,13 +202,13 @@ fn canon_fixes_stream_correct() {
     assert_eq!(vm_1_result_2_trace.deref(), expected_vm_1_result_2_trace);
 }
 
-#[test]
-fn canon_stream_can_be_created_from_aps() {
+#[tokio::test]
+async fn canon_stream_can_be_created_from_aps() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id);
+    let mut vm_1 = create_avm(echo_call_service(), vm_1_peer_id).await;
 
     let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
 
     let script = format!(
         r#"
@@ -231,25 +232,27 @@ fn canon_stream_can_be_created_from_aps() {
     let _ = checked_call_vm!(vm_2, <_>::default(), &script, result_1.data, result_2.data);
 }
 
-#[test]
-fn canon_gates() {
+#[tokio::test]
+async fn canon_gates() {
     let peer_id_1 = "peer_id_1";
-    let mut vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), peer_id_1);
+    let mut vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3, 4, 5])), peer_id_1).await;
 
     let peer_id_2 = "peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2).await;
 
     let peer_id_3 = "peer_id_3";
     let stop_len_count = 2;
-    let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| -> CallServiceResult {
+    let vm_3_call_service: CallServiceClosure = Box::new(move |params: CallRequestParams| {
         let value = params.arguments[0].as_array().unwrap().len();
-        if value >= stop_len_count {
+        let result = if value >= stop_len_count {
             CallServiceResult::ok(json!(true))
         } else {
             CallServiceResult::ok(json!(false))
-        }
+        };
+
+        async move { result }.boxed_local()
     });
-    let mut vm_3 = create_avm(vm_3_call_service, peer_id_3);
+    let mut vm_3 = create_avm(vm_3_call_service, peer_id_3).await;
 
     let script = format!(
         r#"
@@ -289,12 +292,12 @@ fn canon_gates() {
     assert_eq!(fold.lore.len(), stop_len_count);
 }
 
-#[test]
-fn canon_empty_stream() {
+#[tokio::test]
+async fn canon_empty_stream() {
     let peer_id_1 = "peer_id_1";
-    let mut vm_1 = create_avm(echo_call_service(), peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service(), peer_id_1).await;
     let peer_id_2 = "peer_id_2";
-    let mut vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut vm_2 = create_avm(echo_call_service(), peer_id_2).await;
 
     let script = format!(
         r#"
@@ -326,10 +329,10 @@ fn canon_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn canon_empty_not_writable_stream() {
+#[tokio::test]
+async fn canon_empty_not_writable_stream() {
     let peer_id = "peer_id";
-    let mut vm = create_avm(echo_call_service(), peer_id);
+    let mut vm = create_avm(echo_call_service(), peer_id).await;
 
     let script = format!(
         r#"
@@ -352,16 +355,16 @@ fn canon_empty_not_writable_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn canon_over_later_defined_stream() {
+#[tokio::test]
+async fn canon_over_later_defined_stream() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1).await;
 
     let vm_peer_id_2 = "vm_peer_id_2";
-    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
 
     let vm_peer_id_3 = "vm_peer_id_3";
-    let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3);
+    let mut peer_vm_3 = create_avm(echo_call_service(), vm_peer_id_3).await;
 
     let script = format!(
         r#"
@@ -391,10 +394,10 @@ fn canon_over_later_defined_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn canon_map_scalar() {
+#[tokio::test]
+async fn canon_map_scalar() {
     let vm_peer_id_1 = "vm_peer_id_1";
-    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -461,13 +464,13 @@ fn canon_map_scalar() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn canon_map_scalar_with_par() {
+#[tokio::test]
+async fn canon_map_scalar_with_par() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let vm_peer_id_2 = "vm_peer_id_2";
 
-    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1);
-    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2);
+    let mut peer_vm_1 = create_avm(echo_call_service(), vm_peer_id_1).await;
+    let mut peer_vm_2 = create_avm(echo_call_service(), vm_peer_id_2).await;
 
     let script = format!(
         r#"
@@ -570,14 +573,14 @@ fn canon_map_scalar_with_par() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn test_extend_by_request_sent_by() {
+#[tokio::test]
+async fn test_extend_by_request_sent_by() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
     let other_peer_id = "A";
 
-    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
-    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1).await;
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2).await;
 
     let script = format!(
         r#"
@@ -604,14 +607,14 @@ fn test_extend_by_request_sent_by() {
     )
 }
 
-#[test]
-fn test_merge_request_sent_by() {
+#[tokio::test]
+async fn test_merge_request_sent_by() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
     let other_peer_id = "A";
 
-    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
-    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1).await;
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2).await;
 
     let script = format!(
         r#"
@@ -639,15 +642,15 @@ fn test_merge_request_sent_by() {
     )
 }
 
-#[test]
-fn test_merge_executed() {
+#[tokio::test]
+async fn test_merge_executed() {
     let peer_id_1 = "peer_1";
     let peer_id_2 = "peer_2";
     let other_peer_id = "A";
 
-    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1);
-    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2);
-    let mut peer_other_id = create_avm(echo_call_service(), other_peer_id);
+    let mut peer_vm_1 = create_avm(echo_call_service(), peer_id_1).await;
+    let mut peer_vm_2 = create_avm(echo_call_service(), peer_id_2).await;
+    let mut peer_other_id = create_avm(echo_call_service(), other_peer_id).await;
 
     let script = format!(
         r#"
@@ -694,8 +697,8 @@ fn test_merge_executed() {
     );
 }
 
-#[test]
-fn canon_stream_map() {
+#[tokio::test]
+async fn canon_stream_map() {
     let vm_peer_id_1_name = "vm_peer_id_1";
     let vm_peer_id_1_id = at(vm_peer_id_1_name);
 
@@ -712,8 +715,9 @@ fn canon_stream_map() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id_1_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_peer_id_1_name).unwrap();
+    let result = executor.execute_all(vm_peer_id_1_name).await.unwrap();
 
     let actual_data = data_from_result(&result.last().unwrap());
 
@@ -747,19 +751,20 @@ fn canon_stream_map() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
-fn canon_map_single_index_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_single_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -838,19 +843,20 @@ fn canon_map_single_index_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
-fn canon_map_index_with_element_access_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_index_with_element_access_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1).await;
     let m1 = "m1";
     let f1 = "f1";
 
@@ -936,19 +942,20 @@ fn canon_map_index_with_element_access_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
-fn canon_map_index_with_element_and_attribute_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1).await;
     let m1 = "m1";
     let f1 = "f1";
 
@@ -1062,19 +1069,20 @@ fn canon_map_index_with_element_and_attribute_tetraplet_check() {
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
 
-#[test]
-fn canon_map_non_existing_index_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_non_existing_index_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1129,19 +1137,20 @@ fn canon_map_non_existing_index_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
-#[test]
-fn canon_map_non_existing_index_and_element_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_non_existing_index_and_element_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let echo_call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let echo_call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (echo_call_service, tetraplet_checker) = tetraplet_host_function(echo_call_service);
-    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(echo_call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1220,20 +1229,21 @@ fn canon_map_non_existing_index_and_element_tetraplet_check() {
 
     assert_eq!(tetraplet_checker.as_ref(), &expected_tetraplet);
 }
-#[test]
-fn canon_map_2_scalar_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_2_scalar_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
-    let mut vm_1 = create_avm(call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1296,20 +1306,21 @@ fn canon_map_2_scalar_tetraplet_check() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
-fn canon_map_2_scalar_with_lens_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_2_scalar_with_lens_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
-    let mut vm_1 = create_avm(call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1371,20 +1382,21 @@ fn canon_map_2_scalar_with_lens_tetraplet_check() {
     assert_eq!(actual_data.trace, expected_trace, "{:#?}", actual_data.cid_info,);
 }
 
-#[test]
-fn canon_map_with_lens_by_key_number_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_with_lens_by_key_number_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
-    let mut vm_1 = create_avm(call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1451,20 +1463,21 @@ fn canon_map_with_lens_by_key_number_tetraplet_check() {
     );
 }
 
-#[test]
-fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
+#[tokio::test]
+async fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
 
-    let call_service: CallServiceClosure = Box::new(move |mut params| -> CallServiceResult {
+    let call_service: CallServiceClosure = Box::new(move |mut params| {
         let arg_tetraplets_inner = arg_tetraplets.clone();
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(params.arguments.remove(0))
+        let result = CallServiceResult::ok(params.arguments.remove(0));
+        async move { result }.boxed_local()
     });
 
     let (call_service, tetraplet_checker) = tetraplet_host_function(call_service);
-    let mut vm_1 = create_avm(call_service, vm_peer_id_1);
+    let mut vm_1 = create_avm(call_service, vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -1531,8 +1544,8 @@ fn canon_map_with_lens_by_key_number_key_tetraplet_check() {
     );
 }
 
-#[test]
-fn canon_join_behavoir() {
+#[tokio::test]
+async fn canon_join_behavoir() {
     let init_peer_name = "init_peer_id";
 
     let script = r#"
@@ -1548,14 +1561,15 @@ fn canon_join_behavoir() {
     "#;
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
 
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
-#[test]
-fn canon_map_join_behavoir() {
+#[tokio::test]
+async fn canon_map_join_behavoir() {
     let init_peer_name = "init_peer_id";
 
     let script = r#"
@@ -1571,14 +1585,15 @@ fn canon_map_join_behavoir() {
     "#;
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
 
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }
 
-#[test]
-fn canon_map_var_join_behavoir() {
+#[tokio::test]
+async fn canon_map_var_join_behavoir() {
     let init_peer_name = "init_peer_id";
 
     let script = r#"
@@ -1594,8 +1609,9 @@ fn canon_map_var_join_behavoir() {
     "#;
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
 
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 }

@@ -25,6 +25,9 @@ nom_locate = "4.1.0"
 serde_json = "1.0.108"
 regex = "1.10.2"
 air-interpreter-signatures = { version = "0.1.7", path = "../air-lib/interpreter-signatures" }
+tokio = {version = "1.35.1", features = ["rt", "macros"]}
+futures = "0.3.30"
+async-recursion = "1.0.5"
 
 [dev-dependencies]
 maplit = "1.0.2"

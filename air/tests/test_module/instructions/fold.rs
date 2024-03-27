@@ -22,17 +22,19 @@ use air_test_framework::AirScriptExecutor;
 use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
 use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[test]
-fn lfold() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn lfold() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    );
+    )
+    .await;
 
     let lfold = r#"
             (seq
@@ -61,13 +63,14 @@ fn lfold() {
     }
 }
 
-#[test]
-fn rfold() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn rfold() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    );
+    )
+    .await;
 
     let rfold = r#"
             (seq
@@ -96,13 +99,14 @@ fn rfold() {
     }
 }
 
-#[test]
-fn inner_fold() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn inner_fold() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    );
+    )
+    .await;
 
     let script = r#"
             (seq
@@ -143,12 +147,13 @@ fn inner_fold() {
     }
 }
 
-#[test]
-fn inner_fold_with_same_iterator() {
+#[tokio::test]
+async fn inner_fold_with_same_iterator() {
     let mut vm = create_avm(
         set_variable_call_service(json!(["1", "2", "3", "4", "5"])),
         "set_variable",
-    );
+    )
+    .await;
 
     let script = r#"
             (seq
@@ -175,10 +180,10 @@ fn inner_fold_with_same_iterator() {
     assert_eq!(result.ret_code, expected_error.to_error_code());
 }
 
-#[test]
-fn empty_iterable_fold() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable");
+#[tokio::test]
+async fn empty_iterable_fold() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!([])), "set_variable").await;
 
     let empty_fold = r#"
             (seq
@@ -201,9 +206,9 @@ fn empty_iterable_fold() {
     assert_eq!(actual_trace[0.into()], expected_state);
 }
 
-#[test]
-fn empty_literal_array_fold() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn empty_literal_array_fold() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
 
     let empty_fold = r#"
         (fold [] i
@@ -219,10 +224,10 @@ fn empty_literal_array_fold() {
     assert!(actual_trace.is_empty());
 }
 
-#[test]
-fn empty_fold_lens() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable");
+#[tokio::test]
+async fn empty_fold_lens() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable").await;
 
     let empty_fold = r#"
             (seq
@@ -245,10 +250,10 @@ fn empty_fold_lens() {
 }
 
 // Check that fold works with the join behaviour without hanging up.
-#[test]
-fn fold_with_join() {
-    let mut vm = create_avm(echo_call_service(), "A");
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
+#[tokio::test]
+async fn fold_with_join() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable").await;
 
     let fold_with_join = r#"
             (seq
@@ -271,13 +276,14 @@ fn fold_with_join() {
     assert_eq!(actual_trace.len(), 4);
 }
 
-#[test]
-fn lambda() {
-    let mut vm = create_avm(echo_call_service(), "A");
+#[tokio::test]
+async fn lambda() {
+    let mut vm = create_avm(echo_call_service(), "A").await;
     let mut set_variable_vm = create_avm(
         set_variable_call_service(json!({ "array": ["1","2","3","4","5"] })),
         "set_variable",
-    );
+    )
+    .await;
 
     let script = r#"
             (seq
@@ -306,13 +312,13 @@ fn lambda() {
     }
 }
 
-#[test]
-fn shadowing() {
+#[tokio::test]
+async fn shadowing() {
     use executed_state::*;
 
-    let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
-    let mut vm_a = create_avm(echo_call_service(), "A");
-    let mut vm_b = create_avm(echo_call_service(), "B");
+    let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable").await;
+    let mut vm_a = create_avm(echo_call_service(), "A").await;
+    let mut vm_b = create_avm(echo_call_service(), "B").await;
 
     let script = r#"
             (seq
@@ -369,14 +375,14 @@ fn shadowing() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn shadowing_scope() {
+#[tokio::test]
+async fn shadowing_scope() {
     use executed_state::*;
 
-    fn execute_script(script: String) -> Result<RawAVMOutcome, String> {
-        let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable");
-        let mut vm_a = create_avm(echo_call_service(), "A");
-        let mut vm_b = create_avm(echo_call_service(), "B");
+    async fn execute_script(script: String) -> Result<RawAVMOutcome, String> {
+        let mut set_variables_vm = create_avm(set_variable_call_service(json!(["1", "2"])), "set_variable").await;
+        let mut vm_a = create_avm(echo_call_service(), "A").await;
+        let mut vm_b = create_avm(echo_call_service(), "B").await;
 
         let result = checked_call_vm!(set_variables_vm, <_>::default(), script.clone(), "", "");
         let result = checked_call_vm!(vm_a, <_>::default(), script.clone(), "", result.data);
@@ -384,7 +390,7 @@ fn shadowing_scope() {
         let result = checked_call_vm!(vm_a, <_>::default(), script.clone(), "", result.data);
         let result = checked_call_vm!(vm_b, <_>::default(), script.clone(), "", result.data);
 
-        vm_a.call(script, "", result.data, <_>::default())
+        vm_a.call(script, "", result.data, <_>::default()).await
     }
 
     let variable_shadowing_script = r#"
@@ -415,7 +421,7 @@ fn shadowing_scope() {
                 )
             )"#;
 
-    let result = execute_script(String::from(variable_shadowing_script)).unwrap();
+    let result = execute_script(String::from(variable_shadowing_script)).await.unwrap();
 
     let actual_trace = trace_from_result(&result);
     let expected_trace = ExecutionTrace::from(vec![
@@ -435,10 +441,10 @@ fn shadowing_scope() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_waits_on_empty_stream() {
+#[tokio::test]
+async fn fold_waits_on_empty_stream() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -458,10 +464,10 @@ fn fold_waits_on_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_stream_seq_next_never_completes() {
+#[tokio::test]
+async fn fold_stream_seq_next_never_completes() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -491,10 +497,10 @@ fn fold_stream_seq_next_never_completes() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_stream_seq_next_never_completes_with_never() {
+#[tokio::test]
+async fn fold_stream_seq_next_never_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -529,10 +535,10 @@ fn fold_stream_seq_next_never_completes_with_never() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_stream_seq_next_completes_with_null() {
+#[tokio::test]
+async fn fold_stream_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(json!(1)), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -568,11 +574,11 @@ fn fold_stream_seq_next_completes_with_null() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_scalar_seq_next_completes_with_null() {
+#[tokio::test]
+async fn fold_scalar_seq_next_completes_with_null() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([1, 2]);
-    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -612,11 +618,11 @@ fn fold_scalar_seq_next_completes_with_null() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_scalar_seq_next_not_completes_with_never() {
+#[tokio::test]
+async fn fold_scalar_seq_next_not_completes_with_never() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([1, 2]);
-    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -652,10 +658,10 @@ fn fold_scalar_seq_next_not_completes_with_never() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_stream_seq_next_saves_call_result() {
+#[tokio::test]
+async fn fold_stream_seq_next_saves_call_result() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -696,19 +702,19 @@ fn fold_stream_seq_next_saves_call_result() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_par_next_completes() {
+#[tokio::test]
+async fn fold_par_next_completes() {
     let vm_1_peer_id = "vm_1_peer_id";
-    let mut vm_1 = create_avm(set_variable_call_service(json!(1)), vm_1_peer_id);
+    let mut vm_1 = create_avm(set_variable_call_service(json!(1)), vm_1_peer_id).await;
 
     let vm_2_peer_id = "vm_2_peer_id";
-    let mut vm_2 = create_avm(set_variable_call_service(json!(1)), vm_2_peer_id);
+    let mut vm_2 = create_avm(set_variable_call_service(json!(1)), vm_2_peer_id).await;
 
     let vm_3_peer_id = "vm_3_peer_id";
-    let mut vm_3 = create_avm(set_variable_call_service(json!(1)), vm_3_peer_id);
+    let mut vm_3 = create_avm(set_variable_call_service(json!(1)), vm_3_peer_id).await;
 
     let vm_4_peer_id = "vm_4_peer_id";
-    let mut vm_4 = create_avm(set_variable_call_service(json!(1)), vm_4_peer_id);
+    let mut vm_4 = create_avm(set_variable_call_service(json!(1)), vm_4_peer_id).await;
 
     let script = format!(
         r#"
@@ -795,20 +801,21 @@ fn fold_par_next_completes() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn fold_stream_map() {
+#[tokio::test]
+async fn fold_stream_map() {
     let vm_1_peer_id = "vm_1_peer_id";
     let k1 = 42;
     let k2 = "some";
     let arg_tetraplets = Rc::new(RefCell::new(vec![]));
     let arg_tetraplets_inner = arg_tetraplets.clone();
 
-    let set_variable_call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let set_variable_call_service: CallServiceClosure = Box::new(move |params| {
         arg_tetraplets_inner.borrow_mut().push(params.tetraplets.clone());
-        CallServiceResult::ok(json!({"keyo": k1, "keyu": k2}))
+        let result = CallServiceResult::ok(json!({"keyo": k1, "keyu": k2}));
+        async move { result }.boxed_local()
     });
 
-    let mut vm_1 = create_avm(set_variable_call_service, vm_1_peer_id);
+    let mut vm_1 = create_avm(set_variable_call_service, vm_1_peer_id).await;
 
     let script = format!(
         r#"
@@ -935,8 +942,8 @@ fn fold_stream_map() {
     assert_eq!(&arg_tetraplets.borrow()[tetraplates_len - 4..], &expected_tetraplets);
 }
 
-#[test]
-fn fold_canon_stream_map() {
+#[tokio::test]
+async fn fold_canon_stream_map() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
 
@@ -961,8 +968,9 @@ fn fold_canon_stream_map() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
 
@@ -1016,8 +1024,8 @@ fn fold_canon_stream_map() {
 /// the same kvpairs sequences. Please note that call results produced by
 /// the folds mentioned differ in their tetraplets b/c testing framework
 /// increments service name index for each call used.
-#[test]
-fn fold_map_and_canon_map_orders_are_same() {
+#[tokio::test]
+async fn fold_map_and_canon_map_orders_are_same() {
     let vm_1_peer_name = "vm_1_peer_id";
     let vm_1_peer_id = at(vm_1_peer_name);
 
@@ -1056,8 +1064,9 @@ fn fold_map_and_canon_map_orders_are_same() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_1_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(vm_1_peer_name).unwrap();
+    let result = executor.execute_all(vm_1_peer_name).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
 

@@ -19,9 +19,9 @@ use air::PreparationError;
 use air_interpreter_interface::INTERPRETER_SUCCESS;
 use air_test_utils::prelude::*;
 
-#[test]
-fn minimal_version_check() {
-    let mut vm = create_avm(echo_call_service(), "");
+#[tokio::test]
+async fn minimal_version_check() {
+    let mut vm = create_avm(echo_call_service(), "").await;
     let script = "(null)";
 
     let actual_version = semver::Version::new(0, 31, 1);
@@ -37,9 +37,9 @@ fn minimal_version_check() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn publish_version_check() {
-    let mut vm = create_avm(echo_call_service(), "");
+#[tokio::test]
+async fn publish_version_check() {
+    let mut vm = create_avm(echo_call_service(), "").await;
     let script = "(null)";
 
     let actual_version =
@@ -51,9 +51,9 @@ fn publish_version_check() {
     assert_eq!(result.ret_code, INTERPRETER_SUCCESS, "{:?}", result.error_message);
 }
 
-#[test]
-fn publish_unsupported_version_check() {
-    let mut vm = create_avm(echo_call_service(), "");
+#[tokio::test]
+async fn publish_unsupported_version_check() {
+    let mut vm = create_avm(echo_call_service(), "").await;
 
     let actual_version =
         semver::Version::parse("0.31.1-feat-VM-173-add-interpreter-version-in-data-a2d575b-205-1.0").unwrap();

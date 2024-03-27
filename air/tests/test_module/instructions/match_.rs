@@ -22,13 +22,13 @@ use air::NO_ERROR_MESSAGE;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
-fn match_equal() {
+#[tokio::test]
+async fn match_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -62,13 +62,13 @@ fn match_equal() {
     assert_eq!(actual_trace[2.into()], expected_state);
 }
 
-#[test]
-fn match_not_equal() {
+#[tokio::test]
+async fn match_not_equal() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -102,13 +102,13 @@ fn match_not_equal() {
     assert_eq!(actual_trace[2.into()], expected_state);
 }
 
-#[test]
-fn match_with_string() {
+#[tokio::test]
+async fn match_with_string() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -139,13 +139,13 @@ fn match_with_string() {
     assert_eq!(actual_trace[1.into()], expected_state);
 }
 
-#[test]
-fn match_with_init_peer_id() {
+#[tokio::test]
+async fn match_with_init_peer_id() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -177,13 +177,13 @@ fn match_with_init_peer_id() {
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
-#[test]
-fn match_with_timestamp() {
+#[tokio::test]
+async fn match_with_timestamp() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let timestamp = 1337;
     let script = format!(
@@ -216,13 +216,13 @@ fn match_with_timestamp() {
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
-#[test]
-fn match_with_ttl() {
+#[tokio::test]
+async fn match_with_ttl() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let ttl = 1337;
     let script = format!(
@@ -255,10 +255,10 @@ fn match_with_ttl() {
     assert_eq!(actual_trace[1.into()], expected_executed_call_result);
 }
 
-#[test]
-fn match_with_equal_numbers() {
+#[tokio::test]
+async fn match_with_equal_numbers() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = "
             (xor
@@ -273,13 +273,13 @@ fn match_with_equal_numbers() {
     assert!(is_interpreter_succeded(&result));
 }
 
-#[test]
-fn match_without_xor() {
+#[tokio::test]
+async fn match_without_xor() {
     let set_variable_peer_id = "set_variable_peer_id";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -307,10 +307,10 @@ fn match_without_xor() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn match_with_two_xors() {
+#[tokio::test]
+async fn match_with_two_xors() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(set_variable_call_service(serde_json::json!(false)), local_peer_id);
+    let mut vm = create_avm(set_variable_call_service(serde_json::json!(false)), local_peer_id).await;
 
     let local_peer_id_2 = "local_peer_id_2";
 
@@ -343,16 +343,17 @@ fn match_with_two_xors() {
 }
 
 // https://github.com/fluencelabs/aquavm/issues/165
-#[test]
-fn issue_165() {
+#[tokio::test]
+async fn issue_165() {
     let result_setter_peer_id = "result_setter_peer_id";
     let mut result_setter = create_avm(
         set_variable_call_service(serde_json::json!({"success": true})),
         result_setter_peer_id,
-    );
+    )
+    .await;
 
     let echo_peer_id = "echo_peer_id";
-    let mut echo_peer = create_avm(echo_call_service(), echo_peer_id);
+    let mut echo_peer = create_avm(echo_call_service(), echo_peer_id).await;
 
     let script = format!(
         r#"
@@ -390,8 +391,8 @@ fn issue_165() {
     );
 }
 
-#[test]
-fn match_with_undefined_last_error_errcode() {
+#[tokio::test]
+async fn match_with_undefined_last_error_errcode() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -403,8 +404,9 @@ fn match_with_undefined_last_error_errcode() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
     let mut cid_state = ExecutionCidState::new();
@@ -421,8 +423,8 @@ fn match_with_undefined_last_error_errcode() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn match_with_undefined_last_error_message() {
+#[tokio::test]
+async fn match_with_undefined_last_error_message() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -434,8 +436,9 @@ fn match_with_undefined_last_error_message() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
     let mut cid_state = ExecutionCidState::new();
@@ -452,10 +455,10 @@ fn match_with_undefined_last_error_message() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn match_with_error() {
+#[tokio::test]
+async fn match_with_error() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"

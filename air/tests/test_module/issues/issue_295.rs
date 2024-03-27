@@ -19,11 +19,11 @@ use air_test_utils::prelude::*;
 use air_trace_handler::merger::MergeError;
 use air_trace_handler::TraceHandlerError;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/295
-fn issue_295() {
+async fn issue_295() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(echo_call_service(), vm_peer_id);
+    let mut vm = create_avm(echo_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"

@@ -19,10 +19,10 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/211
 // On the versions < 0.20.1 it just crashes
-fn issue_211() {
+async fn issue_211() {
     let peer_1_name = "peer_1_id";
 
     let script = format!(
@@ -71,11 +71,12 @@ fn issue_211() {
     let run_params = TestRunParameters::from_init_peer_id(peer_1_name);
 
     let engine = air_test_framework::AirScriptExecutor::from_annotated(run_params, &script)
+        .await
         .expect("invalid test executor config");
     let peer_1_id = engine.resolve_name(peer_1_name).to_string();
     let peer_1_id = peer_1_id.as_str();
 
-    let result = engine.execute_one(peer_1_name).unwrap();
+    let result = engine.execute_one(peer_1_name).await.unwrap();
 
     let scalar_2 = scalar!(
         json!([1, 2, 3]),

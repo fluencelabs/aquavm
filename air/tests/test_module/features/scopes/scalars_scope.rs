@@ -18,19 +18,21 @@ use air::CatchableError;
 use air::ExecutionError;
 use air_test_utils::prelude::*;
 
-#[test]
-fn scalars_scope() {
+use futures::FutureExt;
+
+#[tokio::test]
+async fn scalars_scope() {
     let peer_1_id = "peer_1_id";
     let array_1_content = json!(["1", "2"]);
-    let mut peer_1_vm = create_avm(set_variable_call_service(array_1_content.clone()), peer_1_id);
+    let mut peer_1_vm = create_avm(set_variable_call_service(array_1_content.clone()), peer_1_id).await;
 
     let some_peer_id = "some_peer_id";
-    let mut some_peer_vm = create_avm(unit_call_service(), some_peer_id);
+    let mut some_peer_vm = create_avm(unit_call_service(), some_peer_id).await;
 
     let set_array_0_peer_id = "set_array_0_peer_id";
     let peer_2_id = "peer_2_id";
     let peers = json!([peer_1_id, peer_2_id]);
-    let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id);
+    let mut set_array_0_vm = create_avm(set_variable_call_service(peers.clone()), set_array_0_peer_id).await;
 
     let script = format!(
         r#"
@@ -73,23 +75,26 @@ fn scalars_scope() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn before_after_of_next() {
+#[tokio::test]
+async fn before_after_of_next() {
     let set_array_0_peer_id = "set_array_0_peer_id";
     let array_0_content = json!([1, 2, 3]);
-    let mut set_array_0_vm = create_avm(set_variable_call_service(array_0_content.clone()), set_array_0_peer_id);
+    let mut set_array_0_vm = create_avm(set_variable_call_service(array_0_content.clone()), set_array_0_peer_id).await;
 
     let vm_peer_0_id = "vm_peer_0_id";
     let counter = std::cell::Cell::new(0);
     let vm_peer_0_call_service: CallServiceClosure = Box::new(move |_params| {
-        let uncelled_request_id = counter.get();
-        counter.set(uncelled_request_id + 1);
-        CallServiceResult::ok(json!(uncelled_request_id))
+        {
+            let uncelled_request_id = counter.get();
+            counter.set(uncelled_request_id + 1);
+            async move { CallServiceResult::ok(json!(uncelled_request_id)) }
+        }
+        .boxed_local()
     });
-    let mut peer_0_vm = create_avm(vm_peer_0_call_service, vm_peer_0_id);
+    let mut peer_0_vm = create_avm(vm_peer_0_call_service, vm_peer_0_id).await;
 
     let vm_peer_1_id = "vm_peer_1_id";
-    let mut peer_1_vm = create_avm(echo_call_service(), vm_peer_1_id);
+    let mut peer_1_vm = create_avm(echo_call_service(), vm_peer_1_id).await;
 
     let script = format!(
         r#"
@@ -124,26 +129,27 @@ fn before_after_of_next() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn local_and_global_scalars() {
+#[tokio::test]
+async fn local_and_global_scalars() {
     let set_variable_peer_id = "set_variable_peer_id";
     let iterable_content = json!([1i64, 2]);
     let mut set_variable_vm = create_avm(
         set_variable_call_service(iterable_content.clone()),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_setter_peer_id = "local_setter_peer_id";
     let counter = std::cell::Cell::new(0);
     let local_setter_call_service: CallServiceClosure = Box::new(move |_params| {
         let uncelled_request_id = counter.get();
         counter.set(uncelled_request_id + 1);
-        CallServiceResult::ok(json!(uncelled_request_id))
+        async move { CallServiceResult::ok(json!(uncelled_request_id)) }.boxed_local()
     });
-    let mut local_setter_vm = create_avm(local_setter_call_service, local_setter_peer_id);
+    let mut local_setter_vm = create_avm(local_setter_call_service, local_setter_peer_id).await;
 
     let local_consumer_peer_id = "local_consumer_peer_id";
-    let mut local_consumer_vm = create_avm(echo_call_service(), local_consumer_peer_id);
+    let mut local_consumer_vm = create_avm(echo_call_service(), local_consumer_peer_id).await;
 
     let script = format!(
         r#"
@@ -213,10 +219,10 @@ fn local_and_global_scalars() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn new_with_randomly_set_scalars_in_fold_1() {
+#[tokio::test]
+async fn new_with_randomly_set_scalars_in_fold_1() {
     let test_peer_id_1 = "test_peer_id_1";
-    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
+    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1).await;
 
     let test_peer_id_2 = "test_peer_id_2";
     let script = format!(
@@ -253,10 +259,10 @@ fn new_with_randomly_set_scalars_in_fold_1() {
     assert_eq!(result.ret_code, 0)
 }
 
-#[test]
-fn new_with_randomly_set_scalars_in_fold_2() {
+#[tokio::test]
+async fn new_with_randomly_set_scalars_in_fold_2() {
     let test_peer_id_1 = "test_peer_id_1";
-    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1);
+    let mut test_vm_1 = create_avm(set_variable_call_service(json!([1, 2, 3])), test_peer_id_1).await;
 
     let test_peer_id_2 = "test_peer_id_2";
     let variable_name = "scalar";

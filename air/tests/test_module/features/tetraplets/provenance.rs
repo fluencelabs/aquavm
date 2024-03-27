@@ -17,8 +17,8 @@
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::{key_utils::at, prelude::*};
 
-#[test]
-fn call_result() {
+#[tokio::test]
+async fn call_result() {
     let init_peer_name = "B";
 
     let air_script = r#"
@@ -26,10 +26,11 @@ fn call_result() {
             (call "B" ("service" "func") [] $s) ; ok = "some_data"
             (canon "B" $s #c))
     "#;
-    let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
+    let runner = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script)
+        .await
+        .unwrap();
 
-    let result = runner.execute_one(init_peer_name).unwrap();
+    let result = runner.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
@@ -67,8 +68,8 @@ fn call_result() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
-fn call_result_iteration() {
+#[tokio::test]
+async fn call_result_iteration() {
     let init_peer_name = "A";
 
     let air_script = r#"
@@ -81,10 +82,11 @@ fn call_result_iteration() {
                         (next a))))
             (canon "A" $s #c))
     "#;
-    let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
+    let runner = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script)
+        .await
+        .unwrap();
 
-    let result = runner.execute_one(init_peer_name).unwrap();
+    let result = runner.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
@@ -140,8 +142,8 @@ fn call_result_iteration() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
-fn literal() {
+#[tokio::test]
+async fn literal() {
     let init_peer_name = "B";
 
     let air_script = r#"
@@ -149,10 +151,11 @@ fn literal() {
             (ap 1 $s)
             (canon "B" $s #c))
     "#;
-    let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
+    let runner = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script)
+        .await
+        .unwrap();
 
-    let result = runner.execute_one(init_peer_name).unwrap();
+    let result = runner.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);
@@ -182,8 +185,8 @@ fn literal() {
     assert_eq!(last_state, &expected_state);
 }
 
-#[test]
-fn canon_in_canon() {
+#[tokio::test]
+async fn canon_in_canon() {
     let init_peer_name = "B";
 
     let air_script = r#"
@@ -195,10 +198,11 @@ fn canon_in_canon() {
                 (ap #c $s)
                 (canon "B" $s #d)))
     "#;
-    let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
+    let runner = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script)
+        .await
+        .unwrap();
 
-    let result = runner.execute_one(init_peer_name).unwrap();
+    let result = runner.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let trace = trace_from_result(&result);
@@ -256,8 +260,8 @@ fn canon_in_canon() {
     assert_eq!(last_state, &expected_state,);
 }
 
-#[test]
-fn lambda_result_iteration() {
+#[tokio::test]
+async fn lambda_result_iteration() {
     let init_peer_name = "A";
 
     let air_script = r#"
@@ -273,10 +277,11 @@ fn lambda_result_iteration() {
                         (next y))))
             (canon "A" $s #c))
     "#;
-    let runner =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script).unwrap();
+    let runner = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), air_script)
+        .await
+        .unwrap();
 
-    let result = runner.execute_one(init_peer_name).unwrap();
+    let result = runner.execute_one(init_peer_name).await.unwrap();
     assert_eq!(result.ret_code, 0, "{:?}", result.error_message);
 
     let data = data_from_result(&result);

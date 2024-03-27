@@ -24,10 +24,10 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
-fn test_missing_cid() {
+#[tokio::test]
+async fn test_missing_cid() {
     let peer_id = "peer_id";
-    let mut vm = create_avm(echo_call_service(), peer_id);
+    let mut vm = create_avm(echo_call_service(), peer_id).await;
 
     let air_script = r#"
        (seq
@@ -48,10 +48,10 @@ fn test_missing_cid() {
     assert!(check_error(&result, expected_error), "{:?}", result);
 }
 
-#[test]
-fn test_correct_cid() {
+#[tokio::test]
+async fn test_correct_cid() {
     let peer_id = "peer_id";
-    let mut vm = create_avm(echo_call_service(), peer_id);
+    let mut vm = create_avm(echo_call_service(), peer_id).await;
 
     let air_script = r#"
        (seq
@@ -68,8 +68,8 @@ fn test_correct_cid() {
     assert_eq!(result.ret_code, 0, "{:?}", result);
 }
 
-#[test]
-fn test_scalar_cid() {
+#[tokio::test]
+async fn test_scalar_cid() {
     let vm_peer_name = "vm_peer_id";
 
     let annotated_air_script = format!(
@@ -83,9 +83,10 @@ fn test_scalar_cid() {
         TestRunParameters::from_init_peer_id(vm_peer_name),
         &annotated_air_script,
     )
+    .await
     .unwrap();
 
-    let result = executor.execute_one(vm_peer_name).unwrap();
+    let result = executor.execute_one(vm_peer_name).await.unwrap();
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
@@ -115,8 +116,8 @@ fn test_scalar_cid() {
     );
 }
 
-#[test]
-fn test_stream_cid() {
+#[tokio::test]
+async fn test_stream_cid() {
     let vm_peer_name = "vm_peer_id";
 
     let annotated_air_script = format!(
@@ -130,9 +131,10 @@ fn test_stream_cid() {
         TestRunParameters::from_init_peer_id(vm_peer_name),
         &annotated_air_script,
     )
+    .await
     .unwrap();
 
-    let result = executor.execute_one(vm_peer_name).unwrap();
+    let result = executor.execute_one(vm_peer_name).await.unwrap();
     let data = data_from_result(&result);
     let mut cid_state = ExecutionCidState::new();
     let expected_trace = vec![
@@ -164,8 +166,8 @@ fn test_stream_cid() {
     );
 }
 
-#[test]
-fn test_unused_cid() {
+#[tokio::test]
+async fn test_unused_cid() {
     let vm_peer_id = "vm_peer_id";
 
     let annotated_air_script = format!(
@@ -177,9 +179,10 @@ fn test_unused_cid() {
     );
     let executor =
         AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(vm_peer_id), &annotated_air_script)
+            .await
             .unwrap();
 
-    let result = executor.execute_one(vm_peer_id).unwrap();
+    let result = executor.execute_one(vm_peer_id).await.unwrap();
     let data = data_from_result(&result);
 
     let expected_trace = vec![
