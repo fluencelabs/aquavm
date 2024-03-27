@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "ahash"
-version = "0.7.7"
+version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a824f2aa7e75a0c98c5a504fceb80649e9c35265d44525b5f94de4771a395cd"
+checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
 dependencies = [
  "getrandom",
  "once_cell",
@@ -24,7 +24,7 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.12"
+version = "0.7.14"
 dependencies = [
  "aquavm-air-parser",
 ]
@@ -47,11 +47,12 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.17.0"
+version = "0.17.2"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-value",
  "air-utils",
  "aquavm-air-parser",
  "fluence-keypair",
@@ -71,9 +72,10 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.17.2"
+version = "0.19.0"
 dependencies = [
  "air-interpreter-sede",
+ "air-interpreter-value",
  "marine-call-parameters",
  "serde",
  "serde_bytes",
@@ -107,6 +109,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "air-interpreter-value"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "air-lambda-ast"
 version = "0.1.0"
 dependencies = [
@@ -134,7 +144,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.10"
+version = "0.5.12"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -151,7 +161,7 @@ dependencies = [
 
 [[package]]
 name = "air-utils"
-version = "0.2.0"
+version = "0.3.0"
 
 [[package]]
 name = "android-tzdata"
@@ -170,7 +180,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air"
-version = "0.59.0"
+version = "0.61.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -178,6 +188,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-value",
  "air-lambda-ast",
  "air-lambda-parser",
  "air-log-targets",
@@ -204,8 +215,9 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-parser"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
+ "air-interpreter-value",
  "air-lambda-ast",
  "air-lambda-parser",
  "codespan",
@@ -541,7 +553,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f76990911f2267d837d9d0ad060aa63aaad170af40904b29461734c339030d4d"
 dependencies = [
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]
 
 [[package]]
@@ -614,9 +626,9 @@ dependencies = [
 
 [[package]]
 name = "curve25519-dalek"
-version = "4.0.0"
+version = "4.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f711ade317dd348950a9910f81c5947e3d8907ebd2b83f76203ff1807e6a2bc2"
+checksum = "0a677b8922c94e01bdbb12126b0bc852f00447528dee1782229af9c720c3f348"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -637,7 +649,7 @@ checksum = "83fdaf97f4804dcebfa5862639bc9ce4121e82140bec2a987ac5140294865b5b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]
 
 [[package]]
@@ -802,9 +814,9 @@ dependencies = [
 
 [[package]]
 name = "fiat-crypto"
-version = "0.1.20"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e825f6987101665dea6ec934c09ec6d721de7bc1bf92248e1d5810c8cd636b77"
+checksum = "1676f435fc1dadde4d03e43f5d62b259e1ce5f40bd4ffb21db2b42ebe59c1382"
 
 [[package]]
 name = "fixedbitset"
@@ -1169,9 +1181,9 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine-call-parameters"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f47b1186bad0b2a5e9218e3f6fbe0612ef6b17c58c58537d77bd08044596ea95"
+checksum = "05495180730abae04abe209386ce367309a82110edb65fcdb1f3080f819bc1a0"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -1181,9 +1193,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "727b1a5449eb1676837c5fc22a8c31dc9980dcef4de938f26f2eaf7c2c54331b"
+checksum = "f502185316f584a9373cceb6ff24a11d260dfd39505c817056bc127cd1a96a08"
 dependencies = [
  "marine-macro-impl",
  "marine-rs-sdk-main",
@@ -1191,9 +1203,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c8cd8a228856db057bd4a32c6e2708848b2b1db7552be0a6063d534cafb4e2"
+checksum = "e50fbc0e70ee4cde7802f0748acfb197d7770c7feffb980ce8c29bddd007519e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1204,9 +1216,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7662e4c6c08f7cd1b63cd6ff8e473e3239a9d3dd10fb46bec357cb8331423268"
+checksum = "f93d2bd852fea1fea8097c195044430347eda98fd6a3752119b549192d5ac4ba"
 dependencies = [
  "marine-call-parameters",
  "marine-macro",
@@ -1217,9 +1229,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cba9000500575b4965ec44e44bbbfd056d121be1195969ce1a5cc146646c37b"
+checksum = "0b79c165fc21438b069babeec5ae36ba0eade5e08fb1d92dabbe6b41014ce841"
 dependencies = [
  "log",
  "serde",
@@ -1227,9 +1239,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47ec0d664570661ecba1feba2dda610ab63f23733edf189dcde7b5ed23966144"
+checksum = "d03f267ac0a29f543ef12a1a519ff8d98e74ac66e1c580f2930d41ce2c50507d"
 dependencies = [
  "chrono",
  "quote",
@@ -1446,7 +1458,7 @@ checksum = "e3d7ddaed09e0eb771a79ab0fd64609ba0afb0a8366421957936ad14cbd13630"
 
 [[package]]
 name = "polyplets"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "marine-call-parameters",
  "serde",
@@ -1509,9 +1521,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.70"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39278fbbf5fb4f646ce651690877f89d1c5811a3d4acb27700c1cb3cdb78fd3b"
+checksum = "e2422ad645d89c99f8f3e6b88a9fdeca7fabeac836b1002371c4367c8f984aae"
 dependencies = [
  "unicode-ident",
 ]
@@ -1547,9 +1559,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.33"
+version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae"
+checksum = "291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef"
 dependencies = [
  "proc-macro2",
 ]
@@ -1795,9 +1807,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.193"
+version = "1.0.197"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25dd9975e68d0cb5aa1120c288333fc98731bd1dd12f561e468ea4728c042b89"
+checksum = "3fb1c873e1b9b056a4dc4c0c198b24c3ffa059243875552b2bd0933b1aee4ce2"
 dependencies = [
  "serde_derive",
 ]
@@ -1813,13 +1825,13 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.193"
+version = "1.0.197"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43576ca501357b9b071ac53cdc7da8ef0cbd9493d8df094cd821777ea6e894d3"
+checksum = "7eb0b34b42edc17f6b7cac84a52a1c5f0e1bb2227e997ca9011ea3dd34e8610b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]
 
 [[package]]
@@ -1975,9 +1987,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.40"
+version = "2.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13fa70a4ee923979ffb522cacce59d34421ebdea5625e1073c4326ef9d2dd42e"
+checksum = "74f1bdc9872430ce9b75da68329d1c1746faf50ffac5f19e02b71e37ff881ffb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2039,7 +2051,7 @@ checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]
 
 [[package]]
@@ -2111,7 +2123,7 @@ checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]
 
 [[package]]
@@ -2210,7 +2222,7 @@ dependencies = [
  "once_cell",
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
  "wasm-bindgen-shared",
 ]
 
@@ -2232,7 +2244,7 @@ checksum = "54681b18a46765f095758388f2d0cf16eb8d4169b639ab575a8f5693af210c7b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
@@ -2460,5 +2472,5 @@ checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.40",
+ "syn 2.0.50",
 ]

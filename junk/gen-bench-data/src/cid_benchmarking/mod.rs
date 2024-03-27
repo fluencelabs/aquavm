@@ -43,7 +43,7 @@ struct CallInfo {
     service: Option<String>,
     function: Option<String>,
     args: Option<Vec<Value>>,
-    json_path: Option<String>,
+    lens: Option<String>,
     kind: Option<Kind>,
 }
 
@@ -88,8 +88,8 @@ fn transform_cid(
     if let Some(args) = meta.args {
         builder = builder.args(args);
     }
-    if let Some(json_path) = meta.json_path {
-        builder = builder.json_path(json_path);
+    if let Some(lens) = meta.lens {
+        builder = builder.lens(lens);
     }
 
     match meta.kind {

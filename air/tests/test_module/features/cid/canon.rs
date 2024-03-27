@@ -62,12 +62,12 @@ async fn test_canon_ok() {
         stream_exec_state,
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
@@ -76,7 +76,7 @@ async fn test_canon_ok() {
                     "result": "to canon",
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
@@ -153,12 +153,12 @@ async fn test_canon_ok_multi() {
         stream_state_2,
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": "to canon",
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": init_peer_id,
                         "service_id": "serv..0",
                     },
@@ -167,7 +167,7 @@ async fn test_canon_ok_multi() {
                     "result": "other",
                     "tetraplet": {
                         "function_name": "other_func",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": other_peer_id,
                         "service_id": "other_serv..1",
                     },
@@ -209,12 +209,12 @@ async fn test_canon_value_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
@@ -258,12 +258,12 @@ async fn test_canon_root_tetraplet_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": other_peer_id,
                         "service_id": "",
                     },
@@ -273,7 +273,7 @@ async fn test_canon_root_tetraplet_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaihraydnoggy3vbf42ebqdjffuqnqpiwk2ryytc4esqasavlo6zzv7e4a";
+    let missing_cid = "bagaaihrays67nve662j4pn5jdqquxlqqi5vpisgs72n4tmnrqbbnah3t5ola";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(
         tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
@@ -319,12 +319,12 @@ async fn test_canon_tetraplet_not_found() {
         ),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": init_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": init_peer_id, "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "func",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": "peer_1",
                         "service_id": "serv..0",
                     },
@@ -333,7 +333,7 @@ async fn test_canon_tetraplet_not_found() {
             &mut cid_state,
         ),
     ];
-    let missing_cid = "bagaaihrasj5rizxwp3gypeiszoyq6nwmlvyu3fxqmfv6yu7uvuir6litgyna";
+    let missing_cid = "bagaaihramktnmwzskmyxlah5zyownsfxv4vt7wf2ypzwvrygb2x7o72vpfyq";
     let tetraplet_store: CidStore<_> = cid_state.tetraplet_tracker.into();
     assert!(
         tetraplet_store.get(&CID::<_>::new(missing_cid)).is_some(),
@@ -371,12 +371,12 @@ async fn test_canon_agg_not_found() {
         ap(0),
         canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "other_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "other_peer_id", "service_id": ""},
                 "values": [{
                     "result": 42,
                     "tetraplet": {
                         "function_name": "",
-                        "json_path": "",
+                        "lens": "",
                         "peer_pk": init_peer_id,
                         "service_id": "",
                     },
@@ -387,7 +387,7 @@ async fn test_canon_agg_not_found() {
         ),
     ];
 
-    let missing_cid = "bagaaihraqxwgyh7ihp2cmyt6piqqm7s2bz2xr2sgohzn34tnstksoyb4wsza";
+    let missing_cid = "bagaaihrad3w3ebwqwgzoxyvdyq7wgxeawv2i6olczg6mnivu6fnwwm4m42oq";
     let canon_element_store: CidStore<_> = cid_state.canon_element_tracker.into();
     assert!(
         canon_element_store.get(&CID::<_>::new(missing_cid)).is_some(),

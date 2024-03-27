@@ -22,6 +22,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.4 to 0.7.5
     * avm-interface bumped from 0.30.0 to 0.31.0
 
+## [0.37.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.36.0...avm-server-v0.37.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.18.0 to 0.19.0
+    * avm-data-store bumped from 0.7.8 to 0.7.9
+    * polyplets bumped from 0.6.0 to 0.7.0
+    * avm-interface bumped from 0.32.0 to 0.32.1
+
+## [0.36.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.35.0...avm-server-v0.36.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+    * air-utils bumped from 0.2.0 to 0.3.0
+    * avm-data-store bumped from 0.7.7 to 0.7.8
+    * avm-interface bumped from 0.31.2 to 0.32.0
+
 ## [0.35.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.34.2...avm-server-v0.35.0) (2024-01-24)
 
 

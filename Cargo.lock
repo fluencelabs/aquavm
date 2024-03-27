@@ -81,9 +81,9 @@ checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
 
 [[package]]
 name = "ahash"
-version = "0.7.7"
+version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a824f2aa7e75a0c98c5a504fceb80649e9c35265d44525b5f94de4771a395cd"
+checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
 dependencies = [
  "getrandom 0.2.11",
  "once_cell",
@@ -92,9 +92,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.6"
+version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91429305e9f0a25f6205c5b8e0d2db09e0708a7a6df0f42212bb56c32c8ac97a"
+checksum = "d713b3834d76b85304d4d525563c1276e2e30dc97cc67bfb4585a4a29fc2c89f"
 dependencies = [
  "cfg-if 1.0.0",
  "once_cell",
@@ -113,7 +113,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautifier"
-version = "0.4.1"
+version = "0.4.3"
 dependencies = [
  "aquavm-air-parser",
  "itertools",
@@ -122,7 +122,7 @@ dependencies = [
 
 [[package]]
 name = "air-beautify-wasm"
-version = "0.3.7"
+version = "0.3.9"
 dependencies = [
  "air-beautifier",
  "wasm-bindgen",
@@ -130,14 +130,14 @@ dependencies = [
 
 [[package]]
 name = "air-execution-info-collector"
-version = "0.7.12"
+version = "0.7.14"
 dependencies = [
  "aquavm-air-parser",
 ]
 
 [[package]]
 name = "air-interpreter"
-version = "0.59.0"
+version = "0.62.0"
 dependencies = [
  "air-interpreter-interface",
  "air-log-targets",
@@ -169,7 +169,7 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-data"
-version = "0.17.0"
+version = "0.17.2"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-sede",
@@ -194,12 +194,12 @@ dependencies = [
 
 [[package]]
 name = "air-interpreter-interface"
-version = "0.17.2"
+version = "0.19.0"
 dependencies = [
  "air-interpreter-sede",
  "air-interpreter-value",
  "fluence-it-types",
- "marine-call-parameters 0.12.0",
+ "marine-call-parameters 0.14.0",
  "marine-rs-sdk",
  "serde",
  "serde_bytes",
@@ -271,7 +271,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.15.1"
+version = "0.17.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -284,11 +284,8 @@ dependencies = [
  "avm-server",
  "ed25519-dalek 2.1.0",
  "fluence-keypair",
- "futures",
  "maplit",
  "marine-rs-sdk",
- "marine-wasm-backend-traits",
- "marine-wasmtime-backend",
  "object-pool",
  "once_cell",
  "rand_chacha 0.3.1",
@@ -296,19 +293,16 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.8",
- "tokio",
 ]
 
 [[package]]
 name = "air-testing-framework"
-version = "0.8.4"
+version = "0.10.1"
 dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
  "aquavm-air-parser",
- "async-recursion",
  "fluence-keypair",
- "futures",
  "itertools",
  "maplit",
  "nom",
@@ -317,12 +311,11 @@ dependencies = [
  "regex",
  "serde_json",
  "strum",
- "tokio",
 ]
 
 [[package]]
 name = "air-trace-handler"
-version = "0.5.10"
+version = "0.5.12"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -339,7 +332,7 @@ dependencies = [
 
 [[package]]
 name = "air-utils"
-version = "0.2.0"
+version = "0.3.0"
 
 [[package]]
 name = "ambient-authority"
@@ -433,7 +426,7 @@ checksum = "080e9890a082662b09c1ad45f567faeeb47f22b5fb23895fbe1e651e718e25ca"
 
 [[package]]
 name = "aquavm-air"
-version = "0.59.0"
+version = "0.62.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -459,7 +452,6 @@ dependencies = [
  "env_logger",
  "fluence-app-service",
  "fluence-keypair",
- "futures",
  "log",
  "maplit",
  "marine-rs-sdk",
@@ -474,14 +466,13 @@ dependencies = [
  "strum",
  "strum_macros",
  "thiserror",
- "tokio",
  "tracing",
  "typed-index-collections",
 ]
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.6.3"
+version = "0.7.2"
 dependencies = [
  "air-beautifier",
  "air-interpreter-data",
@@ -497,9 +488,7 @@ dependencies = [
  "clap 4.4.11",
  "eyre",
  "fluence-keypair",
- "futures",
  "itertools",
- "marine-wasmtime-backend",
  "near-sdk",
  "semver 1.0.21",
  "serde",
@@ -514,7 +503,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-parser"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "air-interpreter-value",
  "air-lambda-ast",
@@ -594,12 +583,6 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "assert_matches"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
 
 [[package]]
 name = "async-channel"
@@ -691,17 +674,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-recursion"
-version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd55a5ba1179988837d24ab4c7cc8ed6efdeff578ede0416b4225a5fca35bd0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.48",
-]
-
-[[package]]
 name = "async-signal"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -783,7 +755,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "avm-data-store"
-version = "0.7.7"
+version = "0.7.9"
 dependencies = [
  "avm-interface",
  "serde",
@@ -793,7 +765,7 @@ dependencies = [
 
 [[package]]
 name = "avm-interface"
-version = "0.31.2"
+version = "0.32.1"
 dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
@@ -809,7 +781,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.35.0"
+version = "0.37.0"
 dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
@@ -821,14 +793,11 @@ dependencies = [
  "log",
  "maplit",
  "marine-runtime",
- "marine-wasm-backend-traits",
- "marine-wasmtime-backend",
  "parking_lot 0.12.1",
  "polyplets",
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
  "tracing",
 ]
 
@@ -1804,7 +1773,7 @@ dependencies = [
  "autocfg",
  "cfg-if 1.0.0",
  "crossbeam-utils",
- "memoffset 0.9.0",
+ "memoffset",
 ]
 
 [[package]]
@@ -1918,9 +1887,9 @@ dependencies = [
 
 [[package]]
 name = "curve25519-dalek"
-version = "4.1.1"
+version = "4.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e89b8c6a2e4b1f45971ad09761aafb85514a84744b67a95e32c3cc1352d1f65c"
+checksum = "0a677b8922c94e01bdbb12126b0bc852f00447528dee1782229af9c720c3f348"
 dependencies = [
  "cfg-if 1.0.0",
  "cpufeatures",
@@ -1928,7 +1897,6 @@ dependencies = [
  "digest 0.10.7",
  "fiat-crypto",
  "platforms",
- "rand_core 0.6.4",
  "rustc_version 0.4.0",
  "subtle",
  "zeroize",
@@ -2225,7 +2193,7 @@ version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f628eaec48bfd21b865dc2950cfa014450c01d2fa2b69a86c2fd5844ec523c0"
 dependencies = [
- "curve25519-dalek 4.1.1",
+ "curve25519-dalek 4.1.2",
  "ed25519 2.2.3",
  "rand_core 0.6.4",
  "serde",
@@ -2460,8 +2428,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.32.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e95950035a16589b5ed736ee920839e475b864965b4e4061e2bc1faaf58f1f2"
 dependencies = [
  "log",
  "maplit",
@@ -2584,13 +2553,12 @@ checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "futures"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "645c6916888f6cb6350d2550b80fb63e734897a8498abe35cfb732b6487804b0"
+checksum = "da0290714b38af9b4a7b094b8a37086d1b4e61f2df9122c3cad2577669145335"
 dependencies = [
  "futures-channel",
  "futures-core",
- "futures-executor",
  "futures-io",
  "futures-sink",
  "futures-task",
@@ -2599,9 +2567,9 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eac8f7d7865dcb88bd4373ab671c8cf4508703796caa2b1985a9ca867b3fcb78"
+checksum = "ff4dd66668b557604244583e3e1e1eada8c5c2e96a6d0d6653ede395b78bbacb"
 dependencies = [
  "futures-core",
  "futures-sink",
@@ -2609,15 +2577,15 @@ dependencies = [
 
 [[package]]
 name = "futures-core"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfc6580bb841c5a68e9ef15c77ccc837b40a7504914d52e47b8b0e9bbda25a1d"
+checksum = "eb1d22c66e66d9d72e1758f0bd7d4fd0bee04cad842ee34587d68c07e45d088c"
 
 [[package]]
 name = "futures-executor"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a576fc72ae164fca6b9db127eaa9a9dda0d61316034f33a0a0d4eda41f02b01d"
+checksum = "0f4fb8693db0cf099eadcca0efe2a5a22e4550f98ed16aba6c48700da29597bc"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -2626,9 +2594,9 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
+checksum = "8bf34a163b5c4c52d0478a4d757da8fb65cabef42ba90515efee0f6f9fa45aaa"
 
 [[package]]
 name = "futures-lite"
@@ -2656,38 +2624,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "futures-macro"
-version = "0.3.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87750cf4b7a4c0625b1529e4c543c2182106e4dedc60a2a6455e00d212c489ac"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.48",
-]
-
-[[package]]
 name = "futures-sink"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fb8e00e87438d937621c1c6269e53f536c14d3fbd6a042bb24879e57d474fb5"
+checksum = "e36d3378ee38c2a36ad710c5d30c2911d752cb941c00c72dbabfb786a7970817"
 
 [[package]]
 name = "futures-task"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38d84fa142264698cdce1a9f9172cf383a0c82de1bddcf3092901442c4097004"
+checksum = "efd193069b0ddadc69c46389b740bbccdd97203899b48d09c5f7969591d6bae2"
 
 [[package]]
 name = "futures-util"
-version = "0.3.30"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
+checksum = "a19526d624e703a3179b3d322efec918b6246ea0fa51d41124525f00f1cc8104"
 dependencies = [
  "futures-channel",
  "futures-core",
  "futures-io",
- "futures-macro",
  "futures-sink",
  "futures-task",
  "memchr",
@@ -2803,7 +2759,7 @@ version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
 dependencies = [
- "ahash 0.7.7",
+ "ahash 0.7.8",
 ]
 
 [[package]]
@@ -2812,7 +2768,7 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
- "ahash 0.7.7",
+ "ahash 0.7.8",
 ]
 
 [[package]]
@@ -2821,7 +2777,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash 0.8.6",
+ "ahash 0.8.9",
 ]
 
 [[package]]
@@ -2830,7 +2786,7 @@ version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 dependencies = [
- "ahash 0.8.6",
+ "ahash 0.8.9",
 ]
 
 [[package]]
@@ -3156,7 +3112,8 @@ dependencies = [
 [[package]]
 name = "it-json-serde"
 version = "0.5.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a74b6ed688d9de56b4e4cb5aca2bd7a883909f1be8d8d6ba40e3a2d25b9feba5"
 dependencies = [
  "serde",
  "serde_derive",
@@ -3167,14 +3124,12 @@ dependencies = [
 
 [[package]]
 name = "it-lilo"
-version = "0.7.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fa7310e6ce8b8b6f11c3d0b5dd5824675fab3cfd335f70bcf9a51198de39cfe"
+checksum = "20108e77e11eeb1ef019f54c3868e0f2e9227295502f0702fa2e7e730ea748f8"
 dependencies = [
  "anyhow",
- "async-recursion",
  "fluence-it-types",
- "futures",
  "it-memory-traits",
  "log",
  "paste",
@@ -3183,9 +3138,9 @@ dependencies = [
 
 [[package]]
 name = "it-memory-traits"
-version = "0.5.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e83089981169d53e2b13df7c8d132b471bf2fc4c85afe427c4a74115695c4612"
+checksum = "d563f2a6baee17cf471b7951dfb96ab17fecc5e8947de39f1057cf3fb4cc906d"
 dependencies = [
  "thiserror",
 ]
@@ -3471,18 +3426,40 @@ checksum = "f47b1186bad0b2a5e9218e3f6fbe0612ef6b17c58c58537d77bd08044596ea95"
 dependencies = [
  "marine-macro 0.12.0",
  "marine-rs-sdk-main 0.12.0",
+ "serde",
+]
+
+[[package]]
+name = "marine-call-parameters"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d16852b36a3cfc8fa044955380901e78109db0035dc93eea4f666d8f3979072"
+dependencies = [
+ "marine-macro 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
+ "serde",
+]
+
+[[package]]
+name = "marine-call-parameters"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05495180730abae04abe209386ce367309a82110edb65fcdb1f3080f819bc1a0"
+dependencies = [
+ "marine-macro 0.14.0",
+ "marine-rs-sdk-main 0.14.0",
  "rkyv",
  "serde",
 ]
 
 [[package]]
 name = "marine-core"
-version = "0.27.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81f40fac4650a022a2ce8d7b6df5614062fc32cb25fb44e61027997e90a3aff6"
 dependencies = [
  "anyhow",
  "bytesize",
- "futures",
  "it-lilo",
  "it-memory-traits",
  "log",
@@ -3506,12 +3483,13 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.14.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23bdd0119dc71f98e2f0a4bef305e43b9a4d9b9adbead12bc05b0fac1d5a247c"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
- "marine-macro-impl 0.12.0",
+ "marine-macro-impl 0.14.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -3523,7 +3501,8 @@ dependencies = [
 [[package]]
 name = "marine-it-interfaces"
 version = "0.9.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c610d90a031911c17b2babc32c9fad7261bae6ab0bf118051cd665b5d9bcfbe"
 dependencies = [
  "multimap 0.8.3",
  "wasmer-interface-types-fl",
@@ -3532,7 +3511,8 @@ dependencies = [
 [[package]]
 name = "marine-it-parser"
 version = "0.15.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "921afa7f139791b24c4cb91c918d1ef7411ef40c3b801309ec43f6b2c89b107b"
 dependencies = [
  "anyhow",
  "itertools",
@@ -3568,6 +3548,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-macro"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cec2cd19fedf559833d0f1e6a33cbcc5cf0efa338bb0975346ff12538a3cdde4"
+dependencies = [
+ "marine-macro-impl 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
+]
+
+[[package]]
+name = "marine-macro"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f502185316f584a9373cceb6ff24a11d260dfd39505c817056bc127cd1a96a08"
+dependencies = [
+ "marine-macro-impl 0.14.0",
+ "marine-rs-sdk-main 0.14.0",
+]
+
+[[package]]
 name = "marine-macro-impl"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3594,9 +3594,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-macro-impl"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e09acb3ada67e69a301b6d7b52a915a36176c5eedb312647de7d5b6cf17f51e4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "marine-macro-impl"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e50fbc0e70ee4cde7802f0748acfb197d7770c7feffb980ce8c29bddd007519e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "marine-min-it-version"
 version = "0.3.2"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "147e6e4c9d3dc9afbb06b2e3bc069b63c749733f698d0c364c320a72b133f1d5"
 dependencies = [
  "once_cell",
  "semver 1.0.21",
@@ -3604,13 +3631,14 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b312830884d07fc495a43e867d9641163897f0b0b047842cf1172cc61f57075"
 dependencies = [
  "anyhow",
  "chrono",
  "derivative",
- "marine-rs-sdk-main 0.12.0",
+ "marine-rs-sdk-main 0.14.0",
  "marine-wasm-backend-traits",
  "semver 1.0.21",
  "serde",
@@ -3621,7 +3649,8 @@ dependencies = [
 [[package]]
 name = "marine-module-interface"
 version = "0.8.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d92d2243bf0d3aea6401d9e57a1ee17677b624337981322e0153cc2d54744080"
 dependencies = [
  "anyhow",
  "itertools",
@@ -3636,13 +3665,13 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7662e4c6c08f7cd1b63cd6ff8e473e3239a9d3dd10fb46bec357cb8331423268"
+checksum = "f93d2bd852fea1fea8097c195044430347eda98fd6a3752119b549192d5ac4ba"
 dependencies = [
- "marine-call-parameters 0.12.0",
- "marine-macro 0.12.0",
- "marine-rs-sdk-main 0.12.0",
+ "marine-call-parameters 0.14.0",
+ "marine-macro 0.14.0",
+ "marine-rs-sdk-main 0.14.0",
  "marine-timestamp-macro",
  "serde",
 ]
@@ -3668,9 +3697,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-rs-sdk-main"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58b487a1a1b288ba06c832942eadb43384cd99c9754c1454e1e061dd9866be92"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk-main"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b79c165fc21438b069babeec5ae36ba0eade5e08fb1d92dabbe6b41014ce841"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
 name = "marine-runtime"
-version = "0.33.0"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+version = "0.35.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c599c7c13e976170a1211e31fe2fb4557e0479cbdba331b19a5a9e87f145f52"
 dependencies = [
  "bytesize",
  "it-json-serde",
@@ -3678,10 +3728,12 @@ dependencies = [
  "itertools",
  "log",
  "marine-call-parameters 0.10.3",
+ "marine-call-parameters 0.12.0",
+ "marine-call-parameters 0.13.0",
  "marine-core",
  "marine-module-interface",
  "marine-rs-sdk",
- "marine-rs-sdk-main 0.12.0",
+ "marine-rs-sdk-main 0.14.0",
  "marine-utils",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -3698,9 +3750,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47ec0d664570661ecba1feba2dda610ab63f23733edf189dcde7b5ed23966144"
+checksum = "d03f267ac0a29f543ef12a1a519ff8d98e74ac66e1c580f2930d41ce2c50507d"
 dependencies = [
  "chrono",
  "quote",
@@ -3709,15 +3761,16 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.5.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fce56bfabfd0af5326ff81c32c8d2261aa03b10e00ea6c165de4ebf8a3f998e4"
 
 [[package]]
 name = "marine-wasm-backend-traits"
 version = "0.5.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "220bc47cfabb8b4ab97bf2bd7bbab9738857b69beeda0a1ac5776c600b64bb46"
 dependencies = [
  "anyhow",
- "futures",
  "it-memory-traits",
  "multimap 0.8.3",
  "paste",
@@ -3729,10 +3782,10 @@ dependencies = [
 [[package]]
 name = "marine-wasmtime-backend"
 version = "0.5.1"
-source = "git+https://github.com/fluencelabs/marine?branch=feat/async-call#5e48c7990ea28ac24feddede08cdf6165b68d473"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aaa0dc5a7da0e3334f3ce5b341ba4354341af9a1f9efae24884a1b931efdf23e"
 dependencies = [
  "anyhow",
- "futures",
  "it-memory-traits",
  "log",
  "marine-wasm-backend-traits",
@@ -3771,15 +3824,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2cffa4ad52c6f791f4f8b15f0c05f9824b2ced1160e88cc393d64fff9a8ac64"
 dependencies = [
  "rustix 0.38.28",
-]
-
-[[package]]
-name = "memoffset"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d61c719bcfbcf5d62b3a09efa6088de8c54bc0bfcd3ea7ae39fcc186108b8de1"
-dependencies = [
- "autocfg",
 ]
 
 [[package]]
@@ -3985,9 +4029,19 @@ dependencies = [
 
 [[package]]
 name = "near-account-id"
-version = "1.0.0"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35cbb989542587b47205e608324ddd391f0cee1c22b4b64ae49f458334b95907"
+checksum = "dc0cb40869cab7f5232f934f45db35bffe0f2d2a7cb0cd0346202fbe4ebf2dd7"
+dependencies = [
+ "borsh 0.10.3",
+ "serde",
+]
+
+[[package]]
+name = "near-account-id"
+version = "1.0.0-alpha.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d10d45a9c49c3e975c362cf4d1dc1d7b72a716b30394bea56ee2a8fb225f50b7"
 dependencies = [
  "borsh 1.1.2",
  "schemars",
@@ -4015,9 +4069,9 @@ dependencies = [
 
 [[package]]
 name = "near-config-utils"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ae1eaab1d545a9be7a55b6ef09f365c2017f93a03063547591d12c0c6d27e58"
+checksum = "5523e7dce493c45bc3241eb3100d943ec471852f9b1f84b46a34789eadf17031"
 dependencies = [
  "anyhow",
  "json_comments",
@@ -4052,19 +4106,19 @@ dependencies = [
 
 [[package]]
 name = "near-crypto"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2991d2912218a80ec0733ac87f84fa803accea105611eea209d4419271957667"
+checksum = "ff6b382b626e7e0cd372d027c6672ac97b4b6ee6114288c9e58d8180b935d315"
 dependencies = [
  "blake2",
- "borsh 1.1.2",
+ "borsh 0.10.3",
  "bs58 0.4.0",
  "c2-chacha",
- "curve25519-dalek 4.1.1",
+ "curve25519-dalek 3.2.0",
  "derive_more",
- "ed25519-dalek 2.1.0",
+ "ed25519-dalek 1.0.1",
  "hex 0.4.3",
- "near-account-id 1.0.0",
+ "near-account-id 0.17.0",
  "near-config-utils",
  "near-stdx",
  "once_cell",
@@ -4079,11 +4133,11 @@ dependencies = [
 
 [[package]]
 name = "near-fmt"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7d998dfc1e04001608899b2498ad5a782c7d036b73769d510de21964db99286"
+checksum = "c44c842c6cfcd9b8c387cccd4cd0619a5f21920cde5d5c292af3cc5d40510672"
 dependencies = [
- "near-primitives-core 0.20.1",
+ "near-primitives-core 0.17.0",
 ]
 
 [[package]]
@@ -4134,23 +4188,21 @@ dependencies = [
 
 [[package]]
 name = "near-o11y"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d20762631bc8253030013bbae9b5f0542691edc1aa6722f1e8141cc9b928ae5b"
+checksum = "af7d35397b02b131c188c72f3885e97daeccab134ec2fc8cc0073a94cf1cfe19"
 dependencies = [
  "actix",
- "base64 0.21.5",
+ "atty",
  "clap 4.4.11",
- "near-crypto 0.20.1",
- "near-fmt",
- "near-primitives-core 0.20.1",
+ "near-crypto 0.17.0",
+ "near-primitives-core 0.17.0",
  "once_cell",
  "opentelemetry",
  "opentelemetry-otlp",
  "opentelemetry-semantic-conventions",
  "prometheus",
  "serde",
- "serde_json",
  "strum",
  "thiserror",
  "tokio",
@@ -4158,25 +4210,6 @@ dependencies = [
  "tracing-appender",
  "tracing-opentelemetry",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "near-parameters"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9f16a59b6c3e69b0585be951af6fe42a0ba86c0e207cb8c63badd19efd16680"
-dependencies = [
- "assert_matches",
- "borsh 1.1.2",
- "enum-map",
- "near-account-id 1.0.0",
- "near-primitives-core 0.20.1",
- "num-rational",
- "serde",
- "serde_repr",
- "serde_yaml",
- "strum",
- "thiserror",
 ]
 
 [[package]]
@@ -4196,7 +4229,7 @@ dependencies = [
  "near-crypto 0.15.0",
  "near-primitives-core 0.15.0",
  "near-rpc-error-macro 0.15.0",
- "near-vm-errors",
+ "near-vm-errors 0.15.0",
  "num-rational",
  "once_cell",
  "primitive-types",
@@ -4211,13 +4244,12 @@ dependencies = [
 
 [[package]]
 name = "near-primitives"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0462b067732132babcc89d5577db3bfcb0a1bcfbaaed3f2db4c11cd033666314"
+checksum = "05f7051aaf199adc4d068620fca6d5f70f906a1540d03a8bb3701271f8881835"
 dependencies = [
  "arbitrary",
- "base64 0.21.5",
- "borsh 1.1.2",
+ "borsh 0.10.3",
  "bytesize",
  "cfg-if 1.0.0",
  "chrono",
@@ -4225,25 +4257,21 @@ dependencies = [
  "easy-ext",
  "enum-map",
  "hex 0.4.3",
- "near-crypto 0.20.1",
+ "near-crypto 0.17.0",
  "near-fmt",
- "near-o11y",
- "near-parameters",
- "near-primitives-core 0.20.1",
- "near-rpc-error-macro 0.20.1",
+ "near-primitives-core 0.17.0",
+ "near-rpc-error-macro 0.17.0",
  "near-stdx",
- "near-vm-runner",
+ "near-vm-errors 0.17.0",
  "num-rational",
  "once_cell",
  "primitive-types",
  "rand 0.8.5",
- "rand_chacha 0.3.1",
  "reed-solomon-erasure",
  "serde",
  "serde_json",
  "serde_with 3.4.0",
  "serde_yaml",
- "sha3",
  "smart-default",
  "strum",
  "thiserror",
@@ -4271,17 +4299,17 @@ dependencies = [
 
 [[package]]
 name = "near-primitives-core"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8443eb718606f572c438be6321a097a8ebd69f8e48d953885b4f16601af88225"
+checksum = "775fec19ef51a341abdbf792a9dda5b4cb89f488f681b2fd689b9321d24db47b"
 dependencies = [
  "arbitrary",
  "base64 0.21.5",
- "borsh 1.1.2",
+ "borsh 0.10.3",
  "bs58 0.4.0",
  "derive_more",
  "enum-map",
- "near-account-id 1.0.0",
+ "near-account-id 0.17.0",
  "num-rational",
  "serde",
  "serde_repr",
@@ -4304,9 +4332,9 @@ dependencies = [
 
 [[package]]
 name = "near-rpc-error-core"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fca203c51edd9595ec14db1d13359fb9ede32314990bf296b6c5c4502f6ab7"
+checksum = "84c1eda300e2e78f4f945ae58117d49e806899f4a51ee2faa09eda5ebc2e6571"
 dependencies = [
  "quote",
  "serde",
@@ -4326,12 +4354,12 @@ dependencies = [
 
 [[package]]
 name = "near-rpc-error-macro"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "897a445de2102f6732c8a185d922f5e3bf7fd0a41243ce40854df2197237f799"
+checksum = "31d2dadd765101c77e664029dd6fbec090e696877d4ae903c620d02ceda4969a"
 dependencies = [
  "fs2",
- "near-rpc-error-core 0.20.1",
+ "near-rpc-error-core 0.17.0",
  "serde",
  "syn 2.0.48",
 ]
@@ -4353,24 +4381,23 @@ dependencies = [
 
 [[package]]
 name = "near-sdk"
-version = "5.0.0-alpha.2"
+version = "5.0.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8869ab54cd71a1a4239002f8c00b9e6742725c386e23084be98dd4bb69336266"
+checksum = "62385d178cbf20d7b62277e0ffe5d65b133989994240b2789d5510fa7de332da"
 dependencies = [
  "base64 0.13.1",
  "borsh 1.1.2",
  "bs58 0.4.0",
  "near-abi",
- "near-account-id 1.0.0",
- "near-crypto 0.20.1",
+ "near-account-id 1.0.0-alpha.4",
+ "near-crypto 0.17.0",
  "near-gas",
- "near-parameters",
- "near-primitives 0.20.1",
- "near-primitives-core 0.20.1",
+ "near-primitives 0.17.0",
+ "near-primitives-core 0.17.0",
  "near-sdk-macros",
  "near-sys",
  "near-token",
- "near-vm-runner",
+ "near-vm-logic",
  "once_cell",
  "schemars",
  "serde",
@@ -4380,9 +4407,9 @@ dependencies = [
 
 [[package]]
 name = "near-sdk-macros"
-version = "5.0.0-alpha.2"
+version = "5.0.0-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0efa94eb99a64491323b71ba2c0591ce4649817f26339de56f110f00649ea908"
+checksum = "d00f960e5f28e8b5a223de7ba35f494c094c213c7b50f94927713a93736013dd"
 dependencies = [
  "Inflector",
  "darling",
@@ -4397,9 +4424,9 @@ dependencies = [
 
 [[package]]
 name = "near-stdx"
-version = "0.20.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "855fd5540e3b4ff6fedf12aba2db1ee4b371b36f465da1363a6d022b27cb43b8"
+checksum = "6540152fba5e96fe5d575b79e8cd244cf2add747bb01362426bdc069bc3a23bc"
 
 [[package]]
 name = "near-sys"
@@ -4432,32 +4459,39 @@ dependencies = [
 ]
 
 [[package]]
-name = "near-vm-runner"
-version = "0.20.1"
+name = "near-vm-errors"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c56c80bdb1954808f59bd36a9112377197b38d424991383bf05f52d0fe2e0da5"
+checksum = "ec545d1bede0579e7c15dd2dce9b998dc975c52f2165702ff40bec7ff69728bb"
 dependencies = [
- "base64 0.21.5",
- "borsh 1.1.2",
- "ed25519-dalek 2.1.0",
- "enum-map",
- "memoffset 0.8.0",
- "near-crypto 0.20.1",
- "near-parameters",
- "near-primitives-core 0.20.1",
- "near-stdx",
- "num-rational",
- "once_cell",
- "prefix-sum-vec",
- "ripemd",
+ "borsh 0.10.3",
+ "near-account-id 0.17.0",
+ "near-rpc-error-macro 0.17.0",
  "serde",
- "serde_repr",
- "serde_with 3.4.0",
- "sha2 0.10.8",
- "sha3",
  "strum",
  "thiserror",
- "tracing",
+]
+
+[[package]]
+name = "near-vm-logic"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30d7487c678ed1963a0ecd5033f72bb41caa58debd6fe8025a9bef6e1a6a519a"
+dependencies = [
+ "borsh 0.10.3",
+ "ed25519-dalek 1.0.1",
+ "near-account-id 0.17.0",
+ "near-crypto 0.17.0",
+ "near-fmt",
+ "near-o11y",
+ "near-primitives 0.17.0",
+ "near-primitives-core 0.17.0",
+ "near-stdx",
+ "near-vm-errors 0.17.0",
+ "ripemd",
+ "serde",
+ "sha2 0.10.8",
+ "sha3",
  "zeropool-bn",
 ]
 
@@ -4931,9 +4965,9 @@ dependencies = [
 
 [[package]]
 name = "polyplets"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
- "marine-call-parameters 0.12.0",
+ "marine-call-parameters 0.14.0",
  "serde",
 ]
 
@@ -4963,12 +4997,6 @@ name = "precomputed-hash"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
-
-[[package]]
-name = "prefix-sum-vec"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa06bd51638b6e76ac9ba9b6afb4164fa647bd2916d722f2623fbb6d1ed8bdba"
 
 [[package]]
 name = "pretty_assertions"
@@ -6443,11 +6471,11 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.36.0"
+version = "1.28.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61285f6515fa018fb2d1e46eb21223fff441ee8db5d0f1435e8ab4f5cdb80931"
+checksum = "94d7b1cfd2aa4011f2de74c2c4c63665e27a71006b0a192dcd2710272e73dfa2"
 dependencies = [
- "backtrace",
+ "autocfg",
  "bytes",
  "libc",
  "mio",
@@ -6455,7 +6483,7 @@ dependencies = [
  "parking_lot 0.12.1",
  "pin-project-lite",
  "signal-hook-registry",
- "socket2 0.5.5",
+ "socket2 0.4.10",
  "tokio-macros",
  "windows-sys 0.48.0",
 ]
@@ -6472,9 +6500,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-macros"
-version = "2.2.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b8a1e28f2deaa14e508979454cb3a223b10b938b45af148bc0986de36f1923b"
+checksum = "630bdcf245f78637c13ec01ffae6187cca34625e8c63150d424b59e55af2675e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7151,20 +7179,18 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.28.0"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a753426d5a76076aa16a435b5a5f316e3803461f551975d196928bc92e42916"
+checksum = "62958478f282fbf2b05c12f9630972bd8194937de1ab22d6a59d43093be32886"
 dependencies = [
  "anyhow",
  "fluence-it-types",
- "futures",
  "it-lilo",
  "it-memory-traits",
  "it-to-bytes",
  "itertools",
  "log",
  "nom",
- "paste",
  "safe-transmute",
  "semver 1.0.21",
  "serde",
@@ -7453,7 +7479,7 @@ dependencies = [
  "log",
  "mach",
  "memfd",
- "memoffset 0.9.0",
+ "memoffset",
  "paste",
  "rand 0.8.5",
  "rustix 0.38.28",
@@ -8028,6 +8054,7 @@ version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71e61de68ede9ffdd69c01664f65a178c5188b73f78faa21f0936016a888ff7c"
 dependencies = [
+ "borsh 0.9.3",
  "byteorder",
  "crunchy",
  "lazy_static",

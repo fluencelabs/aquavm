@@ -19,7 +19,7 @@ use air::LambdaError;
 use air_test_utils::prelude::*;
 
 #[tokio::test]
-async fn dont_wait_on_json_path() {
+async fn dont_wait_on_lens() {
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
@@ -67,7 +67,7 @@ async fn dont_wait_on_json_path() {
 }
 
 #[tokio::test]
-async fn dont_wait_on_json_path_on_scalars() {
+async fn dont_wait_on_lsns_on_scalars() {
     let array = json!([1u32, 2u32, 3u32, 4u32, 5u32]);
 
     let object = json!({
@@ -271,7 +271,7 @@ async fn canon_with_empty_behaviour() {
     let result = checked_call_vm!(peer_2, <_>::default(), script, "", "");
     let actual_trace = trace_from_result(&result);
     let expected_trace = vec![executed_state::canon(
-        json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
+        json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": "peer_id", "service_id": ""}, "values": []}),
     )];
 
     assert_eq!(actual_trace, expected_trace);

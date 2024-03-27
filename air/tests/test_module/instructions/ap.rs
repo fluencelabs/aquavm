@@ -86,11 +86,11 @@ async fn ap_with_string_literal() {
         executed_state::ap(0),
         executed_state::canon(json!(
             {
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "some_string",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
@@ -124,11 +124,11 @@ async fn ap_with_bool_literal() {
     let expected_state = vec![
         executed_state::ap(0),
         executed_state::canon(json!(   {
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": true,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
@@ -161,11 +161,11 @@ async fn ap_with_number_literal() {
     let expected_state = vec![
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": 100,
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
@@ -198,11 +198,11 @@ async fn ap_with_last_error() {
     let expected_state = vec![
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": no_error_object(),
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
@@ -239,11 +239,11 @@ async fn ap_with_error() {
     let expected_state = vec![
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": no_error_object(),
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 0
                 }
             ]
@@ -345,10 +345,10 @@ async fn ap_with_dst_stream() {
         val_1,
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_2_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_2_peer_id", "service_id": ""},
             "values": [{
                 "result": {"field": "scalar_2"},
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
                 "provenance": Provenance::service_result(cid_1),
             }]
         })),
@@ -404,19 +404,19 @@ async fn ap_canon_stream_with_lambda() {
     let canon_1 = executed_state::canon(json!({
     "tetraplet": {
         "function_name": "",
-        "json_path": "",
+        "lens": "",
         "peer_pk": "vm_1_peer_id",
         "service_id": "",
     },
     "values": [{
         "result": 0,
-        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+        "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
         "provenance": Provenance::service_result(cid_1),
     }, {
         "result": 1,
         "tetraplet": {
             "function_name": "some_function_name",
-            "json_path": "",
+            "lens": "",
             "peer_pk": "vm_1_peer_id",
             "service_id": "some_service_name",
         },
@@ -430,10 +430,10 @@ async fn ap_canon_stream_with_lambda() {
         canon_1,
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
             "values": [{
                 "result": 1,
-                "tetraplet": {"function_name": "some_function_name", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"},
+                "tetraplet": {"function_name": "some_function_name", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": "some_service_name"},
                 "provenance": Provenance::service_result(cid_2),
             }]
         })),
@@ -499,16 +499,16 @@ async fn ap_canon_stream() {
     let cid_2 = extract_service_result_cid(&val_2);
 
     let canon_1 = executed_state::canon(json!({
-    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
     "values": [{
         "result": 0,
-        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+        "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
         "provenance": Provenance::service_result(cid_1),
     }, {
         "result": 1,
         "tetraplet": {
             "function_name": "some_function_name",
-            "json_path": "",
+            "lens": "",
             "peer_pk": "vm_1_peer_id",
             "service_id": "some_service_name"
         },
@@ -523,10 +523,10 @@ async fn ap_canon_stream() {
         canon_1,
         executed_state::ap(0),
         executed_state::canon(json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
                 "values": [{
                     "result": [0, 1],
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_1_peer_id", "service_id": ""},
                     "provenance": Provenance::canon(canon_cid_1),
                 }]}
         )),
@@ -674,7 +674,7 @@ async fn ap_canon_stream_map_with_string_key_accessor_lambda() {
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
     let map_value = json!({"key": "key", "value": "value1"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""});
     let call_arg = json!(["value1"]);
 
     let expected_trace: Vec<ExecutedState> = vec![
@@ -731,7 +731,7 @@ async fn ap_canon_stream_map_with_numeric_key_accessor_lambda() {
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
     let map_value = json!({"key": 42, "value": "value1"});
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""});
     let call_arg = json!(["value1"]);
 
     let expected_trace: Vec<ExecutedState> = vec![

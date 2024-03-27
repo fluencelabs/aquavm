@@ -225,7 +225,7 @@ async fn empty_literal_array_fold() {
 }
 
 #[tokio::test]
-async fn empty_fold_json_path() {
+async fn empty_fold_lens() {
     let mut vm = create_avm(echo_call_service(), "A").await;
     let mut set_variable_vm = create_avm(set_variable_call_service(json!({ "messages": [] })), "set_variable").await;
 
@@ -611,7 +611,7 @@ async fn fold_scalar_seq_next_completes_with_null() {
         executed_state::par(1, 0),
         stream!(service_result.clone(), 0, peer = vm_peer_id, args = [2]),
         executed_state::canon(
-            json!({"tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""}, "values": []}),
+            json!({"tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""}, "values": []}),
         ),
         unused!(service_result, peer = vm_peer_id, args = [json!([])]),
     ]);
@@ -877,10 +877,10 @@ async fn fold_stream_map() {
         stream_1,
         executed_state::canon_tracked(
             json!({
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""},
                 "values": [{
                     "result": service_result.clone(),
-                    "tetraplet": {"function_name": "f2", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": "m2"},
+                    "tetraplet": {"function_name": "f2", "lens": "", "peer_pk": vm_1_peer_id, "service_id": "m2"},
                     "provenance": Provenance::service_result(cid_1),
                 }]
             }),
@@ -975,7 +975,7 @@ async fn fold_canon_stream_map() {
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""});
 
     let map_value_1 = json!({"key": "key", "value": "value1"});
     let map_value_2 = json!({"key": -42, "value": "value2"});
@@ -1071,7 +1071,7 @@ async fn fold_map_and_canon_map_orders_are_same() {
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
-    let tetraplet = json!({"function_name": "", "json_path": "", "peer_pk": vm_1_peer_id, "service_id": ""});
+    let tetraplet = json!({"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""});
 
     let map_value_1 = json!({"key": "key", "value": "value1"});
     let map_value_2 = json!({"key": -42, "value": "value2"});

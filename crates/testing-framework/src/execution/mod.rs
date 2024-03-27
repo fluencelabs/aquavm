@@ -1049,12 +1049,12 @@ mod tests {
             ExecutionTrace::from(vec![scalar!(
                 json!([[{
                     "function_name": "",
-                    "json_path": "",
+                    "lens": "",
                     "peer_pk": &peer_id,
                     "service_id": "",
                 }], [{
                     "function_name": "",
-                    "json_path": "",
+                    "lens": "",
                     "peer_pk": &peer_id,
                     "service_id": "",
                 }]]),

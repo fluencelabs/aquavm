@@ -96,7 +96,7 @@ async fn last_error_tetraplets() {
     assert_eq!(tetraplet.peer_pk, fallible_peer_id);
     assert_eq!(tetraplet.service_id, "fallible_call_service");
     assert_eq!(tetraplet.function_name, "");
-    assert_eq!(&(*tetraplets.borrow()).as_ref().unwrap()[0][0].json_path, "");
+    assert_eq!(&(*tetraplets.borrow()).as_ref().unwrap()[0][0].lens, "");
 }
 
 #[tokio::test]

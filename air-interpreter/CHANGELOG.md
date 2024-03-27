@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.62.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.61.0...air-interpreter-v0.62.0) (2024-02-22)
+
+
+### Miscellaneous Chores
+
+* **air-interpreter:** Synchronize air-interpreter versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.61.0 to 0.62.0
+
+## [0.61.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.60.0...air-interpreter-v0.61.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.60.0 to 0.61.0
+    * air-interpreter-interface bumped from 0.18.0 to 0.19.0
+
+## [0.60.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.59.0...air-interpreter-v0.60.0) (2024-02-20)
+
+
+### Miscellaneous Chores
+
+* **air-interpreter:** Synchronize air-interpreter versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.59.0 to 0.60.0
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+
 ## [0.59.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-v0.58.0...air-interpreter-v0.59.0) (2024-01-24)
 
 

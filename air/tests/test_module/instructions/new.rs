@@ -121,7 +121,7 @@ async fn several_restrictions() {
     let expected_trace = ExecutionTrace::from(vec![
         stream!("test", 0, peer = vm_peer_id, args = ["test"]),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
 
             ]
@@ -186,11 +186,11 @@ async fn check_influence_to_not_restricted() {
         executed_state::ap(0),
         executed_state::canon(json!(
             {
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
                 "values": [
                     {
                         "result": "more",
-                        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                        "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                         "trace_pos": 2
                     }
                 ]
@@ -205,11 +205,11 @@ async fn check_influence_to_not_restricted() {
         ),
         executed_state::canon(json!(
             {
-                "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
                 "values": [
                     {
                         "result": "push more",
-                        "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                        "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                         "trace_pos": 0
                     }
                 ]
@@ -223,11 +223,11 @@ async fn check_influence_to_not_restricted() {
             args = [json!(["push more"])]
         ),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "push more",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 1
                 }
             ]
@@ -240,7 +240,7 @@ async fn check_influence_to_not_restricted() {
             args = [json!(["push more"])]
         ),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
             ]
         })),
@@ -300,11 +300,11 @@ async fn new_in_fold_with_ap() {
         scalar!(json!([1, 2, 3, 4, 5]), peer = set_variable_peer_id),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "none",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 1
                 }
             ]
@@ -312,11 +312,11 @@ async fn new_in_fold_with_ap() {
         scalar!(json!(["none"]), peer = vm_peer_id, args = [json!(["none"])]),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "none",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 4
                 }
             ]
@@ -324,11 +324,11 @@ async fn new_in_fold_with_ap() {
         scalar!(json!(["none"]), peer = vm_peer_id, args = [json!(["none"])]),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "none",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 7
                 }
             ]
@@ -336,11 +336,11 @@ async fn new_in_fold_with_ap() {
         scalar!(json!(["none"]), peer = vm_peer_id, args = [json!(["none"])]),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "none",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 10
                 }
             ]
@@ -348,11 +348,11 @@ async fn new_in_fold_with_ap() {
         scalar!(json!(["none"]), peer = vm_peer_id, args = [json!(["none"])]),
         executed_state::ap(0),
         executed_state::canon(json!({
-            "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "vm_peer_id", "service_id": ""},
+            "tetraplet": {"function_name": "", "lens": "", "peer_pk": "vm_peer_id", "service_id": ""},
             "values": [
                 {
                     "result": "none",
-                    "tetraplet": {"function_name": "", "json_path": "", "peer_pk": "", "service_id": ""},
+                    "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
                     "trace_pos": 13
                 }
             ]

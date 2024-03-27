@@ -1,6 +1,6 @@
 [package]
 name = "polyplets"
-version = "0.6.0"
+version = "0.7.0"
 description = "Security primitives to verify origin of service calls in Fluence network"
 authors = ["Fluence Labs"]
 edition = "2021"
@@ -15,7 +15,7 @@ name = "polyplets"
 path = "src/lib.rs"
 
 [dependencies]
-marine-call-parameters = { version = "0.12.0", default-features = false }
+marine-call-parameters = { version = "0.14.0", default-features = false }
 
 serde = { version = "1.0.190", features = ["rc", "derive"] }
 

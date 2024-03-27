@@ -89,7 +89,7 @@ async fn fold_with_inner_call() {
             peer_pk: set_variable_vm_peer_id.clone(),
             service_id: service_id.clone(),
             function_name: function_name.clone(),
-            json_path: format!(".$.[{}]", i),
+            lens: format!(".$.[{}]", i),
         };
 
         let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet.clone()]];
@@ -129,14 +129,14 @@ async fn fold_stream_with_inner_call() {
 
     let expected_trace = vec![
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lens": ""}]]),
             0,
             peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lens": ".$.field"}]]),
             0,
             peer = init_peer_id,
             service = "..2",
@@ -178,14 +178,14 @@ async fn fold_canon_with_inner_call() {
 
     let expected_trace = vec![
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "json_path": ""}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..0", "function_name": "", "lens": ""}]]),
             0,
             peer = &init_peer_id,
             service = "..2",
             args = [42]
         ),
         stream!(
-            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "json_path": ".$.field"}]]),
+            json!([[{"peer_pk": init_peer_id, "service_id": "..1", "function_name": "", "lens": ".$.field"}]]),
             1,
             peer = init_peer_id,
             service = "..2",
@@ -196,7 +196,7 @@ async fn fold_canon_with_inner_call() {
 }
 
 #[tokio::test]
-async fn fold_json_path() {
+async fn fold_lens() {
     let variable_numbers = json!({"args": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]});
 
     let set_variable_vm_peer_id = String::from("some_peer_id_1");
@@ -238,14 +238,14 @@ async fn fold_json_path() {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        json_path: String::from(".$.args.$.[9]"),
+        lens: String::from(".$.args.$.[9]"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: test_params.init_peer_id.clone(),
         service_id: String::new(),
         function_name: String::new(),
-        json_path: String::new(),
+        lens: String::new(),
     };
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
@@ -287,14 +287,14 @@ async fn check_tetraplet_works_correctly() {
         peer_pk: set_variable_vm_peer_id.clone(),
         service_id: service_id.clone(),
         function_name: function_name.clone(),
-        json_path: String::from(".$.args"),
+        lens: String::from(".$.args"),
     };
 
     let second_arg_tetraplet = SecurityTetraplet {
         peer_pk: set_variable_vm_peer_id,
         service_id,
         function_name,
-        json_path: String::from(".$.args.[0]"),
+        lens: String::from(".$.args.[0]"),
     };
 
     let expected_tetraplets = vec![vec![first_arg_tetraplet], vec![second_arg_tetraplet]];
@@ -375,7 +375,7 @@ async fn tetraplet_with_wasm_modules() {
             serde_json::from_slice(&tetraplets).expect("default deserializer shouldn't fail");
 
         let mut call_parameters = CallParameters::default();
-        call_parameters.init_peer_id = ADMIN_PEER_PK.to_string();
+        call_parameters.particle.init_peer_id = ADMIN_PEER_PK.to_string();
         call_parameters.tetraplets = tetraplets;
 
         async move {
@@ -420,7 +420,7 @@ fn to_app_service_call_parameters(
     call_parameters: marine_rs_sdk::CallParameters,
 ) -> fluence_app_service::CallParameters {
     fluence_app_service::CallParameters {
-        init_peer_id: call_parameters.init_peer_id,
+        particle: to_app_service_particle_parameters(call_parameters.particle),
         service_id: call_parameters.service_id,
         service_creator_peer_id: call_parameters.service_creator_peer_id,
         host_id: call_parameters.host_id,
@@ -431,6 +431,20 @@ fn to_app_service_call_parameters(
             .into_iter()
             .map(to_app_service_tetraplets)
             .collect(),
+    }
+}
+
+fn to_app_service_particle_parameters(
+    particle: marine_rs_sdk::ParticleParameters,
+) -> fluence_app_service::ParticleParameters {
+    fluence_app_service::ParticleParameters {
+        id: particle.id,
+        init_peer_id: particle.init_peer_id,
+        timestamp: particle.timestamp,
+        ttl: particle.ttl,
+        script: particle.script,
+        signature: particle.signature,
+        token: particle.token,
     }
 }
 
@@ -445,6 +459,6 @@ fn to_app_service_tetraplet(tetraplet: marine_rs_sdk::SecurityTetraplet) -> flue
         peer_pk: tetraplet.peer_pk,
         service_id: tetraplet.service_id,
         function_name: tetraplet.function_name,
-        json_path: tetraplet.json_path,
+        lens: tetraplet.lens,
     }
 }

@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.62.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.61.0...avm-client-v0.62.0) (2024-02-22)
+
+
+### Miscellaneous Chores
+
+* **avm-client:** Synchronize air-interpreter versions
+
+## [0.61.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.60.0...avm-client-v0.61.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+## [0.60.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.59.0...avm-client-v0.60.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
 ## [0.59.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.58.0...avm-client-v0.59.0) (2024-01-24)
 
 

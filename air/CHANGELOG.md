@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.62.0](https://github.com/fluencelabs/aquavm/compare/air-v0.61.0...air-v0.62.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* Rust channel update dedicated to ENIAC Day
+
+### Features
+
+* Rust channel update dedicated to ENIAC Day ([bab0c00](https://github.com/fluencelabs/aquavm/commit/bab0c002f5200099ab07a8fccf12f8ca7a260b87))
+
+## [0.61.0](https://github.com/fluencelabs/aquavm/compare/air-v0.60.0...air-v0.61.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.2 to 0.12.0
+    * air-execution-info-collector bumped from 0.7.13 to 0.7.14
+    * air-interpreter-data bumped from 0.17.1 to 0.17.2
+    * air-interpreter-interface bumped from 0.18.0 to 0.19.0
+    * air-trace-handler bumped from 0.5.11 to 0.5.12
+    * polyplets bumped from 0.6.0 to 0.7.0
+
+## [0.60.0](https://github.com/fluencelabs/aquavm/compare/air-v0.59.0...air-v0.60.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air-parser bumped from 0.11.1 to 0.11.2
+    * air-execution-info-collector bumped from 0.7.12 to 0.7.13
+    * air-interpreter-data bumped from 0.17.0 to 0.17.1
+    * air-interpreter-interface bumped from 0.17.2 to 0.18.0
+    * air-trace-handler bumped from 0.5.10 to 0.5.11
+    * air-utils bumped from 0.2.0 to 0.3.0
+
 ## [0.59.0](https://github.com/fluencelabs/aquavm/compare/air-v0.58.0...air-v0.59.0) (2024-01-24)
 
 

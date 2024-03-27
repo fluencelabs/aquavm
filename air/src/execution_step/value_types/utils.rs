@@ -23,7 +23,7 @@ pub(crate) fn populate_tetraplet_with_lambda(
 ) -> SecurityTetraplet {
     match lambda {
         LambdaAST::ValuePath(_) => {
-            tetraplet.add_lambda(&lambda.to_string());
+            tetraplet.add_lens(&lambda.to_string());
             tetraplet
         }
         LambdaAST::Functor(_) => SecurityTetraplet::new("", "", "", lambda.to_string()),

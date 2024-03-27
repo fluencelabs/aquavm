@@ -144,14 +144,14 @@ async fn test_runtime_executed_call_tetraplet() {
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
-            r#" service_id: "service1", function_name: "func", json_path: "" }}"#
+            r#" service_id: "service1", function_name: "func", lens: "" }}"#
         ),
         alice_peer_id = alice_peer_id,
     );
     let stored_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
-            r#" service_id: "service2", function_name: "func", json_path: "" }}"#,
+            r#" service_id: "service2", function_name: "func", lens: "" }}"#,
         ),
         alice_peer_id = alice_peer_id,
     );
@@ -296,14 +296,14 @@ async fn test_runtime_failed_call_tetraplet() {
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
-            r#" service_id: "service1", function_name: "func", json_path: "" }}"#
+            r#" service_id: "service1", function_name: "func", lens: "" }}"#
         ),
         alice_peer_id = alice_peer_id,
     );
     let stored_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
-            r#" service_id: "service2", function_name: "func", json_path: "" }}"#,
+            r#" service_id: "service2", function_name: "func", lens: "" }}"#,
         ),
         alice_peer_id = alice_peer_id,
     );
@@ -377,14 +377,14 @@ async fn test_runtime_canon_tetraplet() {
     let expected_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{alice_peer_id}","#,
-            r#" service_id: "", function_name: "", json_path: "" }}"#
+            r#" service_id: "", function_name: "", lens: "" }}"#
         ),
         alice_peer_id = alice_peer_id,
     );
     let stored_value = format!(
         concat!(
             r#"SecurityTetraplet {{ peer_pk: "{mallory_peer_id}","#,
-            r#" service_id: "", function_name: "", json_path: "" }}"#,
+            r#" service_id: "", function_name: "", lens: "" }}"#,
         ),
         mallory_peer_id = mallory_peer_id,
     );

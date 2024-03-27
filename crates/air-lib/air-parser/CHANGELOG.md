@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.12.0](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.2...air-parser-v0.12.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+## [0.11.2](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.1...air-parser-v0.11.2) (2024-02-20)
+
+
+### Features
+
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+
 ## [0.11.1](https://github.com/fluencelabs/aquavm/compare/air-parser-v0.11.0...air-parser-v0.11.1) (2024-01-03)
 
 

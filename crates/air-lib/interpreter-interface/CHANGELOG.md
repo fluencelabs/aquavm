@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.18.0...air-interpreter-interface-v0.19.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820))
+
+### Features
+
+* update marine-rs-sdk to 0.14.0, remove all of json_path remains ([#820](https://github.com/fluencelabs/aquavm/issues/820)) ([08e8547](https://github.com/fluencelabs/aquavm/commit/08e85478b4716f2ae5f57bc57dcb5d1df63f1b5d))
+
+## [0.18.0](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.17.2...air-interpreter-interface-v0.18.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425]
+
+### Features
+
+* **avm-server:** a convenience method to hide implementation from nox and fix for items ordering bug ([#818](https://github.com/fluencelabs/aquavm/issues/818)) ([2ed1901](https://github.com/fluencelabs/aquavm/commit/2ed1901dbc663f0a083d7d1647b85c88fd183d59))
+* **execution-engine:** Rc-based JSON value ([#813](https://github.com/fluencelabs/aquavm/issues/813)) ([0d53f2b](https://github.com/fluencelabs/aquavm/commit/0d53f2bab1a09ae781bf22da6546e750e6172aa7))
+* **preparation,memory:** AquaVM preparation step now checks input arguments sizes [fixes VM-425] ([5afd5cb](https://github.com/fluencelabs/aquavm/commit/5afd5cb3a14753077fbc1aab7e31532054a9f45f))
+
 ## [0.17.2](https://github.com/fluencelabs/aquavm/compare/air-interpreter-interface-v0.17.1...air-interpreter-interface-v0.17.2) (2024-01-24)
 
 
