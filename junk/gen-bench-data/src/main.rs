@@ -8,6 +8,7 @@ use air_test_framework::*;
 use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 
+use analog_literals::analog_literal;
 use clap::Parser;
 use clap::Subcommand;
 use itertools::Itertools as _;
@@ -19,8 +20,71 @@ use std::path::Path;
 use std::path::PathBuf;
 
 const PARTICLE_ID: &str = "0123456789ABCDEF";
-const MAX_STREAM_SIZE: usize = 1023;
-const MB: usize = 1024 * 1024;
+const MAX_STREAM_SIZE: usize = analog_literal! {
+    +------------------------------------------------------------------+
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                   /* That's 33x31 rectangle */                   |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    |                                                                  |
+    +------------------------------------------------------------------+
+}.area();
+const MB: usize = MAX_STREAM_SIZE * MAX_STREAM_SIZE + analog_literal! {
+                    +--------------------------------+
+                   /                                /|
+                  /                                / |
+                 /                                /  |
+                /                                /   |
+               /                                /    |
+              /                                /     |
+             /                                /      |
+            /                                /       |
+           /                                /        +
+          /                                /        /
+         /                                /        /
+        /                                /        /
+       /                                /        /
+      /                                /        /
+     /                                /        /
+    /                                /        /
+   +--------------------------------+        /
+   |                                |       /
+   |                                |      /
+   |                                |     /
+   |                                |    /
+   |                                |   /
+   |                                |  /
+   |                                | /
+   |                                |/
+   +--------------------------------+
+}.volume() - 1;
+
 const SEED: u64 = 123456789;
 
 mod calls;

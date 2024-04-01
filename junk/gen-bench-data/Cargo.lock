@@ -174,7 +174,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.17.0"
+version = "0.17.1"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -199,7 +199,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
@@ -239,6 +239,12 @@ name = "ambient-authority"
 version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9d4ee0d472d1cd2e28c97dfa124b3d8d992e10eb0a035f33f5d12e3a177ba3b"
+
+[[package]]
+name = "analog_literals"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "61a6eed14e152e686e9220e0307cf364694b197d88867087097253d83a67b32c"
 
 [[package]]
 name = "android-tzdata"
@@ -311,7 +317,7 @@ checksum = "080e9890a082662b09c1ad45f567faeeb47f22b5fb23895fbe1e651e718e25ca"
 
 [[package]]
 name = "aquavm-air"
-version = "0.61.0"
+version = "0.62.0"
 dependencies = [
  "air-execution-info-collector",
  "air-interpreter-cid",
@@ -1637,6 +1643,7 @@ dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
  "air-testing-framework",
+ "analog_literals",
  "aquavm-air",
  "bs58",
  "clap",
@@ -2607,9 +2614,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.10"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f3d0b296e374a4e6f3c7b0a1f5a51d748a0d34c85e7dc48fc3fa9a87657fe09"
+checksum = "a4a650543ca06a924e8b371db273b2756685faae30f8487da1b56505a8f78b0c"
 dependencies = [
  "libc",
  "wasi",
