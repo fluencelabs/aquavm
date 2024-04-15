@@ -79,6 +79,24 @@
   * dependencies
     * air-test-utils bumped from 0.17.0 to 0.17.1
 
+## [0.11.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.10.1...air-testing-framework-v0.11.0) (2024-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815))
+
+### Features
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815)) ([bf9414e](https://github.com/fluencelabs/aquavm/commit/bf9414e8d4b38f6e487ae1f0f0314e8f6a166824))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * air-test-utils bumped from 0.17.1 to 0.18.0
+
 ## [0.10.0](https://github.com/fluencelabs/aquavm/compare/air-testing-framework-v0.9.0...air-testing-framework-v0.10.0) (2024-02-22)
 
 

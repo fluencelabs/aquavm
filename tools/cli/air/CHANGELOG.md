@@ -143,6 +143,26 @@
     * aquavm-air bumped from 0.61.0 to 0.62.0
     * air-test-utils bumped from 0.17.0 to 0.17.1
 
+## [0.8.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.7.2...aquavm-air-cli-v0.8.0) (2024-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815))
+
+### Features
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815)) ([bf9414e](https://github.com/fluencelabs/aquavm/commit/bf9414e8d4b38f6e487ae1f0f0314e8f6a166824))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.62.0 to 0.63.0
+    * avm-server bumped from 0.37.0 to 0.38.0
+    * air-test-utils bumped from 0.17.1 to 0.18.0
+
 ## [0.7.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.6.3...aquavm-air-cli-v0.7.0) (2024-02-20)
 
 

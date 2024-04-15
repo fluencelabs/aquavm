@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.4 to 0.7.5
     * avm-interface bumped from 0.30.0 to 0.31.0
 
+## [0.38.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.37.0...avm-server-v0.38.0) (2024-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815))
+
+### Features
+
+* **runtime:** switch to async marine ([#815](https://github.com/fluencelabs/aquavm/issues/815)) ([bf9414e](https://github.com/fluencelabs/aquavm/commit/bf9414e8d4b38f6e487ae1f0f0314e8f6a166824))
+
 ## [0.37.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.36.0...avm-server-v0.37.0) (2024-02-22)
 
 
