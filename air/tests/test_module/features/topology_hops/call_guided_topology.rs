@@ -18,10 +18,10 @@ use air_test_utils::prelude::*;
 use fluence_keypair::KeyFormat;
 use fluence_keypair::KeyPair;
 
-#[test]
-fn call_generates_hop() {
+#[tokio::test]
+async fn call_generates_hop() {
     let client_peer_id = "client";
-    let mut client_vm = create_avm(unit_call_service(), client_peer_id);
+    let mut client_vm = create_avm(unit_call_service(), client_peer_id).await;
 
     let test_peer_id = "test_peer_id";
 
@@ -35,17 +35,17 @@ fn call_generates_hop() {
     assert_next_pks!(&client_result.next_peer_pks, &[test_peer_id]);
 }
 
-#[test]
-fn call_with_join_behaviour() {
+#[tokio::test]
+async fn call_with_join_behaviour() {
     let relay_peer_id = "relay";
-    let mut relay_vm = create_avm(unit_call_service(), relay_peer_id);
+    let mut relay_vm = create_avm(unit_call_service(), relay_peer_id).await;
     let client_peer_id = "client";
-    let mut client_vm = create_avm(unit_call_service(), client_peer_id);
+    let mut client_vm = create_avm(unit_call_service(), client_peer_id).await;
 
     let friend_peer_id = "friend";
-    let mut friend_vm = create_avm(unit_call_service(), friend_peer_id);
+    let mut friend_vm = create_avm(unit_call_service(), friend_peer_id).await;
     let friend_relay_peer_id = "friend_relay";
-    let mut friend_relay_vm = create_avm(unit_call_service(), friend_relay_peer_id);
+    let mut friend_relay_vm = create_avm(unit_call_service(), friend_relay_peer_id).await;
 
     let script = format!(
         r#"
@@ -121,6 +121,7 @@ fn call_with_join_behaviour() {
             &keypair,
             "".to_string(),
         )
+        .await
         .unwrap();
     assert_next_pks!(&client_result.next_peer_pks, &[relay_peer_id]);
 

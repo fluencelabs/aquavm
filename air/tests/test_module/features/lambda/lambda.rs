@@ -18,10 +18,10 @@ use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
-#[test]
-fn lambda_not_allowed_for_non_objects_and_arrays() {
+#[tokio::test]
+async fn lambda_not_allowed_for_non_objects_and_arrays() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(echo_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
@@ -44,8 +44,8 @@ fn lambda_not_allowed_for_non_objects_and_arrays() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn lambda_with_string_scalar() {
+#[tokio::test]
+async fn lambda_with_string_scalar() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "string_accessor".to_string() => json!("some_field_name"),
@@ -54,10 +54,11 @@ fn lambda_with_string_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -78,8 +79,8 @@ fn lambda_with_string_scalar() {
     assert_eq!(&trace[2.into()], &unused!(1u32, peer = local_peer_id, args = vec![1]));
 }
 
-#[test]
-fn lambda_with_number_scalar() {
+#[tokio::test]
+async fn lambda_with_number_scalar() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "number_accessor".to_string() => json!(1u32),
@@ -88,10 +89,11 @@ fn lambda_with_number_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -112,8 +114,8 @@ fn lambda_with_number_scalar() {
     assert_eq!(&trace[2.into()], &unused!(1u32, peer = local_peer_id, args = vec![1]));
 }
 
-#[test]
-fn lambda_with_number_stream() {
+#[tokio::test]
+async fn lambda_with_number_stream() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "number_accessor".to_string() => json!(1),
@@ -122,10 +124,11 @@ fn lambda_with_number_stream() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -160,8 +163,8 @@ fn lambda_with_number_stream() {
     );
 }
 
-#[test]
-fn lambda_with_number_stream_and_followed_scalar() {
+#[tokio::test]
+async fn lambda_with_number_stream_and_followed_scalar() {
     let set_variable_peer_id = "set_variable";
     let checkable_value = 1337;
     let variables = maplit::hashmap! {
@@ -172,10 +175,11 @@ fn lambda_with_number_stream_and_followed_scalar() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -213,8 +217,8 @@ fn lambda_with_number_stream_and_followed_scalar() {
     );
 }
 
-#[test]
-fn lambda_with_scalar_join() {
+#[tokio::test]
+async fn lambda_with_scalar_join() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "string_accessor".to_string() => json!("some_field_name"),
@@ -223,10 +227,11 @@ fn lambda_with_scalar_join() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -250,8 +255,8 @@ fn lambda_with_scalar_join() {
 #[ignore]
 // after 0.32 version AIR is no longer supports lambdas over stream,
 // although this test could be useful in the future for functors
-#[test]
-fn lambda_with_canon_stream_join() {
+#[tokio::test]
+async fn lambda_with_canon_stream_join() {
     let set_variable_peer_id = "set_variable";
     let variables = maplit::hashmap! {
         "number_accessor".to_string() => json!(1),
@@ -260,10 +265,11 @@ fn lambda_with_canon_stream_join() {
     let mut set_variable_vm = create_avm(
         set_variables_call_service(variables, VariableOptionSource::FunctionName),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"

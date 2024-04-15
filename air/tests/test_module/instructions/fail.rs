@@ -20,11 +20,11 @@ use air::ExecutionError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
-fn fail_with_last_error() {
+#[tokio::test]
+async fn fail_with_last_error() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
-    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -47,11 +47,11 @@ fn fail_with_last_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_error() {
+#[tokio::test]
+async fn fail_with_error() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
-    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id);
+    let mut vm = create_avm(fallible_call_service(fallible_service_id), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -68,10 +68,10 @@ fn fail_with_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_literals() {
+#[tokio::test]
+async fn fail_with_literals() {
     let local_peer_id = "local_peer_id";
-    let mut vm = create_avm(echo_call_service(), local_peer_id);
+    let mut vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let script = r#"
             (xor
@@ -94,12 +94,12 @@ fn fail_with_literals() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_last_error_tetraplets() {
+#[tokio::test]
+async fn fail_with_last_error_tetraplets() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
     let (host_closure, tetraplet_anchor) = tetraplet_host_function(fallible_call_service(fallible_service_id));
-    let mut vm = create_avm(host_closure, local_peer_id);
+    let mut vm = create_avm(host_closure, local_peer_id).await;
 
     let local_fn_name = "local_fn_name";
     let script = format!(
@@ -122,12 +122,12 @@ fn fail_with_last_error_tetraplets() {
     );
 }
 
-#[test]
-fn fail_with_error_tetraplets() {
+#[tokio::test]
+async fn fail_with_error_tetraplets() {
     let local_peer_id = "local_peer_id";
     let fallible_service_id = "service_id_1";
     let (host_closure, tetraplet_anchor) = tetraplet_host_function(fallible_call_service(fallible_service_id));
-    let mut vm = create_avm(host_closure, local_peer_id);
+    let mut vm = create_avm(host_closure, local_peer_id).await;
 
     let local_fn_name = "local_fn_name";
     let script = format!(
@@ -150,11 +150,11 @@ fn fail_with_error_tetraplets() {
     );
 }
 
-#[test]
-fn fail_with_literals_tetraplets() {
+#[tokio::test]
+async fn fail_with_literals_tetraplets() {
     let local_peer_id = "local_peer_id";
     let (host_closure, tetraplet_anchor) = tetraplet_host_function(echo_call_service());
-    let mut vm = create_avm(host_closure, local_peer_id);
+    let mut vm = create_avm(host_closure, local_peer_id).await;
 
     let script = format!(
         r#"
@@ -175,15 +175,16 @@ fn fail_with_literals_tetraplets() {
     );
 }
 
-#[test]
-fn fail_with_canon_stream() {
+#[tokio::test]
+async fn fail_with_canon_stream() {
     let vm_peer_id = "local_peer_id";
     let error_code = 1337i64;
     let error_message = "error message";
     let mut vm = create_avm(
         set_variable_call_service(json!({"error_code": error_code, "message": error_message})),
         vm_peer_id,
-    );
+    )
+    .await;
 
     let script = format!(
         r#"
@@ -209,13 +210,14 @@ fn fail_with_canon_stream() {
     assert!(check_error(&result, expected_error));
 }
 
-fn fail_to_fail_with_unsupported_errorcode(script: &str) {
+async fn fail_to_fail_with_unsupported_errorcode(script: &str) {
     let local_peer_id = "local_peer_id";
     let script = script.to_string();
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let results = executor.execute_all(local_peer_id).unwrap();
+    let results = executor.execute_all(local_peer_id).await.unwrap();
 
     let expected_error = ExecutionError::Catchable(rc!(CatchableError::InvalidErrorObjectError(
         ErrorObjectError::ErrorCodeMustBeNonZero
@@ -223,43 +225,43 @@ fn fail_to_fail_with_unsupported_errorcode(script: &str) {
     assert!(check_error(&results.last().unwrap(), expected_error));
 }
 
-#[test]
-fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
+#[tokio::test]
+async fn fail_to_fail_with_unsupported_errorcode_in_scalar() {
     let script = r#"
         (seq
             (call "local_peer_id" ("m" "f1") [] scalar) ; ok = {"error_code": 0, "message": "some message"}
             (fail scalar)
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
-#[test]
-fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
+#[tokio::test]
+async fn fail_to_fail_with_unsupported_errorcode_in_scalar_wl() {
     let script = r#"
         (seq
             (call "local_peer_id" ("m" "f1") [] scalar) ; ok = {"key": {"error_code": 0, "message": "some message"} }
             (fail scalar.$.key)
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
-#[test]
-fn fail_to_fail_with_unsupported_errorcode_in_canon() {
+#[tokio::test]
+async fn fail_to_fail_with_unsupported_errorcode_in_canon() {
     let script = r#"
         (seq
             (call "local_peer_id" ("m" "f1") [] scalar) ; ok = [{"error_code": 0, "message": "some message"}]
             (fail scalar.$.[0])
         )
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }
 
-#[test]
-fn fail_to_fail_with_unsupported_errorcode_in_error() {
+#[tokio::test]
+async fn fail_to_fail_with_unsupported_errorcode_in_error() {
     let script = r#"
         (fail :error:)
     "#;
-    fail_to_fail_with_unsupported_errorcode(script);
+    fail_to_fail_with_unsupported_errorcode(script).await;
 }

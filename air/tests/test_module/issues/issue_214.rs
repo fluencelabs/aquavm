@@ -19,9 +19,9 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/214
-fn issue_214() {
+async fn issue_214() {
     let client_id = "client_peer_id";
     let relay_id = "relay_peer_id";
     let scalar = json!([]);
@@ -35,7 +35,8 @@ fn issue_214() {
     let mut client = create_avm(
         set_variables_call_service(variables_mapping, VariableOptionSource::FunctionName),
         client_id,
-    );
+    )
+    .await;
 
     let script = format!(
         r#"

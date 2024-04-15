@@ -18,8 +18,8 @@ use air::CatchableError;
 use air::LambdaError;
 use air_test_utils::prelude::*;
 
-#[test]
-fn dont_wait_on_lambda() {
+#[tokio::test]
+async fn dont_wait_on_lens() {
     let status = json!({
         "err_msg": "",
         "is_authenticated": 1,
@@ -36,10 +36,10 @@ fn dont_wait_on_lambda() {
     let set_variables_call_service = set_variables_call_service(variables, VariableOptionSource::Argument(0));
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(unit_call_service(), local_peer_id);
+    let mut local_vm = create_avm(unit_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -66,8 +66,8 @@ fn dont_wait_on_lambda() {
     assert_eq!(result.next_peer_pks, vec![test_params.init_peer_id]);
 }
 
-#[test]
-fn dont_wait_on_lambda_on_scalars() {
+#[tokio::test]
+async fn dont_wait_on_lsns_on_scalars() {
     let array = json!([1u32, 2u32, 3u32, 4u32, 5u32]);
 
     let object = json!({
@@ -84,13 +84,13 @@ fn dont_wait_on_lambda_on_scalars() {
     let set_variables_call_service = set_variables_call_service(variables, VariableOptionSource::Argument(0));
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variables_call_service, set_variable_peer_id).await;
 
     let array_consumer_peer_id = "array_consumer_peer_id";
-    let mut array_consumer = create_avm(unit_call_service(), array_consumer_peer_id);
+    let mut array_consumer = create_avm(unit_call_service(), array_consumer_peer_id).await;
 
     let object_consumer_peer_id = "object_consumer_peer_id";
-    let mut object_consumer = create_avm(unit_call_service(), object_consumer_peer_id);
+    let mut object_consumer = create_avm(unit_call_service(), object_consumer_peer_id).await;
 
     let script = format!(
         r#"
@@ -130,12 +130,12 @@ fn dont_wait_on_lambda_on_scalars() {
     assert!(check_error(&object_result, expected_error));
 }
 
-#[test]
-fn ap_scalar_with_join_behaviour() {
+#[tokio::test]
+async fn ap_scalar_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"
@@ -154,12 +154,12 @@ fn ap_scalar_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
-fn ap_stream_with_join_behaviour() {
+#[tokio::test]
+async fn ap_stream_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"
@@ -178,12 +178,12 @@ fn ap_stream_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
-fn match_with_join_behaviour() {
+#[tokio::test]
+async fn match_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"
@@ -204,12 +204,12 @@ fn match_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
-fn mismatch_with_join_behaviour() {
+#[tokio::test]
+async fn mismatch_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"
@@ -230,12 +230,12 @@ fn mismatch_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
-fn fold_with_join_behaviour() {
+#[tokio::test]
+async fn fold_with_join_behaviour() {
     let peer_1_id = "peer_1_id";
     let peer_2_id = "peer_2_id";
 
-    let mut peer_1 = create_avm(unit_call_service(), peer_1_id);
+    let mut peer_1 = create_avm(unit_call_service(), peer_1_id).await;
 
     let script = format!(
         r#"
@@ -256,11 +256,11 @@ fn fold_with_join_behaviour() {
     assert_eq!(trace.len(), 2);
 }
 
-#[test]
-fn canon_with_empty_behaviour() {
+#[tokio::test]
+async fn canon_with_empty_behaviour() {
     let peer_id = "peer_id";
 
-    let mut peer_2 = create_avm(unit_call_service(), peer_id);
+    let mut peer_2 = create_avm(unit_call_service(), peer_id).await;
 
     let script = format!(
         r#"

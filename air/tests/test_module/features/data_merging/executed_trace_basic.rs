@@ -18,13 +18,14 @@ use air::ExecutionCidState;
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
 use pretty_assertions::assert_eq;
 
-#[test]
-fn executed_trace_seq_par_call() {
+#[tokio::test]
+async fn executed_trace_seq_par_call() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = "remote_peer_id";
-    let mut vm = create_avm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -87,11 +88,11 @@ fn executed_trace_seq_par_call() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
-fn executed_trace_par_par_call() {
+#[tokio::test]
+async fn executed_trace_par_par_call() {
     let local_peer_id = "local_peer_id";
     let remote_peer_id = "remote_peer_id";
-    let mut vm = create_avm(unit_call_service(), local_peer_id);
+    let mut vm = create_avm(unit_call_service(), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -160,12 +161,12 @@ fn executed_trace_par_par_call() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn executed_trace_seq_seq() {
+#[tokio::test]
+async fn executed_trace_seq_seq() {
     let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
-    let mut vm1 = create_avm(unit_call_service(), peer_id_1);
-    let mut vm2 = create_avm(unit_call_service(), peer_id_2);
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1).await;
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2).await;
 
     let script = format!(
         r#"
@@ -203,8 +204,8 @@ fn executed_trace_seq_seq() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn executed_trace_create_service() {
+#[tokio::test]
+async fn executed_trace_create_service() {
     let module = "greeting";
     let module_config = json!(
         {
@@ -226,19 +227,22 @@ fn executed_trace_create_service() {
     let add_blueprint_response = "add_blueprint response";
     let create_response = "create response";
 
-    let call_service: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
-        let response = match params.service_id.as_str() {
-            "add_module" => add_module_response,
-            "add_blueprint" => add_blueprint_response,
-            "create" => create_response,
-            _ => "unknown response",
-        };
-        CallServiceResult::ok(json!(response))
+    let call_service: CallServiceClosure = Box::new(move |params| {
+        async move {
+            let response = match params.service_id.as_str() {
+                "add_module" => add_module_response,
+                "add_blueprint" => add_blueprint_response,
+                "create" => create_response,
+                _ => "unknown response",
+            };
+            CallServiceResult::ok(json!(response))
+        }
+        .boxed_local()
     });
 
     let init_peer_id = "A";
     let set_variables_id = "set_variables";
-    let mut vm = create_avm(call_service, init_peer_id);
+    let mut vm = create_avm(call_service, init_peer_id).await;
 
     let script = include_str!("./scripts/create_service.air");
 
@@ -302,15 +306,15 @@ fn executed_trace_create_service() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
-fn executed_trace_par_seq_fold_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+#[tokio::test]
+async fn executed_trace_par_seq_fold_call() {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
     });
 
-    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
-    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
+    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1").await;
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2").await;
+    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3").await;
 
     let script = r#"
         (par
@@ -449,15 +453,15 @@ fn executed_trace_par_seq_fold_call() {
     assert!(result.next_peer_pks.is_empty());
 }
 
-#[test]
-fn executed_trace_par_seq_fold_in_cycle_call() {
-    let return_numbers_call_service: CallServiceClosure = Box::new(|_| -> CallServiceResult {
-        CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]))
+#[tokio::test]
+async fn executed_trace_par_seq_fold_in_cycle_call() {
+    let return_numbers_call_service: CallServiceClosure = Box::new(|_| {
+        async move { CallServiceResult::ok(json!(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])) }.boxed_local()
     });
 
-    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1");
-    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2");
-    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3");
+    let mut vm1 = create_avm(return_numbers_call_service, "some_peer_id_1").await;
+    let mut vm2 = create_avm(echo_call_service(), "some_peer_id_2").await;
+    let mut vm3 = create_avm(unit_call_service(), "some_peer_id_3").await;
 
     let script = r#"
         (par 
@@ -595,12 +599,12 @@ fn executed_trace_par_seq_fold_in_cycle_call() {
     }
 }
 
-#[test]
-fn executed_trace_seq_par_seq_seq() {
+#[tokio::test]
+async fn executed_trace_seq_par_seq_seq() {
     let peer_id_1 = "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er";
     let peer_id_2 = "12D3KooWAzJcYitiZrerycVB4Wryrx22CFKdDGx7c4u31PFdfTbR";
-    let mut vm1 = create_avm(unit_call_service(), peer_id_1);
-    let mut vm2 = create_avm(unit_call_service(), peer_id_2);
+    let mut vm1 = create_avm(unit_call_service(), peer_id_1).await;
+    let mut vm2 = create_avm(unit_call_service(), peer_id_2).await;
     let script = format!(
         r#"
         (seq 

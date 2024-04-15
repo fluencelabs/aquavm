@@ -188,7 +188,7 @@ impl<R: AirRunner> PeerEnv<R> {
         self.neighborhood.iter()
     }
 
-    pub(crate) fn execute_once(
+    pub(crate) async fn execute_once(
         &mut self,
         air: impl Into<String>,
         network: &Network<R>,
@@ -199,17 +199,22 @@ impl<R: AirRunner> PeerEnv<R> {
         let queue_cell = queue.get_peer_queue_cell(self.peer.peer_id.clone());
         let maybe_data = queue_cell.pop_data();
 
-        maybe_data.map(|data| {
-            let res = self
-                .peer
-                .invoke(air, data, test_parameters.clone(), &queue_cell);
+        let maybe_data: futures::future::OptionFuture<_> = maybe_data
+            .map(|data| async {
+                let res = self
+                    .peer
+                    .invoke(air, data, test_parameters.clone(), &queue_cell)
+                    .await;
 
-            if let Ok(outcome) = &res {
-                queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
-            }
+                if let Ok(outcome) = &res {
+                    queue.distribute_to_peers(network, &outcome.next_peer_pks, &outcome.data)
+                }
 
-            res
-        })
+                res
+            })
+            .into();
+
+        maybe_data.await
     }
 
     pub fn get_peer(&self) -> &Peer<R> {
@@ -235,8 +240,8 @@ mod tests {
 
     use std::{iter::FromIterator, rc::Rc};
 
-    #[test]
-    fn test_empty_neighborhood() {
+    #[tokio::test]
+    async fn test_empty_neighborhood() {
         let peer_name = "someone";
         let other_name = "other1";
         let (peer_pk, peer_id) = derive_dummy_keypair(peer_name);
@@ -244,18 +249,19 @@ mod tests {
         let peer_id = PeerId::from(peer_id);
         let other_id = PeerId::from(other_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         assert!(penv.is_reachable(&peer_id));
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
-    fn test_no_self_disconnect() {
+    #[tokio::test]
+    async fn test_no_self_disconnect() {
         let peer_name = "someone";
         let other_name = "other1";
         let (peer_pk, peer_id) = derive_dummy_keypair(peer_name);
@@ -263,10 +269,11 @@ mod tests {
         let peer_id = PeerId::from(peer_id);
         let other_id = PeerId::from(other_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         {
@@ -284,8 +291,8 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
-    fn test_set_neighborhood() {
+    #[tokio::test]
+    async fn test_set_neighborhood() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let other_name2 = "other2";
@@ -295,24 +302,25 @@ mod tests {
         let other_id1 = PeerId::from(other_id1);
         let other_id2 = PeerId::from(other_id2);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         // iter is empty
         assert!(penv.iter().next().is_none());
 
-        network.ensure_named_peer(other_name1, <_>::default());
-        network.ensure_named_peer(other_name1, <_>::default());
-        network.ensure_named_peer(other_name2, <_>::default());
+        network.ensure_named_peer(other_name1, <_>::default()).await;
+        network.ensure_named_peer(other_name1, <_>::default()).await;
+        network.ensure_named_peer(other_name2, <_>::default()).await;
         let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(penv.iter().collect::<PeerSet>(), expected_neighborhood);
     }
 
-    #[test]
-    fn test_insert() {
+    #[tokio::test]
+    async fn test_insert() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let other_name2 = "other2";
@@ -322,24 +330,25 @@ mod tests {
         let other_id1 = PeerId::from(other_id1);
         let other_id2 = PeerId::from(other_id2);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
         // iter is empty
         assert!(penv.iter().next().is_none());
 
-        network.ensure_named_peer(other_name1, <_>::default());
-        network.ensure_named_peer(other_name2, <_>::default());
+        network.ensure_named_peer(other_name1, <_>::default()).await;
+        network.ensure_named_peer(other_name2, <_>::default()).await;
         let expected_neighborhood = PeerSet::from([other_id1, other_id2]);
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
-    #[test]
-    fn test_ensure() {
+    #[tokio::test]
+    async fn test_ensure() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let other_name2 = "other2";
@@ -349,10 +358,11 @@ mod tests {
         let other_id1 = PeerId::from(other_id1);
         let other_id2 = PeerId::from(other_id2);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
@@ -366,18 +376,19 @@ mod tests {
         assert_eq!(PeerSet::from_iter(penv.iter()), expected_neighborhood);
     }
 
-    #[test]
-    fn test_insert_insert() {
+    #[tokio::test]
+    async fn test_insert_insert() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
         let (_other_pk1, other_id1) = derive_dummy_keypair(other_name1);
         let other_id1 = PeerId::from(other_id1);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
@@ -392,16 +403,17 @@ mod tests {
         assert_eq!(penv.iter().collect::<Vec<_>>(), expected_neighborhood);
     }
 
-    #[test]
-    fn test_extend_neighborhood() {
+    #[tokio::test]
+    async fn test_extend_neighborhood() {
         let peer_name = "peer";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
 
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         penv.get_neighborhood_mut()
@@ -414,14 +426,15 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_remove_from_neiborhood() {
+    #[tokio::test]
+    async fn test_remove_from_neiborhood() {
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let (peer_pk, _peer_id) = derive_dummy_keypair("someone");
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         penv.get_neighborhood_mut()
@@ -436,17 +449,18 @@ mod tests {
             },
         );
     }
-    #[test]
-    fn test_fail() {
+    #[tokio::test]
+    async fn test_fail() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
         let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
         let other_id = PeerId::from(other_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
@@ -459,18 +473,19 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
-    fn test_fail_remove() {
+    #[tokio::test]
+    async fn test_fail_remove() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
         let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
         let other_id = PeerId::from(other_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
@@ -488,17 +503,18 @@ mod tests {
         assert!(!penv.is_reachable(&other_id));
     }
 
-    #[test]
-    fn test_fail_unfail() {
+    #[tokio::test]
+    async fn test_fail_unfail() {
         let peer_name = "someone";
         let other_name1 = "other1";
         let (peer_pk, _peer_id) = derive_dummy_keypair(peer_name);
         let (_other_pk, other_id) = derive_dummy_keypair(other_name1);
         let other_id = PeerId::from(other_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
 
@@ -512,8 +528,8 @@ mod tests {
         assert!(penv.is_reachable(&other_id));
     }
 
-    #[test]
-    fn test_failed() {
+    #[tokio::test]
+    async fn test_failed() {
         let peer_name = "someone";
         let other_name = "other1";
         let remote_name = "remote";
@@ -524,10 +540,11 @@ mod tests {
         let other_id = PeerId::from(other_id);
         let remote_id = PeerId::from(remote_id);
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
 
         let mut penv = PeerEnv::new(
-            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()),
+            Peer::new(peer_pk, Rc::from(vec![]), <_>::default()).await,
             &network,
         );
         penv.get_neighborhood_mut()

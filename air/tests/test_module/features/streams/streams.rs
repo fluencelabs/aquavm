@@ -17,27 +17,31 @@
 use air_interpreter_data::ExecutionTrace;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
 use pretty_assertions::assert_eq;
 
 use std::ops::Deref;
 
-#[test]
-fn empty_stream() {
-    fn arg_type_check_closure() -> CallServiceClosure {
-        Box::new(move |params| -> CallServiceResult {
-            let actual_call_args: Vec<Vec<serde_json::Value>> =
-                serde_json::from_value(serde_json::Value::Array(params.arguments))
-                    .expect("json deserialization shouldn't fail");
-            let expected_call_args: Vec<Vec<serde_json::Value>> = vec![vec![]];
+#[tokio::test]
+async fn empty_stream() {
+    fn arg_type_check_closure() -> CallServiceClosure<'static> {
+        Box::new(move |params| {
+            async move {
+                let actual_call_args: Vec<Vec<serde_json::Value>> =
+                    serde_json::from_value(serde_json::Value::Array(params.arguments))
+                        .expect("json deserialization shouldn't fail");
+                let expected_call_args: Vec<Vec<serde_json::Value>> = vec![vec![]];
 
-            assert_eq!(actual_call_args, expected_call_args);
+                assert_eq!(actual_call_args, expected_call_args);
 
-            CallServiceResult::ok(json!(""))
+                CallServiceResult::ok(json!(""))
+            }
+            .boxed_local()
         })
     }
 
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(arg_type_check_closure(), vm_peer_id);
+    let mut vm = create_avm(arg_type_check_closure(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -56,19 +60,19 @@ fn empty_stream() {
     let _ = checked_call_vm!(vm, <_>::default(), script, "", "");
 }
 
-#[test]
-fn stream_merging_v0() {
+#[tokio::test]
+async fn stream_merging_v0() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
     let setter_2_id = "setter_2";
     let setter_3_id = "setter_3";
     let executor_id = "stream_executor";
 
-    let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
-    let mut executor = create_avm(unit_call_service(), executor_id);
+    let mut initiator = create_avm(unit_call_service(), initiator_id).await;
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id).await;
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id).await;
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id).await;
+    let mut executor = create_avm(unit_call_service(), executor_id).await;
 
     let script = format!(
         include_str!("scripts/stream_fold_merging_v0.air"),
@@ -208,19 +212,19 @@ fn stream_merging_v0() {
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
-#[test]
-fn stream_merging_v1() {
+#[tokio::test]
+async fn stream_merging_v1() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
     let setter_2_id = "setter_2";
     let setter_3_id = "setter_3";
     let executor_id = "stream_executor";
 
-    let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
-    let mut executor = create_avm(unit_call_service(), executor_id);
+    let mut initiator = create_avm(unit_call_service(), initiator_id).await;
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id).await;
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id).await;
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id).await;
+    let mut executor = create_avm(unit_call_service(), executor_id).await;
 
     let script = format!(
         include_str!("scripts/stream_fold_merging_v1.air"),
@@ -375,20 +379,20 @@ fn stream_merging_v1() {
     assert_eq!(actual_trace_3, expected_trace_3);
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
-fn stream_merging_v2() {
+async fn stream_merging_v2() {
     let initiator_id = "initiator_id";
     let setter_1_id = "setter_1";
     let setter_2_id = "setter_2";
     let setter_3_id = "setter_3";
     let executor_id = "stream_executor";
 
-    let mut initiator = create_avm(unit_call_service(), initiator_id);
-    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id);
-    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id);
-    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id);
-    let mut executor = create_avm(unit_call_service(), executor_id);
+    let mut initiator = create_avm(unit_call_service(), initiator_id).await;
+    let mut setter_1 = create_avm(set_variable_call_service(json!("1")), setter_1_id).await;
+    let mut setter_2 = create_avm(set_variable_call_service(json!("2")), setter_2_id).await;
+    let mut setter_3 = create_avm(set_variable_call_service(json!("3")), setter_3_id).await;
+    let mut executor = create_avm(unit_call_service(), executor_id).await;
 
     let script = format!(
         include_str!("scripts/stream_fold_merging_v2.air"),

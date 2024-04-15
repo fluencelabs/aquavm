@@ -35,7 +35,7 @@ pub struct TransformedAirScript<R = DefaultAirRunner> {
 
 impl<R: AirRunner> TransformedAirScript<R> {
     // TODO peer transformation mode
-    pub fn new(
+    pub async fn new(
         annotated_air_script: &str,
         network: Rc<Network<R>>,
         test_init_parameters: TestInitParameters,
@@ -45,17 +45,17 @@ impl<R: AirRunner> TransformedAirScript<R> {
         // validate the AIR script with the standard parser first
         air_parser::parse(&at_transformed_air_script)?;
 
-        Self::new_unvalidated(&at_transformed_air_script, network, test_init_parameters)
+        Self::new_unvalidated(&at_transformed_air_script, network, test_init_parameters).await
     }
 
-    pub(crate) fn new_unvalidated(
+    pub(crate) async fn new_unvalidated(
         at_transformed_air_script: &str,
         network: Rc<Network<R>>,
         test_init_parameters: TestInitParameters,
     ) -> Result<Self, String> {
         let transformer = Transformer { network: &network };
         let mut sexp = Sexp::from_str(at_transformed_air_script)?;
-        transformer.transform(&mut sexp, test_init_parameters);
+        transformer.transform(&mut sexp, test_init_parameters).await;
 
         Ok(Self {
             network,
@@ -81,25 +81,31 @@ struct Transformer<'net, R> {
 }
 
 impl<R: AirRunner> Transformer<'_, R> {
-    pub(crate) fn transform(&self, sexp: &mut Sexp, test_init_parameters: TestInitParameters) {
+    #[async_recursion::async_recursion(?Send)]
+    pub(crate) async fn transform(
+        &self,
+        sexp: &mut Sexp,
+        test_init_parameters: TestInitParameters,
+    ) {
         match sexp {
-            Sexp::Call(call) => self.handle_call(call, test_init_parameters),
-            Sexp::Canon(canon) => self.handle_canon(canon, test_init_parameters),
+            Sexp::Call(call) => self.handle_call(call, test_init_parameters).await,
+            Sexp::Canon(canon) => self.handle_canon(canon, test_init_parameters).await,
             Sexp::List(children) => {
                 for child in children.iter_mut().skip(1) {
-                    self.transform(child, test_init_parameters);
+                    self.transform(child, test_init_parameters).await;
                 }
             }
             Sexp::Symbol(_) | Sexp::String(_) => {}
         }
     }
 
-    fn handle_call(&self, call: &mut Call, test_init_parameters: TestInitParameters) {
+    async fn handle_call(&self, call: &mut Call, test_init_parameters: TestInitParameters) {
         // collect peers...
         if let Sexp::String(ref mut peer_name) = &mut call.triplet.0 {
             *peer_name = self
                 .network
                 .ensure_named_peer(peer_name.as_str(), test_init_parameters)
+                .await
                 .to_string();
         }
 
@@ -118,11 +124,12 @@ impl<R: AirRunner> Transformer<'_, R> {
         }
     }
 
-    fn handle_canon(&self, canon: &mut Canon, test_init_parameters: TestInitParameters) {
+    async fn handle_canon(&self, canon: &mut Canon, test_init_parameters: TestInitParameters) {
         if let Sexp::String(ref mut peer_name) = &mut canon.peer {
             *peer_name = self
                 .network
                 .ensure_named_peer(peer_name.as_str(), test_init_parameters)
+                .await
                 .to_string();
         }
     }
@@ -161,41 +168,50 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_translate_null() {
+    #[tokio::test]
+    async fn test_translate_null() {
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
-        let transformed = TransformedAirScript::new("(null)", network, <_>::default()).unwrap();
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
+        let transformed = TransformedAirScript::new("(null)", network, <_>::default())
+            .await
+            .unwrap();
         assert_eq!(&*transformed, "(null)");
     }
 
-    #[test]
-    fn test_translate_call_no_result() {
+    #[tokio::test]
+    async fn test_translate_call_no_result() {
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let script = r#"(call peer_id ("service_id" func) [])"#;
-        let transformed =
-            TransformedAirScript::new_unvalidated(script, network, <_>::default()).unwrap();
+        let transformed = TransformedAirScript::new_unvalidated(script, network, <_>::default())
+            .await
+            .unwrap();
         assert_eq!(&*transformed, script);
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_translate_call_no_string() {
+    async fn test_translate_call_no_string() {
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let script = r#"(call "peer_id" (service_id func) [])"#;
-        let transformed = TransformedAirScript::new(script, network, <_>::default());
+        let transformed = TransformedAirScript::new(script, network, <_>::default()).await;
         assert_eq!(transformed.as_deref(), Ok(script));
     }
 
-    #[test]
-    fn test_translate_call_result() {
+    #[tokio::test]
+    async fn test_translate_call_result() {
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let script = r#"(call "peer_id" ("service_id" func) []) ; ok = 42"#;
         let transformer =
-            TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default()).unwrap();
+            TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default())
+                .await
+                .unwrap();
 
         let peer_id = at("peer_id");
 
@@ -219,8 +235,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_translate_multiple_calls() {
+    #[tokio::test]
+    async fn test_translate_multiple_calls() {
         let script = r#"(seq
    (call peer_id ("service_id" func) [a 11]) ; ok={"test":"me"}
    (seq
@@ -229,9 +245,12 @@ mod tests {
 ))"#;
 
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
         let transformed =
-            TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default()).unwrap();
+            TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default())
+                .await
+                .unwrap();
         assert_eq!(
             &*transformed,
             concat!(
@@ -258,8 +277,8 @@ mod tests {
         assert!(network.get_peers().collect::<Vec<_>>().is_empty());
     }
 
-    #[test]
-    fn test_peers() {
+    #[tokio::test]
+    async fn test_peers() {
         // this script is not correct AIR, but our parser handles it
         let script = r#"(seq
    (call "peer_id1" ("service_id" func) [a 11]) ; ok={"test":"me"}
@@ -271,9 +290,11 @@ mod tests {
 ))"#;
 
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
-        let t =
-            TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default()).unwrap();
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
+        let t = TransformedAirScript::new_unvalidated(script, network.clone(), <_>::default())
+            .await
+            .unwrap();
 
         let peer_id1 = at("peer_id1");
         let peer_id2 = at("peer_id2");
@@ -305,13 +326,16 @@ mod tests {
         assert_eq!(*t, expected);
     }
 
-    #[test]
-    fn test_at_transform() {
+    #[tokio::test]
+    async fn test_at_transform() {
         let script = r#"(call "peer_id1" ("service_id" "func") [1 @"peer_id3"] x) ; ok={"test":@"peer_id2"}"#;
 
         let network =
-            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default());
-        let t = TransformedAirScript::new(script, network.clone(), <_>::default()).unwrap();
+            Network::<NativeAirRunner>::new(std::iter::empty::<PeerId>(), vec![], <_>::default())
+                .await;
+        let t = TransformedAirScript::new(script, network.clone(), <_>::default())
+            .await
+            .unwrap();
 
         let peer_id1 = at("peer_id1");
         let peer_id2 = at("peer_id2");
@@ -330,8 +354,9 @@ mod tests {
             <_>::default(),
             t,
         )
+        .await
         .unwrap();
-        let res = exec.execute_one(peer_name1).unwrap();
+        let res = exec.execute_one(peer_name1).await.unwrap();
         assert_eq!(
             trace_from_result(&res),
             ExecutionTrace::from(vec![scalar!(

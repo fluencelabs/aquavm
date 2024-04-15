@@ -20,10 +20,10 @@ use air_test_utils::prelude::*;
 
 use pretty_assertions::assert_eq;
 
-#[test]
-fn seq_par_call() {
+#[tokio::test]
+async fn seq_par_call() {
     let vm_peer_id = "some_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -61,11 +61,11 @@ fn seq_par_call() {
     assert_eq!(result.next_peer_pks, vec![String::from("remote_peer_id")]);
 }
 
-#[test]
-fn par_par_call() {
+#[tokio::test]
+async fn par_par_call() {
     let vm_peer_id = "some_peer_id";
     let remote_peer_id = "remote_peer_id";
-    let mut vm = create_avm(unit_call_service(), vm_peer_id);
+    let mut vm = create_avm(unit_call_service(), vm_peer_id).await;
 
     let script = format!(
         r#"

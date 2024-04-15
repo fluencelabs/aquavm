@@ -358,122 +358,122 @@ mod tests {
     use pretty_assertions::assert_eq;
     use serde_json::json;
 
-    #[test]
-    fn test_multispace0_empty() {
+    #[tokio::test]
+    async fn test_multispace0_empty() {
         let res = sexp_multispace0::<_, ()>("");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace0_spaces() {
+    #[tokio::test]
+    async fn test_multispace0_spaces() {
         let res = sexp_multispace0::<_, ()>("  ");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace0_comment() {
+    #[tokio::test]
+    async fn test_multispace0_comment() {
         let res = sexp_multispace0::<_, ()>(";; this is comment");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace0_comment_with_space() {
+    #[tokio::test]
+    async fn test_multispace0_comment_with_space() {
         let res = sexp_multispace0::<_, ()>(" ;; ");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace0_multiline() {
+    #[tokio::test]
+    async fn test_multispace0_multiline() {
         let res = sexp_multispace0::<_, ()>(" ;; \n ;;;; \n ");
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace1_empty() {
+    #[tokio::test]
+    async fn test_multispace1_empty() {
         let res = sexp_multispace1("".into());
         assert!(res.is_err());
     }
 
-    #[test]
-    fn test_multispace1_space() {
+    #[tokio::test]
+    async fn test_multispace1_space() {
         let res = sexp_multispace1(" ".into());
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace1_comment() {
+    #[tokio::test]
+    async fn test_multispace1_comment() {
         let res = sexp_multispace1(" ;; ".into());
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_multispace1_multiline() {
+    #[tokio::test]
+    async fn test_multispace1_multiline() {
         let res = sexp_multispace1(" ;; \n ;;;; \n ".into());
         assert!(res.is_ok(), "{}", res.unwrap_err());
     }
 
-    #[test]
-    fn test_symbol() {
+    #[tokio::test]
+    async fn test_symbol() {
         let res = Sexp::from_str("symbol");
         assert_eq!(res, Ok(Sexp::symbol("symbol")));
     }
 
-    #[test]
-    fn test_symbol_lambda() {
+    #[tokio::test]
+    async fn test_symbol_lambda() {
         let res = Sexp::from_str("sym_bol.$.blabla");
         assert_eq!(res, Ok(Sexp::symbol("sym_bol.$.blabla")));
     }
 
-    #[test]
-    fn test_symbol_lambda_exclamation() {
+    #[tokio::test]
+    async fn test_symbol_lambda_exclamation() {
         let res = Sexp::from_str("pid-num.$.[0]!");
         assert_eq!(res, Ok(Sexp::symbol("pid-num.$.[0]!")));
     }
 
-    #[test]
-    fn test_symbol_stream() {
+    #[tokio::test]
+    async fn test_symbol_stream() {
         let res = Sexp::from_str("$stream");
         assert_eq!(res, Ok(Sexp::symbol("$stream")));
     }
 
-    #[test]
-    fn test_symbol_canon() {
+    #[tokio::test]
+    async fn test_symbol_canon() {
         let res = Sexp::from_str("#canon");
         assert_eq!(res, Ok(Sexp::symbol("#canon")));
     }
 
-    #[test]
-    fn test_symbol_lambda2() {
+    #[tokio::test]
+    async fn test_symbol_lambda2() {
         let res = Sexp::from_str(r#"$result.$[0]"#);
         assert_eq!(res, Ok(Sexp::symbol(r#"$result.$[0]"#)));
     }
 
-    #[test]
-    fn test_string_empty() {
+    #[tokio::test]
+    async fn test_string_empty() {
         let res = Sexp::from_str(r#""""#);
         assert_eq!(res, Ok(Sexp::string("")));
     }
 
-    #[test]
-    fn test_string() {
+    #[tokio::test]
+    async fn test_string() {
         let res = Sexp::from_str(r#""str ing""#);
         assert_eq!(res, Ok(Sexp::string("str ing")));
     }
 
-    #[test]
-    fn test_empty_list() {
+    #[tokio::test]
+    async fn test_empty_list() {
         let res = Sexp::from_str("()");
         assert_eq!(res, Ok(Sexp::List(vec![])));
     }
 
-    #[test]
-    fn test_small_list() {
+    #[tokio::test]
+    async fn test_small_list() {
         let res = Sexp::from_str("(null)");
         assert_eq!(res, Ok(Sexp::list(vec![Sexp::symbol("null")])));
     }
 
-    #[test]
-    fn test_call_no_args() {
+    #[tokio::test]
+    async fn test_call_no_args() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [])"#);
         assert_eq!(
             res,
@@ -493,8 +493,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_after_call() {
+    #[tokio::test]
+    async fn test_call_after_call() {
         let res = Sexp::from_str(
             r#"(seq
     (call peer_id ("serv" "func") [])
@@ -535,8 +535,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_annotation_newline() {
+    #[tokio::test]
+    async fn test_call_annotation_newline() {
         let res = Sexp::from_str(
             r#"(seq (call peer_id ("serv" "func") [])
 ; result=42
@@ -548,8 +548,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_args1() {
+    #[tokio::test]
+    async fn test_call_args1() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a])"#);
         assert_eq!(
             res,
@@ -569,8 +569,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_args2() {
+    #[tokio::test]
+    async fn test_call_args2() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b])"#);
         assert_eq!(
             res,
@@ -590,8 +590,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_var() {
+    #[tokio::test]
+    async fn test_call_var() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var)"#);
         assert_eq!(
             res,
@@ -611,8 +611,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_with_annotation() {
+    #[tokio::test]
+    async fn test_call_with_annotation() {
         let res = Sexp::from_str(r#"(call peer_id ("serv" "func") [a b] var) ; ok=42 "#);
         let expected_annotation = ServiceDefinition::Ok(json!(42));
         assert_eq!(
@@ -633,8 +633,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_with_annotation2() {
+    #[tokio::test]
+    async fn test_call_with_annotation2() {
         let res = Sexp::from_str(
             r#"(par
   (call peerid ("serv" "func") [a b] var) ; ok=42
@@ -643,8 +643,8 @@ mod tests {
         assert!(res.is_ok(), "{}", "{res:?}");
     }
 
-    #[test]
-    fn test_generic_sexp() {
+    #[tokio::test]
+    async fn test_generic_sexp() {
         let res = Sexp::from_str(" (fold i n ( par (null) (match y \"asdf\" (fail ))) )");
         assert_eq!(
             res,
@@ -666,14 +666,14 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_trailing_error() {
+    #[tokio::test]
+    async fn test_trailing_error() {
         let res = Sexp::from_str("(null))");
         assert!(res.is_err(), "{}", "{res:?}");
     }
 
-    #[test]
-    fn test_incomplete_string() {
+    #[tokio::test]
+    async fn test_incomplete_string() {
         let err = Sexp::from_str(
             r#"(seq
    "string"#,
@@ -688,8 +688,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_incomplete_list() {
+    #[tokio::test]
+    async fn test_incomplete_list() {
         let err = Sexp::from_str(
             r#"(seq
    "string"
@@ -704,50 +704,50 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_parse_fmt_call() {
+    #[tokio::test]
+    async fn test_parse_fmt_call() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"])"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
-    fn test_parse_fmt_call_var() {
+    #[tokio::test]
+    async fn test_parse_fmt_call_var() {
         let sexp_str = r#"(call "my_id" ("serv" "function") [other_peer_id "other_arg"] var)"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
-    fn test_parse_fmt_symbol() {
+    #[tokio::test]
+    async fn test_parse_fmt_symbol() {
         let sexp_str = "symbol";
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
-    fn test_parse_fmt_string() {
+    #[tokio::test]
+    async fn test_parse_fmt_string() {
         let sexp_str = r#""my_id""#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
-    fn test_parse_fmt_sexp() {
+    #[tokio::test]
+    async fn test_parse_fmt_sexp() {
         let sexp_str = r#"(par (ap x y) (fold x y (next)))"#;
         let sexp = Sexp::from_str(sexp_str).unwrap();
         assert_eq!(format!("{sexp}"), sexp_str);
     }
 
-    #[test]
-    fn test_canon_syntax() {
+    #[tokio::test]
+    async fn test_canon_syntax() {
         let sexp_str = r#"(seq (canon peer_id $stream #canon) (fold #canon i (next)))"#;
         let res = Sexp::from_str(sexp_str);
         assert!(res.is_ok(), "{}", "{res:?}");
     }
 
-    #[test]
-    fn test_comments() {
+    #[tokio::test]
+    async fn test_comments() {
         let sexp_str = r#" ;; One comment
 ( ;;; Second comment
   ;; The third one
@@ -779,8 +779,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_annotation_multiline() {
+    #[tokio::test]
+    async fn test_annotation_multiline() {
         let multiline_annotation = r#" #|
         map = {
           "0": null
@@ -789,8 +789,8 @@ mod tests {
         assert!(res.is_ok(), "{}", "{res:?}");
     }
 
-    #[test]
-    fn test_annotation_multiline_with_call() {
+    #[tokio::test]
+    async fn test_annotation_multiline_with_call() {
         let sexp_str = r#"(call "peer_id" ("serv" "func") [a b] var) #|
         map = {
            "0": null
@@ -819,8 +819,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_annotation_multiline_with_many_calls() {
+    #[tokio::test]
+    async fn test_annotation_multiline_with_many_calls() {
         let sexp_str = r#"(seq
             (call "peer_id" ("serv" "func") [a b] var) #|
                    map = {
@@ -868,8 +868,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_call_with_annotation_last_form() {
+    #[tokio::test]
+    async fn test_call_with_annotation_last_form() {
         let res = Sexp::from_str(
             r#"(par
   (call peerid ("serv" "func") [a b] var)
@@ -909,8 +909,8 @@ mod tests {
             ]))
         );
     }
-    #[test]
-    fn test_call_with_annotation_last_form_multiline() {
+    #[tokio::test]
+    async fn test_call_with_annotation_last_form_multiline() {
         let res = Sexp::from_str(
             r#"(par
   (call peerid ("serv" "func") [a b] var)
@@ -954,8 +954,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_canon_var_peer() {
+    #[tokio::test]
+    async fn test_canon_var_peer() {
         let res = Sexp::from_str(r#"(canon peer $stream #canon)"#);
 
         assert_eq!(
@@ -971,8 +971,8 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_canon_string_peer() {
+    #[tokio::test]
+    async fn test_canon_string_peer() {
         let res = Sexp::from_str(r#"(canon "peer" $stream #canon)"#);
 
         assert_eq!(
@@ -988,8 +988,8 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_canon_error_no_peer() {
+    #[tokio::test]
+    async fn test_canon_error_no_peer() {
         let res = Sexp::from_str(r#"(canon )"#);
         assert_eq!(
             res,
@@ -1000,8 +1000,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_canon_error_no_stream() {
+    #[tokio::test]
+    async fn test_canon_error_no_stream() {
         let res = Sexp::from_str(r#"(canon peer )"#);
         assert_eq!(
             res,
@@ -1012,8 +1012,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_canon_error_no_target() {
+    #[tokio::test]
+    async fn test_canon_error_no_target() {
         let res = Sexp::from_str(r#"(canon peer $stream )"#);
         assert_eq!(
             res,
@@ -1024,8 +1024,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_canon_error_wrong_stream() {
+    #[tokio::test]
+    async fn test_canon_error_wrong_stream() {
         let res = Sexp::from_str(r#"(canon peer "$stream" #canon)"#);
         assert_eq!(
             res,
@@ -1036,8 +1036,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_canon_error_wrong_target() {
+    #[tokio::test]
+    async fn test_canon_error_wrong_target() {
         let res = Sexp::from_str(r##"(canon peer $stream "#canon" )"##);
         assert_eq!(
             res,

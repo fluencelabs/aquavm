@@ -17,11 +17,11 @@
 use air_interpreter_interface::INTERPRETER_SUCCESS;
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/331
-fn issue_331() {
+async fn issue_331() {
     let peer_id_1 = "peer_id_1";
-    let mut peer_vm_1 = create_avm(set_variable_call_service(json!("")), peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(json!("")), peer_id_1).await;
 
     let script = format!(
         r#"

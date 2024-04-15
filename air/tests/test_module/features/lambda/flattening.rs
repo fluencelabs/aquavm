@@ -16,6 +16,8 @@
 
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -29,8 +31,8 @@ struct ClosureCallArgs {
     tetraplets: ClosureSettableVar<Vec<Vec<String>>>,
 }
 
-fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure {
-    Box::new(move |params| -> CallServiceResult {
+fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServiceClosure<'static> {
+    Box::new(move |params| {
         use std::ops::Deref;
 
         *closure_call_args.service_id_var.deref().borrow_mut() = params.service_id.clone();
@@ -40,23 +42,24 @@ fn create_check_service_closure(closure_call_args: ClosureCallArgs) -> CallServi
             .expect("json deserialization shouldn't fail");
         *closure_call_args.args_var.deref().borrow_mut() = call_args;
 
-        CallServiceResult::ok(json!(""))
+        let result = CallServiceResult::ok(json!(""));
+        async move { result }.boxed_local()
     })
 }
 
-#[test]
-fn flattening_scalar_arrays() {
+#[tokio::test]
+async fn flattening_scalar_arrays() {
     let scalar_array = json!({"iterable": [
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]},
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [2, 3]},
     ]});
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(scalar_array), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -87,19 +90,19 @@ fn flattening_scalar_arrays() {
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![2, 3])));
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
-fn flattening_streams() {
+async fn flattening_streams() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args.clone()), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -136,19 +139,19 @@ fn flattening_streams() {
     assert_eq!(closure_call_args.args_var, Rc::new(RefCell::new(vec![0, 1])));
 }
 
-#[test]
+#[tokio::test]
 #[ignore]
-fn test_handling_non_flattening_values() {
+async fn test_handling_non_flattening_values() {
     let stream_value = json!(
         {"peer_id" : "local_peer_id", "service_id": "local_service_id", "function_name": "local_function_name", "args": [0, 1]}
     );
 
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(stream_value), set_variable_peer_id).await;
 
     let closure_call_args = ClosureCallArgs::default();
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(closure_call_args), local_peer_id).await;
 
     let script = format!(
         r#"

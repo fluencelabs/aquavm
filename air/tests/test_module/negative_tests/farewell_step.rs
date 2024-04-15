@@ -17,11 +17,11 @@
 use air::FarewellError;
 use air_test_utils::prelude::*;
 
-#[test]
-fn unprocessed_call_result() {
+#[tokio::test]
+async fn unprocessed_call_result() {
     let air = r#"(null)"#;
     let client_peer_id = "some_peer_id";
-    let mut client_vm = create_avm(unit_call_service(), client_peer_id);
+    let mut client_vm = create_avm(unit_call_service(), client_peer_id).await;
     let prev_data = InterpreterDataEnvelope::new(semver::Version::new(1, 1, 1));
     let prev_data: Vec<u8> = prev_data.serialize().unwrap();
     let call_service_result = air_test_utils::CallServiceResult::ok(json!("null"));
@@ -31,6 +31,7 @@ fn unprocessed_call_result() {
 
     let result = client_vm
         .call_single(air, prev_data, "", client_peer_id, 0, 0, None, call_results_4_call, "")
+        .await
         .unwrap();
 
     let expected_call_service_result = air_interpreter_interface::CallServiceResult::ok(&json!("null"));

@@ -19,7 +19,9 @@ air-interpreter-interface = { version = "0.19.0", path = "../../crates/air-lib/i
 air-interpreter-sede = { version = "0.1.0", path = "../../crates/air-lib/interpreter-sede" }
 air-utils = { version = "0.3.0", path = "../../crates/air-lib/utils" }
 avm-data-store = { version = "0.7.9", path = "../../crates/data-store" }
-marine-runtime = "0.35.0"
+marine-runtime = "0.37.0"
+marine-wasmtime-backend = "0.7.0"
+marine-wasm-backend-traits = "0.7.0"
 polyplets = { version = "0.7.0", path = "../../crates/air-lib/polyplets" }
 avm-interface = { version = "0.32.1", path = "../../avm/interface" }
 
@@ -32,3 +34,4 @@ log = "0.4.20"
 parking_lot = "0.12.1"
 tracing = "0.1.40"
 fluence-keypair = { version = "0.10.4", default-features = false }
+tokio = { version = "1", features = ["rt", "macros"] }

@@ -21,6 +21,7 @@ use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use maplit::hashmap;
 use serde_json::Value as JValue;
+use futures::FutureExt;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -40,7 +41,7 @@ fn client_host_function(
     known_peers: Vec<String>,
     client_id: String,
     relay_id: String,
-) -> (CallServiceClosure, Rc<RefCell<String>>) {
+) -> (CallServiceClosure<'static>, Rc<RefCell<String>>) {
     let all_info = Rc::new(RefCell::new(String::new()));
     let known_peers = JValue::Array(
         known_peers
@@ -68,7 +69,7 @@ fn client_host_function(
     );
 
     let all_info_inner = all_info.clone();
-    let host_function: CallServiceClosure = Box::new(move |params| -> CallServiceResult {
+    let host_function: CallServiceClosure<'static> = Box::new(move |params| {
         let ret_value = match serde_json::from_value(serde_json::Value::Array(params.arguments.clone())) {
             Ok(args) => to_ret_value(
                 params.service_id.as_str(),
@@ -81,7 +82,7 @@ fn client_host_function(
             }
         };
 
-        CallServiceResult::ok(ret_value)
+        async move { CallServiceResult::ok(ret_value) }.boxed_local()
     });
 
     (host_function, all_info)
@@ -93,7 +94,7 @@ fn peer_host_function(
     modules: Vec<String>,
     interfaces: Vec<String>,
     ident: String,
-) -> CallServiceClosure {
+) -> CallServiceClosure<'static> {
     let known_peers = JValue::Array(known_peers.into_iter().map(JValue::String).collect());
     let blueprints = JValue::Array(blueprints.into_iter().map(JValue::String).collect());
     let modules = JValue::Array(modules.into_iter().map(JValue::String).collect());
@@ -115,7 +116,7 @@ fn peer_host_function(
         },
     );
 
-    Box::new(move |params| -> CallServiceResult {
+    Box::new(move |params| {
         let args: Vec<String> = serde_json::from_value(serde_json::Value::Array(params.arguments)).unwrap();
         let t_args = args.iter().map(|s| s.as_str()).collect::<Vec<_>>();
         let ret_value = to_ret_value(
@@ -124,12 +125,12 @@ fn peer_host_function(
             t_args,
         );
 
-        CallServiceResult::ok(ret_value)
+        async move { CallServiceResult::ok(ret_value) }.boxed_local()
     })
 }
 
 #[rustfmt::skip]
-fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure {
+fn create_peer_host_function(peer_id: String, known_peer_ids: Vec<String>) -> CallServiceClosure<'static> {
     let relay_blueprints = (0..=2).map(|id| format!("{peer_id}_blueprint_{id}")).collect::<Vec<_>>();
     let relay_modules = (0..=2).map(|id| format!("{peer_id}_module_{id}")).collect::<Vec<_>>();
     let relay_interfaces = (0..=2).map(|id| format!("{peer_id}_interface_{id}")).collect::<Vec<_>>();
@@ -150,7 +151,7 @@ struct AVMState {
     prev_result: Vec<u8>,
 }
 
-pub(crate) fn dashboard() -> super::Data {
+pub(crate) async fn dashboard() -> super::Data {
     let script = include_str!("dashboard/dashboard.air");
 
     let known_peer_keys = create_peers();
@@ -166,29 +167,26 @@ pub(crate) fn dashboard() -> super::Data {
         client_host_function(known_peer_ids.clone(), client_id.clone(), relay_id.clone());
 
     let mut client =
-        create_avm_with_key::<NativeAirRunner>(client_key, host_function, <_>::default());
+        create_avm_with_key::<NativeAirRunner>(client_key, host_function, <_>::default()).await;
     let mut relay = create_avm_with_key::<NativeAirRunner>(
         relay_key.clone(),
         create_peer_host_function(relay_id.clone(), known_peer_ids.clone()),
         <_>::default(),
-    );
+    ).await;
 
-    let mut known_peers = known_peer_keys
-        .iter()
-        .cloned()
-        .map(|(peer_key, peer_id)| {
-            let vm = create_avm_with_key::<NativeAirRunner>(
-                peer_key,
-                create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
-                <_>::default(),
-            );
-            AVMState {
-                vm,
-                peer_id,
-                prev_result: vec![],
-            }
+    let mut known_peers = Vec::<_>::new();
+    for (peer_key, peer_id) in known_peer_keys.iter().cloned() {
+        let vm = create_avm_with_key::<NativeAirRunner>(
+            peer_key,
+            create_peer_host_function(peer_id.clone(), known_peer_ids.clone()),
+            <_>::default()
+        ).await;
+        known_peers.push(AVMState {
+            vm,
+            peer_id,
+            prev_result: vec![],
         })
-        .collect::<Vec<_>>();
+    }
 
     let test_params = TestRunParameters::from_init_peer_id(client_id.clone())
         .with_particle_id(super::PARTICLE_ID);

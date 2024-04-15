@@ -22,8 +22,8 @@ use air::LambdaError;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
-fn local_service_error() {
+#[tokio::test]
+async fn local_service_error() {
     let client_peer_id = "some_peer_id";
     let script = format!(
         r#"
@@ -31,9 +31,10 @@ fn local_service_error() {
     "#
     );
 
-    let mut client_vm = create_avm(echo_call_service(), client_peer_id);
+    let mut client_vm = create_avm(echo_call_service(), client_peer_id).await;
     let result = client_vm
         .call_single(&script, "", "", client_peer_id, 0, 0, None, <_>::default(), "")
+        .await
         .unwrap();
 
     let err_msg = "some error".to_string();
@@ -53,6 +54,7 @@ fn local_service_error() {
             call_results_4_call,
             "",
         )
+        .await
         .unwrap();
 
     let err_msg = std::rc::Rc::new(format!("\"{err_msg}\""));
@@ -60,8 +62,8 @@ fn local_service_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fold_iterates_over_non_array_scalar_iterable() {
+#[tokio::test]
+async fn fold_iterates_over_non_array_scalar_iterable() {
     let vm_2_peer_id = "vm_2_peer_id";
     let var_name = "outcome".to_string();
     let script = format!(
@@ -78,14 +80,14 @@ fn fold_iterates_over_non_array_scalar_iterable() {
         "#
     );
     let unsupported_jvalue = json!({"attr": 42, });
-    let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::FoldIteratesOverNonArray(unsupported_jvalue.into(), var_name);
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fold_iterates_over_non_array_scalar_lambda_iterable() {
+#[tokio::test]
+async fn fold_iterates_over_non_array_scalar_lambda_iterable() {
     let vm_2_peer_id = "vm_2_peer_id";
     let var_name = "outcome".to_string();
     let scalar_int = 42;
@@ -103,14 +105,14 @@ fn fold_iterates_over_non_array_scalar_lambda_iterable() {
         "#
     );
     let unsupported_jvalue = json!({"int": scalar_int, });
-    let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(unsupported_jvalue.clone()), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::FoldIteratesOverNonArray(scalar_int.into(), ".$.int".to_string());
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn non_string_value_in_triplet_resolution() {
+#[tokio::test]
+async fn non_string_value_in_triplet_resolution() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
     let var_name = "var_name".to_string();
@@ -122,8 +124,8 @@ fn non_string_value_in_triplet_resolution() {
         )
         "#
     );
-    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -141,8 +143,8 @@ fn non_string_value_in_triplet_resolution() {
         )
         "#
     );
-    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
         actual_value: scalar_int.into(),
@@ -161,8 +163,8 @@ fn non_string_value_in_triplet_resolution() {
         )
         "#
     );
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -170,8 +172,8 @@ fn non_string_value_in_triplet_resolution() {
     assert_error_eq!(&result, expected_error);
 }
 
-#[test]
-fn non_string_value_in_triplet_resolution_module_name() {
+#[tokio::test]
+async fn non_string_value_in_triplet_resolution_module_name() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
     let var_name = "var_name".to_string();
@@ -183,8 +185,8 @@ fn non_string_value_in_triplet_resolution_module_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -202,8 +204,8 @@ fn non_string_value_in_triplet_resolution_module_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
         actual_value: scalar_int.into(),
@@ -222,8 +224,8 @@ fn non_string_value_in_triplet_resolution_module_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -231,8 +233,8 @@ fn non_string_value_in_triplet_resolution_module_name() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn non_string_value_in_triplet_resolution_function_name() {
+#[tokio::test]
+async fn non_string_value_in_triplet_resolution_function_name() {
     let vm_2_peer_id = "vm_2_peer_id";
     let scalar_int = 42;
     let var_name = "var_name".to_string();
@@ -244,8 +246,8 @@ fn non_string_value_in_triplet_resolution_function_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(unit_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -263,8 +265,8 @@ fn non_string_value_in_triplet_resolution_function_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(json!({"int": scalar_int, })), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name,
         actual_value: scalar_int.into(),
@@ -283,8 +285,8 @@ fn non_string_value_in_triplet_resolution_function_name() {
         )
         "#
     );
-    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(echo_call_service(), vm_2_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
     let expected_error = CatchableError::NonStringValueInTripletResolution {
         variable_name: var_name.clone(),
         actual_value: scalar_int.into(),
@@ -292,8 +294,8 @@ fn non_string_value_in_triplet_resolution_function_name() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn value_not_contain_such_array_idx_ap() {
+#[tokio::test]
+async fn value_not_contain_such_array_idx_ap() {
     let vm_1_peer_id = "vm_1_peer_id";
     let idx = 42;
     let script = format!(
@@ -305,8 +307,8 @@ fn value_not_contain_such_array_idx_ap() {
         "#
     );
     let wrong_jvalue = json!(["a", "b"]);
-    let mut vm_2 = create_avm(set_variable_call_service(wrong_jvalue.clone()), vm_1_peer_id);
-    let result = vm_2.call(&script, "", "", <_>::default()).unwrap();
+    let mut vm_2 = create_avm(set_variable_call_service(wrong_jvalue.clone()), vm_1_peer_id).await;
+    let result = vm_2.call(&script, "", "", <_>::default()).await.unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchArrayIdx {
         value: wrong_jvalue.into(),
@@ -315,12 +317,12 @@ fn value_not_contain_such_array_idx_ap() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn field_accessor_applied_to_stream() {
+#[tokio::test]
+async fn field_accessor_applied_to_stream() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg = json!({"a": 1,});
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg), vm_peer_id_1).await;
     let field_name = "int".to_string();
     let script = format!(
         r#"
@@ -331,18 +333,18 @@ fn field_accessor_applied_to_stream() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error =
         air::CatchableError::LambdaApplierError(air::LambdaError::FieldAccessorAppliedToStream { field_name });
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn array_accessor_not_match_value() {
+#[tokio::test]
+async fn array_accessor_not_match_value() {
     let vm_peer_id_1 = "vm_peer_id_1";
 
     let arg = json!({"a": 1,});
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
     let idx = 42;
     let script = format!(
         r#"
@@ -353,7 +355,7 @@ fn array_accessor_not_match_value() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ArrayAccessorNotMatchValue {
         value: arg.into(),
         idx,
@@ -361,11 +363,11 @@ fn array_accessor_not_match_value() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn value_not_contain_such_array_idx_call_arg_lambda() {
+#[tokio::test]
+async fn value_not_contain_such_array_idx_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([0, 1]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
     let idx = 42;
     let script = format!(
         r#"
@@ -376,7 +378,7 @@ fn value_not_contain_such_array_idx_call_arg_lambda() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchArrayIdx {
         value: arg.into(),
         idx,
@@ -384,11 +386,11 @@ fn value_not_contain_such_array_idx_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn value_not_contain_such_field_call_arg_lambda() {
+#[tokio::test]
+async fn value_not_contain_such_field_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!({"a": 1,});
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
     let field_name = "b".to_string();
     let script = format!(
         r#"
@@ -399,7 +401,7 @@ fn value_not_contain_such_field_call_arg_lambda() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ValueNotContainSuchField {
         value: arg.into(),
         field_name,
@@ -407,11 +409,11 @@ fn value_not_contain_such_field_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn field_accesssor_not_match_value_call_arg_lambda() {
+#[tokio::test]
+async fn field_accesssor_not_match_value_call_arg_lambda() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let arg = json!([0, 1]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -421,7 +423,7 @@ fn field_accesssor_not_match_value_call_arg_lambda() {
         )
         "#
     );
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::FieldAccessorNotMatchValue {
         value: arg.into(),
         field_name: "b".to_string(),
@@ -429,15 +431,15 @@ fn field_accesssor_not_match_value_call_arg_lambda() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn index_access_not_u32_i64() {
+#[tokio::test]
+async fn index_access_not_u32_i64() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let vm_peer_id_2 = "vm_peer_id_2";
     let number = serde_json::Number::from(8589934592 as i64);
     let arg = json!(number);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_1).await;
     let arg = json!([0, 1]);
-    let mut peer_vm_2 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_2);
+    let mut peer_vm_2 = create_avm(set_variable_call_service(arg.clone()), vm_peer_id_2).await;
 
     let script = format!(
         r#"
@@ -451,18 +453,21 @@ fn index_access_not_u32_i64() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
-    let result = peer_vm_2.call(script.clone(), "", result.data, <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
+    let result = peer_vm_2
+        .call(script.clone(), "", result.data, <_>::default())
+        .await
+        .unwrap();
     let expected_error =
         air::CatchableError::LambdaApplierError(air::LambdaError::IndexAccessNotU32 { accessor: number });
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn scalar_accessor_has_invalid_type_ap() {
+#[tokio::test]
+async fn scalar_accessor_has_invalid_type_ap() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let obj_arg = json!({"a": 1,});
-    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -476,26 +481,26 @@ fn scalar_accessor_has_invalid_type_ap() {
         "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ScalarAccessorHasInvalidType {
         scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 
     let obj_arg = json!([{"a": 1,}]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1).await;
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::ScalarAccessorHasInvalidType {
         scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn stream_accessor_has_invalid_type() {
+#[tokio::test]
+async fn stream_accessor_has_invalid_type() {
     let vm_peer_id_1 = "vm_peer_id_1";
     let obj_arg = json!({"a": 1,});
-    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
+    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1).await;
 
     let script = format!(
         r#"
@@ -512,25 +517,25 @@ fn stream_accessor_has_invalid_type() {
     "#
     );
 
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::StreamAccessorHasInvalidType {
         scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 
     let obj_arg = json!([{"a": 1,}]);
-    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1);
-    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).unwrap();
+    let mut peer_vm_1 = create_avm(set_variable_call_service(obj_arg.clone()), vm_peer_id_1).await;
+    let result = peer_vm_1.call(script.clone(), "", "", <_>::default()).await.unwrap();
     let expected_error = air::CatchableError::LambdaApplierError(air::LambdaError::StreamAccessorHasInvalidType {
         scalar_accessor: obj_arg.into(),
     });
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn canon_stream_not_have_enough_values_call_arg() {
+#[tokio::test]
+async fn canon_stream_not_have_enough_values_call_arg() {
     let local_peer_id = "local_peer_id";
-    let mut local_vm = create_avm(echo_call_service(), local_peer_id);
+    let mut local_vm = create_avm(echo_call_service(), local_peer_id).await;
 
     let join_stream_script = format!(
         r#"
@@ -551,7 +556,10 @@ fn canon_stream_not_have_enough_values_call_arg() {
      )"#
     );
 
-    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let result = local_vm
+        .call(&join_stream_script, "", "", <_>::default())
+        .await
+        .unwrap();
     let actual_trace = trace_from_result(&result);
     assert_eq!(actual_trace.len(), 2); // only the first call and canon should produce a trace
     let expected_error =
@@ -559,11 +567,11 @@ fn canon_stream_not_have_enough_values_call_arg() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn unsupported_map_keytype() {
+#[tokio::test]
+async fn unsupported_map_keytype() {
     let local_peer_id = "local_peer_id";
     let obj_arg = json!({"a": {"b": 1},});
-    let mut local_vm = create_avm(set_variable_call_service(obj_arg), local_peer_id);
+    let mut local_vm = create_avm(set_variable_call_service(obj_arg), local_peer_id).await;
 
     let map_name = "%map";
     let join_stream_script = format!(
@@ -575,13 +583,16 @@ fn unsupported_map_keytype() {
      "#
     );
 
-    let result = local_vm.call(&join_stream_script, "", "", <_>::default()).unwrap();
+    let result = local_vm
+        .call(&join_stream_script, "", "", <_>::default())
+        .await
+        .unwrap();
     let expected_error = CatchableError::StreamMapError(unsupported_map_key_type(map_name));
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn undefined_last_error_functor() {
+#[tokio::test]
+async fn undefined_last_error_functor() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -595,15 +606,16 @@ fn undefined_last_error_functor() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let expected_error = CatchableError::LengthFunctorAppliedToNotArray(no_error_object());
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
-fn undefined_error_functor() {
+#[tokio::test]
+async fn undefined_error_functor() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -617,16 +629,17 @@ fn undefined_error_functor() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let error_object = json!({"error_code":10001, "instruction":"match 1 2","message":"compared values do not match"});
     let expected_error = CatchableError::LengthFunctorAppliedToNotArray(error_object.into());
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
-fn undefined_error_peerid() {
+#[tokio::test]
+async fn undefined_error_peerid() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -640,8 +653,9 @@ fn undefined_error_peerid() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let value = json!({
         "error_code":10001,
@@ -655,8 +669,8 @@ fn undefined_error_peerid() {
     assert!(check_error(&result.last().unwrap(), expected_error));
 }
 
-#[test]
-fn undefined_last_error_instruction() {
+#[tokio::test]
+async fn undefined_last_error_instruction() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -670,8 +684,9 @@ fn undefined_last_error_instruction() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
         value: no_error_object(),
@@ -680,8 +695,8 @@ fn undefined_last_error_instruction() {
     assert!(check_error(&&result.last().unwrap(), expected_error));
 }
 
-#[test]
-fn undefined_last_error_peer_id() {
+#[tokio::test]
+async fn undefined_last_error_peer_id() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -694,8 +709,9 @@ fn undefined_last_error_peer_id() {
     "#
     );
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let expected_error = CatchableError::LambdaApplierError(LambdaError::ValueNotContainSuchField {
         value: no_error_object(),

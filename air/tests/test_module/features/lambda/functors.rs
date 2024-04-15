@@ -21,8 +21,8 @@ use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 use std::cell::RefCell;
 
-#[test]
-fn length_functor_for_array_scalar() {
+#[tokio::test]
+async fn length_functor_for_array_scalar() {
     let script = r#"
         (seq
             (call %init_peer_id% ("" "") [] variable) ; ok = [1,1,1]
@@ -32,9 +32,10 @@ fn length_functor_for_array_scalar() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result);
 
     let expected_trace = vec![
@@ -44,8 +45,8 @@ fn length_functor_for_array_scalar() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn length_functor_for_non_array_scalar() {
+#[tokio::test]
+async fn length_functor_for_non_array_scalar() {
     let result_jvalue = "string_jvalue";
     let script = format!(
         r#"
@@ -58,17 +59,18 @@ fn length_functor_for_non_array_scalar() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     check_error(
         &result,
         CatchableError::LengthFunctorAppliedToNotArray(result_jvalue.into()),
     );
 }
 
-#[test]
-fn length_functor_for_stream() {
+#[tokio::test]
+async fn length_functor_for_stream() {
     let script = r#"
         (seq
             (seq
@@ -83,9 +85,10 @@ fn length_functor_for_stream() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result);
 
     let init_peer_id = executor.resolve_name(init_peer_name).to_string();
@@ -113,8 +116,8 @@ fn length_functor_for_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn length_functor_for_empty_stream() {
+#[tokio::test]
+async fn length_functor_for_empty_stream() {
     let script = r#"
         (new $stream
             (seq
@@ -126,9 +129,10 @@ fn length_functor_for_empty_stream() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result);
 
     let init_peer_id = executor.resolve_name(init_peer_name).to_string();
@@ -143,8 +147,8 @@ fn length_functor_for_empty_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn length_functor_for_canon_stream() {
+#[tokio::test]
+async fn length_functor_for_canon_stream() {
     let script = r#"
         (seq
             (seq
@@ -159,9 +163,10 @@ fn length_functor_for_canon_stream() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result);
 
     let init_peer_id = executor.resolve_name(init_peer_name).to_string();
@@ -180,8 +185,8 @@ fn length_functor_for_canon_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn length_functor_for_empty_canon_stream() {
+#[tokio::test]
+async fn length_functor_for_empty_canon_stream() {
     let script = r#"
         (new $stream
             (seq
@@ -193,9 +198,10 @@ fn length_functor_for_empty_canon_stream() {
 
     let init_peer_name = "init_peer_id";
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), script)
+        .await
         .expect("invalid test AIR script");
 
-    let result = executor.execute_one(init_peer_name).unwrap();
+    let result = executor.execute_one(init_peer_name).await.unwrap();
     let actual_trace = trace_from_result(&result);
 
     let init_peer_id = executor.resolve_name(init_peer_name).to_string();
@@ -209,18 +215,19 @@ fn length_functor_for_empty_canon_stream() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn functor_dont_influence_tetraplet() {
+#[tokio::test]
+async fn functor_dont_influence_tetraplet() {
     let set_variable_peer_id = "set_variable_peer_id";
     let set_variable_peer_result = json!({"field": [1,2,3]});
     let mut set_variable_vm = create_avm(
         set_variable_call_service(set_variable_peer_result.clone()),
         set_variable_peer_id,
-    );
+    )
+    .await;
 
     let tetraplet_catcher_peer_id = "tetraplet_catcher_peer_id";
     let (call_service, actual_tetraplet) = tetraplet_host_function(echo_call_service());
-    let mut tetraplet_catcher_vm = create_avm(call_service, tetraplet_catcher_peer_id);
+    let mut tetraplet_catcher_vm = create_avm(call_service, tetraplet_catcher_peer_id).await;
 
     let script = format!(
         r#"

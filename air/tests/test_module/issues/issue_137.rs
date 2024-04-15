@@ -16,18 +16,18 @@
 
 use air_test_utils::prelude::*;
 
-#[test]
+#[tokio::test]
 // https://github.com/fluencelabs/aquavm/issues/137
-fn issue_137() {
+async fn issue_137() {
     let initiator_id = "initiator_id";
-    let mut initiator = create_avm(unit_call_service(), initiator_id);
+    let mut initiator = create_avm(unit_call_service(), initiator_id).await;
     let node_1_id = "node_1_id";
-    let mut node_1 = create_avm(unit_call_service(), node_1_id);
+    let mut node_1 = create_avm(unit_call_service(), node_1_id).await;
     let node_2_id = "node_2_id";
-    let mut node_2 = create_avm(unit_call_service(), node_2_id);
+    let mut node_2 = create_avm(unit_call_service(), node_2_id).await;
     let node_3_id = "node_3_id";
     let node_4_id = "node_4_id";
-    let mut node_4 = create_avm(unit_call_service(), node_4_id);
+    let mut node_4 = create_avm(unit_call_service(), node_4_id).await;
 
     let script = format!(
         r#"

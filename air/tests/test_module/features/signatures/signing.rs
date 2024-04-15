@@ -20,8 +20,10 @@ use air_test_utils::key_utils::derive_dummy_keypair;
 use air_test_utils::prelude::*;
 use air_test_utils::test_runner::TestRunParameters;
 
-#[test]
-fn test_signature_empty() {
+use futures::stream::StreamExt;
+
+#[tokio::test]
+async fn test_signature_empty() {
     let script = "(null)";
     let init_peer_name = "init_peer_id";
     let (keypair, _) = derive_dummy_keypair(init_peer_name);
@@ -32,8 +34,9 @@ fn test_signature_empty() {
         vec![PeerId::from(init_peer_name)].into_iter(),
         script,
     )
+    .await
     .unwrap();
-    let res = exec.execute_one(init_peer_name).unwrap();
+    let res = exec.execute_one(init_peer_name).await.unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
 
     let data = borsh::to_vec(&(vec![""; 0], "")).unwrap();
@@ -44,8 +47,8 @@ fn test_signature_empty() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
-fn test_signature_call_var() {
+#[tokio::test]
+async fn test_signature_call_var() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
 
@@ -54,10 +57,16 @@ fn test_signature_call_var() {
         (call "{init_peer_name}" ("" "") [] var) ; ok = "ok"
         "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
+    let exec_results = exec
+        .execution_iter(init_peer_id.as_str())
+        .unwrap()
+        .collect::<Vec<_>>()
+        .await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -72,18 +81,20 @@ fn test_signature_call_var() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
-fn test_signature_call_stream() {
+#[tokio::test]
+async fn test_signature_call_stream() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
         r#"
         (call "{init_peer_name}" ("" "") [] $var) ; ok = "ok"
         "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -100,18 +111,20 @@ fn test_signature_call_stream() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
-fn test_signature_call_unused() {
+#[tokio::test]
+async fn test_signature_call_unused() {
     let init_peer_name = "init_peer_id";
     let air_script = format!(
         r#"
         (call "{init_peer_name}" ("" "") []) ; ok = "ok"
         "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let res = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -124,8 +137,8 @@ fn test_signature_call_unused() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
-fn test_signature_call_merged() {
+#[tokio::test]
+async fn test_signature_call_merged() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
 
@@ -140,11 +153,12 @@ fn test_signature_call_merged() {
     "#
     );
 
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
-    let _ = exec.execute_one(init_peer_name).unwrap();
-    let _ = exec.execute_one(other_peer_name).unwrap();
-    let res2 = exec.execute_one(init_peer_name).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
+    let _ = exec.execute_one(init_peer_name).await.unwrap();
+    let _ = exec.execute_one(other_peer_name).await.unwrap();
+    let res2 = exec.execute_one(init_peer_name).await.unwrap();
     let data2 = data_from_result(&res2);
 
     let expected_call_state0 = scalar!("res0", peer_name = init_peer_name, service = "..0");
@@ -163,8 +177,8 @@ fn test_signature_call_merged() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data2.signatures);
 }
 
-#[test]
-fn test_signature_call_twice() {
+#[tokio::test]
+async fn test_signature_call_twice() {
     // Test that if some CID appears twice in the call result, it is accounted twice.
     let init_peer_name = "init_peer_id";
 
@@ -180,10 +194,16 @@ fn test_signature_call_twice() {
                     (next i))))
         "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let res = exec.execution_iter(init_peer_id.as_str()).unwrap().last().unwrap();
+    let exec_results = exec
+        .execution_iter(init_peer_id.as_str())
+        .unwrap()
+        .collect::<Vec<_>>()
+        .await;
+    let res = exec_results.last().unwrap();
     assert_eq!(res.ret_code, 0, "{:?}", res);
     let data = data_from_result(&res);
 
@@ -205,8 +225,8 @@ fn test_signature_call_twice() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", data.signatures);
 }
 
-#[test]
-fn test_signature_canon_basic() {
+#[tokio::test]
+async fn test_signature_canon_basic() {
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
 
@@ -222,11 +242,13 @@ fn test_signature_canon_basic() {
              (canon "{init_peer_name}" $stream #canon)))
     "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result = scalar!(
         json!([1, 2, 3]),
@@ -278,8 +300,8 @@ fn test_signature_canon_basic() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
 }
 
-#[test]
-fn test_signature_canon_merge() {
+#[tokio::test]
+async fn test_signature_canon_merge() {
     let init_peer_name = "init_peer_id";
     let other_peer_name = "other_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -300,14 +322,16 @@ fn test_signature_canon_merge() {
               (call "{init_peer_name}" ("" "") []))) ; ok = "ok"
     "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    exec.execute_all(init_peer_name);
-    exec.execute_one(other_peer_name);
+    exec.execute_all(init_peer_name).await;
+    exec.execute_one(other_peer_name).await;
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result = scalar!(
         json!([1, 2, 3]),
@@ -359,8 +383,8 @@ fn test_signature_canon_merge() {
     assert_eq!(signature, Some(&expected_signature), "{:?}", last_data);
 }
 
-#[test]
-fn test_signature_canon_result() {
+#[tokio::test]
+async fn test_signature_canon_result() {
     // this test checks that call result in canon doesn't lead to repeadted accounting of the call result
     let init_peer_name = "init_peer_id";
     let (keypair, init_peer_id) = derive_dummy_keypair(init_peer_name);
@@ -379,11 +403,13 @@ fn test_signature_canon_result() {
               (canon "{init_peer_name}" $stream #canon)))
     "#
     );
-    let exec =
-        AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script).unwrap();
+    let exec = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(init_peer_name), &air_script)
+        .await
+        .unwrap();
 
-    let last_result = exec.execution_iter(init_peer_name).unwrap().last().unwrap();
-    let last_data = data_from_result(&last_result);
+    let exec_results = exec.execution_iter(init_peer_name).unwrap().collect::<Vec<_>>().await;
+    let res = exec_results.last().unwrap();
+    let last_data = data_from_result(&res);
 
     let expected_call_result1 = scalar!(
         json!([1, 2, 3]),

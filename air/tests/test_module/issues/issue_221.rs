@@ -20,9 +20,9 @@ use air_test_utils::key_utils::at;
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/221
-fn issue_221() {
+async fn issue_221() {
     let peer_1_name = "peer_1_id";
     let peer_2_name = "peer_2_id";
     let join_1_name = "join_1_id";
@@ -77,18 +77,19 @@ fn issue_221() {
         vec![peer_1_name, peer_2_name].into_iter().map(Into::into),
         &script,
     )
+    .await
     .expect("Invalid annotated AIR script");
 
     let peer_1_id = at(peer_1_name);
     let peer_2_id = at(peer_2_name);
     let join_1_id = at(join_1_name);
 
-    let _result = executor.execute_one(set_variable_name).unwrap();
-    let _peer_1_result = executor.execute_one(peer_1_name).unwrap();
-    let _peer_2_result = executor.execute_one(peer_2_name).unwrap();
+    let _result = executor.execute_one(set_variable_name).await.unwrap();
+    let _peer_1_result = executor.execute_one(peer_1_name).await.unwrap();
+    let _peer_2_result = executor.execute_one(peer_2_name).await.unwrap();
 
-    let _join_1_result = executor.execute_one(join_1_name).unwrap();
-    let join_1_result = executor.execute_one(join_1_name).unwrap(); // before 0.20.9 it fails here
+    let _join_1_result = executor.execute_one(join_1_name).await.unwrap();
+    let join_1_result = executor.execute_one(join_1_name).await.unwrap(); // before 0.20.9 it fails here
     let actual_trace = trace_from_result(&join_1_result);
     let expected_trace = ExecutionTrace::from(vec![
         scalar!(

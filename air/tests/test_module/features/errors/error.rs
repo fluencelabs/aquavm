@@ -19,8 +19,8 @@ use air::ExecutionCidState;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
-#[test]
-fn fail_with_rebubble_error() {
+#[tokio::test]
+async fn fail_with_rebubble_error() {
     let peer_id = "peer_id";
     let script = r#"
     (seq
@@ -37,8 +37,9 @@ fn fail_with_rebubble_error() {
     .to_string();
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(peer_id).unwrap();
+    let result = executor.execute_all(peer_id).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
@@ -72,8 +73,8 @@ fn fail_with_rebubble_error() {
     assert_eq!(actual_trace, expected_trace,);
 }
 
-#[test]
-fn rebubble_error_from_xor_right_branch() {
+#[tokio::test]
+async fn rebubble_error_from_xor_right_branch() {
     let peer_id = "peer_id";
     let script = r#"
     (seq
@@ -96,8 +97,9 @@ fn rebubble_error_from_xor_right_branch() {
     .to_string();
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(peer_id).unwrap();
+    let result = executor.execute_all(peer_id).await.unwrap();
     let actual_trace = trace_from_result(&result.last().unwrap());
 
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();

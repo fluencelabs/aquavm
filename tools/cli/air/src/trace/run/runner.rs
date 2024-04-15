@@ -19,13 +19,14 @@ use avm_interface::CallResults;
 use avm_server::AVMRuntimeLimits;
 use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
+use futures::future::LocalBoxFuture;
 
 use std::error::Error as StdError;
 
 pub(crate) trait AirRunner {
     #[allow(clippy::too_many_arguments)]
-    fn call_tracing(
-        &mut self,
+    fn call_tracing<'this>(
+        &'this mut self,
         air: String,
         prev_data: Vec<u8>,
         data: Vec<u8>,
@@ -38,11 +39,14 @@ pub(crate) trait AirRunner {
         tracing_output_mode: u8,
         key_pair: &KeyPair,
         particle_id: String,
-    ) -> eyre::Result<RawAVMOutcome>;
+    ) -> LocalBoxFuture<'this, eyre::Result<RawAVMOutcome>>;
 }
 
 pub(crate) trait DataToHumanReadable {
-    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>>;
+    fn to_human_readable<'this>(
+        &'this mut self,
+        data: Vec<u8>,
+    ) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>>;
 }
 
 /// This struct is used to set limits for the test runner creating AVMRunner.

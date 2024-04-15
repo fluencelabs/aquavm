@@ -21,10 +21,14 @@ use air_test_utils::{
     RawAVMOutcome,
 };
 
+use futures::stream::StreamExt;
+
+use std::pin::pin;
 use std::{
     borrow::Borrow,
     cell::RefCell,
     collections::{HashMap, VecDeque},
+    future::Future,
     hash::Hash,
     ops::Deref,
     rc::Rc,
@@ -83,7 +87,7 @@ impl ExecutionQueue {
         network: Rc<Network<R>>,
         test_parameters: &'ctx TestRunParameters,
         peer_id: &Id,
-    ) -> Option<impl Iterator<Item = RawAVMOutcome> + 'ctx>
+    ) -> Option<impl futures::stream::Stream<Item = RawAVMOutcome> + 'ctx>
     where
         PeerId: Borrow<Id> + for<'a> From<&'a Id>,
         Id: Eq + Hash + ?Sized,
@@ -91,12 +95,12 @@ impl ExecutionQueue {
         let peer_env = network.get_named_peer_env(peer_id);
 
         peer_env.map(|peer_env_cell| {
-            std::iter::from_fn(move || {
+            futures::stream::poll_fn(move |ctx| {
                 let mut peer_env = peer_env_cell.borrow_mut();
-                peer_env
-                    .execute_once(air, &network, self, test_parameters)
-                    .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
+                let x = pin!(peer_env.execute_once(air, &network, self, test_parameters)).poll(ctx);
+                x
             })
+            .map(|r| r.unwrap_or_else(|err| panic!("VM call failed: {}", err)))
         })
     }
 

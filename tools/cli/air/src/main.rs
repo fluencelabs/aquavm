@@ -51,12 +51,13 @@ enum Subcommand {
     Stats(self::trace::stats::Args),
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
     match args.subcommand {
         Subcommand::Beautify(args) => self::beautify::beautify(args)?,
-        Subcommand::Data(args) => self::data::to_human_readable_data(args)?,
-        Subcommand::Run(args) => self::trace::run::run(args)?,
+        Subcommand::Data(args) => self::data::to_human_readable_data(args).await?,
+        Subcommand::Run(args) => self::trace::run::run(args).await?,
         Subcommand::Stats(args) => self::trace::stats::stats(args)?,
     }
     Ok(())

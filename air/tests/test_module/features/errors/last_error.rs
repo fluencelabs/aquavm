@@ -26,6 +26,8 @@ use air::NO_ERROR_MESSAGE;
 use air_test_framework::AirScriptExecutor;
 use air_test_utils::prelude::*;
 
+use futures::FutureExt;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -34,25 +36,30 @@ type ArgToCheck<T> = Rc<RefCell<Option<T>>>;
 fn create_check_service_closure(
     args_to_check: ArgToCheck<serde_json::Value>,
     tetraplets_to_check: ArgToCheck<Vec<Vec<SecurityTetraplet>>>,
-) -> CallServiceClosure {
-    Box::new(move |params| -> CallServiceResult {
-        let mut call_args: Vec<serde_json::Value> = params.arguments;
+) -> CallServiceClosure<'static> {
+    Box::new(move |params| {
+        let args_to_check = args_to_check.clone();
+        let tetraplets_to_check = tetraplets_to_check.clone();
+        async move {
+            let mut call_args: Vec<serde_json::Value> = params.arguments;
 
-        let result = json!(params.tetraplets);
-        *args_to_check.borrow_mut() = Some(call_args.remove(0));
-        *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
+            let result = json!(params.tetraplets);
+            *args_to_check.borrow_mut() = Some(call_args.remove(0));
+            *tetraplets_to_check.borrow_mut() = Some(params.tetraplets);
 
-        CallServiceResult::ok(result)
+            CallServiceResult::ok(result)
+        }
+        .boxed_local()
     })
 }
 
-#[test]
-fn last_error_tetraplets() {
+#[tokio::test]
+async fn last_error_tetraplets() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id).await;
 
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
@@ -61,7 +68,8 @@ fn last_error_tetraplets() {
     let mut local_vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         local_peer_id,
-    );
+    )
+    .await;
 
     let script = format!(
         include_str!("scripts/create_service_with_xor.air"),
@@ -91,16 +99,16 @@ fn last_error_tetraplets() {
     assert_eq!(&(*tetraplets.borrow()).as_ref().unwrap()[0][0].lens, "");
 }
 
-#[test]
-fn not_clear_last_error_in_match() {
+#[tokio::test]
+async fn not_clear_last_error_in_match() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -126,16 +134,16 @@ fn not_clear_last_error_in_match() {
     assert_eq!(actual_value, no_error_object());
 }
 
-#[test]
-fn not_clear_last_error_in_mismatch() {
+#[tokio::test]
+async fn not_clear_last_error_in_mismatch() {
     let set_variable_peer_id = "set_variable";
-    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id);
+    let mut set_variable_vm = create_avm(unit_call_service(), set_variable_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -161,16 +169,16 @@ fn not_clear_last_error_in_mismatch() {
     assert_eq!(actual_value, no_error_object());
 }
 
-#[test]
-fn track_current_peer_id() {
+#[tokio::test]
+async fn track_current_peer_id() {
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id);
+    let mut local_vm = create_avm(create_check_service_closure(args.clone(), tetraplets), local_peer_id).await;
 
     let script = format!(
         r#"
@@ -189,13 +197,13 @@ fn track_current_peer_id() {
     assert_eq!(last_error.get("peer_id").unwrap(), fallible_peer_id);
 }
 
-#[test]
-fn variable_names_shown_in_error() {
+#[tokio::test]
+async fn variable_names_shown_in_error() {
     let set_variable_vm_peer_id = "set_variable_vm_peer_id";
-    let mut set_variable_vm = create_avm(set_variable_call_service(json!(1u32)), set_variable_vm_peer_id);
+    let mut set_variable_vm = create_avm(set_variable_call_service(json!(1u32)), set_variable_vm_peer_id).await;
 
     let echo_vm_peer_id = "echo_vm_peer_id";
-    let mut echo_vm = create_avm(echo_call_service(), echo_vm_peer_id);
+    let mut echo_vm = create_avm(echo_call_service(), echo_vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -217,15 +225,16 @@ fn variable_names_shown_in_error() {
     assert_eq!(trace[1.into()], unused!(msg, peer = echo_vm_peer_id, args = vec![msg]));
 }
 
-#[test]
-fn non_initialized_last_error() {
+#[tokio::test]
+async fn non_initialized_last_error() {
     let vm_peer_id = "vm_peer_id";
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
     let mut vm = create_avm(
         create_check_service_closure(args.clone(), tetraplets.clone()),
         vm_peer_id,
-    );
+    )
+    .await;
 
     let script = format!(
         r#"
@@ -249,10 +258,10 @@ fn non_initialized_last_error() {
     );
 }
 
-#[test]
-fn access_last_error_by_not_exists_field() {
+#[tokio::test]
+async fn access_last_error_by_not_exists_field() {
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id).await;
 
     let local_peer_id = "local_peer_id";
 
@@ -282,16 +291,16 @@ fn access_last_error_by_not_exists_field() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn last_error_with_par_one_subgraph_failed() {
+#[tokio::test]
+async fn last_error_with_par_one_subgraph_failed() {
     let fallible_peer_id = "fallible_peer_id";
     let fallible_call_service_name = "fallible_call_service";
-    let mut fallible_vm = create_avm(fallible_call_service(fallible_call_service_name), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service(fallible_call_service_name), fallible_peer_id).await;
 
     let vm_peer_id = "local_peer_id";
     let args = Rc::new(RefCell::new(None));
     let tetraplets = Rc::new(RefCell::new(None));
-    let mut vm = create_avm(create_check_service_closure(args.clone(), tetraplets), vm_peer_id);
+    let mut vm = create_avm(create_check_service_closure(args.clone(), tetraplets), vm_peer_id).await;
     let script = format!(
         r#"
         (seq
@@ -317,10 +326,10 @@ fn last_error_with_par_one_subgraph_failed() {
     assert_eq!(actual_value, expected_value);
 }
 
-#[test]
-fn fail_with_scalar_rebubble_error() {
+#[tokio::test]
+async fn fail_with_scalar_rebubble_error() {
     let fallible_peer_id = "fallible_peer_id";
-    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id);
+    let mut fallible_vm = create_avm(fallible_call_service("fallible_call_service"), fallible_peer_id).await;
 
     let script = format!(
         r#"
@@ -347,13 +356,13 @@ fn fail_with_scalar_rebubble_error() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_scalar_from_call() {
+#[tokio::test]
+async fn fail_with_scalar_from_call() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
     let error_message = "error message";
     let service_result = json!({"error_code": error_code, "message": error_message});
-    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -376,13 +385,13 @@ fn fail_with_scalar_from_call() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_scalar_with_lambda_from_call() {
+#[tokio::test]
+async fn fail_with_scalar_with_lambda_from_call() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
     let error_message = "error message";
     let service_result = json!({"error": {"error_code": error_code, "message": error_message}});
-    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -405,12 +414,12 @@ fn fail_with_scalar_with_lambda_from_call() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_scalar_from_call_not_enough_fields() {
+#[tokio::test]
+async fn fail_with_scalar_from_call_not_enough_fields() {
     let vm_peer_id = "vm_peer_id";
     let error_code = 1337;
     let service_result = json!({ "error_code": error_code });
-    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -430,11 +439,11 @@ fn fail_with_scalar_from_call_not_enough_fields() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_scalar_from_call_not_right_type() {
+#[tokio::test]
+async fn fail_with_scalar_from_call_not_right_type() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!([]);
-    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -452,11 +461,11 @@ fn fail_with_scalar_from_call_not_right_type() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn fail_with_scalar_from_call_field_not_right_type() {
+#[tokio::test]
+async fn fail_with_scalar_from_call_field_not_right_type() {
     let vm_peer_id = "vm_peer_id";
     let service_result = json!({"error_code": "error_code", "message": "error message"});
-    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id);
+    let mut vm = create_avm(set_variable_call_service(service_result.clone()), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -477,10 +486,10 @@ fn fail_with_scalar_from_call_field_not_right_type() {
     assert!(check_error(&result, expected_error));
 }
 
-#[test]
-fn last_error_with_match() {
+#[tokio::test]
+async fn last_error_with_match() {
     let vm_peer_id = "vm_peer_id";
-    let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id);
+    let mut vm = create_avm(fallible_call_service("fallible_call_service"), vm_peer_id).await;
 
     let script = format!(
         r#"
@@ -499,8 +508,8 @@ fn last_error_with_match() {
     assert_eq!(trace.len(), 2); // if match works there will be 2 calls in a resulted trace
 }
 
-#[test]
-fn undefined_last_error_errcode() {
+#[tokio::test]
+async fn undefined_last_error_errcode() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -509,8 +518,9 @@ fn undefined_last_error_errcode() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
     let mut cid_state = ExecutionCidState::new();
@@ -527,8 +537,8 @@ fn undefined_last_error_errcode() {
     assert_eq!(actual_trace, expected_trace);
 }
 
-#[test]
-fn undefined_last_error_msg_errcode() {
+#[tokio::test]
+async fn undefined_last_error_msg_errcode() {
     let local_peer_id = "local_peer_id";
     let script = format!(
         r#"
@@ -537,8 +547,9 @@ fn undefined_last_error_msg_errcode() {
     );
 
     let executor = AirScriptExecutor::from_annotated(TestRunParameters::from_init_peer_id(local_peer_id), &script)
+        .await
         .expect("invalid test AIR script");
-    let result = executor.execute_all(local_peer_id).unwrap();
+    let result = executor.execute_all(local_peer_id).await.unwrap();
 
     let actual_trace = trace_from_result(&result.last().unwrap());
     let mut cid_state = ExecutionCidState::new();

@@ -24,7 +24,7 @@ use air_test_utils::{
 use fluence_keypair::KeyFormat;
 
 /// Checking that other peers' key algorithms are valid.
-#[test]
+#[tokio::test]
 // ignored for a while until we find an easy way to create "incorrect" rkyv data;
 //
 // n.b.: cfg(any()) disables compilation
@@ -74,7 +74,7 @@ fn test_banned_signature() {
 
     let current_data = data_env.serialize().unwrap();
 
-    let mut avm = create_avm(unit_call_service(), "other_peer_id");
+    let mut avm = create_avm(unit_call_service(), "other_peer_id").await;
     let res = avm
         .call(
             air_script,
@@ -82,6 +82,7 @@ fn test_banned_signature() {
             current_data,
             TestRunParameters::from_init_peer_id("init_peer_fake_id"),
         )
+        .await
         .unwrap();
 
     assert_error_eq!(
@@ -94,14 +95,15 @@ fn test_banned_signature() {
 }
 
 /// Checking that local key is valid.
-#[test]
-fn test_banned_signing_key() {
+#[tokio::test]
+async fn test_banned_signing_key() {
     let air_script = "(null)";
     let bad_algo_keypair = fluence_keypair::KeyPair::generate_secp256k1();
 
-    let mut avm = create_avm_with_key::<NativeAirRunner>(bad_algo_keypair, unit_call_service(), <_>::default());
+    let mut avm = create_avm_with_key::<NativeAirRunner>(bad_algo_keypair, unit_call_service(), <_>::default()).await;
     let res = avm
         .call(air_script, "", "", TestRunParameters::from_init_peer_id("init_peer_id"))
+        .await
         .unwrap();
 
     assert_error_eq!(

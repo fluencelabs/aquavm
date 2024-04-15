@@ -17,9 +17,9 @@
 use air_test_utils::prelude::*;
 use pretty_assertions::assert_eq;
 
-#[test]
+#[tokio::test]
 // test for github.com/fluencelabs/aquavm/issues/222
-fn issue_222() {
+async fn issue_222() {
     let other_id = "other_id";
     let other_1_id = "other_1";
     let other_2_id = "other_2";
@@ -38,9 +38,9 @@ fn issue_222() {
     "#
     );
 
-    let mut other_id_vm = create_avm(echo_call_service(), "other_id");
-    let mut other_1_vm = create_avm(set_variable_call_service(json!([1])), "other_1");
-    let mut other_2_vm = create_avm(set_variable_call_service(json!([2])), "other_2");
+    let mut other_id_vm = create_avm(echo_call_service(), "other_id").await;
+    let mut other_1_vm = create_avm(set_variable_call_service(json!([1])), "other_1").await;
+    let mut other_2_vm = create_avm(set_variable_call_service(json!([2])), "other_2").await;
 
     let result = checked_call_vm!(other_id_vm, <_>::default(), &air_script, "", "");
     let other_1_result = checked_call_vm!(other_1_vm, <_>::default(), &air_script, "", result.data.clone());

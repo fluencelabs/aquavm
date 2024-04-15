@@ -23,6 +23,8 @@ use air_interpreter_interface::RunParameters;
 use avm_interface::raw_outcome::RawAVMOutcome;
 use avm_server::AquaVMRuntimeLimits;
 use fluence_keypair::KeyPair;
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
 
 use std::error::Error as StdError;
 
@@ -31,8 +33,8 @@ pub(crate) struct NativeAvmRunner {
 }
 
 impl AirRunner for NativeAvmRunner {
-    fn call_tracing(
-        &mut self,
+    fn call_tracing<'this>(
+        &'this mut self,
         air: String,
         prev_data: Vec<u8>,
         data: Vec<u8>,
@@ -46,51 +48,58 @@ impl AirRunner for NativeAvmRunner {
         _tracing_output_mode: u8,
         keypair: &KeyPair,
         particle_id: String,
-    ) -> eyre::Result<RawAVMOutcome> {
-        use air_interpreter_sede::ToSerialized;
-        use avm_interface::into_raw_result;
+    ) -> LocalBoxFuture<'this, eyre::Result<RawAVMOutcome>> {
+        let keypair = keypair.clone();
+        async move {
+            use air_interpreter_sede::ToSerialized;
+            use avm_interface::into_raw_result;
 
-        // some inner parts transformations
-        let raw_call_results = into_raw_result(call_results);
-        let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
+            // some inner parts transformations
+            let raw_call_results = into_raw_result(call_results);
+            let raw_call_results = CallResultsRepr.serialize(&raw_call_results).unwrap();
 
-        let key_format = keypair.key_format().into();
-        let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
-        let AquaVMRuntimeLimits {
-            air_size_limit,
-            particle_size_limit,
-            call_result_size_limit,
-            hard_limit_enabled,
-        } = self.aquavm_runtime_limits;
-
-        let outcome = air::execute_air(
-            air,
-            prev_data,
-            data,
-            RunParameters {
-                init_peer_id,
-                current_peer_id,
-                timestamp,
-                ttl,
-                key_format,
-                secret_key_bytes,
-                particle_id,
+            let key_format = keypair.key_format().into();
+            let secret_key_bytes = keypair.secret().expect("Failed to get secret key");
+            let AquaVMRuntimeLimits {
                 air_size_limit,
                 particle_size_limit,
                 call_result_size_limit,
                 hard_limit_enabled,
-            },
-            raw_call_results,
-        );
-        let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+            } = self.aquavm_runtime_limits;
 
-        Ok(outcome)
+            let outcome = air::execute_air(
+                air,
+                prev_data,
+                data,
+                RunParameters {
+                    init_peer_id,
+                    current_peer_id,
+                    timestamp,
+                    ttl,
+                    key_format,
+                    secret_key_bytes,
+                    particle_id,
+                    air_size_limit,
+                    particle_size_limit,
+                    call_result_size_limit,
+                    hard_limit_enabled,
+                },
+                raw_call_results,
+            );
+            let outcome = RawAVMOutcome::from_interpreter_outcome(outcome)?;
+
+            Ok(outcome)
+        }
+        .boxed_local()
     }
 }
 
 impl DataToHumanReadable for NativeAvmRunner {
-    fn to_human_readable(&mut self, data: Vec<u8>) -> Result<String, Box<dyn StdError>> {
-        air::to_human_readable_data(data)
+    fn to_human_readable<'this>(
+        &'this mut self,
+        data: Vec<u8>,
+    ) -> LocalBoxFuture<'this, Result<String, Box<dyn StdError>>> {
+        async move { air::to_human_readable_data(data) }.boxed_local()
     }
 }
 

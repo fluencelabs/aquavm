@@ -81,41 +81,42 @@ enum Bench {
     Hybrid100MB,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Cli::parse();
 
     let data = match args.bench {
-        Bench::MultipleCids10 => multiple_cids(10),
-        Bench::MultipleCids50 => multiple_cids(50),
-        Bench::MultiplePeers5 => multiple_peers(5),
-        Bench::MultiplePeers8 => multiple_peers(8),
-        Bench::MultiplePeers25 => multiple_peers(25),
-        Bench::MultipleSigs10 => multiple_sigs(10),
-        Bench::MultipleSigs30 => multiple_sigs(30),
-        Bench::MultipleSigs200 => multiple_sigs(200),
-        Bench::Dashboard => dashboard::dashboard(),
-        Bench::NetworkExplore => network_explore::network_explore(),
-        Bench::PopulateMapMultipleKeys => populate_map_multiple_keys(MAX_STREAM_SIZE),
-        Bench::PopulateMapSingleKey => populate_map_single_key(770),
-        Bench::CanonMapMultipleKeys => canon_map_multiple_keys(MAX_STREAM_SIZE),
-        Bench::CanonMapSingleKey => canon_map_single_key(770),
-        Bench::CanonMapScalarMultipleKeys => canon_map_scalar_multiple_keys(MAX_STREAM_SIZE),
-        Bench::CanonMapScalarSingleKey => canon_map_scalar_single_key(770),
-        Bench::CanonMapKeyByLens => canon_map_key_by_lens(770),
-        Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770),
+        Bench::MultipleCids10 => multiple_cids(10).await,
+        Bench::MultipleCids50 => multiple_cids(50).await,
+        Bench::MultiplePeers5 => multiple_peers(5).await,
+        Bench::MultiplePeers8 => multiple_peers(8).await,
+        Bench::MultiplePeers25 => multiple_peers(25).await,
+        Bench::MultipleSigs10 => multiple_sigs(10).await,
+        Bench::MultipleSigs30 => multiple_sigs(30).await,
+        Bench::MultipleSigs200 => multiple_sigs(200).await,
+        Bench::Dashboard => dashboard::dashboard().await,
+        Bench::NetworkExplore => network_explore::network_explore().await,
+        Bench::PopulateMapMultipleKeys => populate_map_multiple_keys(MAX_STREAM_SIZE).await,
+        Bench::PopulateMapSingleKey => populate_map_single_key(770).await,
+        Bench::CanonMapMultipleKeys => canon_map_multiple_keys(MAX_STREAM_SIZE).await,
+        Bench::CanonMapSingleKey => canon_map_single_key(770).await,
+        Bench::CanonMapScalarMultipleKeys => canon_map_scalar_multiple_keys(MAX_STREAM_SIZE).await,
+        Bench::CanonMapScalarSingleKey => canon_map_scalar_single_key(770).await,
+        Bench::CanonMapKeyByLens => canon_map_key_by_lens(770).await,
+        Bench::CanonMapKeyElementByLens => canon_map_key_element_by_lens(770).await,
         Bench::LongData => long_data(),
         Bench::BigValuesData => big_values_data(),
-        Bench::CallRequests500 => calls::call_requests(500),
-        Bench::CallResults500 => calls::call_results(500),
+        Bench::CallRequests500 => calls::call_requests(500).await,
+        Bench::CallResults500 => calls::call_results(500).await,
         Bench::Parser10000_100 => parser_10000_100(),
         Bench::ParserCalls10000_100 => parser_calls(10000, 100),
         Bench::Null => null(),
-        Bench::CallResult100MB => mem_consumption_with_size_in_mb(100),
-        Bench::Lense100MB => mem_consumption_w_lense_with_size_in_mb(100),
-        Bench::Map100MB => mem_consumption_w_map_2_scalar_with_size_in_mb(100),
-        Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100),
+        Bench::CallResult100MB => mem_consumption_with_size_in_mb(100).await,
+        Bench::Lense100MB => mem_consumption_w_lense_with_size_in_mb(100).await,
+        Bench::Map100MB => mem_consumption_w_map_2_scalar_with_size_in_mb(100).await,
+        Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100).await,
         Bench::ParserAir100MB => mem_consumption_air_100mb(2800000, 10),
-        Bench::Hybrid100MB => mem_consumption_hybrid_with_size_in_mb(100),
+        Bench::Hybrid100MB => mem_consumption_hybrid_with_size_in_mb(100).await,
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -228,7 +229,7 @@ pub(crate) struct Data {
     pub(crate) keypair: String,
 }
 
-fn multiple_cids(size: usize) -> Data {
+async fn multiple_cids(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("multiple_cids.air.tmpl"), data = data);
 
@@ -238,10 +239,11 @@ fn multiple_cids(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
-    let cur_res = exec.execute_one("other_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
+    let cur_res = exec.execute_one("other_peer_id").await.unwrap();
 
     assert!(!prev_res.next_peer_pks.is_empty());
 
@@ -271,7 +273,7 @@ fn multiple_cids(size: usize) -> Data {
     }
 }
 
-fn multiple_peers(size: usize) -> Data {
+async fn multiple_peers(size: usize) -> Data {
     let data = (0..size).map(|n| format!(r#"@"p{}""#, n)).join(",");
     let peers: Vec<_> = (0..size).map(|n| format!("p{}", n).into()).collect();
     let air_script = format!(include_str!("multiple_peers.air.tmpl"), data = data);
@@ -282,15 +284,16 @@ fn multiple_peers(size: usize) -> Data {
         peers.clone(),
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     for peer in &peers {
-        exec.execute_one(peer).unwrap();
+        exec.execute_one(peer).await.unwrap();
     }
 
-    let cur_res = exec.execute_one("other_peer_id").unwrap();
+    let cur_res = exec.execute_one("other_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -318,7 +321,7 @@ fn multiple_peers(size: usize) -> Data {
     }
 }
 
-fn multiple_sigs(size: usize) -> Data {
+async fn multiple_sigs(size: usize) -> Data {
     let data = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("multiple_sigs.air.tmpl"), data = data);
 
@@ -328,10 +331,11 @@ fn multiple_sigs(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
-    let cur_res = exec.execute_one("other_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
+    let cur_res = exec.execute_one("other_peer_id").await.unwrap();
 
     assert!(!prev_res.next_peer_pks.is_empty());
 
@@ -361,7 +365,7 @@ fn multiple_sigs(size: usize) -> Data {
     }
 }
 
-fn canon_map_key_by_lens(size: usize) -> Data {
+async fn canon_map_key_by_lens(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("canon_map_key_by_lens.air.tmpl"), data = data);
 
@@ -371,9 +375,10 @@ fn canon_map_key_by_lens(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -402,7 +407,7 @@ fn canon_map_key_by_lens(size: usize) -> Data {
     }
 }
 
-fn canon_map_key_element_by_lens(size: usize) -> Data {
+async fn canon_map_key_element_by_lens(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
         include_str!("canon_map_key_element_by_lens.air.tmpl"),
@@ -416,9 +421,10 @@ fn canon_map_key_element_by_lens(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -447,7 +453,7 @@ fn canon_map_key_element_by_lens(size: usize) -> Data {
     }
 }
 
-fn populate_map_multiple_keys(size: usize) -> Data {
+async fn populate_map_multiple_keys(size: usize) -> Data {
     let sq_root = (size as f64).sqrt() as usize;
     let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
@@ -461,9 +467,10 @@ fn populate_map_multiple_keys(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -492,7 +499,7 @@ fn populate_map_multiple_keys(size: usize) -> Data {
     }
 }
 
-fn populate_map_single_key(size: usize) -> Data {
+async fn populate_map_single_key(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
         include_str!("populate_map_single_key.air.tmpl"),
@@ -505,9 +512,10 @@ fn populate_map_single_key(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -536,7 +544,7 @@ fn populate_map_single_key(size: usize) -> Data {
     }
 }
 
-fn canon_map_multiple_keys(size: usize) -> Data {
+async fn canon_map_multiple_keys(size: usize) -> Data {
     let sq_root = (size as f64).sqrt() as usize;
     let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
@@ -550,9 +558,10 @@ fn canon_map_multiple_keys(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -581,7 +590,7 @@ fn canon_map_multiple_keys(size: usize) -> Data {
     }
 }
 
-fn canon_map_single_key(size: usize) -> Data {
+async fn canon_map_single_key(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(include_str!("canon_map_single_key.air.tmpl"), data = data);
 
@@ -591,9 +600,10 @@ fn canon_map_single_key(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -622,7 +632,7 @@ fn canon_map_single_key(size: usize) -> Data {
     }
 }
 
-fn canon_map_scalar_multiple_keys(size: usize) -> Data {
+async fn canon_map_scalar_multiple_keys(size: usize) -> Data {
     let sq_root = (size as f64).sqrt() as usize;
     let data: String = (0..sq_root).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
@@ -636,9 +646,10 @@ fn canon_map_scalar_multiple_keys(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -667,7 +678,7 @@ fn canon_map_scalar_multiple_keys(size: usize) -> Data {
     }
 }
 
-fn canon_map_scalar_single_key(size: usize) -> Data {
+async fn canon_map_scalar_single_key(size: usize) -> Data {
     let data: String = (0..size).map(|n| format!(r#""val{}""#, n)).join(",");
     let air_script = format!(
         include_str!("canon_map_scalar_single_key.air.tmpl"),
@@ -680,9 +691,10 @@ fn canon_map_scalar_single_key(size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let keypair = exec
         .get_network()
@@ -770,7 +782,7 @@ fn generate_random_data(random_data_size: usize) -> Vec<u8> {
     random_data
 }
 
-fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
+async fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
     let random_data = generate_random_data(data_size);
 
     let air_script = format!(
@@ -785,6 +797,7 @@ fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
     let keypair = exec
@@ -796,7 +809,7 @@ fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
         .get_keypair()
         .clone();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let peer_id: String = exec.resolve_name("other_peer_id").to_string();
     let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
@@ -817,7 +830,7 @@ fn mem_consumption_with_size_in_mb(data_size: usize) -> Data {
     }
 }
 
-fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
+async fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
     let random_data = generate_random_data(data_size);
 
     let air_script = format!(
@@ -832,6 +845,7 @@ fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
     let keypair = exec
@@ -843,7 +857,7 @@ fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
         .get_keypair()
         .clone();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let peer_id: String = exec.resolve_name("other_peer_id").to_string();
     let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
@@ -864,7 +878,7 @@ fn mem_consumption_w_lense_with_size_in_mb(data_size: usize) -> Data {
     }
 }
 
-fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
+async fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
     let random_data = generate_random_data(data_size);
 
     let air_script = format!(
@@ -879,6 +893,7 @@ fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
     let keypair = exec
@@ -890,7 +905,7 @@ fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
         .get_keypair()
         .clone();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let peer_id: String = exec.resolve_name("other_peer_id").to_string();
     let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
@@ -911,7 +926,7 @@ fn mem_consumption_w_map_2_scalar_with_size_in_mb(data_size: usize) -> Data {
     }
 }
 
-fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
+async fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
     let random_data = generate_random_data(data_size);
 
     let air_script = format!(
@@ -926,6 +941,7 @@ fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
     let keypair = exec
@@ -937,7 +953,7 @@ fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
         .get_keypair()
         .clone();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let peer_id: String = exec.resolve_name("other_peer_id").to_string();
     let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
@@ -958,7 +974,7 @@ fn mem_consumption_w_canon_map_with_size_in_mb(data_size: usize) -> Data {
     }
 }
 
-fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
+async fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
     let random_data = generate_random_data(data_size);
 
     let air_script = format!(
@@ -973,6 +989,7 @@ fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
         vec![],
         &air_script,
     )
+    .await
     .unwrap();
 
     let keypair = exec
@@ -984,7 +1001,7 @@ fn mem_consumption_hybrid_with_size_in_mb(data_size: usize) -> Data {
         .get_keypair()
         .clone();
 
-    let prev_res = exec.execute_one("init_peer_id").unwrap();
+    let prev_res = exec.execute_one("init_peer_id").await.unwrap();
 
     let peer_id: String = exec.resolve_name("other_peer_id").to_string();
     let init_peer_id: String = exec.resolve_name("init_peer_id").to_string();
