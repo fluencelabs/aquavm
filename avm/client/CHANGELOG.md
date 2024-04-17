@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.63.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.62.0...avm-client-v0.63.0) (2024-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avm-client:** this fixes the last argument type for WASM module 'invoke' function ([#824](https://github.com/fluencelabs/aquavm/issues/824))
+
+### Bug Fixes
+
+* **avm-client:** this fixes the last argument type for WASM module 'invoke' function ([#824](https://github.com/fluencelabs/aquavm/issues/824)) ([2bffc27](https://github.com/fluencelabs/aquavm/commit/2bffc27a8653bc620ee3eb77443316aa6b7b1c0c))
+
 ## [0.62.0](https://github.com/fluencelabs/aquavm/compare/avm-client-v0.61.0...avm-client-v0.62.0) (2024-02-22)
 
 
