@@ -20,7 +20,7 @@ air-interpreter-sede = { version = "0.1.0", path = "../../../crates/air-lib/inte
 avm-server = { version = "0.38.0", path = "../../../avm/server" }
 air-test-utils = { version = "0.18.0",path = "../../../crates/air-lib/test-utils", optional = true }
 
-clap = { version = "4.4.7", features = ["derive", "env"] }
+clap = { version = "4.5.4", features = ["derive", "env"] }
 eyre = "0.6.11"
 itertools = "0.10.5"
 semver = "1.0.21"
