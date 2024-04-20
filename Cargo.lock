@@ -170,7 +170,7 @@ dependencies = [
  "air-interpreter-cid",
  "borsh 0.10.3",
  "borsh-derive 0.10.3",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "fluence-keypair",
  "rkyv",
  "serde",
@@ -395,7 +395,7 @@ dependencies = [
  "air-utils",
  "aquavm-air-parser",
  "borsh 0.10.3",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "concat-idents",
  "criterion 0.3.6",
  "csv",
@@ -437,7 +437,7 @@ dependencies = [
  "avm-data-store",
  "avm-interface",
  "avm-server",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "clap 4.4.11",
  "eyre",
  "fluence-keypair",
@@ -1068,9 +1068,9 @@ checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
 
 [[package]]
 name = "bs58"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5353f36341f7451062466f0b755b96ac3a9547e4d7f6b70d603fc721a7d7896"
+checksum = "bf88ba1141d185c399bee5288d850d63b8369520c1eafc32a0430b5b6c287bf4"
 dependencies = [
  "tinyvec",
 ]
@@ -2375,7 +2375,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "273ecbe8b6757f46e9d2b61f56ac636f27defa88aebc17a4fd6a7b78bf84cca3"
 dependencies = [
  "asn1_der 0.6.3",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "ed25519-dalek 2.1.0",
  "eyre",
  "lazy_static",
@@ -3167,7 +3167,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "999ec70441b2fb35355076726a6bc466c932e9bdc66f6a11c6c0aa17c7ab9be0"
 dependencies = [
  "asn1_der 0.7.6",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "ed25519-dalek 2.1.0",
  "hkdf",
  "libsecp256k1",
@@ -4098,7 +4098,7 @@ checksum = "b5c2e7c9524308b1b301cca05d875de13b3b20dc8b92e71f3890b380372e4c88"
 dependencies = [
  "base64 0.21.5",
  "borsh 1.1.2",
- "bs58 0.5.0",
+ "bs58 0.5.1",
  "near-account-id 1.0.0",
  "near-gas",
  "near-sdk-macros",
