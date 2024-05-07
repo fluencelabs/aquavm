@@ -214,7 +214,7 @@ impl From<fluence_keypair::Signature> for Signature {
     }
 }
 
-#[derive(borsh_derive::BorshSerialize)]
+#[derive(BorshSerialize)]
 pub(crate) struct SaltedData<'ctx, Data: BorshSerialize>(&'ctx Data, &'ctx str);
 
 impl<'ctx, Data: BorshSerialize> SaltedData<'ctx, Data> {
