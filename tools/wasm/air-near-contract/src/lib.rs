@@ -18,16 +18,13 @@ use air::execute_air;
 use air::RunParameters;
 use air_interpreter_interface::InterpreterOutcome;
 
-use near_sdk::near_bindgen;
-use near_sdk::borsh as borsh;
-use borsh::BorshDeserialize;
-use borsh::BorshSerialize;
+use near_sdk::near;
 
-#[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, Default)]
+#[near(contract_state)]
+#[derive(Default)]
 pub struct Aqua {}
 
-#[near_bindgen]
+#[near]
 impl Aqua {
     #[result_serializer(borsh)]
     pub fn execute_script(
@@ -58,6 +55,6 @@ impl Aqua {
         let params: RunParameters =
             serde_json::from_slice(&params).expect("cannot parse RunParameters");
 
-        execute_air(air, prev_data, cur_data, params, call_results)
+        execute_air(air, prev_data, cur_data, params, call_results.into())
     }
 }
