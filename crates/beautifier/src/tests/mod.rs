@@ -32,7 +32,16 @@ use crate::{beautify, beautify_to_string, BeautifyError};
 fn beautify_valid() {
     let air_script = "(seq (null) (null))";
     let mut buffer = vec![];
-    let res = beautify(air_script, &mut buffer);
+    let res = beautify(air_script, &mut buffer, false);
+    assert!(matches!(res, Ok(())));
+    assert_eq!(std::str::from_utf8(&buffer).unwrap(), "null\nnull\n");
+}
+
+#[test]
+fn beautify_valid_with_patterns() {
+    let air_script = "(seq (null) (null))";
+    let mut buffer = vec![];
+    let res = beautify(air_script, &mut buffer, true);
     assert!(matches!(res, Ok(())));
     assert_eq!(std::str::from_utf8(&buffer).unwrap(), "null\nnull\n");
 }
@@ -41,7 +50,7 @@ fn beautify_valid() {
 fn beautify_invalid() {
     let air_script = "(seq (null))";
     let mut buffer = vec![];
-    let res = beautify(air_script, &mut buffer);
+    let res = beautify(air_script, &mut buffer, false);
     assert!(matches!(res, Err(BeautifyError::Parse(_))));
 }
 

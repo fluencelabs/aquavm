@@ -16,6 +16,7 @@
 
 use air_parser::ast;
 
+use core::fmt;
 use std::fmt::Display;
 use std::io;
 
@@ -82,23 +83,40 @@ pub enum BeautifyError {
 pub struct Beautifier<W: io::Write> {
     output: W,
     indent_step: usize,
+    try_hopon: bool,
 }
 
 impl<W: io::Write> Beautifier<W> {
     /// Beautifier for the output with default indentation step.
+    #[inline]
     pub fn new(output: W) -> Self {
         Self {
             output,
             indent_step: DEFAULT_INDENT_STEP,
+            try_hopon: false,
         }
     }
 
     /// Beautifier for the output with custom indentation step.
+    #[inline]
     pub fn new_with_indent(output: W, indent_step: usize) -> Self {
         Self {
             output,
             indent_step,
+            try_hopon: false,
         }
+    }
+
+    #[inline]
+    /// Enable all patterns in the emited code.
+    pub fn enable_all_patterns(self) -> Self {
+        self.enable_try_hopon()
+    }
+
+    #[inline]
+    pub fn enable_try_hopon(mut self) -> Self {
+        self.try_hopon = true;
+        self
     }
 
     /// Unwrap the Beautifier into the underlying writer.
@@ -253,7 +271,52 @@ impl<W: io::Write> Beautifier<W> {
     }
 
     fn beautify_new(&mut self, new: &ast::New<'_>, indent: usize) -> io::Result<()> {
+        if self.try_hopon {
+            if let Some(hop_on) = try_hopon(new) {
+                return self.beautify_simple(&hop_on, indent);
+            }
+        }
+        // else
         compound!(self, indent, new);
         Ok(())
     }
+}
+
+struct HopOn<'i> {
+    pub peer_id: ast::ResolvableToPeerIdVariable<'i>,
+}
+
+impl Display for HopOn<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "hopon {}", self.peer_id)
+    }
+}
+
+fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
+    let expected_stream_name = &root_new.argument;
+
+    if let (ast::Instruction::New(nested_new), ast::NewArgument::Stream(stream_name)) =
+        (&root_new.instruction, expected_stream_name)
+    {
+        let expected_nested_canon_name = &nested_new.argument;
+
+        if let (ast::Instruction::Canon(canon), ast::NewArgument::CanonStream(nested_canon_name)) =
+            (&nested_new.instruction, expected_nested_canon_name)
+        {
+            // TODO is it a correct comparison?
+            if canon.canon_stream.name == nested_canon_name.name
+                && canon.stream.name == stream_name.name
+            {
+                // TODO actualy, one can make sure that nested_canon_name is not used by peer_id
+                //
+                // while compiler doesn't generate such code, it can be crafted manually;
+                // see `hopon_shadowing_bug` test
+                return Some(HopOn {
+                    peer_id: canon.peer_id.clone(),
+                });
+            }
+        }
+    }
+
+    None
 }
