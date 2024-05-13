@@ -32,7 +32,11 @@ pub use crate::beautifier::{Beautifier, BeautifyError, DEFAULT_INDENT_STEP};
 use std::io;
 
 /// Beautify the `air_script` with default settings to the `output`.
-pub fn beautify(air_script: &str, output: &mut impl io::Write, enable_patterns: bool) -> Result<(), BeautifyError> {
+pub fn beautify(
+    air_script: &str,
+    output: &mut impl io::Write,
+    enable_patterns: bool,
+) -> Result<(), BeautifyError> {
     let mut beautifier = Beautifier::new(output);
     if enable_patterns {
         beautifier = beautifier.enable_all_patterns();
