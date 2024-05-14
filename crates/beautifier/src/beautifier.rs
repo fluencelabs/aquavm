@@ -304,7 +304,6 @@ impl Display for HopOn<'_> {
 /// ```
 /// (hopon peer_id)
 /// ```
-
 fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
     let expected_stream_name = &root_new.argument;
 
@@ -316,7 +315,6 @@ fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
         if let (ast::Instruction::Canon(canon), ast::NewArgument::CanonStream(nested_canon_name)) =
             (&nested_new.instruction, expected_nested_canon_name)
         {
-            // TODO is it a correct comparison?
             if canon.canon_stream.name == nested_canon_name.name
                 && canon.stream.name == stream_name.name
             {
