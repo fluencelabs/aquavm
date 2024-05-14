@@ -474,7 +474,7 @@ fn hopon_nested() {
 //
 // the compiler doesn't generate such code, but it can be crafted manually
 #[test]
-fn hopon_shadowing_bug_todo() {
+fn hopon_shadowing() {
     let script = r#"(new #can (new $ephemeral (new #can (canon #can.$.[0] $ephemeral #can))) )"#;
 
     let mut output = vec![];
@@ -483,6 +483,11 @@ fn hopon_shadowing_bug_todo() {
 
     assert_eq!(
         String::from_utf8(output).unwrap(),
-        "new #can:\n    hopon #can.$.[0]\n",
+        concat!(
+            "new #can:\n",
+            "    new $ephemeral:\n",
+            "        new #can:\n",
+            "            canon #can.$.[0] $ephemeral #can\n"
+        ),
     );
 }
