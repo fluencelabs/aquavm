@@ -296,8 +296,15 @@ impl Display for HopOn<'_> {
 ///
 /// For example:
 /// ```
-/// (new #uniq1_name (new $uniq2_name (canon peer_id $uniq2_name #uniq1_name)))
+/// (new #uniq1_name
+///    (new $uniq2_name
+///       (canon peer_id $uniq2_name #uniq1_name)))
 /// ```
+/// is parsed as a virtual instruction
+/// ```
+/// (hopon peer_id)
+/// ```
+
 fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
     let expected_stream_name = &root_new.argument;
 
