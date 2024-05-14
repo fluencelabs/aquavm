@@ -67,11 +67,12 @@ pub(crate) fn beautify(args: Args) -> Result<()> {
     let air_script = read_script(&args).context("failed to read the input")?;
     let output = build_output(&args).context("failed to open the output")?;
 
-    let mut b = Beautifier::new_with_indent(output, args.indent_step);
+    let mut beautifier = Beautifier::new_with_indent(output, args.indent_step);
 
     if args.patterns {
-        b = b.enable_all_patterns();
+        beautifier = beautifier.enable_all_patterns();
     }
-    b.beautify(&air_script)?;
+
+    beautifier.beautify(&air_script)?;
     Ok(())
 }

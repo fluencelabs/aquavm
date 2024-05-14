@@ -292,6 +292,12 @@ impl Display for HopOn<'_> {
     }
 }
 
+/// Try to parse the `new` instruction and its nested elements as a virtual `hopon` instruction.
+///
+/// For example:
+/// ```
+/// (new #uniq1_name (new $uniq2_name (canon peer_id $uniq2_name #uniq1_name)))
+/// ```
 fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
     let expected_stream_name = &root_new.argument;
 
@@ -310,7 +316,7 @@ fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
                 // TODO actualy, one can make sure that nested_canon_name is not used by peer_id
                 //
                 // while compiler doesn't generate such code, it can be crafted manually;
-                // see `hopon_shadowing_bug` test
+                // see `hopon_shadowing_bug_todo` test
                 return Some(HopOn {
                     peer_id: canon.peer_id.clone(),
                 });
