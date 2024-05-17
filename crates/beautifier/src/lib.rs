@@ -26,6 +26,7 @@
 )]
 
 mod beautifier;
+mod r#virtual;
 
 pub use crate::beautifier::{Beautifier, BeautifyError, DEFAULT_INDENT_STEP};
 
