@@ -14,6 +14,7 @@ name = "air_beautifier"
 path = "src/lib.rs"
 
 [dependencies]
+air-lambda-parser = { version = "0.1.0", path = "../air-lib/lambda/parser" }
 aquavm-air-parser = { version = "0.12.0", path = "../air-lib/air-parser" }
 itertools = "0.10.5"
 thiserror = "1.0.50"

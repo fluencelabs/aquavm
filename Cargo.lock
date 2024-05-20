@@ -59,6 +59,7 @@ dependencies = [
 name = "air-beautifier"
 version = "0.4.3"
 dependencies = [
+ "air-lambda-parser",
  "aquavm-air-parser",
  "itertools",
  "thiserror",

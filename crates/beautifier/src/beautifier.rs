@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::r#virtual::try_hopon;
+use crate::r#virtual::try_hopon;
+use crate::r#virtual::try_if_else;
 
 use air_parser::ast;
 
@@ -85,6 +86,7 @@ pub struct Beautifier<W: io::Write> {
     output: W,
     indent_step: usize,
     try_hopon: bool,
+    try_if_else: bool,
 }
 
 impl<W: io::Write> Beautifier<W> {
@@ -95,6 +97,7 @@ impl<W: io::Write> Beautifier<W> {
             output,
             indent_step: DEFAULT_INDENT_STEP,
             try_hopon: false,
+            try_if_else: false,
         }
     }
 
@@ -105,18 +108,25 @@ impl<W: io::Write> Beautifier<W> {
             output,
             indent_step,
             try_hopon: false,
+            try_if_else: false,
         }
     }
 
     #[inline]
     /// Enable all patterns in the emited code.
     pub fn enable_all_patterns(self) -> Self {
-        self.enable_try_hopon()
+        self.enable_try_hopon().enable_try_if_else()
     }
 
     #[inline]
     pub fn enable_try_hopon(mut self) -> Self {
         self.try_hopon = true;
+        self
+    }
+
+    #[inline]
+    pub fn enable_try_if_else(mut self) -> Self {
+        self.try_if_else = true;
         self
     }
 
@@ -275,6 +285,18 @@ impl<W: io::Write> Beautifier<W> {
         if self.try_hopon {
             if let Some(hop_on) = try_hopon(new) {
                 return self.beautify_simple(&hop_on, indent);
+            }
+        }
+        if self.try_if_else {
+            if let Some(if_else) = try_if_else(new) {
+                multiline!(
+                    self, indent;
+                    "if {}:", if_else.condition;
+                    &if_else.then_body;
+                    "else:";
+                    &if_else.else_body
+                );
+                return Ok(());
             }
         }
         // else

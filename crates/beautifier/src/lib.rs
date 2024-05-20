@@ -24,6 +24,15 @@
     unused_unsafe,
     unreachable_patterns
 )]
+// needed for matching AST trees.
+// https://github.com/rust-lang/rust/issues/29641
+//
+// n.b. box_patterns are intended to be eventually replaced by deref_patterns:
+// https://github.com/rust-lang/rust/issues/29641
+//
+// one can get rid of it by splitting the match into parts;
+// or use https://crates.io/crates/match_deref
+#![feature(box_patterns)]
 
 mod beautifier;
 mod r#virtual;

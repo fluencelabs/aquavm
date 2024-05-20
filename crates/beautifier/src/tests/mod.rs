@@ -25,6 +25,7 @@
 )]
 
 mod beautifier;
+mod if_else;
 
 use crate::{beautify, beautify_to_string, BeautifyError};
 

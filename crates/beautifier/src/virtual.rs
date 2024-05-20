@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-use air_parser::ast;
+mod if_else;
 
-use core::fmt;
-use std::fmt::Display;
+use air_parser::ast;
+pub(crate) use if_else::try_if_else;
+use std::fmt;
 
 /// A virtual `hopon` instruction.
 pub(crate) struct HopOn<'i> {
     pub peer_id: ast::ResolvableToPeerIdVariable<'i>,
 }
 
-impl Display for HopOn<'_> {
+impl fmt::Display for HopOn<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "hopon {}", self.peer_id)
     }
