@@ -19,10 +19,11 @@ use std::fmt;
 use air_parser::ast;
 
 /// A virtual 'if-else' instruction.
+#[derive(Debug)]
 pub(crate) struct IfElse<'i> {
     pub(crate) condition: Condition<'i>,
     pub(crate) then_body: &'i ast::Instruction<'i>,
-    pub(crate) else_body: &'i ast::Instruction<'i>,
+    pub(crate) else_body: Option<&'i ast::Instruction<'i>>,
 }
 
 #[derive(Debug)]
@@ -123,14 +124,105 @@ pub(crate) fn try_if_else<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
             _ => return None,
         };
 
+        let if_else_error = root_scalar;
+        let else_error = nested1_scalar;
+        let if_error = nested2_scalar;
+        let expected_error_handling_xor = || {
+            let air_script = format!(
+                // the new instruction are needed to pass a parser validator; they are removed
+                r#"(new {if_else_error}
+           (new {else_error}
+           (new {if_error}
+           ; real code
+           (seq
+             (seq
+               (ap :error: {else_error})
+               (xor
+                 (match :error:.$.error_code 10001
+                   (ap {if_error} {if_else_error})
+                 )
+                 (ap {else_error} {if_else_error})
+               )
+            )
+            (fail {if_else_error})
+      ))))"#
+            );
+            // parse and convert to string to get consistent whitespace
+            let expected_tree = air_parser::parse(&air_script).expect("invalid internal AIR");
+            let expected_tree = pop_new_from_tree(expected_tree, 3);
+            expected_tree.to_string()
+        };
+        // TODO return a Result here
         if let Some(else_body) =
-            validate_error_handling(error_handling, root_scalar, nested1_scalar, nested2_scalar)
+            validate_error_handling(error_handling, if_error, expected_error_handling_xor)
         {
             // todo!("check free variables");
             Some(IfElse {
                 condition,
                 then_body,
-                else_body,
+                else_body: Some(else_body),
+            })
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+pub(crate) fn try_if_then<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> {
+    let root_scalar = if let ast::NewArgument::Scalar(root_scalar) = &root_new.argument {
+        root_scalar
+    } else {
+        return None;
+    };
+
+    if let ast::Instruction::Xor(box ast::Xor(
+        expected_match_or_mismatch,
+        ast::Instruction::Seq(error_handling),
+    )) = &root_new.instruction
+    {
+        let (condition, then_body) = match expected_match_or_mismatch {
+            ast::Instruction::Match(match_) => {
+                let condition = Condition::Match {
+                    left_value: &match_.left_value,
+                    right_value: &match_.right_value,
+                };
+                let then_branch = &match_.instruction;
+                (condition, then_branch)
+            }
+            ast::Instruction::MisMatch(mismatch) => {
+                let condition = Condition::Mismatch {
+                    left_value: &mismatch.left_value,
+                    right_value: &mismatch.right_value,
+                };
+                let then_branch = &mismatch.instruction;
+                (condition, then_branch)
+            }
+            _ => return None,
+        };
+
+        let if_error = root_scalar;
+        let expected_error_handling_xor = || {
+            let air_script = format!(
+                // the new instruction are needed to pass a parser validator; they are removed
+                r#"(new {if_error}
+                       (fail {if_error})
+                 )"#
+            );
+            // parse and convert to string to get consistent whitespace
+            let expected_tree = air_parser::parse(&air_script).expect("invalid internal AIR");
+            let expected_tree = pop_new_from_tree(expected_tree, 1);
+            expected_tree.to_string()
+        };
+        if let Some(ast::Instruction::Null(ast::Null)) =
+            validate_error_handling(error_handling, root_scalar, expected_error_handling_xor)
+        {
+            // todo!("check free variables");
+            Some(IfElse {
+                condition,
+                then_body,
+                else_body: None,
             })
         } else {
             None
@@ -142,12 +234,11 @@ pub(crate) fn try_if_else<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
 
 fn validate_error_handling<'i>(
     root: &'i ast::Seq<'i>,
-    if_else_error: &ast::Scalar<'i>,
-    else_error: &ast::Scalar<'i>,
-    if_error: &ast::Scalar<'i>,
+    if_error: &ast::Scalar<'_>,
+    expected_error_handling_xor: impl FnOnce() -> String,
 ) -> Option<&'i ast::Instruction<'i>> {
     if validate_error_handling_ap(&root.0, if_error) {
-        validate_error_handling_xor(&root.1, if_else_error, else_error, if_error)
+        validate_error_handling_xor(&root.1, expected_error_handling_xor)
     } else {
         None
     }
@@ -155,12 +246,10 @@ fn validate_error_handling<'i>(
 
 fn validate_error_handling_xor<'i>(
     instruction: &'i ast::Instruction<'i>,
-    if_else_error: &ast::Scalar<'i>,
-    else_error: &ast::Scalar<'i>,
-    if_error: &ast::Scalar<'i>,
+    expected_error_handling_xor: impl FnOnce() -> String,
 ) -> Option<&'i ast::Instruction<'i>> {
     if let ast::Instruction::Xor(xor) = instruction {
-        if !validate_error_handling_xor_second(&xor.1, if_else_error, else_error, if_error) {
+        if !validate_error_handling_xor_second(&xor.1, expected_error_handling_xor) {
             return None;
         }
         if let ast::Instruction::Match(match_) = &xor.0 {
@@ -197,33 +286,11 @@ fn validate_error_handling_ap(
 
 fn validate_error_handling_xor_second(
     else_instruction: &ast::Instruction<'_>,
-    if_else_error: &ast::Scalar<'_>,
-    else_error: &ast::Scalar<'_>,
-    if_error: &ast::Scalar<'_>,
+    expected_error_handling_xor: impl FnOnce() -> String,
 ) -> bool {
-    let air_script = format!(
-        // the new instruction are needed to pass a parser validator; they are removed
-        r#"(new {if_else_error}
-           (new {else_error}
-           (new {if_error}
-           ; real code
-           (seq
-             (seq
-               (ap :error: {else_error})
-               (xor
-                 (match :error:.$.error_code 10001
-                   (ap {if_error} {if_else_error})
-                 )
-                 (ap {else_error} {if_else_error})
-               )
-            )
-            (fail {if_else_error})
-      ))))"#
-    );
-    let expected_tree = air_parser::parse(&air_script).expect("invalid internal AIR");
-    let expected_tree = pop_new_from_tree(expected_tree, 3);
+    let expected_air_script = expected_error_handling_xor();
 
-    else_instruction.to_string() == expected_tree.to_string()
+    else_instruction.to_string() == expected_air_script
 }
 
 fn pop_new_from_tree(mut expected_tree: ast::Instruction<'_>, arg: usize) -> ast::Instruction<'_> {

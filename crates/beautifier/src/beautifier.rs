@@ -16,6 +16,7 @@
 
 use crate::r#virtual::try_hopon;
 use crate::r#virtual::try_if_else;
+use crate::r#virtual::try_if_then;
 
 use air_parser::ast;
 
@@ -288,14 +289,19 @@ impl<W: io::Write> Beautifier<W> {
             }
         }
         if self.try_if_else {
-            if let Some(if_else) = try_if_else(new) {
+            if let Some(if_else) = try_if_else(new).or_else(|| try_if_then(new)) {
                 multiline!(
                     self, indent;
                     "if {}:", if_else.condition;
-                    &if_else.then_body;
-                    "else:";
-                    &if_else.else_body
+                    &if_else.then_body
                 );
+                if let Some(else_) = &if_else.else_body {
+                    multiline!(
+                        self, indent;
+                        "else:";
+                        else_
+                    )
+                }
                 return Ok(());
             }
         }

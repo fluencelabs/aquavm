@@ -18,6 +18,7 @@ mod if_else;
 
 use air_parser::ast;
 pub(crate) use if_else::try_if_else;
+pub(crate) use if_else::try_if_then;
 use std::fmt;
 
 /// A virtual `hopon` instruction.
