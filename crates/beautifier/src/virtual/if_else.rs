@@ -124,6 +124,11 @@ pub(crate) fn try_if_else<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
             _ => return None,
         };
 
+        let expected_code = match &condition {
+            Condition::Match { .. } => 10001,
+            Condition::Mismatch { .. } => 10002,
+        };
+
         let if_else_error = root_scalar;
         let else_error = nested1_scalar;
         let if_error = nested2_scalar;
@@ -153,9 +158,12 @@ pub(crate) fn try_if_else<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
             expected_tree.to_string()
         };
         // TODO return a Result here
-        if let Some(else_body) =
-            validate_error_handling(error_handling, if_error, expected_error_handling_xor)
-        {
+        if let Some(else_body) = validate_error_handling(
+            error_handling,
+            if_error,
+            expected_error_handling_xor,
+            expected_code,
+        ) {
             // todo!("check free variables");
             Some(IfElse {
                 condition,
@@ -202,6 +210,11 @@ pub(crate) fn try_if_then<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
             _ => return None,
         };
 
+        let expected_code = match &condition {
+            Condition::Match { .. } => 10001,
+            Condition::Mismatch { .. } => 10002,
+        };
+
         let if_error = root_scalar;
         let expected_error_handling_xor = || {
             let air_script = format!(
@@ -215,9 +228,13 @@ pub(crate) fn try_if_then<'i>(root_new: &'i ast::New<'i>) -> Option<IfElse<'i>> 
             let expected_tree = pop_new_from_tree(expected_tree, 1);
             expected_tree.to_string()
         };
-        if let Some(ast::Instruction::Null(ast::Null)) =
-            validate_error_handling(error_handling, root_scalar, expected_error_handling_xor)
-        {
+
+        if let Some(ast::Instruction::Null(ast::Null)) = validate_error_handling(
+            error_handling,
+            root_scalar,
+            expected_error_handling_xor,
+            expected_code,
+        ) {
             // todo!("check free variables");
             Some(IfElse {
                 condition,
@@ -236,9 +253,10 @@ fn validate_error_handling<'i>(
     root: &'i ast::Seq<'i>,
     if_error: &ast::Scalar<'_>,
     expected_error_handling_xor: impl FnOnce() -> String,
+    expected_code: i64,
 ) -> Option<&'i ast::Instruction<'i>> {
     if validate_error_handling_ap(&root.0, if_error) {
-        validate_error_handling_xor(&root.1, expected_error_handling_xor)
+        validate_error_handling_xor(&root.1, expected_error_handling_xor, expected_code)
     } else {
         None
     }
@@ -247,18 +265,20 @@ fn validate_error_handling<'i>(
 fn validate_error_handling_xor<'i>(
     instruction: &'i ast::Instruction<'i>,
     expected_error_handling_xor: impl FnOnce() -> String,
+    expected_code: i64,
 ) -> Option<&'i ast::Instruction<'i>> {
     if let ast::Instruction::Xor(xor) = instruction {
         if !validate_error_handling_xor_second(&xor.1, expected_error_handling_xor) {
             return None;
         }
         if let ast::Instruction::Match(match_) = &xor.0 {
-            // check arguments: match :error:.$.error_code 10001
+            // check arguments: for == match :error:.$.error_code 10001
+            //                  for != match :error:.$.error_code 10002
             let lambda =
                 air_lambda_parser::parse(".$.error_code").expect("invalid internal lambda");
             let expected_left =
                 ast::ImmutableValue::Error(ast::InstructionErrorAST::new(Some(lambda)));
-            let expected_right = ast::ImmutableValue::Number(ast::Number::Int(10001));
+            let expected_right = ast::ImmutableValue::Number(ast::Number::Int(expected_code));
             if match_.left_value == expected_left && match_.right_value == expected_right {
                 return Some(&match_.instruction);
             }

@@ -201,7 +201,7 @@ fn if_else_mismatch_on() {
              (seq
               (ap :error: -if-error-)
               (xor
-               (match :error:.$.error_code 10001
+               (match :error:.$.error_code 10002
                 (ap 1 $result)
                )
                (seq
@@ -253,7 +253,7 @@ fn if_else_mismatch_off() {
              (seq
               (ap :error: -if-error-)
               (xor
-               (match :error:.$.error_code 10001
+               (match :error:.$.error_code 10002
                 (ap 1 $result)
                )
                (seq
@@ -293,7 +293,7 @@ fn if_else_mismatch_off() {
             "            catch:\n",
             "                ap :error: -if-error-\n",
             "                try:\n",
-            "                    match :error:.$.error_code 10001:\n",
+            "                    match :error:.$.error_code 10002:\n",
             "                        ap 1 $result\n",
             "                catch:\n",
             "                    ap :error: -else-error-\n",
@@ -435,7 +435,7 @@ fn if_then_mismatch_on() {
          (seq
            (ap :error: -if-error-)
            (xor
-             (match :error:.$.error_code 10001
+             (match :error:.$.error_code 10002
                (null)
              )
              (fail -if-error-)
@@ -470,7 +470,7 @@ fn if_then_mismatch_off() {
          (seq
            (ap :error: -if-error-)
            (xor
-             (match :error:.$.error_code 10001
+             (match :error:.$.error_code 10002
                (null)
              )
              (fail -if-error-)
@@ -495,7 +495,7 @@ fn if_then_mismatch_off() {
             "    catch:\n",
             "        ap :error: -if-error-\n",
             "        try:\n",
-            "            match :error:.$.error_code 10001:\n",
+            "            match :error:.$.error_code 10002:\n",
             "                null\n",
             "        catch:\n",
             "            fail -if-error-\n"
