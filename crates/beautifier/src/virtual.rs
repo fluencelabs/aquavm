@@ -59,7 +59,7 @@ pub(crate) fn try_hopon<'i>(root_new: &ast::New<'i>) -> Option<HopOn<'i>> {
                 // can be crafted manually
                 //
                 // see `hopon_shadowing` test for an example
-                && !canon_shadows_peer_id(&nested_canon_name.name, &canon.peer_id)
+                && !canon_shadows_peer_id(nested_canon_name.name, &canon.peer_id)
             {
                 return Some(HopOn {
                     peer_id: canon.peer_id.clone(),
