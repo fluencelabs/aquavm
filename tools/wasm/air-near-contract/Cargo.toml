@@ -14,8 +14,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 aquavm-air = { path = "../../../air" }
-air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface" }
-near-sdk = "4.1.1"
+air-interpreter-interface = { path = "../../../crates/air-lib/interpreter-interface", default-features = false }
+near-sdk = "5.1.0"
 serde = { version = "1.0.190", features = [ "derive", "rc" ] }
 serde_json = "1.0.108"
 hashbrown = { version = "0.14.2", default-features = false }
@@ -38,4 +38,3 @@ check_signatures = ["aquavm-air/check_signatures"]
 
 [patch.crates-io]
 fluence-keypair = { git = "https://github.com/fluencelabs/trust-graph.git", branch = "lean-keypair" }
-libp2p-identity = { git = "https://github.com/fluencelabs/rust-libp2p.git", branch = "rand-feature" }
