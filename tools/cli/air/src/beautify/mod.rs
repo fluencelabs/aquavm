@@ -25,6 +25,8 @@ use std::{io, path::PathBuf};
 pub(crate) struct Args {
     #[clap(short, long, default_value_t = air_beautifier::DEFAULT_INDENT_STEP)]
     indent_step: usize,
+    #[clap(short, long, help = "Recognize virtual instruction patterns")]
+    patterns: bool,
     #[clap(short, long)]
     output: Option<PathBuf>,
     input: Option<PathBuf>,
@@ -65,6 +67,12 @@ pub(crate) fn beautify(args: Args) -> Result<()> {
     let air_script = read_script(&args).context("failed to read the input")?;
     let output = build_output(&args).context("failed to open the output")?;
 
-    Beautifier::new_with_indent(output, args.indent_step).beautify(&air_script)?;
+    let mut beautifier = Beautifier::new_with_indent(output, args.indent_step);
+
+    if args.patterns {
+        beautifier = beautifier.enable_all_patterns();
+    }
+
+    beautifier.beautify(&air_script)?;
     Ok(())
 }
