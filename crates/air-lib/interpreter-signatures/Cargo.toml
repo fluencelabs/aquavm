@@ -15,8 +15,7 @@ air-interpreter-cid = { version = "0.9.0", path = "../interpreter-cid" }
 fluence-keypair = { version = "0.10.4", default-features = false }
 
 bs58 = "0.5.0"
-borsh = { version = "0.10.3", features = ["rc"]}
-borsh-derive = "0.10.3"
+borsh = { version = "1.5.0", features = ["rc", "derive"] }
 serde = { version = "1.0.190", features = ["derive"] }
 thiserror = "1.0.49"
 rkyv = { version = "0.7.43", features = ["validation", "strict"], optional = true }
