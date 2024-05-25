@@ -10,6 +10,8 @@ This subcommand reads an AIR script from standard input and prints it in human-r
 
 It outputs to standard output or a file.
 
+With `--patterns` options, it tries to recognize certain patterns that Aqua compiler emits and outputs it as more human readable Aqua-like syntax.  Currently only `hopon` syntax is recognized.
+
 ## `air run`
 
 Alias: `air r`.

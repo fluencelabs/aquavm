@@ -388,3 +388,106 @@ fn fail_error() {
     let output = beautify_to_string(script).unwrap();
     assert_eq!(output, "fail :error:\n");
 }
+
+#[test]
+fn hopon_on() {
+    let script = r#"(new $ephemeral (new #ephemeral (canon "relay" $ephemeral #ephemeral)))"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output).enable_all_patterns();
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(String::from_utf8(output).unwrap(), "hopon \"relay\"\n");
+}
+
+#[test]
+fn hopon_off() {
+    let script = r#"(new $ephemeral (new #ephemeral (canon "relay" $ephemeral #ephemeral)))"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output);
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        concat!(
+            "new $ephemeral:\n",
+            "    new #ephemeral:\n",
+            "        canon \"relay\" $ephemeral #ephemeral\n"
+        ),
+    );
+}
+
+#[test]
+fn hopon_canon_mismatch() {
+    let script = r#"(new $ephemeral (new #can (canon "relay" $ephemeral #ephemeral)))"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output).enable_all_patterns();
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        concat!(
+            "new $ephemeral:\n",
+            "    new #can:\n",
+            "        canon \"relay\" $ephemeral #ephemeral\n"
+        ),
+    );
+}
+
+#[test]
+fn hopon_stream_mismatch() {
+    let script = r#"(new $stream (new #ephemeral (canon "relay" $ephemeral #ephemeral)))"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output).enable_all_patterns();
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        concat!(
+            "new $stream:\n",
+            "    new #ephemeral:\n",
+            "        canon \"relay\" $ephemeral #ephemeral\n"
+        ),
+    );
+}
+
+#[test]
+fn hopon_nested() {
+    let script =
+        r#"(new $other (new $ephemeral (new #ephemeral (canon "relay" $ephemeral #ephemeral))) )"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output).enable_all_patterns();
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        "new $other:\n    hopon \"relay\"\n",
+    );
+}
+
+// this is bug that should be eventually fixed: it uses top-level #can
+// instead of the nested one which disappeared
+//
+// the compiler doesn't generate such code, but it can be crafted manually
+#[test]
+fn hopon_shadowing() {
+    let script = r#"(new #can (new $ephemeral (new #can (canon #can.$.[0] $ephemeral #can))) )"#;
+
+    let mut output = vec![];
+    let mut beautifier = Beautifier::new(&mut output).enable_all_patterns();
+    beautifier.beautify(script).unwrap();
+
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        concat!(
+            "new #can:\n",
+            "    new $ephemeral:\n",
+            "        new #can:\n",
+            "            canon #can.$.[0] $ephemeral #can\n"
+        ),
+    );
+}

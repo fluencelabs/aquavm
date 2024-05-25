@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::r#virtual::try_hopon;
+
 use air_parser::ast;
 
 use std::fmt::Display;
@@ -82,23 +84,40 @@ pub enum BeautifyError {
 pub struct Beautifier<W: io::Write> {
     output: W,
     indent_step: usize,
+    try_hopon: bool,
 }
 
 impl<W: io::Write> Beautifier<W> {
     /// Beautifier for the output with default indentation step.
+    #[inline]
     pub fn new(output: W) -> Self {
         Self {
             output,
             indent_step: DEFAULT_INDENT_STEP,
+            try_hopon: false,
         }
     }
 
     /// Beautifier for the output with custom indentation step.
+    #[inline]
     pub fn new_with_indent(output: W, indent_step: usize) -> Self {
         Self {
             output,
             indent_step,
+            try_hopon: false,
         }
+    }
+
+    #[inline]
+    /// Enable all patterns in the emited code.
+    pub fn enable_all_patterns(self) -> Self {
+        self.enable_try_hopon()
+    }
+
+    #[inline]
+    pub fn enable_try_hopon(mut self) -> Self {
+        self.try_hopon = true;
+        self
     }
 
     /// Unwrap the Beautifier into the underlying writer.
@@ -253,6 +272,12 @@ impl<W: io::Write> Beautifier<W> {
     }
 
     fn beautify_new(&mut self, new: &ast::New<'_>, indent: usize) -> io::Result<()> {
+        if self.try_hopon {
+            if let Some(hop_on) = try_hopon(new) {
+                return self.beautify_simple(&hop_on, indent);
+            }
+        }
+        // else
         compound!(self, indent, new);
         Ok(())
     }

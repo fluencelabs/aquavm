@@ -19,6 +19,13 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub fn beautify(air_script: String) -> Result<String, JsError> {
     let mut output = vec![];
-    air_beautifier::beautify(&air_script, &mut output)?;
+    air_beautifier::beautify(&air_script, &mut output, true)?;
+    Ok(unsafe { String::from_utf8_unchecked(output) })
+}
+
+#[wasm_bindgen]
+pub fn beautify_raw(air_script: String) -> Result<String, JsError> {
+    let mut output = vec![];
+    air_beautifier::beautify(&air_script, &mut output, false)?;
     Ok(unsafe { String::from_utf8_unchecked(output) })
 }
