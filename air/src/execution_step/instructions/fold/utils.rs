@@ -110,23 +110,17 @@ pub(crate) fn create_canon_stream_map_iterable_value(
     // Can not create iterable from existing CanonStreamMap b/c CSM contains a map with
     // a limited lifetime but the boxed value needs static lifetime.
     let mut met_keys = HashSet::new();
-    let values = canon_stream_map
-        .iter()
-        .rev()
-        .filter(|&val| {
-            if let Some(map_key) = StreamMapKey::from_kvpair_owned(val) {
-                if met_keys.get(&map_key).is_some() {
-                    false
-                } else {
-                    met_keys.insert(map_key);
-                    true
-                }
-            } else {
-                false
+    let mut values = vec![];
+
+    for val in canon_stream_map.canon_stream_map.iter().rev() {
+        if let Some(map_key) = StreamMapKey::from_kvpair_owned(val) {
+            if met_keys.get(&map_key).is_none() {
+                met_keys.insert(map_key);
+                values.push(val.clone());
             }
-        })
-        .cloned()
-        .collect::<Vec<_>>();
+        }
+    }
+
     let iterable_ingredients = CanonStreamMapIterableIngredients::init(values);
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))
