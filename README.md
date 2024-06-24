@@ -98,4 +98,4 @@ you read and follow some basic [rules](./CONTRIBUTING.md).
 ## License
 
 All software code is copyright (c) Fluence Labs, Inc. under the
-[Apache-2.0](./LICENSE) license.
+[AGPLv3](./LICENSE) license.
