@@ -88,7 +88,9 @@ impl CanonStreamMap {
         json_map.into()
     }
 
-    pub(crate) fn iter(&self) -> impl ExactSizeIterator<Item = &ValueAggregate> {
+    pub(crate) fn iter(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &ValueAggregate> + DoubleEndedIterator<Item = &ValueAggregate> {
         self.values.iter()
     }
 
