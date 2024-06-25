@@ -4,7 +4,7 @@ version = "0.3.0"
 description = "AIR helper funcitions and macros"
 authors = ["Fluence Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 keywords = ["fluence", "air", "webassembly", "programming-language"]
 categories = ["wasm"]
 
