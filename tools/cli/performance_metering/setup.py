@@ -22,7 +22,7 @@ from setuptools import setup
 setup(name='aquavm_performance_metering',
       version='0.1',
       description='An AquaVM Performance metering tool',
-      author='Fluence Labs Limited',
+      author='Fluence DAO',
       license='AGPL-3.0-only',
       packages=['performance_metering'],
       zip_safe=True,
