@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use crate::execution_step::execution_context::stream_map_key::StreamMapKey;
 use crate::execution_step::value_types::populate_tetraplet_with_lambda;
 use crate::execution_step::value_types::IterableValue;
 use crate::execution_step::CatchableError;
@@ -26,6 +27,7 @@ use crate::SecurityTetraplet;
 use air_interpreter_data::Provenance;
 use air_parser::ast;
 
+use std::collections::HashSet;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -104,10 +106,21 @@ pub(crate) fn create_canon_stream_map_iterable_value(
         return Ok(FoldIterableScalar::Empty);
     }
 
-    // TODO: this one is a relatively long operation and will be refactored in Boxed Value
+    // TODO: this one is a relatively heavy operation and will be refactored in Boxed Value
     // Can not create iterable from existing CanonStreamMap b/c CSM contains a map with
     // a limited lifetime but the boxed value needs static lifetime.
-    let values = canon_stream_map.iter().cloned().collect::<Vec<_>>();
+    let mut met_keys = HashSet::new();
+    let mut values = vec![];
+
+    for val in canon_stream_map.canon_stream_map.iter().rev() {
+        if let Some(map_key) = StreamMapKey::from_kvpair_owned(val) {
+            if !met_keys.contains(&map_key) {
+                met_keys.insert(map_key);
+                values.push(val.clone());
+            }
+        }
+    }
+
     let iterable_ingredients = CanonStreamMapIterableIngredients::init(values);
     let iterable = Box::new(iterable_ingredients);
     Ok(FoldIterableScalar::ScalarBased(iterable))
