@@ -2,7 +2,7 @@
 name = "air-log-targets"
 version = "0.1.0"
 description = "Definition of global consts used for logging"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 repository = "https://github.com/fluencelabs/aquavm"

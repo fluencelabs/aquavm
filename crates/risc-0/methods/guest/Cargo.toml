@@ -2,7 +2,7 @@
 name = "zk-aquavm"
 version = "0.1.0"
 description = "RISC-0 guest wrapper for AquaVM"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 

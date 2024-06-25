@@ -2,7 +2,7 @@
 name = "aquavm-air-parser"
 description = "Parser of the AIR scripts in a form of string to AST"
 version = "0.12.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 documentation = "https://docs.rs/air-parser"

@@ -2,7 +2,7 @@
 name = "air-testing-framework"
 version = "0.11.0"
 description = "AquaVM testing framework"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/test-framework"

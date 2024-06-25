@@ -2,7 +2,7 @@
 name = "avm-interface"
 description = "Fluence AIR VM interfacing"
 version = "0.32.1"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 documentation = "https://docs.rs/avm-interface"

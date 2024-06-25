@@ -2,7 +2,7 @@
 name = "air-interpreter-wasm"
 version = "0.63.0"
 description = "Distribution of AIR interpreter as .wasm"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 license = "AGPL-3.0-only"
 edition = "2021"
 include = [

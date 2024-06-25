@@ -2,7 +2,7 @@
 name = "air-trace-handler"
 version = "0.5.12"
 description = "Implementation of AIR trace handler"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 keywords = ["fluence", "air", "webassembly", "programming-language"]

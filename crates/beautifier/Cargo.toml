@@ -2,7 +2,7 @@
 name = "air-beautifier"
 version = "0.4.3"
 description = "AIR human-readable format transformer library"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 license = "AGPL-3.0-only"
 repository = "https://github.com/fluencelabs/aquavm"

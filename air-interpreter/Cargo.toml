@@ -2,7 +2,7 @@
 name = "air-interpreter"
 version = "0.63.0"
 description = "Crate-wrapper for air"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 publish = false
 keywords = ["fluence", "air", "webassembly", "programming-language"]
