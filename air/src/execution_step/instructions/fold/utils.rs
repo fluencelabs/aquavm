@@ -114,7 +114,7 @@ pub(crate) fn create_canon_stream_map_iterable_value(
 
     for val in canon_stream_map.canon_stream_map.iter().rev() {
         if let Some(map_key) = StreamMapKey::from_kvpair_owned(val) {
-            if met_keys.get(&map_key).is_none() {
+            if !met_keys.contains(&map_key) {
                 met_keys.insert(map_key);
                 values.push(val.clone());
             }
