@@ -2,9 +2,9 @@
 name = "air-execution-info-collector"
 version = "0.7.14"
 description = "Implementation of AIR execution info collector"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 repository = "https://github.com/fluencelabs/aquavm"
 documentation = "https://docs.rs/air-execution-info-collector"
 keywords = ["fluence", "air", "webassembly", "programming-language"]

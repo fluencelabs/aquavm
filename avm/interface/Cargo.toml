@@ -2,9 +2,9 @@
 name = "avm-interface"
 description = "Fluence AIR VM interfacing"
 version = "0.32.1"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 documentation = "https://docs.rs/avm-interface"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/avm/interface"
 keywords = ["fluence", "air", "webassembly", "programming-language"]

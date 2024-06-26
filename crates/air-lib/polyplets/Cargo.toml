@@ -2,9 +2,9 @@
 name = "polyplets"
 version = "0.7.0"
 description = "Security primitives to verify origin of service calls in Fluence network"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 documentation = "https://docs.rs/polyplets"
 repository = "https://github.com/fluencelabs/aquavm/tree/master/crates/air-lib/polyplets"
 keywords = ["fluence", "air", "webassembly", "security", "authorization"]

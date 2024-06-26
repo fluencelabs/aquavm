@@ -2,9 +2,9 @@
 name = "aquavm-air"
 version = "0.63.0"
 description = "Interpreter of AIR scripts intended to coordinate request flow in the Fluence network"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 repository = "https://github.com/fluencelabs/aquavm"
 documentation = "https://docs.rs/aquavm-air"
 keywords = ["fluence", "air", "webassembly", "programming-language"]

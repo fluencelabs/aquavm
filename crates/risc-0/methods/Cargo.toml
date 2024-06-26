@@ -2,9 +2,9 @@
 name = "zk-aquavm-methods"
 version = "0.1.0"
 description = "RISC-0 methods wrapper for AquaVM"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 
 [build-dependencies]
 risc0-build = { version = "0.19.1" }

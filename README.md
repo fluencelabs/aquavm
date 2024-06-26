@@ -97,5 +97,5 @@ you read and follow some basic [rules](./CONTRIBUTING.md).
 
 ## License
 
-All software code is copyright (c) Fluence Labs, Inc. under the
-[Apache-2.0](./LICENSE) license.
+All software code is copyright (c) Fluence DAO under the
+[AGPLv3](./LICENSE) license.

@@ -2,9 +2,9 @@
 name = "air-near-contract"
 version = "0.63.0"
 description = "AIR interpreter as a NEAR contract"
-authors = ["Fluence labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 keywords = ["fluence", "air", "webassembly", "programming-language", "near"]
 categories = ["wasm"]
 publish = false

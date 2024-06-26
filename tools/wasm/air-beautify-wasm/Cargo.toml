@@ -1,10 +1,10 @@
 [package]
 name = "air-beautify-wasm"
 version = "0.3.9"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO", "Cloudless Labs"]
 edition = "2021"
 description = "WASM module for air-beautify"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 publish = false
 keywords = ["fluence", "air", "beautifier"]
 
