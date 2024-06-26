@@ -143,6 +143,26 @@
     * aquavm-air bumped from 0.61.0 to 0.62.0
     * air-test-utils bumped from 0.17.0 to 0.17.1
 
+## [0.9.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.8.0...aquavm-air-cli-v0.9.0) (2024-06-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** hopon virtual instruction in the beautifier ([#840](https://github.com/fluencelabs/aquavm/issues/840))
+
+### Features
+
+* **cli:** hopon virtual instruction in the beautifier ([#840](https://github.com/fluencelabs/aquavm/issues/840)) ([04bacb7](https://github.com/fluencelabs/aquavm/commit/04bacb70390e05250e8c4931c8a5381a55580159))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * aquavm-air bumped from 0.63.0 to 0.64.0
+    * air-beautifier bumped from 0.4.3 to 0.5.0
+    * air-test-utils bumped from 0.18.0 to 0.18.1
+
 ## [0.8.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.7.2...aquavm-air-cli-v0.8.0) (2024-04-15)
 
 
