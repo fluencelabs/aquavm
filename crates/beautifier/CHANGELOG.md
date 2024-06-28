@@ -20,6 +20,17 @@
   * dependencies
     * aquavm-air-parser bumped from 0.11.2 to 0.12.0
 
+## [0.5.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.4.3...air-beautifier-v0.5.0) (2024-06-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** hopon virtual instruction in the beautifier ([#840](https://github.com/fluencelabs/aquavm/issues/840))
+
+### Features
+
+* **cli:** hopon virtual instruction in the beautifier ([#840](https://github.com/fluencelabs/aquavm/issues/840)) ([04bacb7](https://github.com/fluencelabs/aquavm/commit/04bacb70390e05250e8c4931c8a5381a55580159))
+
 ## [0.4.0](https://github.com/fluencelabs/aquavm/compare/air-beautifier-v0.3.1...air-beautifier-v0.4.0) (2023-12-12)
 
 

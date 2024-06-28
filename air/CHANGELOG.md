@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.64.0](https://github.com/fluencelabs/aquavm/compare/air-v0.63.0...air-v0.64.0) (2024-06-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **air:** change fold over canon map iterator contents [fixes VM-620] ([#843](https://github.com/fluencelabs/aquavm/issues/843))
+
+### Features
+
+* **air:** change fold over canon map iterator contents [fixes VM-620] ([#843](https://github.com/fluencelabs/aquavm/issues/843)) ([325cce2](https://github.com/fluencelabs/aquavm/commit/325cce2f548358750324525f27fd662f3dc97192))
+
 ## [0.63.0](https://github.com/fluencelabs/aquavm/compare/air-v0.62.0...air-v0.63.0) (2024-04-15)
 
 
