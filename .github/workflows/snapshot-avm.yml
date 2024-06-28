@@ -36,7 +36,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Download air-interpreter-wasm binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: air-interpreter-wasm
           path: avm/client/dist/
