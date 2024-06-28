@@ -52,7 +52,7 @@ jobs:
         run: aquavm_performance_metering run
 
       - name: Upload benchmark results to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ./benches/PERFORMANCE.txt
           path: lcov.info
