@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload benchmark results to release
         if: inputs.tag != 'null'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ./benches/PERFORMANCE.txt
           tag_name: ${{ inputs.tag }}
