@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["DecodeError","EncodeError"],"fn":["decode_multiformat","encode_multiformat","parse_multiformat_bytes","write_multiformat"],"type":["SerializationCodec"]};

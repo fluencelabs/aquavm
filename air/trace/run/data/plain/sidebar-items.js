@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_DATA"],"fn":["load","print_air_prompt","read_air_with_prompt"],"struct":["PlainDataArgs"]};
