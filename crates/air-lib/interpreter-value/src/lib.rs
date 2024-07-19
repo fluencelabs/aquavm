@@ -63,6 +63,8 @@ macro_rules! tri {
 }
 
 mod value;
+#[cfg(feature = "starlark")]
+mod starlark;
 
 pub use value::JValue;
 
