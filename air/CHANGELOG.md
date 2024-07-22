@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.64.1](https://github.com/fluencelabs/aquavm/compare/air-v0.64.0...air-v0.64.1) (2024-07-22)
+
+
+### Bug Fixes
+
+* **execution-engine:** quickfix for canon map iteration order ([#845](https://github.com/fluencelabs/aquavm/issues/845)) ([038637f](https://github.com/fluencelabs/aquavm/commit/038637f94d86a37b45ee9d27fcc41d307b597692))
+
 ## [0.64.0](https://github.com/fluencelabs/aquavm/compare/air-v0.63.0...air-v0.64.0) (2024-06-26)
 
 
