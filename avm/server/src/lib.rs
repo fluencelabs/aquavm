@@ -28,7 +28,6 @@
 )]
 
 mod avm;
-mod avm_runtime_limits;
 mod config;
 mod errors;
 mod runner;
