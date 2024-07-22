@@ -29,7 +29,8 @@
     unreachable_patterns
 )]
 // risc0 feature flag is commented out, but the code remains for future experiments
-#[allow(unexpected_cfgs)]
+#![allow(unexpected_cfgs)]
+
 mod beautify;
 mod data;
 mod trace;
