@@ -170,6 +170,7 @@ fn aquavm_module(builder: &mut GlobalsBuilder) {
                 tetraplet,
                 eval.frozen_heap(),
             ))),
+            // TODO is it a catchable error?
             None => anyhow::bail!("value index {index} not valid"),
         }
     }
