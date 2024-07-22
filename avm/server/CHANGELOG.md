@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * avm-data-store bumped from 0.7.4 to 0.7.5
     * avm-interface bumped from 0.30.0 to 0.31.0
 
+## [0.38.1](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.38.0...avm-server-v0.38.1) (2024-07-22)
+
+
+### Bug Fixes
+
+* **avm-server:** remove unused AVM code ([#848](https://github.com/fluencelabs/aquavm/issues/848)) ([50b23c6](https://github.com/fluencelabs/aquavm/commit/50b23c6d9f5746acbddbbe93e3d1c02d7582a56a))
+
 ## [0.38.0](https://github.com/fluencelabs/aquavm/compare/avm-server-v0.37.0...avm-server-v0.38.0) (2024-04-15)
 
 

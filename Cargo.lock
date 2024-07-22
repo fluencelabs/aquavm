@@ -214,7 +214,7 @@ version = "0.1.0"
 
 [[package]]
 name = "air-test-utils"
-version = "0.18.2"
+version = "0.18.3"
 dependencies = [
  "air-interpreter-cid",
  "air-interpreter-data",
@@ -244,7 +244,7 @@ dependencies = [
 
 [[package]]
 name = "air-testing-framework"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "air-interpreter-signatures",
  "air-test-utils",
@@ -424,7 +424,7 @@ dependencies = [
 
 [[package]]
 name = "aquavm-air-cli"
-version = "0.9.1"
+version = "0.9.2"
 dependencies = [
  "air-beautifier",
  "air-interpreter-data",
@@ -721,7 +721,7 @@ dependencies = [
 
 [[package]]
 name = "avm-server"
-version = "0.38.0"
+version = "0.38.1"
 dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
