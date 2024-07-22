@@ -48,7 +48,6 @@
 */
 
 use super::JValue;
-use core::fmt::{self, Display};
 use core::ops;
 use std::string::String;
 
@@ -111,22 +110,6 @@ mod private {
     impl Sealed for str {}
     impl Sealed for std::string::String {}
     impl<'a, T> Sealed for &'a T where T: ?Sized + Sealed {}
-}
-
-/// Used in panic messages.
-struct Type<'a>(&'a JValue);
-
-impl<'a> Display for Type<'a> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match *self.0 {
-            JValue::Null => formatter.write_str("null"),
-            JValue::Bool(_) => formatter.write_str("boolean"),
-            JValue::Number(_) => formatter.write_str("number"),
-            JValue::String(_) => formatter.write_str("string"),
-            JValue::Array(_) => formatter.write_str("array"),
-            JValue::Object(_) => formatter.write_str("object"),
-        }
-    }
 }
 
 // The usual semantics of Index is to panic on invalid indexing.
