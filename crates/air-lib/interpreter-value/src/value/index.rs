@@ -48,7 +48,6 @@
 */
 
 use super::JValue;
-use core::fmt::{self, Display};
 use core::ops;
 use std::string::String;
 
