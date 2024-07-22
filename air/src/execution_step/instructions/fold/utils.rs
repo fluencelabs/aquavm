@@ -123,6 +123,12 @@ pub(crate) fn create_canon_stream_map_iterable_value(
             }
         }
     }
+    // the reverse iteration of the original data produce `values` in reverse order;
+    // the spec requires direct order of iteration, so reverse it one more time
+    //
+    // it can be solved at O(1) with special handling of reversed iterators in fold,
+    // so this O(n) implementation is just a quick fix
+    values.reverse();
 
     let iterable_ingredients = CanonStreamMapIterableIngredients::init(values);
     let iterable = Box::new(iterable_ingredients);

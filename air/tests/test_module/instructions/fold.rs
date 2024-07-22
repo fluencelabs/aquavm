@@ -955,12 +955,12 @@ async fn fold_canon_stream_map() {
         (seq
             (seq
                 (seq
-                    (ap ("key" "value4") %map)
-                    (ap (-42 "value3") %map)
+                    (ap ("key" "value1") %map)
+                    (ap (-42 "value2") %map)
                 )
                 (seq
-                    (ap (-42 "value2") %map)
-                    (ap ("key" "value1") %map)
+                    (ap (-42 "value3") %map)
+                    (ap ("key" "value4") %map)
                 )
             )
             (seq
@@ -986,8 +986,8 @@ async fn fold_canon_stream_map() {
     let mut cid_tracker: ExecutionCidState = ExecutionCidState::new();
     let tetraplet = json!({"function_name": "", "lens": "", "peer_pk": vm_1_peer_id, "service_id": ""});
 
-    let map_value_2 = json!({"key": -42, "value": "value2"});
     let map_value_1 = json!({"key": "key", "value": "value1"});
+    let map_value_2 = json!({"key": -42, "value": "value2"});
     let map_value_3 = json!({"key": -42, "value": "value3"});
     let map_value_4 = json!({"key": "key", "value": "value4"});
 
@@ -999,13 +999,8 @@ async fn fold_canon_stream_map() {
         canon_tracked(
             json!({"tetraplet": tetraplet,
             "values": [
-                {
-                "result": map_value_4,
-                "tetraplet": tetraplet,
-                "provenance": Provenance::Literal,
-            },
             {
-                "result": map_value_3,
+                "result": map_value_1,
                 "tetraplet": tetraplet,
                 "provenance": Provenance::Literal,
             },
@@ -1015,7 +1010,12 @@ async fn fold_canon_stream_map() {
                 "provenance": Provenance::Literal,
             },
             {
-                "result": map_value_1,
+                "result": map_value_3,
+                "tetraplet": tetraplet,
+                "provenance": Provenance::Literal,
+            },
+            {
+                "result": map_value_4,
                 "tetraplet": tetraplet,
                 "provenance": Provenance::Literal,
             },
@@ -1023,20 +1023,20 @@ async fn fold_canon_stream_map() {
             &mut cid_tracker,
         ),
         scalar_tracked!(
-            map_value_1.clone(),
+            map_value_3.clone(),
             cid_tracker,
             peer = &vm_1_peer_id,
             service = "m..0",
             function = "f",
-            args = [map_value_1]
+            args = [map_value_3]
         ),
         scalar_tracked!(
-            map_value_2.clone(),
+            map_value_4.clone(),
             cid_tracker,
             peer = vm_1_peer_id,
             service = "m..0",
             function = "f",
-            args = [map_value_2]
+            args = [map_value_4]
         ),
     ];
 
