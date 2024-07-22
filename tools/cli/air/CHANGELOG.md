@@ -148,6 +148,21 @@
     * aquavm-air bumped from 0.64.0 to 0.64.1
     * air-test-utils bumped from 0.18.1 to 0.18.2
 
+## [0.9.2](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.9.1...aquavm-air-cli-v0.9.2) (2024-07-22)
+
+
+### Bug Fixes
+
+* **value:** remove unused code ([#850](https://github.com/fluencelabs/aquavm/issues/850)) ([58a5f30](https://github.com/fluencelabs/aquavm/commit/58a5f3046adfce9a8c0db6a04afee55318ab600a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * avm-server bumped from 0.38.0 to 0.38.1
+    * air-test-utils bumped from 0.18.2 to 0.18.3
+
 ## [0.9.0](https://github.com/fluencelabs/aquavm/compare/aquavm-air-cli-v0.8.0...aquavm-air-cli-v0.9.0) (2024-06-26)
 
 
