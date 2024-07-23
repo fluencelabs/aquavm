@@ -129,7 +129,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0).peer_pk";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, "my_peer");
     }
 
@@ -140,7 +140,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0).service_id";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, "my_service");
     }
     #[test]
@@ -150,7 +150,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0).function_name";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, "my_func");
     }
 
@@ -161,7 +161,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0).lens";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, ".$.lens");
     }
 
@@ -172,7 +172,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0) == get_tetraplet(0)";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, true);
     }
 
@@ -184,7 +184,7 @@ mod tests {
         let script = "tet = get_tetraplet(0)
 tet == tet";
 
-        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value, tetraplet)]).unwrap().unwrap();
         assert_eq!(res, true);
     }
 
@@ -201,8 +201,9 @@ tet == tet";
             &[
                 (value.clone(), tetraplet1.into()),
                 (value.clone(), tetraplet2.into()),
-            ][..],
+            ],
         )
+        .unwrap()
         .unwrap();
         assert_eq!(res, true);
     }
@@ -221,8 +222,9 @@ tet1 == tet2";
 
         let res = execute(
             script,
-            &[(value.clone(), tetraplet1), (value.clone(), tetraplet2)][..],
+            &[(value.clone(), tetraplet1), (value.clone(), tetraplet2)],
         )
+        .unwrap()
         .unwrap();
         assert_eq!(res, false);
     }

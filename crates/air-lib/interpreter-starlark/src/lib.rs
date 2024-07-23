@@ -38,18 +38,52 @@ use starlark::values::Value;
 
 use crate::tetraplet::StarlarkSecurityTetraplet;
 
-const ERROR_STARLARK_OTHER: i32 = 42;
+#[derive(thiserror::Error, Debug)]
+pub enum ExecutionError {
+    #[error("Starlark value: {0}")]
+    Value(String),
+    #[error("Starlark function: {0}")]
+    Function(String),
+    // Should be a uncatchable error as it is broken script
+    #[error("Starlark scope: {0}")]
+    Scope(String),
+    // Should be a uncatchable error as it is broken script
+    #[error("Starlark lexer: {0}")]
+    Lexer(String),
+    // Should be a uncatchable error
+    #[error("Starlark internal: {0}")]
+    Internal(String),
+    #[error("Starlark other: {0}")]
+    Other(String),
+}
+
+impl ExecutionError {
+    fn from_parser_error(err: starlark::Error) -> Self {
+        use starlark::ErrorKind::*;
+        match err.kind() {
+            Fail(_) => unreachable!("Starlark parser is not expected to produce a Fail error"),
+            Value(err) => Self::Value(err.to_string()),
+            Function(err) => Self::Function(err.to_string()),
+            Scope(err) => Self::Scope(err.to_string()),
+            Lexer(err) => Self::Lexer(err.to_string()),
+            Internal(err) => Self::Internal(err.to_string()),
+            Other(err) => Self::Other(err.to_string()),
+            _ => Self::Other(err.to_string()),
+        }
+    }
+}
 
 pub fn execute(
     content: &str,
     args: &[(JValue, Rc<SecurityTetraplet>)],
-) -> starlark::Result<JValue> {
+) -> Result<Result<JValue, (i32, String)>, ExecutionError> {
     // unfortunately,
     // 1. AstModule is not clonable
     // 2. AstModule is consumed on evaluation
     //
     // for that reason, we have to parse the script on each invocation
-    let ast: AstModule = AstModule::parse("dummy.star", content.to_owned(), &Dialect::Standard)?;
+    let ast: AstModule = AstModule::parse("dummy.star", content.to_owned(), &Dialect::Standard)
+        .map_err(ExecutionError::from_parser_error)?;
 
     // we create a `Globals`, defining the standard library functions available;
     // the `standard` function uses those defined in the Starlark specification
@@ -65,35 +99,40 @@ pub fn execute(
     // We create a `Module`, which stores the global variables for our calculation.
     let module: Module = Module::new();
 
-    let mut ctx = StarlarkCtx::default();
-    ctx.args = args.to_owned();
+    let ctx = StarlarkCtx::new(args.to_owned());
 
-    // We create an evaluator, which controls how evaluation occurs.
-    let mut eval: Evaluator = Evaluator::new(&module);
-    eval.extra = Some(&ctx as _);
+    let res: Result<Value, _> = {
+        // We create an evaluator, which controls how evaluation occurs.
+        let mut eval: Evaluator = Evaluator::new(&module);
+        eval.extra = Some(&ctx as _);
 
-    // And finally we evaluate the code using the evaluator.
-    let res: Result<Value, _> = eval.eval_module(ast, &globals);
-    match res {
-        Ok(val) => {
-            println!("val: {val}");
-            ctx.clear_error();
-            val.try_into()
-        }
+        // And finally we evaluate the code using the evaluator.
+        eval.eval_module(ast, &globals)
+    };
+
+    // TODO TryInto may fail if `starlark::Value` serialization to `serde_json::Value` fails
+    match res.and_then(TryInto::<JValue>::try_into) {
+        Ok(val) => Ok(Ok(val)),
         Err(err) => {
             use starlark::ErrorKind::*;
             match err.kind() {
-                Fail(e) => {
+                Fail(_e) => {
                     // the error is set by aquavm_module's `fail` function
-                    println!("fail: {ctx:?} / {e:#?}");
+                    // n.b.: `_e` is an opaque object, for that reason we use `Ctx` to get error's code and message
+                    Ok(Err(ctx
+                        .error
+                        .into_inner()
+                        // TODO does Starlark std library ever calls fail?
+                        .expect("Starlark Ctx error is empty")))
                 }
-                Other(e) => {
-                    eprintln!("Other: {e}");
-                    ctx.set_error(ERROR_STARLARK_OTHER, e.to_string());
-                }
-                e => todo!("AquaVM uncatchable error: {:?}", e),
+                Value(_) => Err(ExecutionError::Value(err.to_string())),
+                Function(_) => Err(ExecutionError::Function(err.to_string())),
+                Scope(_) => Err(ExecutionError::Scope(err.to_string())),
+                Lexer(_) => Err(ExecutionError::Scope(err.to_string())),
+                Internal(_) => Err(ExecutionError::Scope(err.to_string())),
+                Other(_) => Err(ExecutionError::Scope(err.to_string())),
+                _ => Err(ExecutionError::Scope(err.to_string())), // explicitly matches with the previous one
             }
-            Err(err)
         }
     }
 }
@@ -107,13 +146,16 @@ struct StarlarkCtx {
 }
 
 impl StarlarkCtx {
+    fn new(args: Vec<(JValue, Rc<SecurityTetraplet>)>) -> Self {
+        Self {
+            error: <_>::default(),
+            args,
+        }
+    }
+
     fn set_error(&self, code: i32, message: String) {
         let mut guard = self.error.borrow_mut();
         *guard = Some((code, message));
-    }
-
-    fn clear_error(&self) {
-        *self.error.borrow_mut() = None;
     }
 }
 
@@ -194,7 +236,7 @@ mod tests {
         let script = "get_value(0)";
 
         let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
-        assert_eq!(res, value);
+        assert_eq!(res, Ok(value));
     }
 
     #[test]
@@ -209,6 +251,6 @@ mod tests {
         let script = r#"get_value(0)["property"]"#;
 
         let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
-        assert_eq!(res, JValue::Null);
+        assert_eq!(res, Ok(JValue::Null));
     }
 }
