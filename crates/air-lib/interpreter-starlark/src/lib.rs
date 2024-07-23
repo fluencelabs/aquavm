@@ -175,3 +175,40 @@ fn aquavm_module(builder: &mut GlobalsBuilder) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn test_value() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value: JValue = json!({
+            "test": 42,
+            "property": null,
+        })
+        .into();
+        let script = "get_value(0)";
+
+        let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
+        assert_eq!(res, value);
+    }
+
+    #[test]
+    fn test_value2() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value: JValue = json!({
+            "test": 42,
+            "property": null,
+        })
+        .into();
+        let script = r#"get_value(0)["property"]"#;
+
+        let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
+        assert_eq!(res, JValue::Null);
+    }
+}

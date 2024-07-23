@@ -112,3 +112,118 @@ impl fmt::Display for StarlarkSecurityTetraplet {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use air_interpreter_value::JValue;
+    use serde_json::json;
+
+    use crate::execute;
+
+    use super::*;
+
+    #[test]
+    fn test_tetraplet_peer_pk() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "service_id", "function_name", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "get_tetraplet(0).peer_pk";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, "my_peer");
+    }
+
+    #[test]
+    fn test_tetraplet_service_id() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "get_tetraplet(0).service_id";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, "my_service");
+    }
+    #[test]
+    fn test_tetraplet_function_name() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "get_tetraplet(0).function_name";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, "my_func");
+    }
+
+    #[test]
+    fn test_tetraplet_lens() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "get_tetraplet(0).lens";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, ".$.lens");
+    }
+
+    #[test]
+    fn test_tetraplet_equals_copy() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "get_tetraplet(0) == get_tetraplet(0)";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn test_tetraplet_equals_self() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value = json!(42).into();
+        let script = "tet = get_tetraplet(0)
+tet == tet";
+
+        let res = execute(script, &[(value, tetraplet)][..]).unwrap();
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn test_tetraplet_same() {
+        let tetraplet1 = SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens");
+        let tetraplet2: SecurityTetraplet = tetraplet1.clone();
+        let value: JValue = json!(42).into();
+        let script = "tet = get_tetraplet(0)
+tet == tet";
+
+        let res = execute(
+            script,
+            &[
+                (value.clone(), tetraplet1.into()),
+                (value.clone(), tetraplet2.into()),
+            ][..],
+        )
+        .unwrap();
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn test_tetraplet_different() {
+        // TODO it worth variating fields
+        let tetraplet1 =
+            SecurityTetraplet::new("my_peer1", "my_service1", "my_func1", ".$.lens1").into();
+        let tetraplet2 =
+            SecurityTetraplet::new("my_peer2", "my_service2", "my_func2", ".$.lens2").into();
+        let value: JValue = json!(42).into();
+        let script = "tet1 = get_tetraplet(0)
+tet2 = get_tetraplet(1)
+tet1 == tet2";
+
+        let res = execute(
+            script,
+            &[(value.clone(), tetraplet1), (value.clone(), tetraplet2)][..],
+        )
+        .unwrap();
+        assert_eq!(res, false);
+    }
+}
