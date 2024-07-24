@@ -40,6 +40,8 @@ use crate::tetraplet::StarlarkSecurityTetraplet;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ExecutionError {
+    #[error("Starlark fail: {0}, {1}")]
+    Fail(i32, String),
     #[error("Starlark value: {0}")]
     Value(String),
     #[error("Starlark function: {0}")]
@@ -76,7 +78,7 @@ impl ExecutionError {
 pub fn execute(
     content: &str,
     args: &[(JValue, Rc<SecurityTetraplet>)],
-) -> Result<Result<JValue, (i32, String)>, ExecutionError> {
+) -> Result<JValue, ExecutionError> {
     // unfortunately,
     // 1. AstModule is not clonable
     // 2. AstModule is consumed on evaluation
@@ -112,18 +114,16 @@ pub fn execute(
 
     // TODO TryInto may fail if `starlark::Value` serialization to `serde_json::Value` fails
     match res.and_then(TryInto::<JValue>::try_into) {
-        Ok(val) => Ok(Ok(val)),
+        Ok(val) => Ok(val),
         Err(err) => {
             use starlark::ErrorKind::*;
             match err.kind() {
                 Fail(_e) => {
                     // the error is set by aquavm_module's `fail` function
                     // n.b.: `_e` is an opaque object, for that reason we use `Ctx` to get error's code and message
-                    Ok(Err(ctx
-                        .error
-                        .into_inner()
-                        // TODO does Starlark std library ever calls fail?
-                        .expect("Starlark Ctx error is empty")))
+                    let (code, message) =
+                        ctx.error.into_inner().expect("Starlark Ctx error is empty");
+                    Err(ExecutionError::Fail(code, message))
                 }
                 Value(_) => Err(ExecutionError::Value(err.to_string())),
                 Function(_) => Err(ExecutionError::Function(err.to_string())),
@@ -236,7 +236,7 @@ mod tests {
         let script = "get_value(0)";
 
         let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
-        assert_eq!(res, Ok(value));
+        assert_eq!(res, value);
     }
 
     #[test]
@@ -251,6 +251,6 @@ mod tests {
         let script = r#"get_value(0)["property"]"#;
 
         let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
-        assert_eq!(res, Ok(JValue::Null));
+        assert_eq!(res, JValue::Null);
     }
 }
