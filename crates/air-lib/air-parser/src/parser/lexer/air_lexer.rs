@@ -48,10 +48,10 @@ impl<'input> AIRLexer<'input> {
     }
 
     pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
-        while let Some((start_pos, ch)) = self.chars.next() {
+        while let Some((start_pos, ch)) = dbg!(self.chars.next()) {
             let start_pos = AirPos::from(start_pos);
             match ch {
-                '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
+                '(' => return self.bracket_or_embedded_script(start_pos),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
                 '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
@@ -68,6 +68,18 @@ impl<'input> AIRLexer<'input> {
         }
 
         None
+    }
+
+    fn bracket_or_embedded_script(
+        &mut self,
+        start_pos: AirPos,
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
+        if let Some((_, '#')) = dbg!(self.chars.peek()) {
+            self.chars.next();
+            self.embedded_script(start_pos)
+        } else {
+            Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1)))
+        }
     }
 
     fn skip_comment(&mut self) {
@@ -103,7 +115,6 @@ impl<'input> AIRLexer<'input> {
             start_pos..self.input.len().into(),
         )))
     }
-
     #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string(
         &mut self,
@@ -122,6 +133,30 @@ impl<'input> AIRLexer<'input> {
 
         let token_str_len = end_pos - start_pos;
         Some(Ok((start_pos, token, start_pos + token_str_len)))
+    }
+
+    fn embedded_script(
+        &mut self,
+        start_pos: AirPos,
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
+        while let Some((pos, ch)) = dbg!(self.chars.next()) {
+            // TODO consider ```...``` for the scripts
+            if ch == '#' {
+                if let Some((_, ')')) = dbg!(self.chars.peek()) {
+                    self.chars.next();
+                    let string_size = AirPos::from(pos) - start_pos + 2;
+                    return Some(Ok((
+                        start_pos,
+                        Token::EmbeddedScript(&self.input[(start_pos + 2).into()..pos]),
+                        start_pos + string_size,
+                    )));
+                }
+            }
+        }
+
+        Some(Err(LexerError::unclosed_embedded(
+            start_pos..self.input.len().into(),
+        )))
     }
 
     fn advance_to_token_end(&mut self, start_pos: AirPos, square_met: bool) -> AirPos {
