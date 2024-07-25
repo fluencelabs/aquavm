@@ -250,7 +250,70 @@ mod tests {
         .into();
         let script = r#"get_value(0)["property"]"#;
 
-        let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
+        let res = execute(script, &[(value.clone(), tetraplet)]).unwrap();
         assert_eq!(res, JValue::Null);
     }
+
+    #[test]
+    fn test_value_eq_self() {
+        let tetraplet =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value: JValue = json!({
+            "test": 42,
+            "property": null,
+        })
+        .into();
+        let script = "get_value(0) == get_value(0)";
+
+        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn test_value_eq_same() {
+        let tetraplet: Rc<_> =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value: JValue = json!({
+            "test": 42,
+            "property": null,
+        })
+        .into();
+        let script = "get_value(0) == get_value(1)";
+
+        let res = execute(
+            script,
+            &[(value.clone(), tetraplet.clone()), (value, tetraplet)],
+        )
+        .unwrap();
+        assert_eq!(res, true);
+    }
+
+    #[test]
+    fn test_value_eq_different() {
+        let tetraplet: Rc<_> =
+            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let value1: JValue = json!({
+            "test": 42,
+            "property": null,
+        })
+        .into();
+        let value2: JValue = json!({
+            "test": 48,
+            "property": null,
+        })
+        .into();
+        let script = "get_value(0) == get_value(1)";
+
+        let res = execute(script, &[(value1, tetraplet.clone()), (value2, tetraplet)]).unwrap();
+        assert_eq!(res, false);
+    }
+
+    #[test]
+    fn test_escape_cannot_be_used_in_air_parser() {
+        let script = r#"'test\#'"#;
+
+        let res = execute(script, &[]).unwrap();
+        assert_eq!(res, "test\\#");
+    }
+
 }
