@@ -105,4 +105,5 @@ pub enum Token<'input> {
     Null,
     Match,
     MisMatch,
+    Embed,
 }

@@ -231,6 +231,7 @@ fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
         NULL_INSTR => Ok(Token::Null),
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
+        EMBED_INSTR => Ok(Token::Embed),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(ERROR) => parse_error(input, start_pos, ERROR, Token::Error),
@@ -294,6 +295,7 @@ const NEXT_INSTR: &str = "next";
 const NULL_INSTR: &str = "null";
 const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
+const EMBED_INSTR: &str = "embed";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 pub(crate) const LAST_ERROR: &str = "%last_error%";

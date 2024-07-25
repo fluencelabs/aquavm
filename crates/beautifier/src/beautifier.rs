@@ -167,6 +167,7 @@ impl<W: io::Write> Beautifier<W> {
             ast::Instruction::Next(next) => self.beautify_simple(next, indent),
             ast::Instruction::Null(null) => self.beautify_simple(null, indent),
             ast::Instruction::Error => self.beautify_simple("error", indent),
+            ast::Instruction::Embed(embed) => self.beautify_embed(embed, indent),
         }
     }
 
@@ -182,6 +183,21 @@ impl<W: io::Write> Beautifier<W> {
             "call {} [{}]",
             CallTriplet(&call.triplet),
             CallArgs(call.args.as_slice())
+        )
+    }
+
+    fn beautify_embed(&mut self, embed: &ast::Embed<'_>, indent: usize) -> io::Result<()> {
+        fmt_indent(&mut self.output, indent)?;
+        match &embed.output {
+            ast::EmbedOutputValue::Scalar(v) => write!(&mut self.output, "{v} <- ")?,
+            ast::EmbedOutputValue::None => {}
+        }
+        writeln!(
+            &mut self.output,
+            "embed [{}] (#{}#)",
+            CallArgs(embed.args.as_slice()),
+            embed.script,
+
         )
     }
 

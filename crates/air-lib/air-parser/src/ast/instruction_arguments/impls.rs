@@ -19,6 +19,7 @@
 
 use super::ApResult;
 use super::CallOutputValue;
+use super::EmbedOutputValue;
 use super::NewArgument;
 use super::Scalar;
 use super::Stream;
@@ -60,5 +61,11 @@ impl<'i> CallOutputValue<'i> {
 
     pub fn stream(name: &'i str, position: AirPos) -> Self {
         Self::Stream(Stream { name, position })
+    }
+}
+
+impl<'i> EmbedOutputValue<'i> {
+    pub fn scalar(name: &'i str, position: AirPos) -> Self {
+        Self::Scalar(Scalar { name, position })
     }
 }

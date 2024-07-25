@@ -179,6 +179,17 @@ impl fmt::Display for FoldScalarIterable<'_> {
     }
 }
 
+impl fmt::Display for EmbedOutputValue<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use EmbedOutputValue::*;
+
+        match self {
+            Scalar(scalar) => write!(f, "{scalar}"),
+            None => Ok(()),
+        }
+    }
+}
+
 impl From<Number> for serde_json::Value {
     fn from(number: Number) -> Self {
         (&number).into()
