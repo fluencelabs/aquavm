@@ -21,6 +21,7 @@ mod ap;
 mod call;
 mod canon;
 mod dsl;
+mod embed;
 mod fail;
 mod fold;
 mod match_;
