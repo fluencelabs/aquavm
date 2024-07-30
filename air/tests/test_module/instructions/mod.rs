@@ -20,6 +20,7 @@
 mod ap;
 mod call;
 mod canon;
+mod embed;
 mod fail;
 mod fold;
 mod match_;

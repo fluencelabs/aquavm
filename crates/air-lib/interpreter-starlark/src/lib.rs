@@ -38,7 +38,7 @@ use starlark::values::Value;
 
 use crate::tetraplet::StarlarkSecurityTetraplet;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub enum ExecutionError {
     #[error("Starlark fail: {0}, {1}")]
     Fail(i32, String),

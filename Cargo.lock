@@ -442,6 +442,7 @@ dependencies = [
  "air-interpreter-interface",
  "air-interpreter-sede",
  "air-interpreter-signatures",
+ "air-interpreter-starlark",
  "air-interpreter-value",
  "air-lambda-ast",
  "air-lambda-parser",

@@ -143,6 +143,9 @@ pub enum UncatchableError {
 
     #[error("failed to serialize call arguments {0}")]
     CallArgumentsSerializationFailed(<CallArgumentsRepr as Representation>::SerializeError),
+
+    #[error("Starlark error: {0}")]
+    StalarkError(air_interpreter_starlark::ExecutionError),
 }
 
 impl ToErrorCode for UncatchableError {
