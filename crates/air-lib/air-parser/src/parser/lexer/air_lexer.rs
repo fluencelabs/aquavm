@@ -48,7 +48,7 @@ impl<'input> AIRLexer<'input> {
     }
 
     pub fn next_token(&mut self) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
-        while let Some((start_pos, ch)) = dbg!(self.chars.next()) {
+        while let Some((start_pos, ch)) = self.chars.next() {
             let start_pos = AirPos::from(start_pos);
             match ch {
                 '(' => return self.bracket_or_embedded_script(start_pos),
@@ -74,7 +74,7 @@ impl<'input> AIRLexer<'input> {
         &mut self,
         start_pos: AirPos,
     ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
-        if let Some((_, '#')) = dbg!(self.chars.peek()) {
+        if let Some((_, '#')) = self.chars.peek() {
             self.chars.next();
             self.embedded_script(start_pos)
         } else {
@@ -139,10 +139,10 @@ impl<'input> AIRLexer<'input> {
         &mut self,
         start_pos: AirPos,
     ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
-        while let Some((pos, ch)) = dbg!(self.chars.next()) {
+        while let Some((pos, ch)) = self.chars.next() {
             // TODO consider ```...``` for the scripts
             if ch == '#' {
-                if let Some((_, ')')) = dbg!(self.chars.peek()) {
+                if let Some((_, ')')) = self.chars.peek() {
                     self.chars.next();
                     let string_size = AirPos::from(pos) - start_pos + 2;
                     return Some(Ok((
