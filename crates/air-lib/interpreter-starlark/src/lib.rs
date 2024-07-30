@@ -77,7 +77,7 @@ impl ExecutionError {
 
 pub fn execute(
     content: &str,
-    args: &[(JValue, Rc<SecurityTetraplet>)],
+    args: Vec<(JValue, Vec<Rc<SecurityTetraplet>>)>,
 ) -> Result<JValue, ExecutionError> {
     // unfortunately,
     // 1. AstModule is not clonable
@@ -142,11 +142,11 @@ pub fn execute(
 #[derive(Debug, Default, ProvidesStaticType)]
 struct StarlarkCtx {
     error: RefCell<Option<(i32, String)>>,
-    args: Vec<(JValue, Rc<SecurityTetraplet>)>,
+    args: Vec<(JValue, Vec<Rc<SecurityTetraplet>>)>,
 }
 
 impl StarlarkCtx {
-    fn new(args: Vec<(JValue, Rc<SecurityTetraplet>)>) -> Self {
+    fn new(args: Vec<(JValue, Vec<Rc<SecurityTetraplet>>)>) -> Self {
         Self {
             error: <_>::default(),
             args,
@@ -208,10 +208,18 @@ fn aquavm_module(builder: &mut GlobalsBuilder) {
 
         let heap = eval.heap();
         match ctx.args.get(index) {
-            Some((_value, ref tetraplet)) => Ok(heap.alloc(StarlarkSecurityTetraplet::new(
-                tetraplet,
-                eval.frozen_heap(),
-            ))),
+            Some((_value, ref tetraplets)) => {
+                let tetraplets: Vec<_> = tetraplets
+                    .iter()
+                    .map(|tetraplet| {
+                        heap.alloc(StarlarkSecurityTetraplet::new(
+                            tetraplet,
+                            eval.frozen_heap(),
+                        ))
+                    })
+                    .collect();
+                Ok(heap.alloc(tetraplets))
+            }
             // TODO is it a catchable error?
             None => anyhow::bail!("value index {index} not valid"),
         }
@@ -226,8 +234,8 @@ mod tests {
 
     #[test]
     fn test_value() {
-        let tetraplet =
-            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let tetraplets: Vec<Rc<_>> =
+            vec![SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into()];
         let value: JValue = json!({
             "test": 42,
             "property": null,
@@ -235,14 +243,14 @@ mod tests {
         .into();
         let script = "get_value(0)";
 
-        let res = execute(script, &[(value.clone(), tetraplet)][..]).unwrap();
+        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap();
         assert_eq!(res, value);
     }
 
     #[test]
     fn test_value2() {
-        let tetraplet =
-            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let tetraplets: Vec<Rc<_>> =
+            vec![SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into()];
         let value: JValue = json!({
             "test": 42,
             "property": null,
@@ -250,14 +258,14 @@ mod tests {
         .into();
         let script = r#"get_value(0)["property"]"#;
 
-        let res = execute(script, &[(value.clone(), tetraplet)]).unwrap();
+        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap();
         assert_eq!(res, JValue::Null);
     }
 
     #[test]
     fn test_value_eq_self() {
-        let tetraplet =
-            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let tetraplets: Vec<Rc<_>> =
+            vec![SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into()];
         let value: JValue = json!({
             "test": 42,
             "property": null,
@@ -265,14 +273,14 @@ mod tests {
         .into();
         let script = "get_value(0) == get_value(0)";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, tetraplets)]).unwrap();
         assert_eq!(res, true);
     }
 
     #[test]
     fn test_value_eq_same() {
-        let tetraplet: Rc<_> =
-            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let tetraplets: Vec<Rc<_>> =
+            vec![SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into()];
         let value: JValue = json!({
             "test": 42,
             "property": null,
@@ -282,7 +290,7 @@ mod tests {
 
         let res = execute(
             script,
-            &[(value.clone(), tetraplet.clone()), (value, tetraplet)],
+            vec![(value.clone(), tetraplets.clone()), (value, tetraplets)],
         )
         .unwrap();
         assert_eq!(res, true);
@@ -290,8 +298,8 @@ mod tests {
 
     #[test]
     fn test_value_eq_different() {
-        let tetraplet: Rc<_> =
-            SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
+        let tetraplets: Vec<Rc<_>> =
+            vec![SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into()];
         let value1: JValue = json!({
             "test": 42,
             "property": null,
@@ -304,7 +312,7 @@ mod tests {
         .into();
         let script = "get_value(0) == get_value(1)";
 
-        let res = execute(script, &[(value1, tetraplet.clone()), (value2, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value1, tetraplets.clone()), (value2, tetraplets)]).unwrap();
         assert_eq!(res, false);
     }
 
@@ -312,8 +320,7 @@ mod tests {
     fn test_escape_cannot_be_used_in_air_parser() {
         let script = r#"'test\#'"#;
 
-        let res = execute(script, &[]).unwrap();
+        let res = execute(script, vec![]).unwrap();
         assert_eq!(res, "test\\#");
     }
-
 }

@@ -115,6 +115,8 @@ impl fmt::Display for StarlarkSecurityTetraplet {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use air_interpreter_value::JValue;
     use serde_json::json;
 
@@ -127,9 +129,9 @@ mod tests {
         let tetraplet =
             SecurityTetraplet::new("my_peer", "service_id", "function_name", ".$.lens").into();
         let value = json!(42).into();
-        let script = "get_tetraplet(0).peer_pk";
+        let script = "get_tetraplet(0)[0].peer_pk";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, "my_peer");
     }
 
@@ -138,9 +140,9 @@ mod tests {
         let tetraplet =
             SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
         let value = json!(42).into();
-        let script = "get_tetraplet(0).service_id";
+        let script = "get_tetraplet(0)[0].service_id";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, "my_service");
     }
     #[test]
@@ -148,9 +150,9 @@ mod tests {
         let tetraplet =
             SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
         let value = json!(42).into();
-        let script = "get_tetraplet(0).function_name";
+        let script = "get_tetraplet(0)[0].function_name";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, "my_func");
     }
 
@@ -159,9 +161,9 @@ mod tests {
         let tetraplet =
             SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens").into();
         let value = json!(42).into();
-        let script = "get_tetraplet(0).lens";
+        let script = "get_tetraplet(0)[0].lens";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, ".$.lens");
     }
 
@@ -172,7 +174,7 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0) == get_tetraplet(0)";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, true);
     }
 
@@ -184,23 +186,23 @@ mod tests {
         let script = "tet = get_tetraplet(0)
 tet == tet";
 
-        let res = execute(script, &[(value, tetraplet)]).unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap();
         assert_eq!(res, true);
     }
 
     #[test]
     fn test_tetraplet_same() {
         let tetraplet1 = SecurityTetraplet::new("my_peer", "my_service", "my_func", ".$.lens");
-        let tetraplet2: SecurityTetraplet = tetraplet1.clone();
+        let tetraplet2 = tetraplet1.clone();
         let value: JValue = json!(42).into();
         let script = "tet = get_tetraplet(0)
 tet == tet";
 
         let res = execute(
             script,
-            &[
-                (value.clone(), tetraplet1.into()),
-                (value.clone(), tetraplet2.into()),
+            vec![
+                (value.clone(), vec![tetraplet1.into()]),
+                (value.clone(), vec![tetraplet2.into()]),
             ],
         )
         .unwrap();
@@ -210,10 +212,18 @@ tet == tet";
     #[test]
     fn test_tetraplet_different() {
         // TODO it worth variating fields
-        let tetraplet1 =
-            SecurityTetraplet::new("my_peer1", "my_service1", "my_func1", ".$.lens1").into();
-        let tetraplet2 =
-            SecurityTetraplet::new("my_peer2", "my_service2", "my_func2", ".$.lens2").into();
+        let tetraplet1 = Rc::new(SecurityTetraplet::new(
+            "my_peer1",
+            "my_service1",
+            "my_func1",
+            ".$.lens1",
+        ));
+        let tetraplet2 = Rc::new(SecurityTetraplet::new(
+            "my_peer2",
+            "my_service2",
+            "my_func2",
+            ".$.lens2",
+        ));
         let value: JValue = json!(42).into();
         let script = "tet1 = get_tetraplet(0)
 tet2 = get_tetraplet(1)
@@ -221,7 +231,10 @@ tet1 == tet2";
 
         let res = execute(
             script,
-            &[(value.clone(), tetraplet1), (value.clone(), tetraplet2)],
+            vec![
+                (value.clone(), vec![tetraplet1]),
+                (value.clone(), vec![tetraplet2]),
+            ],
         )
         .unwrap();
         assert_eq!(res, false);
