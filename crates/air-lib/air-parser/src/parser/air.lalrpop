@@ -180,6 +180,7 @@ Instr: Instruction<'input> = {
         let output = output.unwrap_or(EmbedOutputValue::None);
         let embed = Embed::new(args, script, output);
         let span = Span::new(left, right);
+        validator.met_embed(&embed, span);
 
         Instruction::Embed(embed.into())
     },

@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: 2570f46a3405c50e2c3c3bffe2a6eb22ee625326123629245297453e9c271512
+// sha3: 18bc374a6a0d8991d3da6a5fa07ca8053b90de4ad0f9e460854c288f7911cbb1
 use crate::ast::*;
 use crate::parser::ParserError;
 use crate::parser::VariableValidator;
@@ -6151,6 +6151,7 @@ fn __action21<
         let output = output.unwrap_or(EmbedOutputValue::None);
         let embed = Embed::new(args, script, output);
         let span = Span::new(left, right);
+        validator.met_embed(&embed, span);
 
         Instruction::Embed(embed.into())
     }

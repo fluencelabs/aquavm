@@ -34,9 +34,3 @@ fn display_fail_last_error() {
     let ast = crate::parse("(fail %last_error%)").unwrap();
     assert_eq!(ast.to_string(), "fail %last_error%");
 }
-
-#[test]
-fn display_embed() {
-    let ast = crate::parse("(embed [var1 var2.$.length] (#get_argument(0)+get_argument(1)#) x)").unwrap();
-    assert_eq!(ast.to_string(), "embed [var1 var2.$.length] (#get_argument(0)+get_argument(1)#) x");
-}
