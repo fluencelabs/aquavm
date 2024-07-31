@@ -84,6 +84,7 @@ fn classify_starlark_error(err: air_interpreter_starlark::ExecutionError) -> Exe
     use air_interpreter_starlark::ExecutionError::*;
 
     match err {
+        // TODO perhaps, Other should be uncatchable
         Value(_) | Function(_) | Other(_) => ExecutionError::Catchable(CatchableError::StalarkError(err).into()),
         Scope(_) | Lexer(_) | Internal(_) => ExecutionError::Uncatchable(UncatchableError::StalarkError(err).into()),
     }

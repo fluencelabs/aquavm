@@ -82,6 +82,8 @@ pub fn execute(
     // 2. AstModule is consumed on evaluation
     //
     // for that reason, we have to parse the script on each invocation
+    //
+    // see https://github.com/facebook/starlark-rust/issues/124
     let ast: AstModule = AstModule::parse("dummy.star", content.to_owned(), &Dialect::Standard)
         .map_err(ExecutionError::from_parser_error)?;
 
