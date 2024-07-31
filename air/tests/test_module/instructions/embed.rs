@@ -17,12 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+use air::{CatchableError, UncatchableError};
+use air_interpreter_starlark::ExecutionError as StarlarkExecutionError;
 use air_test_utils::prelude::*;
 
 #[tokio::test]
 async fn embed_basic() {
-    let init_peer_id = "init_peer_id";
-    let mut vm = create_avm(unit_call_service(), init_peer_id).await;
+    let mut vm = create_avm(echo_call_service(), "").await;
 
     let script = r#"
         (seq
@@ -38,10 +39,72 @@ async fn embed_basic() {
 
     let expected_trace = vec![scalar!(
         json!("a string\nwith escape"),
-        peer_name = init_peer_id,
+        peer = "",
         args = ["a string\nwith escape"]
     )];
 
     let trace = trace_from_result(&result);
-    assert_eq!(trace, expected_trace);
+    assert_eq!(&*trace, expected_trace);
+}
+
+#[tokio::test]
+async fn embed_error_fail() {
+    let mut vm = create_avm(echo_call_service(), "").await;
+
+    let script = r#"
+        (xor
+            (embed [] (#
+fail(42, "message")
+#)
+                var)
+            (call %init_peer_id% ("" "") [%last_error%.$.code %last_error%.$.message] result_name))"#;
+
+    let result = checked_call_vm!(vm, <_>::default(), script, "", "");
+    assert!(result.next_peer_pks.is_empty());
+
+    let expected_trace = vec![scalar!(
+        json!(42),
+        peer = "",
+        args = [json!(42), json!("message")]
+    )];
+
+    let trace = trace_from_result(&result);
+    assert_eq!(&*trace, expected_trace);
+}
+
+#[tokio::test]
+async fn embed_error_value() {
+    let mut vm = create_avm(echo_call_service(), "").await;
+
+    let script = r#"
+       (embed []
+(#
+42 + "string"
+#)
+              var)"#;
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+    let expected_error = CatchableError::StalarkError(StarlarkExecutionError::Value(
+        "error: Operation `+` not supported for types `int` and `string`\n --> dummy.star:2:1\n  |\n2 | 42 + \"string\"\n  | ^^^^^^^^^^^^^\n  |\n".to_owned(),
+    ));
+    assert_error_eq!(&result, expected_error);
+}
+
+// TODO 42.length gives Other, and it is a problem
+#[tokio::test]
+async fn embed_error_lexer() {
+    let mut vm = create_avm(echo_call_service(), "").await;
+
+    let script = r#"
+       (embed []
+(#
+"an unterminated string
+#)
+              var)"#;
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+    let expected_error = UncatchableError::StalarkError(StarlarkExecutionError::Lexer(
+        "Parse error: unfinished string literal".to_owned(),
+    ));
+    assert_error_eq!(&result, expected_error);
 }
