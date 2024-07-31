@@ -54,19 +54,15 @@ async fn embed_error_fail() {
     let script = r#"
         (xor
             (embed [] (#
-fail(42, "message")
+fail(42, "my message")
 #)
                 var)
-            (call %init_peer_id% ("" "") [%last_error%.$.code %last_error%.$.message] result_name))"#;
+            (call %init_peer_id% ("" "") [%last_error%.$.error_code %last_error%.$.message] result_name))"#;
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert!(result.next_peer_pks.is_empty());
 
-    let expected_trace = vec![scalar!(
-        json!(42),
-        peer = "",
-        args = [json!(42), json!("message")]
-    )];
+    let expected_trace = vec![scalar!(json!(42), peer = "", args = [json!(42), json!("my message")])];
 
     let trace = trace_from_result(&result);
     assert_eq!(&*trace, expected_trace);

@@ -17,10 +17,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+use std::rc::Rc;
+
+use air_interpreter_data::Provenance;
 use air_interpreter_starlark::execute as starlark_execute;
 use air_parser::ast::Embed;
 use air_parser::ast::ImmutableValue;
+use polyplets::SecurityTetraplet;
 
+use super::fail::fail_with_error_object;
+use super::ExecutableInstruction;
+use super::ExecutionCtx;
+use super::ExecutionResult;
+use super::TraceHandler;
 use crate::execution_step::errors::Joinable as _;
 use crate::execution_step::resolver::Resolvable as _;
 use crate::execution_step::LiteralAggregate;
@@ -32,17 +41,29 @@ use crate::ExecutionError;
 use crate::JValue;
 use crate::UncatchableError;
 
-use super::ExecutableInstruction;
-use super::ExecutionCtx;
-use super::ExecutionResult;
-use super::TraceHandler;
-
 impl<'i> ExecutableInstruction<'i> for Embed<'i> {
     fn execute(&self, exec_ctx: &mut ExecutionCtx<'i>, _trace_ctx: &mut TraceHandler) -> ExecutionResult<()> {
         let args = joinable!(collect_args(&self.args, exec_ctx), exec_ctx, ())?;
 
         let output_value = starlark_execute(self.script, args).map_err(classify_starlark_error)?;
-        maybe_set_output_value(&self.output, output_value, exec_ctx)
+        match output_value {
+            Ok(value) => maybe_set_output_value(&self.output, value, exec_ctx),
+            Err((error_code, error_message)) => {
+                let error_object = crate::execution_step::execution_context::error_from_raw_fields_w_peerid(
+                    error_code.into(),
+                    &error_message,
+                    &self.to_string(),
+                    exec_ctx.run_parameters.init_peer_id.as_ref(),
+                );
+                let literal_tetraplet =
+                    SecurityTetraplet::literal_tetraplet(exec_ctx.run_parameters.init_peer_id.as_ref());
+                let literal_tetraplet = Rc::new(literal_tetraplet);
+                // in (fail x y), x and y are always literals
+                let provenance = Provenance::literal();
+
+                fail_with_error_object(exec_ctx, error_object, Some(literal_tetraplet), provenance)
+            }
+        }
     }
 }
 
@@ -63,7 +84,6 @@ fn classify_starlark_error(err: air_interpreter_starlark::ExecutionError) -> Exe
     use air_interpreter_starlark::ExecutionError::*;
 
     match err {
-        Fail(_, _) => todo!("handle it separately"),
         Value(_) | Function(_) | Other(_) => ExecutionError::Catchable(CatchableError::StalarkError(err).into()),
         Scope(_) | Lexer(_) | Internal(_) => ExecutionError::Uncatchable(UncatchableError::StalarkError(err).into()),
     }
