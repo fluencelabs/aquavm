@@ -48,12 +48,50 @@ async fn embed_basic() {
 }
 
 #[tokio::test]
+async fn embed_args() {
+    let init_peer_id = "my_id";
+    let mut vm = create_avm(echo_call_service(), init_peer_id).await;
+
+    let script = r#"
+        (seq
+           (call %init_peer_id% ("myservice" "myfunc") [42] arg)
+           (seq
+               (embed [arg]
+(#
+t = get_tetraplet(0)[0]
+"{}: {}/{}:{}".format(get_value(0), t.peer_pk, t.service_id, t.function_name)
+#)
+                      var)
+               (call %init_peer_id% ("" "") [var] result_name)))"#;
+
+    let run_params = TestRunParameters::from_init_peer_id(init_peer_id);
+    let result = checked_call_vm!(vm, run_params, script, "", "");
+    assert!(result.next_peer_pks.is_empty());
+
+    let expected_val = format!("42: {init_peer_id}/myservice:myfunc");
+    let expected_trace = vec![
+        scalar!(
+            json!(42),
+            peer = init_peer_id,
+            service = "myservice",
+            function = "myfunc",
+            args = [42]
+        ),
+        scalar!(json!(expected_val), peer = init_peer_id, args = [expected_val]),
+    ];
+
+    let trace = trace_from_result(&result);
+    assert_eq!(&*trace, expected_trace);
+}
+
+#[tokio::test]
 async fn embed_error_fail() {
     let mut vm = create_avm(echo_call_service(), "").await;
 
     let script = r#"
         (xor
-            (embed [] (#
+            (embed []
+(#
 fail(42, "my message")
 #)
                 var)
