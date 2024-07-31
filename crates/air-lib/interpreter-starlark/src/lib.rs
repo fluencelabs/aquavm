@@ -40,8 +40,6 @@ use crate::tetraplet::StarlarkSecurityTetraplet;
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum ExecutionError {
-    #[error("Starlark fail: {0}, {1}")]
-    Fail(i32, String),
     #[error("Starlark value: {0}")]
     Value(String),
     #[error("Starlark function: {0}")]
@@ -78,7 +76,7 @@ impl ExecutionError {
 pub fn execute(
     content: &str,
     args: Vec<(JValue, Vec<Rc<SecurityTetraplet>>)>,
-) -> Result<JValue, ExecutionError> {
+) -> Result<Result<JValue, (i32, String)>, ExecutionError> {
     // unfortunately,
     // 1. AstModule is not clonable
     // 2. AstModule is consumed on evaluation
@@ -114,16 +112,18 @@ pub fn execute(
 
     // TODO TryInto may fail if `starlark::Value` serialization to `serde_json::Value` fails
     match res.and_then(TryInto::<JValue>::try_into) {
-        Ok(val) => Ok(val),
+        Ok(val) => Ok(Ok(val)),
         Err(err) => {
             use starlark::ErrorKind::*;
             match err.kind() {
                 Fail(_e) => {
                     // the error is set by aquavm_module's `fail` function
                     // n.b.: `_e` is an opaque object, for that reason we use `Ctx` to get error's code and message
-                    let (code, message) =
-                        ctx.error.into_inner().expect("Starlark Ctx error is empty");
-                    Err(ExecutionError::Fail(code, message))
+                    Ok(Err(ctx
+                        .error
+                        .into_inner()
+                        // TODO does Starlark std library ever calls fail?
+                        .expect("Starlark Ctx error is empty")))
                 }
                 Value(_) => Err(ExecutionError::Value(err.to_string())),
                 Function(_) => Err(ExecutionError::Function(err.to_string())),
@@ -243,7 +243,7 @@ mod tests {
         .into();
         let script = "get_value(0)";
 
-        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap();
+        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap().unwrap();
         assert_eq!(res, value);
     }
 
@@ -258,7 +258,9 @@ mod tests {
         .into();
         let script = r#"get_value(0)["property"]"#;
 
-        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap();
+        let res = execute(script, vec![(value.clone(), tetraplets)])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, JValue::Null);
     }
 
@@ -273,7 +275,7 @@ mod tests {
         .into();
         let script = "get_value(0) == get_value(0)";
 
-        let res = execute(script, vec![(value, tetraplets)]).unwrap();
+        let res = execute(script, vec![(value, tetraplets)]).unwrap().unwrap();
         assert_eq!(res, true);
     }
 
@@ -292,6 +294,7 @@ mod tests {
             script,
             vec![(value.clone(), tetraplets.clone()), (value, tetraplets)],
         )
+        .unwrap()
         .unwrap();
         assert_eq!(res, true);
     }
@@ -312,7 +315,12 @@ mod tests {
         .into();
         let script = "get_value(0) == get_value(1)";
 
-        let res = execute(script, vec![(value1, tetraplets.clone()), (value2, tetraplets)]).unwrap();
+        let res = execute(
+            script,
+            vec![(value1, tetraplets.clone()), (value2, tetraplets)],
+        )
+        .unwrap()
+        .unwrap();
         assert_eq!(res, false);
     }
 
@@ -320,7 +328,7 @@ mod tests {
     fn test_escape_cannot_be_used_in_air_parser() {
         let script = r#"'test\#'"#;
 
-        let res = execute(script, vec![]).unwrap();
+        let res = execute(script, vec![]).unwrap().unwrap();
         assert_eq!(res, "test\\#");
     }
 }
