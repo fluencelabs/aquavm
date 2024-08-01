@@ -719,22 +719,22 @@ fn stream_map_lambda_scalar_accessor() {
 }
 
 #[test]
-fn embedded_script_normal() {
+fn raw_string_normal() {
     lexer_test(
-        r#")"str"(# ("test")#)("#,
+        r##")"str"#" ("test")"#("##,
         All(vec![
             Ok((0.into(), Token::CloseRoundBracket, 1.into())),
             Ok((1.into(), Token::StringLiteral(r#"str"#), 6.into())),
-            Ok((6.into(), Token::EmbeddedScript(r#" ("test")"#), 19.into())),
+            Ok((6.into(), Token::StringLiteral(r#" ("test")"#), 19.into())),
             Ok((19.into(), Token::OpenRoundBracket, 20.into())),
         ]),
     );
 }
 
 #[test]
-fn embedded_script_unclosed() {
+fn raw_string_unclosed() {
     lexer_test(
-        r#")(#("test")()"#,
-        One(1, Err(LexerError::unclosed_embedded(1.into()..13.into()))),
+        r##"""#"("test")()"##,
+        One(1, Err(LexerError::unclosed_quote(2.into()..14.into()))),
     );
 }

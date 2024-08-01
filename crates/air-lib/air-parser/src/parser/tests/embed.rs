@@ -38,10 +38,10 @@ def sum(x):
 sum(get_value(0) + get_value(1))
               "#;
     let source_code = format!(
-        "
-        (embed [x %last_error%.$.message!] (#{}#)
+        r##"
+        (embed [x %last_error%.$.message!] #"{}"#
               var)
-    ",
+        "##,
         embed_script
     );
 
@@ -71,9 +71,9 @@ sum(get_value(0) + get_value(1))
 fn embed_no_var() {
     let embed_script = r#" get_tetraplet(0).peer_pk + ": " + get_value(1) "#;
     let source_code = format!(
-        r#"
-        (embed [x %last_error%.$.message!] (#{}#))
-    "#,
+        r##"
+        (embed [x %last_error%.$.message!] #"{}"#)
+        "##,
         embed_script
     );
 
@@ -102,7 +102,7 @@ fn embed_no_var() {
 #[test]
 fn embed_with_hash_symbol_string() {
     let source_code = r##"
-        (embed [x %last_error%.$.message!] (#"the hash inside the string: \x23"#) var)
+        (embed [x %last_error%.$.message!] #""the hash inside the string: \x23""# var)
     "##;
 
     let actual = parse(source_code);

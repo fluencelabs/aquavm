@@ -25,14 +25,14 @@ use air_test_utils::prelude::*;
 async fn embed_basic() {
     let mut vm = create_avm(echo_call_service(), "").await;
 
-    let script = r#"
+    let script = r##"
         (seq
             (embed []
-(#
+#"
 "a string\nwith escape"
-#)
+"#
                 var)
-            (call %init_peer_id% ("" "") [var] result_name))"#;
+            (call %init_peer_id% ("" "") [var] result_name))"##;
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert!(result.next_peer_pks.is_empty());
@@ -52,17 +52,17 @@ async fn embed_args() {
     let init_peer_id = "my_id";
     let mut vm = create_avm(echo_call_service(), init_peer_id).await;
 
-    let script = r#"
+    let script = r##"
         (seq
            (call %init_peer_id% ("myservice" "myfunc") [42] arg)
            (seq
                (embed [arg]
-(#
+#"
 t = get_tetraplet(0)[0]
 "{}: {}/{}:{}".format(get_value(0), t.peer_pk, t.service_id, t.function_name)
-#)
+"#
                       var)
-               (call %init_peer_id% ("" "") [var] result_name)))"#;
+               (call %init_peer_id% ("" "") [var] result_name)))"##;
 
     let run_params = TestRunParameters::from_init_peer_id(init_peer_id);
     let result = checked_call_vm!(vm, run_params, script, "", "");
@@ -88,14 +88,14 @@ t = get_tetraplet(0)[0]
 async fn embed_error_fail() {
     let mut vm = create_avm(echo_call_service(), "").await;
 
-    let script = r#"
+    let script = r##"
         (xor
             (embed []
-(#
+#"
 fail(42, "my message")
-#)
+"#
                 var)
-            (call %init_peer_id% ("" "") [%last_error%.$.error_code %last_error%.$.message] result_name))"#;
+            (call %init_peer_id% ("" "") [%last_error%.$.error_code %last_error%.$.message] result_name))"##;
 
     let result = checked_call_vm!(vm, <_>::default(), script, "", "");
     assert!(result.next_peer_pks.is_empty());
@@ -110,12 +110,12 @@ fail(42, "my message")
 async fn embed_error_value() {
     let mut vm = create_avm(echo_call_service(), "").await;
 
-    let script = r#"
+    let script = r##"
        (embed []
-(#
+#"
 42 + "string"
-#)
-              var)"#;
+"#
+              var)"##;
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
     let expected_error = CatchableError::StalarkError(StarlarkExecutionError::Value(
@@ -129,12 +129,12 @@ async fn embed_error_value() {
 async fn embed_error_lexer() {
     let mut vm = create_avm(echo_call_service(), "").await;
 
-    let script = r#"
+    let script = r##"
        (embed []
-(#
+#"
 "an unterminated string
-#)
-              var)"#;
+"#
+              var)"##;
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
     let expected_error = UncatchableError::StalarkError(StarlarkExecutionError::Lexer(

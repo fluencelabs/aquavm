@@ -78,7 +78,6 @@ pub enum Token<'input> {
     },
 
     StringLiteral(&'input str),
-    EmbeddedScript(&'input str),
     I64(i64),
     F64(f64),
     Boolean(bool),

@@ -51,11 +51,13 @@ impl<'input> AIRLexer<'input> {
         while let Some((start_pos, ch)) = self.chars.next() {
             let start_pos = AirPos::from(start_pos);
             match ch {
-                '(' => return self.bracket_or_embedded_script(start_pos),
+                '(' => return Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1))),
                 ')' => return Some(Ok((start_pos, Token::CloseRoundBracket, start_pos + 1))),
 
                 '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
                 ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
+
+                '#' => return self.hash_or_string(start_pos),
 
                 ';' => self.skip_comment(),
 
@@ -70,15 +72,15 @@ impl<'input> AIRLexer<'input> {
         None
     }
 
-    fn bracket_or_embedded_script(
+    fn hash_or_string(
         &mut self,
         start_pos: AirPos,
     ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
-        if let Some((_, '#')) = self.chars.peek() {
+        if let Some((_, '"')) = self.chars.peek() {
             self.chars.next();
-            self.embedded_script(start_pos)
+            self.raw_string(start_pos)
         } else {
-            Some(Ok((start_pos, Token::OpenRoundBracket, start_pos + 1)))
+            self.tokenize_string(start_pos, false)
         }
     }
 
@@ -135,26 +137,26 @@ impl<'input> AIRLexer<'input> {
         Some(Ok((start_pos, token, start_pos + token_str_len)))
     }
 
-    fn embedded_script(
+    fn raw_string(
         &mut self,
         start_pos: AirPos,
     ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
         while let Some((pos, ch)) = self.chars.next() {
             // TODO consider ```...``` for the scripts
-            if ch == '#' {
-                if let Some((_, ')')) = self.chars.peek() {
+            if ch == '"' {
+                if let Some((_, '#')) = self.chars.peek() {
                     self.chars.next();
                     let string_size = AirPos::from(pos) - start_pos + 2;
                     return Some(Ok((
                         start_pos,
-                        Token::EmbeddedScript(&self.input[(start_pos + 2).into()..pos]),
+                        Token::StringLiteral(&self.input[(start_pos + 2).into()..pos]),
                         start_pos + string_size,
                     )));
                 }
             }
         }
 
-        Some(Err(LexerError::unclosed_embedded(
+        Some(Err(LexerError::unclosed_quote(
             start_pos..self.input.len().into(),
         )))
     }

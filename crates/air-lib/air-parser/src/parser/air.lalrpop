@@ -175,7 +175,7 @@ Instr: Instruction<'input> = {
         Instruction::MisMatch(mismatch.into())
      },
 
-    <left: @L> "(" embed <args:Args> <script:EmbeddedScript> <output:EmbedOutput?> ")" <right: @R> => {
+    <left: @L> "(" embed <args:Args> <script:Literal> <output:EmbedOutput?> ")" <right: @R> => {
         let args = Rc::new(args);
         let output = output.unwrap_or(EmbedOutputValue::None);
         let embed = Embed::new(args, script, output);
@@ -359,7 +359,6 @@ extern {
         CanonStreamMapWithLambda => Token::CanonStreamMapWithLambda {name: <&'input str>, lambda:<LambdaAST<'input>>, position: <AirPos>},
 
         Literal => Token::StringLiteral(<&'input str>),
-        EmbeddedScript => Token::EmbeddedScript(<&'input str>),
         I64 => Token::I64(<i64>),
         F64 => Token::F64(<f64>),
         Boolean => Token::Boolean(<bool>),

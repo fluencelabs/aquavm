@@ -73,9 +73,6 @@ pub enum LexerError {
 
     #[error("leading dot without any symbols before - please write 0 if it's float or variable name if it's a lambda")]
     LeadingDot(Span),
-
-    #[error("this embedded program has not terminating sequence")]
-    UnclosedEmbedded(Span),
 }
 
 impl LexerError {
@@ -95,7 +92,6 @@ impl LexerError {
             Self::LastErrorPathError { span, .. } => span,
             Self::TooBigFloat(span) => span,
             Self::LeadingDot(span) => span,
-            Self::UnclosedEmbedded(span) => span,
         };
 
         *span
@@ -164,10 +160,6 @@ impl LexerError {
 
     pub fn leading_dot(range: Range<AirPos>) -> Self {
         Self::LeadingDot(range.into())
-    }
-
-    pub fn unclosed_embedded(range: Range<AirPos>) -> Self {
-        Self::UnclosedEmbedded(range.into())
     }
 }
 
