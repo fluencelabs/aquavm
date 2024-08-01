@@ -58,7 +58,7 @@ impl<'v, 'a> AllocValue<'v> for &'a JValue {
     }
 }
 
-impl<'v, 'a> AllocFrozenValue for &'a JValue {
+impl AllocFrozenValue for &JValue {
     fn alloc_frozen_value(
         self,
         heap: &starlark::values::FrozenHeap,
