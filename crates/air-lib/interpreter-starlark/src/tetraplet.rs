@@ -131,7 +131,9 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0)[0].peer_pk";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, "my_peer");
     }
 
@@ -142,7 +144,9 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0)[0].service_id";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, "my_service");
     }
 
@@ -153,7 +157,9 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0)[0].function_name";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, "my_func");
     }
 
@@ -164,7 +170,9 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0)[0].lens";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, ".$.lens");
     }
 
@@ -175,7 +183,9 @@ mod tests {
         let value = json!(42).into();
         let script = "get_tetraplet(0) == get_tetraplet(0)";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, true);
     }
 
@@ -187,7 +197,9 @@ mod tests {
         let script = "tet = get_tetraplet(0)
 tet == tet";
 
-        let res = execute(script, vec![(value, vec![tetraplet])]).unwrap().unwrap();
+        let res = execute(script, vec![(value, vec![tetraplet])])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, true);
     }
 

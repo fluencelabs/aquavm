@@ -245,7 +245,9 @@ mod tests {
         .into();
         let script = "get_value(0)";
 
-        let res = execute(script, vec![(value.clone(), tetraplets)]).unwrap().unwrap();
+        let res = execute(script, vec![(value.clone(), tetraplets)])
+            .unwrap()
+            .unwrap();
         assert_eq!(res, value);
     }
 

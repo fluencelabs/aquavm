@@ -197,7 +197,6 @@ impl<W: io::Write> Beautifier<W> {
             "embed [{}] (#{}#)",
             CallArgs(embed.args.as_slice()),
             embed.script,
-
         )
     }
 
