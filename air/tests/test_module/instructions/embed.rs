@@ -142,3 +142,23 @@ async fn embed_error_lexer() {
     ));
     assert_error_eq!(&result, expected_error);
 }
+
+#[tokio::test]
+async fn embed_with_join_behavior() {
+    let mut vm = create_avm(echo_call_service(), "").await;
+
+    let script = r##"
+        (par
+            (call "other_peer" ("" "") [] var)
+            (seq
+                (embed [var] #"var + var"# var2)
+                (call %init_peer_id% ("" "") [var2])))"##;
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+
+    assert_eq!(result.error_message, "");
+    assert_eq!(result.ret_code, 0);
+
+    let trace = trace_from_result(&result);
+    assert_eq!(trace.len(), 2);
+}
