@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CidCalculationError","CidVerificationError"],"fn":["raw_value_to_json_cid","value_to_json_cid","verify_raw_value","verify_value"],"struct":["ArchivedCID","CID","CIDResolver"],"type":["CidRef"]};

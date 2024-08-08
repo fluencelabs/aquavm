@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["_failure_to_value","ap","canon","canon_request","canon_tracked","extract_canon_result_cid","extract_service_result_cid","fold","par","request_sent_by","simple_value_aggregate_cid","subtrace_desc","subtrace_lore","value_aggregate_cid"],"struct":["CanonResultAlike","ExecutedCallBuilder","ValueAggregateAlike"]};

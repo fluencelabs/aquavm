@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_avm","create_avm_with_key","create_custom_avm"],"struct":["TestInitParameters","TestRunParameters","TestRunner"],"trait":["AirRunner"]};

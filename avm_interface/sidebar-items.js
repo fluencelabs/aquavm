@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CALL_SERVICE_SUCCESS"],"enum":["CallSeDeErrors"],"fn":["into_raw_result"],"mod":["raw_outcome"],"struct":["AVMOutcome","CallRequestParams","CallServiceResult","ErrorAVMOutcome","ParticleParameters","SoftLimitsTriggering"],"type":["CallRequests","CallResults"]};

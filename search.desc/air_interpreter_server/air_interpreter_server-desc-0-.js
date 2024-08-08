@@ -1,0 +1,1 @@
+searchState.loadedDescShard("air_interpreter_server", 0, "Like ast, this function is intended to be run localy by …\nParse AIR script and return it as minified JSON")

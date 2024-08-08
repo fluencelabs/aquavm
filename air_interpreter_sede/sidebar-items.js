@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["define_simple_representation","derive_serialized_type"],"mod":["multiformat"],"struct":["MsgPackFormat","MsgPackMultiformat","RmpSerdeFormat","RmpSerdeMultiformat"],"trait":["Format","FromSerialiedBorrow","FromSerialized","Representation","ToSerialized","ToWriter"]};

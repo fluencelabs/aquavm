@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["VariableOptionSource"],"fn":["echo_call_service","fallible_call_service","fallible_call_service_by_arg","return_string_call_service","set_variable_call_service","set_variables_call_service","tetraplet_host_function","unit_call_service"],"type":["ArgTetraplets"]};

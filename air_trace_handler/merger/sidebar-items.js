@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ApResultError","CallResultError","CanonResultError","DataType","FoldResultError","MergeCtxType","MergeError","MergerApResult","MergerCallResult","MergerCanonResult","PreparationScheme","ValueSource"],"struct":["MergerFoldResult","MergerParResult","MetApResult","MetCallResult","ResolvedFold","ResolvedSubTraceDescs"]};

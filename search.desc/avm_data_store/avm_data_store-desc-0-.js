@@ -1,0 +1,1 @@
+searchState.loadedDescShard("avm_data_store", 0, "This trait is used for\nCleanup data that become obsolete.\nReturns true if an anomaly happened and it’s necessary …\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.")
