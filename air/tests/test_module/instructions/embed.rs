@@ -209,10 +209,7 @@ main()
                 "result": 2
             }]
         })),
-        scalar!(
-            json!([(1, 2), (2, 1)]),
-            args = [json!([(1, 2), (2, 1)])]
-        ),
+        scalar!(json!([(1, 2), (2, 1)]), args = [json!([(1, 2), (2, 1)])]),
     ];
     let data = data_from_result(&result);
     let trace = trace_from_result(&result);
