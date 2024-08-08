@@ -127,7 +127,7 @@ jobs:
         working-directory: air-interpreter
 
       - name: Upload air-interpreter-wasm artifact to GitHub checks
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: air-interpreter-wasm
           path: target/wasm32-wasi/release/air_interpreter_server.wasm
@@ -169,7 +169,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download air-interpreter-wasm artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: air-interpreter-wasm
           path: avm/client/dist/
@@ -227,7 +227,7 @@ jobs:
         uses: dsherret/rust-toolchain-file@v1
 
       - name: Download air-interpreter-wasm artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: air-interpreter-wasm
           path: crates/interpreter-wasm/
