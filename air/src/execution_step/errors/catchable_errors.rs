@@ -103,7 +103,7 @@ pub enum CatchableError {
     StreamMapError(#[from] StreamMapError),
 
     #[error("Starlark error: {0}")]
-    StalarkError(air_interpreter_starlark::ExecutionError),
+    StarlarkError(air_interpreter_starlark::ExecutionError),
 }
 
 impl From<LambdaError> for Rc<CatchableError> {

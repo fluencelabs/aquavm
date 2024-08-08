@@ -118,7 +118,7 @@ async fn embed_error_value() {
               var)"##;
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
-    let expected_error = CatchableError::StalarkError(StarlarkExecutionError::Value(
+    let expected_error = CatchableError::StarlarkError(StarlarkExecutionError::Value(
         "error: Operation `+` not supported for types `int` and `string`\n --> dummy.star:2:1\n  |\n2 | 42 + \"string\"\n  | ^^^^^^^^^^^^^\n  |\n".to_owned(),
     ));
     assert_error_eq!(&result, expected_error);
@@ -137,7 +137,7 @@ async fn embed_error_lexer() {
               var)"##;
 
     let result = call_vm!(vm, <_>::default(), script, "", "");
-    let expected_error = UncatchableError::StalarkError(StarlarkExecutionError::Lexer(
+    let expected_error = UncatchableError::StarlarkError(StarlarkExecutionError::Lexer(
         "Parse error: unfinished string literal".to_owned(),
     ));
     assert_error_eq!(&result, expected_error);
