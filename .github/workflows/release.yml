@@ -134,7 +134,7 @@ jobs:
 
       - name: Add air-interpreter-wasm artifact to GitHub release
         if: needs.release-please.outputs.air-interpreter-release-created
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: target/wasm32-wasi/release/air_interpreter_server.wasm
           tag_name: ${{ needs.release-please.outputs.air-interpreter-tag-name }}
