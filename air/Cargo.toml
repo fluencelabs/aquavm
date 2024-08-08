@@ -24,6 +24,7 @@ air-interpreter-sede = { version = "0.1.0", path = "../crates/air-lib/interprete
 air-interpreter-signatures = { version = "0.1.7", path = "../crates/air-lib/interpreter-signatures", features = ["rkyv"] }
 air-interpreter-value = { version = "0.1.0", path = "../crates/air-lib/interpreter-value" }
 air-interpreter-interface = { version = "0.19.0", path = "../crates/air-lib/interpreter-interface", default-features = false }
+air-interpreter-starlark = { version = "0.1.0", path = "../crates/air-lib/interpreter-starlark", default-features = false }
 air-log-targets = { version = "0.1.0", path = "../crates/air-lib/log-targets" }
 air-lambda-ast = { version = "0.1.0", path = "../crates/air-lib/lambda/ast" }
 air-lambda-parser = { version = "0.1.0", path = "../crates/air-lib/lambda/parser" }

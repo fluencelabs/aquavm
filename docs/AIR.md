@@ -188,6 +188,27 @@ Example
 
 - does nothing, useful for code generation
 
+### embed
+
+```wasm
+(embed [<argument list>] <script literal> <output name>)
+```
+
+Execute a Starlark script, and save its result to an optional scalar output variable.
+
+The Starlark scripts has additional functions defined:
+
+1. `get_value(n)` -- returns nth value from the argument list.
+2. `get_tetraplet(n)`  -- returns tetraplet list of nth value from the argument list.
+   The elements of the list are struct-like values with fields `peer_pk`, `service_id`,
+   `function_name` and `lens`.
+3. `fail(code, message)` overrides the standard Starlark's multiargument `fail` function.
+   When this function is called, the Starlark script execution is cancelled, and
+   AIR script continues as if `(fail code message)` was called.
+
+You may use AIR's raw string literal `#" ... "#` syntax for script literal strings.
+Escape `#` as `\x23` in Starlark strings to avoid collsion with raw string ending
+marker `"#`, and be careful with Starlark comments.
 
 ## AIR: values
 

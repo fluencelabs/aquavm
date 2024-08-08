@@ -167,3 +167,11 @@ pub enum NewArgument<'i> {
     #[serde(borrow)]
     CanonStreamMap(CanonStreamMap<'i>),
 }
+
+#[derive(Serialize, Debug, PartialEq, Eq, Clone, Default)]
+pub enum EmbedOutputValue<'i> {
+    #[serde(borrow)]
+    Scalar(Scalar<'i>),
+    #[default]
+    None,
+}

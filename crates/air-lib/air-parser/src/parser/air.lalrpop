@@ -175,6 +175,16 @@ Instr: Instruction<'input> = {
         Instruction::MisMatch(mismatch.into())
      },
 
+    <left: @L> "(" embed <args:Args> <script:Literal> <output:EmbedOutput?> ")" <right: @R> => {
+        let args = Rc::new(args);
+        let output = output.unwrap_or(EmbedOutputValue::None);
+        let embed = Embed::new(args, script, output);
+        let span = Span::new(left, right);
+        validator.met_embed(&embed, span);
+
+        Instruction::Embed(embed.into())
+    },
+
     ! => { errors.push(<>); Instruction::Error },
 }
 
@@ -206,6 +216,10 @@ StreamMapKeyClause: StreamMapKeyClause<'input> = {
 CallOutput: CallOutputValue<'input> = {
     <scalar:Scalar> => CallOutputValue::scalar(scalar.0, scalar.1),
     <stream:Stream> => CallOutputValue::stream(stream.0, stream.1),
+};
+
+EmbedOutput: EmbedOutputValue<'input> = {
+    <scalar:Scalar> => EmbedOutputValue::scalar(scalar.0, scalar.1),
 };
 
 FailBody: Fail<'input> = {
@@ -371,5 +385,6 @@ extern {
         null => Token::Null,
         match_ => Token::Match,
         mismatch => Token::MisMatch,
+        embed => Token::Embed,
     }
 }

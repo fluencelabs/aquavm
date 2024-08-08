@@ -148,7 +148,7 @@ fn fail_with_error(exec_ctx: &mut ExecutionCtx<'_>) -> ExecutionResult<()> {
     result
 }
 
-fn fail_with_error_object(
+pub(crate) fn fail_with_error_object(
     exec_ctx: &mut ExecutionCtx<'_>,
     error: JValue,
     tetraplet: Option<RcSecurityTetraplet>,

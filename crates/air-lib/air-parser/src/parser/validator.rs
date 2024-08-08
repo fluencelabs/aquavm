@@ -394,6 +394,18 @@ impl<'i> VariableValidator<'i> {
         self.met_pivotalnext_instr(iterable_name, span);
     }
 
+    pub(super) fn met_embed(&mut self, embed: &Embed<'i>, span: Span) {
+        self.met_args(&embed.args, span);
+
+        match &embed.output {
+            EmbedOutputValue::Scalar(name) => {
+                self.met_variable_name_definition(name.name, span);
+            }
+            EmbedOutputValue::None => {}
+        }
+        self.met_simple_instr(span);
+    }
+
     pub(super) fn met_ap(&mut self, ap: &Ap<'i>, span: Span) {
         match &ap.argument {
             ApArgument::Number(_)

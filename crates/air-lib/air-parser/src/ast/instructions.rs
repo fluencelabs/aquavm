@@ -50,6 +50,7 @@ pub enum Instruction<'i> {
     Next(Box<Next<'i>>),
     Null(Null),
     Error,
+    Embed(Box<Embed<'i>>),
 }
 
 /// (call (peer part of a triplet: PeerPart) (function part of a triplet: FunctionPart) [arguments] output)
@@ -204,4 +205,12 @@ pub struct Null;
 
 pub trait PeerIDErrorLogable {
     fn log_errors_with_peer_id(&self) -> bool;
+}
+
+/// (embed [arguments] (# script #) output)
+#[derive(Serialize, Debug, PartialEq)]
+pub struct Embed<'i> {
+    pub args: Rc<Vec<ImmutableValue<'i>>>,
+    pub script: &'i str,
+    pub output: EmbedOutputValue<'i>,
 }

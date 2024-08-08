@@ -203,3 +203,17 @@ impl<'i> New<'i> {
         }
     }
 }
+
+impl<'i> Embed<'i> {
+    pub fn new(
+        args: Rc<Vec<ImmutableValue<'i>>>,
+        script: &'i str,
+        output: EmbedOutputValue<'i>,
+    ) -> Self {
+        Self {
+            args,
+            script,
+            output,
+        }
+    }
+}
