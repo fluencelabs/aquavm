@@ -177,13 +177,16 @@ async fn embed_zip_reverse() {
             (seq
                 (embed [#canon #canon]
 #"
-v1 = get_value(0)
-v2 = get_value(1)
+def main():
+    v1 = get_value(0)
+    v2 = get_value(1)
 
-if get_tetraplet(0)['peer_pk'] != get_tetraplet(1)['peer_pk']:
-    fail(42, "tetraplet peer_pk mismatch")
+    if get_tetraplet(0)[0].peer_pk != get_tetraplet(1)[0].peer_pk:
+        fail(42, 'tetraplet peer_pk mismatch')
 
-(list(zip(v1, reversed(v2))), get_tetraplet(0))
+    return list(zip(v1, reversed(v2)))
+
+main()
 "#
                        var2)
                 (call %init_peer_id% ("" "") [var2] var3)))"##;
@@ -206,7 +209,10 @@ if get_tetraplet(0)['peer_pk'] != get_tetraplet(1)['peer_pk']:
                 "result": 2
             }]
         })),
-        scalar!(json!([(1, 2), (2, 1)]), args = [json!([[1, 2], (2, 1)])]),
+        scalar!(
+            json!([(1, 2), (2, 1)]),
+            args = [json!([(1, 2), (2, 1)])]
+        ),
     ];
     let data = data_from_result(&result);
     let trace = trace_from_result(&result);
