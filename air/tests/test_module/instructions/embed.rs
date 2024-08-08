@@ -162,3 +162,53 @@ async fn embed_with_join_behavior() {
     let trace = trace_from_result(&result);
     assert_eq!(trace.len(), 2);
 }
+
+#[tokio::test]
+async fn embed_zip_reverse() {
+    let mut vm = create_avm(echo_call_service(), "").await;
+
+    let script = r##"
+        (seq
+            (seq
+               (seq
+                   (ap 1 $stream)
+                   (ap 2 $stream))
+            (canon %init_peer_id% $stream #canon))
+            (seq
+                (embed [#canon #canon]
+#"
+v1 = get_value(0)
+v2 = get_value(1)
+
+if get_tetraplet(0)['peer_pk'] != get_tetraplet(1)['peer_pk']:
+    fail(42, "tetraplet peer_pk mismatch")
+
+(list(zip(v1, reversed(v2))), get_tetraplet(0))
+"#
+                       var2)
+                (call %init_peer_id% ("" "") [var2] var3)))"##;
+
+    let result = call_vm!(vm, <_>::default(), script, "", "");
+
+    assert_eq!(result.error_message, "", "{}", result.error_message);
+    assert_eq!(result.ret_code, 0);
+
+    let expected_trace = vec![
+        ap(0),
+        ap(0),
+        canon(json!({
+            "tetraplet":  {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
+            "values": [{
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
+                "result": 1
+            }, {
+                "tetraplet": {"function_name": "", "lens": "", "peer_pk": "", "service_id": ""},
+                "result": 2
+            }]
+        })),
+        scalar!(json!([(1, 2), (2, 1)]), args = [json!([[1, 2], (2, 1)])]),
+    ];
+    let data = data_from_result(&result);
+    let trace = trace_from_result(&result);
+    assert_eq!(&*trace, expected_trace, "{:#?}", data.cid_info);
+}
