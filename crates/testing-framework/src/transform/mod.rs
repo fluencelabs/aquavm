@@ -40,9 +40,17 @@ pub(crate) struct Canon {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+pub(crate) struct Embed {
+    args: Vec<Sexp>,
+    script: Sexp,
+    var: Option<Box<Sexp>>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Sexp {
     Call(Box<Call>),
     Canon(Box<Canon>),
+    Embed(Box<Embed>),
     List(Vec<Sexp>),
     Symbol(String),
     String(String),
@@ -69,6 +77,10 @@ impl Sexp {
         }))
     }
 
+    pub(crate) fn embed(args: Vec<Sexp>, script: Sexp, var: Option<Box<Sexp>>) -> Self {
+        Self::Embed(Box::new(Embed { args, script, var }))
+    }
+
     pub(crate) fn inject(&mut self, service_definition: ServiceDefinition) -> Result<(), String> {
         match self {
             Sexp::Call(ref mut call) => {
@@ -81,6 +93,9 @@ impl Sexp {
             },
             Sexp::Canon(_) => Err(format!(
                 "cannot attach a service definition to a canon {self:?}"
+            )),
+            Sexp::Embed(_) => Err(format!(
+                "cannot attach a service definition to an embed {self:?}"
             )),
             Sexp::Symbol(s) => Err(format!(
                 "cannot attach a service definition to a symbol {s:?}"
@@ -118,6 +133,18 @@ impl std::fmt::Display for Sexp {
                     peer = canon.peer,
                     stream = canon.stream,
                     target = canon.target,
+                )
+            }
+            Sexp::Embed(embed) => {
+                write!(
+                    f,
+                    "(embed [{args}] #"{script}"#{var})",
+                    args = embed.args.iter().format(" "),
+                    script = embed.script,
+                    var = match &embed.var {
+                        Some(var) => format!(" {var}"),
+                        None => "".to_owned(),
+                    }
                 )
             }
             Sexp::List(items) => write!(f, "({})", items.iter().format(" ")),

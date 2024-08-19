@@ -81,6 +81,7 @@ pub(crate) fn parse_sexp(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<
     alt((
         parse_sexp_call,
         parse_sexp_canon,
+        parse_sexp_embed,
         parse_sexp_list,
         parse_sexp_string,
         parse_sexp_symbol,
@@ -205,6 +206,36 @@ fn parse_canon_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_
             pair(sexp_multispace0, tag(")")),
         ),
         |((peer, stream), target)| Sexp::canon(peer, stream, target),
+    )(inp)
+}
+
+fn parse_sexp_embed(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    preceded(
+        delim_ws(tag("(")),
+        preceded(
+            tag("embed "),
+            context("within embed instructon", cut(parse_embed_content)),
+        ),
+    )(inp)
+}
+
+fn parse_embed_content(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    map(
+        terminated(
+            pair(
+                separated_pair(
+                    cut(context("embed arguments", parse_sexp_call_arguments)),
+                    sexp_multispace1,
+                    cut(context("embed script", parse_sexp_string)),
+                ),
+                context(
+                    "embed result",
+                    opt(preceded(sexp_multispace1, map(parse_sexp_symbol, Box::new))),
+                ),
+            ),
+            pair(sexp_multispace0, tag(")")),
+        ),
+        |((args, script), var)| Sexp::embed(args, script, var),
     )(inp)
 }
 

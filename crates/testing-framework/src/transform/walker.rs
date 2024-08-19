@@ -98,7 +98,7 @@ impl<R: AirRunner> Transformer<'_, R> {
                     self.transform(child, test_init_parameters).await;
                 }
             }
-            Sexp::Symbol(_) | Sexp::String(_) => {}
+            Sexp::Embed(_) | Sexp::Symbol(_) | Sexp::String(_) => {}
         }
     }
 
