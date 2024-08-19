@@ -23,9 +23,9 @@ use crate::asserts::ServiceDefinition;
 use nom::branch::alt;
 use nom::bytes::complete::{is_not, tag, take_until};
 use nom::character::complete::{alphanumeric1, multispace0, multispace1, one_of, space1};
-use nom::combinator::{cut, map, map_parser, map_res, opt, recognize, rest, value};
+use nom::combinator::{cut, map, map_parser, map_res, not, opt, recognize, rest, value};
 use nom::error::{context, VerboseError, VerboseErrorKind};
-use nom::multi::{many0, many1, many1_count, separated_list0};
+use nom::multi::{fold_many0, many0, many1, many1_count, separated_list0};
 use nom::sequence::{delimited, pair, preceded, separated_pair, terminated};
 use nom::{IResult, InputTakeAtPosition};
 use nom_locate::LocatedSpan;
@@ -115,6 +115,10 @@ fn parse_sexp_list(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
 }
 
 fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    alt((parse_simple_string, parse_raw_string))(inp)
+}
+
+fn parse_simple_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
     // N.B. escape are rejected by AIR parser, but we simply treat backslash
     // as any other character
     map(
@@ -129,6 +133,30 @@ fn parse_sexp_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>>
                         tag(""),
                     )),
                     context("closing quotes not found", tag("\"")),
+                )),
+            ),
+        ),
+        Sexp::string,
+    )(inp)
+}
+
+fn parse_raw_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> {
+    map(
+        context(
+            "within raw string",
+            preceded(
+                tag("#\""),
+                cut(terminated(
+                    recognize(fold_many0(
+                        alt((
+                            value((), is_not("\"")),
+                            //
+                            value((), pair(tag("\""), not(tag("#")))),
+                        )),
+                        || (),
+                        |_, _| (),
+                    )),
+                    context("closing raw quotes not found", tag("\"#")),
                 )),
             ),
         ),
@@ -461,6 +489,18 @@ mod tests {
     async fn test_string() {
         let res = Sexp::from_str(r#""str ing""#);
         assert_eq!(res, Ok(Sexp::string("str ing")));
+    }
+
+    #[tokio::test]
+    async fn test_empty_raw_string() {
+        let res = Sexp::from_str(r##"#""#"##);
+        assert_eq!(res, Ok(Sexp::string("")));
+    }
+
+    #[tokio::test]
+    async fn test_raw_string() {
+        let res = Sexp::from_str(r##"#"str " ing"#"##);
+        assert_eq!(res, Ok(Sexp::string("str \" ing")));
     }
 
     #[tokio::test]
