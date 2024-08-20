@@ -54,6 +54,7 @@ pub(crate) enum Sexp {
     List(Vec<Sexp>),
     Symbol(String),
     String(String),
+    RawString(String),
 }
 
 impl Sexp {
@@ -67,6 +68,10 @@ impl Sexp {
 
     pub(crate) fn string(value: impl ToString) -> Self {
         Self::String(value.to_string())
+    }
+
+    pub(crate) fn raw_string(value: impl ToString) -> Self {
+        Self::RawString(value.to_string())
     }
 
     pub(crate) fn canon(peer: Sexp, stream: Sexp, target: Sexp) -> Self {
@@ -103,6 +108,9 @@ impl Sexp {
             Sexp::String(ref s) => Err(format!(
                 r#"cannot attach a service definition to a string: "{s:?}""#
             )),
+            Sexp::RawString(ref s) => Err(format!(
+                r#"cannot attach a service definition to a raw string: "{s:?}""#
+            )),
         }
     }
 }
@@ -138,9 +146,9 @@ impl std::fmt::Display for Sexp {
             Sexp::Embed(embed) => {
                 write!(
                     f,
-                    "(embed [{args}] #"{script}"#{var})",
+                    r##"(embed [{args}] {script}{var})"##,
                     args = embed.args.iter().format(" "),
-                    script = embed.script,
+                    script = dbg!(&embed.script),
                     var = match &embed.var {
                         Some(var) => format!(" {var}"),
                         None => "".to_owned(),
@@ -150,6 +158,7 @@ impl std::fmt::Display for Sexp {
             Sexp::List(items) => write!(f, "({})", items.iter().format(" ")),
             Sexp::Symbol(symbol) => write!(f, "{symbol}"),
             Sexp::String(string) => write!(f, r#""{string}""#),
+            Sexp::RawString(string) => write!(f, r##"#"{string}"#"##),
         }
     }
 }

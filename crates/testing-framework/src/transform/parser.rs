@@ -161,7 +161,7 @@ fn parse_raw_string(inp: Input<'_>) -> IResult<Input<'_>, Sexp, ParseError<'_>> 
                 )),
             ),
         ),
-        Sexp::string,
+        Sexp::raw_string,
     )(inp)
 }
 
@@ -525,13 +525,13 @@ mod tests {
     #[tokio::test]
     async fn test_empty_raw_string() {
         let res = Sexp::from_str(r##"#""#"##);
-        assert_eq!(res, Ok(Sexp::string("")));
+        assert_eq!(res, Ok(Sexp::raw_string("")));
     }
 
     #[tokio::test]
     async fn test_raw_string() {
         let res = Sexp::from_str(r##"#"str " ing"#"##);
-        assert_eq!(res, Ok(Sexp::string("str \" ing")));
+        assert_eq!(res, Ok(Sexp::raw_string("str \" ing")));
     }
 
     #[tokio::test]
