@@ -25,6 +25,7 @@ mod canon_map;
 mod canon_stream_map_scalar;
 mod canon_utils;
 mod compare_matchable;
+mod embed;
 mod fail;
 mod fold;
 mod fold_scalar;
@@ -95,6 +96,7 @@ impl<'i> ExecutableInstruction<'i> for Instruction<'i> {
             Instruction::Xor(xor) => execute!(self, xor, exec_ctx, trace_ctx),
             Instruction::Match(match_) => execute!(self, match_, exec_ctx, trace_ctx),
             Instruction::MisMatch(mismatch) => execute!(self, mismatch, exec_ctx, trace_ctx),
+            Instruction::Embed(embed) => execute!(self, embed, exec_ctx, trace_ctx),
 
             Instruction::Error => unreachable!("should not execute if parsing succeeded. QED."),
         }

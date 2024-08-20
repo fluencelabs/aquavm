@@ -46,6 +46,7 @@ impl fmt::Display for Instruction<'_> {
             New(new) => write!(f, "{new}"),
             Null(null) => write!(f, "{null}"),
             Error => write!(f, "error"),
+            Embed(embed) => write!(f, "{embed}"),
         }
     }
 }
@@ -191,6 +192,15 @@ impl fmt::Display for New<'_> {
     }
 }
 
+impl fmt::Display for Embed<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use itertools::Itertools;
+
+        let args = self.args.iter().map(|arg| format!("{arg}")).join(" ");
+        write!(f, "embed [{}] (#{}#) {}", args, self.script, self.output)
+    }
+}
+
 macro_rules! peer_id_error_logable {
     ($($t:ty),+) => {
         $(
@@ -234,5 +244,6 @@ no_peer_id_error_logable!(
     Never,
     Next<'_>,
     New<'_>,
-    Null
+    Null,
+    Embed<'_>
 );

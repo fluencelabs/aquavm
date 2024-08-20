@@ -57,6 +57,8 @@ impl<'input> AIRLexer<'input> {
                 '[' => return Some(Ok((start_pos, Token::OpenSquareBracket, start_pos + 1))),
                 ']' => return Some(Ok((start_pos, Token::CloseSquareBracket, start_pos + 1))),
 
+                '#' => return self.hash_or_string(start_pos),
+
                 ';' => self.skip_comment(),
 
                 ch if ch.is_whitespace() => {}
@@ -68,6 +70,18 @@ impl<'input> AIRLexer<'input> {
         }
 
         None
+    }
+
+    fn hash_or_string(
+        &mut self,
+        start_pos: AirPos,
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
+        if let Some((_, '"')) = self.chars.peek() {
+            self.chars.next();
+            self.raw_string(start_pos)
+        } else {
+            self.tokenize_string(start_pos, false)
+        }
     }
 
     fn skip_comment(&mut self) {
@@ -103,7 +117,6 @@ impl<'input> AIRLexer<'input> {
             start_pos..self.input.len().into(),
         )))
     }
-
     #[allow(clippy::unnecessary_wraps)]
     fn tokenize_string(
         &mut self,
@@ -122,6 +135,30 @@ impl<'input> AIRLexer<'input> {
 
         let token_str_len = end_pos - start_pos;
         Some(Ok((start_pos, token, start_pos + token_str_len)))
+    }
+
+    fn raw_string(
+        &mut self,
+        start_pos: AirPos,
+    ) -> Option<Spanned<Token<'input>, AirPos, LexerError>> {
+        while let Some((pos, ch)) = self.chars.next() {
+            // TODO consider ```...``` for the scripts
+            if ch == '"' {
+                if let Some((_, '#')) = self.chars.peek() {
+                    self.chars.next();
+                    let string_size = AirPos::from(pos) - start_pos + 2;
+                    return Some(Ok((
+                        start_pos,
+                        Token::StringLiteral(&self.input[(start_pos + 2).into()..pos]),
+                        start_pos + string_size,
+                    )));
+                }
+            }
+        }
+
+        Some(Err(LexerError::unclosed_quote(
+            start_pos..self.input.len().into(),
+        )))
     }
 
     fn advance_to_token_end(&mut self, start_pos: AirPos, square_met: bool) -> AirPos {
@@ -196,6 +233,7 @@ fn string_to_token(input: &str, start_pos: AirPos) -> LexerResult<Token> {
         NULL_INSTR => Ok(Token::Null),
         MATCH_INSTR => Ok(Token::Match),
         MISMATCH_INSTR => Ok(Token::MisMatch),
+        EMBED_INSTR => Ok(Token::Embed),
 
         INIT_PEER_ID => Ok(Token::InitPeerId),
         _ if input.starts_with(ERROR) => parse_error(input, start_pos, ERROR, Token::Error),
@@ -259,6 +297,7 @@ const NEXT_INSTR: &str = "next";
 const NULL_INSTR: &str = "null";
 const MATCH_INSTR: &str = "match";
 const MISMATCH_INSTR: &str = "mismatch";
+const EMBED_INSTR: &str = "embed";
 
 const INIT_PEER_ID: &str = "%init_peer_id%";
 pub(crate) const LAST_ERROR: &str = "%last_error%";
