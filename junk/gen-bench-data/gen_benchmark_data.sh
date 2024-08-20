@@ -33,6 +33,10 @@ for bench in multiple-cids10 \
             call-result-100mb \
             parser-air-100mb \
             hybrid-100mb \
+            starlark-10mb \
+            starlark-100mb \
+            starlark-lite \
+            starlark-long-script \
             ;
 do
     echo "Generating ${bench} ..." >&2

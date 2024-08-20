@@ -79,6 +79,14 @@ enum Bench {
     ParserAir100MB,
     #[command(name = "hybrid-100mb")]
     Hybrid100MB,
+    #[command(name = "starlark-10mb")]
+    Starlark10MB,
+    #[command(name = "starlark-100mb")]
+    Starlark100MB,
+    #[command(name = "starlark-lite")]
+    StarlarkLite,
+    #[command(name = "starlark-long-script")]
+    StarlarkLongScript,
 }
 
 #[tokio::main]
@@ -117,6 +125,10 @@ async fn main() {
         Bench::CanonMap100MB => mem_consumption_w_canon_map_with_size_in_mb(100).await,
         Bench::ParserAir100MB => mem_consumption_air_100mb(2800000, 10),
         Bench::Hybrid100MB => mem_consumption_hybrid_with_size_in_mb(100).await,
+        Bench::Starlark10MB => starlark_big_value(10).await,
+        Bench::Starlark100MB => starlark_big_value(100).await,
+        Bench::StarlarkLite => starlark_lite(),
+        Bench::StarlarkLongScript => starlark_long_script(),
     };
 
     save_data(&args.dest_dir, data).unwrap();
@@ -1157,6 +1169,166 @@ fn null() -> Data {
         params_json: hashmap! {
             "comment".to_owned() => "Empty data and null script".to_owned(),
             "particle-id".to_owned() => particle_id.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+    }
+}
+
+/// Measure large
+async fn starlark_big_value(data_size: usize) -> Data {
+    let init_peer_id = "init_peer_id";
+    let random_data = generate_random_data(data_size);
+    let air_script = format!(r##"
+(seq
+   (call %init_peer_id% ("" "") [] var) ; ok = "{}"
+   (embed [var] #"
+v = get_value(0)
+v
+"#))
+"##, hex::encode(random_data));
+
+    let exec = AirScriptExecutor::<NativeAirRunner>::new(
+        TestRunParameters::from_init_peer_id(init_peer_id).with_particle_id(PARTICLE_ID),
+        vec![],
+        vec![],
+        &air_script,
+    )
+    .await
+    .unwrap();
+
+    let res = exec.execute_one(init_peer_id).await.unwrap();
+
+    let keypair = exec
+        .get_network()
+        .get_named_peer_env(init_peer_id)
+        .expect("main peer")
+        .borrow()
+        .get_peer()
+        .get_keypair()
+        .clone();
+    let peer_id: String = exec.resolve_name(init_peer_id).to_string();
+
+    Data {
+        air: exec.get_transformed_air_script().to_string(),
+        prev_data: vec![],
+        cur_data: res.data,
+        call_results: None,
+        keypair: bs58::encode(keypair.to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "embed execution with large data".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+    }
+}
+
+/// Measure lightweight execution
+fn starlark_lite() -> Data {
+    let air_script = r##"
+   (embed [8 6]
+#"
+get_value(0) + get_value(1)
+"#
+          x)
+"##;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+
+    Data {
+        air: air_script.to_owned(),
+        prev_data: vec![],
+        cur_data: vec![],
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "Lightweight embed execution".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
+            "current-peer-id".to_owned() => peer_id.clone(),
+            "init-peer-id".to_owned() => peer_id,
+        },
+    }
+}
+
+/// Measure script parsing
+fn starlark_long_script() -> Data {
+    let air_script = r##"
+   (embed [8 6]
+#"
+
+# https://bazel.build/rules/language
+def fizz_buzz(n):
+  """Print Fizz Buzz numbers from 1 to n."""
+  output = []
+  for i in range(1, n + 1):
+    s = ""
+    if i % 3 == 0:
+      s += "Fizz"
+    if i % 5 == 0:
+      s += "Buzz"
+    # We have not print, push it to a list
+    output.push(s if s else i)
+  return output
+
+# These definitions contain recursion.
+# Starlark forbids recursion, but it is detected dynamically.
+# Later versions of Starlark may allow recursion.
+def ackermann1(m, n, p):
+  if p == 0:
+    return m + n
+  elif n == 0:
+    if p == 1:
+      return 0
+    elif p == 2:
+      return 1
+    else:
+      return m
+  else:
+     return ackermann2(m, ackermann3(m, n - 1, p), p - 1)
+
+def ackermann2(m, n, p):
+  if p == 0:
+    return m + n
+  elif n == 0:
+    if p == 1:
+      return 0
+    elif p == 2:
+      return 1
+    else:
+      return m
+  else:
+     return ackermann3(m, ackermann1(m, n - 1, p), p - 1)
+
+def ackermann3(m, n, p):
+  if p == 0:
+    return m + n
+  elif n == 0:
+    if p == 1:
+      return 0
+    elif p == 2:
+      return 1
+    else:
+      return m
+  else:
+     return ackermann1(m, ackermann2(m, n - 1, p), p - 1)
+
+get_value(0) + get_value(1)
+"#
+          x)
+"##;
+
+    let (keypair, peer_id) = derive_dummy_keypair("init_peer_id");
+
+    Data {
+        air: air_script.to_owned(),
+        prev_data: vec![],
+        cur_data: vec![],
+        call_results: None,
+        keypair: bs58::encode(keypair.as_inner().to_vec()).into_string(),
+        params_json: hashmap! {
+            "comment".to_owned() => "Lightweight embed execution with longer script".to_owned(),
+            "particle-id".to_owned() => PARTICLE_ID.to_owned(),
             "current-peer-id".to_owned() => peer_id.clone(),
             "init-peer-id".to_owned() => peer_id,
         },
