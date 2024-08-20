@@ -73,6 +73,7 @@ impl ExecutionError {
     }
 }
 
+#[tracing::instrument(skip_all)]
 pub fn execute(
     content: &str,
     args: Vec<(JValue, Vec<Rc<SecurityTetraplet>>)>,

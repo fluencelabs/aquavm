@@ -20,3 +20,4 @@ starlark = "0.12.0"
 
 air-interpreter-value = { version = "0.1.0", path = "../interpreter-value", features = ["starlark"] }
 thiserror = "1.0.63"
+tracing = { version = "0.1.40", features = ["attributes"]}
