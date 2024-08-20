@@ -159,6 +159,7 @@ dependencies = [
  "serde_json",
  "starlark",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]
